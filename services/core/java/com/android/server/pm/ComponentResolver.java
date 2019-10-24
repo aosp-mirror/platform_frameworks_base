@@ -562,7 +562,7 @@ public class ComponentResolver {
 
             if (pkg != null) {
                 // TODO(b/135203078): Print AppInfo?
-                pw.print("      applicationInfo="); pw.println(pkg.toAppInfo());
+                pw.print("      applicationInfo="); pw.println(pkg.toAppInfoWithoutState());
             }
         }
     }

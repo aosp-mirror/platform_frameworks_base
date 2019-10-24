@@ -63,7 +63,7 @@ public class AndroidTestBaseUpdater extends PackageSharedLibraryUpdater {
                     ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
             try {
                 return platformCompat.isChangeEnabled(REMOVE_ANDROID_TEST_BASE,
-                        pkg.toAppInfo());
+                        pkg.toAppInfoWithoutState());
             } catch (RemoteException | NullPointerException e) {
                 Log.e(TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
             }

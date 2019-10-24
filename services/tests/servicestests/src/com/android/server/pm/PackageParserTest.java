@@ -382,8 +382,6 @@ public class PackageParserTest {
         // Sanity check for InstrumentationInfo.
         assertEquals(a.getTargetPackage(), b.getTargetPackage());
         assertEquals(a.getTargetProcesses(), b.getTargetProcesses());
-        assertEquals(a.sourceDir, b.sourceDir);
-        assertEquals(a.publicSourceDir, b.publicSourceDir);
     }
 
     private static void assertServicesEqual(

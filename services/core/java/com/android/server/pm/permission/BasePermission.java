@@ -166,7 +166,10 @@ public final class BasePermission {
         return 0;
     }
 
-    public boolean isPermission(ParsedPermission perm) {
+    public boolean isPermission(@NonNull ParsedPermission perm) {
+        if (this.perm == null) {
+            return false;
+        }
         return Objects.equals(this.perm.className, perm.className);
     }
 

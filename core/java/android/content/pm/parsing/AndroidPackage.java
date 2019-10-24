@@ -23,6 +23,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageParser;
+import android.content.pm.PackageUserState;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
@@ -452,7 +453,13 @@ public interface AndroidPackage extends Parcelable {
 
     boolean requestsIsolatedSplitLoading();
 
-    ApplicationInfo toAppInfo();
+    /**
+     * Generates an {@link ApplicationInfo} object with only the data available in this object.
+     *
+     * This does not contain any system or user state data, and should be avoided. Prefer
+     * {@link PackageInfoUtils#generateApplicationInfo(AndroidPackage, int, PackageUserState, int)}.
+     */
+    ApplicationInfo toAppInfoWithoutState();
 
     Creator<PackageImpl> CREATOR = new Creator<PackageImpl>() {
         @Override

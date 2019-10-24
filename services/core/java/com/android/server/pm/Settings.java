@@ -4482,7 +4482,7 @@ public final class Settings {
             pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
             // TODO(b/135203078): Is there anything to print here with AppInfo removed?
             pw.print(prefix); pw.print("  applicationInfo=");
-                pw.println(pkg.toAppInfo().toString());
+            pw.println(pkg.toAppInfoWithoutState().toString());
             pw.print(prefix); pw.print("  flags="); printFlags(pw, pkg.getFlags(),
                     FLAG_DUMP_SPEC); pw.println();
             if (pkg.getPrivateFlags() != 0) {

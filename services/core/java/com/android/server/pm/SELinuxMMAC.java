@@ -350,7 +350,7 @@ public final class SELinuxMMAC {
         if ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) {
             return sharedUserSetting.seInfoTargetSdkVersion;
         }
-        if (compatibility.isChangeEnabled(SELINUX_LATEST_CHANGES, pkg.toAppInfo())) {
+        if (compatibility.isChangeEnabled(SELINUX_LATEST_CHANGES, pkg.toAppInfoWithoutState())) {
             return android.os.Build.VERSION_CODES.R;
         }
 

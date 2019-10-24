@@ -43,6 +43,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.PackageImpl;
+import android.content.pm.parsing.PackageInfoUtils;
 import android.content.pm.parsing.ParsedPackage;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.res.TypedArray;
@@ -522,7 +523,8 @@ public class ScanTests {
         final PackageSetting pkgSetting = scanResult.pkgSetting;
         assertBasicPackageSetting(scanResult, packageName, isInstant, pkgSetting);
 
-        final ApplicationInfo applicationInfo = pkgSetting.pkg.toAppInfo();
+        final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
+                pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0);
         assertBasicApplicationInfo(scanResult, applicationInfo);
     }
 
@@ -555,21 +557,25 @@ public class ScanTests {
     }
 
     private static void assertAbiAndPathssDerived(PackageManagerService.ScanResult scanResult) {
-        final ApplicationInfo applicationInfo = scanResult.pkgSetting.pkg.toAppInfo();
+        PackageSetting pkgSetting = scanResult.pkgSetting;
+        final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
+                pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0);
         assertThat(applicationInfo.primaryCpuAbi, is("derivedPrimary"));
         assertThat(applicationInfo.secondaryCpuAbi, is("derivedSecondary"));
 
         assertThat(applicationInfo.nativeLibraryRootDir, is("derivedRootDir"));
-        assertThat(scanResult.pkgSetting.legacyNativeLibraryPathString, is("derivedRootDir"));
+        assertThat(pkgSetting.legacyNativeLibraryPathString, is("derivedRootDir"));
         assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(true));
         assertThat(applicationInfo.nativeLibraryDir, is("derivedNativeDir"));
         assertThat(applicationInfo.secondaryNativeLibraryDir, is("derivedNativeDir2"));
     }
 
     private static void assertPathsNotDerived(PackageManagerService.ScanResult scanResult) {
-        final ApplicationInfo applicationInfo = scanResult.pkgSetting.pkg.toAppInfo();
+        PackageSetting pkgSetting = scanResult.pkgSetting;
+        final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
+                pkgSetting.pkg, 0, pkgSetting.readUserState(0), 0);
         assertThat(applicationInfo.nativeLibraryRootDir, is("getRootDir"));
-        assertThat(scanResult.pkgSetting.legacyNativeLibraryPathString, is("getRootDir"));
+        assertThat(pkgSetting.legacyNativeLibraryPathString, is("getRootDir"));
         assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(true));
         assertThat(applicationInfo.nativeLibraryDir, is("getNativeDir"));
         assertThat(applicationInfo.secondaryNativeLibraryDir, is("getNativeDir2"));

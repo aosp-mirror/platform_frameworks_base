@@ -2256,75 +2256,96 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     }
 
     @Override
-    public ApplicationInfo toAppInfo() {
+    public ApplicationInfo toAppInfoWithoutState() {
         updateFlags();
 
-        ApplicationInfo applicationInfo = new ApplicationInfo();
-        applicationInfo.packageName = packageName;
-        applicationInfo.flags = flags;
-        applicationInfo.privateFlags = privateFlags;
-        applicationInfo.sharedLibraryFiles = usesLibraryFiles;
-        applicationInfo.sharedLibraryInfos = usesLibraryInfos;
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.packageName = packageName;
+        appInfo.flags = flags;
+        appInfo.privateFlags = privateFlags;
 
-        applicationInfo.appComponentFactory = appComponentFactory;
-        applicationInfo.backupAgentName = backupAgentName;
-        applicationInfo.banner = banner;
-        applicationInfo.category = category;
-        applicationInfo.classLoaderName = classLoaderName;
-        applicationInfo.className = className;
-        applicationInfo.compatibleWidthLimitDp = compatibleWidthLimitDp;
-        applicationInfo.credentialProtectedDataDir = credentialProtectedDataDir;
-        applicationInfo.dataDir = dataDir;
-        applicationInfo.descriptionRes = descriptionRes;
-        applicationInfo.deviceProtectedDataDir = deviceProtectedDataDir;
-        applicationInfo.enabled = enabled;
-        applicationInfo.fullBackupContent = fullBackupContent;
-        applicationInfo.icon = icon;
-        applicationInfo.iconRes = iconRes;
-        applicationInfo.installLocation = installLocation;
-        applicationInfo.labelRes = labelRes;
-        applicationInfo.largestWidthLimitDp = largestWidthLimitDp;
-        applicationInfo.logo = logo;
-        applicationInfo.manageSpaceActivityName = manageSpaceActivityName;
-        applicationInfo.maxAspectRatio = maxAspectRatio;
-        applicationInfo.minAspectRatio = minAspectRatio;
-        applicationInfo.minSdkVersion = minSdkVersion;
-        applicationInfo.name = name;
-        applicationInfo.nativeLibraryDir = nativeLibraryDir;
-        applicationInfo.nativeLibraryRootDir = nativeLibraryRootDir;
-        applicationInfo.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;
-        applicationInfo.networkSecurityConfigRes = networkSecurityConfigRes;
-        applicationInfo.nonLocalizedLabel = nonLocalizedLabel;
-        applicationInfo.permission = permission;
-        applicationInfo.primaryCpuAbi = primaryCpuAbi;
-        applicationInfo.processName = processName;
-        applicationInfo.requiresSmallestWidthDp = requiresSmallestWidthDp;
-        applicationInfo.roundIconRes = roundIconRes;
-        applicationInfo.secondaryCpuAbi = secondaryCpuAbi;
-        applicationInfo.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
-        applicationInfo.seInfo = seInfo;
-        applicationInfo.seInfoUser = seInfoUser;
-        applicationInfo.splitClassLoaderNames = splitClassLoaderNames;
-        applicationInfo.splitDependencies = splitDependencies;
-        applicationInfo.splitNames = splitNames;
-        applicationInfo.storageUuid = StorageManager.convert(applicationVolumeUuid);
-        applicationInfo.targetSandboxVersion = targetSandboxVersion;
-        applicationInfo.targetSdkVersion = targetSdkVersion;
-        applicationInfo.taskAffinity = taskAffinity;
-        applicationInfo.theme = theme;
-        applicationInfo.uid = uid;
-        applicationInfo.uiOptions = uiOptions;
-        applicationInfo.volumeUuid = applicationVolumeUuid;
-        applicationInfo.zygotePreloadName = zygotePreloadName;
+        appInfo.appComponentFactory = appComponentFactory;
+        appInfo.backupAgentName = backupAgentName;
+        appInfo.banner = banner;
+        appInfo.category = category;
+        appInfo.classLoaderName = classLoaderName;
+        appInfo.className = className;
+        appInfo.compatibleWidthLimitDp = compatibleWidthLimitDp;
+        appInfo.compileSdkVersion = compileSdkVersion;
+        appInfo.compileSdkVersionCodename = compileSdkVersionCodename;
+        appInfo.credentialProtectedDataDir = credentialProtectedDataDir;
+        appInfo.dataDir = dataDir;
+        appInfo.descriptionRes = descriptionRes;
+        appInfo.deviceProtectedDataDir = deviceProtectedDataDir;
+        appInfo.enabled = enabled;
+        appInfo.fullBackupContent = fullBackupContent;
+        appInfo.hiddenUntilInstalled = hiddenUntilInstalled;
+        appInfo.icon = icon;
+        appInfo.iconRes = iconRes;
+        appInfo.installLocation = installLocation;
+        appInfo.labelRes = labelRes;
+        appInfo.largestWidthLimitDp = largestWidthLimitDp;
+        appInfo.logo = logo;
+        appInfo.manageSpaceActivityName = manageSpaceActivityName;
+        appInfo.maxAspectRatio = maxAspectRatio;
+        appInfo.metaData = appMetaData;
+        appInfo.minAspectRatio = minAspectRatio;
+        appInfo.minSdkVersion = minSdkVersion;
+        appInfo.name = name;
+        if (appInfo.name != null) {
+            appInfo.name = appInfo.name.trim();
+        }
+        appInfo.nativeLibraryDir = nativeLibraryDir;
+        appInfo.nativeLibraryRootDir = nativeLibraryRootDir;
+        appInfo.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;
+        appInfo.networkSecurityConfigRes = networkSecurityConfigRes;
+        appInfo.nonLocalizedLabel = nonLocalizedLabel;
+        if (appInfo.nonLocalizedLabel != null) {
+            appInfo.nonLocalizedLabel = appInfo.nonLocalizedLabel.toString().trim();
+        }
+        appInfo.packageName = packageName;
+        appInfo.permission = permission;
+        appInfo.primaryCpuAbi = primaryCpuAbi;
+        appInfo.processName = getProcessName();
+        appInfo.requiresSmallestWidthDp = requiresSmallestWidthDp;
+        appInfo.roundIconRes = roundIconRes;
+        appInfo.secondaryCpuAbi = secondaryCpuAbi;
+        appInfo.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
+        appInfo.seInfo = seInfo;
+        appInfo.seInfoUser = seInfoUser;
+        appInfo.sharedLibraryFiles = usesLibraryFiles;
+        appInfo.sharedLibraryInfos = ArrayUtils.isEmpty(usesLibraryInfos) ? null : usesLibraryInfos;
+        appInfo.splitClassLoaderNames = splitClassLoaderNames;
+        appInfo.splitDependencies = splitDependencies;
+        appInfo.splitNames = splitNames;
+        appInfo.storageUuid = StorageManager.convert(volumeUuid);
+        appInfo.targetSandboxVersion = targetSandboxVersion;
+        appInfo.targetSdkVersion = targetSdkVersion;
+        appInfo.taskAffinity = taskAffinity;
+        appInfo.theme = theme;
+        appInfo.uid = uid;
+        appInfo.uiOptions = uiOptions;
+        appInfo.volumeUuid = volumeUuid;
+        appInfo.zygotePreloadName = zygotePreloadName;
 
-        applicationInfo.setBaseCodePath(baseCodePath);
-        applicationInfo.setBaseResourcePath(applicationInfoBaseResourcePath);
-        applicationInfo.setCodePath(applicationInfoCodePath);
-        applicationInfo.setResourcePath(applicationInfoResourcePath);
-        applicationInfo.setSplitCodePaths(splitCodePaths);
-        applicationInfo.setSplitResourcePaths(applicationInfoSplitResourcePaths);
+        appInfo.setBaseCodePath(baseCodePath);
+        appInfo.setBaseResourcePath(baseCodePath);
+        appInfo.setCodePath(codePath);
+        appInfo.setResourcePath(codePath);
+        appInfo.setSplitCodePaths(splitCodePaths);
+        appInfo.setSplitResourcePaths(splitCodePaths);
+        appInfo.setVersionCode(getLongVersionCode());
 
-        return applicationInfo;
+        // TODO(b/135203078): Can this be removed? Looks only used in ActivityInfo.
+//        appInfo.showUserIcon = pkg.getShowUserIcon();
+        // TODO(b/135203078): Unused?
+//        appInfo.resourceDirs = pkg.getResourceDirs();
+        // TODO(b/135203078): Unused?
+//        appInfo.enabledSetting = pkg.getEnabledSetting();
+        // TODO(b/135203078): See PackageImpl#getHiddenApiEnforcementPolicy
+//        appInfo.mHiddenApiPolicy = pkg.getHiddenApiPolicy();
+
+        return appInfo;
     }
 
     @Override

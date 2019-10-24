@@ -50,7 +50,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
 
@@ -947,7 +946,7 @@ public class ComponentParseUtils {
         }
 
         public boolean isRuntime() {
-            return protectionLevel == PermissionInfo.PROTECTION_DANGEROUS;
+            return getProtection() == PermissionInfo.PROTECTION_DANGEROUS;
         }
 
         public boolean isAppOp() {
@@ -1104,20 +1103,6 @@ public class ComponentParseUtils {
         public boolean handleProfiling;
         public boolean functionalTest;
 
-        public String sourceDir;
-        public String publicSourceDir;
-        public String[] splitNames;
-        public String[] splitSourceDirs;
-        public String[] splitPublicSourceDirs;
-        public SparseArray<int[]> splitDependencies;
-        public String dataDir;
-        public String deviceProtectedDataDir;
-        public String credentialProtectedDataDir;
-        public String primaryCpuAbi;
-        public String secondaryCpuAbi;
-        public String nativeLibraryDir;
-        public String secondaryNativeLibraryDir;
-
         public ParsedInstrumentation() {
         }
 
@@ -1149,42 +1134,14 @@ public class ComponentParseUtils {
             dest.writeString(this.targetProcesses);
             dest.writeBoolean(this.handleProfiling);
             dest.writeBoolean(this.functionalTest);
-            dest.writeString(this.sourceDir);
-            dest.writeString(this.publicSourceDir);
-            dest.writeStringArray(this.splitNames);
-            dest.writeStringArray(this.splitSourceDirs);
-            dest.writeStringArray(this.splitPublicSourceDirs);
-            dest.writeSparseArray(this.splitDependencies);
-            dest.writeString(this.dataDir);
-            dest.writeString(this.deviceProtectedDataDir);
-            dest.writeString(this.credentialProtectedDataDir);
-            dest.writeString(this.primaryCpuAbi);
-            dest.writeString(this.secondaryCpuAbi);
-            dest.writeString(this.nativeLibraryDir);
-            dest.writeString(this.secondaryNativeLibraryDir);
         }
 
         protected ParsedInstrumentation(Parcel in) {
             super(in);
-            // We use the boot classloader for all classes that we load.
-            final ClassLoader boot = Object.class.getClassLoader();
             this.targetPackage = TextUtils.safeIntern(in.readString());
             this.targetProcesses = TextUtils.safeIntern(in.readString());
             this.handleProfiling = in.readByte() != 0;
             this.functionalTest = in.readByte() != 0;
-            this.sourceDir = in.readString();
-            this.publicSourceDir = in.readString();
-            this.splitNames = in.createStringArray();
-            this.splitSourceDirs = in.createStringArray();
-            this.splitPublicSourceDirs = in.createStringArray();
-            this.splitDependencies = in.readSparseArray(boot);
-            this.dataDir = in.readString();
-            this.deviceProtectedDataDir = in.readString();
-            this.credentialProtectedDataDir = in.readString();
-            this.primaryCpuAbi = in.readString();
-            this.secondaryCpuAbi = in.readString();
-            this.nativeLibraryDir = in.readString();
-            this.secondaryNativeLibraryDir = in.readString();
         }
 
         public static final Creator<ParsedInstrumentation> CREATOR =

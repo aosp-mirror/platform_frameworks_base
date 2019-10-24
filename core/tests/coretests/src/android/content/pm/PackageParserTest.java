@@ -360,12 +360,7 @@ public class PackageParserTest {
      * @param template templated string with %s subbed with Activity, Service, Provider, Receiver
      */
     private void assertOneComponentOfEachType(String template, AndroidPackage p) {
-        assertEquals(2, p.getActivities().size());
-
-        // For normal apps, a Activity that forwards to the App Details page is added.
-        assertEquals("android.app.AppDetailsActivity", p.getActivities().get(1)
-                .className);
-
+        assertEquals(1, p.getActivities().size());
         assertComponent(String.format(template, "Activity"),
                 0 /* intents */, p.getActivities().get(0));
         assertEquals(1, p.getServices().size());

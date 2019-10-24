@@ -25,6 +25,7 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.PackageInfoUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -521,7 +522,7 @@ class InstantAppRegistry {
         }
 
         // TODO(b/135203078): Remove toAppInfo call? Requires significant additions/changes to PM
-        Drawable icon = pkg.toAppInfo().loadIcon(mService.mContext.getPackageManager());
+        Drawable icon = pkg.toAppInfoWithoutState().loadIcon(mService.mContext.getPackageManager());
 
         final Bitmap bitmap;
         if (icon instanceof BitmapDrawable) {
@@ -866,7 +867,10 @@ class InstantAppRegistry {
         String[] grantedPermissions = new String[permissions.size()];
         permissions.toArray(grantedPermissions);
 
-        ApplicationInfo appInfo = pkg.toAppInfo();
+        // TODO(b/135203078): This may be broken due to inner mutability problems that were broken
+        //  as part of moving to PackageInfoUtils. Flags couldn't be determined.
+        ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(ps.pkg, 0,
+                ps.readUserState(userId), userId);
         if (addApplicationInfo) {
             return new InstantAppInfo(appInfo,
                     requestedPermissions, grantedPermissions);

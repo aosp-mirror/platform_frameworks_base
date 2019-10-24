@@ -168,7 +168,7 @@ public class AppsFilter {
             try {
                 // TODO(b/135203078): Do not use toAppInfo
                 return mInjector.getCompatibility().isChangeEnabled(
-                        PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfo());
+                        PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfoWithoutState());
             } finally {
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }

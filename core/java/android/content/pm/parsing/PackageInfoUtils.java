@@ -16,8 +16,6 @@
 
 package android.content.pm.parsing;
 
-import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
-
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -43,8 +41,6 @@ import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
 import android.content.pm.parsing.ComponentParseUtils.ParsedPermissionGroup;
-import android.os.Bundle;
-import android.os.UserHandle;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -213,7 +209,7 @@ public class PackageInfoUtils {
                     pi.instrumentation = new InstrumentationInfo[N];
                     for (int i = 0; i < N; i++) {
                         pi.instrumentation[i] = generateInstrumentationInfo(
-                                pkg.getInstrumentations().get(i), flags);
+                                pkg.getInstrumentations().get(i), pkg, flags);
                     }
                 }
             }
@@ -281,93 +277,7 @@ public class PackageInfoUtils {
         return pi;
     }
 
-    // TODO(b/135203078): Remove this in favor of AndroidPackage.toAppInfo()
-    private static ApplicationInfo appInfoFromFinalPackage(AndroidPackage pkg) {
-        ApplicationInfo appInfo = new ApplicationInfo();
-        appInfo.name = pkg.getName();
-        if (appInfo.name != null) appInfo.name = appInfo.name.trim();
-        appInfo.packageName = pkg.getPackageName();
-        appInfo.labelRes = pkg.getLabelRes();
-        appInfo.nonLocalizedLabel = pkg.getNonLocalizedLabel();
-        if (appInfo.nonLocalizedLabel != null) {
-            appInfo.nonLocalizedLabel = appInfo.nonLocalizedLabel.toString().trim();
-        }
-        appInfo.icon = pkg.getIcon();
-        appInfo.banner = pkg.getBanner();
-        appInfo.logo = pkg.getLogo();
-        appInfo.metaData = pkg.getMetaData();
-
-        // TODO(b/135203078): Can this be removed? Looks only used in ActivityInfo.
-//        appInfo.showUserIcon = pkg.getShowUserIcon();
-
-        appInfo.taskAffinity = pkg.getTaskAffinity();
-        appInfo.permission = pkg.getPermission();
-        appInfo.processName = pkg.getProcessName();
-        appInfo.className = pkg.getClassName();
-        appInfo.theme = pkg.getTheme();
-        appInfo.flags = pkg.getFlags();
-        appInfo.privateFlags = pkg.getPrivateFlags();
-        appInfo.requiresSmallestWidthDp = pkg.getRequiresSmallestWidthDp();
-        appInfo.compatibleWidthLimitDp = pkg.getCompatibleWidthLimitDp();
-        appInfo.largestWidthLimitDp = pkg.getLargestWidthLimitDp();
-        appInfo.volumeUuid = pkg.getVolumeUuid();
-        appInfo.storageUuid = pkg.getStorageUuid();
-        appInfo.scanSourceDir = pkg.getScanSourceDir();
-        appInfo.scanPublicSourceDir = pkg.getScanPublicSourceDir();
-        appInfo.sourceDir = pkg.getBaseCodePath();
-        appInfo.publicSourceDir = pkg.getPublicSourceDir();
-        appInfo.splitNames = pkg.getSplitNames();
-        appInfo.splitSourceDirs = pkg.getSplitCodePaths();
-        appInfo.splitPublicSourceDirs = pkg.getSplitPublicSourceDirs();
-        appInfo.splitDependencies = pkg.getSplitDependencies();
-        appInfo.nativeLibraryDir = pkg.getNativeLibraryDir();
-        appInfo.secondaryNativeLibraryDir = pkg.getSecondaryNativeLibraryDir();
-        appInfo.nativeLibraryRootDir = pkg.getNativeLibraryRootDir();
-        appInfo.nativeLibraryRootRequiresIsa = pkg.isNativeLibraryRootRequiresIsa();
-        appInfo.primaryCpuAbi = pkg.getPrimaryCpuAbi();
-        appInfo.secondaryCpuAbi = pkg.getSecondaryCpuAbi();
-
-        // TODO(b/135203078): Unused?
-//        appInfo.resourceDirs = pkg.getResourceDirs();
-        appInfo.seInfo = pkg.getSeInfo();
-        appInfo.seInfoUser = pkg.getSeInfoUser();
-        appInfo.sharedLibraryFiles = pkg.getUsesLibraryFiles();
-        appInfo.sharedLibraryInfos = pkg.getUsesLibraryInfos();
-        appInfo.dataDir = pkg.getDataDir();
-        appInfo.deviceProtectedDataDir = pkg.getDeviceProtectedDataDir();
-        appInfo.credentialProtectedDataDir = pkg.getCredentialProtectedDataDir();
-        appInfo.uid = pkg.getUid();
-        appInfo.minSdkVersion = pkg.getMinSdkVersion();
-        appInfo.targetSdkVersion = pkg.getTargetSdkVersion();
-        appInfo.setVersionCode(pkg.getLongVersionCode());
-        appInfo.enabled = pkg.isEnabled();
-
-        // TODO(b/135203078): Unused?
-//        appInfo.enabledSetting = pkg.getEnabledSetting();
-        appInfo.installLocation = pkg.getInstallLocation();
-        appInfo.manageSpaceActivityName = pkg.getManageSpaceActivityName();
-        appInfo.descriptionRes = pkg.getDescriptionRes();
-        appInfo.uiOptions = pkg.getUiOptions();
-        appInfo.backupAgentName = pkg.getBackupAgentName();
-        appInfo.fullBackupContent = pkg.getFullBackupContent();
-        appInfo.networkSecurityConfigRes = pkg.getNetworkSecurityConfigRes();
-        appInfo.category = pkg.getCategory();
-        appInfo.targetSandboxVersion = pkg.getTargetSandboxVersion();
-        appInfo.classLoaderName = pkg.getClassLoaderName();
-        appInfo.splitClassLoaderNames = pkg.getSplitClassLoaderNames();
-        appInfo.appComponentFactory = pkg.getAppComponentFactory();
-        appInfo.iconRes = pkg.getIconRes();
-        appInfo.roundIconRes = pkg.getRoundIconRes();
-        appInfo.compileSdkVersion = pkg.getCompileSdkVersion();
-        appInfo.compileSdkVersionCodename = pkg.getCompileSdkVersionCodeName();
-
-        // TODO(b/135203078): See PackageImpl#getHiddenApiEnforcementPolicy
-//        appInfo.mHiddenApiPolicy = pkg.getHiddenApiPolicy();
-        appInfo.hiddenUntilInstalled = pkg.isHiddenUntilInstalled();
-        appInfo.zygotePreloadName = pkg.getZygotePreloadName();
-        return appInfo;
-    }
-
+    @Nullable
     public static ApplicationInfo generateApplicationInfo(AndroidPackage pkg,
             @PackageManager.ApplicationInfoFlags int flags, PackageUserState state, int userId) {
 
@@ -375,34 +285,16 @@ public class PackageInfoUtils {
         if (!checkUseInstalledOrHidden(pkg, state, flags) || !pkg.isMatch(flags)) {
             return null;
         }
-        if (!copyNeeded(flags, pkg, state, null, userId)
-                && ((flags & PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS) == 0
-                || state.enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED)) {
-            // TODO(b/135203078): This isn't applicable anymore, as AppInfo isn't cached and
-            //   always built new in toAppInfo(). Remove entire copyNeeded flow? Or find a way to
-            //   transiently cache AppInfo, since multiple calls in quick secession probably need
-            //   the same AppInfo.
-            // In this case it is safe to directly modify the internal ApplicationInfo state:
-            // - CompatibilityMode is global state, so will be the same for every call.
-            // - We only come in to here if the app should reported as installed; this is the
-            // default state, and we will do a copy otherwise.
-            // - The enable state will always be reported the same for the application across
-            // calls; the only exception is for the UNTIL_USED mode, and in that case we will
-            // be doing a copy.
-            ApplicationInfo applicationInfo = pkg.toAppInfo();
-            updateApplicationInfo(applicationInfo, flags, state);
-            return applicationInfo;
-        }
 
         // Make shallow copy so we can store the metadata/libraries safely
-        ApplicationInfo ai = appInfoFromFinalPackage(pkg);
+        ApplicationInfo ai = pkg.toAppInfoWithoutState();
         ai.initForUser(userId);
-        if ((flags & PackageManager.GET_META_DATA) != 0) {
-            ai.metaData = pkg.getAppMetaData();
+        if ((flags & PackageManager.GET_META_DATA) == 0) {
+            ai.metaData = null;
         }
-        if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0) {
-            ai.sharedLibraryFiles = pkg.getUsesLibraryFiles();
-            ai.sharedLibraryInfos = pkg.getUsesLibraryInfos();
+        if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) == 0) {
+            ai.sharedLibraryFiles = null;
+            ai.sharedLibraryInfos = null;
         }
         if (state.stopped) {
             ai.flags |= ApplicationInfo.FLAG_STOPPED;
@@ -423,9 +315,6 @@ public class PackageInfoUtils {
         }
         if (applicationInfo == null) {
             applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
-        }
-        if (!copyNeeded(flags, pkg, state, a.metaData, userId)) {
-            updateApplicationInfo(applicationInfo, flags, state);
         }
         // Make shallow copies so we can store the metadata safely
         ActivityInfo ai = new ActivityInfo();
@@ -475,9 +364,6 @@ public class PackageInfoUtils {
         if (applicationInfo == null) {
             applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
         }
-        if (!copyNeeded(flags, pkg, state, s.metaData, userId)) {
-            updateApplicationInfo(applicationInfo, flags, state);
-        }
         // Make shallow copies so we can store the metadata safely
         ServiceInfo si = new ServiceInfo();
         assignSharedFieldsForComponentInfo(si, s);
@@ -507,11 +393,6 @@ public class PackageInfoUtils {
         }
         if (applicationInfo == null) {
             applicationInfo = generateApplicationInfo(pkg, flags, state, userId);
-        }
-        if (!copyNeeded(flags, pkg, state, p.metaData, userId)
-                && ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) != 0
-                || p.uriPermissionPatterns == null)) {
-            updateApplicationInfo(applicationInfo, flags, state);
         }
         // Make shallow copies so we can store the metadata safely
         ProviderInfo pi = new ProviderInfo();
@@ -544,7 +425,7 @@ public class PackageInfoUtils {
     }
 
     public static InstrumentationInfo generateInstrumentationInfo(ParsedInstrumentation i,
-            @PackageManager.ComponentInfoFlags int flags) {
+            AndroidPackage pkg, @PackageManager.ComponentInfoFlags int flags) {
         if (i == null) return null;
 
         InstrumentationInfo ii = new InstrumentationInfo();
@@ -554,19 +435,19 @@ public class PackageInfoUtils {
         ii.handleProfiling = i.handleProfiling;
         ii.functionalTest = i.functionalTest;
 
-        ii.sourceDir = i.sourceDir;
-        ii.publicSourceDir = i.publicSourceDir;
-        ii.splitNames = i.splitNames;
-        ii.splitSourceDirs = i.splitSourceDirs;
-        ii.splitPublicSourceDirs = i.splitPublicSourceDirs;
-        ii.splitDependencies = i.splitDependencies;
-        ii.dataDir = i.dataDir;
-        ii.deviceProtectedDataDir = i.deviceProtectedDataDir;
-        ii.credentialProtectedDataDir = i.credentialProtectedDataDir;
-        ii.primaryCpuAbi = i.primaryCpuAbi;
-        ii.secondaryCpuAbi = i.secondaryCpuAbi;
-        ii.nativeLibraryDir = i.nativeLibraryDir;
-        ii.secondaryNativeLibraryDir = i.secondaryNativeLibraryDir;
+        ii.sourceDir = pkg.getBaseCodePath();
+        ii.publicSourceDir = pkg.getCodePath();
+        ii.splitNames = pkg.getSplitNames();
+        ii.splitSourceDirs = pkg.getSplitCodePaths();
+        ii.splitPublicSourceDirs = pkg.getSplitCodePaths();
+        ii.splitDependencies = pkg.getSplitDependencies();
+        ii.dataDir = pkg.getDataDir();
+        ii.deviceProtectedDataDir = pkg.getDeviceProtectedDataDir();
+        ii.credentialProtectedDataDir = pkg.getCredentialProtectedDataDir();
+        ii.primaryCpuAbi = pkg.getPrimaryCpuAbi();
+        ii.secondaryCpuAbi = pkg.getSecondaryCpuAbi();
+        ii.nativeLibraryDir = pkg.getNativeLibraryDir();
+        ii.secondaryNativeLibraryDir = pkg.getSecondaryNativeLibraryDir();
 
         if ((flags & PackageManager.GET_META_DATA) == 0) {
             return ii;
@@ -613,47 +494,6 @@ public class PackageInfoUtils {
         }
         pgi.metaData = pg.metaData;
         return pgi;
-    }
-
-    private static boolean copyNeeded(@PackageManager.ComponentInfoFlags int flags,
-            AndroidPackage pkg, PackageUserState state, Bundle metaData, int userId) {
-        if (userId != UserHandle.USER_SYSTEM) {
-            // We always need to copy for other users, since we need
-            // to fix up the uid.
-            return true;
-        }
-        if (state.enabled != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
-            boolean enabled = state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-            if (pkg.isEnabled() != enabled) {
-                return true;
-            }
-        }
-        boolean suspended = (pkg.getFlags() & FLAG_SUSPENDED) != 0;
-        if (state.suspended != suspended) {
-            return true;
-        }
-        if (!state.installed || state.hidden) {
-            return true;
-        }
-        if (state.stopped) {
-            return true;
-        }
-        if (state.instantApp != pkg.isInstantApp()) {
-            return true;
-        }
-        if ((flags & PackageManager.GET_META_DATA) != 0
-                && (metaData != null || pkg.getAppMetaData() != null)) {
-            return true;
-        }
-        if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0
-                && pkg.getUsesLibraryFiles() != null) {
-            return true;
-        }
-        if ((flags & PackageManager.GET_SHARED_LIBRARY_FILES) != 0
-                && pkg.getUsesLibraryInfos() != null) {
-            return true;
-        }
-        return pkg.getStaticSharedLibName() != null;
     }
 
     private static void updateApplicationInfo(ApplicationInfo ai,

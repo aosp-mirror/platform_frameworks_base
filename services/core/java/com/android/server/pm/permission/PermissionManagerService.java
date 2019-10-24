@@ -1266,7 +1266,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         if (bp.isSoftRestricted() && !SoftRestrictedPermissionPolicy.forPermission(mContext,
-                pkg.toAppInfo(), UserHandle.of(userId), permName).mayGrantPermission()) {
+                pkg.toAppInfoWithoutState(), UserHandle.of(userId), permName)
+                .mayGrantPermission()) {
             Log.e(TAG, "Cannot grant soft restricted permission " + permName + " for package "
                     + packageName);
             return;

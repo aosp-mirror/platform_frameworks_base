@@ -767,7 +767,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * specificity (the more generic, the earlier in the list a partition appears).
      */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static final List<SystemPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
+    public static final List<SystemPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
             Arrays.asList(
                     new SystemPartition(Environment.getRootDirectory(), 0 /* scanFlag */,
                             false /* hasOverlays */),
@@ -2466,7 +2466,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static class SystemPartition {
+    public static class SystemPartition {
         public final File folder;
         public final int scanFlag;
         public final File appFolder;
@@ -8391,14 +8391,16 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             final int callingUid = Binder.getCallingUid();
             final int callingUserId = UserHandle.getUserId(callingUid);
-            final PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
-            if (ps == null) return null;
+            String packageName = component.getPackageName();
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
+            AndroidPackage pkg = mPackages.get(packageName);
+            if (ps == null || pkg == null) return null;
             if (shouldFilterApplicationLocked(
                     ps, callingUid, component, TYPE_UNKNOWN, callingUserId)) {
                 return null;
             }
             final ParsedInstrumentation i = mInstrumentation.get(component);
-            return PackageInfoUtils.generateInstrumentationInfo(i, flags);
+            return PackageInfoUtils.generateInstrumentationInfo(i, pkg, flags);
         }
     }
 
@@ -8425,10 +8427,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 final ParsedInstrumentation p = i.next();
                 if (targetPackage == null
                         || targetPackage.equals(p.getTargetPackage())) {
-                    InstrumentationInfo ii = PackageInfoUtils.generateInstrumentationInfo(p,
-                            flags);
-                    if (ii != null) {
-                        finalList.add(ii);
+                    AndroidPackage pkg = mPackages.get(p.getPackageName());
+                    if (pkg != null) {
+                        InstrumentationInfo ii = PackageInfoUtils.generateInstrumentationInfo(p,
+                                pkg, flags);
+                        if (ii != null) {
+                            finalList.add(ii);
+                        }
                     }
                 }
             }
@@ -11503,7 +11508,7 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mLock) {
                 // Set up information for our fall-back user intent resolution activity.
                 mPlatformPackage = pkg;
-                mAndroidApplication = pkg.toAppInfo();
+                mAndroidApplication = pkg.toAppInfoWithoutState();
                 if (!mResolverReplaced) {
                     mResolveActivity.applicationInfo = mAndroidApplication;
                     mResolveActivity.name = ResolverActivity.class.getName();
@@ -11619,20 +11624,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int i;
             for (i = 0; i < collectionSize; i++) {
                 ParsedInstrumentation a = pkg.getInstrumentations().get(i);
-                a.setPackageName(pkg.getAppInfoPackageName());
-                a.sourceDir = pkg.getBaseCodePath();
-                a.publicSourceDir = pkg.getPublicSourceDir();
-                a.splitNames = pkg.getSplitNames();
-                a.splitSourceDirs = pkg.getSplitCodePaths();
-                a.splitPublicSourceDirs = pkg.getSplitPublicSourceDirs();
-                a.splitDependencies = pkg.getSplitDependencies();
-                a.dataDir = pkg.getDataDir();
-                a.deviceProtectedDataDir = pkg.getDeviceProtectedDataDir();
-                a.credentialProtectedDataDir = pkg.getCredentialProtectedDataDir();
-                a.primaryCpuAbi = pkg.getPrimaryCpuAbi();
-                a.secondaryCpuAbi = pkg.getSecondaryCpuAbi();
-                a.nativeLibraryDir = pkg.getNativeLibraryDir();
-                a.secondaryNativeLibraryDir = pkg.getSecondaryNativeLibraryDir();
+                a.setPackageName(pkg.getPackageName());
                 mInstrumentation.put(a.getComponentName(), a);
                 if (chatty) {
                     if (r == null) {
@@ -11677,7 +11669,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             mResolverReplaced = true;
             // Set up information for custom user intent resolution activity.
-            mResolveActivity.applicationInfo = pkg.toAppInfo();
+            mResolveActivity.applicationInfo = pkg.toAppInfoWithoutState();
             mResolveActivity.name = mCustomResolverComponentName.getClassName();
             mResolveActivity.packageName = pkg.getAppInfoPackageName();
             mResolveActivity.processName = pkg.getAppInfoProcessName();
@@ -21535,7 +21527,7 @@ public class PackageManagerService extends IPackageManager.Stub
             packageAbiOverride = ps.cpuAbiOverrideString;
             appId = UserHandle.getAppId(pkg.getUid());
             seinfo = pkg.getSeInfo();
-            label = String.valueOf(pm.getApplicationLabel(pkg.toAppInfo()));
+            label = String.valueOf(pm.getApplicationLabel(pkg.toAppInfoWithoutState()));
             targetSdkVersion = pkg.getTargetSdkVersion();
             freezer = freezePackage(packageName, "movePackageInternal");
             installedUserIds = ps.queryInstalledUsers(mUserManager.getUserIds(), true);
