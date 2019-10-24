@@ -32,5 +32,5 @@ class PeopleNotificationIdentifierImpl @Inject constructor(
 
     override fun isPeopleNotification(sbn: StatusBarNotification) =
             sbn.notification.notificationStyle == Notification.MessagingStyle::class.java ||
-                    personExtractor.extractPersonKey(sbn) != null
+                    personExtractor.isPersonNotification(sbn)
 }

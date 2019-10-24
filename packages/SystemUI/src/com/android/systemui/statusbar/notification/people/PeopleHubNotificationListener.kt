@@ -47,6 +47,7 @@ private const val MAX_STORED_INACTIVE_PEOPLE = 10
 interface NotificationPersonExtractor {
     fun extractPerson(sbn: StatusBarNotification): PersonModel?
     fun extractPersonKey(sbn: StatusBarNotification): String?
+    fun isPersonNotification(sbn: StatusBarNotification): Boolean
 }
 
 @Singleton
@@ -75,6 +76,9 @@ class NotificationPersonExtractorPluginBoundary @Inject constructor(
             }
 
     override fun extractPersonKey(sbn: StatusBarNotification) = plugin?.extractPersonKey(sbn)
+
+    override fun isPersonNotification(sbn: StatusBarNotification): Boolean =
+            plugin?.isPersonNotification(sbn) ?: false
 }
 
 @Singleton
