@@ -32,6 +32,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
+import android.os.ParcelFileDescriptor;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 
@@ -45,6 +46,8 @@ import com.android.cts.install.lib.Uninstall;
 import com.android.cts.rollback.lib.Rollback;
 import com.android.cts.rollback.lib.RollbackUtils;
 import com.android.internal.R;
+
+import libcore.io.IoUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -332,7 +335,8 @@ public class StagedRollbackTest {
     }
 
     private void runShellCommand(String cmd) {
-        InstrumentationRegistry.getInstrumentation().getUiAutomation()
+        ParcelFileDescriptor pfd = InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .executeShellCommand(cmd);
+        IoUtils.closeQuietly(pfd);
     }
 }
