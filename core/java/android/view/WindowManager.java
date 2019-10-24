@@ -1445,7 +1445,10 @@ public interface WindowManager extends ViewManager {
          * position its UI elements with this overscan flag is set:</p>
          *
          * {@sample development/samples/ApiDemos/res/layout/overscan_activity.xml complete}
+         *
+         * @deprecated Overscan areas aren't set by any Android product anymore.
          */
+        @Deprecated
         public static final int FLAG_LAYOUT_IN_OVERSCAN = 0x02000000;
 
         /**

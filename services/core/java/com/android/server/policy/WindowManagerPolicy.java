@@ -213,15 +213,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public Rect getDisplayFrameLw();
 
         /**
-         * Retrieve the frame of the area inside the overscan region of the
-         * display that this window was last laid out in.  Must be called with the
-         * window manager lock held.
-         *
-         * @return Rect The rectangle holding the display overscan frame.
-         */
-        public Rect getOverscanFrameLw();
-
-        /**
          * Retrieve the frame of the content area that this window was last
          * laid out in.  This is the area in which the content of the window
          * should be placed.  It will be smaller than the display frame to

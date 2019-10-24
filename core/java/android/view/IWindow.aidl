@@ -51,8 +51,8 @@ oneway interface IWindow {
      */
     void executeCommand(String command, String parameters, in ParcelFileDescriptor descriptor);
 
-    void resized(in Rect frame, in Rect overscanInsets, in Rect contentInsets,
-            in Rect visibleInsets, in Rect stableInsets, in Rect outsets, boolean reportDraw,
+    void resized(in Rect frame, in Rect contentInsets,
+            in Rect visibleInsets, in Rect stableInsets, boolean reportDraw,
             in MergedConfiguration newMergedConfiguration, in Rect backDropFrame,
             boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
             in DisplayCutout.ParcelableWrapper displayCutout);

@@ -209,7 +209,7 @@ class TaskSnapshotSurface implements StartingSurface {
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,
                     View.GONE, activity.getDisplayContent().getDisplayId(), tmpFrame, tmpRect, tmpRect,
-                    tmpRect, tmpCutout, null, mTmpInsetsState);
+                    tmpCutout, null, mTmpInsetsState);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                 return null;
@@ -224,7 +224,7 @@ class TaskSnapshotSurface implements StartingSurface {
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
-                    tmpFrame, tmpRect, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect, tmpRect,
+                    tmpFrame, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect,
                     tmpCutout, tmpMergedConfiguration, surfaceControl, mTmpInsetsState);
         } catch (RemoteException e) {
             // Local call.
@@ -466,8 +466,8 @@ class TaskSnapshotSurface implements StartingSurface {
         }
 
         @Override
-        public void resized(Rect frame, Rect overscanInsets, Rect contentInsets, Rect visibleInsets,
-                Rect stableInsets, Rect outsets, boolean reportDraw,
+        public void resized(Rect frame, Rect contentInsets, Rect visibleInsets,
+                Rect stableInsets, boolean reportDraw,
                 MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
                 boolean alwaysConsumeSystemBars, int displayId,
                 DisplayCutout.ParcelableWrapper displayCutout) {

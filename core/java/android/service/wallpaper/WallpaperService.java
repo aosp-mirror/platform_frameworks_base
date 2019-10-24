@@ -176,14 +176,10 @@ public abstract class WallpaperService extends Service {
         int mCurWindowPrivateFlags = mWindowPrivateFlags;
         final Rect mVisibleInsets = new Rect();
         final Rect mWinFrame = new Rect();
-        final Rect mOverscanInsets = new Rect();
         final Rect mContentInsets = new Rect();
         final Rect mStableInsets = new Rect();
-        final Rect mOutsets = new Rect();
-        final Rect mDispatchedOverscanInsets = new Rect();
         final Rect mDispatchedContentInsets = new Rect();
         final Rect mDispatchedStableInsets = new Rect();
-        final Rect mDispatchedOutsets = new Rect();
         final Rect mFinalSystemInsets = new Rect();
         final Rect mFinalStableInsets = new Rect();
         final Rect mBackdropFrame = new Rect();
@@ -317,13 +313,13 @@ public abstract class WallpaperService extends Service {
 
         final BaseIWindow mWindow = new BaseIWindow() {
             @Override
-            public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
-                    Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
+            public void resized(Rect frame, Rect contentInsets,
+                    Rect visibleInsets, Rect stableInsets, boolean reportDraw,
                     MergedConfiguration mergedConfiguration, Rect backDropRect, boolean forceLayout,
                     boolean alwaysConsumeSystemBars, int displayId,
                     DisplayCutout.ParcelableWrapper displayCutout) {
-                Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
-                        reportDraw ? 1 : 0, outsets);
+                Message msg = mCaller.obtainMessageI(MSG_WINDOW_RESIZED,
+                        reportDraw ? 1 : 0);
                 mCaller.sendMessage(msg);
             }
 
@@ -822,7 +818,7 @@ public abstract class WallpaperService extends Service {
 
                         if (mSession.addToDisplay(mWindow, mWindow.mSeq, mLayout, View.VISIBLE,
                                 mDisplay.getDisplayId(), mWinFrame, mContentInsets, mStableInsets,
-                                mOutsets, mDisplayCutout, inputChannel,
+                                mDisplayCutout, inputChannel,
                                 mInsetsState) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
@@ -838,17 +834,13 @@ public abstract class WallpaperService extends Service {
 
                     if (!fixedSize) {
                         mLayout.surfaceInsets.set(mIWallpaperEngine.mDisplayPadding);
-                        mLayout.surfaceInsets.left += mOutsets.left;
-                        mLayout.surfaceInsets.top += mOutsets.top;
-                        mLayout.surfaceInsets.right += mOutsets.right;
-                        mLayout.surfaceInsets.bottom += mOutsets.bottom;
                     } else {
                         mLayout.surfaceInsets.set(0, 0, 0, 0);
                     }
                     final int relayoutResult = mSession.relayout(
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
-                            View.VISIBLE, 0, -1, mWinFrame, mOverscanInsets, mContentInsets,
-                            mVisibleInsets, mStableInsets, mOutsets, mBackdropFrame,
+                            View.VISIBLE, 0, -1, mWinFrame, mContentInsets,
+                            mVisibleInsets, mStableInsets, mBackdropFrame,
                             mDisplayCutout, mMergedConfiguration, mSurfaceControl,
                             mInsetsState);
                     if (mSurfaceControl.isValid()) {
@@ -864,12 +856,8 @@ public abstract class WallpaperService extends Service {
 
                     if (!fixedSize) {
                         final Rect padding = mIWallpaperEngine.mDisplayPadding;
-                        w += padding.left + padding.right + mOutsets.left + mOutsets.right;
-                        h += padding.top + padding.bottom + mOutsets.top + mOutsets.bottom;
-                        mOverscanInsets.left += padding.left;
-                        mOverscanInsets.top += padding.top;
-                        mOverscanInsets.right += padding.right;
-                        mOverscanInsets.bottom += padding.bottom;
+                        w += padding.left + padding.right;
+                        h += padding.top + padding.bottom;
                         mContentInsets.left += padding.left;
                         mContentInsets.top += padding.top;
                         mContentInsets.right += padding.right;
@@ -898,10 +886,8 @@ public abstract class WallpaperService extends Service {
                         Log.v(TAG, "Wallpaper size has changed: (" + mCurWidth + ", " + mCurHeight);
                     }
 
-                    insetsChanged |= !mDispatchedOverscanInsets.equals(mOverscanInsets);
                     insetsChanged |= !mDispatchedContentInsets.equals(mContentInsets);
                     insetsChanged |= !mDispatchedStableInsets.equals(mStableInsets);
-                    insetsChanged |= !mDispatchedOutsets.equals(mOutsets);
                     insetsChanged |= !mDispatchedDisplayCutout.equals(mDisplayCutout.get());
 
                     mSurfaceHolder.setSurfaceFrameSize(w, h);
@@ -961,16 +947,9 @@ public abstract class WallpaperService extends Service {
                         }
 
                         if (insetsChanged) {
-                            mDispatchedOverscanInsets.set(mOverscanInsets);
-                            mDispatchedOverscanInsets.left += mOutsets.left;
-                            mDispatchedOverscanInsets.top += mOutsets.top;
-                            mDispatchedOverscanInsets.right += mOutsets.right;
-                            mDispatchedOverscanInsets.bottom += mOutsets.bottom;
                             mDispatchedContentInsets.set(mContentInsets);
                             mDispatchedStableInsets.set(mStableInsets);
-                            mDispatchedOutsets.set(mOutsets);
                             mDispatchedDisplayCutout = mDisplayCutout.get();
-                            mFinalSystemInsets.set(mDispatchedOverscanInsets);
                             mFinalStableInsets.set(mDispatchedStableInsets);
                             WindowInsets insets = new WindowInsets(mFinalSystemInsets,
                                     mFinalStableInsets,
@@ -1457,7 +1436,6 @@ public abstract class WallpaperService extends Service {
                 } break;
                 case MSG_WINDOW_RESIZED: {
                     final boolean reportDraw = message.arg1 != 0;
-                    mEngine.mOutsets.set((Rect) message.obj);
                     mEngine.updateSurface(true, false, reportDraw);
                     mEngine.doOffsetsChanged(true);
                 } break;

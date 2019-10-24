@@ -43,7 +43,7 @@ import java.util.List;
 interface IWindowSession {
     int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outFrame,
-            out Rect outContentInsets, out Rect outStableInsets, out Rect outOutsets,
+            out Rect outContentInsets, out Rect outStableInsets,
             out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
             out InsetsState insetsState);
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
@@ -70,9 +70,6 @@ interface IWindowSession {
      * @param frameNumber A frame number in which changes requested in this layout will be rendered.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
-     * @param outOverscanInsets Rect in which is placed the offsets from
-     * <var>outFrame</var> in which the content of the window are inside
-     * of the display's overlay region.
      * @param outContentInsets Rect in which is placed the offsets from
      * <var>outFrame</var> in which the content of the window should be
      * placed.  This can be used to modify the window layout to ensure its
@@ -99,9 +96,9 @@ interface IWindowSession {
      */
     int relayout(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, long frameNumber, out Rect outFrame, out Rect outOverscanInsets,
+            int flags, long frameNumber, out Rect outFrame,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
-            out Rect outOutsets, out Rect outBackdropFrame,
+            out Rect outBackdropFrame,
             out DisplayCutout.ParcelableWrapper displayCutout,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
             out InsetsState insetsState);

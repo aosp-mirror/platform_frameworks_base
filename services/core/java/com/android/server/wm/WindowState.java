@@ -1047,9 +1047,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         applyGravityAndUpdateFrame(layoutContainingFrame, layoutDisplayFrame);
 
-        // Calculate the outsets before the content frame gets shrinked to the window frame.
-        mWindowFrames.calculateOutsets();
-
         // Make sure the content and visible frames are inside of the
         // final window frame.
         if (windowsAreFloating && !mWindowFrames.mFrame.isEmpty()) {
@@ -1092,13 +1089,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     Math.max(mWindowFrames.mStableFrame.top, mWindowFrames.mFrame.top),
                     Math.min(mWindowFrames.mStableFrame.right, mWindowFrames.mFrame.right),
                     Math.min(mWindowFrames.mStableFrame.bottom, mWindowFrames.mFrame.bottom));
-        }
-
-        if (isFullscreenAndFillsDisplay && !windowsAreFloating) {
-            // Windows that are not fullscreen can be positioned outside of the display frame,
-            // but that is not a reason to provide them with overscan insets.
-            InsetUtils.insetsBetweenFrames(layoutContainingFrame, mWindowFrames.mOverscanFrame,
-                    mWindowFrames.mOverscanInsets);
         }
 
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
@@ -1167,11 +1157,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public Rect getDisplayFrameLw() {
         return mWindowFrames.mDisplayFrame;
-    }
-
-    @Override
-    public Rect getOverscanFrameLw() {
-        return mWindowFrames.mOverscanFrame;
     }
 
     @Override
@@ -3265,11 +3250,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             final Rect frame = mWindowFrames.mCompatFrame;
-            final Rect overscanInsets = mWindowFrames.mLastOverscanInsets;
             final Rect contentInsets = mWindowFrames.mLastContentInsets;
             final Rect visibleInsets = mWindowFrames.mLastVisibleInsets;
             final Rect stableInsets = mWindowFrames.mLastStableInsets;
-            final Rect outsets = mWindowFrames.mLastOutsets;
             final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING;
             final boolean reportOrientation = mReportOrientationChanged;
             final int displayId = getDisplayId();
@@ -3281,8 +3264,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     @Override
                     public void run() {
                         try {
-                            dispatchResized(frame, overscanInsets, contentInsets, visibleInsets,
-                                    stableInsets, outsets, reportDraw, mergedConfiguration,
+                            dispatchResized(frame, contentInsets, visibleInsets,
+                                    stableInsets, reportDraw, mergedConfiguration,
                                     reportOrientation, displayId, displayCutout);
                         } catch (RemoteException e) {
                             // Not a remote call, RemoteException won't be raised.
@@ -3290,8 +3273,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     }
                 });
             } else {
-                dispatchResized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
-                        outsets, reportDraw, mergedConfiguration, reportOrientation, displayId,
+                dispatchResized(frame, contentInsets, visibleInsets, stableInsets,
+                        reportDraw, mergedConfiguration, reportOrientation, displayId,
                         displayCutout);
             }
             if (mWmService.mAccessibilityController != null) {
@@ -3423,14 +3406,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return stack.mStackId;
     }
 
-    private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
-            Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
+    private void dispatchResized(Rect frame, Rect contentInsets,
+            Rect visibleInsets, Rect stableInsets, boolean reportDraw,
             MergedConfiguration mergedConfiguration, boolean reportOrientation, int displayId,
             DisplayCutout displayCutout)
             throws RemoteException {
         final boolean forceRelayout = isDragResizeChanged() || reportOrientation;
 
-        mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
+        mClient.resized(frame, contentInsets, visibleInsets, stableInsets,
                 reportDraw, mergedConfiguration, getBackdropFrame(frame), forceRelayout,
                 getDisplayContent().getDisplayPolicy().areSystemBarsForcedShownLw(this), displayId,
                 new DisplayCutout.ParcelableWrapper(displayCutout));
@@ -5282,13 +5265,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * Copy the inset values over so they can be sent back to the client when a relayout occurs.
      */
-    void getInsetsForRelayout(Rect outOverscanInsets, Rect outContentInsets, Rect outVisibleInsets,
-            Rect outStableInsets, Rect outOutsets) {
-        outOverscanInsets.set(mWindowFrames.mOverscanInsets);
+    void getInsetsForRelayout(Rect outContentInsets, Rect outVisibleInsets,
+            Rect outStableInsets) {
         outContentInsets.set(mWindowFrames.mContentInsets);
         outVisibleInsets.set(mWindowFrames.mVisibleInsets);
         outStableInsets.set(mWindowFrames.mStableInsets);
-        outOutsets.set(mWindowFrames.mOutsets);
 
         mLastRelayoutContentInsets.set(mWindowFrames.mContentInsets);
     }

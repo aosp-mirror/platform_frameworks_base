@@ -111,11 +111,9 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase {
 
     private static class RelayoutRunner {
         final Rect mOutFrame = new Rect();
-        final Rect mOutOverscanInsets = new Rect();
         final Rect mOutContentInsets = new Rect();
         final Rect mOutVisibleInsets = new Rect();
         final Rect mOutStableInsets = new Rect();
-        final Rect mOutOutsets = new Rect();
         final Rect mOutBackDropFrame = new Rect();
         final DisplayCutout.ParcelableWrapper mOutDisplayCutout =
                 new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
@@ -149,8 +147,8 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase {
             while (state.keepRunning()) {
                 session.relayout(mWindow, mSeq, mParams, mWidth, mHeight,
                         mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrame,
-                        mOutOverscanInsets, mOutContentInsets, mOutVisibleInsets, mOutStableInsets,
-                        mOutOutsets, mOutBackDropFrame, mOutDisplayCutout, mOutMergedConfiguration,
+                        mOutContentInsets, mOutVisibleInsets, mOutStableInsets,
+                        mOutBackDropFrame, mOutDisplayCutout, mOutMergedConfiguration,
                         mOutSurfaceControl, mOutInsetsState);
             }
         }

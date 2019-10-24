@@ -88,8 +88,6 @@ interface IWindowManager
     void clearForcedDisplayDensityForUser(int displayId, int userId);
     void setForcedDisplayScalingMode(int displayId, int mode); // 0 = auto, 1 = disable
 
-    void setOverscan(int displayId, int left, int top, int right, int bottom);
-
     // These can only be called when holding the MANAGE_APP_TOKENS permission.
     void setEventDispatching(boolean enabled);
     void addWindowToken(IBinder token, int type, int displayId);

@@ -162,7 +162,6 @@ please see themes_device_defaults.xml.
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">@bool/config_windowNoTitleDefault</item>
         <item name="windowFullscreen">false</item>
-        <item name="windowOverscan">@bool/config_windowOverscanByDefault</item>
         <item name="windowIsFloating">false</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
@@ -536,7 +535,6 @@ please see themes_device_defaults.xml.
         <item name="windowFrame">@null</item>
         <item name="windowNoTitle">@bool/config_windowNoTitleDefault</item>
         <item name="windowFullscreen">false</item>
-        <item name="windowOverscan">@bool/config_windowOverscanByDefault</item>
         <item name="windowIsFloating">false</item>
         <item name="windowContentOverlay">@null</item>
         <item name="windowShowWallpaper">false</item>
@@ -963,10 +961,11 @@ please see themes_device_defaults.xml.
     <!-- Variant of the material (dark) theme that has no title bar and fills
          the entire screen and extends into the display overscan region.  This theme
          sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
-         to true. -->
+         to true.
+         @deprecated Overscan areas aren't set by any Android product anymore.
+         -->
     <style name="Theme.Material.NoActionBar.Overscan">
         <item name="windowFullscreen">true</item>
-        <item name="windowOverscan">true</item>
         <item name="windowContentOverlay">@null</item>
     </style>
 
@@ -996,10 +995,11 @@ please see themes_device_defaults.xml.
     <!-- Variant of the material (light) theme that has no title bar and fills
          the entire screen and extends into the display overscan region.  This theme
          sets {@link android.R.attr#windowFullscreen} and {@link android.R.attr#windowOverscan}
-         to true. -->
+         to true.
+         @deprecated Overscan areas aren't set by any Android product anymore.
+         -->
     <style name="Theme.Material.Light.NoActionBar.Overscan">
         <item name="windowFullscreen">true</item>
-        <item name="windowOverscan">true</item>
         <item name="windowContentOverlay">@null</item>
     </style>
 
