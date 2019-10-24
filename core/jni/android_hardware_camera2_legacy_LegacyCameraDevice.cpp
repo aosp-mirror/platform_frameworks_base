@@ -396,9 +396,8 @@ static sp<ANativeWindow> getNativeWindow(JNIEnv* env, jobject surface) {
 }
 
 static sp<ANativeWindow> getSurfaceTextureNativeWindow(JNIEnv* env, jobject thiz) {
-    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
     sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, thiz));
-    sp<Surface> surfaceTextureClient(surfaceTexture != NULL ? new Surface(producer) : NULL);
+    sp<Surface> surfaceTextureClient(producer != NULL ? new Surface(producer) : NULL);
     return surfaceTextureClient;
 }
 

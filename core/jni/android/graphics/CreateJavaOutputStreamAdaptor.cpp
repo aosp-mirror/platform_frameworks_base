@@ -7,6 +7,7 @@
 #include "Utils.h"
 
 #include <nativehelper/JNIHelp.h>
+#include <log/log.h>
 #include <memory>
 
 static jmethodID    gInputStream_readMethodID;

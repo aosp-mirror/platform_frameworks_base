@@ -22,8 +22,6 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include "SkTypeface.h"
-#include <android_runtime/android_util_AssetManager.h>
-#include <androidfw/AssetManager.h>
 #include <hwui/Typeface.h>
 #include <minikin/FontFamily.h>
 #include <minikin/SystemFonts.h>

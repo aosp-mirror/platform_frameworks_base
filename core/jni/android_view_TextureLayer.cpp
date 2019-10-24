@@ -17,7 +17,6 @@
 #define LOG_TAG "OpenGLRenderer"
 
 #include "jni.h"
-#include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>
 
 #include "core_jni_helpers.h"
@@ -27,12 +26,8 @@
 #include <gui/surfacetexture/surface_texture_platform.h>
 #include <gui/surfacetexture/SurfaceTexture.h>
 #include <hwui/Paint.h>
-
 #include <SkMatrix.h>
-
 #include <DeferredLayerUpdater.h>
-#include <Rect.h>
-#include <RenderNode.h>
 
 namespace android {
 
