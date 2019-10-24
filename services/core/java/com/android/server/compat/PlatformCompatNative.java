@@ -29,8 +29,8 @@ public class PlatformCompatNative extends IPlatformCompatNative.Stub {
     }
 
     @Override
-    public void reportChangeByPackageName(long changeId, String packageName) {
-        mPlatformCompat.reportChangeByPackageName(changeId, packageName);
+    public void reportChangeByPackageName(long changeId, String packageName, int userId) {
+        mPlatformCompat.reportChangeByPackageName(changeId, packageName, userId);
     }
 
     @Override
@@ -39,8 +39,8 @@ public class PlatformCompatNative extends IPlatformCompatNative.Stub {
     }
 
     @Override
-    public boolean isChangeEnabledByPackageName(long changeId, String packageName) {
-        return mPlatformCompat.isChangeEnabledByPackageName(changeId, packageName);
+    public boolean isChangeEnabledByPackageName(long changeId, String packageName, int userId) {
+        return mPlatformCompat.isChangeEnabledByPackageName(changeId, packageName, userId);
     }
 
     @Override

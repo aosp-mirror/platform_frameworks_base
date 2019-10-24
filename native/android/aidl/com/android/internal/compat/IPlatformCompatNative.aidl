@@ -33,9 +33,10 @@ interface IPlatformCompatNative
      * you do not need to call this API directly. The change will be reported for you.
      *
      * @param changeId    The ID of the compatibility change taking effect.
+     * @param userId      The ID of the user that the operation is done for.
      * @param packageName The package name of the app in question.
      */
-     void reportChangeByPackageName(long changeId, @utf8InCpp String packageName);
+     void reportChangeByPackageName(long changeId, @utf8InCpp String packageName, int userId);
 
     /**
      * Reports that a compatibility change is affecting an app process now.
@@ -64,9 +65,10 @@ interface IPlatformCompatNative
      *
      * @param changeId    The ID of the compatibility change in question.
      * @param packageName The package name of the app in question.
+     * @param userId      The ID of the user that the operation is done for.
      * @return {@code true} if the change is enabled for the current app.
      */
-    boolean isChangeEnabledByPackageName(long changeId, @utf8InCpp String packageName);
+    boolean isChangeEnabledByPackageName(long changeId, @utf8InCpp String packageName, int userId);
 
     /**
      * Query if a given compatibility change is enabled for an app process. This method should
