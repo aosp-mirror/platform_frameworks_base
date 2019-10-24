@@ -18,3 +18,11 @@ filegroup {
         "java/android/net/netlink/*.java",
     ],
 }
+
+filegroup {
+    name: "services-tethering-shared-srcs",
+    srcs: [
+        ":framework-annotations",
+        "java/android/net/util/SharedLog.java"
+    ],
+}
