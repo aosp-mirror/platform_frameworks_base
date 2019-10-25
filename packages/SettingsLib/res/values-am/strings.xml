@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ለአውታረመረቦች መቃኘት አይቻልም"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"የለም"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"ተቀምጧል"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"ተቋርጧል"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ተሰናክሏል"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"የአይ.ፒ. ውቅረት መሰናከል"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"በዝቅተኛ አውታረ መረብ ምክንያት አልተገናኘም"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"በ%1$s በኩል የሚገኝ"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"ለመመዝገብ መታ ያድርጉ"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"ተገናኝቷል፣ ምንም በይነመረብ የለም"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"የተገደበ ግንኙነት"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"ምንም በይነመረብ የለም"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"ወደ መለያ መግባት ያስፈልጋል"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"የመዳረሻ ነጥብ ለጊዜው ሞልቷል"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"ተገናኝቷል (ምንም ማህደረ መረጃ የለም)፣ ባትሪ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"ተገናኝቷል (ምንም ስልክ ወይም ማህደረ መረጃ የለም)፣ ባትሪ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"ንቁ፣ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ባትሪ"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"ገቢር፣ ግ፦ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ባትሪ፣ ቀ፦ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ባትሪ"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ባትሪ"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"ግ፦ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ባትሪ፣ ቀ፦ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ባትሪ"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"ንቁ"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"የማህደረ መረጃ ኦዲዮ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"የስልክ ጥሪዎች"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"አውታረ መረብ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"የWi‑Fi ተጨማሪ ቃላት ምዝግብ ማስታወሻ መያዝ"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi scan throttling"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"የተንቀሳቃሽ ስልክ ውሂብ ሁልጊዜ ገቢር ነው"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"የሃርድዌር ማቀላጠፊያን በማስተሳሰር ላይ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"የብሉቱዝ መሣሪያዎችን ያለ ስሞች አሳይ"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"መገናኘት አልተቻለም"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ አማራጮችን አሳይ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"የWi‑Fi ምዝግብ ማስታወሻ አያያዝ ደረጃ ጨምር፣ በWi‑Fi መምረጫ ውስጥ በአንድ SSID RSSI አሳይ"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"የባትሪ መላሸቅን ይቀንሳል እንዲሁም የአውታረ መረብ አፈጻጸም ብቃትን ያሻሽላል"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"የሚለካ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"ያልተለካ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"የምዝግብ ማስታወሻ ያዥ መጠኖች"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"እስከ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) ገደማ ድረስ መቆየት አለበት"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"እስከ <xliff:g id="TIME">%1$s</xliff:g> ገደማ መቆየት አለበት"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"እስከ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"የባትሪ ዕድሜን ከ <xliff:g id="TIME">%1$s</xliff:g> በላይ አራዝም"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"ከ<xliff:g id="THRESHOLD">%1$s</xliff:g> ያነሰ ይቀራል"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"ከ<xliff:g id="THRESHOLD">%1$s</xliff:g> ያነሰ ይቀራል (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"ከ<xliff:g id="TIME_REMAINING">%1$s</xliff:g> በላይ ይቀራል (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ሁልጊዜ ጠይቅ"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"እስኪያጠፉት ድረስ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ልክ አሁን"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"ይህ መሣሪያ"</string>
 </resources>

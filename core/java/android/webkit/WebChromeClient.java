@@ -519,15 +519,17 @@ public class WebChromeClient {
          * may not be supported and applications wishing to support these sources
          * or more advanced file operations should build their own Intent.
          *
-         * <pre>
-         * How to use:
-         * 1. Build an intent using {@link #createIntent}
-         * 2. Fire the intent using {@link android.app.Activity#startActivityForResult}.
-         * 3. Check for ActivityNotFoundException and take a user friendly action if thrown.
-         * 4. Listen the result using {@link android.app.Activity#onActivityResult}
-         * 5. Parse the result using {@link #parseResult} only if media capture was not requested.
-         * 6. Send the result using filePathCallback of {@link WebChromeClient#onShowFileChooser}
-         * </pre>
+         * <p>How to use:
+         * <ol>
+         *   <li>Build an intent using {@link #createIntent}</li>
+         *   <li>Fire the intent using {@link android.app.Activity#startActivityForResult}.</li>
+         *   <li>Check for ActivityNotFoundException and take a user friendly action if thrown.</li>
+         *   <li>Listen the result using {@link android.app.Activity#onActivityResult}</li>
+         *   <li>Parse the result using {@link #parseResult} only if media capture was not
+         *   requested.</li>
+         *   <li>Send the result using filePathCallback of {@link
+         *   WebChromeClient#onShowFileChooser}</li>
+         * </ol>
          *
          * @return an Intent that supports basic file chooser sources.
          */

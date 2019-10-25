@@ -248,7 +248,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public boolean disallowInterceptTouch(MotionEvent event) {
-        return mLockPatternScreenBounds.contains((int) event.getRawX(), (int) event.getRawY());
+        return !mLockPatternView.isEmpty()
+                || mLockPatternScreenBounds.contains((int) event.getRawX(), (int) event.getRawY());
     }
 
     /** TODO: hook this up */
@@ -442,7 +443,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public void showMessage(CharSequence message, ColorStateList colorState) {
-        mSecurityMessageDisplay.setNextMessageColor(colorState);
+        if (colorState != null) {
+            mSecurityMessageDisplay.setNextMessageColor(colorState);
+        }
         mSecurityMessageDisplay.setMessage(message);
     }
 

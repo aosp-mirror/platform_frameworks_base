@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -40,6 +41,10 @@ public class TestIWindow extends IWindow.Stub {
             Rect stableInsets, Rect outsets, boolean reportDraw, MergedConfiguration mergedConfig,
             Rect backDropFrame, boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
             DisplayCutout.ParcelableWrapper displayCutout) throws RemoteException {
+    }
+
+    @Override
+    public void locationInParentDisplayChanged(Point offset) throws RemoteException {
     }
 
     @Override

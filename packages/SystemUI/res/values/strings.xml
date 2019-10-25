@@ -303,6 +303,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated">Face authenticated</string>
     <!-- Content description for the face icon when the user has been authenticated and the confirm button has been pressed [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_face_icon_description_confirmed">Confirmed</string>
+    <!-- Message shown when a biometric is authenticated, waiting for the user to confirm authentication [CHAR LIMIT=40]-->
+    <string name="biometric_dialog_tap_confirm">Tap Confirm to complete</string>
 
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
@@ -953,8 +955,8 @@
     <!-- Shows to explain the double tap interaction with notifications: After tapping a notification on Keyguard, this will explain users to tap again to launch a notification. [CHAR LIMIT=60] -->
     <string name="notification_tap_again">Tap again to open</string>
 
-    <!-- Shows when people have pressed the unlock icon to explain how to unlock. [CHAR LIMIT=60] -->
-    <string name="keyguard_unlock">Swipe up to unlock</string>
+    <!-- Message shown when lock screen is tapped or face authentication fails. [CHAR LIMIT=60] -->
+    <string name="keyguard_unlock">Swipe up to open</string>
 
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
     <string name="do_disclosure_generic">This device is managed by your organization</string>

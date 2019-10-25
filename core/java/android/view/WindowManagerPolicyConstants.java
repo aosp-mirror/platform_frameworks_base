@@ -38,10 +38,11 @@ public interface WindowManagerPolicyConstants {
     int FLAG_INTERACTIVE = 0x20000000;
     int FLAG_PASS_TO_USER = 0x40000000;
 
-    // Flags for IActivityManager.keyguardGoingAway()
+    // Flags for IActivityTaskManager.keyguardGoingAway()
     int KEYGUARD_GOING_AWAY_FLAG_TO_SHADE = 1 << 0;
     int KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS = 1 << 1;
     int KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER = 1 << 2;
+    int KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS = 1 << 3;
 
     // Flags used for indicating whether the internal and/or external input devices
     // of some type are available.

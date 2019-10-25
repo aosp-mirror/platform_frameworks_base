@@ -135,13 +135,13 @@
     <item msgid="7158319962230727476">"Optimalizovaná kvalita zvuku (990kbps/909kbps)"</item>
     <item msgid="2921767058740704969">"Vyrovnaná kvalita zvuku a pripojenia (660/606 kb/s)"</item>
     <item msgid="8860982705384396512">"Optimalizovaná kvalita pripojenia (330kbps/303kbps)"</item>
-    <item msgid="4414060457677684127">"Najvyšši kvalita (adaptívna prenosová rýchlosť)"</item>
+    <item msgid="4414060457677684127">"Najvyššia kvalita (adaptívna prenosová rýchlosť)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"Optimalizovaná kvalita zvuku"</item>
     <item msgid="4327143584633311908">"Vyrovnaná kvalita zvuku a pripojenia"</item>
     <item msgid="4681409244565426925">"Optimalizovaná kvalita pripojenia"</item>
-    <item msgid="364670732877872677">"Najvyšši kvalita (adaptívna prenosová rýchlosť)"</item>
+    <item msgid="364670732877872677">"Najvyššia kvalita (adaptívna prenosová rýchlosť)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="4862957058729193940"></item>

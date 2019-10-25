@@ -119,7 +119,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private boolean mIsEnabled;
     private int mCurrentBoundedUserId = -1;
     private float mNavBarButtonAlpha;
-    private MotionEvent mStatusBarGestureDownEvent;
+    private boolean mInputFocusTransferStarted;
+    private float mInputFocusTransferStartY;
+    private long mInputFocusTransferStartMillis;
     private float mWindowCornerRadius;
     private boolean mSupportsRoundedCornersOnWindows;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
@@ -164,6 +166,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
+        // TODO: change the method signature to use (boolean inputFocusTransferStarted)
         @Override
         public void onStatusBarMotionEvent(MotionEvent event) {
             if (!verifyCaller("onStatusBarMotionEvent")) {
@@ -175,15 +178,19 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 mHandler.post(()->{
                     StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
                     if (bar != null) {
-                        bar.dispatchNotificationsPanelTouchEvent(event);
 
                         int action = event.getActionMasked();
                         if (action == ACTION_DOWN) {
-                            mStatusBarGestureDownEvent = MotionEvent.obtain(event);
+                            mInputFocusTransferStarted = true;
+                            mInputFocusTransferStartY = event.getY();
+                            mInputFocusTransferStartMillis = event.getEventTime();
+                            bar.onInputFocusTransfer(mInputFocusTransferStarted, 0 /* velocity */);
                         }
                         if (action == ACTION_UP || action == ACTION_CANCEL) {
-                            mStatusBarGestureDownEvent.recycle();
-                            mStatusBarGestureDownEvent = null;
+                            mInputFocusTransferStarted = false;
+                            bar.onInputFocusTransfer(mInputFocusTransferStarted,
+                                    (event.getY() - mInputFocusTransferStartY)
+                                    / (event.getEventTime() - mInputFocusTransferStartMillis));
                         }
                         event.recycle();
                     }
@@ -539,7 +546,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             navBarFragment.updateSystemUiStateFlags(-1);
         }
         if (navBarView != null) {
-            navBarView.updateSystemUiStateFlags();
+            navBarView.updatePanelSystemUiStateFlags();
+            navBarView.updateDisabledSystemUiStateFlags();
         }
         if (mStatusBarWinController != null) {
             mStatusBarWinController.notifyStateChangedCallbacks();
@@ -590,14 +598,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public void cleanupAfterDeath() {
-        if (mStatusBarGestureDownEvent != null) {
+        if (mInputFocusTransferStarted) {
             mHandler.post(()-> {
                 StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
                 if (bar != null) {
-                    mStatusBarGestureDownEvent.setAction(MotionEvent.ACTION_CANCEL);
-                    bar.dispatchNotificationsPanelTouchEvent(mStatusBarGestureDownEvent);
-                    mStatusBarGestureDownEvent.recycle();
-                    mStatusBarGestureDownEvent = null;
+                    mInputFocusTransferStarted = false;
+                    bar.onInputFocusTransfer(false, 0 /* velocity */);
                 }
             });
         }
@@ -746,6 +752,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         try {
             if (mOverviewProxy != null) {
                 mOverviewProxy.onAssistantVisibilityChanged(visibility);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for assistant visibility.");
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to call onAssistantVisibilityChanged()", e);
@@ -780,6 +788,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         pw.println(QuickStepContract.isBackGestureDisabled(mSysUiStateFlags));
         pw.print("    assistantGestureDisabled=");
         pw.println(QuickStepContract.isAssistantGestureDisabled(mSysUiStateFlags));
+        pw.print(" mInputFocusTransferStarted="); pw.println(mInputFocusTransferStarted);
     }
 
     public interface OverviewProxyListener {

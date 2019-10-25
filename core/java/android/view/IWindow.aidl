@@ -17,6 +17,7 @@
 
 package android.view;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -55,6 +56,12 @@ oneway interface IWindow {
             in MergedConfiguration newMergedConfiguration, in Rect backDropFrame,
             boolean forceLayout, boolean alwaysConsumeSystemBars, int displayId,
             in DisplayCutout.ParcelableWrapper displayCutout);
+
+    /**
+     * Called when the window location in parent display has changed. The offset will only be a
+     * nonzero value if the window is on an embedded display that is re-parented to another window.
+     */
+    void locationInParentDisplayChanged(in Point offset);
 
     /**
      * Called when the window insets configuration has changed.

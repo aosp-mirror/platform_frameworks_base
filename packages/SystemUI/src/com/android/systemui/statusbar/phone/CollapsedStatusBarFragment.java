@@ -35,6 +35,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -201,20 +202,21 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     protected int adjustDisableFlags(int state) {
+        boolean headsUpVisible = mStatusBarComponent.headsUpShouldBeVisible();
+        if (headsUpVisible) {
+            state |= DISABLE_CLOCK;
+        }
+
         if (!mKeyguardMonitor.isLaunchTransitionFadingAway()
                 && !mKeyguardMonitor.isKeyguardFadingAway()
-                && shouldHideNotificationIcons()) {
+                && shouldHideNotificationIcons()
+                && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                        && headsUpVisible)) {
             state |= DISABLE_NOTIFICATION_ICONS;
             state |= DISABLE_SYSTEM_INFO;
             state |= DISABLE_CLOCK;
         }
 
-        // In landscape, the heads up show but shouldHideNotificationIcons() return false
-        // because the visual icon is in notification icon area rather than heads up's space.
-        // whether the notification icon show or not, clock should hide when heads up show.
-        if (mStatusBarComponent.isHeadsUpShouldBeVisible()) {
-            state |= DISABLE_CLOCK;
-        }
 
         if (mNetworkController != null && EncryptionHelper.IS_DATA_ENCRYPTED) {
             if (mNetworkController.hasEmergencyCryptKeeperText()) {

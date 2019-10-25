@@ -16,12 +16,13 @@ package com.android.systemui.plugins;
 import android.view.View;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
+import com.android.systemui.plugins.statusbar.DozeParameters;
 
 @ProvidesInterface(action = OverlayPlugin.ACTION, version = OverlayPlugin.VERSION)
 public interface OverlayPlugin extends Plugin {
 
     String ACTION = "com.android.systemui.action.PLUGIN_OVERLAY";
-    int VERSION = 3;
+    int VERSION = 4;
 
     /**
      * Setup overlay plugin
@@ -29,9 +30,10 @@ public interface OverlayPlugin extends Plugin {
     void setup(View statusBar, View navBar);
 
     /**
-     * Setup overlay plugin with callback
+     * Setup overlay plugin with callback and DozeParameters
      */
-    default void setup(View statusBar, View navBar, Callback callback) {
+    default void setup(View statusBar, View navBar, Callback callback,
+            DozeParameters dozeParameters) {
         setup(statusBar, navBar);
     }
 

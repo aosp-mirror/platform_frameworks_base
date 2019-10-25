@@ -94,6 +94,16 @@
     <item type="id" name="top_roundess_animator_start_tag"/>
     <item type="id" name="top_roundess_animator_end_tag"/>
 
+    <item type="id" name="keyguard_hun_animator_tag"/>
+    <item type="id" name="keyguard_hun_animator_start_tag"/>
+    <item type="id" name="keyguard_hun_animator_end_tag"/>
+
+    <item type="id" name="view_group_fade_helper_modified_views"/>
+    <item type="id" name="view_group_fade_helper_animator"/>
+    <item type="id" name="view_group_fade_helper_previous_value_tag"/>
+    <item type="id" name="view_group_fade_helper_restore_tag"/>
+    <item type="id" name="view_group_fade_helper_hardware_layer"/>
+
     <!-- Accessibility actions for the notification menu -->
     <item type="id" name="action_snooze_undo"/>
     <item type="id" name="action_snooze_shorter"/>

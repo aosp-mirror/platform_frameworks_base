@@ -46,6 +46,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     // authentication while the device is already locked out. In that case, the client is created
     // but not started yet. The user shouldn't receive the error haptics in this case.
     private boolean mStarted;
+    private long mStartTimeMs;
 
     /**
      * This method is called when authentication starts.
@@ -73,6 +74,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 restricted, owner, cookie);
         mOpId = opId;
         mRequireConfirmation = requireConfirmation;
+    }
+
+    protected long getStartTimeMs() {
+        return mStartTimeMs;
     }
 
     @Override
@@ -228,6 +233,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         mStarted = true;
         onStart();
         try {
+            mStartTimeMs = System.currentTimeMillis();
             final int result = getDaemonWrapper().authenticate(mOpId, getGroupId());
             if (result != 0) {
                 Slog.w(getLogTag(), "startAuthentication failed, result=" + result);

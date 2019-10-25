@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"වැරදි PIN කේතයකි."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"වලංගු නොවන කාඩ්පත."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"සම්පූර්ණයෙන් ආරෝපණය වී ඇත"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • නොරැහැන්ව ආරෝපණය වේ"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • නොරැහැන්ව ආරෝපණ කෙරේ"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • වේගයෙන් ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • සෙමින් ආරෝපණය වෙමින්"</string>
@@ -151,84 +151,7 @@
       <item quantity="one">SIM දැන් අබල කර ඇත. දිගටම කරගෙන යාමට PUK කේතය ඇතුළු කරන්න. SIM ස්ථිරවම භාවිත කළ නොහැකි බවට පත් වීමට පෙර ඔබ සතුව උත්සාහයන් <xliff:g id="_NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත. විස්තර සඳහා වාහක සම්බන්ධ කර ගන්න.</item>
       <item quantity="other">SIM දැන් අබල කර ඇත. දිගටම කරගෙන යාමට PUK කේතය ඇතුළු කරන්න. SIM ස්ථිරවම භාවිත කළ නොහැකි බවට පත් වීමට පෙර ඔබ සතුව උත්සාහයන් <xliff:g id="_NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත. විස්තර සඳහා වාහක සම්බන්ධ කර ගන්න.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="one">"<annotation name="color">"එය"</annotation>\n"^1\n^2 යි</item>
-      <item quantity="other">"<annotation name="color">"එය"</annotation>\n"^1\n^2 යි</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"දොළහ"</item>
-    <item msgid="7389464214252023751">"එක"</item>
-    <item msgid="8803180377002008046">"දෙක"</item>
-    <item msgid="8614897059944644719">"තුන"</item>
-    <item msgid="2293058674782619556">"හතර"</item>
-    <item msgid="4815402358455041664">"පහ"</item>
-    <item msgid="3325754778509665687">"හය"</item>
-    <item msgid="5805551341866280575">"හත"</item>
-    <item msgid="203334816668238610">"අට"</item>
-    <item msgid="4828052671464488923">"නවය"</item>
-    <item msgid="2233497913571137419">"දහය"</item>
-    <item msgid="5621554266768657830">"එකොළහ"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"පැය"</item>
-    <item msgid="8837126587669001578">"එකයි"</item>
-    <item msgid="4294343372940455660">"දෙකයි"</item>
-    <item msgid="7129166637707421536">"තුනයි"</item>
-    <item msgid="7579404865008788673">"හතරයි"</item>
-    <item msgid="3873924689207380586">"පහයි"</item>
-    <item msgid="4849565597850069377">"හයයි"</item>
-    <item msgid="4404219424523572364">"හතයි"</item>
-    <item msgid="8740481214764087329">"අටයි"</item>
-    <item msgid="1713216865806811237">"නවයයි"</item>
-    <item msgid="3508406095411245038">"දහය"</item>
-    <item msgid="7161996337755311711">"එකොළහ"</item>
-    <item msgid="4044549963329624197">"දොළහ"</item>
-    <item msgid="333373157917379088">"දහතුන"</item>
-    <item msgid="2631202907124819385">"දහහතර"</item>
-    <item msgid="6472396076858033453">"පහළොව"</item>
-    <item msgid="8656981856181581643">"දහසය"</item>
-    <item msgid="7289026608562030619">"දහහත"</item>
-    <item msgid="3881477602692646573">"දහඅට"</item>
-    <item msgid="3358129827772984226">"දහනවය"</item>
-    <item msgid="3308575407402865807">"විස්ස"</item>
-    <item msgid="5346560955382229629">"විසි\nඑක"</item>
-    <item msgid="226750304761473436">"විසි\nදෙක"</item>
-    <item msgid="616811325336838734">"විසි\nතුනයි"</item>
-    <item msgid="616346116869053440">"විසි\nහතර"</item>
-    <item msgid="4642996410384042830">"විසි\nපහ"</item>
-    <item msgid="7506092849993571465">"විසි\nහය"</item>
-    <item msgid="1915078191101042031">"විසි\nහත"</item>
-    <item msgid="4292378641900520252">"විසි\nඅට"</item>
-    <item msgid="5339513901773103696">"විසි\nනවය"</item>
-    <item msgid="3574673250891657607">"තිහ"</item>
-    <item msgid="5796923836589110940">"තිස්\nඑක"</item>
-    <item msgid="5859323597571702052">"තිස්\nදෙක"</item>
-    <item msgid="5133326723148876507">"තිස්\nතුන"</item>
-    <item msgid="2693999494655663096">"තිස්\nහතර"</item>
-    <item msgid="3316754944962836197">"තිස්\nපහ"</item>
-    <item msgid="816891008836796723">"තිස්\nහය"</item>
-    <item msgid="9158890488666520078">"තිස්\nහත"</item>
-    <item msgid="1894769703213894011">"තිස්\nඅට"</item>
-    <item msgid="5638820345598572399">"තිස්\nනවය"</item>
-    <item msgid="8838304023017895439">"හතළිහ"</item>
-    <item msgid="1834742948932559597">"හතළිස්\nඑක"</item>
-    <item msgid="6573707308847773944">"හතළිස්\nදෙක"</item>
-    <item msgid="2450149950652678001">"හතළිස්\nතුන"</item>
-    <item msgid="2874667401318178036">"හතළිස්\nහතර"</item>
-    <item msgid="3391101532763048862">"හතළිස්\nපහ"</item>
-    <item msgid="1671489330863254362">"හතළිස්\nහය"</item>
-    <item msgid="5916017359554531038">"හතළිස්\nහත"</item>
-    <item msgid="8205413177993059967">"හතළිස්\nඅට"</item>
-    <item msgid="6607867415142171302">"හතළිස්\nනවය"</item>
-    <item msgid="8358850748472089162">"පනහ"</item>
-    <item msgid="3551313125255080234">"පනස්\nඑක"</item>
-    <item msgid="1559678130725716542">"පනස්\nදෙක"</item>
-    <item msgid="431441994725492377">"පනස්\nතුන"</item>
-    <item msgid="6345774640539623024">"පනස්\nහතර"</item>
-    <item msgid="8018192990793931120">"පනස්\nපහ"</item>
-    <item msgid="6187650843754604534">"පනස\nහය"</item>
-    <item msgid="8727240174015993259">"පනස්\nහත"</item>
-    <item msgid="848339003778952950">"පනස්\nඅට"</item>
-    <item msgid="5798985802835423618">"පනස්\nනවය"</item>
-  </string-array>
+    <string name="clock_title_default" msgid="6645600990069154049">"පෙරනිමි"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"බුබුළ"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"ප්‍රතිසමය"</string>
 </resources>

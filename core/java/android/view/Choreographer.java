@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.DisplayEventReceiver.CONFIG_CHANGED_EVENT_SUPPRESS;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_APP;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 
@@ -910,7 +911,7 @@ public final class Choreographer {
         private int mFrame;
 
         public FrameDisplayEventReceiver(Looper looper, int vsyncSource) {
-            super(looper, vsyncSource);
+            super(looper, vsyncSource, CONFIG_CHANGED_EVENT_SUPPRESS);
         }
 
         // TODO(b/116025192): physicalDisplayId is ignored because SF only emits VSYNC events for

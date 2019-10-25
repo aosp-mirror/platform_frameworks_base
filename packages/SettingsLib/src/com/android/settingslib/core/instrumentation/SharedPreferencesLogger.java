@@ -102,7 +102,8 @@ public class SharedPreferencesLogger implements SharedPreferences {
             OnSharedPreferenceChangeListener listener) {
     }
 
-    private void logValue(String key, Object value) {
+    @VisibleForTesting
+    protected void logValue(String key, Object value) {
         logValue(key, value, false /* forceLog */);
     }
 
@@ -138,11 +139,18 @@ public class SharedPreferencesLogger implements SharedPreferences {
             } else {
                 intVal = (int) floatValue;
             }
+        } else if (value instanceof String) {
+            try {
+                intVal = Integer.parseInt((String) value);
+            } catch (NumberFormatException e) {
+                Log.w(LOG_TAG, "Tried to log unloggable object=" + value);
+                return;
+            }
         } else {
-            Log.w(LOG_TAG, "Tried to log unloggable object" + value);
+            Log.w(LOG_TAG, "Tried to log unloggable object=" + value);
             return;
         }
-        // Pref key exists in set, log it's change in metrics.
+        // Pref key exists in set, log its change in metrics.
         mMetricsFeature.action(SettingsEnums.PAGE_UNKNOWN,
                 SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE,
                 SettingsEnums.PAGE_UNKNOWN,

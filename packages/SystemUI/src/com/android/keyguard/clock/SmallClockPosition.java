@@ -67,7 +67,8 @@ class SmallClockPosition {
      */
     int getPreferredY() {
         // On AOD, clock needs to appear below the status bar with enough room for pixel shifting
-        int aodY = mStatusBarHeight + mKeyguardLockPadding + mBurnInOffsetY;
+        int aodY = mStatusBarHeight + mKeyguardLockHeight + 2 * mKeyguardLockPadding
+                + mBurnInOffsetY;
         // On lock screen, clock needs to appear below the lock icon
         int lockY =  mStatusBarHeight + mKeyguardLockHeight + 2 * mKeyguardLockPadding;
         return (int) MathUtils.lerp(lockY, aodY, mDarkAmount);

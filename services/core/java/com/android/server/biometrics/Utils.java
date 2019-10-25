@@ -18,10 +18,15 @@ package com.android.server.biometrics;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.UserHandle;
 import android.provider.Settings;
 
 public class Utils {
     public static boolean isDebugEnabled(Context context, int targetUserId) {
+        if (targetUserId == UserHandle.USER_NULL) {
+            return false;
+        }
+
         if (!(Build.IS_ENG || Build.IS_USERDEBUG)) {
             return false;
         }

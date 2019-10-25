@@ -1546,7 +1546,9 @@ public class Activity extends ContextThemeWrapper
      * had previously been frozen by {@link #onSaveInstanceState}.
      *
      * <p>This method is called between {@link #onStart} and
-     * {@link #onPostCreate}.
+     * {@link #onPostCreate}. This method is called only when recreating
+     * an activity; the method isn't invoked if {@link #onStart} is called for
+     * any other reason.</p>
      *
      * @param savedInstanceState the data most recently supplied in {@link #onSaveInstanceState}.
      *

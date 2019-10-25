@@ -1866,7 +1866,8 @@ public final class SurfaceControl implements Parcelable {
         final ScreenshotGraphicBuffer buffer = screenshotToBuffer(display, sourceCrop, width,
                 height, useIdentityTransform, rotation);
         try {
-            consumer.attachAndQueueBuffer(buffer.getGraphicBuffer());
+            consumer.attachAndQueueBufferWithColorSpace(buffer.getGraphicBuffer(),
+                    buffer.getColorSpace());
         } catch (RuntimeException e) {
             Log.w(TAG, "Failed to take screenshot - " + e.getMessage());
         }
