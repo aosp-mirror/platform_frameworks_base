@@ -1154,7 +1154,7 @@ class RootActivityContainer extends ConfigurationContainer
                 // activity is started and resumed, and no recursion occurs.
                 final ActivityStack focusedStack = display.getFocusedStack();
                 if (focusedStack != null) {
-                    focusedStack.resumeTopActivityUncheckedLocked(target, targetOptions);
+                    result |= focusedStack.resumeTopActivityUncheckedLocked(target, targetOptions);
                 }
             }
         }
