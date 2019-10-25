@@ -38,9 +38,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 import android.app.TaskStackListener;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
@@ -348,10 +350,12 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         final ActivityRecord activity = createFullscreenStackWithSimpleActivityAt(
                 display).topRunningActivityLocked();
         activity.setState(ActivityStack.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
+        when(activity.getRequestedOrientation()).thenReturn(
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         activity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         activity.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        activity.getTaskRecord().getConfiguration().windowConfiguration.setAppBounds(
-                0, 0, 1000, 2000);
+        activity.visible = true;
+        activity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
 
         final ArrayList<CompletableFuture<IBinder>> resultWrapper = new ArrayList<>();
         mService.getTaskChangeNotificationController().registerTaskStackListener(
@@ -363,11 +367,14 @@ public class ActivityDisplayTests extends ActivityTestsBase {
                     }
                 });
 
-        // Expect the exact token when the activity is in size compatibility mode.
-        activity.getResolvedOverrideConfiguration().windowConfiguration.setAppBounds(
-                0, 0, 800, 1600);
         resultWrapper.add(new CompletableFuture<>());
-        display.handleActivitySizeCompatModeIfNeeded(activity);
+
+        // resize the display to exercise size-compat mode
+        final DisplayContent displayContent = display.mDisplayContent;
+        displayContent.mBaseDisplayHeight = (int) (0.8f * displayContent.mBaseDisplayHeight);
+        Configuration c = new Configuration();
+        displayContent.computeScreenConfiguration(c);
+        display.onRequestedOverrideConfigurationChanged(c);
 
         assertEquals(activity.appToken, resultWrapper.get(0).get(2, TimeUnit.SECONDS));
 

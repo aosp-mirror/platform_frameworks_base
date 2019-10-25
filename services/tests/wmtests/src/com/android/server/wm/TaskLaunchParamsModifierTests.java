@@ -410,51 +410,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testForceMaximizesPreDApp() {
-        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
-                WINDOWING_MODE_FREEFORM);
-
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
-        options.setLaunchBounds(new Rect(0, 0, 200, 100));
-
-        mCurrent.mPreferredDisplayId = freeformDisplay.mDisplayId;
-        mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
-        mCurrent.mBounds.set(0, 0, 200, 100);
-
-        mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUPCAKE;
-
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
-
-        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
-                WINDOWING_MODE_FREEFORM);
-    }
-
-    @Test
-    public void testForceMaximizesAppWithoutMultipleDensitySupport() {
-        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
-                WINDOWING_MODE_FREEFORM);
-
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
-        options.setLaunchBounds(new Rect(0, 0, 200, 100));
-
-        mCurrent.mPreferredDisplayId = freeformDisplay.mDisplayId;
-        mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
-        mCurrent.mBounds.set(0, 0, 200, 100);
-
-        mActivity.info.applicationInfo.flags = 0;
-
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
-                mActivity, /* source */ null, options, mCurrent, mResult));
-
-        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
-                WINDOWING_MODE_FREEFORM);
-    }
-
-    @Test
     public void testForceMaximizesUnresizeableApp() {
+        mService.mSizeCompatFreeform = false;
         final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
                 WINDOWING_MODE_FREEFORM);
 
@@ -472,6 +429,33 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
                 mActivity, /* source */ null, options, mCurrent, mResult));
 
         assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
+                WINDOWING_MODE_FREEFORM);
+    }
+
+    @Test
+    public void testLaunchesAppInWindowOnFreeformDisplay() {
+        mService.mSizeCompatFreeform = true;
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+
+        Rect expectedLaunchBounds = new Rect(0, 0, 200, 100);
+
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchWindowingMode(WINDOWING_MODE_FREEFORM);
+        options.setLaunchBounds(expectedLaunchBounds);
+
+        mCurrent.mPreferredDisplayId = freeformDisplay.mDisplayId;
+        mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        mCurrent.mBounds.set(expectedLaunchBounds);
+
+        mActivity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
+                mActivity, /* source */ null, options, mCurrent, mResult));
+
+        assertEquals(expectedLaunchBounds, mResult.mBounds);
+
+        assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
                 WINDOWING_MODE_FREEFORM);
     }
 

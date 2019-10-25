@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 
@@ -74,6 +75,20 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
             mWm.mSettingsObserver.onChange(false, forceResizableUri);
 
             assertEquals(mWm.mAtmService.mForceResizableActivities, forceResizableMode);
+        }
+    }
+
+    @Test
+    public void testEnableSizeCompatFreeform() {
+        try (SettingsSession enableSizeCompatFreeformSession = new
+                SettingsSession(DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM)) {
+            final boolean enableSizeCompatFreeform =
+                    !enableSizeCompatFreeformSession.getSetting();
+            final Uri enableSizeCompatFreeformUri =
+                    enableSizeCompatFreeformSession.setSetting(enableSizeCompatFreeform);
+            mWm.mSettingsObserver.onChange(false, enableSizeCompatFreeformUri);
+
+            assertEquals(mWm.mAtmService.mSizeCompatFreeform, enableSizeCompatFreeform);
         }
     }
 

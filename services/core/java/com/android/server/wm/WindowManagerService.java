@@ -39,6 +39,7 @@ import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURES_EX
 import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP;
 import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -717,6 +718,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT);
         private final Uri mForceResizableUri = Settings.Global.getUriFor(
                 DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
+        private final Uri mSizeCompatFreeformUri = Settings.Global.getUriFor(
+                DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM);
 
         public SettingsObserver() {
             super(new Handler());
@@ -737,6 +740,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mFreeformWindowUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mForceResizableUri, false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(mSizeCompatFreeformUri, false, this,
+                    UserHandle.USER_ALL);
         }
 
         @Override
@@ -772,6 +777,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mForceResizableUri.equals(uri)) {
                 updateForceResizableTasks();
+                return;
+            }
+
+            if (mSizeCompatFreeformUri.equals(uri)) {
+                updateSizeCompatFreeform();
                 return;
             }
 
@@ -843,6 +853,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
 
             mAtmService.mForceResizableActivities = forceResizable;
+        }
+
+        void updateSizeCompatFreeform() {
+            ContentResolver resolver = mContext.getContentResolver();
+            final boolean sizeCompatFreeform = Settings.Global.getInt(resolver,
+                    DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM, 0) != 0;
+
+            mAtmService.mSizeCompatFreeform = sizeCompatFreeform;
         }
     }
 
