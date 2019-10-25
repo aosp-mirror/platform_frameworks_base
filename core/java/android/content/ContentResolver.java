@@ -3638,19 +3638,19 @@ public abstract class ContentResolver implements ContentInterface {
             orientation.value = (extras != null) ? extras.getInt(EXTRA_ORIENTATION, 0) : 0;
             return afd;
         }), (ImageDecoder decoder, ImageInfo info, Source source) -> {
-            decoder.setAllocator(allocator);
+                decoder.setAllocator(allocator);
 
-            // One last-ditch check to see if we've been canceled.
-            if (signal != null) signal.throwIfCanceled();
+                // One last-ditch check to see if we've been canceled.
+                if (signal != null) signal.throwIfCanceled();
 
-            // We requested a rough thumbnail size, but the remote size may have
-            // returned something giant, so defensively scale down as needed.
-            final int widthSample = info.getSize().getWidth() / size.getWidth();
-            final int heightSample = info.getSize().getHeight() / size.getHeight();
-            final int sample = Math.min(widthSample, heightSample);
-            if (sample > 1) {
-                decoder.setTargetSampleSize(sample);
-            }
+                // We requested a rough thumbnail size, but the remote size may have
+                // returned something giant, so defensively scale down as needed.
+                final int widthSample = info.getSize().getWidth() / size.getWidth();
+                final int heightSample = info.getSize().getHeight() / size.getHeight();
+                final int sample = Math.max(widthSample, heightSample);
+                if (sample > 1) {
+                    decoder.setTargetSampleSize(sample);
+                }
         });
 
         // Transform the bitmap if requested. We use a side-channel to
