@@ -1928,7 +1928,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"સમાચાર અને સામાયિકો"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"નકશા અને નેવિગેશન"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ઉત્પાદકતા"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ડિવાઇસ સ્ટૉરેજ"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ઉપકરણ સ્ટૉરેજ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ડિબગિંગ"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"કલાક"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"મિનિટ"</string>

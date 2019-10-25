@@ -509,10 +509,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Pantailaren blokeoaren konplexutasun-maila (handia, ertaina, txikia edo bat ere ez) jakiteko aukera ematen dio aplikazioari. Informazio horrekin, pantailaren blokeoaren luzera-barruti edo mota posiblea ondoriozta liteke. Halaber, pantailaren blokeoa maila jakin batera igotzeko iradoki diezaieke aplikazioak erabiltzaileei, baina horri ez ikusi egin eta aplikazioa erabiltzen jarraitzeko aukera dute erabiltzaileek. Kontuan izan pantailaren blokeoa ez dela gordetzen testu arrunt gisa; beraz, aplikazioak ez du jakingo pasahitz zehatza zein den."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Erabili hardware biometrikoa"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Autentifikatzeko hardware biometrikoa erabiltzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kudeatu hatz-marken hardwarea"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kudeatu erreferentzia-gako digitalen hardwarea"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Erreferentzia-gako digitalen txantiloiak gehitzeko eta ezabatzeko metodoei dei egitea baimentzen die aplikazioei."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"erabili hatz-marken hardwarea"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Autentifikatzeko hatz-marken hardwarea erabiltzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"erabili erreferentzia-gako digitalen hardwarea"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Autentifikatzeko erreferentzia-gako digitalen hardwarea erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"musika-bilduma aldatu"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Musika-bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"bideo-bilduma aldatu"</string>
@@ -537,7 +537,7 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Autentifikatu da hatz-marka"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Autentifikatu da aurpegia"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hatz-marken hardwarea ez dago erabilgarri."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hatz-markaren hardwarea ez dago erabilgarri."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Ezin da gorde hatz-marka digitala. Kendu lehendik gordeta duzunetako bat."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Hatz-markak prozesatzeko denbora-muga gainditu da. Saiatu berriro."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Hatz-markaren eragiketa bertan behera utzi da."</string>
@@ -1546,7 +1546,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Aukera gehiago"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Barneko memoria partekatua"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Barneko biltegiratze partekatua"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD txartela"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD txartela"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB bidezko unitatea"</string>

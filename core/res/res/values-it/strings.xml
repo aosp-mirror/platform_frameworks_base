@@ -344,7 +344,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ricezione messaggi di testo (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Consente all\'applicazione di ricevere ed elaborare messaggi MMS. Significa che l\'applicazione potrebbe monitorare o eliminare i messaggi inviati al tuo dispositivo senza mostrarteli."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lettura di messaggi cell broadcast"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Consente all\'applicazione di leggere i messaggi cell broadcast ricevuti dal dispositivo. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di eventuali situazioni di emergenza. Le app dannose potrebbero interferire con le prestazioni o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Consente all\'applicazione di leggere i messaggi cell broadcast ricevuti dal dispositivo. Gli avvisi cell broadcast vengono trasmessi in alcune località per avvertire di eventuali situazioni di emergenza. Le applicazioni dannose potrebbero interferire con il rendimento o con il funzionamento del dispositivo quando si riceve un messaggio cell broadcast di emergenza."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lettura feed sottoscritti"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Consente all\'applicazione di ottenere dettagli sui feed attualmente sincronizzati."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"invio e visualizzazione di SMS"</string>
@@ -1578,7 +1578,7 @@
     <string name="serial_number" msgid="758814067660862493">"Numero di serie:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Fingerprint:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Impronta SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Fingerprint SHA-1:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Impronta SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Mostra tutto"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Scegli attività"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Condividi con"</string>

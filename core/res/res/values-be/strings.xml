@@ -329,7 +329,7 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Кіраваць маштабам дысплэя і пазіцыянаваннем."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Выконваць жэсты"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Можна кранаць, праводзіць пальцам, маштабаваць шчыпком, а таксама выконваць іншыя жэсты."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Жэсты на сканеры адбіткаў пальцаў"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Жэсты адбіткаў пальцаў"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Можа распазнаваць жэсты на сканеры адбіткаў пальцаў прылады."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"адключаць ці змяняць радок стану"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Дазваляе прыкладанням адключаць радок стану або дадаваць і выдаляць сістэмныя значкі."</string>
@@ -533,7 +533,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Не распазнана"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Аўтэнтыфікацыя скасавана"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Не заданы PIN-код, узор разблакіроўкі або пароль"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Не ўвесь адбітак пальца адсканіраваны. Паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Выяўлена частка адбіткаў пальцаў. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не атрымалася апрацаваць адбітак пальца. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчык адбіткаў пальцаў брудны. Ачысціце яго і паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Палец рухаўся занадта хутка. Паспрабуйце яшчэ раз."</string>
@@ -544,12 +544,12 @@
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Твар распазнаны"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Твар распазнаны. Націсніце, каб пацвердзіць"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Апаратныя сродкі адбіткаў пальцаў недаступныя."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Адбіткі пальцаў нельга захаваць. Выдаліце існуючы адбітак."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час чакання выйшаў. Паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Адбіткі пальцаў нельга захаваць. Выдаліце існы адбітак."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час чакання адбіткаў пальцаў выйшаў. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Аперацыя з адбіткамі пальцаў скасавана."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Аўтэнтыфікацыя па адбітках пальцаў скасавана карыстальнікам."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Занадта шмат спроб. Паспрабуйце яшчэ раз пазней."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Занадта шмат спроб. Сканер адбіткаў пальцаў выключаны."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Занадта шмат спроб. Сканер адбіткаў пальцаў адключаны."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Адбіткі пальцаў не зарэгістраваны."</string>
     <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"На гэтай прыладзе няма сканера адбіткаў пальцаў."</string>
@@ -1623,7 +1623,7 @@
     <string name="expires_on" msgid="3676242949915959821">"Заканчваецца:"</string>
     <string name="serial_number" msgid="758814067660862493">"Серыйны нумар:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Адбіткі пальцаў:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Адбітак SHA-256:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Адбітак пальцаў SHA-256:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Адбіткі пальцаў SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Прагледзець усё"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Выберыце працэс"</string>

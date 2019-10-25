@@ -509,9 +509,9 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Huruhusu programu kupata maelezo kuhusu kiwango cha uchangamano wa kufunga skrini (juu, wastani, chini au hakuna), ambacho huashiria urefu unaowezekana na aina ya kufunga skrini. Programu pia inaweza kumpendekezea mtumiaji asasishe mbinu ya kufunga skrini iwe ya kiwango fulani lakini mtumiaji anaweza kuamua kupuuza na kuendelea. Kumbuka kuwa maelezo ya kufunga skrini hayahifadhiwi kama maandishi, hivyo programu haitambui nenosiri mahususi."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"tumia maunzi ya kibiolojia"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Huruhusu programu itumie maunzi ya kibiolojia katika uthibitishaji"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"dhibiti maunzi ya alama ya kidole"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Huruhusu programu kuomba njia za kuongeza na kufuta violezo vya alama ya kidole kwa matumizi."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"tumia maunzi ya alama ya kidole"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"dhibiti maunzi ya kitambulisho"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Huruhusu programu kuomba njia za kuongeza na kufuta violezo vya kitambulisho kwa matumizi."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"tumia maunzi ya kitambulisho"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Huruhusu programu kutumia maunzi ya kitambulisho kwa uthibitisho"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"kubadilisha mkusanyiko wako wa muziki"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Inaruhusu programu kubadilisha mkusanyiko wako wa muziki."</string>
@@ -527,7 +527,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Hayatambuliki"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Imeghairi uthibitishaji"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Hujaweka pin, mchoro au nenosiri"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Kitambuzi kimegundua sehemu ya alama ya kidole. Tafadhali jaribu tena."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Kitambuzi kimegundua sehemu ya kitambulisho. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Imeshindwa kuchakata alama ya kidole. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Kitambuzi alama ya kidole ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Ulisogeza kidole kwa kasi mno. Tafadhali jaribu tena."</string>
@@ -537,10 +537,10 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Imethibitisha alama ya kidole"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Uso umethibitishwa"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Uso umethibitishwa, tafadhali bonyeza thibitisha"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Maunzi ya alama ya kidole hayapatikani."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Alama ya kidole haiwezi kuhifadhiwa. Tafadhali ondoa alama ya kidole iliyopo."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Muda wa kuweka alama ya kidole umekwisha. Jaribu tena."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Mchakato wa alama ya kidole umeghairiwa."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Maunzi ya kitambulisho hayapatikani."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Kitambulisho hakiwezi kuhifadhiwa. Tafadhali ondoa kitambulisho kilichopo."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Muda wa kitambulisho umekwisha. Jaribu tena."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Utendaji wa kitambulisho imeghairiwa."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Mtumiaji ameghairi uthibitishaji wa alama ya kidole."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Majaribio mengi mno. Jaribu tena baadaye."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Majaribio mengi mno. Kitambua alama ya kidole kimezimwa."</string>
@@ -550,7 +550,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Kidole cha <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Aikoni ya alama ya kidole"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Aikoni ya kitambulisho"</string>
     <string name="permlab_manageFace" msgid="7262837876352591553">"dhibiti maunzi ya kufungua kwa uso"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Huruhusu programu iombe njia za kuongeza na kufuta violezo vya uso vitakavyotumiwa."</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"tumia maunzi ya kufungua kwa uso"</string>
@@ -1545,7 +1545,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Chaguo zaidi"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Hifadhi ya ndani ya pamoja"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Hifadhi ya ndani inayoshirikiwa"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Kadi ya SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"Kadi ya SD iliyotengenezwa na <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Hifadhi ya USB"</string>
@@ -1577,8 +1577,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Inaisha muda mnamo:"</string>
     <string name="serial_number" msgid="758814067660862493">"Nambari ya ufuatiliaji:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Alazama za Vidole:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Kitambulisho dijitali cha SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Kitambulisho dijitali cha  SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Alama ya  kidole ya SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Alama ya kidole ya  SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Angalia zote"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Chagua shughuli"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Shiriki na"</string>
