@@ -16,6 +16,8 @@
 
 package android.net.wifi.p2p;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -237,6 +239,12 @@ public class WifiP2pDevice implements Parcelable {
         }
     }
 
+    /** The Wifi Display information for this device, or null if unavailable. */
+    @Nullable
+    public WifiP2pWfdInfo getWfdInfo() {
+        return wfdInfo;
+    }
+
     /** Returns true if WPS push button configuration is supported */
     public boolean wpsPbcSupported() {
         return (wpsConfigMethodsSupported & WPS_CONFIG_PUSHBUTTON) != 0;
@@ -278,14 +286,15 @@ public class WifiP2pDevice implements Parcelable {
     }
 
     /**
-     * Update device details. This will be throw an exception if the device address
-     * does not match.
+     * Update device details. This will throw an exception if the device address does not match.
+     *
      * @param device to be updated
-     * @throws IllegalArgumentException if the device is null or device address does not match
+     * @throws IllegalArgumentException if the device is null or the device address does not match
+     *
      * @hide
      */
     @UnsupportedAppUsage
-    public void update(WifiP2pDevice device) {
+    public void update(@NonNull WifiP2pDevice device) {
         updateSupplicantDetails(device);
         status = device.status;
     }

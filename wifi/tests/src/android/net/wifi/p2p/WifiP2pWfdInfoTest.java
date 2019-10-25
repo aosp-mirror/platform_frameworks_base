@@ -43,7 +43,7 @@ public class WifiP2pWfdInfoTest {
     @Before
     public void setUp() {
         // initialize device info flags.
-        mSourceInfo.setDeviceType(WifiP2pWfdInfo.WFD_SOURCE);
+        mSourceInfo.setDeviceType(WifiP2pWfdInfo.DEVICE_TYPE_WFD_SOURCE);
         mSourceInfo.setSessionAvailable(true);
     }
 
@@ -57,14 +57,8 @@ public class WifiP2pWfdInfoTest {
         info.setWfdEnabled(true);
         assertTrue(info.isWfdEnabled());
 
-        info.setDeviceType(WifiP2pWfdInfo.WFD_SOURCE);
-        assertEquals(WifiP2pWfdInfo.WFD_SOURCE, info.getDeviceType());
-
-        info.setCoupledSinkSupportAtSource(true);
-        assertTrue(info.isCoupledSinkSupportedAtSource());
-
-        info.setCoupledSinkSupportAtSink(true);
-        assertTrue(info.isCoupledSinkSupportedAtSink());
+        info.setDeviceType(WifiP2pWfdInfo.DEVICE_TYPE_WFD_SOURCE);
+        assertEquals(WifiP2pWfdInfo.DEVICE_TYPE_WFD_SOURCE, info.getDeviceType());
 
         info.setSessionAvailable(true);
         assertTrue(info.isSessionAvailable());
@@ -75,7 +69,7 @@ public class WifiP2pWfdInfoTest {
         info.setMaxThroughput(TEST_MAX_TPUT);
         assertEquals(TEST_MAX_TPUT, info.getMaxThroughput());
 
-        assertEquals("0018270f0400", info.getDeviceInfoHex());
+        assertEquals("0010270f0400", info.getDeviceInfoHex());
     }
 
     /**
