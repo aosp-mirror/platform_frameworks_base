@@ -122,6 +122,7 @@ import android.os.RemoteException;
 import android.os.SimpleClock;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionPlan;
@@ -196,6 +197,7 @@ import java.util.stream.Collectors;
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
+@Presubmit
 public class NetworkPolicyManagerServiceTest {
     private static final String TAG = "NetworkPolicyManagerServiceTest";
 
