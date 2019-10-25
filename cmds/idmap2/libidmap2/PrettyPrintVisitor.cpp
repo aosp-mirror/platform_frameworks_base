@@ -16,6 +16,7 @@
 
 #include "idmap2/PrettyPrintVisitor.h"
 
+#include <istream>
 #include <string>
 
 #include "android-base/macros.h"
@@ -28,21 +29,30 @@ namespace android::idmap2 {
 
 #define RESID(pkg, type, entry) (((pkg) << 24) | ((type) << 16) | (entry))
 
+#define TAB "    "
+
 void PrettyPrintVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
 }
 
 void PrettyPrintVisitor::visit(const IdmapHeader& header) {
-  stream_ << "target apk path  : " << header.GetTargetPath() << std::endl
-          << "overlay apk path : " << header.GetOverlayPath() << std::endl;
+  stream_ << "Paths:" << std::endl
+          << TAB "target apk path  : " << header.GetTargetPath() << std::endl
+          << TAB "overlay apk path : " << header.GetOverlayPath() << std::endl;
   const std::string& debug = header.GetDebugInfo();
   if (!debug.empty()) {
-    stream_ << debug;  // assume newline terminated
+    std::istringstream debug_stream(debug);
+    std::string line;
+    stream_ << "Debug info:" << std::endl;
+    while (std::getline(debug_stream, line)) {
+      stream_ << TAB << line << std::endl;
+    }
   }
 
   target_apk_ = ApkAssets::Load(header.GetTargetPath().to_string());
   if (target_apk_) {
     target_am_.SetApkAssets({target_apk_.get()});
   }
+  stream_ << "Mapping:" << std::endl;
 }
 
 void PrettyPrintVisitor::visit(const IdmapData::Header& header ATTRIBUTE_UNUSED) {
@@ -55,7 +65,7 @@ void PrettyPrintVisitor::visit(const IdmapData& data) {
   const size_t string_pool_offset = data.GetHeader()->GetStringPoolIndexOffset();
 
   for (auto& target_entry : data.GetTargetEntries()) {
-    stream_ << base::StringPrintf("0x%08x ->", target_entry.target_id);
+    stream_ << TAB << base::StringPrintf("0x%08x ->", target_entry.target_id);
 
     if (target_entry.data_type != Res_value::TYPE_REFERENCE &&
         target_entry.data_type != Res_value::TYPE_DYNAMIC_REFERENCE) {
