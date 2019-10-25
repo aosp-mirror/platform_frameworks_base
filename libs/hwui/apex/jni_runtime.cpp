@@ -21,6 +21,7 @@
 #include <sys/cdefs.h>
 
 #include <EGL/egl.h>
+#include <GraphicsJNI.h>
 #include <Properties.h>
 #include <SkGraphics.h>
 
@@ -150,6 +151,10 @@ void init_android_graphics() {
 }
 
 int register_android_graphics_classes(JNIEnv *env) {
+    JavaVM* vm = nullptr;
+    env->GetJavaVM(&vm);
+    GraphicsJNI::setJavaVM(vm);
+
     for (size_t i = 0; i < NELEM(android::gRegJNI); i++) {
         if (android::gRegJNI[i].mProc(env) < 0) {
 #ifndef NDEBUG

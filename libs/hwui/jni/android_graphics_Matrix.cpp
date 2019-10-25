@@ -18,9 +18,6 @@
 #include "GraphicsJNI.h"
 #include "Matrix.h"
 #include "SkMatrix.h"
-#include "core_jni_helpers.h"
-
-#include <jni.h>
 
 namespace android {
 

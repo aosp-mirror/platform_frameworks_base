@@ -19,12 +19,9 @@
 #include "Picture.h"
 #include "SkCanvas.h"
 #include "SkStream.h"
-#include "core_jni_helpers.h"
-#include "nativehelper/jni_macros.h"
-
-#include <jni.h>
 
 #include <array>
+#include "nativehelper/jni_macros.h"
 
 namespace android {
 

@@ -31,9 +31,6 @@
 #include "NinePatchPeeker.h"
 #include "NinePatchUtils.h"
 
-#include <nativehelper/JNIHelp.h>
-#include "core_jni_helpers.h"
-
 jclass      gInsetStruct_class;
 jmethodID   gInsetStruct_constructorMethodID;
 

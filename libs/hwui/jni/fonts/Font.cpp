@@ -17,16 +17,12 @@
 #undef LOG_TAG
 #define LOG_TAG "Minikin"
 
-#include <nativehelper/JNIHelp.h>
-#include <core_jni_helpers.h>
-
 #include "SkData.h"
 #include "SkFontMgr.h"
 #include "SkRefCnt.h"
 #include "SkTypeface.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/ScopedUtfChars.h>
-#include <android_runtime/AndroidRuntime.h>
 #include "Utils.h"
 #include "FontUtils.h"
 
@@ -52,14 +48,11 @@ static void releaseFont(jlong font) {
 }
 
 static void release_global_ref(const void* /*data*/, void* context) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    if (env == nullptr) {
-        JavaVMAttachArgs args;
-        args.version = JNI_VERSION_1_4;
-        args.name = "release_font_data";
-        args.group = nullptr;
-        jint result = AndroidRuntime::getJavaVM()->AttachCurrentThread(&env, &args);
-        if (result != JNI_OK) {
+    JNIEnv* env = GraphicsJNI::getJNIEnv();
+    bool needToAttach = (env == nullptr);
+    if (needToAttach) {
+        env = GraphicsJNI::attachJNIEnv("release_font_data");
+        if (env == nullptr) {
             ALOGE("failed to attach to thread to release global ref.");
             return;
         }

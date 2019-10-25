@@ -16,8 +16,7 @@
 
 #include "FontUtils.h"
 
-#include <nativehelper/JNIHelp.h>
-#include <core_jni_helpers.h>
+#include "graphics_jni_helpers.h"
 
 namespace android {
 namespace {

@@ -15,9 +15,7 @@
 ** limitations under the License.
 */
 
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include "core_jni_helpers.h"
 
 #include "SkColorFilter.h"
 #include "SkColorMatrixFilter.h"

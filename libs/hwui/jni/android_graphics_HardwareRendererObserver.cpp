@@ -16,7 +16,7 @@
 
 #include "android_graphics_HardwareRendererObserver.h"
 
-#include "core_jni_helpers.h"
+#include "graphics_jni_helpers.h"
 #include "nativehelper/jni_macros.h"
 
 #include <array>

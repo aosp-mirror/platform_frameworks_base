@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include "jni.h"
 #include "GraphicsJNI.h"
 
 #include <PathParser.h>
@@ -22,7 +21,6 @@
 #include <utils/VectorDrawableUtils.h>
 
 #include <android/log.h>
-#include "core_jni_helpers.h"
 
 namespace android {
 

@@ -18,9 +18,6 @@
 #include <log/log.h>
 #include <utils/Errors.h>
 
-#include <mutex>
-#include <thread>
-
 #include "Properties.h"
 
 namespace android {

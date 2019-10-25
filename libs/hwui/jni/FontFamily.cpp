@@ -17,9 +17,6 @@
 #undef LOG_TAG
 #define LOG_TAG "Minikin"
 
-#include <nativehelper/JNIHelp.h>
-#include <core_jni_helpers.h>
-
 #include "SkData.h"
 #include "SkFontMgr.h"
 #include "SkRefCnt.h"
@@ -27,7 +24,6 @@
 #include "GraphicsJNI.h"
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include <android_runtime/AndroidRuntime.h>
 #include "Utils.h"
 #include "FontUtils.h"
 
@@ -145,15 +141,11 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
 }
 
 static void release_global_ref(const void* /*data*/, void* context) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = GraphicsJNI::getJNIEnv();
     bool needToAttach = (env == NULL);
     if (needToAttach) {
-        JavaVMAttachArgs args;
-        args.version = JNI_VERSION_1_4;
-        args.name = "release_font_data";
-        args.group = NULL;
-        jint result = AndroidRuntime::getJavaVM()->AttachCurrentThread(&env, &args);
-        if (result != JNI_OK) {
+        env = GraphicsJNI::attachJNIEnv("release_font_data");
+        if (env == nullptr) {
             ALOGE("failed to attach to thread to release global ref.");
             return;
         }
@@ -163,7 +155,7 @@ static void release_global_ref(const void* /*data*/, void* context) {
     env->DeleteGlobalRef(obj);
 
     if (needToAttach) {
-       AndroidRuntime::getJavaVM()->DetachCurrentThread();
+       GraphicsJNI::detachJNIEnv();
     }
 }
 

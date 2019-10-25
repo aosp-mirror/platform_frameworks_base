@@ -4,9 +4,6 @@
 #include "SkDashPathEffect.h"
 #include "SkDiscretePathEffect.h"
 #include "SkPathEffect.h"
-#include "core_jni_helpers.h"
-
-#include <jni.h>
 
 class SkPathEffectGlue {
 public:

@@ -15,8 +15,6 @@
  */
 
 #include "GraphicsJNI.h"
-#include "jni.h"
-#include "core_jni_helpers.h"
 
 #include "PathParser.h"
 #include "VectorDrawable.h"

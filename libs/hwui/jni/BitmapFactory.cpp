@@ -13,17 +13,15 @@
 #include "SkStream.h"
 #include "SkUtils.h"
 #include "Utils.h"
-#include "core_jni_helpers.h"
 
 #include <HardwareBitmapUploader.h>
 #include <nativehelper/JNIHelp.h>
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
 #include <cutils/compiler.h>
+#include <fcntl.h>
 #include <memory>
-#include <netinet/in.h>
 #include <stdio.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 
 jfieldID gOptions_justBoundsFieldID;
@@ -522,7 +520,9 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
 
 static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fileDescriptor,
         jobject padding, jobject bitmapFactoryOptions, jlong inBitmapHandle, jlong colorSpaceHandle) {
-
+#ifndef __ANDROID__ // LayoutLib for Windows does not support F_DUPFD_CLOEXEC
+      return nullObjectReturn("Not supported on Windows");
+#else
     NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
 
     int descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
@@ -569,6 +569,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
 
     return doDecode(env, std::move(stream), padding, bitmapFactoryOptions, inBitmapHandle,
                     colorSpaceHandle);
+#endif
 }
 
 static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,

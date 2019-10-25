@@ -4,10 +4,7 @@
 #include "SkImagePriv.h"
 #include "SkShader.h"
 #include "SkBlendMode.h"
-#include "core_jni_helpers.h"
 #include "include/effects/SkRuntimeEffect.h"
-
-#include <jni.h>
 
 #include <vector>
 

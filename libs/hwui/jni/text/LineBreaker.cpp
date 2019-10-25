@@ -19,10 +19,9 @@
 
 #include "utils/misc.h"
 #include "utils/Log.h"
+#include "graphics_jni_helpers.h"
 #include <nativehelper/ScopedStringChars.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
-#include <nativehelper/JNIHelp.h>
-#include "core_jni_helpers.h"
 #include "scoped_nullable_primitive_array.h"
 #include <cstdint>
 #include <vector>

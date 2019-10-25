@@ -24,9 +24,6 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
-#include <jni.h>
-#include <core_jni_helpers.h>
-
 namespace android {
 
 static jfieldID gRegion_nativeInstanceFieldID;

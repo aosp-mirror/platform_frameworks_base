@@ -4,10 +4,6 @@
 #include "SkBlurMaskFilter.h"
 #include "SkTableMaskFilter.h"
 
-#include "core_jni_helpers.h"
-
-#include <jni.h>
-
 static void ThrowIAE_IfNull(JNIEnv* env, void* ptr) {
     if (NULL == ptr) {
         doThrowIAE(env);

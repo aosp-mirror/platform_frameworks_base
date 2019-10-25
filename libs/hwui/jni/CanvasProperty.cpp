@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include <core_jni_helpers.h>
 
 #include <hwui/Paint.h>
 #include <utils/RefBase.h>

@@ -15,11 +15,7 @@
 ** limitations under the License.
 */
 
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
-
-#include "core_jni_helpers.h"
 
 #include "hwui/Paint.h"
 #include "hwui/PaintFilter.h"

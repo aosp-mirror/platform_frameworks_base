@@ -10,9 +10,10 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkColorSpace.h"
-#include <jni.h>
 #include <hwui/Canvas.h>
 #include <hwui/Bitmap.h>
+
+#include "graphics_jni_helpers.h"
 
 class SkBitmapRegionDecoder;
 class SkCanvas;
@@ -38,6 +39,20 @@ public:
 
         kLastEnum_LegacyBitmapConfig = kHardware_LegacyBitmapConfig
     };
+
+    static void setJavaVM(JavaVM* javaVM);
+
+    /** returns a pointer to the JavaVM provided when we initialized the module */
+    static JavaVM* getJavaVM() { return mJavaVM; }
+
+    /** return a pointer to the JNIEnv for this thread */
+    static JNIEnv* getJNIEnv();
+
+    /** create a JNIEnv* for this thread or assert if one already exists */
+    static JNIEnv* attachJNIEnv(const char* envName);
+
+    /** detach the current thread from the JavaVM */
+    static void detachJNIEnv();
 
     // returns true if an exception is set (and dumps it out to the Log)
     static bool hasException(JNIEnv*);
@@ -131,6 +146,10 @@ public:
      * above.
      */
     static SkColor4f convertColorLong(jlong color);
+
+private:
+    /* JNI JavaVM pointer */
+    static JavaVM* mJavaVM;
 };
 
 class HeapAllocator : public SkBRDAllocator {

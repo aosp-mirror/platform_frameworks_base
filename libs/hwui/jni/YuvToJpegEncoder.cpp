@@ -4,9 +4,7 @@
 #include <ui/PixelFormat.h>
 #include <hardware/hardware.h>
 
-#include "core_jni_helpers.h"
-
-#include <jni.h>
+#include "graphics_jni_helpers.h"
 
 YuvToJpegEncoder* YuvToJpegEncoder::create(int format, int* strides) {
     // Only ImageFormat.NV21 and ImageFormat.YUY2 are supported

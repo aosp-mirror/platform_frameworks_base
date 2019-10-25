@@ -20,9 +20,7 @@
 // To change this file, either edit the include, or device/tools/gluemaker/main.cpp,
 // or one of the auxilary file specifications in device/tools/gluemaker.
 
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include "core_jni_helpers.h"
 
 #include "SkPath.h"
 #include "SkPathOps.h"

@@ -1,7 +1,6 @@
 #include "ByteBufferStreamAdaptor.h"
-#include "core_jni_helpers.h"
+#include "GraphicsJNI.h"
 #include "Utils.h"
-#include <jni.h>
 
 #include <SkStream.h>
 

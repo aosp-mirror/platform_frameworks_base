@@ -16,15 +16,11 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include "jni.h"
-#include <nativehelper/JNIHelp.h>
-#include <android_runtime/AndroidRuntime.h>
-
 #include <Animator.h>
 #include <Interpolator.h>
 #include <RenderProperties.h>
 
-#include "core_jni_helpers.h"
+#include "graphics_jni_helpers.h"
 
 namespace android {
 

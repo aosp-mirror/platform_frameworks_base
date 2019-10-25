@@ -18,16 +18,14 @@
 #define LOG_TAG "GraphicsStatsService"
 
 #include <JankTracker.h>
-#include <jni.h>
 #include <log/log.h>
-#include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <service/GraphicsStatsService.h>
 #include <stats_event.h>
 #include <stats_pull_atom_callback.h>
 #include <statslog.h>
-#include "core_jni_helpers.h"
+#include "GraphicsJNI.h"
 
 namespace android {
 
@@ -116,7 +114,7 @@ static jobject gGraphicsStatsServiceObject = nullptr;
 static jmethodID gGraphicsStatsService_pullGraphicsStatsMethodID;
 
 static JNIEnv* getJNIEnv() {
-    JavaVM* vm = AndroidRuntime::getJavaVM();
+    JavaVM* vm = GraphicsJNI::getJavaVM();
     JNIEnv* env = nullptr;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         if (vm->AttachCurrentThreadAsDaemon(&env, nullptr) != JNI_OK) {

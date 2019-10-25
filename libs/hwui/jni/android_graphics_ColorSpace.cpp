@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include "core_jni_helpers.h"
 
 #include "SkColor.h"
 #include "SkColorSpace.h"
+#include "SkHalf.h"
 
 using namespace android;
 
@@ -42,9 +41,13 @@ static skcms_Matrix3x3 getNativeXYZMatrix(JNIEnv* env, jfloatArray xyzD50) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static float halfToFloat(uint16_t bits) {
-  __fp16 h;
-  memcpy(&h, &bits, 2);
-  return (float)h;
+#ifdef __ANDROID__ // __fp16 is not defined on non-Android builds
+    __fp16 h;
+    memcpy(&h, &bits, 2);
+    return (float)h;
+#else
+    return SkHalfToFloat(bits);
+#endif
 }
 
 SkColor4f GraphicsJNI::convertColorLong(jlong color) {

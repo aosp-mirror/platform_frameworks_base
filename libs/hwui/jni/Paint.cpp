@@ -20,9 +20,7 @@
 
 #include <utils/Log.h>
 
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include "core_jni_helpers.h"
 #include <nativehelper/ScopedStringChars.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/ScopedPrimitiveArray.h>

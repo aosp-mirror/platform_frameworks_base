@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include "core_jni_helpers.h"
 
 #ifdef __ANDROID_
 #include <android/api-level.h>

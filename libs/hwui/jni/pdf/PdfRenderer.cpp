@@ -16,14 +16,11 @@
 
 #include "PdfUtils.h"
 
-#include "jni.h"
-#include <nativehelper/JNIHelp.h>
 #include "GraphicsJNI.h"
 #include "SkBitmap.h"
 #include "SkMatrix.h"
 #include "fpdfview.h"
 
-#include "core_jni_helpers.h"
 #include <vector>
 #include <utils/Log.h>
 #include <unistd.h>

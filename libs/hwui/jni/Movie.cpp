@@ -6,13 +6,11 @@
 #include "SkStream.h"
 #include "SkUtils.h"
 #include "Utils.h"
-#include "core_jni_helpers.h"
 
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
-#include <jni.h>
 #include <netinet/in.h>
 
 static jclass       gMovie_class;

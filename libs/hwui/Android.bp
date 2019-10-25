@@ -203,6 +203,11 @@ cc_defaults {
                 "apex/renderthread.cpp",
             ],
         },
+        host: {
+            srcs: [
+                "apex/LayoutlibLoader.cpp",
+            ],
+        }
     },
 }
 

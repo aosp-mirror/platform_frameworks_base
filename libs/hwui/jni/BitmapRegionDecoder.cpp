@@ -28,12 +28,8 @@
 #include "SkData.h"
 #include "SkStream.h"
 
-#include "core_jni_helpers.h"
-
 #include <HardwareBitmapUploader.h>
-#include <nativehelper/JNIHelp.h>
 #include <androidfw/Asset.h>
-#include <jni.h>
 #include <sys/stat.h>
 
 #include <memory>

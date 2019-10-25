@@ -22,7 +22,6 @@
 #include "ImageDecoder.h"
 #include "NinePatchPeeker.h"
 #include "Utils.h"
-#include "core_jni_helpers.h"
 
 #include <hwui/Bitmap.h>
 #include <hwui/ImageDecoder.h>
@@ -34,7 +33,7 @@
 #include <SkStream.h>
 
 #include <androidfw/Asset.h>
-#include <jni.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 
 using namespace android;
@@ -154,6 +153,9 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream,
 
 static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
         jobject fileDescriptor, jboolean preferAnimation, jobject source) {
+#ifndef __ANDROID__ // LayoutLib for Windows does not support F_DUPFD_CLOEXEC
+    return throw_exception(env, kSourceException, "Only supported on Android", nullptr, source);
+#else
     int descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     struct stat fdStat;
@@ -172,6 +174,7 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
 
     std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
     return native_create(env, std::move(fileStream), source, preferAnimation);
+#endif
 }
 
 static jobject ImageDecoder_nCreateInputStream(JNIEnv* env, jobject /*clazz*/,

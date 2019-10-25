@@ -27,8 +27,7 @@
 
 #include "PdfUtils.h"
 
-#include "jni.h"
-#include <nativehelper/JNIHelp.h>
+#include "graphics_jni_helpers.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
@@ -39,8 +38,6 @@
 #pragma GCC diagnostic pop
 
 #include "SkMatrix.h"
-
-#include <core_jni_helpers.h>
 
 namespace android {
 

@@ -17,7 +17,6 @@
 #include "GraphicsJNI.h"
 #include "ImageDecoder.h"
 #include "Utils.h"
-#include "core_jni_helpers.h"
 
 #include <SkAndroidCodec.h>
 #include <SkAnimatedImage.h>

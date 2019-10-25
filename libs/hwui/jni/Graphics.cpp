@@ -1,22 +1,54 @@
 #undef LOG_TAG
 #define LOG_TAG "GraphicsJNI"
 
+#include <assert.h>
 #include <unistd.h>
-#include <sys/mman.h>
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include "GraphicsJNI.h"
-#include "core_jni_helpers.h"
 
 #include "SkCanvas.h"
 #include "SkMath.h"
 #include "SkRegion.h"
-#include <android_runtime/AndroidRuntime.h>
 #include <cutils/ashmem.h>
 #include <hwui/Canvas.h>
 
 using namespace android;
+
+/*static*/ JavaVM* GraphicsJNI::mJavaVM = nullptr;
+
+void GraphicsJNI::setJavaVM(JavaVM* javaVM) {
+  mJavaVM = javaVM;
+}
+
+/** return a pointer to the JNIEnv for this thread */
+JNIEnv* GraphicsJNI::getJNIEnv() {
+  assert(mJavaVM != nullptr);
+  JNIEnv* env;
+  if (mJavaVM->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
+      return nullptr;
+  }
+  return env;
+}
+
+/** create a JNIEnv* for this thread or assert if one already exists */
+JNIEnv* GraphicsJNI::attachJNIEnv(const char* envName) {
+  assert(getJNIEnv() == nullptr);
+  JNIEnv* env = nullptr;
+  JavaVMAttachArgs args = { JNI_VERSION_1_4, envName, NULL };
+  int result = mJavaVM->AttachCurrentThread(&env, (void*) &args);
+  if (result != JNI_OK) {
+      ALOGE("thread attach failed: %#x", result);
+  }
+  return env;
+}
+
+/** detach the current thread from the JavaVM */
+void GraphicsJNI::detachJNIEnv() {
+  assert(mJavaVM != nullptr);
+  mJavaVM->DetachCurrentThread();
+}
 
 void doThrowNPE(JNIEnv* env) {
     jniThrowNullPointerException(env, NULL);

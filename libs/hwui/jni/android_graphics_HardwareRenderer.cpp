@@ -44,8 +44,6 @@
 #include <atomic>
 
 #include "android_graphics_HardwareRendererObserver.h"
-#include "core_jni_helpers.h"
-#include "jni.h"
 
 namespace android {
 

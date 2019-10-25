@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include <nativehelper/JNIHelp.h>
 
-#include <android_runtime/AndroidRuntime.h>
 #ifdef __ANDROID__ // Layoutlib does not support Looper and device properties
 #include <utils/Looper.h>
 #endif
@@ -35,8 +32,6 @@
 #ifdef __ANDROID__ // Layoutlib does not support RenderThread
 #include <renderthread/RenderProxy.h>
 #endif
-
-#include "core_jni_helpers.h"
 
 namespace android {
 

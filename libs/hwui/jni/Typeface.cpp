@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-#include "jni.h"
-#include "core_jni_helpers.h"
-
 #include "FontUtils.h"
 #include "GraphicsJNI.h"
 #include <nativehelper/ScopedPrimitiveArray.h>

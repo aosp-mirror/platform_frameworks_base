@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-#include "jni.h"
-#include <nativehelper/JNIHelp.h>
-
 #include <android/surface_texture_jni.h>
-#include "core_jni_helpers.h"
+#include "graphics_jni_helpers.h"
 
 #include <hwui/Paint.h>
 #include <SkMatrix.h>

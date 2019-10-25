@@ -1,6 +1,3 @@
-#include "jni.h"
-#include "core_jni_helpers.h"
-
 #include "SkCamera.h"
 
 #include "GraphicsJNI.h"

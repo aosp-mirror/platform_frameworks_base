@@ -26,9 +26,6 @@
 #include <renderthread/RenderProxy.h>
 #endif
 
-#include "core_jni_helpers.h"
-
-#include <jni.h>
 #include <string.h>
 #include <memory>
 #include <string>

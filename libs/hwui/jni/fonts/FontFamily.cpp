@@ -17,9 +17,8 @@
 #undef LOG_TAG
 #define LOG_TAG "Minikin"
 
-#include <nativehelper/JNIHelp.h>
+#include "graphics_jni_helpers.h"
 #include <nativehelper/ScopedUtfChars.h>
-#include <core_jni_helpers.h>
 
 #include "FontUtils.h"
 

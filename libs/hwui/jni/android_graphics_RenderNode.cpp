@@ -15,10 +15,7 @@
  */
 
 #define ATRACE_TAG ATRACE_TAG_VIEW
-#include "jni.h"
 #include "GraphicsJNI.h"
-#include <nativehelper/JNIHelp.h>
-#include <android_runtime/AndroidRuntime.h>
 
 #include <Animator.h>
 #include <DamageAccumulator.h>
@@ -30,8 +27,6 @@
 #include <TreeInfo.h>
 #include <hwui/Paint.h>
 #include <utils/TraceUtils.h>
-
-#include "core_jni_helpers.h"
 
 namespace android {
 
