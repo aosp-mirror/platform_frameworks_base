@@ -47,6 +47,6 @@ public class InterfaceSet {
     public boolean equals(Object obj) {
         return obj != null
                 && obj instanceof InterfaceSet
-                && ifnames.equals(((InterfaceSet)obj).ifnames);
+                && ifnames.equals(((InterfaceSet) obj).ifnames);
     }
 }

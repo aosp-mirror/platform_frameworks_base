@@ -43,5 +43,8 @@ filegroup {
     name: "tethering-tests-src",
     srcs: [
         "src/com/android/server/connectivity/tethering/TetheringConfigurationTest.java",
+        "src/android/net/dhcp/DhcpServingParamsParcelExtTest.java",
+        "src/android/net/ip/IpServerTest.java",
+        "src/android/net/util/InterfaceSetTest.java",
     ],
 }
