@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -38,6 +36,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.view.RotationPolicy;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -346,7 +345,7 @@ public class RotationButtonController {
     private boolean shouldOverrideUserLockPrefs(final int rotation) {
         // Only override user prefs when returning to the natural rotation (normally portrait).
         // Don't let apps that force landscape or 180 alter user lock.
-        return rotation == NATURAL_ROTATION;
+        return rotation == RotationPolicy.getNaturalRotation();
     }
 
     private boolean isRotationAnimationCCW(int from, int to) {
