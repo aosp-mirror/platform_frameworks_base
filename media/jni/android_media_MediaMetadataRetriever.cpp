@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
-#include <SkBitmap.h>
+#include <android/graphics/bitmap.h>
 #include <media/IMediaHTTPService.h>
 #include <media/mediametadataretriever.h>
 #include <media/mediascanner.h>
@@ -36,8 +36,6 @@
 #include "android_media_Streams.h"
 #include "android_util_Binder.h"
 
-#include "android/graphics/GraphicsJNI.h"
-
 using namespace android;
 
 struct fields_t {
@@ -45,8 +43,6 @@ struct fields_t {
     jclass bitmapClazz;  // Must be a global ref
     jmethodID createBitmapMethod;
     jmethodID createScaledBitmapMethod;
-    jclass configClazz;  // Must be a global ref
-    jmethodID createConfigMethod;
     jclass bitmapParamsClazz; // Must be a global ref
     jfieldID inPreferredConfig;
     jfieldID outActualConfig;
@@ -263,7 +259,7 @@ static void rotate(T *dst, const T *src, size_t width, size_t height, int angle)
 
 static jobject getBitmapFromVideoFrame(
         JNIEnv *env, VideoFrame *videoFrame, jint dst_width, jint dst_height,
-        SkColorType outColorType) {
+        AndroidBitmapFormat outColorType) {
     ALOGV("getBitmapFromVideoFrame: dimension = %dx%d, displaySize = %dx%d, bytes = %d",
             videoFrame->mWidth,
             videoFrame->mHeight,
@@ -271,11 +267,7 @@ static jobject getBitmapFromVideoFrame(
             videoFrame->mDisplayHeight,
             videoFrame->mSize);
 
-    ScopedLocalRef<jobject> config(env,
-            env->CallStaticObjectMethod(
-                    fields.configClazz,
-                    fields.createConfigMethod,
-                    GraphicsJNI::colorTypeToLegacyBitmapConfig(outColorType)));
+    ScopedLocalRef<jobject> config(env, ABitmapConfig_getConfigFromFormat(env, outColorType));
 
     uint32_t width, height, displayWidth, displayHeight;
     bool swapWidthAndHeight = false;
@@ -306,10 +298,9 @@ static jobject getBitmapFromVideoFrame(
         return NULL;
     }
 
-    SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jBitmap, &bitmap);
+    graphics::Bitmap bitmap(env, jBitmap);
 
-    if (outColorType == kRGB_565_SkColorType) {
+    if (outColorType == ANDROID_BITMAP_FORMAT_RGB_565) {
         rotate((uint16_t*)bitmap.getPixels(),
                (uint16_t*)((char*)videoFrame + sizeof(VideoFrame)),
                videoFrame->mWidth,
@@ -350,37 +341,26 @@ static jobject getBitmapFromVideoFrame(
     return jBitmap;
 }
 
-static int getColorFormat(JNIEnv *env, jobject options,
-        int defaultPreferred = HAL_PIXEL_FORMAT_RGBA_8888) {
+static AndroidBitmapFormat getColorFormat(JNIEnv *env, jobject options,
+        AndroidBitmapFormat defaultPreferred = ANDROID_BITMAP_FORMAT_RGBA_8888) {
     if (options == NULL) {
         return defaultPreferred;
     }
 
     ScopedLocalRef<jobject> inConfig(env, env->GetObjectField(options, fields.inPreferredConfig));
-    SkColorType prefColorType = GraphicsJNI::getNativeBitmapColorType(env, inConfig.get());
+    AndroidBitmapFormat format = ABitmapConfig_getFormatFromConfig(env, inConfig.get());
 
-    if (prefColorType == kRGB_565_SkColorType) {
-        return HAL_PIXEL_FORMAT_RGB_565;
+    if (format == ANDROID_BITMAP_FORMAT_RGB_565) {
+        return ANDROID_BITMAP_FORMAT_RGB_565;
     }
-    return HAL_PIXEL_FORMAT_RGBA_8888;
+    return ANDROID_BITMAP_FORMAT_RGBA_8888;
 }
 
-static SkColorType setOutColorType(JNIEnv *env, int colorFormat, jobject options) {
-    SkColorType outColorType = kN32_SkColorType;
-    if (colorFormat == HAL_PIXEL_FORMAT_RGB_565) {
-        outColorType = kRGB_565_SkColorType;
-    }
-
+static void setOutConfig(JNIEnv *env, jobject options, AndroidBitmapFormat colorFormat) {
     if (options != NULL) {
-        ScopedLocalRef<jobject> config(env,
-                env->CallStaticObjectMethod(
-                        fields.configClazz,
-                        fields.createConfigMethod,
-                        GraphicsJNI::colorTypeToLegacyBitmapConfig(outColorType)));
-
+        ScopedLocalRef<jobject> config(env, ABitmapConfig_getConfigFromFormat(env, colorFormat));
         env->SetObjectField(options, fields.outActualConfig, config.get());
     }
-    return outColorType;
 }
 
 static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
@@ -394,9 +374,9 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
         return NULL;
     }
-    // For getFrameAtTime family of calls, default to HAL_PIXEL_FORMAT_RGB_565
+    // For getFrameAtTime family of calls, default to ANDROID_BITMAP_FORMAT_RGB_565
     // to keep the behavior consistent with older releases
-    int colorFormat = getColorFormat(env, params, HAL_PIXEL_FORMAT_RGB_565);
+    AndroidBitmapFormat colorFormat = getColorFormat(env, params, ANDROID_BITMAP_FORMAT_RGB_565);
 
     // Call native method to retrieve a video frame
     VideoFrame *videoFrame = NULL;
@@ -413,9 +393,8 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
         return NULL;
     }
 
-    SkColorType outColorType = setOutColorType(env, colorFormat, params);
-
-    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height, outColorType);
+    setOutConfig(env, params, colorFormat);
+    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height, colorFormat);
 }
 
 static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
@@ -428,7 +407,7 @@ static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
         return NULL;
     }
 
-    int colorFormat = getColorFormat(env, params);
+    AndroidBitmapFormat colorFormat = getColorFormat(env, params);
 
     // Call native method to retrieve an image
     VideoFrame *videoFrame = NULL;
@@ -445,9 +424,8 @@ static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
         return NULL;
     }
 
-    SkColorType outColorType = setOutColorType(env, colorFormat, params);
-
-    return getBitmapFromVideoFrame(env, videoFrame, -1, -1, outColorType);
+    setOutConfig(env, params, colorFormat);
+    return getBitmapFromVideoFrame(env, videoFrame, -1, -1, colorFormat);
 }
 
 static jobject android_media_MediaMetadataRetriever_getThumbnailImageAtIndex(
@@ -461,7 +439,7 @@ static jobject android_media_MediaMetadataRetriever_getThumbnailImageAtIndex(
         return NULL;
     }
 
-    int colorFormat = getColorFormat(env, params);
+    AndroidBitmapFormat colorFormat = getColorFormat(env, params);
     jint dst_width = -1, dst_height = -1;
 
     // Call native method to retrieve an image
@@ -508,9 +486,8 @@ static jobject android_media_MediaMetadataRetriever_getThumbnailImageAtIndex(
     // thumbnails extracted by BitmapFactory APIs.
     videoFrame->mRotationAngle = 0;
 
-    SkColorType outColorType = setOutColorType(env, colorFormat, params);
-
-    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height, outColorType);
+    setOutConfig(env, params, colorFormat);
+    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height, colorFormat);
 }
 
 static jobject android_media_MediaMetadataRetriever_getFrameAtIndex(
@@ -532,8 +509,8 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtIndex(
         return NULL;
     }
 
-    int colorFormat = getColorFormat(env, params);
-    SkColorType outColorType = setOutColorType(env, colorFormat, params);
+    AndroidBitmapFormat colorFormat = getColorFormat(env, params);
+    setOutConfig(env, params, colorFormat);
     size_t i = 0;
     for (; i < numFrames; i++) {
         sp<IMemory> frame = retriever->getFrameAtIndex(frameIndex + i, colorFormat);
@@ -546,7 +523,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtIndex(
         //       Either document why it is safe in this case or address the
         //       issue (e.g. by copying).
         VideoFrame *videoFrame = static_cast<VideoFrame *>(frame->unsecurePointer());
-        jobject bitmapObj = getBitmapFromVideoFrame(env, videoFrame, -1, -1, outColorType);
+        jobject bitmapObj = getBitmapFromVideoFrame(env, videoFrame, -1, -1, colorFormat);
         env->CallBooleanMethod(arrayList, fields.arrayListAdd, bitmapObj);
         env->DeleteLocalRef(bitmapObj);
     }
@@ -668,21 +645,6 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
                     "(Landroid/graphics/Bitmap;IIZ)"
                     "Landroid/graphics/Bitmap;");
     if (fields.createScaledBitmapMethod == NULL) {
-        return;
-    }
-
-    clazz.reset(env->FindClass("android/graphics/Bitmap$Config"));
-    if (clazz.get() == NULL) {
-        return;
-    }
-    fields.configClazz = (jclass) env->NewGlobalRef(clazz.get());
-    if (fields.configClazz == NULL) {
-        return;
-    }
-    fields.createConfigMethod =
-            env->GetStaticMethodID(fields.configClazz, "nativeToConfig",
-                    "(I)Landroid/graphics/Bitmap$Config;");
-    if (fields.createConfigMethod == NULL) {
         return;
     }
 
