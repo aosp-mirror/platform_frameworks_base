@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -148,10 +149,6 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         public int getMediumToLargeAnimationDurationMs() {
             return AuthDialog.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS;
-        }
-
-        public int getAnimateCredentialStartDelayMs() {
-            return AuthDialog.ANIMATE_CREDENTIAL_START_DELAY_MS;
         }
     }
 
@@ -401,7 +398,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     if (biometricView.getParent() != null) {
-                        // ((ViewGroup) biometricView.getParent()).removeView(biometricView);
+                        ((ViewGroup) biometricView.getParent()).removeView(biometricView);
                     }
                     mSize = newSize;
                 }
@@ -629,9 +626,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     void startTransitionToCredentialUI() {
         updateSize(AuthDialog.SIZE_LARGE);
-        mHandler.postDelayed(() -> {
-            mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
-        }, mInjector.getAnimateCredentialStartDelayMs());
+        mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
     }
 
     @Override
