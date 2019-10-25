@@ -190,7 +190,7 @@ static void vibratorSetExternalControl(JNIEnv*, jclass, jboolean enabled) {
     }
 }
 
-static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jint strength,
+static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong strength,
                                    jobject vibration) {
     Status status;
     uint32_t lengthMs;
