@@ -56,10 +56,6 @@ CacheManager::CacheManager(const DisplayInfo& display)
         , mBackgroundCpuFontCacheBytes(mMaxCpuFontCacheBytes * BACKGROUND_RETENTION_PERCENTAGE) {
 
     SkGraphics::SetFontCacheLimit(mMaxCpuFontCacheBytes);
-
-    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
-            mMaxSurfaceArea / 2,
-            skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
 }
 
 void CacheManager::reset(sk_sp<GrContext> context) {
@@ -76,9 +72,6 @@ void CacheManager::reset(sk_sp<GrContext> context) {
 void CacheManager::destroy() {
     // cleanup any caches here as the GrContext is about to go away...
     mGrContext.reset(nullptr);
-    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
-            mMaxSurfaceArea / 2,
-            skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
 }
 
 class CommonPoolExecutor : public SkExecutor {
@@ -109,7 +102,6 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
 
     switch (mode) {
         case TrimMemoryMode::Complete:
-            mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea / 2);
             mGrContext->freeGpuResources();
             SkGraphics::PurgeAllCaches();
             break;
@@ -136,16 +128,6 @@ void CacheManager::trimStaleResources() {
     }
     mGrContext->flush();
     mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(30));
-}
-
-sp<skiapipeline::VectorDrawableAtlas> CacheManager::acquireVectorDrawableAtlas() {
-    LOG_ALWAYS_FATAL_IF(mVectorDrawableAtlas.get() == nullptr);
-    LOG_ALWAYS_FATAL_IF(mGrContext == nullptr);
-
-    /**
-     * TODO: define memory conditions where we clear the cache (e.g. surface->reset())
-     */
-    return mVectorDrawableAtlas;
 }
 
 void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState) {
@@ -176,8 +158,6 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
 
     log.appendFormat("Other Caches:\n");
     log.appendFormat("                         Current / Maximum\n");
-    log.appendFormat("  VectorDrawableAtlas  %6.2f kB / %6.2f KB (entries = %zu)\n", 0.0f, 0.0f,
-                     (size_t)0);
 
     if (renderState) {
         if (renderState->mActiveLayers.size() > 0) {

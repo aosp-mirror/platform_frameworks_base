@@ -80,7 +80,6 @@ public:
     virtual bool pinImages(std::vector<SkImage*>& mutableImages) = 0;
     virtual bool pinImages(LsaVector<sk_sp<Bitmap>>& images) = 0;
     virtual void unpinImages() = 0;
-    virtual void onPrepareTree() = 0;
     virtual SkColorType getSurfaceColorType() const = 0;
     virtual sk_sp<SkColorSpace> getSurfaceColorSpace() = 0;
     virtual GrSurfaceOrigin getSurfaceOrigin() = 0;
