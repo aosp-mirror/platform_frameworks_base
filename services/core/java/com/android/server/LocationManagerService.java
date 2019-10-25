@@ -43,7 +43,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.hardware.location.ActivityRecognitionHardware;
 import android.location.Address;
 import android.location.Criteria;
@@ -79,7 +78,6 @@ import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.stats.location.LocationStatsEnums;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -99,12 +97,12 @@ import com.android.server.location.CallerIdentity;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GeofenceProxy;
-import com.android.server.location.LocationBlacklist;
 import com.android.server.location.LocationFudger;
 import com.android.server.location.LocationProviderProxy;
 import com.android.server.location.LocationRequestStatistics;
 import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
 import com.android.server.location.LocationRequestStatistics.PackageStatistics;
+import com.android.server.location.LocationSettingsStore;
 import com.android.server.location.MockProvider;
 import com.android.server.location.PassiveProvider;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -183,13 +181,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static final int FOREGROUND_IMPORTANCE_CUTOFF
             = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
-    // default background throttling interval if not overriden in settings
-    private static final long DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS = 30 * 60 * 1000;
-
-    // Default value for maximum age of last location returned to applications with foreground-only
-    // location permissions.
-    private static final long DEFAULT_LAST_LOCATION_MAX_AGE_MS = 20 * 60 * 1000;
-
     // Location Providers may sometimes deliver location updates
     // slightly faster that requested - provide grace period so
     // we don't unnecessarily filter events that are otherwise on
@@ -208,13 +199,14 @@ public class LocationManagerService extends ILocationManager.Stub {
     private ActivityManager mActivityManager;
     private UserManager mUserManager;
 
+    private LocationSettingsStore mSettingsStore;
+
     private GeofenceManager mGeofenceManager;
     private LocationFudger mLocationFudger;
     private GeocoderProxy mGeocodeProvider;
     @Nullable
     private GnssManagerService mGnssManagerService;
     private PassiveProvider mPassiveProvider; // track passive provider for special cases
-    private LocationBlacklist mBlacklist;
     @GuardedBy("mLock")
     private String mExtraLocationControllerPackage;
     private boolean mExtraLocationControllerPackageEnabled;
@@ -244,10 +236,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     @GuardedBy("mLock")
     private final HashMap<String, Location> mLastLocationCoarseInterval =
             new HashMap<>();
-
-    private final ArraySet<String> mBackgroundThrottlePackageWhitelist = new ArraySet<>();
-
-    private final ArraySet<String> mIgnoreSettingsPackageWhitelist = new ArraySet<>();
 
     // current active user on the device - other users are denied location data
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
@@ -287,16 +275,19 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("mLock")
     private void initializeLocked() {
-        mAppOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mPackageManager = mContext.getPackageManager();
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
+        mPowerManager = mContext.getSystemService(PowerManager.class);
+        mActivityManager = mContext.getSystemService(ActivityManager.class);
+        mUserManager = mContext.getSystemService(UserManager.class);
+
+        mSettingsStore = new LocationSettingsStore(mContext, mHandler);
 
         mLocationFudger = new LocationFudger(mContext, mHandler);
-        mBlacklist = new LocationBlacklist(mContext, mHandler);
-        mBlacklist.init();
-        mGeofenceManager = new GeofenceManager(mContext, mBlacklist);
+        mGeofenceManager = new GeofenceManager(mContext, mSettingsStore);
+
+        PowerManagerInternal localPowerManager =
+                LocalServices.getService(PowerManagerInternal.class);
 
         // prepare providers
         initializeProvidersLocked();
@@ -327,7 +318,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                         }
                     });
                 });
-
         mActivityManager.addOnUidImportanceListener(
                 (uid, importance) -> {
                     // listener invoked on ui thread, move to our thread to reduce risk of blocking
@@ -339,63 +329,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     });
                 },
                 FOREGROUND_IMPORTANCE_CUTOFF);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCATION_MODE), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        synchronized (mLock) {
-                            onLocationModeChangedLocked(true);
-                        }
-                    }
-                }, UserHandle.USER_ALL);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCATION_PROVIDERS_ALLOWED), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        synchronized (mLock) {
-                            onProviderAllowedChangedLocked();
-                        }
-                    }
-                }, UserHandle.USER_ALL);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS),
-                true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        synchronized (mLock) {
-                            onBackgroundThrottleIntervalChangedLocked();
-                        }
-                    }
-                }, UserHandle.USER_ALL);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(
-                        Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST),
-                true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        synchronized (mLock) {
-                            onBackgroundThrottleWhitelistChangedLocked();
-                        }
-                    }
-                }, UserHandle.USER_ALL);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(
-                        Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST),
-                true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        synchronized (mLock) {
-                            onIgnoreSettingsWhitelistChangedLocked();
-                        }
-                    }
-                }, UserHandle.USER_ALL);
-        PowerManagerInternal localPowerManager =
-                LocalServices.getService(PowerManagerInternal.class);
+
         localPowerManager.registerLowPowerModeObserver(ServiceType.LOCATION,
                 state -> {
                     // listener invoked on ui thread, move to our thread to reduce risk of blocking
@@ -406,6 +340,33 @@ public class LocationManagerService extends ILocationManager.Stub {
                         }
                     });
                 });
+        mBatterySaverMode = mPowerManager.getLocationPowerSaveMode();
+
+        mSettingsStore.addOnLocationEnabledChangedListener(() -> {
+            synchronized (mLock) {
+                onLocationModeChangedLocked(true);
+            }
+        });
+        mSettingsStore.addOnLocationProvidersAllowedChangedListener(() -> {
+            synchronized (mLock) {
+                onProviderAllowedChangedLocked();
+            }
+        });
+        mSettingsStore.addOnBackgroundThrottleIntervalChangedListener(() -> {
+            synchronized (mLock) {
+                onBackgroundThrottleIntervalChangedLocked();
+            }
+        });
+        mSettingsStore.addOnBackgroundThrottlePackageWhitelistChangedListener(() -> {
+            synchronized (mLock) {
+                onBackgroundThrottleWhitelistChangedLocked();
+            }
+        });
+        mSettingsStore.addOnIgnoreSettingsPackageWhitelistChangedListener(() -> {
+            synchronized (mLock) {
+                onIgnoreSettingsWhitelistChangedLocked();
+            }
+        });
 
         new PackageMonitor() {
             @Override
@@ -453,11 +414,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         // provider initialization, and propagates changes until a steady state is reached
         mCurrentUserId = UserHandle.USER_NULL;
         onUserChangedLocked(ActivityManager.getCurrentUser());
-
-        // initialize in-memory settings values
-        onBackgroundThrottleWhitelistChangedLocked();
-        onIgnoreSettingsWhitelistChangedLocked();
-        onBatterySaverModeChangedLocked(mPowerManager.getLocationPowerSaveMode());
     }
 
     @GuardedBy("mLock")
@@ -479,6 +435,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("mLock")
     private void onBatterySaverModeChangedLocked(int newLocationMode) {
+        if (mBatterySaverMode == newLocationMode) {
+            return;
+        }
+
         if (D) {
             Slog.d(TAG,
                     "Battery Saver location mode changed from "
@@ -486,11 +446,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                             + locationPowerSaveModeToString(newLocationMode));
         }
 
-        if (mBatterySaverMode == newLocationMode) {
-            return;
-        }
-
         mBatterySaverMode = newLocationMode;
+
         for (LocationProvider p : mProviders) {
             applyRequirementsLocked(p);
         }
@@ -588,17 +545,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("mLock")
     private void onBackgroundThrottleWhitelistChangedLocked() {
-        mBackgroundThrottlePackageWhitelist.clear();
-        mBackgroundThrottlePackageWhitelist.addAll(
-                SystemConfig.getInstance().getAllowUnthrottledLocation());
-
-        String setting = Settings.Global.getString(
-                mContext.getContentResolver(),
-                Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
-        if (!TextUtils.isEmpty(setting)) {
-            mBackgroundThrottlePackageWhitelist.addAll(Arrays.asList(setting.split(",")));
-        }
-
         for (LocationProvider p : mProviders) {
             applyRequirementsLocked(p);
         }
@@ -606,17 +552,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("lock")
     private void onIgnoreSettingsWhitelistChangedLocked() {
-        mIgnoreSettingsPackageWhitelist.clear();
-        mIgnoreSettingsPackageWhitelist.addAll(
-                SystemConfig.getInstance().getAllowIgnoreLocationSettings());
-
-        String setting = Settings.Global.getString(
-                mContext.getContentResolver(),
-                Settings.Global.LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST);
-        if (!TextUtils.isEmpty(setting)) {
-            mIgnoreSettingsPackageWhitelist.addAll(Arrays.asList(setting.split(",")));
-        }
-
         for (LocationProvider p : mProviders) {
             applyRequirementsLocked(p);
         }
@@ -859,8 +794,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         mCurrentUserId = userId;
         onUserProfilesChangedLocked();
 
-        mBlacklist.switchUser(userId);
-
         // if the user changes, per-user settings may also have changed
         onLocationModeChangedLocked(false);
         onProviderAllowedChangedLocked();
@@ -1083,11 +1016,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         @GuardedBy("mLock")
         public void onAllowedChangedLocked() {
             if (mIsManagedBySettings) {
-                String allowedProviders = Settings.Secure.getStringForUser(
-                        mContext.getContentResolver(),
-                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                        mCurrentUserId);
-                boolean allowed = TextUtils.delimitedStringContains(allowedProviders, ',', mName);
+                boolean allowed = mSettingsStore.getLocationProvidersAllowed(
+                        mCurrentUserId).contains(mName);
 
                 if (allowed == mAllowed) {
                     return;
@@ -1909,10 +1839,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             long identity = Binder.clearCallingIdentity();
             try {
-                backgroundThrottleInterval = Settings.Global.getLong(
-                        mContext.getContentResolver(),
-                        Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
-                        DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS);
+                backgroundThrottleInterval = mSettingsStore.getBackgroundThrottleIntervalMs();
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2032,16 +1959,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public String[] getBackgroundThrottlingWhitelist() {
-        synchronized (mLock) {
-            return mBackgroundThrottlePackageWhitelist.toArray(new String[0]);
-        }
+        return mSettingsStore.getBackgroundThrottlePackageWhitelist().toArray(new String[0]);
     }
 
     @Override
     public String[] getIgnoreSettingsWhitelist() {
-        synchronized (mLock) {
-            return mIgnoreSettingsPackageWhitelist.toArray(new String[0]);
-        }
+        return mSettingsStore.getIgnoreSettingsPackageWhitelist().toArray(new String[0]);
     }
 
     @GuardedBy("mLock")
@@ -2050,7 +1973,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             return true;
         }
 
-        if (mBackgroundThrottlePackageWhitelist.contains(callerIdentity.mPackageName)) {
+        if (mSettingsStore.getBackgroundThrottlePackageWhitelist().contains(
+                callerIdentity.mPackageName)) {
             return true;
         }
 
@@ -2064,7 +1988,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             return false;
         }
 
-        if (mIgnoreSettingsPackageWhitelist.contains(
+        if (mSettingsStore.getIgnoreSettingsPackageWhitelist().contains(
                 record.mReceiver.mCallerIdentity.mPackageName)) {
             return true;
         }
@@ -2472,7 +2396,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             final int uid = Binder.getCallingUid();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (mBlacklist.isBlacklisted(packageName)) {
+                if (mSettingsStore.isLocationPackageBlacklisted(UserHandle.getUserId(uid),
+                        packageName)) {
                     if (D) {
                         Log.d(TAG, "not returning last loc for blacklisted app: "
                                 + packageName);
@@ -2513,10 +2438,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 String op = resolutionLevelToOpStr(allowedResolutionLevel);
                 long locationAgeMs = TimeUnit.NANOSECONDS.toMillis(
                         SystemClock.elapsedRealtime() - location.getElapsedRealtimeNanos());
-                if ((locationAgeMs > Settings.Global.getLong(
-                        mContext.getContentResolver(),
-                        Settings.Global.LOCATION_LAST_LOCATION_MAX_AGE_MILLIS,
-                        DEFAULT_LAST_LOCATION_MAX_AGE_MS))
+                if (locationAgeMs > mSettingsStore.getMaxLastLocationAgeMs()
                         && (mAppOps.unsafeCheckOp(op, uid, packageName)
                         == AppOpsManager.MODE_FOREGROUND)) {
                     return null;
@@ -2575,11 +2497,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 boolean foreground = LocationManagerServiceUtils.isImportanceForeground(
                         mActivityManager.getPackageImportance(packageName));
                 if (!foreground) {
-                    long backgroundThrottleIntervalMs = Settings.Global.getLong(
-                            mContext.getContentResolver(),
-                            Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
-                            DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS);
-                    if (locationAgeMs < backgroundThrottleIntervalMs) {
+                    if (locationAgeMs < mSettingsStore.getBackgroundThrottleIntervalMs()) {
                         // not allowed to request new locations, so we can't return anything
                         return false;
                     }
@@ -2910,11 +2828,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         long identity = Binder.clearCallingIdentity();
         try {
-            return Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(),
-                    Settings.Secure.LOCATION_MODE,
-                    Settings.Secure.LOCATION_MODE_OFF,
-                    userId) != Settings.Secure.LOCATION_MODE_OFF;
+            return mSettingsStore.isLocationEnabled(userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -3050,7 +2964,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 continue;
             }
 
-            if (mBlacklist.isBlacklisted(receiver.mCallerIdentity.mPackageName)) {
+            if (mSettingsStore.isLocationPackageBlacklisted(receiverUserId,
+                    receiver.mCallerIdentity.mPackageName)) {
                 if (D) {
                     Log.d(TAG, "skipping loc update for blacklisted app: " +
                             receiver.mCallerIdentity.mPackageName);
@@ -3392,31 +3307,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                 ipw.decreaseIndent();
             }
 
-            if (mBlacklist != null) {
-                mBlacklist.dump(ipw);
-            }
-
             if (mExtraLocationControllerPackage != null) {
                 ipw.println("Location Controller Extra Package: " + mExtraLocationControllerPackage
                         + (mExtraLocationControllerPackageEnabled ? " [enabled]" : "[disabled]"));
-            }
-
-            if (!mBackgroundThrottlePackageWhitelist.isEmpty()) {
-                ipw.println("Throttling Whitelisted Packages:");
-                ipw.increaseIndent();
-                for (String packageName : mBackgroundThrottlePackageWhitelist) {
-                    ipw.println(packageName);
-                }
-                ipw.decreaseIndent();
-            }
-
-            if (!mIgnoreSettingsPackageWhitelist.isEmpty()) {
-                ipw.println("Bypass Whitelisted Packages:");
-                ipw.increaseIndent();
-                for (String packageName : mIgnoreSettingsPackageWhitelist) {
-                    ipw.println(packageName);
-                }
-                ipw.decreaseIndent();
             }
 
             if (mLocationFudger != null) {
@@ -3425,6 +3318,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mLocationFudger.dump(fd, ipw, args);
                 ipw.decreaseIndent();
             }
+
+            mSettingsStore.dump(fd, pw, args);
 
             ipw.println("Location Providers:");
             ipw.increaseIndent();
