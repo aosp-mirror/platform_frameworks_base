@@ -93,8 +93,9 @@ class WindowlessWindowManager implements IWindowSession {
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
-            .setParent(mRootSurface)
-            .setName(attrs.getTitle().toString());
+                .setParent(mRootSurface)
+                .setFormat(attrs.format)
+                .setName(attrs.getTitle().toString());
         final SurfaceControl sc = b.build();
         synchronized (this) {
             mStateForWindow.put(window.asBinder(), new State(sc, attrs));
