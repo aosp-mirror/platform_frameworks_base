@@ -1167,9 +1167,6 @@ Lcom/android/internal/telephony/Call$State;->INCOMING:Lcom/android/internal/tele
 Lcom/android/internal/telephony/Call$State;->values()[Lcom/android/internal/telephony/Call$State;
 Lcom/android/internal/telephony/Call$State;->WAITING:Lcom/android/internal/telephony/Call$State;
 Lcom/android/internal/telephony/Call;-><init>()V
-Lcom/android/internal/telephony/CallerInfoAsyncQuery$CallerInfoAsyncQueryHandler;-><init>(Lcom/android/internal/telephony/CallerInfoAsyncQuery;Landroid/content/Context;)V
-Lcom/android/internal/telephony/CallerInfoAsyncQuery$CookieWrapper;-><init>()V
-Lcom/android/internal/telephony/CallerInfoAsyncQuery;->release()V
 Lcom/android/internal/telephony/CallForwardInfo;-><init>()V
 Lcom/android/internal/telephony/CallTracker;-><init>()V
 Lcom/android/internal/telephony/cat/AppInterface$CommandType;->values()[Lcom/android/internal/telephony/cat/AppInterface$CommandType;
