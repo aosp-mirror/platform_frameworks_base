@@ -299,10 +299,10 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
-import com.android.internal.R;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
@@ -2724,9 +2724,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(b/137329632): Exclude current activity when looking for the next one with
         //  ActivityDisplay#topRunningActivity().
         final ActivityRecord next = display.topRunningActivity();
-        final boolean isLastStackOverEmptyHome =
-                next == null && stack.isFocusedStackOnDisplay() && display.getHomeStack() != null;
-        if (isLastStackOverEmptyHome) {
+        final boolean isLastStackOverUnreadyHome = display.getHomeStack() != null
+                && (next == null || (next.isActivityTypeHome() && !next.isState(RESUMED)))
+                && stack.isFocusedStackOnDisplay();
+        if (isLastStackOverUnreadyHome) {
             // Don't destroy activity immediately if this is the last activity on the display and
             // the display contains home stack. Although there is no next activity at the moment,
             // another home activity should be started later. Keep this activity alive until next

@@ -24,6 +24,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.MathUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
@@ -187,7 +188,12 @@ public class DozeParameters implements TunerService.Tunable,
             return;
         }
         mControlScreenOffAnimation = controlScreenOffAnimation;
-        mPowerManager.setDozeAfterScreenOff(!controlScreenOffAnimation);
+        getPowerManager().setDozeAfterScreenOff(!controlScreenOffAnimation);
+    }
+
+    @VisibleForTesting
+    protected PowerManager getPowerManager() {
+        return mPowerManager;
     }
 
     private boolean getBoolean(String propName, int resId) {
