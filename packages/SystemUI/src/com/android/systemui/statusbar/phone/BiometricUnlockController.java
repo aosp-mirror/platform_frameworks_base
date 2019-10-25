@@ -55,10 +55,10 @@ import javax.inject.Singleton;
 @Singleton
 public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
 
-    private static final String TAG = "BiometricUnlockCtrl";
+    private static final String TAG = "BiometricUnlockController";
     private static final boolean DEBUG_BIO_WAKELOCK = KeyguardConstants.DEBUG_BIOMETRIC_WAKELOCK;
     private static final long BIOMETRIC_WAKELOCK_TIMEOUT_MS = 15 * 1000;
-    private static final String BIOMETRIC_WAKE_LOCK_NAME = "wake-and-unlock:wakelock";
+    private static final String BIOMETRIC_WAKE_LOCK_NAME = "wake-and-unlock wakelock";
 
     @IntDef(prefix = { "MODE_" }, value = {
             MODE_NONE,
@@ -134,7 +134,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     private final KeyguardBypassController mKeyguardBypassController;
     private PowerManager.WakeLock mWakeLock;
     private final KeyguardUpdateMonitor mUpdateMonitor;
-    private DozeParameters mDozeParameters;
+    private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
     private final StatusBarWindowController mStatusBarWindowController;
     private final Context mContext;
