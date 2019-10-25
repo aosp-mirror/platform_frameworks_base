@@ -1,6 +1,9 @@
 java_library_static {
     name: "services.net",
-    srcs: ["java/**/*.java"],
+    srcs: [
+        ":tethering-services-srcs",
+        "java/**/*.java",
+    ],
     static_libs: [
         "dnsresolver_aidl_interface-V2-java",
         "netd_aidl_interface-java",
@@ -23,6 +26,12 @@ filegroup {
     name: "services-tethering-shared-srcs",
     srcs: [
         ":framework-annotations",
+        "java/android/net/ConnectivityModuleConnector.java",
+        "java/android/net/NetworkStackClient.java",
+        "java/android/net/ip/InterfaceController.java",
+        "java/android/net/util/InterfaceParams.java",
+        "java/android/net/util/NetdService.java",
+        "java/android/net/util/NetworkConstants.java",
         "java/android/net/util/SharedLog.java"
     ],
 }
