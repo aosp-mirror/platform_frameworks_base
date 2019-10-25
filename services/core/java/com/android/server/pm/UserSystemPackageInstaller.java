@@ -49,13 +49,14 @@ import java.util.Set;
  * <p>If {@link #isEnforceMode()} is false, then all system packages are always installed for all
  * users. The following applies when it is true.
  *
- * Any package can be in one of three states in the SystemConfig whitelist
+ * <p>Any package can be in one of three states in the {@code SystemConfig} whitelist
  * <ol>
  *     <li>Explicitly blacklisted for a particular user type</li>
  *     <li>Explicitly whitelisted for a particular user type</li>
  *     <li>Not mentioned at all, for any user type (neither whitelisted nor blacklisted)</li>
  * </ol>
- * Blacklisting always takes precedence - if a package is blacklisted for a particular user,
+ *
+ * <p>Blacklisting always takes precedence - if a package is blacklisted for a particular user,
  * it won't be installed on that type of user (even if it is also whitelisted for that user).
  * Next comes whitelisting - if it is whitelisted for a particular user, it will be installed on
  * that type of user (as long as it isn't blacklisted).
@@ -69,6 +70,12 @@ import java.util.Set;
  *     <li>Either way, for {@link UserHandle#USER_SYSTEM}, the package will be implicitly
  *          whitelisted so that it can be used for local development purposes.</li>
  * </ul>
+ *
+ * <p><b>NOTE:</b> the {@code SystemConfig} state is only updated on first boot or after a system
+ * update. So, to verify changes during development, you can emulate the latter by calling:
+ * <pre><code>
+ * adb shell setprop persist.pm.mock-upgrade true
+ * </code></pre>
  */
 class UserSystemPackageInstaller {
     private static final String TAG = "UserManagerService";
