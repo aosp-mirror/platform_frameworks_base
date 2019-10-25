@@ -115,7 +115,8 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     }
 
     @Override
-    public boolean startInstallation(long systemSize, long userdataSize) throws RemoteException {
+    public boolean startInstallation(String name, long size, boolean readOnly)
+            throws RemoteException {
         // priority from high to low: sysprop -> sdcard -> /data
         String path = SystemProperties.get("os.aot.path");
         if (path.isEmpty()) {
@@ -137,11 +138,18 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
             }
             Slog.i(TAG, "startInstallation -> " + path);
         }
+        IGsiService service = getGsiService();
         GsiInstallParams installParams = new GsiInstallParams();
         installParams.installDir = path;
-        installParams.gsiSize = systemSize;
-        installParams.userdataSize = userdataSize;
-        return getGsiService().beginGsiInstall(installParams) == 0;
+        installParams.name = name;
+        installParams.size = size;
+        installParams.wipe = readOnly;
+        installParams.readOnly = readOnly;
+        if (service.beginGsiInstall(installParams) != 0) {
+            Slog.i(TAG, "Failed to install " + name);
+            return false;
+        }
+        return true;
     }
 
     @Override
