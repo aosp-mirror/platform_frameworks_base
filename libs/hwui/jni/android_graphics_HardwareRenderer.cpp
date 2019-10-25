@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#undef LOG_TAG
 #define LOG_TAG "ThreadedRenderer"
 #define ATRACE_TAG ATRACE_TAG_VIEW
 

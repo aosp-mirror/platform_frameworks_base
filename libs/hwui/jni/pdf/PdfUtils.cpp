@@ -21,6 +21,7 @@
 
 #include "fpdfview.h"
 
+#undef LOG_TAG
 #define LOG_TAG "PdfUtils"
 #include <utils/Log.h>
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 

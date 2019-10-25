@@ -15,6 +15,7 @@
 ** limitations under the License.
 */
 
+#undef LOG_TAG
 #define LOG_TAG "Paint"
 
 #include <utils/Log.h>

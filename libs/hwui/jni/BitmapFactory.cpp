@@ -1,3 +1,4 @@
+#undef LOG_TAG
 #define LOG_TAG "BitmapFactory"
 
 #include "BitmapFactory.h"

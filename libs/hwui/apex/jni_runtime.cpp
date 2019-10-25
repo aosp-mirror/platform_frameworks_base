@@ -24,6 +24,7 @@
 #include <Properties.h>
 #include <SkGraphics.h>
 
+#undef LOG_TAG
 #define LOG_TAG "AndroidGraphicsJNI"
 
 extern int register_android_graphics_Bitmap(JNIEnv*);
