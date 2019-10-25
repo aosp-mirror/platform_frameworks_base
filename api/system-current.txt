@@ -1370,6 +1370,14 @@ package android.bluetooth.le {
 
 }
 
+package android.companion {
+
+  public final class CompanionDeviceManager {
+    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociated(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
+  }
+
+}
+
 package android.content {
 
   public class ContentProviderClient implements java.lang.AutoCloseable {
