@@ -1778,6 +1778,11 @@
         android:label="@string/permlab_preferredPaymentInfo"
         android:protectionLevel="normal" />
 
+    <!-- @SystemApi Allows an internal user to use privileged SecureElement APIs.
+         @hide -->
+    <permission android:name="android.permission.SECURE_ELEMENT_PRIVILEGED"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @deprecated This permission used to allow too broad access to sensitive methods and all its
          uses have been replaced by a more appropriate permission. Most uses have been replaced with
          a NETWORK_STACK or NETWORK_SETTINGS check. Please look up the documentation of the
