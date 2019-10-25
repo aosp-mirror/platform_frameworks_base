@@ -24,14 +24,19 @@
 #include "jni.h"
 
 using ::android::hardware::Return;
+using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterEvent;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterStatus;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
+using ::android::hardware::tv::tuner::V1_0::FrontendEventType;
 using ::android::hardware::tv::tuner::V1_0::FrontendId;
+using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
+using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
 using ::android::hardware::tv::tuner::V1_0::IDemux;
 using ::android::hardware::tv::tuner::V1_0::IFilter;
 using ::android::hardware::tv::tuner::V1_0::IFilterCallback;
 using ::android::hardware::tv::tuner::V1_0::IFrontend;
+using ::android::hardware::tv::tuner::V1_0::IFrontendCallback;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
 
 namespace android {
@@ -39,6 +44,18 @@ namespace android {
 struct FilterCallback : public IFilterCallback {
     virtual Return<void> onFilterEvent(const DemuxFilterEvent& filterEvent);
     virtual Return<void> onFilterStatus(const DemuxFilterStatus status);
+};
+
+struct FrontendCallback : public IFrontendCallback {
+    FrontendCallback(jweak tunerObj, FrontendId id);
+
+    virtual Return<void> onEvent(FrontendEventType frontendEventType);
+    virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
+    virtual Return<void> onScanMessage(
+            FrontendScanMessageType type, const FrontendScanMessage& message);
+
+    jweak mObject;
+    FrontendId mId;
 };
 
 struct JTuner : public RefBase {
@@ -55,6 +72,7 @@ private:
     jclass mClass;
     jweak mObject;
     static sp<ITuner> mTuner;
+    hidl_vec<FrontendId> mFeIds;
     sp<IFrontend> mFe;
     sp<IDemux> mDemux;
     int mDemuxId;
