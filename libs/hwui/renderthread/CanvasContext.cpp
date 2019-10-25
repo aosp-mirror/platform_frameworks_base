@@ -565,8 +565,8 @@ SkISize CanvasContext::getNextFrameSize() const {
     ReliableSurface* surface = mNativeSurface.get();
     if (surface) {
         SkISize size;
-        surface->query(NATIVE_WINDOW_WIDTH, &size.fWidth);
-        surface->query(NATIVE_WINDOW_HEIGHT, &size.fHeight);
+        size.fWidth = ANativeWindow_getWidth(surface);
+        size.fHeight = ANativeWindow_getHeight(surface);
         return size;
     }
     return {INT32_MAX, INT32_MAX};

@@ -208,9 +208,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaDisplayList, prepareListAndChildren_vdOffscr
     test::TestContext testContext;
     testContext.setRenderOffscreen(true);
     auto surface = testContext.surface();
-    int width, height;
-    surface->query(NATIVE_WINDOW_WIDTH, &width);
-    surface->query(NATIVE_WINDOW_HEIGHT, &height);
+    int width = ANativeWindow_getWidth(surface.get());
+    int height = ANativeWindow_getHeight(surface.get());
     canvasContext->setSurface(std::move(surface));
 
     TreeInfo info(TreeInfo::MODE_FULL, *canvasContext.get());
