@@ -234,7 +234,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Zgłoszenie błędu"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Zakończ sesję"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Zrzut ekranu"</string>
-    <string name="bugreport_title" msgid="5981047024855257269">"Zgłoszenie błędu"</string>
+    <string name="bugreport_title" msgid="5981047024855257269">"Zgłoś błąd"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Informacje o bieżącym stanie urządzenia zostaną zebrane i wysłane e-mailem. Przygotowanie zgłoszenia błędu do wysłania chwilę potrwa, więc zachowaj cierpliwość."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktywny"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Używaj tej opcji w większości przypadków. Umożliwia śledzenie postępów raportu, podanie dodatkowych szczegółów problemu i wykonanie zrzutów ekranu. Raport może pomijać niektóre rzadko używane sekcje, których utworzenie zajmuje dużo czasu."</string>
@@ -545,7 +545,7 @@
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Twarz rozpoznana, kliknij Potwierdź"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Czytnik linii papilarnych nie jest dostępny."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Nie można zapisać odcisku palca. Usuń istniejący odcisk palca."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu linii papilarnych. Spróbuj ponownie."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu odcisków palców. Spróbuj ponownie."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Odczyt odcisku palca został anulowany przez użytkownika."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Zbyt wiele prób. Spróbuj ponownie później."</string>

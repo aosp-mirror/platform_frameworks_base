@@ -323,8 +323,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ಪ್ರದರ್ಶನದ ಝೂಮ್ ಮಟ್ಟ ಮತ್ತು ಸ್ಥಾನ ನಿರ್ಧಾರವನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಮಾಡಿ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ಟ್ಯಾಪ್ ಮಾಡಬಹುದು, ಸ್ವೈಪ್ ಮಾಡಬಹುದು, ಪಿಂಚ್ ಮಾಡಬಹುದು ಮತ್ತು ಇತರ ಗೆಸ್ಚರ್‌ಗಳನ್ನು ಮಾಡಬಹುದು."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ ಸೂಚಕಗಳು"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ಸಾಧನದ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌ನಲ್ಲಿ ನಡೆಸಿದ ಸೂಚಕಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ ಗೆಶ್ಚರ್‌ಗಳು"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ಸಾಧನದ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌ನಲ್ಲಿ ನಡೆಸಿದ ಗೆಶ್ಚರ್‌ಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಇಲ್ಲವೇ ಮಾರ್ಪಡಿಸಿ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಥವಾ ಸೇರಿಸಲು ಮತ್ತು ಸಿಸ್ಟಂ ಐಕಾನ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯಾಗಿರಲು"</string>
@@ -509,10 +509,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"ಆ್ಯಪ್‌ಗೆ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಸಂಕೀರ್ಣತೆ ಮಟ್ಟವನ್ನು (ಅಧಿಕ, ಮಧ್ಯಮ, ಕಡಿಮೆ ಅಥವಾ ಯಾವುದೂ ಅಲ್ಲ) ತಿಳಿದುಕೊಳ್ಳಲು ಅನುಮತಿಸುತ್ತದೆ, ಅದು ಉದ್ದದ ಸಂಭವನೀಯ ಶ್ರೇಣಿ ಮತ್ತು ಸ್ಕ್ರೀನ್ ಲಾಕ್‌ನ ವಿಧವನ್ನು ಸೂಚಿಸುತ್ತದೆ. ಬಳಕೆದಾರರು ನಿರ್ದಿಷ್ಟ ಹಂತದವರೆಗೆ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಬಹುದು, ಆದರೆ ಅವರು ಅದನ್ನು ನಿರ್ಲಕ್ಷಿಸಬಹುದು ಮತ್ತು ಅದರಿಂದ ಹೊರಬರಬಹುದು ಎಂಬುದನ್ನು ಸಹ ಆ್ಯಪ್ ಬಳಕೆದಾರರಿಗೆ ಸೂಚಿಸುತ್ತದೆ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಪಠ್ಯದ ರೂಪದಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವುದಿಲ್ಲ, ಇದರಿಂದಾಗಿ ಆ್ಯಪ್‌ಗೆ ಸರಿಯಾದ ಪಾಸ್‌ವರ್ಡ್ ಗೊತ್ತಿರುವುದಿಲ್ಲ ಎಂಬುದನ್ನು ಗಮನಿಸಿ."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ಬಯೋಮೆಟ್ರಿಕ್ ಹಾರ್ಡ್‌ವೇರ್‌ ಬಳಸಿ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಬಯೋಮೆಟ್ರಿಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್ ನಿರ್ವಹಿಸಿ"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ಬಳಕೆಗೆ ಬೆರಳಚ್ಚು ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಿ"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ಬಳಕೆಗೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಿ"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಆ್ಯಪ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"ನಿಮ್ಮ ಸಂಗೀತ ಸಂಗ್ರಹಣೆಯನ್ನು ಮಾರ್ಪಡಿಸಿ"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"ನಿಮ್ಮ ಸಂಗೀತ ಸಂಗ್ರಹಣೆಯನ್ನು ಮಾರ್ಪಡಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"ನಿಮ್ಮ ವೀಡಿಯೊ ಸಂಗ್ರಹಣೆಯನ್ನು ಮಾರ್ಪಡಿಸಿ"</string>
@@ -527,9 +527,9 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"ಪ್ರಮಾಣೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ಪಿನ್, ಪ್ಯಾಟರ್ನ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ಸೆಟ್ ಮಾಡಿಲ್ಲ"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ಭಾಗಶಃ ಬೆರಳಚ್ಚು ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ಬೆರಳಚ್ಚು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಬೆರಳಚ್ಚು ಸೆನ್ಸರ್ ಮಲಿನಗೊಂಡಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ಭಾಗಶಃ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ಮಲಿನಗೊಂಡಿದೆ. ದಯವಿಟ್ಟು ಅದನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ಬೆರಳನ್ನು ಅತಿ ವೇಗವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -537,20 +537,20 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪ್ರಮಾಣೀಕರಣ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ, ದೃಢೀಕರಣವನ್ನು ಒತ್ತಿ"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ಬೆರಳಚ್ಚು ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬೆರಳಚ್ಚು ತೆಗೆದುಹಾಕಿ."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ಬೆರಳಚ್ಚು ಅವಧಿ ಮೀರಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ಬೆರಳಚ್ಚು ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"ಬಳಕೆದಾರರಿಂದ ಫಿಂಗರ್‌ ಫ್ರಿಂಟ್‌ ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಪಡಿಸಲಾಗಿದೆ."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ತೆಗೆದುಹಾಕಿ."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅವಧಿ ಮೀರಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"ಬಳಕೆದಾರರು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಪಡಿಸಿದ್ದಾರೆ."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ಹಲವಾರು ಪ್ರಯತ್ನಗಳು. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಫಿಂಗರ್‌ ಫ್ರಿಂಟ್‌ ಸೆನ್ಸಾರ್ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"ಯಾವುದೇ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ ಅನ್ನು ನೋಂದಣಿ ಮಾಡಿಲ್ಲ."</string>
     <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ಈ ಸಾಧನವು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಹೊಂದಿಲ್ಲ."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ಫಿಂಗರ್ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ಬೆರಳಚ್ಚು ಐಕಾನ್"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="permlab_manageFace" msgid="7262837876352591553">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಅನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ಬಳಕೆಗೆ ಮುಖದ ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ಫೇಸ್ ಅನ್‌ಲಾಕ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಿ"</string>
@@ -1579,7 +1579,7 @@
     <string name="serial_number" msgid="758814067660862493">"ಕ್ರಮ ಸಂಖ್ಯೆ:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"ಫಿಂಗರ್ ಪ್ರಿಂಟ್‌ಗಳು:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ಬೆರಳಚ್ಚು:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ಬೆರಳಚ್ಚು:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ಫಿಂಗರ್‌ಪ್ರಿಂಟ್:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"ಎಲ್ಲವನ್ನೂ ನೋಡಿ"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ಚಟುವಟಿಕೆಯನ್ನು ಆರಿಸಿ"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"ಹಂಚಿಕೊಳ್ಳಿ"</string>

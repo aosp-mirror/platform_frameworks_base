@@ -1343,7 +1343,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Walang mga kinakailangang pahintulot"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"maaari itong magdulot ng gastos sa iyo"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"China-charge ang device na ito sa pamamagitan ng USB"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"China-charge ang device sa USB"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"China-charge ang nakakonektang device sa pamamagitan ng USB"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Na-on ang paglipat ng USB file"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Na-on ang PTP sa pamamagitan ng USB"</string>
