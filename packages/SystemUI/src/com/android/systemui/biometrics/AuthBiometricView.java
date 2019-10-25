@@ -23,7 +23,6 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
@@ -33,7 +32,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -41,7 +39,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 
 import java.lang.annotation.Retention;
@@ -404,7 +401,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     if (biometricView.getParent() != null) {
-                        ((ViewGroup) biometricView.getParent()).removeView(biometricView);
+                        // ((ViewGroup) biometricView.getParent()).removeView(biometricView);
                     }
                     mSize = newSize;
                 }
