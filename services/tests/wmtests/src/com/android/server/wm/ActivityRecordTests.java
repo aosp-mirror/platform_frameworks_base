@@ -776,6 +776,14 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Set process to 'null' to allow immediate removal, but don't call mActivity.setProcess() -
         // this will cause NPE when updating task's process.
         mActivity.app = null;
+
+        // Put a visible activity on top, so the finishing activity doesn't have to wait until the
+        // next activity reports idle to destroy it.
+        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        topActivity.visible = true;
+        topActivity.nowVisible = true;
+        topActivity.setState(RESUMED, "test");
+
         assertEquals("Activity outside of task/stack cannot be finished", FINISH_RESULT_REMOVED,
                 mActivity.finishIfPossible("test", false /* oomAdj */));
         assertTrue(mActivity.finishing);
@@ -1042,8 +1050,11 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Add another stack to become focused and make the activity there visible. This way it
         // simulates finishing in non-focused stack in split-screen.
         final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
-        stack.getChildAt(0).getChildAt(0).nowVisible = true;
-        stack.getChildAt(0).getChildAt(0).visible = true;
+        final ActivityRecord focusedActivity = stack.getChildAt(0).getChildAt(0);
+        focusedActivity.nowVisible = true;
+        focusedActivity.visible = true;
+        focusedActivity.setState(RESUMED, "test");
+        stack.mResumedActivity = focusedActivity;
 
         topActivity.completeFinishing("test");
 
@@ -1085,6 +1096,30 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Verify that the activity was not actually destroyed, but waits for next one to come up
         // instead.
+        verify(mActivity, never()).destroyImmediately(eq(true) /* removeFromApp */, anyString());
+        assertEquals(FINISHING, mActivity.getState());
+        assertTrue(mActivity.mStackSupervisor.mFinishingActivities.contains(mActivity));
+    }
+
+    /**
+     * Verify that complete finish request for visible activity must resume next home stack before
+     * destroying it immediately if it is the last running activity on a display with a home stack.
+     * We must wait for home activity to come up to avoid a black flash in this case.
+     */
+    @Test
+    public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
+        // Empty the home stack.
+        final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
+        for (TaskRecord t : homeStack.getAllTasks()) {
+            homeStack.removeTask(t, "test", REMOVE_TASK_MODE_DESTROYING);
+        }
+        mActivity.finishing = true;
+        spyOn(mStack);
+
+        // Try to finish the last activity above the home stack.
+        mActivity.completeFinishing("test");
+
+        // Verify that the activity is not destroyed immediately, but waits for next one to come up.
         verify(mActivity, never()).destroyImmediately(eq(true) /* removeFromApp */, anyString());
         assertEquals(FINISHING, mActivity.getState());
         assertTrue(mActivity.mStackSupervisor.mFinishingActivities.contains(mActivity));
