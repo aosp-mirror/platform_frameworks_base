@@ -62,4 +62,6 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
             String packageName, boolean hasGrant) {
         return false;
     }
+
+    public void setLocationEnabled(ComponentName who, boolean locationEnabled) {}
 }
