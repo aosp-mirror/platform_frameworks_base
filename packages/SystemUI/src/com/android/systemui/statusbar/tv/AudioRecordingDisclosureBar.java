@@ -30,6 +30,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -45,7 +46,10 @@ class AudioRecordingDisclosureBar {
     private static final String TAG = "AudioRecordingDisclosureBar";
     private static final boolean DEBUG = false;
 
-    private static final String LAYOUT_PARAMS_TITLE = "AudioRecordingDisclosureBar";
+    // This title is used to test the microphone disclosure indicator in
+    // CtsSystemUiHostTestCases:TvMicrophoneCaptureIndicatorTest
+    private static final String LAYOUT_PARAMS_TITLE = "MicrophoneCaptureIndicator";
+
     private static final int ANIM_DURATION_MS = 150;
 
     private final Context mContext;
@@ -70,6 +74,7 @@ class AudioRecordingDisclosureBar {
     }
 
     private void createView() {
+        //TODO(b/142228704): this is to be re-implemented once proper design is completed
         mView = View.inflate(mContext,
                 R.layout.tv_status_bar_audio_recording, null);
         mAppsInfoContainer = mView.findViewById(R.id.container);
@@ -88,7 +93,7 @@ class AudioRecordingDisclosureBar {
                 Context.WINDOW_SERVICE);
         windowManager.addView(mView, layoutParams);
 
-        // Set invisible first util it gains its actual size and we are able to hide it by moving
+        // Set invisible first until it gains its actual size and we are able to hide it by moving
         // off the screen
         mView.setVisibility(View.INVISIBLE);
         mView.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -98,16 +103,18 @@ class AudioRecordingDisclosureBar {
                         // Now that we get the height, we can move the bar off ("below") the screen
                         final int height = mView.getHeight();
                         mView.setTranslationY(height);
-                        // ... and make it visible
-                        mView.setVisibility(View.VISIBLE);
                         // Remove the observer
                         mView.getViewTreeObserver()
                                 .removeOnGlobalLayoutListener(this);
+                        // Now, that the view has been measured, and the translation was set to
+                        // move it off the screen, we change the visibility to GONE
+                        mView.setVisibility(View.GONE);
                     }
                 });
     }
 
     private void showAudioRecordingDisclosureBar() {
+        mView.setVisibility(View.VISIBLE);
         mView.animate()
                 .translationY(0f)
                 .setDuration(ANIM_DURATION_MS)
@@ -138,9 +145,10 @@ class AudioRecordingDisclosureBar {
     }
 
     private void hideAudioRecordingDisclosureBar() {
-        mView.animate()
-                .translationY(mView.getHeight())
+        final ViewPropertyAnimator animator = mView.animate();
+        animator.translationY(mView.getHeight())
                 .setDuration(ANIM_DURATION_MS)
+                .withEndAction(() -> mView.setVisibility(View.GONE))
                 .start();
     }
 
@@ -156,7 +164,7 @@ class AudioRecordingDisclosureBar {
         public void onOpActiveChanged(String op, int uid, String packageName, boolean active) {
             if (DEBUG) {
                 Log.d(TAG,
-                        "OP_RECORD_AUDIO active change, active" + active + ", app=" + packageName);
+                        "OP_RECORD_AUDIO active change, active=" + active + ", app=" + packageName);
             }
 
             if (mExemptApps.contains(packageName)) {
