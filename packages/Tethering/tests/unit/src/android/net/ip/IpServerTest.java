@@ -183,7 +183,7 @@ public class IpServerTest {
     @Test
     public void shouldDoNothingUntilRequested() throws Exception {
         initStateMachine(TETHERING_BLUETOOTH);
-        final int [] NOOP_COMMANDS = {
+        final int [] noOp_commands = {
             IpServer.CMD_TETHER_UNREQUESTED,
             IpServer.CMD_IP_FORWARDING_ENABLE_ERROR,
             IpServer.CMD_IP_FORWARDING_DISABLE_ERROR,
@@ -192,7 +192,7 @@ public class IpServerTest {
             IpServer.CMD_SET_DNS_FORWARDERS_ERROR,
             IpServer.CMD_TETHER_CONNECTION_CHANGED
         };
-        for (int command : NOOP_COMMANDS) {
+        for (int command : noOp_commands) {
             // None of these commands should trigger us to request action from
             // the rest of the system.
             dispatchCommand(command);
