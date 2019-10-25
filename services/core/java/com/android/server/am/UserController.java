@@ -560,8 +560,8 @@ class UserController implements Handler.Callback {
             Slog.i(TAG, "Stopping pre-created user " + userInfo.toFullString());
             // Pre-created user was started right after creation so services could properly
             // intialize it; it should be stopped right away as it's not really a "real" user.
-            // TODO(b/140750212): in the long-term, we should add a onCreateUser() callback
-            // on SystemService instead.
+            // TODO(b/143092698): in the long-term, it might be better to add a onCreateUser()
+            // callback on SystemService instead.
             stopUser(userInfo.id, /* force= */ true, /* stopUserCallback= */ null,
                     /* keyEvictedCallback= */ null);
             return;
