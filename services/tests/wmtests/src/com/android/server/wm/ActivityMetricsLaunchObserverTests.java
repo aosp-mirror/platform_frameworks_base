@@ -195,9 +195,15 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     public void testOnReportFullyDrawn() {
         onActivityLaunched();
 
+        // The activity reports fully drawn before windows drawn, then the fully drawn event will
+        // be pending (see {@link WindowingModeTransitionInfo#pendingFullyDrawn}).
         mActivityMetricsLogger.logAppTransitionReportedDrawn(mTopActivity, false);
+        notifyTransitionStarting();
+        // The pending fully drawn event should send when the actual windows drawn event occurs.
+        notifyWindowsDrawn(mTopActivity);
 
         verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mTopActivity), anyLong());
+        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mTopActivity), anyLong());
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
