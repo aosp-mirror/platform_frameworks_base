@@ -1705,11 +1705,6 @@ public interface WindowManager extends ViewManager {
          * {@hide} */
         public static final int PRIVATE_FLAG_SYSTEM_ERROR = 0x00000100;
 
-        /** Window flag: maintain the previous translucent decor state when this window
-         * becomes top-most.
-         * {@hide} */
-        public static final int PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR = 0x00000200;
-
         /**
          * Flag whether the current window is a keyguard window, meaning that it will hide all other
          * windows behind it except for windows with flag {@link #FLAG_SHOW_WHEN_LOCKED} set.
@@ -1880,10 +1875,6 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_SYSTEM_ERROR,
                         equals = PRIVATE_FLAG_SYSTEM_ERROR,
                         name = "SYSTEM_ERROR"),
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR,
-                        equals = PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR,
-                        name = "INHERIT_TRANSLUCENT_DECOR"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_KEYGUARD,
                         equals = PRIVATE_FLAG_KEYGUARD,

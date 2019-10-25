@@ -56,7 +56,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
@@ -1927,13 +1926,11 @@ public class DisplayPolicy {
             }
         } else {
             dcf.set(displayFrames.mSystem);
-            final boolean inheritTranslucentDecor =
-                    (attrs.privateFlags & PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) != 0;
             final boolean isAppWindow =
                     type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW;
             final boolean topAtRest =
                     win == mTopFullscreenOpaqueWindowState && !win.isAnimatingLw();
-            if (isAppWindow && !inheritTranslucentDecor && !topAtRest) {
+            if (isAppWindow && !topAtRest) {
                 if ((sysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0
                         && (fl & FLAG_FULLSCREEN) == 0
                         && (fl & FLAG_TRANSLUCENT_STATUS) == 0
