@@ -76,7 +76,6 @@ interface IStatusBarService
     void onNotificationSmartReplySent(in String key, in int replyIndex, in CharSequence reply,
             in int notificationLocation, boolean modifiedBeforeSending);
     void onNotificationSettingsViewed(String key);
-    void setSystemUiVisibility(int displayId, int vis, int mask, String cause);
     void onNotificationBubbleChanged(String key, boolean isBubble);
     void grantInlineReplyUriPermission(String key, in Uri uri);
 

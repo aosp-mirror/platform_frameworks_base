@@ -24,7 +24,6 @@ import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
-import static android.view.InsetsFlags.getAppearance;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -857,19 +856,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
 
-        if ((result.mSystemUiVisibility & View.STATUS_BAR_TRANSIENT) != 0) {
+        if (containsType(result.mTransientBarTypes, TYPE_TOP_BAR)) {
             showTransientUnchecked();
         }
-        final int fullscreenAppearance = getAppearance(result.mFullscreenStackSysUiVisibility);
-        final int dockedAppearance = getAppearance(result.mDockedStackSysUiVisibility);
-        final AppearanceRegion[] appearanceRegions = result.mDockedStackBounds.isEmpty()
-                ? new AppearanceRegion[]{
-                        new AppearanceRegion(fullscreenAppearance, result.mFullscreenStackBounds)}
-                : new AppearanceRegion[]{
-                        new AppearanceRegion(fullscreenAppearance, result.mFullscreenStackBounds),
-                        new AppearanceRegion(dockedAppearance, result.mDockedStackBounds)};
-        onSystemBarAppearanceChanged(mDisplayId, getAppearance(result.mSystemUiVisibility),
-                appearanceRegions, result.mNavbarColorManagedByIme);
+        onSystemBarAppearanceChanged(mDisplayId, result.mAppearance, result.mAppearanceRegions,
+                result.mNavbarColorManagedByIme);
         mAppFullscreen = result.mAppFullscreen;
         mAppImmersive = result.mAppImmersive;
 
@@ -889,7 +880,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     "init: icons=%d disabled=0x%08x lights=0x%08x imeButton=0x%08x",
                     numIcons,
                     result.mDisabledFlags1,
-                    result.mSystemUiVisibility,
+                    result.mAppearance,
                     result.mImeWindowVis));
         }
 

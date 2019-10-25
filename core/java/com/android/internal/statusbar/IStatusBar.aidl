@@ -38,25 +38,6 @@ oneway interface IStatusBar
 
     void showWirelessChargingAnimation(int batteryLevel);
 
-    /**
-     * Notifies System UI side of a visibility flag change on the specified display.
-     *
-     * @param displayId the id of the display to notify
-     * @param vis the visibility flags except SYSTEM_UI_FLAG_LIGHT_STATUS_BAR which will be reported
-     *            separately in fullscreenStackVis and dockedStackVis
-     * @param fullscreenStackVis the flags which only apply in the region of the fullscreen stack,
-     *                           which is currently only SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-     * @param dockedStackVis the flags that only apply in the region of the docked stack, which is
-     *                       currently only SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-     * @param mask which flags to change
-     * @param fullscreenBounds the current bounds of the fullscreen stack, in screen coordinates
-     * @param dockedBounds the current bounds of the docked stack, in screen coordinates
-     * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
-     */
-    void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis, int dockedStackVis,
-            int mask, in Rect fullscreenBounds, in Rect dockedBounds,
-            boolean navbarColorManagedByIme);
-
     void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive);
     void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher, boolean isMultiClientImeEnabled);

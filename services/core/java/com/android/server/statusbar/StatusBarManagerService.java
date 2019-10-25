@@ -25,7 +25,6 @@ import android.app.Notification;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -43,10 +42,11 @@ import android.os.UserHandle;
 import android.service.notification.NotificationStats;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Log;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.InsetsState.InternalInsetType;
 import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.R;
@@ -263,12 +263,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-                int dockedStackVis, int mask, Rect fullscreenBounds, Rect dockedBounds,
-                boolean isNavbarColorManagedByIme, String cause) {
-            StatusBarManagerService.this.setSystemUiVisibility(displayId, vis, fullscreenStackVis,
-                    dockedStackVis, mask, fullscreenBounds, dockedBounds, isNavbarColorManagedByIme,
-                    cause);
+        public void setDisableFlags(int displayId, int flags, String cause) {
+            StatusBarManagerService.this.setDisableFlags(displayId, flags, cause);
         }
 
         @Override
@@ -473,7 +469,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         @Override
         public void onSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
-            // TODO (b/118118435): save the information to UiState
+            final UiState state = getUiState(displayId);
+            if (!state.appearanceEquals(appearance, appearanceRegions, navbarColorManagedByIme)) {
+                state.setAppearance(appearance, appearanceRegions, navbarColorManagedByIme);
+            }
             if (mBar != null) {
                 try {
                     mBar.onSystemBarAppearanceChanged(displayId, appearance, appearanceRegions,
@@ -483,7 +482,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void showTransient(int displayId, int[] types) {
+        public void showTransient(int displayId, @InternalInsetType int[] types) {
+            getUiState(displayId).showTransient(types);
             if (mBar != null) {
                 try {
                     mBar.showTransient(displayId, types);
@@ -492,7 +492,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void abortTransient(int displayId, int[] types) {
+        public void abortTransient(int displayId, @InternalInsetType int[] types) {
+            getUiState(displayId).clearTransient(types);
             if (mBar != null) {
                 try {
                     mBar.abortTransient(displayId, types);
@@ -896,54 +897,20 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
     }
 
-    @Override
-    public void setSystemUiVisibility(int displayId, int vis, int mask, String cause) {
-        final UiState state = getUiState(displayId);
-        setSystemUiVisibility(displayId, vis, 0, 0, mask,
-                state.mFullscreenStackBounds, state.mDockedStackBounds,
-                state.mNavbarColorManagedByIme, cause);
-    }
-
-    private void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-            int dockedStackVis, int mask, Rect fullscreenBounds, Rect dockedBounds,
-            boolean isNavbarColorManagedByIme, String cause) {
+    private void setDisableFlags(int displayId, int flags, String cause) {
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
-        if (SPEW) Slog.d(TAG, "setSystemUiVisibility(0x" + Integer.toHexString(vis) + ")");
+        final int unknownFlags = flags & ~StatusBarManager.DISABLE_MASK;
+        if (unknownFlags != 0) {
+            Slog.e(TAG, "Unknown disable flags: 0x" + Integer.toHexString(unknownFlags),
+                    new RuntimeException());
+        }
+
+        if (SPEW) Slog.d(TAG, "setDisableFlags(0x" + Integer.toHexString(flags) + ")");
 
         synchronized (mLock) {
-            updateUiVisibilityLocked(displayId, vis, fullscreenStackVis, dockedStackVis, mask,
-                    fullscreenBounds, dockedBounds, isNavbarColorManagedByIme);
-            disableLocked(
-                    displayId,
-                    mCurrentUserId,
-                    vis & StatusBarManager.DISABLE_MASK,
-                    mSysUiVisToken,
-                    cause, 1);
-        }
-    }
-
-    private void updateUiVisibilityLocked(final int displayId, final int vis,
-            final int fullscreenStackVis, final int dockedStackVis, final int mask,
-            final Rect fullscreenBounds, final Rect dockedBounds,
-            final boolean isNavbarColorManagedByIme) {
-        final UiState state = getUiState(displayId);
-        if (!state.systemUiStateEquals(vis, fullscreenStackVis, dockedStackVis,
-                fullscreenBounds, dockedBounds, isNavbarColorManagedByIme)) {
-            state.setSystemUiState(vis, fullscreenStackVis, dockedStackVis, fullscreenBounds,
-                    dockedBounds, isNavbarColorManagedByIme);
-            mHandler.post(() -> {
-                if (mBar != null) {
-                    try {
-                        mBar.setSystemUiVisibility(displayId, vis, fullscreenStackVis,
-                                dockedStackVis, mask, fullscreenBounds, dockedBounds,
-                                isNavbarColorManagedByIme);
-                    } catch (RemoteException ex) {
-                        Log.w(TAG, "Can not get StatusBar!");
-                    }
-                }
-            });
+            disableLocked(displayId, mCurrentUserId, flags, mSysUiVisToken, cause, 1);
         }
     }
 
@@ -965,11 +932,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     private class UiState {
-        private int mSystemUiVisibility = 0;
-        private int mFullscreenStackSysUiVisibility = 0;
-        private int mDockedStackSysUiVisibility = 0;
-        private final Rect mFullscreenStackBounds = new Rect();
-        private final Rect mDockedStackBounds = new Rect();
+        private @Appearance int mAppearance = 0;
+        private AppearanceRegion[] mAppearanceRegions = new AppearanceRegion[0];
+        private ArraySet<Integer> mTransientBarTypes = new ArraySet<>();
+        private boolean mNavbarColorManagedByIme = false;
         private boolean mFullscreen = false;
         private boolean mImmersive = false;
         private int mDisabled1 = 0;
@@ -978,7 +944,47 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         private int mImeBackDisposition = 0;
         private boolean mShowImeSwitcher = false;
         private IBinder mImeToken = null;
-        private boolean mNavbarColorManagedByIme = false;
+
+        private void setAppearance(@Appearance int appearance,
+                AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
+            mAppearance = appearance;
+            mAppearanceRegions = appearanceRegions;
+            mNavbarColorManagedByIme = navbarColorManagedByIme;
+        }
+
+        private boolean appearanceEquals(@Appearance int appearance,
+                AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
+            if (mAppearance != appearance || mAppearanceRegions.length != appearanceRegions.length
+                    || mNavbarColorManagedByIme != navbarColorManagedByIme) {
+                return false;
+            }
+            for (int i = appearanceRegions.length - 1; i >= 0; i--) {
+                if (!mAppearanceRegions[i].equals(appearanceRegions[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void showTransient(@InternalInsetType int[] types) {
+            for (int type : types) {
+                mTransientBarTypes.add(type);
+            }
+        }
+
+        private void clearTransient(@InternalInsetType int[] types) {
+            for (int type : types) {
+                mTransientBarTypes.remove(type);
+            }
+        }
+
+        private void setFullscreen(boolean isFullscreen) {
+            mFullscreen = isFullscreen;
+        }
+
+        private void setImmersive(boolean isImmersive) {
+            mImmersive = isImmersive;
+        }
 
         private int getDisabled1() {
             return mDisabled1;
@@ -993,38 +999,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             mDisabled2 = disabled2;
         }
 
-        private void setFullscreen(boolean isFullscreen) {
-            mFullscreen = isFullscreen;
-        }
-
-        private void setImmersive(boolean immersive) {
-            mImmersive = immersive;
-        }
-
         private boolean disableEquals(int disabled1, int disabled2) {
             return mDisabled1 == disabled1 && mDisabled2 == disabled2;
-        }
-
-        private void setSystemUiState(final int vis, final int fullscreenStackVis,
-                final int dockedStackVis, final Rect fullscreenBounds, final Rect dockedBounds,
-                final boolean navbarColorManagedByIme) {
-            mSystemUiVisibility = vis;
-            mFullscreenStackSysUiVisibility = fullscreenStackVis;
-            mDockedStackSysUiVisibility = dockedStackVis;
-            mFullscreenStackBounds.set(fullscreenBounds);
-            mDockedStackBounds.set(dockedBounds);
-            mNavbarColorManagedByIme = navbarColorManagedByIme;
-        }
-
-        private boolean systemUiStateEquals(final int vis, final int fullscreenStackVis,
-                final int dockedStackVis, final Rect fullscreenBounds, final Rect dockedBounds,
-                final boolean navbarColorManagedByIme) {
-            return mSystemUiVisibility == vis
-                && mFullscreenStackSysUiVisibility == fullscreenStackVis
-                && mDockedStackSysUiVisibility == dockedStackVis
-                && mFullscreenStackBounds.equals(fullscreenBounds)
-                && mDockedStackBounds.equals(dockedBounds)
-                && mNavbarColorManagedByIme == navbarColorManagedByIme;
         }
 
         private void setImeWindowState(final int vis, final int backDisposition,
@@ -1084,13 +1060,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             // TODO(b/118592525): Currently, status bar only works on the default display.
             // Make it aware of multi-display if needed.
             final UiState state = mDisplayUiState.get(DEFAULT_DISPLAY);
+            final int[] transientBarTypes = new int[state.mTransientBarTypes.size()];
+            for (int i = 0; i < transientBarTypes.length; i++) {
+                transientBarTypes[i] = state.mTransientBarTypes.valueAt(i);
+            }
             return new RegisterStatusBarResult(icons, gatherDisableActionsLocked(mCurrentUserId, 1),
-                    state.mSystemUiVisibility, state.mImeWindowVis,
+                    state.mAppearance, state.mAppearanceRegions, state.mImeWindowVis,
                     state.mImeBackDisposition, state.mShowImeSwitcher,
-                    gatherDisableActionsLocked(mCurrentUserId, 2),
-                    state.mFullscreenStackSysUiVisibility, state.mDockedStackSysUiVisibility,
-                    state.mImeToken, state.mFullscreenStackBounds, state.mDockedStackBounds,
-                    state.mNavbarColorManagedByIme, state.mFullscreen, state.mImmersive);
+                    gatherDisableActionsLocked(mCurrentUserId, 2), state.mImeToken,
+                    state.mNavbarColorManagedByIme, state.mFullscreen, state.mImmersive,
+                    transientBarTypes);
         }
     }
 

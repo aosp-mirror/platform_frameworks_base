@@ -178,11 +178,14 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
     @Test
     public void testShowTransientBars_topCanBeTransient_appGetsTopFakeControl() {
+        // Adding app window before setting source visibility is to prevent the visibility from
+        // being cleared by InsetsSourceProvider.updateVisibility.
+        final WindowState app = addWindow(TYPE_APPLICATION, "app");
+
         addWindow(TYPE_STATUS_BAR, "topBar")
                 .getControllableInsetProvider().getSource().setVisible(false);
         addWindow(TYPE_NAVIGATION_BAR, "navBar")
                 .getControllableInsetProvider().getSource().setVisible(true);
-        final WindowState app = addWindow(TYPE_APPLICATION, "app");
 
         final InsetsPolicy policy = mDisplayContent.getInsetsPolicy();
         policy.updateBarControlTarget(app);

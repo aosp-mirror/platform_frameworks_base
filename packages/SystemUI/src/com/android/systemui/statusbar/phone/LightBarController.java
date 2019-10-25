@@ -247,7 +247,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("LightBarController: ");
-        pw.print(" mAppearance=0x"); pw.println(ViewDebug.flagsToString(
+        pw.print(" mAppearance="); pw.println(ViewDebug.flagsToString(
                 InsetsFlags.class, "appearance", mAppearance));
         final int numStacks = mAppearanceRegions.length;
         for (int i = 0; i < numStacks; i++) {
