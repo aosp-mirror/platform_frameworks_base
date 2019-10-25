@@ -519,12 +519,13 @@ public final class Font {
         }
         Font f = (Font) o;
         return mFontStyle.equals(f.mFontStyle) && f.mTtcIndex == mTtcIndex
-                && Arrays.equals(f.mAxes, mAxes) && f.mBuffer.equals(mBuffer);
+                && Arrays.equals(f.mAxes, mAxes) && f.mBuffer.equals(mBuffer)
+                && Objects.equals(f.mLocaleList, mLocaleList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFontStyle, mTtcIndex, Arrays.hashCode(mAxes), mBuffer);
+        return Objects.hash(mFontStyle, mTtcIndex, Arrays.hashCode(mAxes), mBuffer, mLocaleList);
     }
 
     @Override
