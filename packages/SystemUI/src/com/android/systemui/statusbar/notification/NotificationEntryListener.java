@@ -20,11 +20,11 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
-
-import androidx.annotation.NonNull;
 
 /**
  * Listener interface for changes sent by NotificationEntryManager.
@@ -35,13 +35,6 @@ public interface NotificationEntryListener {
      * views haven't been inflated yet and most of the system pretends like it doesn't exist yet.
      */
     default void onPendingEntryAdded(NotificationEntry entry) {
-    }
-
-    // TODO: Combine this with onPreEntryUpdated into "onBeforeEntryFiltered" or similar
-    /**
-     * Called when a new entry is created but before it has been filtered or displayed to the user.
-     */
-    default void onBeforeNotificationAdded(NotificationEntry entry) {
     }
 
     /**
