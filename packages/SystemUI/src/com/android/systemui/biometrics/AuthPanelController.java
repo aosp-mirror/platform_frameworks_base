@@ -19,7 +19,6 @@ package com.android.systemui.biometrics;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Outline;
 import android.util.Log;
 import android.view.View;
@@ -142,7 +141,6 @@ public class AuthPanelController extends ViewOutlineProvider {
                 mContentHeight = (int) animation.getAnimatedValue();
                 mPanelView.invalidateOutline();
             });
-            heightAnimator.start();
 
             // Animate width
             ValueAnimator widthAnimator = ValueAnimator.ofInt(mContentWidth, contentWidth);
@@ -163,7 +161,8 @@ public class AuthPanelController extends ViewOutlineProvider {
             AnimatorSet as = new AnimatorSet();
             as.setDuration(animateDurationMs);
             as.setInterpolator(new AccelerateDecelerateInterpolator());
-            as.playTogether(cornerAnimator, widthAnimator, marginAnimator, alphaAnimator);
+            as.playTogether(cornerAnimator, heightAnimator, widthAnimator, marginAnimator,
+                    alphaAnimator);
             as.start();
 
         } else {
