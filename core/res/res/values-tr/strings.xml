@@ -543,7 +543,7 @@
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Parmak izi işlemi iptal edildi."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Parmak izi işlemi kullanıcı tarafından iptal edildi."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Çok fazla deneme yapıldı. Daha sonra tekrar deneyin."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Çok fazla deneme yapıldı. Parmak izi sensörü devre dışı bırakıldı."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Çok fazla deneme yapıldı. Parmak izi sensörü devre dışı bıraıldı."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Tekrar deneyin."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Parmak izi kaydedilmedi."</string>
     <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Bu cihazda parmak izi sensörü yok."</string>

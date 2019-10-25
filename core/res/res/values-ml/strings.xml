@@ -324,7 +324,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ജെസ്‌റ്ററുകൾ നിർവഹിക്കുക"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ടാപ്പുചെയ്യാനോ സ്വൈപ്പുചെയ്യാനോ പിഞ്ചുചെയ്യാനോ മറ്റ് ജെസ്‌റ്ററുകൾ നിർവഹിക്കാനോ കഴിയും."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ഫിംഗർപ്രിന്റ് ജെസ്‌റ്ററുകൾ"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ഉപകരണത്തിന്റെ ഫിംഗർപ്രിന്റ് സെൻസറിൽ ചെയ്‌ത ജെസ്‌റ്ററുകൾ ക്യാപ്‌ചർ ചെയ്യാനാകും."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ഉപകരണത്തിന്റെ വിരലടയാള സെൻസറിൽ ചെയ്‌ത ജെസ്‌റ്ററുകൾ ക്യാപ്‌ചർ ചെയ്യാനാകും."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"സ്റ്റാറ്റസ് ബാർ പ്രവർത്തനരഹിതമാക്കുക അല്ലെങ്കിൽ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"നില ബാർ പ്രവർത്തരഹിതമാക്കുന്നതിന് അല്ലെങ്കിൽ സിസ്‌റ്റം ഐക്കണുകൾ ചേർക്കുന്നതിനും നീക്കംചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"സ്റ്റാറ്റസ് ബാർ ആയിരിക്കുക"</string>
@@ -510,9 +510,9 @@
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"പരിശോധിച്ചുറപ്പിക്കുന്നതിനായി, ബയോമെട്രിക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ ആപ്പിനെ അനുവദിക്കുക"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ നിയന്ത്രിക്കുക"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ഉപയോഗിക്കാനായി ഫിംഗർപ്രിന്റ് ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ഉപയോഗിക്കാനായി വിരലടയാള ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"പ്രാമാണീകരണത്തിനായി ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"പ്രാമാണീകരണത്തിനായി വിരലടയാളം ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"നിങ്ങളുടെ സംഗീത ശേഖരം പരിഷ്‌കരിക്കുക"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"നിങ്ങളുടെ സംഗീത ശേഖരം പരിഷ്‌ക്കരിക്കുന്നതിന് ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"നിങ്ങളുടെ വീഡിയോ ശേഖരം പരിഷ്‌കരിക്കുക"</string>
@@ -527,9 +527,9 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"തിരിച്ചറിഞ്ഞില്ല"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"പിന്നോ പാറ്റേണോ പാസ്‌വേഡോ സജ്ജീകരിച്ചിട്ടില്ല"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ഫിംഗർപ്രിന്റ് ഭാഗികമായി തിരിച്ചറിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ഫിംഗർപ്രിന്റ് പ്രോസസ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ഫിംഗർപ്രിന്റ് സെൻസറിൽ ചെളിയുണ്ട്. അത് വൃത്തിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"വിരലടയാളം ഭാഗികമായി തിരിച്ചറിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിൽ ചെളിയുണ്ട്. അത് വൃത്തിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"വിരൽ വളരെ വേഗത്തിൽ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"വിരൽ വളരെ പതുക്കെ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -538,19 +538,19 @@
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"മുഖം പരിശോധിച്ചുറപ്പിച്ചു, സ്ഥിരീകരിക്കുക അമർത്തുക"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ഫിംഗർപ്രിന്റ് സംഭരിക്കാനാവില്ല. നിലവിലുള്ള ഫിംഗർപ്രിന്റ് നീക്കംചെയ്യുക."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ഫിംഗർപ്രിന്റ് നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"വിരലടയാളം സംഭരിക്കാനാവില്ല. നിലവിലുള്ള വിരലടയാളം നീക്കംചെയ്യുക."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"ഉപയോക്താവ് റദ്ദാക്കിയ ഫിംഗർപ്രിന്‍റ് പ്രവർത്തനം."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"നിരവധി തവണ ശ്രമിച്ചതിനാൽ, ഫിംഗർപ്രിന്റ് സെൻസർ പ്രവർത്തനരഹിതമായി."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"നിരവധി തവണ ശ്രമിച്ചതിനാൽ, വിരലടയാള സെൻസർ പ്രവർത്തനരഹിതമായി."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ഈ ഉപകരണത്തിൽ ഫിംഗർപ്രിന്റ് സെൻസറില്ല."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ഈ ഉപകരണത്തിൽ വിരലടയാള സെൻസറില്ല."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"കൈവിരൽ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"വിരലടയാള ഐക്കൺ"</string>
     <string name="permlab_manageFace" msgid="7262837876352591553">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ മാനേജ് ചെയ്യുക"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ഉപയോഗിക്കാനായി, മുഖത്തിന്റെ ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
@@ -1579,7 +1579,7 @@
     <string name="serial_number" msgid="758814067660862493">"സീരിയൽ നമ്പർ:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"വിരലടയാളങ്ങൾ:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 വിരലടയാളം:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA ഫിംഗർപ്രിന്റ്:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA വിരലടയാളം:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"എല്ലാം കാണുക"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"പ്രവർത്തനം തിരഞ്ഞെടുക്കുക"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"ഇവരുമായി പങ്കിടുക"</string>

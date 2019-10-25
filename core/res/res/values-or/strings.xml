@@ -323,8 +323,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ଡିସପ୍ଲେର ଜୁମ୍‍ ସ୍ତର ଓ ପୋଜିସନିଙ୍ଗ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ।"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ଜେଶ୍ଚର୍‍ କରନ୍ତୁ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ଟାପ୍‍, ସ୍ୱାଇପ୍‍, ପିଞ୍ଚ ଓ ଅନ୍ୟାନ୍ୟ ଜେଶ୍ଚର୍‍ ସମ୍ପାଦନ କରିପାରିବ।"</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ଟିପଚିହ୍ନ ଜେଶ୍ଚର"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ଡିଭାଇସ୍‌ର ଟିପଚିହ୍ନ ସେନସର୍ ଉପରେ ଜେଶ୍ଚର୍‍ କ୍ୟାପଚର୍‍ କାର୍ଯ୍ୟ କରାଯାଇପାରିବ।"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଜେଶ୍ଚର"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ଡିଭାଇସ୍‌ର ଆଙ୍ଗୁଠି ଚିହ୍ନ ସେନସର୍ ଉପରେ ଜେଶ୍ଚର୍‍ କ୍ୟାପଚର୍‍ କାର୍ଯ୍ୟ କରାଯାଇପାରିବ।"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"ଷ୍ଟାଟସ୍‌ ବାର୍‌କୁ ଅକ୍ଷମ କିମ୍ୱା ସଂଶୋଧନ କରନ୍ତୁ"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ଆପ୍‍କୁ, ସ୍ଥିତି ବାର୍‍ ଅକ୍ଷମ କରିବାକୁ କିମ୍ବା ସିଷ୍ଟମ୍‍ ଆଇକନ୍‍ ଯୋଡ଼ିବା କିମ୍ବା ବାହାର କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ଷ୍ଟାଟସ୍‍ ବାର୍‍ ରହିବାକୁ ଦିଅନ୍ତୁ"</string>
@@ -509,10 +509,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"ସ୍କ୍ରିନ୍ ଲକ୍‌ର ଜଟିଳତା ସ୍ତର (ଉଚ୍ଚ, ମଧ୍ୟମ, ନିମ୍ନ କିମ୍ବା କିଛିନୁହେଁ), ଜାଣିବାକୁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ, ଯାହା ସ୍କ୍ରିନ୍ ଲକ୍‌ର ସମ୍ଭାବ୍ୟ ପରିସୀମାର ଲମ୍ବ ଏବଂ ପ୍ରକାର ସୂଚୀତ କରେ। ଆପ୍ ଏହା ମଧ୍ୟ ଉପଯୋଗକର୍ତ୍ତାମାନଙ୍କୁ ପରାମର୍ଶ ଦେଇପାରେ ଯେ ସେମାନେ ସ୍କ୍ରିନ୍ ଲକ୍‌କୁ ଏକ ନିର୍ଦ୍ଧିଷ୍ଟ ସ୍ତର ପର୍ଯ୍ୟନ୍ତ ଅପ୍‌ଡେଟ୍ କରିପାରନ୍ତି, କିନ୍ତୁ ଉପଯୋଗକର୍ତ୍ତାମାନେ ନିଜ ଇଚ୍ଛାରେ ଏହାକୁ ଉପେକ୍ଷା ଏବଂ ନାଭିଗେଟ୍ କରିପାରିବେ। ଧ୍ୟାନ ଦିଅନ୍ତୁ ଯେ, ସ୍କ୍ରିନ୍ ଲକ୍ ସରଳ ଟେକ୍ସଟ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇନଥାଏ ତେଣୁ ଆପ୍ ସଠିକ୍ ପାସ୍‌‍ୱର୍ଡ ଜାଣିପାରି ନଥାଏ।"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ବାୟୋମେଟ୍ରିକ୍‌ ହାର୍ଡୱେର୍‌ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ସ୍ୱୀକୃତି ପାଇଁ ବାୟୋମେଟ୍ରିକ୍‌ ହାର୍ଡୱେର୍‌ ବ୍ୟବହାର କରିବାକୁ ଅନୁମତି ଦିଏ"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ଟିପଚିହ୍ନ ହାର୍ଡୱେର୍‍ ପରିଚାଳନା କରନ୍ତୁ"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ବ୍ୟବହାର କରିବା ପାଇଁ ଟିପଚିହ୍ନ ଟେମ୍ପ୍ଲେଟ୍ ଯୋଡ଼ିବାକୁ ଓ ଡିଲିଟ୍‍ କରିବାକୁ ଆପକୁ ପ୍ରକ୍ରିୟା ଆରମ୍ଭ କରିବାକୁ ଦେଇଥାଏ।"</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ଟିପଚିହ୍ନ ହାର୍ଡୱେର୍‍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ପ୍ରମାଣିକରଣ ପାଇଁ ଟିପଚିହ୍ନ ହାର୍ଡୱେର୍‍ ବ୍ୟବହାର କରିବାକୁ ଅନୁମତି ଦିଏ"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ହାର୍ଡୱେର୍‍ ପରିଚାଳନା କରନ୍ତୁ"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ବ୍ୟବହାର କରିବା ପାଇଁ ଆଙ୍ଗୁଠି ଚିହ୍ନ ଯୋଡ଼ିବାକୁ ଓ ଡିଲିଟ୍‍ କରିବାକୁ ଆପକୁ ବିଧି ଆରମ୍ଭ କରିବାକୁ ଦେଇଥାଏ।"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ହାର୍ଡୱେର୍‍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ସ୍ୱୀକୃତି ପାଇଁ ଆଙ୍ଗୁଠି ଚିହ୍ନ ହାର୍ଡୱେର୍‍ ବ୍ୟବହାର କରିବାକୁ ଅନୁମତି ଦିଏ"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"ଆପଣଙ୍କ ସଙ୍ଗୀତ ସଂଗ୍ରହ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"ଆପଣ ଆପଣଙ୍କ ସଙ୍ଗୀତ ସଂଗ୍ରହ ପରିବର୍ତ୍ତନ କରିବାକୁ ଆପ୍‍କୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"ଆପଣଙ୍କ ଭିଡିଓ ସଂଗ୍ରହ ସଂଶୋଧନ କରନ୍ତୁ"</string>
@@ -527,30 +527,30 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"ପ୍ରାମାଣିକତାକୁ ବାତିଲ୍ କରାଯାଇଛି"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"କୌଣସି ପିନ୍, ପେଟେର୍ନ ବା ପାସ୍‍ୱର୍ଡ ସେଟ୍ ନାହିଁ"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ଆଂଶିକ ଟିପଚିହ୍ନ ଚିହ୍ନଟ ହେଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଂଶିକ ଚିହ୍ନଟ ହେଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ଟିପଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ଟିପଚିହ୍ନ ସେନ୍ସର୍‍ ମଇଳା ହୋଇଯାଇଛି। ଦୟାକରି ସଫା କରନ୍ତୁ ଓ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ଆଙ୍ଗୁଠି ବହୁତ ଜୋର୍‌ରେ ଚଲାଗଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ଆଙ୍ଗୁଠି ଖୁବ୍‍ ଧୀରେ ନିଆଗଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"ଟିପଚିହ୍ନ ପ୍ରମାଣିତ ହେଲା"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ପ୍ରମାଣୀକୃତ ହେଲା"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"ମୁହଁ ଚିହ୍ନଟ ହୋଇଛି, ଦୟାକରି ସୁନିଶ୍ଚିତ ଦବାନ୍ତୁ"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ଟିପଚିହ୍ନ ହାର୍ଡୱେର୍‍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ଟିପଚିହ୍ନ ଷ୍ଟୋର୍‍ କରାଯାଇପାରିବ ନାହିଁ। ଦୟାକରି ପୂର୍ବରୁ ଥିବା ଟିପଚିହ୍ନକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ଟିପଚିହ୍ନର ସମୟ ଶେଷ ହେଲା । ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରାଗଲା।"</string>
-    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"ଉପଯୋଗକର୍ତ୍ତା ଟିପଚିହ୍ନ କାର୍ଯ୍ୟ ବାତିଲ୍ କରିଛନ୍ତି।"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ହାର୍ଡୱେର୍‍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଷ୍ଟୋର୍‍ କରାଯାଇପାରିବ ନାହିଁ। ଦୟାକରି ପୂର୍ବରୁ ଥିବା ଆଙ୍ଗୁଠି ଚିହ୍ନକୁ ବାହାର କରିଦିଅନ୍ତୁ।"</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ଆଙ୍ଗୁଠି ଚିହ୍ନର ସମୟ ଶେଷ ହେଲା । ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ଆଙ୍ଗୁଠି ଚିହ୍ନ କାର୍ଯ୍ୟ କ୍ୟାନ୍ସଲ୍‍ କରାଗଲା।"</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"ୟୁଜର୍‌ଙ୍କ ଦ୍ଵାରା ଆଙ୍ଗୁଠି ଚିହ୍ନ ନେବା କାମକୁ କ୍ୟାନ୍ସଲ୍ କରିଦିଆଯାଇଛି।"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ବହୁତ ପ୍ରୟାସ କରାଗଲା। ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ବହୁଥର ପ୍ରୟାସ କରିଛନ୍ତି। ଟିପଚିହ୍ନ ସେନ୍ସର୍‍ ଅକ୍ଷମ କରାଯାଇଛି।"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ବହୁତ ଥର ଭୁଲ ପ୍ରୟାସ କରିଛନ୍ତି। ଆଙ୍ଗୁଠି ଚିହ୍ନ ସେନ୍ସର୍‍ ଅକ୍ଷମ କରାଗଲା।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"କୌଣସି ଆଙ୍ଗୁଠି ଚିହ୍ନ ପଞ୍ଜୀକୃତ ହୋଇନାହିଁ।"</string>
     <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ଏହି ଡିଭାଇସ୍‌ରେ ଟିପଚିହ୍ନ ସେନ୍‍ସର୍ ନାହିଁ।"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ଆଙ୍ଗୁଠି <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଇକନ୍"</string>
     <string name="permlab_manageFace" msgid="7262837876352591553">"ଫେସ୍ ଅନ୍‌ଲକ୍ ହାର୍ଡୱେର୍ ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ବ୍ୟବହାର ପାଇଁ ଆପ୍‍କୁ ଫେସିଆଲ୍‍ ଟେମ୍ପଲେଟ୍‍ ଯୋଡିବା ଓ ଡିଲିଟ୍‍ ର ପଦ୍ଧତି ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ଫେସ୍ ଅନ୍‌ଲକ୍ ହାର୍ଡୱେର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
@@ -1578,7 +1578,7 @@
     <string name="serial_number" msgid="758814067660862493">"କ୍ରମିକ ସଂଖ୍ୟା:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"ଆଙ୍ଗୁଠି ଚିହ୍ନ:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ଆଙ୍ଗୁଠି ଚିହ୍ନ:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ଟିପଚିହ୍ନ:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ଆଙ୍ଗୁଠି ଚିହ୍ନ:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"ସମସ୍ତ ଦେଖନ୍ତୁ"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ଗତିବିଧି ଚୟନ କରନ୍ତୁ"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"ଏହାଙ୍କ ସହ ସେୟାର୍‍ କରନ୍ତୁ"</string>

@@ -324,7 +324,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ធ្វើកាយវិការ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"អាចប៉ះ អូស ច្បិច និងធ្វើកាយវិការផ្សេងទៀត"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ចលនា​ស្នាមម្រាមដៃ"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"អាចចាប់យក​ចលនា​ដែលធ្វើនៅលើ​នៅលើ​ឧបករណ៍​ចាប់​ស្នាម​ម្រាមដៃ​របស់ឧបករណ៍បាន។"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"អាចថត​ចលនា​ដែលមាន​សកម្មភាព​នៅលើ​ឧបករណ៍​ចាប់​ស្នាម​ម្រាមដៃ​របស់ឧបករណ៍បាន។"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"បិទ ឬ​កែ​របារ​ស្ថានភាព"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ឲ្យ​កម្មវិធី​បិទ​របារ​ស្ថានភាព ឬ​បន្ថែម និង​លុប​រូប​តំណាង​ប្រព័ន្ធ។"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ធ្វើជារបារស្ថានភាព"</string>
@@ -510,7 +510,7 @@
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"គ្រប់គ្រងផ្នែករឹងស្នាមម្រាមដៃ"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"អនុញ្ញាតឲ្យកម្មវិធីប្រើវិធីនានា ដើម្បីបញ្ចូល និងលុបទម្រង់គំរូស្នាមម្រាមដៃសម្រាប់ប្រើប្រាស់។"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"អនុញ្ញាតឲ្យកម្មវិធីប្រើវិធីសាស្ត្របន្ថែម និងលុបពុម្ពម្រាមដៃសម្រាប់ប្រើប្រាស់។"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ប្រើផ្នែករឹងស្នាមម្រាមដៃ"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"អនុញ្ញាតឲ្យកម្មវិធីប្រើផ្នែករឹងស្នាមម្រាមដៃសម្រាប់ការផ្ទៀងផ្ទាត់"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"កែប្រែ​បណ្ដុំ​តន្ត្រី​របស់​អ្នក"</string>
@@ -529,7 +529,7 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"គ្មាន​ការកំណត់​កូដ pin លំនាំ ឬពាក្យសម្ងាត់​ទេ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ឧបករណ៍ចាប់ស្នាមម្រាមដៃគឺប្រឡាក់។ សូមសម្អាត រួចព្យាយាមម្តងទៀត។"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ឧបករណ៍ផ្តិតម្រាមដៃប្រឡាក់ហើយ។ សូមសម្អាត ហើយព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ម្រាមដៃផ្លាស់ទីលឿនពេក។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ចលនាម្រាមដៃយឺតពេកហើយ។ សូមព្យាយាមម្តងទៀត។"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -539,7 +539,7 @@
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"បានផ្ទៀងផ្ទាត់​មុខ សូម​ចុច​បញ្ជាក់"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ផ្នែករឹងស្នាមម្រាមដៃមិនមានទេ។"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"មិនអាចផ្ទុកស្នាមម្រាមដៃទេ។ សូមយកស្នាមម្រាមដៃដែលមានស្រាប់ចេញ។"</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ស្នាមម្រាមដៃបានអស់ម៉ោង។ សូមព្យាយាមម្តងទៀត។"</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ការផ្តិតម្រាមដៃបានអស់ពេល។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"បានបោះបង់ប្រតិបត្តិការស្នាមម្រាមដៃ។"</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"ប្រតិបត្តិការ​ស្នាម​ម្រាម​ដៃ​ត្រូវ​បាន​បោះ​បង់​ដោយ​អ្នក​ប្រើប្រាស់។"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
@@ -550,7 +550,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ម្រាមដៃ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"រូបស្នាមម្រាមដៃ"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"រូបតំណាងស្នាមម្រាមដៃ"</string>
     <string name="permlab_manageFace" msgid="7262837876352591553">"គ្រប់គ្រង​ហាតវែរ​ដោះសោតាមទម្រង់មុខ"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"អនុញ្ញាតឱ្យកម្មវិធីប្រើវិធីសាស្ត្រដើម្បី​បញ្ចូល និងលុបទម្រង់​គំរូ​ផ្ទៃមុខសម្រាប់ប្រើប្រាស់។"</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ប្រើ​ហាតវែរ​ដោះសោ​តាមទម្រង់មុខ"</string>
@@ -1158,7 +1158,7 @@
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"សម្អាត​លំនាំដើម​ក្នុង​ការកំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"ជ្រើស​សកម្មភាព​​"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"ជ្រើស​កម្មវិធី​សម្រាប់​ឧបករណ៍​យូអេសប៊ី"</string>
-    <string name="noApplications" msgid="2991814273936504689">"មិន​មាន​​កម្មវិធី​ដែលអាចធ្វើ​សកម្មភាពនេះ​បាន​ទេ។"</string>
+    <string name="noApplications" msgid="2991814273936504689">"គ្មាន​កម្មវិធី​អាច​អនុវត្ត​សកម្មភាព​នេះ។"</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> បានឈប់"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> បានឈប់"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> ឈប់ដំណើរការម្តងហើយម្តងទៀត"</string>
@@ -1510,7 +1510,7 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"មិន​ធ្វើអ្វី​ទេ​ឥឡូវ"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"ជ្រើស​គណនី"</string>
     <string name="add_account_label" msgid="2935267344849993553">"បញ្ចូល​គណនី​"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"បញ្ចូល​គណនី"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"បន្ថែម​គណនី"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"បង្កើន"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"បន្ថយ"</string>
     <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> ប៉ះ និងសង្កត់ឲ្យជាប់"</string>

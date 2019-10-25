@@ -527,7 +527,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Non reconnu"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Authentification annulée"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Aucun code, schéma ni mot de passe n\'est défini"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partiellement détectée. Veuillez réessayer."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte numérique partiellement détectée. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le lecteur d\'empreinte digitale est sale. Veuillez le nettoyer, puis réessayer."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Vous avez déplacé votre doigt trop rapidement. Veuillez réessayer."</string>
@@ -537,10 +537,10 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Visage authentifié, veuillez appuyer sur \"Confirmer\""</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte digitale indisponible."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Impossible d\'enregistrer l\'empreinte digitale. Veuillez en supprimer une autre."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Délai de détection de l\'empreinte digitale expiré. Veuillez réessayer."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Opération d\'empreinte digitale annulée."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte numérique indisponible."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Impossible d\'enregistrer l\'empreinte numérique. Veuillez supprimer une empreinte."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Délai de détection de l\'empreinte numérique expiré. Veuillez réessayer."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Opération d\'empreinte numérique annulée."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Opération d\'authentification par empreinte digitale annulée par l\'utilisateur."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Trop de tentatives. Veuillez réessayer plus tard."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Trop de tentatives. Lecteur d\'empreinte digitale désactivé."</string>
