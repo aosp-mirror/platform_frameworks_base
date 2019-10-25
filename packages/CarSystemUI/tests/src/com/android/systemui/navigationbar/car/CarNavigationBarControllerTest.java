@@ -31,7 +31,9 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.car.hvac.HvacController;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +62,10 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
         mNavigationBarViewFactory = new NavigationBarViewFactory(mContext);
         mHvacControllerLazy = () -> mHvacController;
         mTestableResources = mContext.getOrCreateTestableResources();
+
+        // Needed to inflate top navigation bar.
+        mDependency.injectMockDependency(DarkIconDispatcher.class);
+        mDependency.injectMockDependency(StatusBarIconController.class);
     }
 
     @Test
@@ -189,7 +195,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
                 mHvacControllerLazy);
 
         ViewGroup window = mCarNavigationBar.getBottomWindow();
-        mCarNavigationBar.setBottomWindowVisibility(true);
+        mCarNavigationBar.setBottomWindowVisibility(View.VISIBLE);
 
         assertThat(window.getVisibility()).isEqualTo(View.VISIBLE);
     }
@@ -201,7 +207,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
                 mHvacControllerLazy);
 
         ViewGroup window = mCarNavigationBar.getBottomWindow();
-        mCarNavigationBar.setBottomWindowVisibility(false);
+        mCarNavigationBar.setBottomWindowVisibility(View.GONE);
 
         assertThat(window.getVisibility()).isEqualTo(View.GONE);
     }
@@ -213,7 +219,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
                 mHvacControllerLazy);
 
         ViewGroup window = mCarNavigationBar.getLeftWindow();
-        mCarNavigationBar.setLeftWindowVisibility(true);
+        mCarNavigationBar.setLeftWindowVisibility(View.VISIBLE);
 
         assertThat(window.getVisibility()).isEqualTo(View.VISIBLE);
     }
@@ -225,7 +231,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
                 mHvacControllerLazy);
 
         ViewGroup window = mCarNavigationBar.getLeftWindow();
-        mCarNavigationBar.setLeftWindowVisibility(false);
+        mCarNavigationBar.setLeftWindowVisibility(View.GONE);
 
         assertThat(window.getVisibility()).isEqualTo(View.GONE);
     }
@@ -237,7 +243,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
                 mHvacControllerLazy);
 
         ViewGroup window = mCarNavigationBar.getRightWindow();
-        mCarNavigationBar.setRightWindowVisibility(true);
+        mCarNavigationBar.setRightWindowVisibility(View.VISIBLE);
 
         assertThat(window.getVisibility()).isEqualTo(View.VISIBLE);
     }
@@ -249,7 +255,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
                 mHvacControllerLazy);
 
         ViewGroup window = mCarNavigationBar.getRightWindow();
-        mCarNavigationBar.setRightWindowVisibility(false);
+        mCarNavigationBar.setRightWindowVisibility(View.GONE);
 
         assertThat(window.getVisibility()).isEqualTo(View.GONE);
     }
@@ -312,5 +318,91 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
                 bottomBar.getNotificationsPanelController();
 
         assertThat(controller).isNotNull();
+    }
+
+    @Test
+    public void testShowAllKeyguardButtons_bottomEnabled_bottomKeyguardButtonsVisible() {
+        mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
+        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
+                mHvacControllerLazy);
+        CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
+        View bottomKeyguardButtons = bottomBar.findViewById(R.id.lock_screen_nav_buttons);
+
+        mCarNavigationBar.showAllKeyguardButtons(/* isSetUp= */ true);
+
+        assertThat(bottomKeyguardButtons.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testShowAllKeyguardButtons_bottomEnabled_bottomNavButtonsGone() {
+        mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
+        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
+                mHvacControllerLazy);
+        CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
+        View bottomButtons = bottomBar.findViewById(R.id.nav_buttons);
+
+        mCarNavigationBar.showAllKeyguardButtons(/* isSetUp= */ true);
+
+        assertThat(bottomButtons.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void testHideAllKeyguardButtons_bottomEnabled_bottomKeyguardButtonsGone() {
+        mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
+        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
+                mHvacControllerLazy);
+        CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
+        View bottomKeyguardButtons = bottomBar.findViewById(R.id.lock_screen_nav_buttons);
+
+        mCarNavigationBar.showAllKeyguardButtons(/* isSetUp= */ true);
+        assertThat(bottomKeyguardButtons.getVisibility()).isEqualTo(View.VISIBLE);
+        mCarNavigationBar.hideAllKeyguardButtons(/* isSetUp= */ true);
+
+        assertThat(bottomKeyguardButtons.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void testHideAllKeyguardButtons_bottomEnabled_bottomNavButtonsVisible() {
+        mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
+        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
+                mHvacControllerLazy);
+        CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
+        View bottomButtons = bottomBar.findViewById(R.id.nav_buttons);
+
+        mCarNavigationBar.showAllKeyguardButtons(/* isSetUp= */ true);
+        assertThat(bottomButtons.getVisibility()).isEqualTo(View.GONE);
+        mCarNavigationBar.hideAllKeyguardButtons(/* isSetUp= */ true);
+
+        assertThat(bottomButtons.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testToggleAllNotificationsUnseenIndicator_bottomEnabled_hasUnseen_setCorrectly() {
+        mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
+        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
+                mHvacControllerLazy);
+        CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
+        CarNavigationButton notifications = bottomBar.findViewById(R.id.notifications);
+
+        boolean hasUnseen = true;
+        mCarNavigationBar.toggleAllNotificationsUnseenIndicator(/* isSetUp= */ true,
+                hasUnseen);
+
+        assertThat(notifications.getUnseen()).isTrue();
+    }
+
+    @Test
+    public void testToggleAllNotificationsUnseenIndicator_bottomEnabled_noUnseen_setCorrectly() {
+        mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
+        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
+                mHvacControllerLazy);
+        CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
+        CarNavigationButton notifications = bottomBar.findViewById(R.id.notifications);
+
+        boolean hasUnseen = false;
+        mCarNavigationBar.toggleAllNotificationsUnseenIndicator(/* isSetUp= */ true,
+                hasUnseen);
+
+        assertThat(notifications.getUnseen()).isFalse();
     }
 }

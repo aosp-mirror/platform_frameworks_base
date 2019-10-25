@@ -150,6 +150,11 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
         updateImage();
     }
 
+    /** Gets whether the icon is in an unseen state. */
+    public boolean getUnseen() {
+        return mHasUnseen;
+    }
+
     private void updateImage() {
         if (mHasUnseen) {
             setImageResource(mSelected ? UNSEEN_SELECTED_ICON_RESOURCE_ID

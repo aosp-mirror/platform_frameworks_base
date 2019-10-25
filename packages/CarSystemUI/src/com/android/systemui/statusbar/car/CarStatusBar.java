@@ -168,13 +168,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private Drawable mNotificationPanelBackground;
 
     private ViewGroup mTopNavigationBarContainer;
-    private ViewGroup mNavigationBarWindow;
-    private ViewGroup mLeftNavigationBarWindow;
-    private ViewGroup mRightNavigationBarWindow;
     private CarNavigationBarView mTopNavigationBarView;
-    private CarNavigationBarView mNavigationBarView;
-    private CarNavigationBarView mLeftNavigationBarView;
-    private CarNavigationBarView mRightNavigationBarView;
 
     private final Object mQueueLock = new Object();
     private final CarNavigationBarController mCarNavigationBarController;
@@ -425,12 +419,12 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 new DeviceProvisionedController.DeviceProvisionedListener() {
                     @Override
                     public void onUserSetupChanged() {
-                        mHandler.post(() -> restartNavBarsIfNecessary());
+                        mHandler.post(() -> resetSystemBarsIfNecessary());
                     }
 
                     @Override
                     public void onUserSwitched() {
-                        mHandler.post(() -> restartNavBarsIfNecessary());
+                        mHandler.post(() -> resetSystemBarsIfNecessary());
                     }
                 });
 
@@ -444,11 +438,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
     }
 
-    private void restartNavBarsIfNecessary() {
+    private void resetSystemBarsIfNecessary() {
         boolean currentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
         if (mDeviceIsSetUpForUser != currentUserSetup) {
             mDeviceIsSetUpForUser = currentUserSetup;
-            restartNavBars();
+            resetSystemBars();
         }
     }
 
@@ -456,18 +450,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      * Remove all content from navbars and rebuild them. Used to allow for different nav bars
      * before and after the device is provisioned. . Also for change of density and font size.
      */
-    private void restartNavBars() {
+    private void resetSystemBars() {
         mCarFacetButtonController.removeAll();
-
-        if (mNavigationBarWindow != null) {
-            mNavigationBarView = null;
-        }
-        if (mLeftNavigationBarWindow != null) {
-            mLeftNavigationBarView = null;
-        }
-        if (mRightNavigationBarWindow != null) {
-            mRightNavigationBarView = null;
-        }
 
         buildNavBarContent();
         // CarFacetButtonController was reset therefore we need to re-add the status bar elements
@@ -480,51 +464,22 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      * the full screen user selector is shown.
      */
     void setNavBarVisibility(@View.Visibility int visibility) {
-        if (mNavigationBarWindow != null) {
-            mNavigationBarWindow.setVisibility(visibility);
-        }
-        if (mLeftNavigationBarWindow != null) {
-            mLeftNavigationBarWindow.setVisibility(visibility);
-        }
-        if (mRightNavigationBarWindow != null) {
-            mRightNavigationBarWindow.setVisibility(visibility);
-        }
+        mCarNavigationBarController.setBottomWindowVisibility(visibility);
+        mCarNavigationBarController.setLeftWindowVisibility(visibility);
+        mCarNavigationBarController.setRightWindowVisibility(visibility);
     }
 
     @Override
     public boolean hideKeyguard() {
         boolean result = super.hideKeyguard();
-        if (mNavigationBarView != null) {
-            mNavigationBarView.hideKeyguardButtons();
-        }
-        if (mLeftNavigationBarView != null) {
-            mLeftNavigationBarView.hideKeyguardButtons();
-        }
-        if (mRightNavigationBarView != null) {
-            mRightNavigationBarView.hideKeyguardButtons();
-        }
+        mCarNavigationBarController.hideAllKeyguardButtons(mDeviceIsSetUpForUser);
         return result;
     }
 
     @Override
     public void showKeyguard() {
         super.showKeyguard();
-        updateNavBarForKeyguardContent();
-    }
-
-    /**
-     * Switch to the keyguard applicable content contained in the nav bars
-     */
-    private void updateNavBarForKeyguardContent() {
-        if (mNavigationBarView != null) {
-            mNavigationBarView.showKeyguardButtons();
-        }
-        if (mLeftNavigationBarView != null) {
-            mLeftNavigationBarView.showKeyguardButtons();
-        }
-        if (mRightNavigationBarView != null) {
-            mRightNavigationBarView.showKeyguardButtons();
-        }
+        mCarNavigationBarController.showAllKeyguardButtons(mDeviceIsSetUpForUser);
     }
 
     @Override
@@ -628,20 +583,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mNotificationDataManager = new NotificationDataManager();
         mNotificationDataManager.setOnUnseenCountUpdateListener(
                 () -> {
-                    if (mNavigationBarView != null && mNotificationDataManager != null) {
-                        Boolean hasUnseen =
+                    if (mNotificationDataManager != null) {
+                        boolean hasUnseen =
                                 mNotificationDataManager.getUnseenNotificationCount() > 0;
-                        if (mNavigationBarView != null) {
-                            mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
-
-                        if (mLeftNavigationBarView != null) {
-                            mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
-
-                        if (mRightNavigationBarView != null) {
-                            mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
+                        mCarNavigationBarController.toggleAllNotificationsUnseenIndicator(
+                                mDeviceIsSetUpForUser, hasUnseen);
                     }
                 });
 
@@ -895,35 +841,25 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Override
     protected void createNavigationBar(@Nullable RegisterStatusBarResult result) {
-        buildNavBarWindows();
+        mTopNavigationBarContainer = mStatusBarWindow
+                .findViewById(R.id.car_top_navigation_bar_container);
+
         buildNavBarContent();
     }
 
     private void buildNavBarContent() {
         buildTopBar();
 
-        mNavigationBarView = mCarNavigationBarController.getBottomBar(mDeviceIsSetUpForUser);
         mCarNavigationBarController.registerBottomBarTouchListener(
                 mNavBarNotificationTouchListener);
 
-        mLeftNavigationBarView = mCarNavigationBarController.getLeftBar(mDeviceIsSetUpForUser);
         mCarNavigationBarController.registerLeftBarTouchListener(
                 mNavBarNotificationTouchListener);
 
-        mRightNavigationBarView = mCarNavigationBarController.getLeftBar(mDeviceIsSetUpForUser);
         mCarNavigationBarController.registerRightBarTouchListener(
                 mNavBarNotificationTouchListener);
 
         mCarNavigationBarController.registerNotificationController(() -> togglePanel());
-    }
-
-    private void buildNavBarWindows() {
-        mTopNavigationBarContainer = mStatusBarWindow
-                .findViewById(R.id.car_top_navigation_bar_container);
-
-        mNavigationBarWindow = mCarNavigationBarController.getBottomWindow();
-        mLeftNavigationBarWindow = mCarNavigationBarController.getLeftWindow();
-        mRightNavigationBarWindow = mCarNavigationBarController.getRightWindow();
     }
 
     private void buildTopBar() {
@@ -1099,7 +1035,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     @Override
     public void onDensityOrFontScaleChanged() {
         super.onDensityOrFontScaleChanged();
-        restartNavBars();
+        resetSystemBars();
         // Need to update the background on density changed in case the change was due to night
         // mode.
         mNotificationPanelBackground = getDefaultWallpaper();
