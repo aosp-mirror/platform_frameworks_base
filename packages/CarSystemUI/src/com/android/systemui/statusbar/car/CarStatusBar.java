@@ -153,6 +153,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private float mOpeningVelocity = DEFAULT_FLING_VELOCITY;
     private float mClosingVelocity = DEFAULT_FLING_VELOCITY;
 
+    private float mBackgroundAlphaDiff;
+    private float mInitialBackgroundAlpha;
+
     private FullscreenUserSwitcher mFullscreenUserSwitcher;
 
     private CarBatteryController mCarBatteryController;
@@ -374,6 +377,25 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // created.
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
         mScreenLifecycle.addObserver(mScreenObserver);
+
+      	// Notification bar related setup.
+        mInitialBackgroundAlpha = (float) mContext.getResources().getInteger(
+            R.integer.config_initialNotificationBackgroundAlpha) / 100;
+        if (mInitialBackgroundAlpha < 0 || mInitialBackgroundAlpha > 100) {
+            throw new RuntimeException(
+              "Unable to setup notification bar due to incorrect initial background alpha"
+                      + " percentage");
+        }
+        float finalBackgroundAlpha = Math.max(
+            mInitialBackgroundAlpha,
+            (float) mContext.getResources().getInteger(
+                R.integer.config_finalNotificationBackgroundAlpha) / 100);
+        if (finalBackgroundAlpha < 0 || finalBackgroundAlpha > 100) {
+            throw new RuntimeException(
+              "Unable to setup notification bar due to incorrect final background alpha"
+                      + " percentage");
+        }
+        mBackgroundAlphaDiff = finalBackgroundAlpha - mInitialBackgroundAlpha;
 
         super.start();
 
@@ -1094,15 +1116,20 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             mHandleBar.setTranslationY(height - mHandleBar.getHeight() - lp.bottomMargin);
         }
         if (mNotificationView.getHeight() > 0) {
-            // Calculates the alpha value for the background based on how much of the notification
-            // shade is visible to the user. When the notification shade is completely open then
-            // alpha value will be 1.
-            float alpha = (float) height / mNotificationView.getHeight();
             Drawable background = mNotificationView.getBackground().mutate();
-
-            background.setAlpha((int) (alpha * 255));
+            background.setAlpha((int) (getBackgroundAlpha(height) * 255));
             mNotificationView.setBackground(background);
         }
+    }
+
+    /**
+     * Calculates the alpha value for the background based on how much of the notification
+     * shade is visible to the user. When the notification shade is completely open then
+     * alpha value will be 1.
+     */
+    private float getBackgroundAlpha(int height) {
+        return mInitialBackgroundAlpha +
+            ((float) height / mNotificationView.getHeight() * mBackgroundAlphaDiff);
     }
 
     @Override
