@@ -389,6 +389,20 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(mReceiver).onDialogDismissed(eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL));
     }
 
+    @Test
+    public void testDoesNotCrash_whenTryAgainPressedAfterDismissal() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED);
+        mAuthController.onTryAgainPressed();
+    }
+
+    @Test
+    public void testDoesNotCrash_whenDeviceCredentialPressedAfterDismissal() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED);
+        mAuthController.onDeviceCredentialPressed();
+    }
+
     // Helpers
 
     private void showDialog(int authenticators, int biometricModality) {
