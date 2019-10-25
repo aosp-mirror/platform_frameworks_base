@@ -23,7 +23,6 @@ import static android.service.attention.AttentionService.ATTENTION_FAILURE_UNKNO
 import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.attention.AttentionManagerInternal;
 import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
 import android.content.BroadcastReceiver;
@@ -300,7 +299,8 @@ public class AttentionManagerService extends SystemService {
     @GuardedBy("mLock")
     @VisibleForTesting
     protected UserState getOrCreateCurrentUserStateLocked() {
-        return getOrCreateUserStateLocked(ActivityManager.getCurrentUser());
+        // Doesn't need to cache the states of different users.
+        return getOrCreateUserStateLocked(0);
     }
 
     @GuardedBy("mLock")
@@ -318,7 +318,8 @@ public class AttentionManagerService extends SystemService {
     @Nullable
     @VisibleForTesting
     protected UserState peekCurrentUserStateLocked() {
-        return peekUserStateLocked(ActivityManager.getCurrentUser());
+        // Doesn't need to cache the states of different users.
+        return peekUserStateLocked(0);
     }
 
     @GuardedBy("mLock")
