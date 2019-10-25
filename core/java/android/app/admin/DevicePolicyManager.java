@@ -11276,4 +11276,39 @@ public class DevicePolicyManager {
         }
         return false;
     }
+
+    /**
+     * Called by Device owner to set packages as protected. User will not be able to clear app
+     * data or force-stop protected packages.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @param packages The package names to protect.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setProtectedPackages(@NonNull ComponentName admin, @NonNull List<String> packages) {
+        if (mService != null) {
+            try {
+                mService.setProtectedPackages(admin, packages);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the list of packages protected by the device owner.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public @NonNull List<String> getProtectedPackages(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getProtectedPackages(admin);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptyList();
+    }
 }

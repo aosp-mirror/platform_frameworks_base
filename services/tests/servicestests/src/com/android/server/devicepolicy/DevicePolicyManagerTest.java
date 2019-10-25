@@ -5573,6 +5573,36 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.isPackageAllowedToAccessCalendar(testPackage));
     }
 
+    public void testSetProtectedPackages_asDO() throws Exception {
+        final List<String> testPackages = new ArrayList<>();
+        testPackages.add("package_1");
+        testPackages.add("package_2");
+
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+        setDeviceOwner();
+
+        dpm.setProtectedPackages(admin1, testPackages);
+
+        verify(getServices().packageManagerInternal).setDeviceOwnerProtectedPackages(testPackages);
+
+        assertEquals(testPackages, dpm.getProtectedPackages(admin1));
+    }
+
+    public void testSetProtectedPackages_failingAsPO() throws Exception {
+        final List<String> testPackages = new ArrayList<>();
+        testPackages.add("package_1");
+        testPackages.add("package_2");
+
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+        setAsProfileOwner(admin1);
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setProtectedPackages(admin1, testPackages));
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.getProtectedPackages(admin1));
+    }
+
     private void configureProfileOwnerOfOrgOwnedDevice(ComponentName who, int userId) {
         when(getServices().userManager.getProfileParent(eq(UserHandle.of(userId))))
                 .thenReturn(UserHandle.SYSTEM);
