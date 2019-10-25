@@ -1137,7 +1137,8 @@ public final class SystemServiceRegistry {
         registerService(Context.PERMISSION_SERVICE, PermissionManager.class,
                 new CachedServiceFetcher<PermissionManager>() {
                     @Override
-                    public PermissionManager createService(ContextImpl ctx) {
+                    public PermissionManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
                         IPackageManager packageManager = AppGlobals.getPackageManager();
                         return new PermissionManager(ctx.getOuterContext(), packageManager);
                     }});
