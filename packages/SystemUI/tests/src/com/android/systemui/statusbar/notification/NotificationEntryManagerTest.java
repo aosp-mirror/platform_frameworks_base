@@ -140,6 +140,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private RowInflaterTask mAsyncInflationTask;
     @Mock private NotificationRowBinder mMockedRowBinder;
 
+    private int mId;
     private NotificationEntry mEntry;
     private StatusBarNotification mSbn;
     private TestableNotificationEntryManager mEntryManager;
@@ -243,18 +244,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         when(mListContainer.getViewParentForNotification(any())).thenReturn(
                 new FrameLayout(mContext));
 
-        Notification.Builder n = new Notification.Builder(mContext, "")
-                .setSmallIcon(R.drawable.ic_person)
-                .setContentTitle("Title")
-                .setContentText("Text");
-
-        mEntry = new NotificationEntryBuilder()
-                .setPkg(TEST_PACKAGE_NAME)
-                .setOpPkg(TEST_PACKAGE_NAME)
-                .setUid(TEST_UID)
-                .setNotification(n.build())
-                .setUser(new UserHandle(ActivityManager.getCurrentUser()))
-                .build();
+        mEntry = createNotification();
         mSbn = mEntry.getSbn();
 
         mEntry.expandedIcon = mock(StatusBarIconView.class);
@@ -605,6 +595,22 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         assertNull(mEntryManager.getNotificationData().get(mEntry.getKey()));
         verify(mEntryListener, atLeastOnce()).onEntryRemoved(eq(mEntry),
                 any(NotificationVisibility.class), anyBoolean());
+    }
+
+    private NotificationEntry createNotification() {
+        Notification.Builder n = new Notification.Builder(mContext, "")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text");
+
+        return new NotificationEntryBuilder()
+                .setPkg(TEST_PACKAGE_NAME)
+                .setOpPkg(TEST_PACKAGE_NAME)
+                .setUid(TEST_UID)
+                .setId(mId++)
+                .setNotification(n.build())
+                .setUser(new UserHandle(ActivityManager.getCurrentUser()))
+                .build();
     }
 
     private Notification.Action createAction() {

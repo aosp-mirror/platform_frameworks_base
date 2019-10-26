@@ -168,6 +168,11 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
+    public void allowAutojoin(int netId, boolean choice) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean startScan(String packageName) {
         throw new UnsupportedOperationException();
     }

@@ -2183,7 +2183,7 @@ public class LocationManager {
     public void removeGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {}
 
     /**
-     * Registers a GNSS Navigation Message callback.
+     * Registers a GNSS Navigation Message callback which will run on a binder thread.
      *
      * @param callback a {@link GnssNavigationMessage.Callback} object to register.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
@@ -2194,7 +2194,7 @@ public class LocationManager {
     @Deprecated
     public boolean registerGnssNavigationMessageCallback(
             @NonNull GnssNavigationMessage.Callback callback) {
-        return registerGnssNavigationMessageCallback(callback, null);
+        return registerGnssNavigationMessageCallback(Runnable::run, callback);
     }
 
     /**

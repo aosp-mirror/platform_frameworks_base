@@ -81,10 +81,16 @@ import com.android.systemui.util.leak.RotationUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Lazy;
+
 /**
  * An overlay that draws screen decorations in software (e.g for rounded corners or display cutout)
  * for antialiasing and emulation purposes.
  */
+@Singleton
 public class ScreenDecorations extends SystemUI implements Tunable {
     private static final boolean DEBUG = false;
     private static final String TAG = "ScreenDecorations";
@@ -94,6 +100,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private static final boolean DEBUG_SCREENSHOT_ROUNDED_CORNERS =
             SystemProperties.getBoolean("debug.screenshot_rounded_corners", false);
     private static final boolean VERBOSE = false;
+    private final Lazy<StatusBar> mStatusBarLazy;
 
     private DisplayManager mDisplayManager;
     private DisplayManager.DisplayListener mDisplayListener;
@@ -132,8 +139,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         return result;
     }
 
-    public ScreenDecorations(Context context) {
+    @Inject
+    public ScreenDecorations(Context context, Lazy<StatusBar> statusBarLazy) {
         super(context);
+        mStatusBarLazy = statusBarLazy;
     }
 
     @Override
@@ -434,13 +443,13 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
     private void setupStatusBarPadding(int padding) {
         // Add some padding to all the content near the edge of the screen.
-        StatusBar sb = getComponent(StatusBar.class);
-        View statusBar = (sb != null ? sb.getStatusBarWindow() : null);
-        if (statusBar != null) {
-            TunablePadding.addTunablePadding(statusBar.findViewById(R.id.keyguard_header), PADDING,
-                    padding, FLAG_END);
+        StatusBar statusBar = mStatusBarLazy.get();
+        View statusBarWindow = statusBar.getStatusBarWindow();
+        if (statusBarWindow != null) {
+            TunablePadding.addTunablePadding(statusBarWindow.findViewById(R.id.keyguard_header),
+                    PADDING, padding, FLAG_END);
 
-            FragmentHostManager fragmentHostManager = FragmentHostManager.get(statusBar);
+            FragmentHostManager fragmentHostManager = FragmentHostManager.get(statusBarWindow);
             fragmentHostManager.addTagListener(CollapsedStatusBarFragment.TAG,
                     new TunablePaddingTagListener(padding, R.id.status_bar));
             fragmentHostManager.addTagListener(QS.TAG,

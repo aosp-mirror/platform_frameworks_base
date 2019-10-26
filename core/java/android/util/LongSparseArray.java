@@ -17,13 +17,14 @@
 package android.util;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import libcore.util.EmptyArray;
+
+import java.util.Arrays;
 
 /**
  * SparseArray mapping longs to Objects.  Unlike a normal array of Objects,
@@ -450,22 +451,25 @@ public class LongSparseArray<E> implements Cloneable {
     /**
      * @hide
      */
-    public static class StringParcelling implements com.android.internal.util.Parcelling {
+    public static class StringParcelling implements
+            com.android.internal.util.Parcelling<LongSparseArray<String>> {
         @Override
-        public void parcel(Object item, Parcel dest, int parcelFlags) {
-            if (item == null) {
+        public void parcel(LongSparseArray<String> array, Parcel dest, int parcelFlags) {
+            if (array == null) {
                 dest.writeInt(-1);
                 return;
             }
 
-            LongSparseArray<String> array = (LongSparseArray<String>) item;
-            dest.writeInt(array.mSize);
+            int size = array.mSize;
+
+            dest.writeInt(size);
             dest.writeLongArray(array.mKeys);
-            dest.writeStringArray((String[]) array.mValues);
+
+            dest.writeStringArray(Arrays.copyOfRange(array.mValues, 0, size, String[].class));
         }
 
         @Override
-        public Object unparcel(Parcel source) {
+        public LongSparseArray<String> unparcel(Parcel source) {
             int size = source.readInt();
             if (size == -1) {
                 return null;
@@ -475,51 +479,6 @@ public class LongSparseArray<E> implements Cloneable {
             array.mSize = size;
             array.mKeys = source.createLongArray();
             array.mValues = source.createStringArray();
-
-            // Make sure array is sane
-            Preconditions.checkArgument(array.mKeys.length >= size);
-            Preconditions.checkArgument(array.mValues.length >= size);
-
-            if (size > 0) {
-                long last = array.mKeys[0];
-                for (int i = 1; i < size; i++) {
-                    Preconditions.checkArgument(last < array.mKeys[i]);
-                }
-            }
-
-            return array;
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public static class Parcelling<T extends Parcelable> implements
-            com.android.internal.util.Parcelling {
-        @Override
-        public void parcel(Object item, Parcel dest, int parcelFlags) {
-            if (item == null) {
-                dest.writeInt(-1);
-                return;
-            }
-
-            LongSparseArray<T> array = (LongSparseArray<T>) item;
-            dest.writeInt(array.mSize);
-            dest.writeLongArray(array.mKeys);
-            dest.writeParcelableArray((T[]) array.mValues, parcelFlags);
-        }
-
-        @Override
-        public Object unparcel(Parcel source) {
-            int size = source.readInt();
-            if (size == -1) {
-                return null;
-            }
-
-            LongSparseArray<T> array = new LongSparseArray<>(0);
-            array.mSize = size;
-            array.mKeys = source.createLongArray();
-            array.mValues = source.readParcelableArray(null);
 
             // Make sure array is sane
             Preconditions.checkArgument(array.mKeys.length >= size);

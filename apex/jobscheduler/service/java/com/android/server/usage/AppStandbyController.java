@@ -53,7 +53,6 @@ import android.app.AppGlobals;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
-import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -102,6 +101,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.usage.AppIdleHistory.AppUsageHistory;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import java.io.File;
 import java.io.PrintWriter;

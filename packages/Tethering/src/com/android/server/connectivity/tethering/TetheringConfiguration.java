@@ -82,7 +82,7 @@ public class TetheringConfiguration {
         "192.168.48.2", "192.168.48.254", "192.168.49.2", "192.168.49.254",
     };
 
-    private final String[] DEFAULT_IPV4_DNS = {"8.8.4.4", "8.8.8.8"};
+    private static final String[] DEFAULT_IPV4_DNS = {"8.8.4.4", "8.8.8.8"};
 
     public final String[] tetherableUsbRegexs;
     public final String[] tetherableWifiRegexs;
@@ -133,10 +133,12 @@ public class TetheringConfiguration {
         configLog.log(toString());
     }
 
+    /** Check whether input interface belong to usb.*/
     public boolean isUsb(String iface) {
         return matchesDownstreamRegexs(iface, tetherableUsbRegexs);
     }
 
+    /** Check whether input interface belong to wifi.*/
     public boolean isWifi(String iface) {
         return matchesDownstreamRegexs(iface, tetherableWifiRegexs);
     }
@@ -146,18 +148,22 @@ public class TetheringConfiguration {
         return matchesDownstreamRegexs(iface, tetherableWifiP2pRegexs);
     }
 
+    /** Check whether using legacy mode for wifi P2P. */
     public boolean isWifiP2pLegacyTetheringMode() {
         return (tetherableWifiP2pRegexs == null || tetherableWifiP2pRegexs.length == 0);
     }
 
+    /** Check whether input interface belong to bluetooth.*/
     public boolean isBluetooth(String iface) {
         return matchesDownstreamRegexs(iface, tetherableBluetoothRegexs);
     }
 
+    /** Check whether no ui entitlement application is available.*/
     public boolean hasMobileHotspotProvisionApp() {
         return !TextUtils.isEmpty(provisioningAppNoUi);
     }
 
+    /** Does the dumping.*/
     public void dump(PrintWriter pw) {
         pw.print("subId: ");
         pw.println(subId);
@@ -186,6 +192,7 @@ public class TetheringConfiguration {
         pw.println(enableLegacyDhcpServer);
     }
 
+    /** Returns the string representation of this object.*/
     public String toString() {
         final StringJoiner sj = new StringJoiner(" ");
         sj.add(String.format("subId:%d", subId));
@@ -210,7 +217,7 @@ public class TetheringConfiguration {
 
         if (values != null) {
             final StringJoiner sj = new StringJoiner(", ", "[", "]");
-            for (String value : values) { sj.add(value); }
+            for (String value : values) sj.add(value);
             pw.print(sj.toString());
         } else {
             pw.print("null");

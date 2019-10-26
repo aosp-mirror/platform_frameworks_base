@@ -17,6 +17,7 @@
 package com.android.systemui.dagger;
 
 import com.android.systemui.LatencyTester;
+import com.android.systemui.ScreenDecorations;
 import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.pip.PipUI;
@@ -73,6 +74,11 @@ public abstract class SystemUIBinder {
     @ClassKey(Recents.class)
     public abstract SystemUI bindRecents(Recents sysui);
 
+    /** Inject into ScreenDecorations. */
+    @Binds
+    @IntoMap
+    @ClassKey(ScreenDecorations.class)
+    public abstract SystemUI bindScreenDecorations(ScreenDecorations sysui);
 
     /** Inject into VolumeUI. */
     @Binds

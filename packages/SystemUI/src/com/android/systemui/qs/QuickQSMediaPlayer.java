@@ -84,6 +84,11 @@ public class QuickQSMediaPlayer {
         mController = new MediaController(mContext, token);
         MediaMetadata mMediaMetadata = mController.getMetadata();
 
+        if (mMediaMetadata == null) {
+            Log.e(TAG, "Media metadata was null");
+            return;
+        }
+
         // Album art
         addAlbumArtBackground(mMediaMetadata, bgColor);
 

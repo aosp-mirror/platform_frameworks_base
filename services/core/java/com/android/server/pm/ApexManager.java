@@ -32,12 +32,14 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.sysprop.ApexProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -46,6 +48,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -63,9 +66,9 @@ abstract class ApexManager {
     static final int MATCH_FACTORY_PACKAGE = 1 << 1;
 
     /**
-     * Returns an instance of either {@link ApexManagerImpl} or {@link ApexManagerNoOp} depending
-     * on whenever this device supports APEX, i.e. {@link ApexProperties#updatable()} evaluates to
-     * {@code true}.
+     * Returns an instance of either {@link ApexManagerImpl} or {@link ApexManagerFlattenedApex}
+     * depending on whether this device supports APEX, i.e. {@link ApexProperties#updatable()}
+     * evaluates to {@code true}.
      */
     static ApexManager create(Context systemContext) {
         if (ApexProperties.updatable().orElse(false)) {
@@ -76,9 +79,27 @@ abstract class ApexManager {
                 throw new IllegalStateException("Required service apexservice not available");
             }
         } else {
-            return new ApexManagerNoOp();
+            return new ApexManagerFlattenedApex();
         }
     }
+
+    /**
+     * Minimal information about APEX mount points and the original APEX package they refer to.
+     */
+    static class ActiveApexInfo {
+        public final File apexDirectory;
+        public final File preinstalledApexPath;
+
+        private ActiveApexInfo(File apexDirectory, File preinstalledApexPath) {
+            this.apexDirectory = apexDirectory;
+            this.preinstalledApexPath = preinstalledApexPath;
+        }
+    }
+
+    /**
+     * Returns {@link ActiveApexInfo} records relative to all active APEX packages.
+     */
+    abstract List<ActiveApexInfo> getActiveApexInfos();
 
     abstract void systemReady();
 
@@ -217,7 +238,8 @@ abstract class ApexManager {
      * An implementation of {@link ApexManager} that should be used in case device supports updating
      * APEX packages.
      */
-    private static class ApexManagerImpl extends ApexManager {
+    @VisibleForTesting
+    static class ApexManagerImpl extends ApexManager {
         private final IApexService mApexService;
         private final Context mContext;
         private final Object mLock = new Object();
@@ -254,6 +276,22 @@ abstract class ApexManager {
          */
         private static boolean isFactory(PackageInfo packageInfo) {
             return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+        }
+
+        @Override
+        List<ActiveApexInfo> getActiveApexInfos() {
+            try {
+                return Arrays.stream(mApexService.getActivePackages())
+                        .map(apexInfo -> new ActiveApexInfo(
+                                new File(
+                                Environment.getApexDirectory() + File.separator
+                                        + apexInfo.moduleName),
+                                new File(apexInfo.modulePath))).collect(
+                                Collectors.toList());
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to retrieve packages from apexservice", e);
+            }
+            return Collections.emptyList();
         }
 
         @Override
@@ -335,8 +373,8 @@ abstract class ApexManager {
                 if (!packageInfo.packageName.equals(packageName)) {
                     continue;
                 }
-                if ((!matchActive || isActive(packageInfo))
-                        && (!matchFactory || isFactory(packageInfo))) {
+                if ((matchActive && isActive(packageInfo))
+                        || (matchFactory && isFactory(packageInfo))) {
                     return packageInfo;
                 }
             }
@@ -547,7 +585,40 @@ abstract class ApexManager {
      * An implementation of {@link ApexManager} that should be used in case device does not support
      * updating APEX packages.
      */
-    private static final class ApexManagerNoOp extends ApexManager {
+    private static final class ApexManagerFlattenedApex extends ApexManager {
+
+        @Override
+        List<ActiveApexInfo> getActiveApexInfos() {
+            // There is no apexd running in case of flattened apex
+            // We look up the /apex directory and identify the active APEX modules from there.
+            // As "preinstalled" path, we just report /system since in the case of flattened APEX
+            // the /apex directory is just a symlink to /system/apex.
+            List<ActiveApexInfo> result = new ArrayList<>();
+            File apexDir = Environment.getApexDirectory();
+            // In flattened configuration, init special-case the art directory and bind-mounts
+            // com.android.art.{release|debug} to com.android.art. At the time of writing, these
+            // directories are copied from the kArtApexDirNames variable in
+            // system/core/init/mount_namespace.cpp.
+            String[] skipDirs = {"com.android.art.release", "com.android.art.debug"};
+            if (apexDir.isDirectory()) {
+                File[] files = apexDir.listFiles();
+                // listFiles might be null if system server doesn't have permission to read
+                // a directory.
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isDirectory() && !file.getName().contains("@")) {
+                            for (String skipDir : skipDirs) {
+                                if (file.getName().equals(skipDir)) {
+                                    continue;
+                                }
+                            }
+                            result.add(new ActiveApexInfo(file, Environment.getRootDirectory()));
+                        }
+                    }
+                }
+            }
+            return result;
+        }
 
         @Override
         void systemReady() {

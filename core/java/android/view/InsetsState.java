@@ -109,6 +109,7 @@ public class InsetsState implements Parcelable {
             INSET_SIDE_TOP,
             INSET_SIDE_RIGHT,
             INSET_SIDE_BOTTOM,
+            INSET_SIDE_FLOATING,
             INSET_SIDE_UNKNWON
     })
     public @interface InsetSide {}
@@ -116,7 +117,8 @@ public class InsetsState implements Parcelable {
     static final int INSET_SIDE_TOP = 1;
     static final int INSET_SIDE_RIGHT = 2;
     static final int INSET_SIDE_BOTTOM = 3;
-    static final int INSET_SIDE_UNKNWON = 4;
+    static final int INSET_SIDE_FLOATING = 4;
+    static final int INSET_SIDE_UNKNWON = 5;
 
     private final ArrayMap<Integer, InsetsSource> mSources = new ArrayMap<>();
 
@@ -224,10 +226,10 @@ public class InsetsState implements Parcelable {
             typeVisibilityMap[index] = source.isVisible();
         }
 
-        if (typeSideMap != null && !Insets.NONE.equals(insets)) {
+        if (typeSideMap != null) {
             @InsetSide int insetSide = getInsetSide(insets);
             if (insetSide != INSET_SIDE_UNKNWON) {
-                typeSideMap.put(source.getType(), getInsetSide(insets));
+                typeSideMap.put(source.getType(), insetSide);
             }
         }
     }
@@ -237,6 +239,9 @@ public class InsetsState implements Parcelable {
      * is set in order that this method returns a meaningful result.
      */
     private @InsetSide int getInsetSide(Insets insets) {
+        if (Insets.NONE.equals(insets)) {
+            return INSET_SIDE_FLOATING;
+        }
         if (insets.left != 0) {
             return INSET_SIDE_LEFT;
         }

@@ -530,7 +530,9 @@ public class WifiManager {
     @SystemApi
     public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
     /**
-     * The interface used for the softap.
+     * The lookup key for a String extra that stores the interface name used for the Soft AP.
+     * This extra is included in the broadcast {@link #WIFI_AP_STATE_CHANGED_ACTION}.
+     * Retrieve its value with {@link android.content.Intent#getStringExtra(String)}.
      *
      * @hide
      */
@@ -538,9 +540,10 @@ public class WifiManager {
     public static final String EXTRA_WIFI_AP_INTERFACE_NAME =
             "android.net.wifi.extra.WIFI_AP_INTERFACE_NAME";
     /**
-     * The intended ip mode for this softap.
-     * @see #IFACE_IP_MODE_TETHERED
-     * @see #IFACE_IP_MODE_LOCAL_ONLY
+     * The lookup key for an int extra that stores the intended IP mode for this Soft AP.
+     * One of {@link #IFACE_IP_MODE_TETHERED} or {@link #IFACE_IP_MODE_LOCAL_ONLY}.
+     * This extra is included in the broadcast {@link #WIFI_AP_STATE_CHANGED_ACTION}.
+     * Retrieve its value with {@link android.content.Intent#getIntExtra(String, int)}.
      *
      * @hide
      */
@@ -2697,12 +2700,13 @@ public class WifiManager {
     }
 
     /**
-     * Start SoftAp mode with the specified configuration.
-     * Note that starting in access point mode disables station
-     * mode operation
-     * @param wifiConfig SSID, security and channel details as
-     *        part of WifiConfiguration
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     * Start Soft AP (hotspot) mode with the specified configuration.
+     * Note that starting Soft AP mode may disable station mode operation if the device does not
+     * support concurrency.
+     * @param wifiConfig SSID, security and channel details as part of WifiConfiguration, or null to
+     *                   use the persisted Soft AP configuration that was previously set using
+     *                   {@link #setWifiApConfiguration(WifiConfiguration)}.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
      *
      * @hide
      */
@@ -3250,21 +3254,22 @@ public class WifiManager {
         /**
          * Called when soft AP state changes.
          *
-         * @param state new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
-         *        {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
-         *        {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
+         * @param state         new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
+         *                      {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
+         *                      {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
          * @param failureReason reason when in failed state. One of
-         *        {@link #SAP_START_FAILURE_GENERAL}, {@link #SAP_START_FAILURE_NO_CHANNEL}
+         *                      {@link #SAP_START_FAILURE_GENERAL},
+         *                      {@link #SAP_START_FAILURE_NO_CHANNEL}
          */
-        public abstract void onStateChanged(@WifiApState int state,
+        void onStateChanged(@WifiApState int state,
                 @SapStartFailure int failureReason);
 
         /**
-         * Called when number of connected clients to soft AP changes.
+         * Called when the connected clients to soft AP changes.
          *
-         * @param numClients number of connected clients
+         * @param clients the currently connected clients
          */
-        public abstract void onNumClientsChanged(int numClients);
+        void onConnectedClientsChanged(@NonNull List<WifiClient> clients);
     }
 
     /**
@@ -3287,18 +3292,21 @@ public class WifiManager {
                 Log.v(TAG, "SoftApCallbackProxy: onStateChanged: state=" + state
                         + ", failureReason=" + failureReason);
             }
+
             mHandler.post(() -> {
                 mCallback.onStateChanged(state, failureReason);
             });
         }
 
         @Override
-        public void onNumClientsChanged(int numClients) {
+        public void onConnectedClientsChanged(List<WifiClient> clients) {
             if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "SoftApCallbackProxy: onNumClientsChanged: numClients=" + numClients);
+                Log.v(TAG, "SoftApCallbackProxy: onConnectedClientsChanged: clients="
+                        + clients.size() + " clients");
             }
+
             mHandler.post(() -> {
-                mCallback.onNumClientsChanged(numClients);
+                mCallback.onConnectedClientsChanged(clients);
             });
         }
     }
@@ -3861,6 +3869,29 @@ public class WifiManager {
             } else {
                 listener.onFailure(ERROR);
             }
+        }
+    }
+
+    /**
+     * Sets the user choice for allowing auto-join to a network.
+     * The updated choice will be made available through the updated config supplied by the
+     * CONFIGURED_NETWORKS_CHANGED broadcast.
+     *
+     * @param netId the id of the network to allow/disallow autojoin for.
+     * @param choice true to allow autojoin, false to disallow autojoin
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void allowAutojoin(int netId, boolean choice) {
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            iWifiManager.allowAutojoin(netId, choice);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

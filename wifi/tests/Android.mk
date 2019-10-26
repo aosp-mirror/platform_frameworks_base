@@ -49,6 +49,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     core-test-rules \
     guava \
     mockito-target-minus-junit4 \
+    net-tests-utils \
     frameworks-base-testutils \
     truth-prebuilt \
 

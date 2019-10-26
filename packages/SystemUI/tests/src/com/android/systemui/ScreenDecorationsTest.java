@@ -61,8 +61,12 @@ import com.android.systemui.tuner.TunerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
+
+import dagger.Lazy;
 
 @RunWithLooper
 @RunWith(AndroidTestingRunner.class)
@@ -71,16 +75,19 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
     private ScreenDecorations mScreenDecorations;
-    private StatusBar mStatusBar;
+    @Mock private StatusBar mStatusBar;
     private WindowManager mWindowManager;
     private FragmentService mFragmentService;
     private FragmentHostManager mFragmentHostManager;
     private TunerService mTunerService;
     private StatusBarWindowView mView;
     private TunablePaddingService mTunablePaddingService;
+    @Mock private Lazy<StatusBar> mStatusBarLazy;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
         mTestableLooper = TestableLooper.get(this);
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 new Handler(mTestableLooper.getLooper()));
@@ -88,11 +95,10 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mTunerService = mDependency.injectMockDependency(TunerService.class);
         mFragmentService = mDependency.injectMockDependency(FragmentService.class);
 
-        mStatusBar = mock(StatusBar.class);
         mWindowManager = mock(WindowManager.class);
         mView = spy(new StatusBarWindowView(mContext, null));
+        when(mStatusBarLazy.get()).thenReturn(mStatusBar);
         when(mStatusBar.getStatusBarWindow()).thenReturn(mView);
-        mContext.putComponent(StatusBar.class, mStatusBar);
 
         Display display = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
         when(mWindowManager.getDefaultDisplay()).thenReturn(display);
@@ -102,7 +108,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mFragmentService.getFragmentHostManager(any())).thenReturn(mFragmentHostManager);
 
 
-        mScreenDecorations = new ScreenDecorations(mContext) {
+        mScreenDecorations = new ScreenDecorations(mContext, mStatusBarLazy) {
             @Override
             public void start() {
                 super.start();

@@ -99,11 +99,13 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             // init input stream before calling startInstallation(), which takes 90 seconds.
             initInputStream();
 
-            Thread thread = new Thread(() -> {
-                mInstallationSession =
-                        mDynSystem.startInstallation(mSystemSize, mUserdataSize);
-            });
-
+            Thread thread =
+                    new Thread(
+                            () -> {
+                                mDynSystem.startInstallation("userdata", mUserdataSize, false);
+                                mInstallationSession =
+                                        mDynSystem.startInstallation("system", mSystemSize, true);
+                            });
 
             thread.start();
 

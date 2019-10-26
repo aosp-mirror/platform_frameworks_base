@@ -4733,10 +4733,18 @@ package android.net.wifi {
     field @Deprecated public byte id;
   }
 
+  public final class WifiClient implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.net.MacAddress getMacAddress();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiClient> CREATOR;
+  }
+
   @Deprecated public class WifiConfiguration implements android.os.Parcelable {
     method @Deprecated public boolean hasNoInternetAccess();
     method @Deprecated public boolean isEphemeral();
     method @Deprecated public boolean isNoInternetAccessExpected();
+    field @Deprecated public boolean allowAutojoin;
     field @Deprecated public String creatorName;
     field @Deprecated public int creatorUid;
     field @Deprecated public String lastUpdateName;
@@ -4759,6 +4767,7 @@ package android.net.wifi {
 
   public class WifiManager {
     method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void addOnWifiUsabilityStatsListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
+    method @RequiresPermission("android.permission.NETWORK_SETTINGS") public void allowAutojoin(int, boolean);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void connect(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void connect(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @Deprecated @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void disable(int, @Nullable android.net.wifi.WifiManager.ActionListener);
@@ -4845,6 +4854,7 @@ package android.net.wifi {
   public class WifiScanner {
     method @Deprecated public void configureWifiChange(int, int, int, int, int, android.net.wifi.WifiScanner.BssidInfo[]);
     method @Deprecated public void configureWifiChange(android.net.wifi.WifiScanner.WifiChangeSettings);
+    method @Nullable @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<java.lang.Integer> getAvailableChannels(int);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean getScanResults();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener, android.os.WorkSource);
@@ -5941,6 +5951,7 @@ package android.provider {
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
     field public static final String NAMESPACE_PACKAGE_MANAGER_SERVICE = "package_manager_service";
+    field public static final String NAMESPACE_PERMISSIONS = "permissions";
     field public static final String NAMESPACE_PRIVACY = "privacy";
     field public static final String NAMESPACE_ROLLBACK = "rollback";
     field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
@@ -8219,24 +8230,6 @@ package android.telephony {
     method public boolean disableCellBroadcastRange(int, int, int);
     method public boolean enableCellBroadcastRange(int, int, int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void sendMultipartTextMessageWithoutPersisting(String, String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
-    field public static final int RESULT_CANCELLED = 23; // 0x17
-    field public static final int RESULT_ENCODING_ERROR = 18; // 0x12
-    field public static final int RESULT_ERROR_FDN_CHECK_FAILURE = 6; // 0x6
-    field public static final int RESULT_ERROR_NONE = 0; // 0x0
-    field public static final int RESULT_INTERNAL_ERROR = 21; // 0x15
-    field public static final int RESULT_INVALID_ARGUMENTS = 11; // 0xb
-    field public static final int RESULT_INVALID_SMSC_ADDRESS = 19; // 0x13
-    field public static final int RESULT_INVALID_SMS_FORMAT = 14; // 0xe
-    field public static final int RESULT_INVALID_STATE = 12; // 0xc
-    field public static final int RESULT_MODEM_ERROR = 16; // 0x10
-    field public static final int RESULT_NETWORK_ERROR = 17; // 0x11
-    field public static final int RESULT_NETWORK_REJECT = 10; // 0xa
-    field public static final int RESULT_NO_MEMORY = 13; // 0xd
-    field public static final int RESULT_NO_RESOURCES = 22; // 0x16
-    field public static final int RESULT_OPERATION_NOT_ALLOWED = 20; // 0x14
-    field public static final int RESULT_RADIO_NOT_AVAILABLE = 9; // 0x9
-    field public static final int RESULT_REQUEST_NOT_SUPPORTED = 24; // 0x18
-    field public static final int RESULT_SYSTEM_ERROR = 15; // 0xf
   }
 
   public class SubscriptionInfo implements android.os.Parcelable {

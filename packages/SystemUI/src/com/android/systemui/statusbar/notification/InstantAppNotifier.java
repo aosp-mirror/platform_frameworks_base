@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -155,7 +156,8 @@ public class InstantAppNotifier extends SystemUI
                                     focusedStack.configuration.windowConfiguration
                                             .getWindowingMode();
                             if (windowingMode == WINDOWING_MODE_FULLSCREEN
-                                    || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+                                    || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                                    || windowingMode == WINDOWING_MODE_FREEFORM) {
                                 checkAndPostForStack(focusedStack, notifs, noMan, pm);
                             }
                         }

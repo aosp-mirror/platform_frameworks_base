@@ -54,11 +54,15 @@ public class BootImageProfileTest implements IDeviceTest {
         assertTrue("profile system server not enabled", res != null && res.equals("true"));
     }
 
-    private void forceSaveProfile(String pkg) throws Exception {
+    private boolean forceSaveProfile(String pkg) throws Exception {
         String pid = mTestDevice.executeShellCommand("pidof " + pkg).trim();
-        assertTrue("Invalid pid " + pid, pid.length() > 0);
+        if (pid.length() == 0) {
+            // Not yet running.
+            return false;
+        }
         String res = mTestDevice.executeShellCommand("kill -s SIGUSR1 " + pid).trim();
         assertTrue("kill SIGUSR1: " + res, res.length() == 0);
+        return true;
     }
 
     @Test
@@ -71,10 +75,13 @@ public class BootImageProfileTest implements IDeviceTest {
         // Wait up to 20 seconds for the profile to be saved.
         for (int i = 0; i < 20; ++i) {
             // Force save the profile since we truncated it.
-            forceSaveProfile("system_server");
-            String s = mTestDevice.executeShellCommand("wc -c <" + SYSTEM_SERVER_PROFILE).trim();
-            if (!"0".equals(s)) {
-                break;
+            if (forceSaveProfile("system_server")) {
+                // Might fail if system server is not yet running.
+                String s = mTestDevice.executeShellCommand(
+                        "wc -c <" + SYSTEM_SERVER_PROFILE).trim();
+                if (!"0".equals(s)) {
+                    break;
+                }
             }
             Thread.sleep(1000);
         }

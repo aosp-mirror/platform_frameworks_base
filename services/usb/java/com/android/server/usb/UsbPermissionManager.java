@@ -20,14 +20,20 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.service.usb.UsbSettingsManagerProto;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.dump.DualDumpOutputStream;
+
+import java.util.List;
 
 class UsbPermissionManager {
     private static final String LOG_TAG = UsbPermissionManager.class.getSimpleName();
@@ -110,6 +116,20 @@ class UsbPermissionManager {
         intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+    }
+
+    void dump(@NonNull DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        synchronized (mPermissionsByUser) {
+            List<UserInfo> users = userManager.getUsers();
+            int numUsers = users.size();
+            for (int i = 0; i < numUsers; i++) {
+                getPermissionsForUser(users.get(i).id).dump(dump, "user_permissions",
+                        UsbSettingsManagerProto.USER_SETTINGS);
+            }
+        }
+        dump.end(token);
     }
 
 }

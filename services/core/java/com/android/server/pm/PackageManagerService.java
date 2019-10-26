@@ -370,6 +370,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -761,6 +762,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             true /* hasPriv */, true /* hasOverlays */),
                     new SystemPartition(Environment.getSystemExtDirectory(), SCAN_AS_SYSTEM_EXT,
                             true /* hasPriv */, true /* hasOverlays */)));
+
+    private final List<SystemPartition> mDirsToScanAsSystem;
 
     /**
      * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
@@ -2552,6 +2555,16 @@ public class PackageManagerService extends IPackageManager.Stub
         mApexManager = ApexManager.create(mContext);
         mAppsFilter = mInjector.getAppsFilter();
 
+        mDirsToScanAsSystem = new ArrayList<>();
+        mDirsToScanAsSystem.addAll(SYSTEM_PARTITIONS);
+        mDirsToScanAsSystem.addAll(mApexManager.getActiveApexInfos().stream()
+                .map(ai -> resolveApexToSystemPartition(ai))
+                .filter(Objects::nonNull).collect(Collectors.toList()));
+        Slog.d(TAG,
+                "Directories scanned as system partitions: [" + mDirsToScanAsSystem.stream().map(
+                        d -> (d.folder.getAbsolutePath() + ":" + d.scanFlag))
+                        .collect(Collectors.joining(",")) + "]");
+
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
         // writer
@@ -2684,8 +2697,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // reside in the right directory.
             final int systemParseFlags = mDefParseFlags | PackageParser.PARSE_IS_SYSTEM_DIR;
             final int systemScanFlags = scanFlags | SCAN_AS_SYSTEM;
-            for (int i = SYSTEM_PARTITIONS.size() - 1; i >= 0; i--) {
-                final SystemPartition partition = SYSTEM_PARTITIONS.get(i);
+            for (int i = mDirsToScanAsSystem.size() - 1; i >= 0; i--) {
+                final SystemPartition partition = mDirsToScanAsSystem.get(i);
                 if (partition.overlayFolder == null) {
                     continue;
                 }
@@ -2699,8 +2712,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 throw new IllegalStateException(
                         "Failed to load frameworks package; check log for warnings");
             }
-            for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
-                final SystemPartition partition = SYSTEM_PARTITIONS.get(i);
+            for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
+                final SystemPartition partition = mDirsToScanAsSystem.get(i);
                 if (partition.privAppFolder != null) {
                     scanDirTracedLI(partition.privAppFolder, systemParseFlags,
                             systemScanFlags | SCAN_AS_PRIVILEGED | partition.scanFlag, 0);
@@ -2878,8 +2891,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
                         @ParseFlags int reparseFlags = 0;
                         @ScanFlags int rescanFlags = 0;
-                        for (int i1 = 0, size = SYSTEM_PARTITIONS.size(); i1 < size; i1++) {
-                            SystemPartition partition = SYSTEM_PARTITIONS.get(i1);
+                        for (int i1 = 0, size = mDirsToScanAsSystem.size(); i1 < size; i1++) {
+                            SystemPartition partition = mDirsToScanAsSystem.get(i1);
                             if (partition.containsPrivApp(scanFile)) {
                                 reparseFlags = systemParseFlags;
                                 rescanFlags = systemScanFlags | SCAN_AS_PRIVILEGED
@@ -4092,7 +4105,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 return generatePackageInfo(ps, flags, userId);
             }
-            if (!matchFactoryOnly && (flags & MATCH_APEX) != 0) {
+            if ((flags & MATCH_APEX) != 0) {
                 return mApexManager.getPackageInfo(packageName, ApexManager.MATCH_ACTIVE_PACKAGE);
             }
         }
@@ -17778,6 +17791,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     static boolean locationIsPrivileged(String path) {
+        // TODO(dariofreni): include APEX partitions when they will support priv apps.
         for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
             SystemPartition partition = SYSTEM_PARTITIONS.get(i);
             if (partition.containsPrivPath(path)) {
@@ -17787,6 +17801,18 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    private static @Nullable SystemPartition resolveApexToSystemPartition(
+            ApexManager.ActiveApexInfo apexInfo) {
+        for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
+            SystemPartition sp = SYSTEM_PARTITIONS.get(i);
+            if (apexInfo.preinstalledApexPath.getAbsolutePath().startsWith(
+                    sp.folder.getAbsolutePath())) {
+                return new SystemPartition(apexInfo.apexDirectory, sp.scanFlag,
+                        false /* hasPriv */, false /* hasOverlays */);
+            }
+        }
+        return null;
+    }
 
     /*
      * Tries to delete system package.
@@ -17897,8 +17923,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 | PackageParser.PARSE_MUST_BE_APK
                 | PackageParser.PARSE_IS_SYSTEM_DIR;
         @ScanFlags int scanFlags = SCAN_AS_SYSTEM;
-        for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
-            SystemPartition partition = SYSTEM_PARTITIONS.get(i);
+        for (int i = 0, size = mDirsToScanAsSystem.size(); i < size; i++) {
+            SystemPartition partition = mDirsToScanAsSystem.get(i);
             if (partition.containsPath(codePathString)) {
                 scanFlags |= partition.scanFlag;
                 if (partition.containsPrivPath(codePathString)) {

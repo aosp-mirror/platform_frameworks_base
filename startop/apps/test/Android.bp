@@ -22,6 +22,8 @@ android_app {
         "src/CPUIntensiveBenchmarks.java",
         "src/EmptyActivity.java",
         "src/FrameLayoutInflationActivity.java",
+        "src/InitCheckOverheadBenchmarkActivity.java",
+        "src/InitCheckOverheadBenchmarks.java",
         "src/LayoutInflationActivity.java",
         "src/NonInteractiveSystemServerBenchmarkActivity.java",
         "src/SystemServerBenchmarkActivity.java",

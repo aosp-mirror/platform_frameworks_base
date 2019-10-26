@@ -126,6 +126,22 @@ public class AudioDeviceBrokerTest {
         doTestConnectionDisconnectionReconnection(AudioService.BECOMING_NOISY_DELAY_MS / 2);
     }
 
+    /**
+     * Verify connecting an A2DP sink will call into AudioService to unmute media
+     */
+    @Test
+    public void testA2dpConnectionUnmutesMedia() throws Exception {
+        Log.i(TAG, "testA2dpConnectionUnmutesMedia");
+        Assert.assertNotNull("invalid null BT device", mFakeBtDevice);
+
+        mAudioDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(mFakeBtDevice,
+                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP, true, 1);
+        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+        verify(mMockAudioService, times(1)).postAccessoryPlugMediaUnmute(
+                ArgumentMatchers.eq(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+
+    }
+
     private void doTestConnectionDisconnectionReconnection(int delayAfterDisconnection)
             throws Exception {
         when(mMockAudioService.getDeviceForStream(AudioManager.STREAM_MUSIC))

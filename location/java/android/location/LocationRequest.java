@@ -30,6 +30,8 @@ import android.os.SystemClock;
 import android.os.WorkSource;
 import android.util.TimeUtils;
 
+import com.android.internal.util.Preconditions;
+
 
 /**
  * A data object that contains quality of service parameters for requests
@@ -195,6 +197,8 @@ public final class LocationRequest implements Parcelable {
     @NonNull
     public static LocationRequest createFromDeprecatedProvider(
             @NonNull String provider, long minTime, float minDistance, boolean singleShot) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+
         if (minTime < 0) minTime = 0;
         if (minDistance < 0) minDistance = 0;
 
@@ -222,6 +226,8 @@ public final class LocationRequest implements Parcelable {
     @NonNull
     public static LocationRequest createFromDeprecatedCriteria(
             @NonNull Criteria criteria, long minTime, float minDistance, boolean singleShot) {
+        Preconditions.checkArgument(criteria != null, "invalid null criteria");
+
         if (minTime < 0) minTime = 0;
         if (minDistance < 0) minDistance = 0;
 

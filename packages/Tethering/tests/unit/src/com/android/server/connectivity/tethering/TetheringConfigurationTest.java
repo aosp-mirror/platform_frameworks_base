@@ -24,7 +24,12 @@ import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.provider.Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import static com.android.internal.R.array.config_mobile_hotspot_provision_app;
+import static com.android.internal.R.array.config_tether_bluetooth_regexs;
+import static com.android.internal.R.array.config_tether_dhcp_range;
 import static com.android.internal.R.array.config_tether_upstream_types;
+import static com.android.internal.R.array.config_tether_usb_regexs;
+import static com.android.internal.R.array.config_tether_wifi_regexs;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -86,7 +91,9 @@ public class TetheringConfigurationTest {
         }
 
         @Override
-        public Resources getResources() { return mResources; }
+        public Resources getResources() {
+            return mResources;
+        }
 
         @Override
         public Object getSystemService(String name) {
@@ -105,17 +112,13 @@ public class TetheringConfigurationTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        when(mResources.getStringArray(com.android.internal.R.array.config_tether_dhcp_range))
-                .thenReturn(new String[0]);
-        when(mResources.getStringArray(com.android.internal.R.array.config_tether_usb_regexs))
-                .thenReturn(new String[0]);
-        when(mResources.getStringArray(com.android.internal.R.array.config_tether_wifi_regexs))
+        when(mResources.getStringArray(config_tether_dhcp_range)).thenReturn(new String[0]);
+        when(mResources.getStringArray(config_tether_usb_regexs)).thenReturn(new String[0]);
+        when(mResources.getStringArray(config_tether_wifi_regexs))
                 .thenReturn(new String[]{ "test_wlan\\d" });
-        when(mResources.getStringArray(com.android.internal.R.array.config_tether_bluetooth_regexs))
-                .thenReturn(new String[0]);
+        when(mResources.getStringArray(config_tether_bluetooth_regexs)).thenReturn(new String[0]);
         when(mResources.getIntArray(config_tether_upstream_types)).thenReturn(new int[0]);
-        when(mResources.getStringArray(
-                com.android.internal.R.array.config_mobile_hotspot_provision_app))
+        when(mResources.getStringArray(config_mobile_hotspot_provision_app))
                 .thenReturn(new String[0]);
         mContentResolver = new MockContentResolver();
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
@@ -297,19 +300,16 @@ public class TetheringConfigurationTest {
 
     private void setUpResourceForSubId() {
         when(mResourcesForSubId.getStringArray(
-                com.android.internal.R.array.config_tether_dhcp_range)).thenReturn(new String[0]);
+                config_tether_dhcp_range)).thenReturn(new String[0]);
         when(mResourcesForSubId.getStringArray(
-                com.android.internal.R.array.config_tether_usb_regexs)).thenReturn(new String[0]);
+                config_tether_usb_regexs)).thenReturn(new String[0]);
         when(mResourcesForSubId.getStringArray(
-                com.android.internal.R.array.config_tether_wifi_regexs))
-                .thenReturn(new String[]{ "test_wlan\\d" });
+                config_tether_wifi_regexs)).thenReturn(new String[]{ "test_wlan\\d" });
         when(mResourcesForSubId.getStringArray(
-                com.android.internal.R.array.config_tether_bluetooth_regexs))
-                .thenReturn(new String[0]);
+                config_tether_bluetooth_regexs)).thenReturn(new String[0]);
         when(mResourcesForSubId.getIntArray(config_tether_upstream_types)).thenReturn(new int[0]);
         when(mResourcesForSubId.getStringArray(
-                com.android.internal.R.array.config_mobile_hotspot_provision_app))
-                .thenReturn(PROVISIONING_APP_NAME);
+                config_mobile_hotspot_provision_app)).thenReturn(PROVISIONING_APP_NAME);
     }
 
 }

@@ -46,7 +46,7 @@ message NotificationHistoryProto {
 
     // The uid of the package that posted the notification
     optional int32 uid = 7;
-    // The user id of the package that posted the notification
+    // The user id that the notification was posted to
     optional int32 user_id = 8;
     // The time at which the notification was posted
     optional int64 posted_time_ms = 9;
@@ -71,19 +71,19 @@ message NotificationHistoryProto {
       optional ImageTypeEnum image_type = 1;
       optional string image_bitmap_filename = 2;
       optional int32 image_resource_id = 3;
-      optional bytes image_data = 4;
-      optional string image_uri = 5;
+      optional string image_resource_id_package = 4;
+      optional bytes image_data = 5;
+      optional int32 image_data_length = 6;
+      optional int32 image_data_offset = 7;
+      optional string image_uri = 8;
     }
   }
 
-  // The time the last entry was written
-  optional int64 end_time_ms = 1;
   // Pool of strings to save space
-  optional StringPool stringpool = 2;
+  optional StringPool string_pool = 1;
   // Versioning fields
-  optional int32 major_version = 3;
-  optional int32 minor_version = 4;
+  optional int32 major_version = 2;
 
   // List of historical notifications
-  repeated Notification notification = 5;
+  repeated Notification notification = 3;
 }

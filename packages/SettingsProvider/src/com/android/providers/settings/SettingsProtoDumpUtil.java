@@ -548,6 +548,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
                 GlobalSettingsProto.Development.FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS);
+        dumpSetting(s, p,
+                Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM,
+                GlobalSettingsProto.Development.ENABLE_SIZECOMPAT_FREEFORM);
         p.end(developmentToken);
 
         final long deviceToken = p.start(GlobalSettingsProto.DEVICE);

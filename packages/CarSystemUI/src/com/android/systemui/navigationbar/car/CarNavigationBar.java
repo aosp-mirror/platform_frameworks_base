@@ -25,7 +25,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -37,8 +36,6 @@ import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
-import com.android.systemui.statusbar.car.hvac.HvacController;
-import com.android.systemui.statusbar.car.hvac.TemperatureView;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -52,15 +49,13 @@ import dagger.Lazy;
 /** Navigation bars customized for the automotive use case. */
 public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks {
 
-    private final NavigationBarViewFactory mNavigationBarViewFactory;
+    private final CarNavigationBarController mCarNavigationBarController;
     private final WindowManager mWindowManager;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final Lazy<FacetButtonTaskStackListener> mFacetButtonTaskStackListener;
     private final Handler mMainHandler;
     private final Lazy<KeyguardStateController> mKeyguardStateController;
-    private final Lazy<CarFacetButtonController> mFacetButtonController;
     private final Lazy<NavigationBarController> mNavigationBarController;
-    private final Lazy<HvacController> mHvacController;
 
     private IStatusBarService mBarService;
     private CommandQueue mCommandQueue;
@@ -82,33 +77,23 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     // it's open.
     private boolean mDeviceIsSetUpForUser = true;
 
-    // Configuration values for if nav bars should be shown.
-    private boolean mShowBottom;
-    private boolean mShowLeft;
-    private boolean mShowRight;
-
-
     @Inject
     public CarNavigationBar(Context context,
-            NavigationBarViewFactory navigationBarViewFactory,
+            CarNavigationBarController carNavigationBarController,
             WindowManager windowManager,
             DeviceProvisionedController deviceProvisionedController,
             Lazy<FacetButtonTaskStackListener> facetButtonTaskStackListener,
             @MainHandler Handler mainHandler,
             Lazy<KeyguardStateController> keyguardStateController,
-            Lazy<CarFacetButtonController> facetButtonController,
-            Lazy<NavigationBarController> navigationBarController,
-            Lazy<HvacController> hvacController) {
+            Lazy<NavigationBarController> navigationBarController) {
         super(context);
-        mNavigationBarViewFactory = navigationBarViewFactory;
+        mCarNavigationBarController = carNavigationBarController;
         mWindowManager = windowManager;
         mDeviceProvisionedController = deviceProvisionedController;
         mFacetButtonTaskStackListener = facetButtonTaskStackListener;
         mMainHandler = mainHandler;
         mKeyguardStateController = keyguardStateController;
-        mFacetButtonController = facetButtonController;
         mNavigationBarController = navigationBarController;
-        mHvacController = hvacController;
     }
 
     @Override
@@ -117,11 +102,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mHideNavBarForKeyboard = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_automotiveHideNavBarForKeyboard);
         mBottomNavBarVisible = false;
-
-        // Read configuration.
-        mShowBottom = mContext.getResources().getBoolean(R.bool.config_enableBottomNavigationBar);
-        mShowLeft = mContext.getResources().getBoolean(R.bool.config_enableLeftNavigationBar);
-        mShowRight = mContext.getResources().getBoolean(R.bool.config_enableRightNavigationBar);
 
         // Get bar service.
         mBarService = IStatusBarService.Stub.asInterface(
@@ -157,7 +137,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
         mActivityManagerWrapper.registerTaskStackListener(mFacetButtonTaskStackListener.get());
 
-        mHvacController.get().connectToCarService();
+        mCarNavigationBarController.connectToHvac();
     }
 
     private void restartNavBarsIfNecessary() {
@@ -175,8 +155,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private void restartNavBars() {
         // remove and reattach all hvac components such that we don't keep a reference to unused
         // ui elements
-        mHvacController.get().removeAllComponents();
-        mFacetButtonController.get().removeAll();
+        mCarNavigationBarController.removeAllFromHvac();
 
         if (mNavigationBarWindow != null) {
             mNavigationBarWindow.removeAllViews();
@@ -199,10 +178,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         if (mKeyguardStateController.get().isShowing()) {
             updateNavBarForKeyguardContent();
         }
-
-        // CarFacetButtonController was reset therefore we need to re-add the status bar elements
-        // to the controller.
-        // TODO(hseog): Add facet buttons in status bar to controller.
     }
 
     private void createNavigationBar(RegisterStatusBarResult result) {
@@ -224,54 +199,30 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     }
 
     private void buildNavBarWindows() {
-        if (mShowBottom) {
-            mNavigationBarWindow = mNavigationBarViewFactory.getBottomWindow();
-        }
-
-        if (mShowLeft) {
-            mLeftNavigationBarWindow = mNavigationBarViewFactory.getLeftWindow();
-        }
-
-        if (mShowRight) {
-            mRightNavigationBarWindow = mNavigationBarViewFactory.getRightWindow();
-        }
+        mNavigationBarWindow = mCarNavigationBarController.getBottomWindow();
+        mLeftNavigationBarWindow = mCarNavigationBarController.getLeftWindow();
+        mRightNavigationBarWindow = mCarNavigationBarController.getRightWindow();
     }
 
     private void buildNavBarContent() {
-        if (mShowBottom) {
-            mNavigationBarView = mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser);
+        mNavigationBarView = mCarNavigationBarController.getBottomBar(mDeviceIsSetUpForUser);
+        if (mNavigationBarView != null) {
             mNavigationBarWindow.addView(mNavigationBarView);
-            addTemperatureViewToController(mNavigationBarView);
         }
 
-        if (mShowLeft) {
-            mLeftNavigationBarView = mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser);
+        mLeftNavigationBarView = mCarNavigationBarController.getLeftBar(mDeviceIsSetUpForUser);
+        if (mLeftNavigationBarView != null) {
             mLeftNavigationBarWindow.addView(mLeftNavigationBarView);
-            addTemperatureViewToController(mLeftNavigationBarView);
         }
 
-        if (mShowRight) {
-            mRightNavigationBarView = mNavigationBarViewFactory.getRightBar(mDeviceIsSetUpForUser);
+        mRightNavigationBarView = mCarNavigationBarController.getRightBar(mDeviceIsSetUpForUser);
+        if (mRightNavigationBarView != null) {
             mRightNavigationBarWindow.addView(mRightNavigationBarView);
-            // Add ability to toggle notification center.
-            addTemperatureViewToController(mRightNavigationBarView);
-            // Add ability to close notification center on touch.
-        }
-    }
-
-    private void addTemperatureViewToController(View v) {
-        if (v instanceof TemperatureView) {
-            mHvacController.get().addHvacTextView((TemperatureView) v);
-        } else if (v instanceof ViewGroup) {
-            ViewGroup viewGroup = (ViewGroup) v;
-            for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                addTemperatureViewToController(viewGroup.getChildAt(i));
-            }
         }
     }
 
     private void attachNavBarWindows() {
-        if (mShowBottom && !mBottomNavBarVisible) {
+        if (mNavigationBarWindow != null && !mBottomNavBarVisible) {
             mBottomNavBarVisible = true;
 
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -287,7 +238,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             mWindowManager.addView(mNavigationBarWindow, lp);
         }
 
-        if (mShowLeft) {
+        if (mLeftNavigationBarWindow != null) {
             int width = mContext.getResources().getDimensionPixelSize(
                     R.dimen.car_left_navigation_bar_width);
             WindowManager.LayoutParams leftlp = new WindowManager.LayoutParams(
@@ -304,7 +255,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             leftlp.gravity = Gravity.LEFT;
             mWindowManager.addView(mLeftNavigationBarWindow, leftlp);
         }
-        if (mShowRight) {
+        if (mRightNavigationBarWindow != null) {
             int width = mContext.getResources().getDimensionPixelSize(
                     R.dimen.car_right_navigation_bar_width);
             WindowManager.LayoutParams rightlp = new WindowManager.LayoutParams(
@@ -340,23 +291,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         }
 
         boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
-        showBottomNavBarWindow(isKeyboardVisible);
-    }
-
-    private void showBottomNavBarWindow(boolean isKeyboardVisible) {
-        if (!mShowBottom) {
-            return;
-        }
-
-        // If keyboard is visible and bottom nav bar not visible, this is the correct state, so do
-        // nothing. Same with if keyboard is not visible and bottom nav bar is visible.
-        if (isKeyboardVisible ^ mBottomNavBarVisible) {
-            return;
-        }
-
-        mNavigationBarViewFactory.getBottomWindow().setVisibility(
-                isKeyboardVisible ? View.GONE : View.VISIBLE);
-        mBottomNavBarVisible = !isKeyboardVisible;
+        mCarNavigationBarController.setBottomWindowVisibility(!isKeyboardVisible);
     }
 
     private void updateNavBarForKeyguardContent() {

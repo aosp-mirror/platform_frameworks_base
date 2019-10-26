@@ -32,6 +32,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
+import android.os.ParcelFileDescriptor;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 
@@ -45,6 +46,8 @@ import com.android.cts.install.lib.Uninstall;
 import com.android.cts.rollback.lib.Rollback;
 import com.android.cts.rollback.lib.RollbackUtils;
 import com.android.internal.R;
+
+import libcore.io.IoUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -215,7 +218,7 @@ public class StagedRollbackTest {
         String networkStack = getNetworkStackPackageName();
 
         rm.expireRollbackForPackage(networkStack);
-        Uninstall.packages(networkStack);
+        uninstallNetworkStackPackage();
 
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                         networkStack)).isNull();
@@ -247,6 +250,12 @@ public class StagedRollbackTest {
         ComponentName comp = intent.resolveSystemService(
                 InstrumentationRegistry.getContext().getPackageManager(), 0);
         return comp.getPackageName();
+    }
+
+    private void uninstallNetworkStackPackage() {
+        // Since the host side use shell command to install the network stack package, uninstall
+        // must be done by shell command as well. Otherwise uninstall by a different user will fail.
+        runShellCommand("pm uninstall " + getNetworkStackPackageName());
     }
 
     @Test
@@ -291,7 +300,7 @@ public class StagedRollbackTest {
         String networkStack = getNetworkStackPackageName();
 
         rm.expireRollbackForPackage(networkStack);
-        Uninstall.packages(networkStack);
+        uninstallNetworkStackPackage();
 
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                         networkStack)).isNull();
@@ -332,7 +341,8 @@ public class StagedRollbackTest {
     }
 
     private void runShellCommand(String cmd) {
-        InstrumentationRegistry.getInstrumentation().getUiAutomation()
+        ParcelFileDescriptor pfd = InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .executeShellCommand(cmd);
+        IoUtils.closeQuietly(pfd);
     }
 }

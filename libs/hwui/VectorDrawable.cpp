@@ -496,87 +496,6 @@ Bitmap& Tree::getBitmapUpdateIfDirty() {
     return *mCache.bitmap;
 }
 
-void Tree::updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* context) {
-#ifdef __ANDROID__  // Layoutlib does not support hardware acceleration
-    SkRect dst;
-    sk_sp<SkSurface> surface = mCache.getSurface(&dst);
-    bool canReuseSurface = surface && dst.width() >= mProperties.getScaledWidth() &&
-                           dst.height() >= mProperties.getScaledHeight();
-    if (!canReuseSurface) {
-        int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
-        int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
-        auto atlasEntry = atlas->requestNewEntry(scaledWidth, scaledHeight, context);
-        if (INVALID_ATLAS_KEY != atlasEntry.key) {
-            dst = atlasEntry.rect;
-            surface = atlasEntry.surface;
-            mCache.setAtlas(atlas, atlasEntry.key);
-        } else {
-            // don't draw, if we failed to allocate an offscreen buffer
-            mCache.clear();
-            surface.reset();
-        }
-    }
-    if (!canReuseSurface || mCache.dirty) {
-        if (surface) {
-            Bitmap& bitmap = getBitmapUpdateIfDirty();
-            SkBitmap skiaBitmap;
-            bitmap.getSkBitmap(&skiaBitmap);
-            surface->writePixels(skiaBitmap, dst.fLeft, dst.fTop);
-        }
-        mCache.dirty = false;
-    }
-#endif
-}
-
-void Tree::Cache::setAtlas(sp<skiapipeline::VectorDrawableAtlas> newAtlas,
-                           skiapipeline::AtlasKey newAtlasKey) {
-    LOG_ALWAYS_FATAL_IF(newAtlasKey == INVALID_ATLAS_KEY);
-    clear();
-    mAtlas = newAtlas;
-    mAtlasKey = newAtlasKey;
-}
-
-sk_sp<SkSurface> Tree::Cache::getSurface(SkRect* bounds) {
-    sk_sp<SkSurface> surface;
-#ifdef __ANDROID__  // Layoutlib does not support hardware acceleration
-    sp<skiapipeline::VectorDrawableAtlas> atlas = mAtlas.promote();
-    if (atlas.get() && mAtlasKey != INVALID_ATLAS_KEY) {
-        auto atlasEntry = atlas->getEntry(mAtlasKey);
-        *bounds = atlasEntry.rect;
-        surface = atlasEntry.surface;
-        mAtlasKey = atlasEntry.key;
-    }
-#endif
-
-    return surface;
-}
-
-void Tree::Cache::clear() {
-#ifdef __ANDROID__  // Layoutlib does not support hardware acceleration
-    if (mAtlasKey != INVALID_ATLAS_KEY) {
-        if (renderthread::RenderThread::isCurrent()) {
-            sp<skiapipeline::VectorDrawableAtlas> lockAtlas = mAtlas.promote();
-            if (lockAtlas.get()) {
-                lockAtlas->releaseEntry(mAtlasKey);
-            }
-        } else {
-            // VectorDrawableAtlas can be accessed only on RenderThread.
-            // Use by-copy capture of the current Cache variables, because "this" may not be valid
-            // by the time the lambda is evaluated on RenderThread.
-            renderthread::RenderThread::getInstance().queue().post(
-                    [atlas = mAtlas, atlasKey = mAtlasKey]() {
-                        sp<skiapipeline::VectorDrawableAtlas> lockAtlas = atlas.promote();
-                        if (lockAtlas.get()) {
-                            lockAtlas->releaseEntry(atlasKey);
-                        }
-                    });
-        }
-        mAtlasKey = INVALID_ATLAS_KEY;
-    }
-    mAtlas = nullptr;
-#endif
-}
-
 void Tree::draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& inPaint) {
     if (canvas->quickReject(bounds)) {
         // The RenderNode is on screen, but the AVD is not.
@@ -587,39 +506,14 @@ void Tree::draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& inPaint) 
     SkPaint paint = inPaint;
     paint.setAlpha(mProperties.getRootAlpha() * 255);
 
-    if (canvas->getGrContext() == nullptr) {
-        // Recording to picture, don't use the SkSurface which won't work off of renderthread.
-        Bitmap& bitmap = getBitmapUpdateIfDirty();
-        SkBitmap skiaBitmap;
-        bitmap.getSkBitmap(&skiaBitmap);
+    Bitmap& bitmap = getBitmapUpdateIfDirty();
+    SkBitmap skiaBitmap;
+    bitmap.getSkBitmap(&skiaBitmap);
 
-        int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
-        int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
-        canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
-                               &paint, SkCanvas::kFast_SrcRectConstraint);
-        return;
-    }
-
-    SkRect src;
-    sk_sp<SkSurface> vdSurface = mCache.getSurface(&src);
-    if (vdSurface) {
-        canvas->drawImageRect(vdSurface->makeImageSnapshot().get(), src, bounds, &paint,
-                              SkCanvas::kFast_SrcRectConstraint);
-    } else {
-        // Handle the case when VectorDrawableAtlas has been destroyed, because of memory pressure.
-        // We render the VD into a temporary standalone buffer and mark the frame as dirty. Next
-        // frame will be cached into the atlas.
-        Bitmap& bitmap = getBitmapUpdateIfDirty();
-        SkBitmap skiaBitmap;
-        bitmap.getSkBitmap(&skiaBitmap);
-
-        int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
-        int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
-        canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
-                               &paint, SkCanvas::kFast_SrcRectConstraint);
-        mCache.clear();
-        markDirty();
-    }
+    int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
+    int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
+    canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
+                           &paint, SkCanvas::kFast_SrcRectConstraint);
 }
 
 void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {

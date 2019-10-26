@@ -16,24 +16,16 @@
 
 package com.android.systemui.statusbar.notification;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.Notification;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
@@ -121,107 +113,6 @@ public class NotificationListControllerTest extends SysuiTestCase {
     public void testCallUpdateNotificationsOnDeviceProvisionedChange() {
         mProvisionedListener.onDeviceProvisionedChanged();
         verify(mEntryManager).updateNotifications(anyString());
-    }
-
-    @Test
-    public void testAppOps_appOpAddedToForegroundNotif() {
-        // GIVEN a notification associated with a foreground service
-        final NotificationEntry entry = buildEntry();
-        mNotificationData.add(entry);
-        when(mForegroundServiceController.getStandardLayoutKey(anyInt(), anyString()))
-                .thenReturn(entry.getKey());
-
-        // WHEN we are notified of a new app op
-        mController.updateNotificationsForAppOp(
-                AppOpsManager.OP_CAMERA,
-                entry.getSbn().getUid(),
-                entry.getSbn().getPackageName(),
-                true);
-
-        // THEN the app op is added to the entry
-        assertTrue(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
-        // THEN updateNotifications(TEST) is called
-        verify(mEntryManager, times(1)).updateNotifications(anyString());
-    }
-
-    @Test
-    public void testAppOps_appOpAddedToUnrelatedNotif() {
-        // GIVEN No current foreground notifs
-        when(mForegroundServiceController.getStandardLayoutKey(anyInt(), anyString()))
-                .thenReturn(null);
-
-        // WHEN An unrelated notification gets a new app op
-        mController.updateNotificationsForAppOp(AppOpsManager.OP_CAMERA, 1000, "pkg", true);
-
-        // THEN We never call updateNotifications(TEST)
-        verify(mEntryManager, never()).updateNotifications(anyString());
-    }
-
-    @Test
-    public void testAppOps_addNotificationWithExistingAppOps() {
-        // GIVEN a notification with three associated app ops that is associated with a foreground
-        // service
-        final NotificationEntry entry = buildEntry();
-        mNotificationData.add(entry);
-        ArraySet<Integer> expected = new ArraySet<>();
-        expected.add(3);
-        expected.add(235);
-        expected.add(1);
-        when(mForegroundServiceController.getStandardLayoutKey(
-                entry.getSbn().getUserId(),
-                entry.getSbn().getPackageName())).thenReturn(entry.getKey());
-        when(mForegroundServiceController.getAppOps(entry.getSbn().getUserId(),
-                entry.getSbn().getPackageName())).thenReturn(expected);
-
-        // WHEN the notification is added
-        mEntryListener.onBeforeNotificationAdded(entry);
-
-        // THEN the entry is tagged with all three app ops
-        assertEquals(expected.size(), entry.mActiveAppOps.size());
-        for (int op : expected) {
-            assertTrue("Entry missing op " + op, entry.mActiveAppOps.contains(op));
-        }
-    }
-
-    @Test
-    public void testAdd_addNotificationWithNoExistingAppOps() {
-        // GIVEN a notification with NO associated app ops
-        final NotificationEntry entry = buildEntry();
-
-        mNotificationData.add(entry);
-        when(mForegroundServiceController.getStandardLayoutKey(
-                entry.getSbn().getUserId(),
-                entry.getSbn().getPackageName())).thenReturn(entry.getKey());
-        when(mForegroundServiceController.getAppOps(entry.getSbn().getUserId(),
-                entry.getSbn().getPackageName())).thenReturn(null);
-
-        // WHEN the notification is added
-        mEntryListener.onBeforeNotificationAdded(entry);
-
-        // THEN the entry doesn't have any app ops associated with it
-        assertEquals(0, entry.mActiveAppOps.size());
-    }
-
-    @Test
-    public void testAdd_addNonForegroundNotificationWithExistingAppOps() {
-        // GIVEN a notification with app ops that isn't associated with a foreground service
-        final NotificationEntry entry = buildEntry();
-        mNotificationData.add(entry);
-        ArraySet<Integer> ops = new ArraySet<>();
-        ops.add(3);
-        ops.add(235);
-        ops.add(1);
-        when(mForegroundServiceController.getAppOps(entry.getSbn().getUserId(),
-                entry.getSbn().getPackageName())).thenReturn(ops);
-        when(mForegroundServiceController.getStandardLayoutKey(
-                entry.getSbn().getUserId(),
-                entry.getSbn().getPackageName())).thenReturn("something else");
-
-        // WHEN the notification is added
-        mEntryListener.onBeforeNotificationAdded(entry);
-
-        // THEN the entry doesn't have any app ops associated with it
-        assertEquals(0, entry.mActiveAppOps.size());
     }
 
     private NotificationEntry buildEntry() {

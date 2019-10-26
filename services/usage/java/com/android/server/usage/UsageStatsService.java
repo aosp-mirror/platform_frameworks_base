@@ -86,6 +86,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -180,8 +181,8 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private UsageStatsManagerInternal.AppIdleStateChangeListener mStandbyChangeListener =
-            new UsageStatsManagerInternal.AppIdleStateChangeListener() {
+    private AppIdleStateChangeListener mStandbyChangeListener =
+            new AppIdleStateChangeListener() {
                 @Override
                 public void onAppIdleStateChanged(String packageName, int userId, boolean idle,
                         int bucket, int reason) {
@@ -253,6 +254,7 @@ public class UsageStatsService extends SystemService implements
                 null, mHandler);
 
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
+        publishLocalService(AppStandbyInternal.class, mAppStandby);
         publishBinderService(Context.USAGE_STATS_SERVICE, new BinderService());
     }
 
@@ -2026,17 +2028,6 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void prepareForPossibleShutdown() {
             UsageStatsService.this.prepareForPossibleShutdown();
-        }
-
-        @Override
-        public void addAppIdleStateChangeListener(AppIdleStateChangeListener listener) {
-            mAppStandby.addListener(listener);
-        }
-
-        @Override
-        public void removeAppIdleStateChangeListener(
-                AppIdleStateChangeListener listener) {
-            mAppStandby.removeListener(listener);
         }
 
         @Override

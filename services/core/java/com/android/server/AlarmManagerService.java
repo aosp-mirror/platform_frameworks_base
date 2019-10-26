@@ -99,6 +99,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.LocalLog;
 import com.android.internal.util.StatLogger;
 import com.android.server.AppStateTracker.Listener;
+import com.android.server.usage.AppStandbyInternal;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
@@ -1599,7 +1601,9 @@ class AlarmManagerService extends SystemService {
                         LocalServices.getService(DeviceIdleInternal.class);
                 mUsageStatsManagerInternal =
                         LocalServices.getService(UsageStatsManagerInternal.class);
-                mUsageStatsManagerInternal.addAppIdleStateChangeListener(new AppStandbyTracker());
+                AppStandbyInternal appStandbyInternal =
+                        LocalServices.getService(AppStandbyInternal.class);
+                appStandbyInternal.addListener(new AppStandbyTracker());
 
                 mAppStateTracker = LocalServices.getService(AppStateTracker.class);
                 mAppStateTracker.addListener(mForceAppStandbyListener);
@@ -4468,7 +4472,7 @@ class AlarmManagerService extends SystemService {
      * Tracking of app assignments to standby buckets
      */
     private final class AppStandbyTracker extends
-            UsageStatsManagerInternal.AppIdleStateChangeListener {
+            AppIdleStateChangeListener {
         @Override
         public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
                 boolean idle, int bucket, int reason) {

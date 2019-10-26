@@ -225,24 +225,6 @@ public class NotificationData {
         updateRankingAndSort(ranking, reason);
     }
 
-    public void updateAppOp(int appOp, int uid, String pkg, String key, boolean showIcon) {
-        synchronized (mEntries) {
-            final int len = mEntries.size();
-            for (int i = 0; i < len; i++) {
-                NotificationEntry entry = mEntries.valueAt(i);
-                if (uid == entry.getSbn().getUid()
-                        && pkg.equals(entry.getSbn().getPackageName())
-                        && key.equals(entry.getKey())) {
-                    if (showIcon) {
-                        entry.mActiveAppOps.add(appOp);
-                    } else {
-                        entry.mActiveAppOps.remove(appOp);
-                    }
-                }
-            }
-        }
-    }
-
     /**
      * Returns true if this notification should be displayed in the high-priority notifications
      * section

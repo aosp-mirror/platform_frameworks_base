@@ -2505,9 +2505,7 @@ public class ChooserActivity extends ResolverActivity {
                         ri.noResourceId = true;
                         ri.icon = 0;
                     }
-                    ResolveInfoPresentationGetter getter = makePresentationGetter(ri);
-                    mCallerTargets.add(new DisplayResolveInfo(ii, ri,
-                            getter.getLabel(), getter.getSubLabel(), ii));
+                    mCallerTargets.add(new DisplayResolveInfo(ii, ri, ii));
                 }
             }
         }
@@ -2606,7 +2604,22 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public void onListRebuilt() {
-            updateAlphabeticalList();
+            if (getDisplayList() == null || getDisplayList().isEmpty()) {
+                notifyDataSetChanged();
+            } else {
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        updateAlphabeticalList();
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        notifyDataSetChanged();
+                    }
+                }.execute();
+            }
 
             // don't support direct share on low ram devices
             if (ActivityManager.isLowRamDeviceStatic()) {

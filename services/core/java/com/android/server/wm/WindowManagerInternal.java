@@ -216,7 +216,7 @@ public abstract class WindowManagerInternal {
      *
      * @param displayId The logical display id.
      * @param callbacks The callbacks to invoke.
-     * @return {@code false} if display id is not valid.
+     * @return {@code false} if display id is not valid or an embedded display.
      */
     public abstract boolean setMagnificationCallbacks(int displayId,
             @Nullable MagnificationCallbacks callbacks);

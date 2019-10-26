@@ -262,9 +262,6 @@ public class NotificationEntryManager implements
                     listener.onEntryInflated(entry, inflatedFlags);
                 }
                 mNotificationData.add(entry);
-                for (NotificationEntryListener listener : mNotificationEntryListeners) {
-                    listener.onBeforeNotificationAdded(entry);
-                }
                 updateNotifications("onAsyncInflationFinished");
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onNotificationAdded(entry);
@@ -561,6 +558,18 @@ public class NotificationEntryManager implements
      */
     public Iterable<NotificationEntry> getPendingNotificationsIterator() {
         return mPendingNotifications.values();
+    }
+
+    /**
+     * Gets the pending or visible notification entry with the given key. Returns null if
+     * notification doesn't exist.
+     */
+    public NotificationEntry getPendingOrCurrentNotif(String key) {
+        if (mPendingNotifications.containsKey(key)) {
+            return mPendingNotifications.get(key);
+        } else {
+            return mNotificationData.get(key);
+        }
     }
 
     private void extendLifetime(NotificationEntry entry, NotificationLifetimeExtender extender) {

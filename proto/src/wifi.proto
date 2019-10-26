@@ -720,6 +720,9 @@ message ConnectionEvent {
 
     // The reason code if there was EAP failure while authenticating.
     AUTH_FAILURE_EAP_FAILURE = 4;
+
+    // The reason code if the AP can no longer accept new clients.
+    ASSOCIATION_REJECTION_AP_UNABLE_TO_HANDLE_NEW_STA = 5;
   }
 
   // Entity that recommended connecting to this network.

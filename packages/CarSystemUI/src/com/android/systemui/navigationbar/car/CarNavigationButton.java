@@ -85,6 +85,7 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
         super.onFinishInflate();
         setScaleType(ImageView.ScaleType.CENTER);
         setAlpha(mUnselectedAlpha);
+        setImageResource(mIconResourceId);
         try {
             if (mIntent != null) {
                 final Intent intent = Intent.parseUri(mIntent, Intent.URI_INTENT_SCHEME);

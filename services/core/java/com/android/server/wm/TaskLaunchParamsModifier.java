@@ -43,10 +43,8 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.Build;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.View;
@@ -64,15 +62,6 @@ import java.util.List;
 class TaskLaunchParamsModifier implements LaunchParamsModifier {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskLaunchParamsModifier" : TAG_ATM;
     private static final boolean DEBUG = false;
-
-    // A mask for SUPPORTS_SCREEN that indicates the activity supports resize.
-    private static final int SUPPORTS_SCREEN_RESIZEABLE_MASK =
-            ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES
-                    | ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS
-                    | ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS
-                    | ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS
-                    | ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES
-                    | ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS;
 
     // Screen size of Nexus 5x
     private static final int DEFAULT_PORTRAIT_PHONE_WIDTH_DP = 412;
@@ -253,10 +242,9 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         if (display.inFreeformWindowingMode()) {
             if (launchMode == WINDOWING_MODE_PINNED) {
                 if (DEBUG) appendLog("picture-in-picture");
-            } else if (isTaskForcedMaximized(root)) {
-                // We're launching an activity that probably can't handle resizing nicely, so force
-                // it to be maximized even someone suggests launching it in freeform using launch
-                // options.
+            } else if (!mSupervisor.mService.mSizeCompatFreeform && !root.isResizeable()) {
+                // We're launching an activity in size-compat mode and they aren't allowed in
+                // freeform, so force it to be maximized.
                 launchMode = WINDOWING_MODE_FULLSCREEN;
                 outParams.mBounds.setEmpty();
                 if (DEBUG) appendLog("forced-maximize");
@@ -457,28 +445,6 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         final int xOffset = (int) (fractionOfHorizontalOffset * (defaultWidth - width));
         final int yOffset = (int) (fractionOfVerticalOffset * (defaultHeight - height));
         outBounds.offset(xOffset, yOffset);
-    }
-
-    /**
-     * Returns if task is forced to maximize.
-     *
-     * There are several cases where we force a task to maximize:
-     * 1) Root activity is targeting pre-Donut, which by default can't handle multiple screen
-     *    densities, so resizing will likely cause issues;
-     * 2) Root activity doesn't declare any flag that it supports any screen density, so resizing
-     *    may also cause issues;
-     * 3) Root activity is not resizeable, for which we shouldn't allow user resize it.
-     *
-     * @param root the root activity to check against.
-     * @return {@code true} if it should be forced to maximize; {@code false} otherwise.
-     */
-    private boolean isTaskForcedMaximized(@NonNull ActivityRecord root) {
-        if (root.info.applicationInfo.targetSdkVersion < Build.VERSION_CODES.DONUT
-                || (root.info.applicationInfo.flags & SUPPORTS_SCREEN_RESIZEABLE_MASK) == 0) {
-            return true;
-        }
-
-        return !root.isResizeable();
     }
 
     /**

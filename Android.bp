@@ -548,6 +548,12 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "framework-tethering-shared-srcs",
+    srcs: [
+        "core/java/android/util/LocalLog.java",
+    ],
+}
 // Build ext.jar
 // ============================================================
 java_library {
@@ -922,7 +928,8 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide RequiresPermission " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo "
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*"
 
 // http://b/129765390 Rewrite links to "platform" or "technotes" folders
 // which are siblings (and thus outside of) {@docRoot}.
@@ -1595,6 +1602,17 @@ filegroup {
         "core/java/android/util/Slog.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
+    ],
+}
+
+filegroup {
+    name: "framework-ims-common-shared-srcs",
+    srcs: [
+        "core/java/android/os/AsyncResult.java",
+        "core/java/android/os/RegistrantList.java",
+        "core/java/android/os/Registrant.java",
+        "core/java/com/android/internal/os/SomeArgs.java",
+        "core/java/com/android/internal/util/Preconditions.java",
     ],
 }
 

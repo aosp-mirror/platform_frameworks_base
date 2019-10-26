@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
-import static android.app.AppOpsManager.OP_ACCEPT_HANDOVER;
-import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.Notification.CATEGORY_ALARM;
 import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.CATEGORY_EVENT;
@@ -56,7 +54,6 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaSession;
 import android.os.Bundle;
-import android.os.Process;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
@@ -64,7 +61,6 @@ import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
@@ -157,69 +153,6 @@ public class NotificationDataTest extends SysuiTestCase {
         mNotificationData.rankingOverrides.put(mRow.getEntry().getKey(), override);
         mNotificationData.add(mRow.getEntry());
         assertEquals(NOTIFICATION_CHANNEL, mRow.getEntry().getChannel());
-    }
-
-    @Test
-    public void testAllRelevantNotisTaggedWithAppOps() throws Exception {
-        mNotificationData.add(mRow.getEntry());
-        ExpandableNotificationRow row2 = new NotificationTestHelper(getContext(), mDependency)
-                .createRow();
-        mNotificationData.add(row2.getEntry());
-        ExpandableNotificationRow diffPkg =
-                new NotificationTestHelper(getContext(), mDependency).createRow("pkg", 4000,
-                        Process.myUserHandle());
-        mNotificationData.add(diffPkg.getEntry());
-
-        ArraySet<Integer> expectedOps = new ArraySet<>();
-        expectedOps.add(OP_CAMERA);
-        expectedOps.add(OP_ACCEPT_HANDOVER);
-
-        for (int op : expectedOps) {
-            mNotificationData.updateAppOp(op, NotificationTestHelper.UID,
-                    NotificationTestHelper.PKG, mRow.getEntry().getKey(), true);
-            mNotificationData.updateAppOp(op, NotificationTestHelper.UID,
-                    NotificationTestHelper.PKG, row2.getEntry().getKey(), true);
-        }
-        for (int op : expectedOps) {
-            assertTrue(mRow.getEntry().getKey() + " doesn't have op " + op,
-                    mNotificationData.get(mRow.getEntry().getKey()).mActiveAppOps.contains(op));
-            assertTrue(row2.getEntry().getKey() + " doesn't have op " + op,
-                    mNotificationData.get(row2.getEntry().getKey()).mActiveAppOps.contains(op));
-            assertFalse(diffPkg.getEntry().getKey() + " has op " + op,
-                    mNotificationData.get(diffPkg.getEntry().getKey()).mActiveAppOps.contains(op));
-        }
-    }
-
-    @Test
-    public void testAppOpsRemoval() throws Exception {
-        mNotificationData.add(mRow.getEntry());
-        ExpandableNotificationRow row2 = new NotificationTestHelper(getContext(), mDependency)
-                .createRow();
-        mNotificationData.add(row2.getEntry());
-
-        ArraySet<Integer> expectedOps = new ArraySet<>();
-        expectedOps.add(OP_CAMERA);
-        expectedOps.add(OP_ACCEPT_HANDOVER);
-
-        for (int op : expectedOps) {
-            mNotificationData.updateAppOp(op, NotificationTestHelper.UID,
-                    NotificationTestHelper.PKG, row2.getEntry().getKey(), true);
-        }
-
-        expectedOps.remove(OP_ACCEPT_HANDOVER);
-        mNotificationData.updateAppOp(OP_ACCEPT_HANDOVER, NotificationTestHelper.UID,
-                NotificationTestHelper.PKG, row2.getEntry().getKey(), false);
-
-        assertTrue(mRow.getEntry().getKey() + " doesn't have op " + OP_CAMERA,
-                mNotificationData.get(mRow.getEntry().getKey()).mActiveAppOps.contains(OP_CAMERA));
-        assertTrue(row2.getEntry().getKey() + " doesn't have op " + OP_CAMERA,
-                mNotificationData.get(row2.getEntry().getKey()).mActiveAppOps.contains(OP_CAMERA));
-        assertFalse(mRow.getEntry().getKey() + " has op " + OP_ACCEPT_HANDOVER,
-                mNotificationData.get(mRow.getEntry().getKey())
-                        .mActiveAppOps.contains(OP_ACCEPT_HANDOVER));
-        assertFalse(row2.getEntry().getKey() + " has op " + OP_ACCEPT_HANDOVER,
-                mNotificationData.get(row2.getEntry().getKey())
-                        .mActiveAppOps.contains(OP_ACCEPT_HANDOVER));
     }
 
     @Test

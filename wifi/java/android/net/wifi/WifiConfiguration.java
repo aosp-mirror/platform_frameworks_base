@@ -735,6 +735,14 @@ public class WifiConfiguration implements Parcelable {
      */
     public int userApproved = USER_UNSPECIFIED;
 
+    /**
+     * @hide
+     * Auto-join is allowed by user for this network.
+     * Default true.
+     */
+    @SystemApi
+    public boolean allowAutojoin = true;
+
     /** The Below RSSI thresholds are used to configure AutoJoin
      *  - GOOD/LOW/BAD thresholds are used so as to calculate link score
      *  - UNWANTED_SOFT are used by the blacklisting logic so as to handle
@@ -2022,6 +2030,7 @@ public class WifiConfiguration implements Parcelable {
         if (updateIdentifier != null) sbuf.append(" updateIdentifier=" + updateIdentifier);
         sbuf.append(" lcuid=" + lastConnectUid);
         sbuf.append(" userApproved=" + userApprovedAsString(userApproved));
+        sbuf.append(" allowAutojoin=" + allowAutojoin);
         sbuf.append(" noInternetAccessExpected=" + noInternetAccessExpected);
         sbuf.append(" ");
 
@@ -2421,6 +2430,7 @@ public class WifiConfiguration implements Parcelable {
             numScorerOverrideAndSwitchedNetwork = source.numScorerOverrideAndSwitchedNetwork;
             numAssociation = source.numAssociation;
             userApproved = source.userApproved;
+            allowAutojoin = source.allowAutojoin;
             numNoInternetAccessReports = source.numNoInternetAccessReports;
             noInternetAccessExpected = source.noInternetAccessExpected;
             creationTime = source.creationTime;
@@ -2496,6 +2506,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(numScorerOverrideAndSwitchedNetwork);
         dest.writeInt(numAssociation);
         dest.writeInt(userApproved);
+        dest.writeBoolean(allowAutojoin);
         dest.writeInt(numNoInternetAccessReports);
         dest.writeInt(noInternetAccessExpected ? 1 : 0);
         dest.writeInt(shared ? 1 : 0);
@@ -2571,6 +2582,7 @@ public class WifiConfiguration implements Parcelable {
                 config.numScorerOverrideAndSwitchedNetwork = in.readInt();
                 config.numAssociation = in.readInt();
                 config.userApproved = in.readInt();
+                config.allowAutojoin = in.readBoolean();
                 config.numNoInternetAccessReports = in.readInt();
                 config.noInternetAccessExpected = in.readInt() != 0;
                 config.shared = in.readInt() != 0;

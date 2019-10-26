@@ -24,7 +24,6 @@
 #include "Readback.h"
 #include "Rect.h"
 #include "WebViewFunctorManager.h"
-#include "pipeline/skia/VectorDrawableAtlas.h"
 #include "renderthread/CanvasContext.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
@@ -363,27 +362,6 @@ int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
 
 void RenderProxy::disableVsync() {
     Properties::disableVsync = true;
-}
-
-void RenderProxy::repackVectorDrawableAtlas() {
-    RenderThread& thread = RenderThread::getInstance();
-    thread.queue().post([&thread]() {
-        // The context may be null if trimMemory executed, but then the atlas was deleted too.
-        if (thread.getGrContext() != nullptr) {
-            thread.cacheManager().acquireVectorDrawableAtlas()->repackIfNeeded(
-                    thread.getGrContext());
-        }
-    });
-}
-
-void RenderProxy::releaseVDAtlasEntries() {
-    RenderThread& thread = RenderThread::getInstance();
-    thread.queue().post([&thread]() {
-        // The context may be null if trimMemory executed, but then the atlas was deleted too.
-        if (thread.getGrContext() != nullptr) {
-            thread.cacheManager().acquireVectorDrawableAtlas()->delayedReleaseEntries();
-        }
-    });
 }
 
 void RenderProxy::preload() {

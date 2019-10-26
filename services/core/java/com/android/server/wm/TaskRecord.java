@@ -519,18 +519,7 @@ class TaskRecord extends ConfigurationContainer {
         mAtmService.deferWindowLayout();
 
         try {
-            if (!isResizeable()) {
-                Slog.w(TAG, "resizeTask: task " + this + " not resizeable.");
-                return true;
-            }
-
-            // If this is a forced resize, let it go through even if the bounds is not changing,
-            // as we might need a relayout due to surface size change (to/from fullscreen).
             final boolean forced = (resizeMode & RESIZE_MODE_FORCED) != 0;
-            if (equivalentRequestedOverrideBounds(bounds) && !forced) {
-                // Nothing to do here...
-                return true;
-            }
 
             if (mTask == null) {
                 // Task doesn't exist in window manager yet (e.g. was restored from recents).
@@ -2065,7 +2054,10 @@ class TaskRecord extends ConfigurationContainer {
             } else {
                 // Apply the given non-decor and stable insets to calculate the corresponding bounds
                 // for screen size of configuration.
-                final int rotation = parentConfig.windowConfiguration.getRotation();
+                int rotation = inOutConfig.windowConfiguration.getRotation();
+                if (rotation == ROTATION_UNDEFINED) {
+                    rotation = parentConfig.windowConfiguration.getRotation();
+                }
                 if (rotation != ROTATION_UNDEFINED && compatInsets != null) {
                     mTmpNonDecorBounds.set(bounds);
                     mTmpStableBounds.set(bounds);
@@ -2379,14 +2371,14 @@ class TaskRecord extends ConfigurationContainer {
         if (intent != null) {
             StringBuilder sb = new StringBuilder(128);
             sb.append(prefix); sb.append("intent={");
-            intent.toShortString(sb, false, true, false, true);
+            intent.toShortString(sb, false, true, false, false);
             sb.append('}');
             pw.println(sb.toString());
         }
         if (affinityIntent != null) {
             StringBuilder sb = new StringBuilder(128);
             sb.append(prefix); sb.append("affinityIntent={");
-            affinityIntent.toShortString(sb, false, true, false, true);
+            affinityIntent.toShortString(sb, false, true, false, false);
             sb.append('}');
             pw.println(sb.toString());
         }

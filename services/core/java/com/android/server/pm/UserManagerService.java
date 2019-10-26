@@ -2986,8 +2986,8 @@ public class UserManagerService extends IUserManager.Stub {
                 // Must start user (which will be stopped right away, through
                 // UserController.finishUserUnlockedCompleted) so services can properly
                 // intialize it.
-                // TODO(b/140750212): in the long-term, we should add a onCreateUser() callback
-                // on SystemService instead.
+                // TODO(b/143092698): in the long-term, it might be better to add a onCreateUser()
+                // callback on SystemService instead.
                 Slog.i(LOG_TAG, "starting pre-created user " + userInfo.toFullString());
                 final IActivityManager am = ActivityManager.getService();
                 try {
@@ -3003,7 +3003,7 @@ public class UserManagerService extends IUserManager.Stub {
             Binder.restoreCallingIdentity(ident);
         }
 
-        // TODO(b/140750212): it's possible to reach "max users overflow" when the user is created
+        // TODO(b/143092698): it's possible to reach "max users overflow" when the user is created
         // "from scratch" (i.e., not from a pre-created user) and reaches the maximum number of
         // users without counting the pre-created one. Then when the pre-created is converted, the
         // "effective" number of max users is exceeds. Example:
@@ -3048,7 +3048,7 @@ public class UserManagerService extends IUserManager.Stub {
      * <p>Should be used only during user creation, so the pre-created user can be used (instead of
      * creating and initializing a new user from scratch).
      */
-    // TODO(b/140750212): add unit test
+    // TODO(b/143092698): add unit test
     @GuardedBy("mUsersLock")
     private @Nullable UserData getPreCreatedUserLU(@UserInfoFlag int flags) {
         if (DBG) {

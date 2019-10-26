@@ -2406,6 +2406,11 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: Q
     SETTINGS_AWARE_DISPLAY = 1750;
+
+    // OPEN: Settings > System > Input & Gesture > tap gesture
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_GESTURE_TAP = 1751;
     // ---- End Q Constants, all Q constants go above this line ----
     // OPEN: Settings > Network & Internet > Wi-Fi > Click new network
     // CATEGORY: SETTINGS
@@ -2425,5 +2430,10 @@ enum PageId {
     // Note: Shows up only when Magnify with shortcut is enabled.
     // and under gesture navigation mode.
     DIALOG_TOGGLE_SCREEN_MAGNIFICATION_GESTURE_NAVIGATION = 1802;
+
+    // OPEN: Settings > Security & screen lock -> Encryption & credentials > Install a certificate
+    // CATEGORY: SETTINGS
+    // OS: R
+    INSTALL_CERTIFICATE_FROM_STORAGE = 1803;
 
 }
