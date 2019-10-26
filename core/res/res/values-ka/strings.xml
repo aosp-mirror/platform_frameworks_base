@@ -510,9 +510,9 @@
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ბიომეტრიული აპარატის გამოყენება"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"საშუალებას აძლევს აპს, ავტორიზაციისთვის გამოიყენოს ბიომეტრიული აპარატი"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"თითის ანაბეჭდის აპარატის მართვა"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"საშუალებას აძლევს აპლიკაციას დაამატოს ან ამოშალოს გამოსაყენებელი თითის ანაბეჭდის ნიმუშები."</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"საშუალებას აძლევს აპლიკაციას დაამატოს ან ამოშალოს გამოსაყენებელი თითის ანაბეჭდის ნიმუშები,"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"თითის ანაბეჭდის აპარატის გამოყენება"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"საშუალებას აძლევს აპლიკაციას ავტორიზაციისთვის გამოიყენოს თითის ანაბეჭდის აპარატი"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"საშუალებას აძლევს აპლიკაციას გამოიყენოს ავტენთიფიკაციისათვის თითის ანაბეჭდის აპარატი"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"თქვენი მუსიკალური კოლექციის შეცვლა"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"აპი შეძლებს თქვენი მუსიკალური კოლექციის შეცვლას."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"თქვენი ვიდეოკოლექციის შეცვლა"</string>
@@ -528,7 +528,7 @@
     <string name="biometric_error_canceled" msgid="349665227864885880">"ავტორიზაცია გაუქმდა"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"PIN-კოდი, ნიმუში ან პაროლი დაყენებული არ არის"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"აღმოჩენილია თითის ნაწილობრივი ანაბეჭდი. გთხოვთ, სცადოთ ხელახლა."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"თითის ანაბეჭდის დამუშავება ვერ მოხერხდა. გთხოვთ, ცადოთ ხელახლა."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"თითის ანაბეჭდი ვერ მუშავდება. გთხოვთ, სცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"თითის ანაბეჭდის სენსორი დაბინძურებულია. გთხოვთ, გაასუფთაოთ და სცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"თითის აღება მეტისმეტად სწრაფად მოხდა. გთხოვთ, სცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"თითის აღება მეტისმეტად ნელა მოხდა. გთხოვთ, სცადოთ ხელახლა."</string>

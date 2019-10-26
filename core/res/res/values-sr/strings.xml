@@ -1600,8 +1600,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Истиче:"</string>
     <string name="serial_number" msgid="758814067660862493">"Серијски број:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Дигитални отисци:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 отисак прста:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 отисак прста:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 дигитални отисак:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 дигитални отисак:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Прикажи све"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Избор активности"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Дели са"</string>

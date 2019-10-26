@@ -529,7 +529,7 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"PIN kod, grafik kalit yoki parol sozlanmagan"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmoq izi qisman aniqlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Barmoq izi aniqlanmadi. Qaytadan urining."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Barmoq izi skanerini tozalab, keyin qaytadan urining."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Skanerni tozalab, keyin qaytadan urining."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Barmoq juda tez harakatlandi. Qaytadan urining."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
   <string-array name="fingerprint_acquired_vendor">

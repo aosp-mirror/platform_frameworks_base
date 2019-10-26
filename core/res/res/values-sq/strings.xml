@@ -1186,7 +1186,7 @@
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Shfaq gjithmonë"</string>
     <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> është ndërtuar për një version të papërputhshëm të sistemit operativ Android dhe mund të shfaqë sjellje të papritura. Mund të ofrohet një version i përditësuar i aplikacionit."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Shfaq gjithnjë"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Kontrollo për përditësim"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Kliko për përditësim"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacioni <xliff:g id="APPLICATION">%1$s</xliff:g> (procesi <xliff:g id="PROCESS">%2$s</xliff:g>) ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i ashpër\" (StrictMode)."</string>
     <string name="smv_process" msgid="5120397012047462446">"Procesi <xliff:g id="PROCESS">%1$s</xliff:g> ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i rreptë\" (StrictMode)"</string>
     <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"Telefoni po përditësohet…"</string>
@@ -1905,7 +1905,7 @@
     <string name="work_mode_off_message" msgid="5130856710614337649">"Aplikacionet e punës, njoftimet, të dhënat e tua dhe funksionet e tjera të profilit të punës do të aktivizohen"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivizo"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Ky aplikacion është ndërtuar për një version më të vjetër të Android dhe mund të mos funksionojë mirë. Provo të kontrollosh për përditësime ose kontakto me zhvilluesin."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Kontrollo për përditësim"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Kliko për përditësim"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Hap aplikacionin SMS për ta parë"</string>
     <string name="profile_encrypted_title" msgid="4260432497586829134">"Disa funksione mund të jenë të kufizuara"</string>
