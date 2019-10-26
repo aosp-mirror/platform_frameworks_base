@@ -16,7 +16,6 @@
 
 package com.android.systemui.biometrics;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -205,6 +204,11 @@ public class AuthContainerViewTest extends SysuiTestCase {
         @Override
         public View getPanelView(FrameLayout parent) {
             return mock(View.class);
+        }
+
+        @Override
+        public int getAnimateCredentialStartDelayMs() {
+            return 0;
         }
     }
 }

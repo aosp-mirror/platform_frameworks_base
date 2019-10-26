@@ -24,13 +24,12 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
-import android.os.UserManager;
+import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -75,6 +74,7 @@ public class AuthContainerView extends LinearLayout
     @interface ContainerState {}
 
     final Config mConfig;
+    private final Handler mHandler;
     private final Injector mInjector;
     private final IBinder mWindowToken = new Binder();
     private final WindowManager mWindowManager;
@@ -177,6 +177,10 @@ public class AuthContainerView extends LinearLayout
         View getPanelView(FrameLayout parent) {
             return parent.findViewById(R.id.panel);
         }
+
+        int getAnimateCredentialStartDelayMs() {
+            return AuthDialog.ANIMATE_CREDENTIAL_START_DELAY_MS;
+        }
     }
 
     @VisibleForTesting
@@ -201,7 +205,9 @@ public class AuthContainerView extends LinearLayout
                     break;
                 case AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL:
                     mConfig.mCallback.onDeviceCredentialPressed();
-                    addCredentialView(false /* animatePanel */, true /* animateContents */);
+                    mHandler.postDelayed(() -> {
+                        addCredentialView(false /* animatePanel */, true /* animateContents */);
+                    }, mInjector.getAnimateCredentialStartDelayMs());
                     break;
                 default:
                     Log.e(TAG, "Unhandled action: " + action);
@@ -223,6 +229,7 @@ public class AuthContainerView extends LinearLayout
         mConfig = config;
         mInjector = injector;
 
+        mHandler = new Handler(Looper.getMainLooper());
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
 

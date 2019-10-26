@@ -23,7 +23,6 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
@@ -41,7 +40,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 
 import java.lang.annotation.Retention;
@@ -151,10 +149,6 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         public int getMediumToLargeAnimationDurationMs() {
             return AuthDialog.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS;
-        }
-
-        public int getAnimateCredentialStartDelayMs() {
-            return AuthDialog.ANIMATE_CREDENTIAL_START_DELAY_MS;
         }
     }
 
@@ -632,9 +626,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     void startTransitionToCredentialUI() {
         updateSize(AuthDialog.SIZE_LARGE);
-        mHandler.postDelayed(() -> {
-            mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
-        }, mInjector.getAnimateCredentialStartDelayMs());
+        mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
     }
 
     @Override
