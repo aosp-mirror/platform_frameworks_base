@@ -1274,6 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> haina uwezo wa kufikia intaneti"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Gusa ili upate chaguo"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"Mtandao wa simu hauna uwezo wa kufikia intaneti"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"Mtandao hauna uwezo wa kufikia intaneti"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"Seva ya faragha ya DNS haiwezi kufikiwa"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Imeunganisha"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ina muunganisho unaofikia huduma chache."</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Gusa ili uunganishe tu"</string>
@@ -1349,7 +1352,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"Sawa"</string>
     <string name="usb_charging_notification_title" msgid="1595122345358177163">"Unachaji kifaa hiki kupitia USB"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Inachaji kifaa kilichounganishwa kupitia USB"</string>
-    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Umewasha hali ya uhamishaji wa faili kupitia USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Umewasha uhamishaji wa faili kupitia USB"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Umewasha hali ya PTP kupitia USB"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"Umewasha hali ya kusambaza mtandao ukitumia USB"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"Umewasha hali ya MIDI kupitia USB"</string>
@@ -1666,14 +1669,14 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ondoa"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Ungependa kupandisha sauti zaidi ya kiwango kinachopendekezwa?\n\nKusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Ungependa Kutumia Njia ya Mkato ya Zana za walio na matatizo ya kuona au kusikia?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Unapowasha kipengele cha njia ya mkato, hatua ya kubonyeza vitufe vyote viwili vya sauti kwa dakika 3 itafungua kipengele cha zana za walio na matatizo ya kuona au kusikia.\n\n Kipengele kilichopo cha zana za walio na matatizo ya kuona au kusikia:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Unaweza kubadilisha kipengele hiki katika Mipangilio &gt; Zana za walio na matatizo ya kuona au kusikia."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Ungependa kutumia njia ya mkato ya ufikivu?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Unapowasha kipengele cha njia ya mkato, hatua ya kubonyeza vitufe vyote viwili vya sauti kwa dakika 3 itafungua kipengele cha ufikivu.\n\n Kipengele cha ufikivu kilichopo kwa sasa:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Unaweza kubadilisha kipengele hiki katika Mipangilio &gt; Zana za ufikivu."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Zima kipengele cha Njia ya Mkato"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Tumia Njia ya Mkato"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Ugeuzaji rangi"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Usahihishaji wa rangi"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Njia ya mkato ya ufikivu imewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Njia ya mkato ya ufikivu imezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Bonyeza na ushikilie vitufe vyote viwili vya sauti kwa sekunde tatu ili utumie <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Chagua huduma ya kutumia unapogusa kitufe cha ufikivu:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Chagua huduma ya kutumia pamoja na ishara ya ufikivu (telezesha vidole viwili kutoka chini kwenda juu kwenye skrini):"</string>
@@ -1961,9 +1964,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"Hifadhi"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Hapana, asante"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Sasisha"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"Endelea"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"nenosiri"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"anwani"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kadi ya mikopo"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"kadi ya malipo"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"kadi ya malipo"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"kadi"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"jina la mtumiaji"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"anwani ya barua pepe"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Tulia na utafute hifadhi ya karibu."</string>

@@ -532,21 +532,21 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"No s\'ha reconegut"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"S\'ha cancel·lat l\'autenticació"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"No s\'ha establert cap PIN, patró o contrasenya"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"S\'ha detectat una empremta dactilar parcial. Torna-ho a provar."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"No s\'ha pogut processar l\'empremta dactilar. Torna-ho a provar."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"S\'ha detectat una empremta digital parcial. Torna-ho a provar."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"El sensor d\'empremtes dactilars està brut. Neteja\'l i torna-ho a provar."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"El dit s\'ha mogut massa ràpid. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"El dit s\'ha mogut massa lentament. Torna-ho a provar."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"L\'empremta dactilar s\'ha autenticat"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"L\'empremta digital s\'ha autenticat"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Cara autenticada"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Cara autenticada; prem el botó per confirmar"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"El maquinari per a empremtes dactilars no està disponible."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empremta dactilar no es pot desar. Suprimeix-ne una."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"S\'ha esgotat el temps d\'espera per a l\'empremta dactilar. Torna-ho a provar."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"S\'ha cancel·lat l\'operació d\'empremta dactilar."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"L\'usuari ha cancel·lat l\'operació d\'empremta dactilar."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empremta digital no es pot desar. Suprimeix-ne una."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"L\'usuari ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"S\'han produït massa intents. Torna-ho a provar més tard."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"S\'han fet massa intents. S\'ha desactivat el sensor d\'empremtes dactilars."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Torna-ho a provar."</string>
@@ -555,7 +555,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona d\'empremta dactilar"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona d\'empremta digital"</string>
     <string name="permlab_manageFace" msgid="7262837876352591553">"gestiona el maquinari de desbloqueig facial"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permet que l\'aplicació afegeixi i suprimeixi plantilles de cares que es puguin fer servir."</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"utilitza el maquinari de desbloqueig facial"</string>
@@ -1274,6 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> no té accés a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca per veure les opcions"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"La xarxa mòbil no té accés a Internet"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"La xarxa no té accés a Internet"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"No es pot accedir al servidor DNS privat"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Connectat"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> té una connectivitat limitada"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Toca per connectar igualment"</string>
@@ -1961,9 +1964,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"Desa"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No, gràcies"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Actualitza"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"Continua"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"contrasenya"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adreça"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"targeta de crèdit"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"targeta de dèbit"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"targeta de pagament"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"targeta"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"nom d\'usuari"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"adreça electrònica"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Mantén la calma i busca refugi a prop."</string>
