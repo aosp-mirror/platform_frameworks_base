@@ -4359,9 +4359,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
-        void onParentChanged() {
+        void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
             if (getParent() != null) {
-                super.onParentChanged(() -> {
+                super.onParentChanged(newParent, oldParent, () -> {
                     mAppAnimationLayer = makeChildSurface(null)
                             .setName("animationLayer")
                             .build();
@@ -4381,7 +4381,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                             .show(mSplitScreenDividerAnchor);
                 });
             } else {
-                super.onParentChanged();
+                super.onParentChanged(newParent, oldParent);
                 mWmService.mTransactionFactory.get()
                         .remove(mAppAnimationLayer)
                         .remove(mBoostedAppAnimationLayer)
@@ -4611,7 +4611,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
-    void onParentChanged() {
+    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
         // Since we are the top of the SurfaceControl hierarchy here
         // we create the root surfaces explicitly rather than chaining
         // up as the default implementation in onParentChanged does. So we

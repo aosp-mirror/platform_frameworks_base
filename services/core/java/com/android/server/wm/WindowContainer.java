@@ -106,6 +106,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     private WindowContainer<WindowContainer> mParent = null;
 
+    // Set to true when we are performing a reparenting operation so we only send one
+    // onParentChanged() notification.
+    private boolean mReparenting;
+
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
     protected final WindowList<E> mChildren = new WindowList<E>();
@@ -187,9 +191,45 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         scheduleAnimation();
     }
 
+    void reparent(WindowContainer newParent, int position) {
+        if (newParent == null) {
+            throw new IllegalArgumentException("reparent: can't reparent to null " + this);
+        }
+
+        final WindowContainer oldParent = mParent;
+        if (mParent == newParent) {
+            throw new IllegalArgumentException("WC=" + this + " already child of " + mParent);
+        }
+
+        // The display object before reparenting as that might lead to old parent getting removed
+        // from the display if it no longer has any child.
+        final DisplayContent prevDc = oldParent.getDisplayContent();
+        final DisplayContent dc = newParent.getDisplayContent();
+
+        mReparenting = true;
+        oldParent.removeChild(this);
+        newParent.addChild(this, position);
+        mReparenting = false;
+
+        // Send onParentChanged notification here is we disabled sending it in setParent for
+        // reparenting case.
+        onParentChanged(newParent, oldParent);
+
+        // Relayout display(s)
+        dc.setLayoutNeeded();
+        if (prevDc != dc) {
+            onDisplayChanged(dc);
+            prevDc.setLayoutNeeded();
+        }
+        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+    }
+
     final protected void setParent(WindowContainer<WindowContainer> parent) {
+        final WindowContainer oldParent = mParent;
         mParent = parent;
-        onParentChanged();
+        if (!mReparenting) {
+            onParentChanged(mParent, oldParent);
+        }
     }
 
     /**
@@ -197,12 +237,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Supposed to be overridden and contain actions that should be executed after parent was set.
      */
     @Override
-    void onParentChanged() {
-        onParentChanged(null);
+    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
+        onParentChanged(newParent, oldParent, null);
     }
 
-    void onParentChanged(PreAssignChildLayersCallback callback) {
-        super.onParentChanged();
+    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent,
+            PreAssignChildLayersCallback callback) {
+        super.onParentChanged(newParent, oldParent);
         if (mParent == null) {
             return;
         }

@@ -68,13 +68,16 @@ import static com.android.server.am.TaskRecordProto.RESIZE_MODE;
 import static com.android.server.am.TaskRecordProto.STACK_ID;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
+import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
@@ -82,6 +85,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECEN
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
@@ -126,6 +130,7 @@ import android.view.DisplayInfo;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.XmlUtils;
+import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.ActivityStack.ActivityState;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -969,6 +974,7 @@ class TaskRecord extends ConfigurationContainer {
      * Must be used for setting parent stack because it performs configuration updates.
      * Must be called after adding task as a child to the stack.
      */
+    // TODO(task-unify): Remove or rework after task level unification.
     void setStack(ActivityStack stack) {
         if (stack != null && !stack.isInStackLocked(this)) {
             throw new IllegalStateException("Task must be added as a Stack child first.");
@@ -993,7 +999,7 @@ class TaskRecord extends ConfigurationContainer {
             }
         }
 
-        onParentChanged();
+        onParentChanged(mStack, oldStack);
     }
 
     /**
@@ -1019,8 +1025,9 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     @Override
-    protected void onParentChanged() {
-        super.onParentChanged();
+    protected void onParentChanged(
+            ConfigurationContainer newParent, ConfigurationContainer oldParent) {
+        super.onParentChanged(newParent, oldParent);
         mAtmService.mRootActivityContainer.updateUIDsPresentOnDisplay();
     }
 
@@ -1215,10 +1222,6 @@ class TaskRecord extends ConfigurationContainer {
         updateEffectiveIntent();
     }
 
-    void addActivityToTop(ActivityRecord r) {
-        addActivityAtIndex(getChildCount(), r);
-    }
-
     @Override
     /*@WindowConfiguration.ActivityType*/
     public int getActivityType() {
@@ -1229,18 +1232,11 @@ class TaskRecord extends ConfigurationContainer {
         return getChildAt(0).getActivityType();
     }
 
-    /**
-     * Adds an activity {@param r} at the given {@param index}. The activity {@param r} must either
-     * be in the current task or unparented to any task.
-     */
-    void addActivityAtIndex(int index, ActivityRecord r) {
-        TaskRecord task = r.getTaskRecord();
-        if (task != null && task != this) {
-            throw new IllegalArgumentException("Can not add r=" + " to task=" + this
-                    + " current parent=" + task);
-        }
-
-        r.setTask(this);
+    /** Called when a Task child is added from the Task.java side. */
+    // TODO(task-unify): Just override addChild to do what is needed when someone calls to add a
+    // child.
+    void onChildAdded(ActivityRecord r, int index) {
+        r.inHistory = true;
 
         // Remove r first, and if it wasn't already in the list and it's fullscreen, count it.
         if (!mActivities.remove(r) && r.occludesParent()) {
@@ -1287,34 +1283,34 @@ class TaskRecord extends ConfigurationContainer {
             mAtmService.notifyTaskPersisterLocked(this, false);
         }
 
-        if (r.getParent() != null) {
-            // Only attempt to move in WM if the child has a controller. It is possible we haven't
-            // created controller for the activity we are starting yet.
-            mTask.positionChildAt(r, index);
-        }
-
         // Make sure the list of display UID whitelists is updated
         // now that this record is in a new task.
         mAtmService.mRootActivityContainer.updateUIDsPresentOnDisplay();
     }
 
-    /**
-     * Removes the specified activity from this task.
-     * @param r The {@link ActivityRecord} to remove.
-     * @return true if this was the last activity in the task.
-     */
-    boolean removeActivity(ActivityRecord r) {
-        return removeActivity(r, false /* reparenting */);
-    }
-
-    boolean removeActivity(ActivityRecord r, boolean reparenting) {
-        if (r.getTaskRecord() != this) {
-            throw new IllegalArgumentException(
-                    "Activity=" + r + " does not belong to task=" + this);
+    // TODO(task-unify): Merge onChildAdded method below into this since task will be a single
+    //  object.
+    void addChild(ActivityRecord r) {
+        if (r.getParent() != null) {
+            // Shouldn't already have a parent since we are just adding to the task...
+            throw new IllegalStateException(
+                    "r=" + r + " parent=" + r.getParent() + " task=" + this);
         }
 
-        r.setTask(null /* task */, reparenting /* reparenting */);
+        ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addChild: %s at top.", this);
+        // This means the activity isn't attached to Task.java yet. Go ahead and do that.
+        // TODO(task-unify): Remove/call super once we unify task level.
+        if (mTask != null) {
+            mTask.addChild(r, Integer.MAX_VALUE /* add on top */);
+        } else {
+            onChildAdded(r, Integer.MAX_VALUE);
+        }
+    }
 
+    /** Called when a Task child is removed from the Task.java side. */
+    // TODO(task-unify): Just override removeChild to do what is needed when someone calls to remove
+    // a child.
+    void onChildRemoved(ActivityRecord r) {
         if (mActivities.remove(r) && r.occludesParent()) {
             // Was previously in list.
             numFullscreen--;
@@ -1330,11 +1326,27 @@ class TaskRecord extends ConfigurationContainer {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
 
-        if (!hasChild()) {
-            return !mReuseTask;
+        if (hasChild()) {
+            updateEffectiveIntent();
+
+            // The following block can be executed multiple times if there is more than one overlay.
+            // {@link ActivityStackSupervisor#removeTaskByIdLocked} handles this by reverse lookup
+            // of the task by id and exiting early if not found.
+            if (onlyHasTaskOverlayActivities(false /* excludingFinishing */)) {
+                // When destroying a task, tell the supervisor to remove it so that any activity it
+                // has can be cleaned up correctly. This is currently the only place where we remove
+                // a task with the DESTROYING mode, so instead of passing the onlyHasTaskOverlays
+                // state into removeTask(), we just clear the task here before the other residual
+                // work.
+                // TODO: If the callers to removeTask() changes such that we have multiple places
+                //       where we are destroying the task, move this back into removeTask()
+                mAtmService.mStackSupervisor.removeTaskByIdLocked(mTaskId, false /* killProcess */,
+                        !REMOVE_FROM_RECENTS, "onChildRemoved");
+            }
+        } else if (!mReuseTask) {
+            // Remove entire task if it doesn't have any activity left and it isn't marked for reuse
+            mStack.removeTask(this, "onChildRemoved", REMOVE_TASK_MODE_DESTROYING);
         }
-        updateEffectiveIntent();
-        return false;
     }
 
     /**
