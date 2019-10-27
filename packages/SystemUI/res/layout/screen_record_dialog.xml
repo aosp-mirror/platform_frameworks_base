@@ -25,6 +25,12 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/screenrecord_taps_label"/>
+        <CheckBox
+            android:id="@+id/checkbox_stopdot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/screenrecord_stopdot_label"/>
         <Button
             android:id="@+id/record_button"
             android:layout_width="match_parent"

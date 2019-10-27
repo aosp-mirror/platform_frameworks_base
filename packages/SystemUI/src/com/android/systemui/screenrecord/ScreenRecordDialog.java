@@ -41,8 +41,15 @@ public class ScreenRecordDialog extends Activity {
     private static final int REQUEST_CODE_VIDEO_AUDIO = 300;
     private static final int REQUEST_CODE_VIDEO_AUDIO_TAPS = 301;
     private static final int REQUEST_CODE_PERMISSIONS_AUDIO = 399;
+    
+    private static final int REQUEST_CODE_VIDEO_ONLY_DOT = 202;
+    private static final int REQUEST_CODE_VIDEO_TAPS_DOT = 203;
+    private static final int REQUEST_CODE_VIDEO_AUDIO_DOT = 302;
+    private static final int REQUEST_CODE_VIDEO_AUDIO_TAPS_DOT = 303;
+
     private boolean mUseAudio;
     private boolean mShowTaps;
+    private boolean mShowDot;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,12 +58,14 @@ public class ScreenRecordDialog extends Activity {
 
         final CheckBox micCheckBox = findViewById(R.id.checkbox_mic);
         final CheckBox tapsCheckBox = findViewById(R.id.checkbox_taps);
+        final CheckBox dotCheckBox = findViewById(R.id.checkbox_stopdot);
 
         final Button recordButton = findViewById(R.id.record_button);
         recordButton.setOnClickListener(v -> {
             mUseAudio = micCheckBox.isChecked();
             mShowTaps = tapsCheckBox.isChecked();
-            Log.d(TAG, "Record button clicked: audio " + mUseAudio + ", taps " + mShowTaps);
+            mShowDot = dotCheckBox.isChecked();
+            Log.d(TAG, "Record button clicked: audio " + mUseAudio + ", taps " + mShowTaps + ", dot " + mShowDot);
 
             if (mUseAudio && checkSelfPermission(Manifest.permission.RECORD_AUDIO)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -76,28 +85,42 @@ public class ScreenRecordDialog extends Activity {
 
         if (mUseAudio) {
             startActivityForResult(permissionIntent,
-                    mShowTaps ? REQUEST_CODE_VIDEO_AUDIO_TAPS : REQUEST_CODE_VIDEO_AUDIO);
+                    mShowTaps ? (mShowDot ? REQUEST_CODE_VIDEO_AUDIO_TAPS_DOT : REQUEST_CODE_VIDEO_AUDIO_TAPS)
+                    : (mShowDot ? REQUEST_CODE_VIDEO_AUDIO_DOT : REQUEST_CODE_VIDEO_AUDIO));
         } else {
             startActivityForResult(permissionIntent,
-                    mShowTaps ? REQUEST_CODE_VIDEO_TAPS : REQUEST_CODE_VIDEO_ONLY);
+                    mShowTaps ? (mShowDot ? REQUEST_CODE_VIDEO_TAPS_DOT : REQUEST_CODE_VIDEO_TAPS)
+                    : (mShowDot ? REQUEST_CODE_VIDEO_ONLY_DOT : REQUEST_CODE_VIDEO_ONLY));
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mShowTaps = (requestCode == REQUEST_CODE_VIDEO_TAPS
-                || requestCode == REQUEST_CODE_VIDEO_AUDIO_TAPS);
+                || requestCode == REQUEST_CODE_VIDEO_AUDIO_TAPS
+                || requestCode == REQUEST_CODE_VIDEO_TAPS_DOT
+                || requestCode == REQUEST_CODE_VIDEO_AUDIO_TAPS_DOT);
+        mShowDot = (requestCode == REQUEST_CODE_VIDEO_AUDIO_DOT
+                || requestCode == REQUEST_CODE_VIDEO_ONLY_DOT
+                || requestCode == REQUEST_CODE_VIDEO_TAPS_DOT
+                || requestCode == REQUEST_CODE_VIDEO_AUDIO_TAPS_DOT);
         switch (requestCode) {
             case REQUEST_CODE_VIDEO_TAPS:
             case REQUEST_CODE_VIDEO_AUDIO_TAPS:
             case REQUEST_CODE_VIDEO_ONLY:
             case REQUEST_CODE_VIDEO_AUDIO:
+            case REQUEST_CODE_VIDEO_AUDIO_TAPS_DOT:
+            case REQUEST_CODE_VIDEO_AUDIO_DOT:
+            case REQUEST_CODE_VIDEO_TAPS_DOT:
+            case REQUEST_CODE_VIDEO_ONLY_DOT:
                 if (resultCode == RESULT_OK) {
                     mUseAudio = (requestCode == REQUEST_CODE_VIDEO_AUDIO
-                            || requestCode == REQUEST_CODE_VIDEO_AUDIO_TAPS);
+                            || requestCode == REQUEST_CODE_VIDEO_AUDIO_DOT
+                            || requestCode == REQUEST_CODE_VIDEO_AUDIO_TAPS
+                            || requestCode == REQUEST_CODE_VIDEO_AUDIO_TAPS_DOT);
                     startForegroundService(
                             RecordingService.getStartIntent(this, resultCode, data, mUseAudio,
-                                    mShowTaps));
+                                    mShowTaps, mShowDot));
                 } else {
                     Toast.makeText(this,
                             getResources().getString(R.string.screenrecord_permission_error),

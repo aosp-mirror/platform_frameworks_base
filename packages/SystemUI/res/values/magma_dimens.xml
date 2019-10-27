@@ -15,15 +15,7 @@
 -->
 <resources>
 
-    <!-- Custom QS tiles -->
-    <!-- Caffeine QS tile -->
-    <string name="quick_settings_caffeine_label">Caffeine</string>
-    <string name="accessibility_quick_settings_caffeine_off">Caffeine off.</string>
-    <string name="accessibility_quick_settings_caffeine_on">Caffeine on.</string>
-
-    <!-- Screenrecord stuff -->
-    <string name="screenrecord_stopdot_label">Show stop dot</string>
-    <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
-    <string name="global_action_screenshot_cust">"Screenshot/Rec"</string>
+    <!-- Screenrecord dot size -->
+    <dimen name="screenrecord_dot_size">48dp</dimen>
 
 </resources>
