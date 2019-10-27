@@ -50,8 +50,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="1842558472039505091">"ਕੀ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?\nਇਸ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਪਰ ਇਹ USB ਡੀਵਾਈਸ ਰਾਹੀਂ ਆਡੀਓ ਕੈਪਚਰ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"ਕੀ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ਤੱਕ <xliff:g id="APPLICATION">%1$s</xliff:g> ਨੂੰ ਪਹੁੰਚ ਕਰਨ ਦੇਣੀ ਹੈ?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"ਕੀ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ਨੂੰ ਵਰਤਣ ਲਈ <xliff:g id="APPLICATION">%1$s</xliff:g> ਖੋਲ੍ਹਣੀ ਹੈ?"</string>
-    <!-- no translation found for usb_device_confirm_prompt_warn (210658281376801521) -->
-    <skip />
+    <string name="usb_device_confirm_prompt_warn" msgid="210658281376801521">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ਨੂੰ ਸੰਭਾਲਣ ਲਈ <xliff:g id="APPLICATION">%1$s</xliff:g> ਖੋਲ੍ਹੋ?\nਇਸ ਐਪ ਨੂੰ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਪਰ ਇਹ USB ਡੀਵਾਈਸ ਰਾਹੀਂ ਆਡੀਓ ਕੈਪਚਰ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"ਕੀ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ਨੂੰ ਵਰਤਣ ਲਈ <xliff:g id="APPLICATION">%1$s</xliff:g> ਖੋਲ੍ਹਣੀ ਹੈ?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ਕੋਈ ਇੰਸਟੌਲ ਕੀਤੇ ਐਪਸ ਇਸ USB ਐਕਸੈਸਰੀ ਨਾਲ ਕੰਮ ਨਹੀਂ ਕਰਦੇ। <xliff:g id="URL">%1$s</xliff:g> ਤੇ ਇਸ ਐਕਸੈਸਰੀ ਬਾਰੇ ਹੋਰ ਜਾਣੋ"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB ਐਕਸੈਸਰੀ"</string>
@@ -189,9 +188,6 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_5ge" msgid="4699478963278829331">"5Ge"</string>
-    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
-    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"ਰੋਮਿੰਗ"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
