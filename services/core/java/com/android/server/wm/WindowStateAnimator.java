@@ -1200,6 +1200,9 @@ class WindowStateAnimator {
         if (mXOffset == dx && mYOffset == dy) {
             return false;
         }
+        if (mSurfaceController == null) {
+            return false;
+        }
         mXOffset = dx;
         mYOffset = dy;
 
