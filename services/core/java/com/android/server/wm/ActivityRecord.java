@@ -137,10 +137,8 @@ import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_APP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
@@ -299,10 +297,10 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.R;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
@@ -426,8 +424,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Last configuration reported to the activity in the client process.
     private MergedConfiguration mLastReportedConfiguration;
     private int mLastReportedDisplayId;
-    private boolean mLastReportedMultiWindowMode;
-    private boolean mLastReportedPictureInPictureMode;
+    boolean mLastReportedMultiWindowMode;
+    boolean mLastReportedPictureInPictureMode;
     CompatibilityInfo compat;// last used compatibility mode
     ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
@@ -490,7 +488,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     long lastLaunchTime;    // time of last launch of this activity
     ComponentName requestedVrComponent; // the requested component for handling VR mode.
 
-    private boolean inHistory;  // are we in the history stack?
+    boolean inHistory;  // are we in the history stack?
     final ActivityStackSupervisor mStackSupervisor;
     final RootActivityContainer mRootActivityContainer;
 
@@ -529,10 +527,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     // True if we are current in the process of removing this app token from the display
     private boolean mRemovingFromDisplay = false;
-
-    // Flag set while reparenting to prevent actions normally triggered by an individual parent
-    // change.
-    private boolean mReparenting;
 
     private RemoteAnimationDefinition mRemoteAnimationDefinition;
 
@@ -1189,7 +1183,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    // TODO: Remove once TaskRecord and Task are unified.
+    // TODO(task-unify): Remove once TaskRecord and Task are unified.
     TaskRecord getTaskRecord() {
         return task;
     }
@@ -1201,16 +1195,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * {@link ActivityStack}.
      * @param task The new parent {@link TaskRecord}.
      */
+    // TODO(task-unify): Can be remove after task level unification. Callers can just use addChild
     void setTask(TaskRecord task) {
-        setTask(task /* task */, false /* reparenting */);
-    }
-
-    /**
-     * This method should only be called by {@link TaskRecord#removeActivity(ActivityRecord)}.
-     * @param task          The new parent task.
-     * @param reparenting   Whether we're in the middle of reparenting.
-     */
-    void setTask(TaskRecord task, boolean reparenting) {
         // Do nothing if the {@link TaskRecord} is the same as the current {@link getTaskRecord}.
         if (task != null && task == getTaskRecord()) {
             return;
@@ -1222,7 +1208,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Inform old stack (if present) of activity removal and new stack (if set) of activity
         // addition.
         if (oldStack != newStack) {
-            if (!reparenting && oldStack != null) {
+            if (oldStack != null) {
                 oldStack.onActivityRemovedFromStack(this);
             }
 
@@ -1231,38 +1217,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
 
+        final TaskRecord oldTask = this.task;
         this.task = task;
 
         // This is attaching the activity to the task which we only want to do once.
-        // TODO: Need to re-work after unifying the task level since it will already have a parent
-        // then. Just need to restructure the re-parent case not to do this. NOTE that the
-        // reparenting flag passed in can't be used directly for this as it isn't set in
+        // TODO(task-unify): Need to re-work after unifying the task level since it will already
+        // have a parent then. Just need to restructure the re-parent case not to do this. NOTE that
+        // the reparenting flag passed in can't be used directly for this as it isn't set in
         // ActivityRecord#reparent() case that ends up calling this method.
         if (task != null && getParent() == null) {
-            inHistory = true;
-            final Task container = task.getTask();
-            if (container != null) {
-                onAttachToTask(task.voiceSession != null, container.getDisplayContent(),
-                        getInputDispatchingTimeoutLocked(this) * 1000000L);
-                ProtoLog.v(WM_DEBUG_ADD_REMOVE, "setTask: %s at top.", this);
-                container.addChild(this, Integer.MAX_VALUE /* add on top */);
-            }
-
-            // TODO(b/36505427): Maybe this call should be moved inside
-            // updateOverrideConfiguration()
-            task.updateOverrideConfigurationFromLaunchBounds();
-            // Make sure size-compat is up-to-date before using to create window controller.
-            updateSizeCompatMode();
-
-            task.addActivityToTop(this);
-
-            // When an activity is started directly into a split-screen fullscreen stack, we need to
-            // update the initial multi-window modes so that the callbacks are scheduled correctly
-            // when the user leaves that mode.
-            mLastReportedMultiWindowMode = inMultiWindowMode();
-            mLastReportedPictureInPictureMode = inPinnedWindowingMode();
-        } else if (!reparenting) {
-            onParentChanged();
+            task.addChild(this);
+        } else {
+            onParentChanged(task, oldTask);
         }
     }
 
@@ -1288,24 +1254,46 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    void onParentChanged() {
-        super.onParentChanged();
+    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
+        final TaskRecord oldTask = (oldParent != null) ? ((Task) oldParent).mTaskRecord : null;
+        final TaskRecord newTask = (newParent != null) ? ((Task) newParent).mTaskRecord : null;
+        this.task = newTask;
+
+        super.onParentChanged(newParent, oldParent);
 
         final Task task = getTask();
+
+        if (oldParent == null && newParent != null) {
+            // First time we are adding the activity to the system.
+            // TODO(task-unify): See if mVoiceInteraction variable is really needed after task level
+            // unification.
+            mVoiceInteraction = task.mTaskRecord != null && task.mTaskRecord.voiceSession != null;
+            mInputDispatchingTimeoutNanos = getInputDispatchingTimeoutLocked(this) * 1000000L;
+            onDisplayChanged(task.getDisplayContent());
+            if (task.mTaskRecord != null) {
+                task.mTaskRecord.updateOverrideConfigurationFromLaunchBounds();
+            }
+            // Make sure override configuration is up-to-date before using to create window
+            // controller.
+            updateSizeCompatMode();
+            // When an activity is started directly into a split-screen fullscreen stack, we need to
+            // update the initial multi-window modes so that the callbacks are scheduled correctly
+            // when the user leaves that mode.
+            mLastReportedMultiWindowMode = inMultiWindowMode();
+            mLastReportedPictureInPictureMode = inPinnedWindowingMode();
+        }
 
         // When the associated task is {@code null}, the {@link ActivityRecord} can no longer
         // access visual elements like the {@link DisplayContent}. We must remove any associations
         // such as animations.
-        if (!mReparenting) {
-            if (task == null) {
-                // It is possible we have been marked as a closing app earlier. We must remove ourselves
-                // from this list so we do not participate in any future animations.
-                if (getDisplayContent() != null) {
-                    getDisplayContent().mClosingApps.remove(this);
-                }
-            } else if (mLastParent != null && mLastParent.mStack != null) {
-                task.mStack.mExitingActivities.remove(this);
+        if (task == null) {
+            // It is possible we have been marked as a closing app earlier. We must remove ourselves
+            // from this list so we do not participate in any future animations.
+            if (getDisplayContent() != null) {
+                getDisplayContent().mClosingApps.remove(this);
             }
+        } else if (mLastParent != null && mLastParent.mStack != null) {
+            task.mStack.mExitingActivities.remove(this);
         }
         final TaskStack stack = getStack();
 
@@ -1320,6 +1308,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLastParent = task;
 
         updateColorTransform();
+
+        final ActivityStack oldStack = (oldTask != null) ? oldTask.getStack() : null;
+        final ActivityStack newStack = (newTask != null) ? newTask.getStack() : null;
+        // Inform old stack (if present) of activity removal and new stack (if set) of activity
+        // addition.
+        if (oldStack != newStack) {
+            // TODO(task-unify): Might be better to use onChildAdded and onChildRemoved signal for
+            // this once task level is unified.
+            if (oldStack !=  null) {
+                oldStack.onActivityRemovedFromStack(this);
+            }
+            if (newStack !=  null) {
+                newStack.onActivityAddedToStack(this);
+            }
+        }
     }
 
     private void updateColorTransform() {
@@ -1697,17 +1700,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return hasProcess() && app.hasThread();
     }
 
-    void onAttachToTask(boolean voiceInteraction, DisplayContent dc,
-            long inputDispatchingTimeoutNanos) {
-        mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
-        mVoiceInteraction = voiceInteraction;
-        onDisplayChanged(dc);
-
-        // Application tokens start out hidden.
-        setHidden(true);
-        hiddenRequested = true;
-    }
-
     boolean addStartingWindow(String pkg, int theme, CompatibilityInfo compatInfo,
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
@@ -1967,12 +1959,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         });
     }
 
-    void removeWindowContainer() {
+    private void removeAppTokenFromDisplay() {
         if (mWmService.mRoot == null) return;
 
         final DisplayContent dc = mWmService.mRoot.getDisplayContent(getDisplayId());
         if (dc == null) {
-            Slog.w(TAG, "removeWindowContainer: Attempted to remove token: "
+            Slog.w(TAG, "removeAppTokenFromDisplay: Attempted to remove token: "
                     + appToken + " from non-existing displayId=" + getDisplayId());
             return;
         }
@@ -2005,56 +1997,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     + " r=" + this + " (" + prevTask.getStackId() + ")");
         }
 
-        final Task task = newTask.getTask();
-        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "reparent: moving app token=%s"
+        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "reparent: moving activity=%s"
                 + " to task=%d at %d", this, task.mTaskId, position);
 
-        if (task == null) {
-            throw new IllegalArgumentException("reparent: could not find task");
-        }
-        final Task currentTask = getTask();
-        if (task == currentTask) {
-            throw new IllegalArgumentException(
-                    "window token=" + this + " already child of task=" + currentTask);
-        }
+        reparent(newTask.getTask(), position);
+    }
 
-        if (currentTask.mStack != task.mStack) {
-            throw new IllegalArgumentException(
-                    "window token=" + this + " current task=" + currentTask
-                            + " belongs to a different stack than " + task);
-        }
-
-        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "reParentWindowToken: removing window token=%s"
-                + " from task=%s"  , this, currentTask);
-        final DisplayContent prevDisplayContent = getDisplayContent();
-
-        mReparenting = true;
-
-        getParent().removeChild(this);
-        task.addChild(this, position);
-
-        mReparenting = false;
-
-        // Relayout display(s).
-        final DisplayContent displayContent = task.getDisplayContent();
-        displayContent.setLayoutNeeded();
-        if (prevDisplayContent != displayContent) {
-            onDisplayChanged(displayContent);
-            prevDisplayContent.setLayoutNeeded();
-        }
-        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
-
-        // Reparenting prevents informing the parent stack of activity removal in the case that
-        // the new stack has the same parent. we must manually signal here if this is not the case.
-        final ActivityStack prevStack = prevTask.getStack();
-
-        if (prevStack != newTask.getStack()) {
-            prevStack.onActivityRemovedFromStack(this);
-        }
-        // Remove the activity from the old task and add it to the new task.
-        prevTask.removeActivity(this, true /* reparenting */);
-
-        newTask.addActivityAtIndex(position, this);
+    // TODO(task-unify): Remove once Task level is unified.
+    void onParentChanged(TaskRecord newParent, TaskRecord oldParent) {
+        onParentChanged(
+                newParent != null ? newParent.mTask : null,
+                oldParent != null ? oldParent.mTask : null);
     }
 
     private boolean isHomeIntent(Intent intent) {
@@ -2895,6 +2848,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /** Note: call {@link #cleanUp(boolean, boolean)} before this method. */
+    // TODO(task-unify): Look into consolidating this with TaskRecord.removeChild once we unify
+    // task level.
     void removeFromHistory(String reason) {
         finishActivityResults(Activity.RESULT_CANCELED, null /* resultData */);
         makeFinishingLocked();
@@ -2912,41 +2867,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         setState(DESTROYED, "removeFromHistory");
         if (DEBUG_APP) Slog.v(TAG_APP, "Clearing app during remove for activity " + this);
         app = null;
-        removeWindowContainer();
-        final TaskRecord task = getTaskRecord();
-        final boolean lastActivity = task.removeActivity(this);
-        // If we are removing the last activity in the task, not including task overlay activities,
-        // then fall through into the block below to remove the entire task itself
-        final boolean onlyHasTaskOverlays =
-                task.onlyHasTaskOverlayActivities(false /* excludingFinishing */);
-
-        if (lastActivity || onlyHasTaskOverlays) {
-            if (DEBUG_STATES) {
-                Slog.i(TAG, "removeFromHistory: last activity removed from " + this
-                        + " onlyHasTaskOverlays=" + onlyHasTaskOverlays);
-            }
-
-            // The following block can be executed multiple times if there is more than one overlay.
-            // {@link ActivityStackSupervisor#removeTaskByIdLocked} handles this by reverse lookup
-            // of the task by id and exiting early if not found.
-            if (onlyHasTaskOverlays) {
-                // When destroying a task, tell the supervisor to remove it so that any activity it
-                // has can be cleaned up correctly. This is currently the only place where we remove
-                // a task with the DESTROYING mode, so instead of passing the onlyHasTaskOverlays
-                // state into removeTask(), we just clear the task here before the other residual
-                // work.
-                // TODO: If the callers to removeTask() changes such that we have multiple places
-                //       where we are destroying the task, move this back into removeTask()
-                mStackSupervisor.removeTaskByIdLocked(task.mTaskId, false /* killProcess */,
-                        !REMOVE_FROM_RECENTS, reason);
-            }
-
-            // We must keep the task around until all activities are destroyed. The following
-            // statement will only execute once since overlays are also considered activities.
-            if (lastActivity) {
-                stack.removeTask(task, reason, REMOVE_TASK_MODE_DESTROYING);
-            }
-        }
+        removeAppTokenFromDisplay();
 
         cleanUpActivityServices();
         removeUriPermissionsLocked();

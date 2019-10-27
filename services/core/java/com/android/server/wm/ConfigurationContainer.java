@@ -540,7 +540,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return sameWindowingMode;
     }
 
-    public void registerConfigurationChangeListener(ConfigurationContainerListener listener) {
+    void registerConfigurationChangeListener(ConfigurationContainerListener listener) {
         if (mChangeListeners.contains(listener)) {
             return;
         }
@@ -548,7 +548,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         listener.onRequestedOverrideConfigurationChanged(mResolvedOverrideConfiguration);
     }
 
-    public void unregisterConfigurationChangeListener(ConfigurationContainerListener listener) {
+    void unregisterConfigurationChangeListener(ConfigurationContainerListener listener) {
         mChangeListeners.remove(listener);
     }
 
@@ -560,13 +560,12 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     /**
      * Must be called when new parent for the container was set.
      */
-    void onParentChanged() {
-        final ConfigurationContainer parent = getParent();
+    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
         // Removing parent usually means that we've detached this entity to destroy it or to attach
         // to another parent. In both cases we don't need to update the configuration now.
-        if (parent != null) {
+        if (newParent != null) {
             // Update full configuration of this container and all its children.
-            onConfigurationChanged(parent.mFullConfiguration);
+            onConfigurationChanged(newParent.mFullConfiguration);
             // Update merged override configuration of this container and all its children.
             onMergedOverrideConfigurationChanged();
         }

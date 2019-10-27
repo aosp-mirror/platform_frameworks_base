@@ -67,7 +67,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     final int mTaskId;
     /* User for which this task was created. */
     final int mUserId;
-    private boolean mDeferRemoval = false;
 
     final Rect mPreparedFrozenBounds = new Rect();
     final Configuration mPreparedFrozenMergedConfig = new Configuration();
@@ -176,14 +175,18 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     void addChild(ActivityRecord child, int position) {
         position = getAdjustedAddPosition(position);
         super.addChild(child, position);
-        mDeferRemoval = false;
+
+        // Inform the TaskRecord side of the child addition
+        // TODO(task-unify): Will be removed after task unification.
+        if (mTaskRecord != null) {
+            mTaskRecord.onChildAdded(child, position);
+        }
     }
 
     @Override
     void positionChildAt(int position, ActivityRecord child, boolean includingParents) {
         position = getAdjustedAddPosition(position);
         super.positionChildAt(position, child, includingParents);
-        mDeferRemoval = false;
     }
 
     private boolean hasWindowsAlive() {
@@ -197,8 +200,10 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     @VisibleForTesting
     boolean shouldDeferRemoval() {
-        // TODO: This should probably return false if mChildren.isEmpty() regardless if the stack
-        // is animating...
+        if (mChildren.isEmpty()) {
+            // No reason to defer removal of a Task that doesn't have any child.
+            return false;
+        }
         return hasWindowsAlive() && mStack.isSelfOrChildAnimating();
     }
 
@@ -206,7 +211,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     void removeIfPossible() {
         if (shouldDeferRemoval()) {
             if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
-            mDeferRemoval = true;
             return;
         }
         removeImmediately();
@@ -216,7 +220,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     void removeImmediately() {
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeTask");
-        mDeferRemoval = false;
         if (mTaskRecord != null) {
             mTaskRecord.unregisterConfigurationChangeListener(this);
         }
@@ -266,8 +269,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     @Override
-    void onParentChanged() {
-        super.onParentChanged();
+    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
+        super.onParentChanged(newParent, oldParent);
 
         // Update task bounds if needed.
         adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
@@ -290,11 +293,18 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
         super.removeChild(child);
 
+        // Inform the TaskRecord side of the child removal
+        // TODO(task-unify): Will be removed after task unification.
+        if (mTaskRecord != null) {
+            mTaskRecord.onChildRemoved(child);
+        }
+
+        // TODO(task-unify): Need to make this account for what we are doing in
+        // ActivityRecord.removeFromHistory so that the task isn't removed in some situations when
+        // we unify task level.
         if (mChildren.isEmpty()) {
             EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeActivity: last activity");
-            if (mDeferRemoval) {
-                removeIfPossible();
-            }
+            removeIfPossible();
         }
     }
 
@@ -745,7 +755,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     @Override
     public String toString() {
-        return "{taskId=" + mTaskId + " appTokens=" + mChildren + " mdr=" + mDeferRemoval + "}";
+        return "{taskId=" + mTaskId + " appTokens=" + mChildren + "}";
     }
 
     String getName() {
@@ -792,7 +802,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         proto.write(FILLS_PARENT, matchParentBounds());
         getBounds().writeToProto(proto, BOUNDS);
         mOverrideDisplayedBounds.writeToProto(proto, DISPLAYED_BOUNDS);
-        proto.write(DEFER_REMOVAL, mDeferRemoval);
         proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
         proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
         proto.end(token);
@@ -805,7 +814,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
         pw.println(prefix + "taskId=" + mTaskId);
         pw.println(doublePrefix + "mBounds=" + getBounds().toShortString());
-        pw.println(doublePrefix + "mdr=" + mDeferRemoval);
         pw.println(doublePrefix + "appTokens=" + mChildren);
         pw.println(doublePrefix + "mDisplayedBounds=" + mOverrideDisplayedBounds.toShortString());
 

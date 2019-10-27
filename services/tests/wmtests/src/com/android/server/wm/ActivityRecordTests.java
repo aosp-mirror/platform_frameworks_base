@@ -130,13 +130,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testStackCleanupOnClearingTask() {
-        mActivity.setTask(null);
+        mActivity.onParentChanged(null /*newParent*/, mActivity.getTask());
         verify(mStack, times(1)).onActivityRemovedFromStack(any());
     }
 
     @Test
     public void testStackCleanupOnActivityRemoval() {
-        mTask.removeActivity(mActivity);
+        mTask.mTask.removeChild(mActivity);
         verify(mStack, times(1)).onActivityRemovedFromStack(any());
     }
 
@@ -795,7 +795,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Remove activity from task
         mActivity.finishing = false;
-        mActivity.setTask(null);
+        mActivity.onParentChanged(null /*newParent*/, mActivity.getTask());
         assertEquals("Activity outside of task/stack cannot be finished", FINISH_RESULT_CANCELLED,
                 mActivity.finishIfPossible("test", false /* oomAdj */));
         assertFalse(mActivity.finishing);

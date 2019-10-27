@@ -950,8 +950,8 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     @Override
-    void onParentChanged() {
-        super.onParentChanged();
+    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
+        super.onParentChanged(newParent, oldParent);
 
         if (getParent() != null || mDisplayContent == null) {
             return;

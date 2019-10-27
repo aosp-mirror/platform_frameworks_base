@@ -868,8 +868,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    void onParentChanged() {
-        super.onParentChanged();
+    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
+        super.onParentChanged(newParent, oldParent);
         setDrawnStateEvaluated(false /*evaluated*/);
 
         getDisplayContent().reapplyMagnificationSpec();

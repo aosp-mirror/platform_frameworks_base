@@ -35,6 +35,7 @@ import static android.view.WindowManager.TRANSIT_UNSET;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
@@ -208,6 +209,9 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testSizeCompatBounds() {
+        // Disable the real configuration resolving because we only simulate partial flow.
+        // TODO: Have test use full flow.
+        doNothing().when(mTask.mTaskRecord).computeConfigResourceOverrides(any(), any());
         final Rect fixedBounds = mActivity.getRequestedOverrideConfiguration().windowConfiguration
                 .getBounds();
         fixedBounds.set(0, 0, 1200, 1600);
@@ -249,6 +253,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     @Presubmit
     public void testGetOrientation() {
+        mActivity.setHidden(false);
+
         mActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         mActivity.setOccludesParent(false);
@@ -309,6 +315,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testSetOrientation() {
+        mActivity.setHidden(false);
+
         // Assert orientation is unspecified to start.
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, mActivity.getOrientation());
 
