@@ -102,7 +102,6 @@ public class TaskStack extends WindowContainer<Task> implements
     private Rect mTmpRect3 = new Rect();
 
     /** For Pinned stack controlling. */
-    private Rect mTmpFromBounds = new Rect();
     private Rect mTmpToBounds = new Rect();
 
     /** Stack bounds adjusted to screen content area (taking into account IM windows, etc.) */
@@ -491,7 +490,6 @@ public class TaskStack extends WindowContainer<Task> implements
      */
     void addChild(Task task, int position, boolean showForAllUsers, boolean moveParents) {
         // Add child task.
-        task.mStack = this;
         addChild(task, null);
 
         // Move child to a proper position, as some restriction for position might apply.
@@ -674,7 +672,6 @@ public class TaskStack extends WindowContainer<Task> implements
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeChild: task=" + task);
 
         super.removeChild(task);
-        task.mStack = null;
 
         // TODO(task-merge): Remove cast.
         mActivityStack.onChildRemoved((TaskRecord) task, mDisplayContent);

@@ -1628,7 +1628,7 @@ class RootActivityContainer extends ConfigurationContainer
         return false;
     }
 
-    <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
+    ActivityStack getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop) {
         return getLaunchStack(r, options, candidateTask, onTop, null /* launchParams */,
                 -1 /* no realCallingPid */, -1 /* no realCallingUid */);
@@ -1646,7 +1646,7 @@ class RootActivityContainer extends ConfigurationContainer
      *
      * @return The stack to use for the launch or INVALID_STACK_ID.
      */
-    <T extends ActivityStack> T getLaunchStack(@Nullable ActivityRecord r,
+    ActivityStack getLaunchStack(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop,
             @Nullable LaunchParamsController.LaunchParams launchParams, int realCallingPid,
             int realCallingUid) {
@@ -1674,7 +1674,7 @@ class RootActivityContainer extends ConfigurationContainer
         }
 
         final int activityType = resolveActivityType(r, options, candidateTask);
-        T stack;
+        ActivityStack stack;
 
         // Next preference for stack goes to the display Id set the candidate display.
         if (launchParams != null && launchParams.mPreferredDisplayId != INVALID_DISPLAY) {
@@ -1690,7 +1690,7 @@ class RootActivityContainer extends ConfigurationContainer
         if (displayId != INVALID_DISPLAY && (canLaunchOnDisplay(r, displayId)
                 || canLaunchOnDisplayFromStartRequest)) {
             if (r != null) {
-                stack = (T) getValidLaunchStackOnDisplay(displayId, r, candidateTask, options,
+                stack = getValidLaunchStackOnDisplay(displayId, r, candidateTask, options,
                         launchParams);
                 if (stack != null) {
                     return stack;
