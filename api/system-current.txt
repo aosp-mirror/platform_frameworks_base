@@ -1394,6 +1394,7 @@ package android.content {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public void startActivityAsUser(@RequiresPermission @NonNull android.content.Intent, @NonNull android.os.UserHandle);
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
     field public static final String BACKUP_SERVICE = "backup";
+    field public static final String BATTERY_STATS_SERVICE = "batterystats";
     field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
@@ -5212,6 +5213,23 @@ package android.os {
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setLocationMode(int);
   }
 
+  public class BatteryStatsManager {
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) @NonNull public android.os.connectivity.WifiBatteryStats getWifiBatteryStats();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteFullWifiLockAcquiredFromSource(@NonNull android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteFullWifiLockReleasedFromSource(@NonNull android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiBatchedScanStartedFromSource(@NonNull android.os.WorkSource, @IntRange(from=0) int);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiBatchedScanStoppedFromSource(@NonNull android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiMulticastDisabled(int);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiMulticastEnabled(int);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiOff();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiOn();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiRssiChanged(@IntRange(from=0xffffff81, to=0) int);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiScanStartedFromSource(@NonNull android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiScanStoppedFromSource(@NonNull android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiState(int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteWifiSupplicantStateChanged(int, boolean);
+  }
+
   public class Binder implements android.os.IBinder {
     method public static void setProxyTransactListener(@Nullable android.os.Binder.ProxyTransactListener);
   }
@@ -5696,6 +5714,30 @@ package android.os {
     method public int getAttributionUid();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.WorkSource.WorkChain> CREATOR;
+  }
+
+}
+
+package android.os.connectivity {
+
+  public final class WifiBatteryStats implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getEnergyConsumedMaMillis();
+    method public long getIdleTimeMillis();
+    method public long getKernelActiveTimeMillis();
+    method public long getLoggingDurationMillis();
+    method public long getMonitoredRailChargeConsumedMaMillis();
+    method public long getNumAppScanRequest();
+    method public long getNumBytesRx();
+    method public long getNumBytesTx();
+    method public long getNumPacketsRx();
+    method public long getNumPacketsTx();
+    method public long getRxTimeMillis();
+    method public long getScanTimeMillis();
+    method public long getSleepTimeMillis();
+    method public long getTxTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.connectivity.WifiBatteryStats> CREATOR;
   }
 
 }

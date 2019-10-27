@@ -4745,6 +4745,14 @@ public abstract class Context {
     public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.BatteryStatsManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String BATTERY_STATS_SERVICE = "batterystats";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
