@@ -58,12 +58,12 @@ public class TaskStackTests extends WindowTestsBase {
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
 
         // Current user task should be moved to top.
-        stack.positionChildAt(WindowContainer.POSITION_TOP, task1, false /* includingParents */);
+        stack.positionChildAt(WindowContainer.POSITION_TOP, (TaskRecord) task1, false /* includingParents */);
         assertEquals(stack.mChildren.get(0), task2);
         assertEquals(stack.mChildren.get(1), task1);
 
         // Non-current user won't be moved to top.
-        stack.positionChildAt(WindowContainer.POSITION_TOP, task2, false /* includingParents */);
+        stack.positionChildAt(WindowContainer.POSITION_TOP, (TaskRecord) task2, false /* includingParents */);
         assertEquals(stack.mChildren.get(0), task2);
         assertEquals(stack.mChildren.get(1), task1);
     }

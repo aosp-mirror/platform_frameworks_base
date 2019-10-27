@@ -237,7 +237,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             prevStack.moveHomeStackToFrontIfNeeded(wasTopFocusedStack, prevStackDisplay, reason);
         }
 
-        stack.positionChildAt(position, this, moveParents);
+        // TODO(task-merge): Remove cast.
+        stack.positionChildAt(position, (TaskRecord) this, moveParents);
 
         // If we are moving from the fullscreen stack to the pinned stack then we want to preserve
         // our insets so that there will not be a jump in the area covered by system decorations.
@@ -247,7 +248,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     /** @see ActivityTaskManagerService#positionTaskInStack(int, int, int). */
     void positionAt(int position) {
-        getTaskStack().positionChildAt(position, this, false /* includingParents */);
+        // TODO(task-merge): Remove cast.
+        getTaskStack().positionChildAt(position, (TaskRecord) this, false /* includingParents */);
     }
 
     void setSendingToBottom(boolean toBottom) {
