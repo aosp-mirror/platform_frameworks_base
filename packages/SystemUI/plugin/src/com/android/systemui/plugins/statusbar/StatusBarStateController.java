@@ -18,7 +18,6 @@ package com.android.systemui.plugins.statusbar;
 
 import com.android.systemui.plugins.annotations.DependsOn;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
-import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 
 
 /**
@@ -94,5 +93,15 @@ public interface StatusBarStateController {
          * performance regressions.
          */
         default void onDozeAmountChanged(float linear, float eased) {}
+
+        /**
+         * Callback to be notified when the sysui visibility changes
+         */
+        default void onSystemUiVisibilityChanged(int visibility) {}
+
+        /**
+         * Callback to be notified when the pulsing state changes
+         */
+        default void onPulsingChanged(boolean pulsing) {}
     }
 }

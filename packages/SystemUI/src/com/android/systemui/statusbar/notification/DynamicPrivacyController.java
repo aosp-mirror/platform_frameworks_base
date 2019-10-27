@@ -20,8 +20,12 @@ import android.content.Context;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,22 +38,33 @@ public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMetho
 
     private final UnlockMethodCache mUnlockMethodCache;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
+    private final StatusBarStateController mStateController;
+    private final KeyguardMonitor mKeyguardMonitor;
     private ArraySet<Listener> mListeners = new ArraySet<>();
 
     private boolean mLastDynamicUnlocked;
     private boolean mCacheInvalid;
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Inject
     DynamicPrivacyController(Context context,
-            NotificationLockscreenUserManager notificationLockscreenUserManager) {
-        this(notificationLockscreenUserManager, UnlockMethodCache.getInstance(context));
+            KeyguardMonitor keyguardMonitor,
+            NotificationLockscreenUserManager notificationLockscreenUserManager,
+            StatusBarStateController stateController) {
+        this(notificationLockscreenUserManager, keyguardMonitor,
+                UnlockMethodCache.getInstance(context),
+                stateController);
     }
 
     @VisibleForTesting
     DynamicPrivacyController(NotificationLockscreenUserManager notificationLockscreenUserManager,
-            UnlockMethodCache unlockMethodCache) {
+            KeyguardMonitor keyguardMonitor,
+            UnlockMethodCache unlockMethodCache,
+            StatusBarStateController stateController) {
         mLockscreenUserManager = notificationLockscreenUserManager;
+        mStateController = stateController;
         mUnlockMethodCache = unlockMethodCache;
+        mKeyguardMonitor = keyguardMonitor;
         mUnlockMethodCache.addListener(this);
         mLastDynamicUnlocked = isDynamicallyUnlocked();
     }
@@ -77,11 +92,37 @@ public class DynamicPrivacyController implements UnlockMethodCache.OnUnlockMetho
     }
 
     public boolean isDynamicallyUnlocked() {
-        return mUnlockMethodCache.canSkipBouncer() && isDynamicPrivacyEnabled();
+        return (mUnlockMethodCache.canSkipBouncer() || mKeyguardMonitor.isKeyguardGoingAway()
+                || mKeyguardMonitor.isKeyguardFadingAway())
+                && isDynamicPrivacyEnabled();
     }
 
     public void addListener(Listener listener) {
         mListeners.add(listener);
+    }
+
+    /**
+     * Is the notification shade currently in a locked down mode where it's fully showing but the
+     * contents aren't revealed yet?
+     */
+    public boolean isInLockedDownShade() {
+        if (!mStatusBarKeyguardViewManager.isShowing()
+                || !mStatusBarKeyguardViewManager.isSecure()) {
+            return false;
+        }
+        int state = mStateController.getState();
+        if (state != StatusBarState.SHADE && state != StatusBarState.SHADE_LOCKED) {
+            return false;
+        }
+        if (!isDynamicPrivacyEnabled() || isDynamicallyUnlocked()) {
+            return false;
+        }
+        return true;
+    }
+
+    public void setStatusBarKeyguardViewManager(
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
     }
 
     public interface Listener {

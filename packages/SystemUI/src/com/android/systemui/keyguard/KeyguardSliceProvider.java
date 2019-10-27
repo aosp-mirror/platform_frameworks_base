@@ -53,6 +53,8 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -61,7 +63,6 @@ import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -103,8 +104,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private final Date mCurrentTime = new Date();
     private final Handler mHandler;
     private final AlarmManager.OnAlarmListener mUpdateNextAlarm = this::updateNextAlarm;
-    private final HashSet<Integer> mMediaInvisibleStates;
     private final Object mMediaToken = new Object();
+    private DozeParameters mDozeParameters;
     @VisibleForTesting
     protected SettableWakeLock mMediaWakeLock;
     @VisibleForTesting
@@ -123,6 +124,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private PendingIntent mPendingIntent;
     protected NotificationMediaManager mMediaManager;
     private StatusBarStateController mStatusBarStateController;
+    private KeyguardBypassController mKeyguardBypassController;
     private CharSequence mMediaTitle;
     private CharSequence mMediaArtist;
     protected boolean mDozing;
@@ -184,11 +186,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
         mAlarmUri = Uri.parse(KEYGUARD_NEXT_ALARM_URI);
         mDndUri = Uri.parse(KEYGUARD_DND_URI);
         mMediaUri = Uri.parse(KEYGUARD_MEDIA_URI);
-
-        mMediaInvisibleStates = new HashSet<>();
-        mMediaInvisibleStates.add(PlaybackState.STATE_NONE);
-        mMediaInvisibleStates.add(PlaybackState.STATE_STOPPED);
-        mMediaInvisibleStates.add(PlaybackState.STATE_PAUSED);
     }
 
     /**
@@ -200,11 +197,15 @@ public class KeyguardSliceProvider extends SliceProvider implements
      */
     public void initDependencies(
             NotificationMediaManager mediaManager,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            KeyguardBypassController keyguardBypassController,
+            DozeParameters dozeParameters) {
         mMediaManager = mediaManager;
         mMediaManager.addCallback(this);
         mStatusBarStateController = statusBarStateController;
         mStatusBarStateController.addCallback(this);
+        mKeyguardBypassController = keyguardBypassController;
+        mDozeParameters = dozeParameters;
     }
 
     @AnyThread
@@ -229,10 +230,13 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     protected boolean needsMediaLocked() {
+        boolean keepWhenAwake = mKeyguardBypassController != null
+                && mKeyguardBypassController.getBypassEnabled() && mDozeParameters.getAlwaysOn();
         // Show header if music is playing and the status bar is in the shade state. This way, an
         // animation isn't necessary when pressing power and transitioning to AOD.
         boolean keepWhenShade = mStatusBarState == StatusBarState.SHADE && mMediaIsVisible;
-        return !TextUtils.isEmpty(mMediaTitle) && mMediaIsVisible && (mDozing || keepWhenShade);
+        return !TextUtils.isEmpty(mMediaTitle) && mMediaIsVisible && (mDozing || keepWhenAwake
+                || keepWhenShade);
     }
 
     protected void addMediaLocked(ListBuilder listBuilder) {
@@ -457,7 +461,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     @Override
     public void onMetadataOrStateChanged(MediaMetadata metadata, @PlaybackState.State int state) {
         synchronized (this) {
-            boolean nextVisible = !mMediaInvisibleStates.contains(state);
+            boolean nextVisible = NotificationMediaManager.isPlayingState(state);
             mHandler.removeCallbacksAndMessages(mMediaToken);
             if (mMediaIsVisible && !nextVisible && mStatusBarState != StatusBarState.SHADE) {
                 // We need to delay this event for a few millis when stopping to avoid jank in the
@@ -476,7 +480,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     }
 
     private void updateMediaStateLocked(MediaMetadata metadata, @PlaybackState.State int state) {
-        boolean nextVisible = !mMediaInvisibleStates.contains(state);
+        boolean nextVisible = NotificationMediaManager.isPlayingState(state);
         CharSequence title = null;
         if (metadata != null) {
             title = metadata.getText(MediaMetadata.METADATA_KEY_TITLE);

@@ -118,9 +118,9 @@ public class RemoteAnimationDefinition implements Parcelable {
      * To be called by system_server to keep track which pid is running the remote animations inside
      * this definition.
      */
-    public void setCallingPid(int pid) {
+    public void setCallingPidUid(int pid, int uid) {
         for (int i = mTransitionAnimationMap.size() - 1; i >= 0; i--) {
-            mTransitionAnimationMap.valueAt(i).adapter.setCallingPid(pid);
+            mTransitionAnimationMap.valueAt(i).adapter.setCallingPidUid(pid, uid);
         }
     }
 

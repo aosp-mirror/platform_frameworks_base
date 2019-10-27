@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wifi_status">
     <item msgid="1922181315419294640"></item>
-    <item msgid="8934131797783724664">"Explorando..."</item>
+    <item msgid="8934131797783724664">"Buscando..."</item>
     <item msgid="8513729475867537913">"Conectando..."</item>
     <item msgid="515055375277271756">"Autenticando…"</item>
     <item msgid="1943354004029184381">"Obtendo enderezo IP..."</item>
@@ -36,7 +36,7 @@
   </string-array>
   <string-array name="wifi_status_with_ssid">
     <item msgid="7714855332363650812"></item>
-    <item msgid="8878186979715711006">"Explorando..."</item>
+    <item msgid="8878186979715711006">"Buscando..."</item>
     <item msgid="355508996603873860">"Conectando con <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="554971459996405634">"Autenticando con <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="7928343808033020343">"Obtendo enderezo IP de <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
@@ -59,9 +59,9 @@
     <item msgid="45075631231212732">"Utilizar sempre a comprobación HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="3966341281672645384">"Opción desactivada"</item>
+    <item msgid="3966341281672645384">"Desactivada"</item>
     <item msgid="1969681323976948639">"Está activado o filtrado"</item>
-    <item msgid="8719029132154020716">"Opción activada"</item>
+    <item msgid="8719029132154020716">"Activada"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (predeterminado)"</item>
@@ -86,7 +86,7 @@
     <item msgid="3304843301758635896">"Desactivar códecs opcionais"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"Usar selección do sistema (predeterminado)"</item>
+    <item msgid="5062108632402595000">"Usa a selección do sistema (predeterminado)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
     <item msgid="6839647709301342559">"AAC"</item>
     <item msgid="7848030269621918608">"Audio <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -103,7 +103,7 @@
     <item msgid="1234212100239985373">"96,0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="3214516120190965356">"Usar selección do sistema (predeterminado)"</item>
+    <item msgid="3214516120190965356">"Usa a selección do sistema (predeterminado)"</item>
     <item msgid="4482862757811638365">"44,1 kHz"</item>
     <item msgid="354495328188724404">"48,0 kHz"</item>
     <item msgid="7329816882213695083">"88,2 kHz"</item>
@@ -116,7 +116,7 @@
     <item msgid="121583001492929387">"32 bits/mostra"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="1081159789834584363">"Usar selección do sistema (predeterminado)"</item>
+    <item msgid="1081159789834584363">"Usa a selección do sistema (predeterminado)"</item>
     <item msgid="4726688794884191540">"16 bits/mostra"</item>
     <item msgid="305344756485516870">"24 bits/mostra"</item>
     <item msgid="244568657919675099">"32 bits/mostra"</item>
@@ -127,7 +127,7 @@
     <item msgid="5571632958424639155">"Estéreo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="4118561796005528173">"Usar selección do sistema (predeterminado)"</item>
+    <item msgid="4118561796005528173">"Usa a selección do sistema (predeterminado)"</item>
     <item msgid="8900559293912978337">"Mono"</item>
     <item msgid="8883739882299884241">"Estéreo"</item>
   </string-array>

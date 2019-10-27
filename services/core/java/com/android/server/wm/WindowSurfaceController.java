@@ -507,6 +507,8 @@ class WindowSurfaceController {
 
         mService.updateNonSystemOverlayWindowsVisibilityIfNeeded(mAnimator.mWin, surfaceShown);
 
+        mAnimator.mWin.onSurfaceShownChanged(surfaceShown);
+
         if (mWindowSession != null) {
             mWindowSession.onWindowSurfaceVisibilityChanged(this, mSurfaceShown, mWindowType);
         }

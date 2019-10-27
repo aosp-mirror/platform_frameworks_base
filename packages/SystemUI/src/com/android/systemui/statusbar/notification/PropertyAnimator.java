@@ -115,7 +115,20 @@ public class PropertyAnimator {
         view.setTag(animationEndTag, newEndValue);
     }
 
-    public static <T extends View> boolean isAnimating(T view, AnimatableProperty property) {
-        return  view.getTag(property.getAnimatorTag()) != null;
+    public static <T extends View> void applyImmediately(T view, AnimatableProperty property,
+            float newValue) {
+        cancelAnimation(view, property);
+        property.getProperty().set(view, newValue);
+    }
+
+    public static void cancelAnimation(View view, AnimatableProperty property) {
+        ValueAnimator animator = (ValueAnimator) view.getTag(property.getAnimatorTag());
+        if (animator != null) {
+            animator.cancel();
+        }
+    }
+
+    public static boolean isAnimating(View view, AnimatableProperty property) {
+        return view.getTag(property.getAnimatorTag()) != null;
     }
 }

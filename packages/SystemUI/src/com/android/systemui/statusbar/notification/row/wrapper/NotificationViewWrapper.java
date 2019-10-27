@@ -224,7 +224,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return null;
     }
 
-    public int getHeaderTranslation() {
+    public int getHeaderTranslation(boolean forceNoHeader) {
         return 0;
     }
 
@@ -259,6 +259,12 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public void setVisible(boolean visible) {
         mView.animate().cancel();
         mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    /**
+     * Called to indicate this view is removed
+     */
+    public void setRemoved() {
     }
 
     public int getCustomBackgroundColor() {

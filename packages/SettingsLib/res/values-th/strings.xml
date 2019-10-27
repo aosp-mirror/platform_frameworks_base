@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ไม่สามารถสแกนหาเครือข่าย"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"ไม่มี"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"บันทึกแล้ว"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"เลิกเชื่อมต่อแล้ว"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ปิดอยู่"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"การกำหนดค่า IP ล้มเหลว"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ไม่ได้เชื่อมต่อเนื่องจากเครือข่ายคุณภาพต่ำ"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"พร้อมใช้งานผ่านทาง %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"แตะเพื่อลงชื่อสมัครใช้"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"เชื่อมต่อแล้ว ไม่พบอินเทอร์เน็ต"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"การเชื่อมต่อที่จำกัด"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"ไม่มีอินเทอร์เน็ต"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"ต้องลงชื่อเข้าใช้"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"จุดเข้าใช้งานเต็มชั่วคราว"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"เชื่อมต่อแล้ว (ไม่รวมสื่อ) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"เชื่อมต่อแล้ว (ไม่รวมโทรศัพท์หรือสื่อ) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"ใช้งานอยู่ แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"ใช้งานอยู่ L: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"ใช้งานอยู่"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"เสียงของสื่อ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"โทรศัพท์"</string>
@@ -139,7 +137,7 @@
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"สัญญาณ Wi-Fi เต็ม"</string>
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"เครือข่ายแบบเปิด"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"เครือข่ายที่ปลอดภัย"</string>
-    <string name="process_kernel_label" msgid="3916858646836739323">"ระบบปฏิบัติการของ Android"</string>
+    <string name="process_kernel_label" msgid="3916858646836739323">"ระบบปฏิบัติการ Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"แอปพลิเคชันที่นำออก"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"แอปพลิเคชันและผู้ใช้ที่นำออก"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"การอัปเดตระบบ"</string>
@@ -216,19 +214,20 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"อนุญาตให้ปลดล็อกตัวโหลดการเปิดเครื่อง"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"อนุญาตการปลดล็อก OEM ไหม"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"คำเตือน: ฟีเจอร์การปกป้องอุปกรณ์จะไม่ทำงานบนอุปกรณ์นี้ขณะที่การตั้งค่านี้เปิดอยู่"</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"เลือกแอปจำลองตำแหน่ง"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"ไม่ได้ตั้งค่าแอปจำลองตำแหน่ง"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"แอปจำลองตำแหน่ง: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"เลือกแอปจำลองสถานที่"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"ไม่ได้ตั้งค่าแอปจำลองสถานที่"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"แอปจำลองสถานที่: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"เครือข่าย"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"การรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"เปิดใช้การบันทึกรายละเอียด Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"การควบคุมการสแกนหา Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"เปิดใช้เน็ตมือถือเสมอ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"การเร่งฮาร์ดแวร์การเชื่อมต่ออินเทอร์เน็ตผ่านมือถือ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"แสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ปิดใช้การควบคุมระดับเสียงของอุปกรณ์อื่น"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"เวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ตัวแปลงรหัสเสียงบลูทูธ"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ตัวแปลงสัญญาณเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"อัตราตัวอย่างเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: อัตราตัวอย่าง"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"เชื่อมต่อไม่ได้"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"ลดการเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"ไม่มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ขนาดบัฟเฟอร์ของตัวบันทึก"</string>
@@ -268,8 +268,8 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ยกเลิกการเข้าถึงเพื่อแก้ปัญหาผ่าน USB จากคอมพิวเตอร์ทุกเครื่องที่คุณได้ให้สิทธิ์ก่อนหน้านี้ไหม"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"อนุญาตการตั้งค่าสำหรับการพัฒนาหรือไม่"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"การตั้งค่านี้มีไว้เพื่อการพัฒนาเท่านั้น จึงอาจทำให้อุปกรณ์และแอปพลิเคชันที่มีอยู่เสียหายหรือทำงานผิดพลาดได้"</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปพลิเคชันผ่าน USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปพลิเคชันที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปผ่าน USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ระบบจะแสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ (มีเฉพาะที่อยู่ MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ปิดใช้ฟีเจอร์การควบคุมระดับเสียงของอุปกรณ์อื่นผ่านบลูทูธในกรณีที่มีปัญหาเกี่ยวกับระดับเสียงของอุปกรณ์ระยะไกล เช่น ระดับเสียงที่ดังเกินไปหรือระดับเสียงที่ไม่มีการควบคุม"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"เทอร์มินัลในตัวเครื่อง"</string>
@@ -277,7 +277,7 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"การตรวจสอบ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"ตั้งค่าการตรวจสอบ HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"การแก้ไขข้อบกพร่อง"</string>
-    <string name="debug_app" msgid="8349591734751384446">"เลือกแอปพลิเคชันที่จะแก้ไขข้อบกพร่อง"</string>
+    <string name="debug_app" msgid="8349591734751384446">"เลือกแอปที่จะแก้ไขข้อบกพร่อง"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"ไม่มีชุดแอปพลิเคชันแก้ไขข้อบกพร่อง"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"แอปพลิเคชันแก้ไขข้อบกพร่อง: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"เลือกแอปพลิเคชัน"</string>
@@ -292,13 +292,13 @@
     <string name="strict_mode" msgid="1938795874357830695">"เปิดใช้งานโหมดเข้มงวด"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"กะพริบหน้าจอเมื่อแอปทำงานในชุดข้อความหลักนาน"</string>
     <string name="pointer_location" msgid="6084434787496938001">"ตำแหน่งของตัวชี้"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"การวางซ้อนหน้าจอที่แสดงข้อมูลการแตะ ในปัจจุบัน"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"การวางซ้อนหน้าจอที่แสดงข้อมูลการแตะในปัจจุบัน"</string>
     <string name="show_touches" msgid="2642976305235070316">"แสดงการแตะ"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"แสดงความคิดเห็นด้วยภาพสำหรับการแตะ"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"แสดงผลตอบสนองแบบภาพเมื่อแตะ"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"แสดงการอัปเดตพื้นผิว"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"แฟลชพื้นผิวหน้าต่างทั้งหมดเมื่อมีการอัปเดต"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"กะพริบหน้าต่างทั้งหมดเมื่อมีการอัปเดต"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"แสดงมุมมองการอัปเดต"</string>
-    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"แสดงมุมมองภายในหน้าต่างขณะลาก"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"แสดงมุมมองกะพริบภายในหน้าต่างขณะลาก"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"แสดงอัปเดตเลเยอร์ฮาร์ดแวร์"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"เลเยอร์ฮาร์ดแวร์กะพริบเป็นสีเขียว เมื่อมีการอัปเดต"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"แก้ปัญหาการแสดงพิกเซลซ้ำด้วย GPU"</string>
@@ -331,13 +331,13 @@
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ทำให้สามารถเขียนแอปใดๆ ก็ตามไปยังพื้นที่เก็บข้อมูลภายนอกได้ โดยไม่คำนึงถึงค่าในไฟล์ Manifest"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"เขียนแอปในพื้นที่เก็บข้อมูลภายนอกได้ โดยไม่คำนึงถึงค่าไฟล์ Manifest"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"บังคับให้กิจกรรมปรับขนาดได้"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ทำให้กิจกรรมทั้งหมดปรับขนาดได้สำหรับหน้าต่างหลายบาน โดยไม่คำนึงถึงค่าในไฟล์ Manifest"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"เปิดใช้หน้าต่างรูปแบบอิสระ"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"เปิดการสนับสนุนหน้าต่างรูปแบบอิสระแบบทดลอง"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"รหัสผ่านการสำรองข้อมูลในเดสก์ท็อป"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"การสำรองข้อมูลเต็มรูปแบบในเดสก์ท็อป ไม่ได้รับการป้องกันในขณะนี้"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"การสำรองข้อมูลเต็มรูปแบบในเดสก์ท็อปไม่ได้รับการป้องกันในขณะนี้"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"แตะเพื่อเปลี่ยนแปลงหรือลบรหัสผ่านสำหรับการสำรองข้อมูลเต็มรูปแบบในเดสก์ท็อป"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ตั้งรหัสผ่านสำหรับการสำรองข้อมูลใหม่แล้ว"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"รหัสผ่านใหม่และการพิมพ์ยืนยันไม่ตรงกัน"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"น่าจะใช้งานได้ถึงเวลาประมาณ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"น่าจะใช้งานได้ถึงเวลาประมาณ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"จนถึง <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"ยืดอายุการใช้งานแบตเตอรี่หลังเวลา <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"เหลืออีกไม่ถึง <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"เหลือเวลาอีกไม่ถึง <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"เหลือเวลามากกว่า <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -404,7 +403,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"อุปกรณ์อาจปิดเครื่องในไม่ช้า (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"อีก <xliff:g id="TIME">%1$s</xliff:g> จึงจะชาร์จเต็ม"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> จนกว่าจะชาร์จเต็ม"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>จนกว่าจะชาร์จเต็ม"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"ไม่ทราบ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"กำลังชาร์จ"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"กำลังชาร์จ"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ถามทุกครั้ง"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"จนกว่าคุณจะปิด"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"เมื่อสักครู่"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"อุปกรณ์นี้"</string>
 </resources>

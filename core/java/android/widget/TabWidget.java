@@ -433,7 +433,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * to the next tabbed view, in this example).
      * <p>
      * To move both the focus AND the selected tab at once, please use
-     * {@link #setCurrentTab}. Normally, the view logic takes care of
+     * {@link #focusCurrentTab}. Normally, the view logic takes care of
      * adjusting the focus, so unless you're circumventing the UI,
      * you'll probably just focus your interest here.
      *

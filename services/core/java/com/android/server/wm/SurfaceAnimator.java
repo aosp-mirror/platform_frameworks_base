@@ -324,9 +324,9 @@ class SurfaceAnimator {
                 .setName(surface + " - animation-leash");
         final SurfaceControl leash = builder.build();
         t.setWindowCrop(leash, width, height);
-        if (!hidden) {
-            t.show(leash);
-        }
+        t.show(leash);
+        // TODO: change this back to use show instead of alpha when b/138459974 is fixed.
+        t.setAlpha(leash, hidden ? 0 : 1);
         t.reparent(surface, leash);
         return leash;
     }

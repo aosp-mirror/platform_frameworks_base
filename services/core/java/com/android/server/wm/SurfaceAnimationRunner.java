@@ -193,7 +193,9 @@ class SurfaceAnimationRunner {
             public void onAnimationStart(Animator animation) {
                 synchronized (mCancelLock) {
                     if (!a.mCancelled) {
-                        mFrameTransaction.show(a.mLeash);
+                        // TODO: change this back to use show instead of alpha when b/138459974 is
+                        // fixed.
+                        mFrameTransaction.setAlpha(a.mLeash, 1);
                     }
                 }
             }

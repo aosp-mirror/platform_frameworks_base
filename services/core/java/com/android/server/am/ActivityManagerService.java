@@ -5279,7 +5279,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             storageManager.commitChanges();
         } catch (Exception e) {
             PowerManager pm = (PowerManager)
-                     mContext.getSystemService(Context.POWER_SERVICE);
+                     mInjector.getContext().getSystemService(Context.POWER_SERVICE);
             pm.reboot("Checkpoint commit failed");
         }
 
@@ -8484,32 +8484,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
-        if (pid == Process.myPid()) {
-            Slog.wtf(TAG, "system can't run remote animation");
-            return;
-        }
-        synchronized (ActivityManagerService.this) {
-            final ProcessRecord pr;
-            synchronized (mPidsSelfLocked) {
-                pr = mPidsSelfLocked.get(pid);
-                if (pr == null) {
-                    Slog.w(TAG, "setRunningRemoteAnimation called on unknown pid: " + pid);
-                    return;
-                }
-            }
-            if (pr.runningRemoteAnimation == runningRemoteAnimation) {
-                return;
-            }
-            pr.runningRemoteAnimation = runningRemoteAnimation;
-            if (DEBUG_OOM_ADJ) {
-                Slog.i(TAG, "Setting runningRemoteAnimation=" + pr.runningRemoteAnimation
-                        + " for pid=" + pid);
-            }
-            updateOomAdjLocked(pr, true, OomAdjuster.OOM_ADJ_REASON_UI_VISIBILITY);
         }
     }
 
@@ -17988,11 +17962,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 return isUidActiveLocked(uid);
             }
-        }
-
-        @Override
-        public void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation) {
-            ActivityManagerService.this.setRunningRemoteAnimation(pid, runningRemoteAnimation);
         }
 
         @Override

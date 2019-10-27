@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Не може да скенира за мрежи"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ниедна"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Зачувано"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Исклучен"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Оневозможено"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Конфигурирањето ИП не успеа"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Не е поврзано поради нискиот квалитет на мрежата"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Достапно преку %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Допрете за да се регистрирате"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Поврзана, нема интернет"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Ограничена врска"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Нема интернет"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Потребно е најавување"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Пристапната точка привремено е преоптоварена"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без аудиовизуелни содржини), ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Поврзан со <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без телефон и аудиовизуелни содржини), ниво на батеријата <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Активен, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Активен, Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерија"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерија, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерија"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Активен"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Аудио на медиуми"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Телефонски повици"</string>
@@ -155,7 +153,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Поставени се некои стандардни вредности"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Нема поставено стандардни вредности"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Поставки на текст-во-говор"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Излез текст-во-говор"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Претворање текст во говор"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Брзина на говор"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Брзина со која се кажува текстот"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Интензитет"</string>
@@ -169,7 +167,7 @@
     <string name="tts_install_data_title" msgid="4264378440508149986">"Инсталирај гласовни податоци"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Инсталирај ги гласовните податоци потребни за синтеза на говор"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Овој софтвер за синтеза на говор може да го собере сиот текст што ќе се говори, вклучувајќи и лични податоци како што се лозинки и броеви на кредитни картички. Тоа го прави апликацијата <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Употреби го овој софтвер за синтеза на говор?"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"За овој јазик е потребно поврување со мрежа што функционира на излез за текст-во-говор."</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"За претворање текст во говор на овој јазик, потребна е активна мрежна врска."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Ова е пример на синтеза на говор"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Статус на стандарден јазик"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> е целосно поддржан"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Вмрежување"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Приказ на сертификација на безжична мрежа"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Овозможи преопширно пријавување Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Регулирање на скенирањето за Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобилниот интернет е секогаш активен"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Хардверско забрзување за врзување"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Прикажувај уреди со Bluetooth без имиња"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не може да се поврзе"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Покажи ги опциите за безжичен приказ на сертификат"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Зголеми Wi‑Fi ниво на пријавување, прикажи по SSID RSSI во Wi‑Fi бирач"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Го намалува искористувањето на батеријата и ја подобрува изведбата на мрежата"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Со ограничен интернет"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Без ограничен интернет"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Величини на меѓумеморија за дневникот"</string>
@@ -262,7 +262,7 @@
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Овозможи лажни локации"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Овозможете проверка на атрибутот на приказот"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Секогаш држи го активен мобилниот интернет, дури и при активно Wi-Fi (за брзо префрлување мрежа)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Ако е достапно, користете хардверско забрзување за врзување"</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Ако е достапно, користи хардверско забрзување за врзување"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Овозможи отстранување грешки на USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отстранувањето грешки на USB е наменето само за целите на развој. Користете го за копирање податоци меѓу вашиот компјутер и вашиот уред, за инсталирање апликации на вашиот уред без известување и за читање евиденција на податоци."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Отповикај пристап кон отстранување грешка од USB од сите претходно овластени компјутери?"</string>
@@ -336,9 +336,9 @@
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Направете сите активности да бидат со променлива големина за повеќе прозорци, без разлика на вредностите на манифестот."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Овозможи прозорци со слободна форма"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Овозможи поддршка за експериментални прозорци со слободна форма."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Резервна лозинка за работна површина"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Целосни резервни копии на работната површина кои во моментов не се заштитени"</string>
-    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Допрете за да се промени или отстрани лозинката за целосни резервни копии на работната површина"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Лозинка за бекап на компјутер"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Целосниот бекап на компјутерот во моментов не е заштитен"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Допрете за да се промени или отстрани лозинката за целосен бекап на компјутерот"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Подесена нова лозинка на резервна копија"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Новата лозинка и потврдата не се исти"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Неуспешно подесување лозинка на резервна копија"</string>
@@ -375,7 +375,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Девтераномалија (слепило за црвена и зелена)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Протаномалија (слепило за црвена и зелена)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Тританомалија (слепило за сина и жолта)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Корекција на боја"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Корекција на бои"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Функцијата е експериментална и може да влијае на изведбата."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Прескокнато според <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Треба да трае до околу <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Треба да трае до околу <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"До <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Продолжи го траењето на батеријата после <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Уште помалку од <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Уште помалку од <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Уште повеќе од <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Секогаш прашувај"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Додека не го исклучите"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Неодамнешни"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Овој уред"</string>
 </resources>

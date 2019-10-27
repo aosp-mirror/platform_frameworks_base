@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.NonNull;
+
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
@@ -45,5 +47,5 @@ public interface OnHeadsUpChangedListener {
      * @param entry     the entry of the changed notification
      * @param isHeadsUp whether the notification is now a headsUp notification
      */
-    default void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {}
+    default void onHeadsUpStateChanged(@NonNull NotificationEntry entry, boolean isHeadsUp) {}
 }

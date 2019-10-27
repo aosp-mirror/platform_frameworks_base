@@ -34,16 +34,16 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"El codi PIN no és correcte."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"La targeta no és vàlida."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Completament carregada"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant sense fils"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant sense fil"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant ràpidament"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • S\'està carregant lentament"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Connecta el carregador."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Prem Menú per desbloquejar."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"La xarxa està bloquejada"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"No hi ha cap targeta SIM"</string>
-    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"No hi ha cap targeta SIM a la tauleta."</string>
-    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"No hi ha cap targeta SIM al telèfon."</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"No hi ha cap SIM"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"No hi ha cap SIM a la tauleta."</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"No hi ha cap SIM al telèfon."</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Insereix una targeta SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"Falta la targeta SIM o no es pot llegir. Insereix-ne una."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"La targeta SIM no es pot fer servir."</string>
@@ -112,7 +112,7 @@
       <item quantity="other">El codi PUK de la SIM no és correcte. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents; si els esgotes tots, la SIM no es podrà tornar a fer servir.</item>
       <item quantity="one">El codi PUK de la SIM no és correcte. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir.</item>
     </plurals>
-    <string name="kg_password_pin_failed" msgid="8769990811451236223">"No s\'ha pogut desbloquejar la SIM amb el codi PIN."</string>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"Ha fallat l\'operació del PIN de la SIM"</string>
     <string name="kg_password_puk_failed" msgid="1331621440873439974">"No s\'ha pogut desbloquejar la SIM amb el codi PUK."</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"S\'ha acceptat el codi."</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"Sense servei"</string>
@@ -151,31 +151,7 @@
       <item quantity="other">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queden <xliff:g id="_NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
       <item quantity="one">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queda <xliff:g id="_NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="other">"<annotation name="color">"Són les"</annotation>\n"^1 i\n^2</item>
-      <item quantity="one">"<annotation name="color">"És la"</annotation>\n"^1 i\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"i dotze"</item>
-    <item msgid="7389464214252023751">"Una"</item>
-    <item msgid="8803180377002008046">"Dues"</item>
-    <item msgid="8614897059944644719">"Tres"</item>
-    <item msgid="2293058674782619556">"Quatre"</item>
-    <item msgid="4815402358455041664">"Cinc"</item>
-    <item msgid="3325754778509665687">"Sis"</item>
-    <item msgid="5805551341866280575">"Set"</item>
-    <item msgid="203334816668238610">"Vuit"</item>
-    <item msgid="4828052671464488923">"Nou"</item>
-    <item msgid="2233497913571137419">"Deu"</item>
-    <item msgid="5621554266768657830">"i onze"</item>
-  </string-array>
-    <!-- no translation found for type_clock_minutes:1 (2091812961809760681) -->
-    <!-- no translation found for type_clock_minutes:2 (1496435384877290709) -->
-    <!-- no translation found for type_clock_minutes:3 (881846472976674129) -->
-    <!-- no translation found for type_clock_minutes:4 (2784477043911540584) -->
-    <!-- no translation found for type_clock_minutes:5 (1610928853656700614) -->
-    <!-- no translation found for type_clock_minutes:6 (2317806244043886658) -->
-    <!-- no translation found for type_clock_minutes:7 (3318687539120971327) -->
-    <!-- no translation found for type_clock_minutes:8 (5701600693712102348) -->
-    <!-- no translation found for type_clock_minutes:9 (3247381605947372495) -->
+    <string name="clock_title_default" msgid="6645600990069154049">"Predeterminada"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bombolla"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analògica"</string>
 </resources>

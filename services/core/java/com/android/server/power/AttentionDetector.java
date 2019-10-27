@@ -40,6 +40,7 @@ import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -102,6 +103,9 @@ public class AttentionDetector {
     protected AttentionManagerInternal mAttentionManager;
 
     @VisibleForTesting
+    protected WindowManagerInternal mWindowManager;
+
+    @VisibleForTesting
     protected PackageManager mPackageManager;
 
     @VisibleForTesting
@@ -142,6 +146,7 @@ public class AttentionDetector {
         mPackageManager = context.getPackageManager();
         mContentResolver = context.getContentResolver();
         mAttentionManager = LocalServices.getService(AttentionManagerInternal.class);
+        mWindowManager = LocalServices.getService(WindowManagerInternal.class);
         mMaximumExtensionMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_attentionMaximumExtension);
         mMaxAttentionApiTimeoutMillis = context.getResources().getInteger(
@@ -156,7 +161,7 @@ public class AttentionDetector {
 
         context.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                 Settings.System.ADAPTIVE_SLEEP),
-                false, new ContentObserver(new Handler()) {
+                false, new ContentObserver(new Handler(context.getMainLooper())) {
                     @Override
                     public void onChange(boolean selfChange) {
                         updateEnabledFromSettings(context);
@@ -165,14 +170,10 @@ public class AttentionDetector {
     }
 
     public long updateUserActivity(long nextScreenDimming) {
-        if (nextScreenDimming == mLastActedOnNextScreenDimming) {
-            return nextScreenDimming;
-        }
-        if (!mIsSettingEnabled) {
-            return nextScreenDimming;
-        }
-
-        if (!isAttentionServiceSupported()) {
+        if (nextScreenDimming == mLastActedOnNextScreenDimming
+                || !mIsSettingEnabled
+                || !isAttentionServiceSupported()
+                || mWindowManager.isKeyguardShowingAndNotOccluded()) {
             return nextScreenDimming;
         }
 
@@ -297,6 +298,7 @@ public class AttentionDetector {
 
     public void dump(PrintWriter pw) {
         pw.println("AttentionDetector:");
+        pw.println(" mIsSettingEnabled=" + mIsSettingEnabled);
         pw.println(" mMaximumExtensionMillis=" + mMaximumExtensionMillis);
         pw.println(" mMaxAttentionApiTimeoutMillis=" + mMaxAttentionApiTimeoutMillis);
         pw.println(" mLastUserActivityTime(excludingAttention)=" + mLastUserActivityTime);

@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.util.Assert;
@@ -86,6 +87,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final boolean mAlwaysExpandNonGroupedNotification;
     private final BubbleData mBubbleData;
     private final DynamicPrivacyController mDynamicPrivacyController;
+    private final KeyguardBypassController mBypassController;
 
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
@@ -106,9 +108,11 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             NotificationEntryManager notificationEntryManager,
             Lazy<ShadeController> shadeController,
             BubbleData bubbleData,
+            KeyguardBypassController bypassController,
             DynamicPrivacyController privacyController) {
         mHandler = mainHandler;
         mLockscreenUserManager = notificationLockscreenUserManager;
+        mBypassController = bypassController;
         mGroupManager = groupManager;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
@@ -168,7 +172,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             boolean deviceSensitive = devicePublic
                     && !mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
                     currentUserId);
-            ent.getRow().setSensitive(sensitive, deviceSensitive);
+            ent.setSensitive(sensitive, deviceSensitive);
             ent.getRow().setNeedsRedaction(needsRedaction);
             if (mGroupManager.isChildInGroupWithSummary(ent.notification)) {
                 NotificationEntry summary = mGroupManager.getGroupSummary(ent.notification);
@@ -362,7 +366,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         int visibleNotifications = 0;
         boolean onKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
         int maxNotifications = -1;
-        if (onKeyguard) {
+        if (onKeyguard && !mBypassController.getBypassEnabled()) {
             maxNotifications = mPresenter.getMaxNotificationsWhileLocked(true /* recompute */);
         }
         mListContainer.setMaxDisplayedNotifications(maxNotifications);
@@ -390,7 +394,6 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                         && !row.isLowPriority()));
             }
 
-            entry.getRow().setOnAmbient(mShadeController.get().isDozing());
             int userId = entry.notification.getUserId();
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
                     entry.notification) && !entry.isRowRemoved();

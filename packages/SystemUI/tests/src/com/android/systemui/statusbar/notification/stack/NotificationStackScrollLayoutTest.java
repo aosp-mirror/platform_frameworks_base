@@ -55,13 +55,13 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -105,7 +106,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private StatusBar mBar;
-    @Mock private StatusBarStateController mBarState;
+    @Mock private SysuiStatusBarStateController mBarState;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
     @Mock private NotificationGroupManager mGroupManager;
@@ -117,6 +118,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
+    @Mock private KeyguardBypassController mKeyguardBypassController;
     private TestableNotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
 
@@ -135,7 +137,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mDependency.injectTestDependency(
                 NotificationBlockingHelperManager.class,
                 mBlockingHelperManager);
-        mDependency.injectTestDependency(StatusBarStateController.class, mBarState);
+        mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(NotificationRemoteInputManager.class,
                 mRemoteInputManager);
@@ -158,16 +160,16 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // member variables, not the spy's member variables.
         mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null,
                 true /* allowLongPress */, mNotificationRoundnessManager,
-                new AmbientPulseManager(mContext),
                 mock(DynamicPrivacyController.class),
                 mock(ConfigurationController.class),
                 mock(ActivityStarterDelegate.class),
-                mock(StatusBarStateController.class));
+                mock(SysuiStatusBarStateController.class),
+                mHeadsUpManager,
+                mKeyguardBypassController);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);
         mStackScroller.setScrimController(mock(ScrimController.class));
-        mStackScroller.setHeadsUpManager(mHeadsUpManager);
         mStackScroller.setGroupManager(mGroupManager);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         mStackScroller.setIconAreaController(mNotificationIconAreaController);
@@ -182,7 +184,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mGroupManager).collapseAllGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(notificationShelf).setAnimationsEnabled(anyBoolean());
-        doNothing().when(notificationShelf).fadeInTranslating();
     }
 
     @After
@@ -197,17 +198,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.setDimmed(true /* dimmed */, false /* animate */);
         mStackScroller.setDimmed(true /* dimmed */, true /* animate */);
         assertFalse(mStackScroller.isDimmed());
-    }
-
-    @Test
-    public void testAntiBurnInOffset() {
-        final int burnInOffset = 30;
-        mStackScroller.setAntiBurnInOffsetX(burnInOffset);
-        mStackScroller.setDark(false /* dark */, false /* animated */, null /* touch */);
-        Assert.assertEquals(0 /* expected */, mStackScroller.getTranslationX(), 0.01 /* delta */);
-        mStackScroller.setDark(true /* dark */, false /* animated */, null /* touch */);
-        Assert.assertEquals(burnInOffset /* expected */, mStackScroller.getTranslationX(),
-                0.01 /* delta */);
     }
 
     @Test
@@ -395,7 +385,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         NotificationSwipeHelper swipeActionHelper =
                 (NotificationSwipeHelper) mStackScroller.getSwipeActionHelper();
         swipeActionHelper.setExposedMenuView(new View(mContext));
-        mStackScroller.setDarkAmount(0.1f, 0.1f);
+        mStackScroller.setHideAmount(0.1f, 0.1f);
         assertNull(swipeActionHelper.getExposedMenuView());
     }
 
@@ -442,9 +432,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @UiThreadTest
-    public void testOnMenuShownLogging() {
-        // Set up the object under test to have a valid mHeadsUpManager. See notes in setup.
-        mStackScrollerInternal.setHeadsUpManager(mHeadsUpManager);
+    public void testOnMenuShownLogging() { ;
 
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
         when(row.getStatusBarNotification().getLogMaker()).thenReturn(new LogMaker(

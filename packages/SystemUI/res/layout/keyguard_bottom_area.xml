@@ -46,6 +46,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:paddingStart="@dimen/keyguard_indication_text_padding"
+                android:paddingEnd="@dimen/keyguard_indication_text_padding"
                 android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
                 android:visibility="gone" />
 
@@ -54,6 +56,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:paddingStart="@dimen/keyguard_indication_text_padding"
+                android:paddingEnd="@dimen/keyguard_indication_text_padding"
                 android:textAppearance="@style/TextAppearance.Keyguard.BottomArea"
                 android:accessibilityLiveRegion="polite" />
 
