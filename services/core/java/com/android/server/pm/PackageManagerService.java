@@ -249,7 +249,6 @@ import android.os.storage.VolumeInfo;
 import android.os.storage.VolumeRecord;
 import android.permission.IPermissionManager;
 import android.provider.DeviceConfig;
-import android.provider.MediaStore;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.security.KeyStore;
@@ -21938,6 +21937,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     void onNewUserCreated(final int userId) {
         mPermissionManager.onNewUserCreated(userId);
+    }
+
+    boolean readPermissionStateForUser(@UserIdInt int userId) {
+        synchronized (mPackages) {
+            mSettings.readPermissionStateForUserSyncLPr(userId);
+            return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
+        }
     }
 
     @Override

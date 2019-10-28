@@ -492,6 +492,10 @@ public class UserManagerService extends IUserManager.Stub {
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mUms.cleanupPartialUsers();
+
+                if (mUms.mPm.isDeviceUpgrading()) {
+                    mUms.cleanupPreCreatedUsers();
+                }
             }
         }
 
@@ -613,6 +617,33 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo ui = partials.get(i);
             Slog.w(LOG_TAG, "Removing partially created user " + ui.id
                     + " (name=" + ui.name + ")");
+            removeUserState(ui.id);
+        }
+    }
+
+    /**
+     * Removes any pre-created users from the system. Should be invoked after OTAs, to ensure
+     * pre-created users are not stale. New pre-created pool can be re-created after the update.
+     */
+    void cleanupPreCreatedUsers() {
+        final ArrayList<UserInfo> preCreatedUsers;
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            preCreatedUsers = new ArrayList<>(userSize);
+            for (int i = 0; i < userSize; i++) {
+                UserInfo ui = mUsers.valueAt(i).info;
+                if (ui.preCreated) {
+                    preCreatedUsers.add(ui);
+                    addRemovingUserIdLocked(ui.id);
+                    ui.flags |= UserInfo.FLAG_DISABLED;
+                    ui.partial = true;
+                }
+            }
+        }
+        final int preCreatedSize = preCreatedUsers.size();
+        for (int i = 0; i < preCreatedSize; i++) {
+            UserInfo ui = preCreatedUsers.get(i);
+            Slog.i(LOG_TAG, "Removing pre-created user " + ui.id);
             removeUserState(ui.id);
         }
     }
@@ -3079,7 +3110,6 @@ public class UserManagerService extends IUserManager.Stub {
             @NonNull String userType, @UserInfoFlag int flags, @UserIdInt int parentId,
             boolean preCreate, @Nullable String[] disallowedPackages,
             @NonNull TimingsTraceAndSlog t) {
-
         final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
         if (userTypeDetails == null) {
             Slog.e(LOG_TAG, "Cannot create user of invalid user type: " + userType);
@@ -3255,9 +3285,9 @@ public class UserManagerService extends IUserManager.Stub {
                 mBaseUserRestrictions.append(userId, restrictions);
             }
 
-            t.traceBegin("PM.onNewUserCreated");
+            t.traceBegin("PM.onNewUserCreated-" + userId);
             mPm.onNewUserCreated(userId);
-
+            t.traceEnd();
             if (preCreate) {
                 // Must start user (which will be stopped right away, through
                 // UserController.finishUserUnlockedCompleted) so services can properly
@@ -3324,11 +3354,16 @@ public class UserManagerService extends IUserManager.Stub {
         preCreatedUser.preCreated = false;
         preCreatedUser.creationTime = getCreationTime();
 
-        dispatchUserAddedIntent(preCreatedUser);
         synchronized (mPackagesLock) {
             writeUserLP(preCreatedUserData);
             writeUserListLP();
         }
+        updateUserIds();
+        if (!mPm.readPermissionStateForUser(preCreatedUser.id)) {
+            // Could not read the existing permissions, re-grant them.
+            mPm.onNewUserCreated(preCreatedUser.id);
+        }
+        dispatchUserAddedIntent(preCreatedUser);
         return preCreatedUser;
     }
 
@@ -4024,14 +4059,16 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
-                if (!mUsers.valueAt(i).info.partial) {
+                UserInfo userInfo = mUsers.valueAt(i).info;
+                if (!userInfo.partial && !userInfo.preCreated) {
                     num++;
                 }
             }
             final int[] newUsers = new int[num];
             int n = 0;
             for (int i = 0; i < userSize; i++) {
-                if (!mUsers.valueAt(i).info.partial) {
+                UserInfo userInfo = mUsers.valueAt(i).info;
+                if (!userInfo.partial && !userInfo.preCreated) {
                     newUsers[n++] = mUsers.keyAt(i);
                 }
             }
@@ -4092,7 +4129,10 @@ public class UserManagerService extends IUserManager.Stub {
      * recycled.
      */
     void reconcileUsers(String volumeUuid) {
-        mUserDataPreparer.reconcileUsers(volumeUuid, getUsers(true /* excludeDying */));
+        mUserDataPreparer.reconcileUsers(volumeUuid, getUsers(
+                /* excludePartial= */ true,
+                /* excludeDying= */ true,
+                /* excludePreCreated= */ false));
     }
 
     /**

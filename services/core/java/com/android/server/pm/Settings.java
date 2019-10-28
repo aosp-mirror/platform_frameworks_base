@@ -3123,6 +3123,10 @@ public final class Settings {
         return true;
     }
 
+    void readPermissionStateForUserSyncLPr(@UserIdInt int userId) {
+        mRuntimePermissionsPersistence.readStateForUserSyncLPr(userId);
+    }
+
     void applyDefaultPreferredAppsLPw(int userId) {
         // First pull data from any pre-installed apps.
         final PackageManagerInternal pmInternal =
