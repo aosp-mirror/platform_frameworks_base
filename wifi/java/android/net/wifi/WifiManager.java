@@ -2154,69 +2154,69 @@ public class WifiManager {
     }
 
     /** @hide */
-    public static final int WIFI_FEATURE_INFRA            = 0x0001;  // Basic infrastructure mode
+    public static final long WIFI_FEATURE_INFRA            = 0x0001L;  // Basic infrastructure mode
     /** @hide */
-    public static final int WIFI_FEATURE_INFRA_5G         = 0x0002;  // Support for 5 GHz Band
+    public static final long WIFI_FEATURE_INFRA_5G         = 0x0002L;  // Support for 5 GHz Band
     /** @hide */
-    public static final int WIFI_FEATURE_PASSPOINT        = 0x0004;  // Support for GAS/ANQP
+    public static final long WIFI_FEATURE_PASSPOINT        = 0x0004L;  // Support for GAS/ANQP
     /** @hide */
-    public static final int WIFI_FEATURE_P2P              = 0x0008;  // Wifi-Direct
+    public static final long WIFI_FEATURE_P2P              = 0x0008L;  // Wifi-Direct
     /** @hide */
-    public static final int WIFI_FEATURE_MOBILE_HOTSPOT   = 0x0010;  // Soft AP
+    public static final long WIFI_FEATURE_MOBILE_HOTSPOT   = 0x0010L;  // Soft AP
     /** @hide */
-    public static final int WIFI_FEATURE_SCANNER          = 0x0020;  // WifiScanner APIs
+    public static final long WIFI_FEATURE_SCANNER          = 0x0020L;  // WifiScanner APIs
     /** @hide */
-    public static final int WIFI_FEATURE_AWARE            = 0x0040;  // Wi-Fi AWare networking
+    public static final long WIFI_FEATURE_AWARE            = 0x0040L;  // Wi-Fi AWare networking
     /** @hide */
-    public static final int WIFI_FEATURE_D2D_RTT          = 0x0080;  // Device-to-device RTT
+    public static final long WIFI_FEATURE_D2D_RTT          = 0x0080L;  // Device-to-device RTT
     /** @hide */
-    public static final int WIFI_FEATURE_D2AP_RTT         = 0x0100;  // Device-to-AP RTT
+    public static final long WIFI_FEATURE_D2AP_RTT         = 0x0100L;  // Device-to-AP RTT
     /** @hide */
-    public static final int WIFI_FEATURE_BATCH_SCAN       = 0x0200;  // Batched Scan (deprecated)
+    public static final long WIFI_FEATURE_BATCH_SCAN       = 0x0200L;  // Batched Scan (deprecated)
     /** @hide */
-    public static final int WIFI_FEATURE_PNO              = 0x0400;  // Preferred network offload
+    public static final long WIFI_FEATURE_PNO              = 0x0400L;  // Preferred network offload
     /** @hide */
-    public static final int WIFI_FEATURE_ADDITIONAL_STA   = 0x0800;  // Support for two STAs
+    public static final long WIFI_FEATURE_ADDITIONAL_STA   = 0x0800L;  // Support for two STAs
     /** @hide */
-    public static final int WIFI_FEATURE_TDLS             = 0x1000;  // Tunnel directed link setup
+    public static final long WIFI_FEATURE_TDLS             = 0x1000L;  // Tunnel directed link setup
     /** @hide */
-    public static final int WIFI_FEATURE_TDLS_OFFCHANNEL  = 0x2000;  // Support for TDLS off channel
+    public static final long WIFI_FEATURE_TDLS_OFFCHANNEL  = 0x2000L;  // TDLS off channel
     /** @hide */
-    public static final int WIFI_FEATURE_EPR              = 0x4000;  // Enhanced power reporting
+    public static final long WIFI_FEATURE_EPR              = 0x4000L;  // Enhanced power reporting
     /** @hide */
-    public static final int WIFI_FEATURE_AP_STA           = 0x8000;  // AP STA Concurrency
+    public static final long WIFI_FEATURE_AP_STA           = 0x8000L;  // AP STA Concurrency
     /** @hide */
-    public static final int WIFI_FEATURE_LINK_LAYER_STATS = 0x10000; // Link layer stats collection
+    public static final long WIFI_FEATURE_LINK_LAYER_STATS = 0x10000L; // Link layer stats
     /** @hide */
-    public static final int WIFI_FEATURE_LOGGER           = 0x20000; // WiFi Logger
+    public static final long WIFI_FEATURE_LOGGER           = 0x20000L; // WiFi Logger
     /** @hide */
-    public static final int WIFI_FEATURE_HAL_EPNO         = 0x40000; // Enhanced PNO
+    public static final long WIFI_FEATURE_HAL_EPNO         = 0x40000L; // Enhanced PNO
     /** @hide */
-    public static final int WIFI_FEATURE_RSSI_MONITOR     = 0x80000; // RSSI Monitor
+    public static final long WIFI_FEATURE_RSSI_MONITOR     = 0x80000L; // RSSI Monitor
     /** @hide */
-    public static final int WIFI_FEATURE_MKEEP_ALIVE      = 0x100000; // mkeep_alive
+    public static final long WIFI_FEATURE_MKEEP_ALIVE      = 0x100000L; // mkeep_alive
     /** @hide */
-    public static final int WIFI_FEATURE_CONFIG_NDO       = 0x200000; // ND offload
+    public static final long WIFI_FEATURE_CONFIG_NDO       = 0x200000L; // ND offload
     /** @hide */
-    public static final int WIFI_FEATURE_TRANSMIT_POWER   = 0x400000; // Capture transmit power
+    public static final long WIFI_FEATURE_TRANSMIT_POWER   = 0x400000L; // Capture transmit power
     /** @hide */
-    public static final int WIFI_FEATURE_CONTROL_ROAMING  = 0x800000; // Control firmware roaming
+    public static final long WIFI_FEATURE_CONTROL_ROAMING  = 0x800000L; // Control firmware roaming
     /** @hide */
-    public static final int WIFI_FEATURE_IE_WHITELIST     = 0x1000000; // Probe IE white listing
+    public static final long WIFI_FEATURE_IE_WHITELIST     = 0x1000000L; // Probe IE white listing
     /** @hide */
-    public static final int WIFI_FEATURE_SCAN_RAND        = 0x2000000; // Random MAC & Probe seq
+    public static final long WIFI_FEATURE_SCAN_RAND        = 0x2000000L; // Random MAC & Probe seq
     /** @hide */
-    public static final int WIFI_FEATURE_TX_POWER_LIMIT   = 0x4000000; // Set Tx power limit
+    public static final long WIFI_FEATURE_TX_POWER_LIMIT   = 0x4000000L; // Set Tx power limit
     /** @hide */
-    public static final int WIFI_FEATURE_WPA3_SAE         = 0x8000000; // WPA3-Personal SAE
+    public static final long WIFI_FEATURE_WPA3_SAE         = 0x8000000L; // WPA3-Personal SAE
     /** @hide */
-    public static final int WIFI_FEATURE_WPA3_SUITE_B     = 0x10000000; // WPA3-Enterprise Suite-B
+    public static final long WIFI_FEATURE_WPA3_SUITE_B     = 0x10000000L; // WPA3-Enterprise Suite-B
     /** @hide */
-    public static final int WIFI_FEATURE_OWE              = 0x20000000; // Enhanced Open
+    public static final long WIFI_FEATURE_OWE              = 0x20000000L; // Enhanced Open
     /** @hide */
-    public static final int WIFI_FEATURE_LOW_LATENCY      = 0x40000000; // Low Latency modes
+    public static final long WIFI_FEATURE_LOW_LATENCY      = 0x40000000L; // Low Latency modes
     /** @hide */
-    public static final int WIFI_FEATURE_DPP              = 0x80000000; // DPP (Easy-Connect)
+    public static final long WIFI_FEATURE_DPP              = 0x80000000L; // DPP (Easy-Connect)
     /** @hide */
     public static final long WIFI_FEATURE_P2P_RAND_MAC    = 0x100000000L; // Random P2P MAC
 
