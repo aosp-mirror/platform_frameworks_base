@@ -857,10 +857,10 @@ class RootActivityContainer extends ConfigurationContainer
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
-                stack.switchUserLocked(userId);
+                stack.switchUser(userId);
                 TaskRecord task = stack.topTask();
                 if (task != null) {
-                    stack.positionChildWindowContainerAtTop(task);
+                    stack.positionChildAtTop(task);
                 }
             }
         }
@@ -930,7 +930,7 @@ class RootActivityContainer extends ConfigurationContainer
             return;
         }
 
-        stack.reparent(activityDisplay, onTop, false /* displayRemoved */);
+        stack.reparent(activityDisplay.mDisplayContent, onTop);
         // TODO(multi-display): resize stacks properly if moved from split-screen.
     }
 
@@ -1244,7 +1244,7 @@ class RootActivityContainer extends ConfigurationContainer
         final int displayId = stack.mDisplayId;
         final ActivityDisplay display = getActivityDisplay(displayId);
         ActivityManager.StackInfo info = new ActivityManager.StackInfo();
-        stack.getWindowContainerBounds(info.bounds);
+        stack.getBounds(info.bounds);
         info.displayId = displayId;
         info.stackId = stack.mStackId;
         info.userId = stack.mCurrentUser;

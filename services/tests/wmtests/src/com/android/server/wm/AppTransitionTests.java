@@ -157,7 +157,7 @@ public class AppTransitionTests extends WindowTestsBase {
         final DisplayContent dc1 = createNewDisplay(Display.STATE_ON);
         final DisplayContent dc2 = createNewDisplay(Display.STATE_ON);
 
-        final TaskStack stack1 = createTaskStackOnDisplay(dc1);
+        final ActivityStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
         final ActivityRecord activity1 =
                 WindowTestUtils.createTestActivityRecord(dc1);
@@ -176,7 +176,7 @@ public class AppTransitionTests extends WindowTestsBase {
         assertTrue(dc1.mOpeningApps.size() > 0);
 
         // Move stack to another display.
-        stack1.reparent(dc2.getDisplayId(),  new Rect(), true);
+        stack1.reparent(dc2, true);
 
         // Verify if token are cleared from both pending transition list in former display.
         assertFalse(dc1.mOpeningApps.contains(activity1));

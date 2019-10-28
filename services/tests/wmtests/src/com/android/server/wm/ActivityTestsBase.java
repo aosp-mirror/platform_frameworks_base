@@ -462,7 +462,6 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             }
 
             spyOn(stack);
-            spyOn(stack.mTaskStack);
             doNothing().when(stack).startActivityLocked(
                     any(), any(), anyBoolean(), anyBoolean(), any());
 

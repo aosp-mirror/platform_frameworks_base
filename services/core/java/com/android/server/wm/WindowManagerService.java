@@ -3200,7 +3200,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mKeyguardDisableHandler.setCurrentUser(newUserId);
 
             // Hide windows that should not be seen by the new user.
-            mRoot.switchUser();
+            mRoot.switchUser(newUserId);
             mWindowPlacerLocked.performSurfacePlacement();
 
             // Notify whether the docked stack exists for the current user

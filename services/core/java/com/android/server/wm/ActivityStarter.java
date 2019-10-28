@@ -1449,7 +1449,7 @@ class ActivityStarter {
         if (startedActivityStack != null && startedActivityStack.isAttached()
                 && startedActivityStack.numActivities() == 0
                 && !startedActivityStack.isActivityTypeHome()) {
-            startedActivityStack.remove();
+            startedActivityStack.removeIfPossible();
             startedActivityStack = null;
         }
         return startedActivityStack;
@@ -2356,7 +2356,7 @@ class ActivityStarter {
                     // The task does not need to be reparented to the launch stack. Remove the
                     // launch stack if there is no activity in it.
                     Slog.w(TAG, "Removing an empty stack: " + launchStack);
-                    launchStack.remove();
+                    launchStack.removeIfPossible();
                 }
 
                 mOptions = null;

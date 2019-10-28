@@ -17,12 +17,10 @@
 package com.android.server.wm;
 
 import static android.app.AppOpsManager.OP_NONE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
-import android.app.ActivityManager;
 import android.os.IBinder;
 import android.view.IWindow;
 import android.view.WindowManager;
@@ -34,13 +32,13 @@ import com.android.server.wm.ActivityTestsBase.ActivityBuilder;
  */
 class WindowTestUtils {
 
-    /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
-    static Task createTaskInStack(WindowManagerService service, TaskStack stack, int userId) {
+    /** Creates a {@link Task} and adds it to the specified {@link ActivityStack}. */
+    static Task createTaskInStack(WindowManagerService service, ActivityStack stack, int userId) {
         synchronized (service.mGlobalLock) {
             final TaskRecord task = new ActivityTestsBase.TaskBuilder(
-                    stack.mActivityStack.mStackSupervisor)
+                    stack.mStackSupervisor)
                     .setUserId(userId)
-                    .setStack(stack.mActivityStack)
+                    .setStack(stack)
                     .build();
             return task;
         }
@@ -60,7 +58,7 @@ class WindowTestUtils {
                     .setStack(stack)
                     .setCreateTask(true)
                     .build();
-            postCreateActivitySetup(activity, stack.mTaskStack.getDisplayContent());
+            postCreateActivitySetup(activity, stack.getDisplayContent());
             return activity;
         }
     }

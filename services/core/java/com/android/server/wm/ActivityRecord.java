@@ -42,6 +42,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.content.Intent.ACTION_MAIN;
@@ -1992,9 +1994,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * @return Stack value from current task, null if there is no task.
      */
-    // TODO(stack-unify): Remove once ActivityStack and TaskStack are unified.
-    <T extends ActivityStack> T getActivityStack() {
-        return task != null ? (T) task.getStack() : null;
+    ActivityStack getActivityStack() {
+        return task != null ? task.getStack() : null;
     }
 
     int getStackId() {
@@ -2080,10 +2081,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return ActivityInfo.isResizeableMode(info.resizeMode) || info.supportsPictureInPicture();
     }
 
-    /**
-     * @return whether this activity is non-resizeable or forced to be resizeable
-     */
-    boolean isNonResizableOrForcedResizable() {
+    /** @return whether this activity is non-resizeable or forced to be resizeable */
+    boolean isNonResizableOrForcedResizable(int windowingMode) {
+        if (windowingMode == WINDOWING_MODE_PINNED && info.supportsPictureInPicture()) {
+            return false;
+        }
         return info.resizeMode != RESIZE_MODE_RESIZEABLE
                 && info.resizeMode != RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
     }

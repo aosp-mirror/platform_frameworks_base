@@ -345,7 +345,7 @@ class TaskRecord extends Task {
             boolean userSetupComplete, int minWidth, int minHeight, ActivityInfo info,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
             ActivityStack stack) {
-        super(_taskId, stack != null ? stack.mTaskStack : null, _userId, resizeMode,
+        super(_taskId, stack, _userId, resizeMode,
                 supportsPictureInPicture, _lastTaskDescription, atmService);
         mRemoteToken = new RemoteToken(this);
         affinityIntent = _affinityIntent;
@@ -606,13 +606,10 @@ class TaskRecord extends Task {
             final boolean wasFront = r != null && sourceStack.isTopStackOnDisplay()
                     && (sourceStack.topRunningActivityLocked() == r);
 
-            // Adjust the position for the new parent stack as needed.
-            position = toStack.getAdjustedPositionForTask(this, position, null /* starting */);
-
             final boolean moveStackToFront = moveStackMode == REPARENT_MOVE_STACK_TO_FRONT
                     || (moveStackMode == REPARENT_KEEP_STACK_AT_FRONT && (wasFocused || wasFront));
 
-            reparent(toStack.getTaskStack(), position, moveStackToFront, reason);
+            reparent(toStack, position, moveStackToFront, reason);
 
             if (schedulePictureInPictureModeChange) {
                 // Notify of picture-in-picture mode changes
@@ -850,19 +847,11 @@ class TaskRecord extends Task {
         return mStack;
     }
 
-    // TODO(stack-unify): Can be removed on stack unified.
-    void onParentChanged(ActivityStack newParent, ActivityStack oldParent) {
-        onParentChanged(
-                newParent != null ? newParent.mTaskStack : null,
-                oldParent != null ? oldParent.mTaskStack : null);
-    }
-
     @Override
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        final ActivityStack oldStack = (oldParent != null)
-                ? ((TaskStack) oldParent).mActivityStack : null;
-        final ActivityStack newStack = (newParent != null)
-                ? ((TaskStack) newParent).mActivityStack : null;
+        // TODO(stack-merge): Remove cats ater object merge.
+        final ActivityStack oldStack = ((ActivityStack) oldParent);
+        final ActivityStack newStack = ((ActivityStack) newParent);
 
         mStack = newStack;
 
@@ -1137,13 +1126,6 @@ class TaskRecord extends Task {
 
     @Override
     void addChild(ActivityRecord r, int index) {
-        if (r.getParent() != null) {
-            // Shouldn't already have a parent since we are just adding to the task...Maybe you
-            // meant to use reparent?
-            throw new IllegalStateException(
-                    "r=" + r + " parent=" + r.getParent() + " task=" + this);
-        }
-
         // If this task had any child before we added this one.
         boolean hadChild = hasChild();
 
@@ -1193,10 +1175,6 @@ class TaskRecord extends Task {
 
     @Override
     void removeChild(ActivityRecord r) {
-        removeChild(r, "removeChild");
-    }
-
-    void removeChild(ActivityRecord r, String reason) {
         if (!mChildren.contains(r)) {
             Slog.e(TAG, "removeChild: r=" + r + " not found in t=" + this);
             return;
@@ -1217,6 +1195,7 @@ class TaskRecord extends Task {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
 
+        final String reason = "removeChild";
         if (hasChild()) {
             updateEffectiveIntent();
 

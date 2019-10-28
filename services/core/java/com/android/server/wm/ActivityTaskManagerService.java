@@ -2619,7 +2619,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     throw new IllegalArgumentException("Stack: " + stackId
                         + " doesn't support animated resize.");
                 }
-                stack.animateResizePinnedStack(null /* sourceHintBounds */, destBounds,
+                stack.animateResizePinnedStack(destBounds, null /* sourceHintBounds */,
                         animationDuration, false /* fromFullscreen */);
             }
         } finally {
@@ -2654,7 +2654,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
                 destBounds.offset(xOffset, yOffset);
-                stack.animateResizePinnedStack(null /* sourceHintBounds */, destBounds,
+                stack.animateResizePinnedStack(destBounds, null /* sourceHintBounds */,
                         animationDuration, false /* fromFullscreen */);
             }
         } finally {
@@ -3997,8 +3997,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + " doesn't support animated resize.");
                 }
                 if (animate) {
-                    stack.animateResizePinnedStack(null /* sourceHintBounds */,
-                            null /* destBounds */, animationDuration, false /* fromFullscreen */);
+                    stack.animateResizePinnedStack(null /* destBounds */,
+                            null /* sourceHintBounds */, animationDuration,
+                            false /* fromFullscreen */);
                 } else {
                     stack.dismissPip();
                 }
@@ -4103,7 +4104,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         // If we are animating to fullscreen then we have already dispatched the PIP mode
         // changed, so we should reflect that check here as well.
-        final TaskStack taskStack = r.getActivityStack().getTaskStack();
+        final ActivityStack taskStack = r.getActivityStack();
         return !taskStack.isAnimatingBoundsToFullscreen();
     }
 

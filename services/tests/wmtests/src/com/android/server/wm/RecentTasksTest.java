@@ -886,7 +886,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(task);
         // Only keep the task in RecentTasks.
         task.removeIfPossible();
-        mStack.remove();
+        mStack.removeIfPossible();
 
         // The following APIs should not restore task from recents to the active list.
         assertNotRestoreTask(() -> mService.setFocusedTask(taskId));

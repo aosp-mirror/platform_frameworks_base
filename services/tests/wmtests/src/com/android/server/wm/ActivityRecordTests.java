@@ -595,7 +595,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final int originalDpi = mActivity.getConfiguration().densityDpi;
 
         // Move the non-resizable activity to the new display.
-        mStack.reparent(newDisplay, true /* onTop */, false /* displayRemoved */);
+        mStack.reparent(newDisplay.mDisplayContent, true /* onTop */);
 
         assertEquals(originalBounds.width(),
                 mActivity.getWindowConfiguration().getBounds().width());
