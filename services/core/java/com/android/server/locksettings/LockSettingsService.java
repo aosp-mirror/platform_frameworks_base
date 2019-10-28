@@ -1011,8 +1011,12 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public boolean getSeparateProfileChallengeEnabled(int userId) {
         checkReadPermission(SEPARATE_PROFILE_CHALLENGE_KEY, userId);
+        return getSeparateProfileChallengeEnabledInternal(userId);
+    }
+
+    private boolean getSeparateProfileChallengeEnabledInternal(int userId) {
         synchronized (mSeparateChallengeLock) {
-            return getBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, false, userId);
+            return getBooleanUnchecked(SEPARATE_PROFILE_CHALLENGE_KEY, false, userId);
         }
     }
 
@@ -1096,6 +1100,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public boolean getBoolean(String key, boolean defaultValue, int userId) {
         checkReadPermission(key, userId);
+        return getBooleanUnchecked(key, defaultValue, userId);
+    }
+
+    private boolean getBooleanUnchecked(String key, boolean defaultValue, int userId) {
         String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ?
                 defaultValue : (value.equals("1") || value.equals("true"));
@@ -3159,7 +3167,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // observe it from the keyguard directly.
             pw.println("Quality: " + getKeyguardStoredQuality(userId));
             pw.println("CredentialType: " + getCredentialTypeInternal(userId));
-            pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabled(userId));
+            pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabledInternal(userId));
             pw.println(String.format("Metrics: %s",
                     getUserPasswordMetrics(userId) != null ? "known" : "unknown"));
             pw.decreaseIndent();
