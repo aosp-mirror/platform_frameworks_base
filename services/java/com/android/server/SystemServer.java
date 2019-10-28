@@ -1133,7 +1133,6 @@ public final class SystemServer {
 
         StatusBarManagerService statusBar = null;
         INotificationManager notification = null;
-        LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
         ILockSettings lockSettings = null;
         MediaRouterService mediaRouter = null;
@@ -1430,12 +1429,7 @@ public final class SystemServer {
             t.traceEnd();
 
             t.traceBegin("StartLocationManagerService");
-            try {
-                location = new LocationManagerService(context);
-                ServiceManager.addService(Context.LOCATION_SERVICE, location);
-            } catch (Throwable e) {
-                reportWtf("starting Location Manager", e);
-            }
+            mSystemServiceManager.startService(LocationManagerService.Lifecycle.class);
             t.traceEnd();
 
             t.traceBegin("StartCountryDetectorService");
@@ -2019,7 +2013,6 @@ public final class SystemServer {
         final NetworkStatsService networkStatsF = networkStats;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final ConnectivityService connectivityF = connectivity;
-        final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
         final InputManagerService inputManagerF = inputManager;
@@ -2175,16 +2168,6 @@ public final class SystemServer {
             }
             t.traceEnd();
 
-
-            t.traceBegin("MakeLocationServiceReady");
-            try {
-                if (locationF != null) {
-                    locationF.systemRunning();
-                }
-            } catch (Throwable e) {
-                reportWtf("Notifying Location Service running", e);
-            }
-            t.traceEnd();
             t.traceBegin("MakeCountryDetectionServiceReady");
             try {
                 if (countryDetectorF != null) {

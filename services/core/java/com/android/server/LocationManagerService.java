@@ -128,6 +128,32 @@ import java.util.concurrent.TimeUnit;
  * updates and alerts.
  */
 public class LocationManagerService extends ILocationManager.Stub {
+
+    /**
+     * Controls lifecycle of LocationManagerService.
+     */
+    public static class Lifecycle extends SystemService {
+
+        private LocationManagerService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+            mService = new LocationManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.LOCATION_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+                mService.systemRunning();
+            }
+        }
+    }
+
     private static final String TAG = "LocationManagerService";
     public static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -234,8 +260,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @GuardedBy("mLock")
     private final LocationUsageLogger mLocationUsageLogger;
 
-    public LocationManagerService(Context context) {
-        super();
+    private LocationManagerService(Context context) {
         mContext = context;
         mHandler = FgThread.getHandler();
         mLocationUsageLogger = new LocationUsageLogger();
@@ -254,7 +279,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // most startup is deferred until systemRunning()
     }
 
-    public void systemRunning() {
+    private void systemRunning() {
         synchronized (mLock) {
             initializeLocked();
         }
