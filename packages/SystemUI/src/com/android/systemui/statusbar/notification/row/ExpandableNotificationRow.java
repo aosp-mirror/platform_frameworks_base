@@ -95,6 +95,7 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -114,7 +115,7 @@ import java.util.function.Consumer;
  * the group summary (which contains 1 or more child notifications).
  */
 public class ExpandableNotificationRow extends ActivatableNotificationView
-        implements PluginListener<NotificationMenuRowPlugin> {
+        implements PluginListener<NotificationMenuRowPlugin>, SwipeableView {
 
     private static final boolean DEBUG = false;
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
@@ -288,7 +289,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     };
     private boolean mForceUnlocked;
-    private boolean mDismissed;
     private boolean mKeepInParent;
     private boolean mRemoved;
     private static final Property<ExpandableNotificationRow, Float> TRANSLATE_CONTENT =
@@ -307,7 +307,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
     private View mGroupParentWhenDismissed;
-    private boolean mRefocusOnDismiss;
     private float mContentTransformationAmount;
     private boolean mIconsVisible = true;
     private boolean mAboveShelf;
@@ -1164,6 +1163,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    @Override
+    public boolean hasFinishedInitialization() {
+        return getEntry().hasFinishedInitialization();
+    }
+
     /**
      * Get a handle to a NotificationMenuRowPlugin whose menu view has been added to our hierarchy,
      * or null if there is no menu row
@@ -1323,11 +1327,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public void setDismissed(boolean fromAccessibility) {
+    @Override
+    public void dismiss(boolean refocusOnDismiss) {
+        super.dismiss(refocusOnDismiss);
         setLongPressListener(null);
-        mDismissed = true;
         mGroupParentWhenDismissed = mNotificationParent;
-        mRefocusOnDismiss = fromAccessibility;
         mChildAfterViewWhenDismissed = null;
         mEntry.icon.setDismissed();
         if (isChildInGroup()) {
@@ -1338,10 +1342,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mChildAfterViewWhenDismissed = notificationChildren.get(i + 1);
             }
         }
-    }
-
-    public boolean isDismissed() {
-        return mDismissed;
     }
 
     public boolean keepInParent() {
@@ -1445,7 +1445,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 groupSummary.getRow().performDismiss(fromAccessibility);
             }
         }
-        setDismissed(fromAccessibility);
+        dismiss(fromAccessibility);
         if (mEntry.isClearable()) {
             // TODO: beverlyt, log dismissal
             // TODO: track dismiss sentiment
@@ -3019,10 +3019,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
         }
         return false;
-    }
-
-    public boolean shouldRefocusOnDismiss() {
-        return mRefocusOnDismiss || isAccessibilityFocused();
     }
 
     public interface OnExpandClickListener {

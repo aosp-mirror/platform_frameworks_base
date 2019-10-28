@@ -195,20 +195,6 @@ public class StackScrollAlgorithm {
         }
     }
 
-    public static boolean canChildBeDismissed(View v) {
-        if (!(v instanceof ExpandableNotificationRow)) {
-            return false;
-        }
-        ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-        if (row.isBlockingHelperShowingAndTranslationFinished()) {
-            return true;
-        }
-        if (row.areGutsExposed() || !row.getEntry().hasFinishedInitialization()) {
-            return false;
-        }
-        return row.canViewBeDismissed();
-    }
-
     /**
      * Updates the dimmed, activated and hiding sensitive states of the children.
      */

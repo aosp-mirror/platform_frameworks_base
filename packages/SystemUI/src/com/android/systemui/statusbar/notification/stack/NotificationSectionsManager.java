@@ -23,7 +23,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -310,6 +309,8 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                 mParent.removeView(mPeopleHubView);
             }
         } else {
+            mPeopleHubView.unDismiss();
+            mPeopleHubView.resetTranslation();
             if (!currentlyVisible) {
                 if (mPeopleHubView.getTransientContainer() != null) {
                     mPeopleHubView.getTransientContainer().removeTransientView(mPeopleHubView);
@@ -419,8 +420,9 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         }
     }
 
-    private void handlePeopleHubClick(PendingIntent pendingIntent) {
-        mActivityStarter.startPendingIntentDismissingKeyguard(pendingIntent, null, mPeopleHubView);
+    void hidePeopleRow() {
+        mPeopleHubVisible = false;
+        updateSectionBoundaries();
     }
 
     /**

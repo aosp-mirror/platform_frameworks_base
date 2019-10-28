@@ -226,7 +226,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 any(NotificationMenuRowPlugin.MenuItem.class));
         reset(listener);
 
-        mGroupRow.setDismissed(true);
+        mGroupRow.dismiss(true);
         mGroupRow.doLongClickCallback(0,0);
         verify(listener, times(0)).onLongPress(eq(mGroupRow), eq(0), eq(0),
                 any(NotificationMenuRowPlugin.MenuItem.class));
