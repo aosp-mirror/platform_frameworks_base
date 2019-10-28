@@ -763,28 +763,33 @@ public final class KeyChain {
      * @see KeyChain#bind
      */
     public static class KeyChainConnection implements Closeable {
-        private final Context context;
-        private final ServiceConnection serviceConnection;
-        private final IKeyChainService service;
+        private final Context mContext;
+        private final ServiceConnection mServiceConnection;
+        private final IKeyChainService mService;
         protected KeyChainConnection(Context context,
                                      ServiceConnection serviceConnection,
                                      IKeyChainService service) {
-            this.context = context;
-            this.serviceConnection = serviceConnection;
-            this.service = service;
+            this.mContext = context;
+            this.mServiceConnection = serviceConnection;
+            this.mService = service;
         }
         @Override public void close() {
-            context.unbindService(serviceConnection);
+            mContext.unbindService(mServiceConnection);
         }
+
+        /** returns the service binder. */
         public IKeyChainService getService() {
-            return service;
+            return mService;
         }
     }
 
     /**
-     * @hide for reuse by CertInstaller and Settings.
-     *
+     * Bind to KeyChainService in the current user.
      * Caller should call unbindService on the result when finished.
+     *
+     *@throws InterruptedException if interrupted during binding.
+     *@throws AssertionError if unable to bind to KeyChainService.
+     * @hide for reuse by CertInstaller and Settings.
      */
     @WorkerThread
     public static KeyChainConnection bind(@NonNull Context context) throws InterruptedException {
@@ -792,6 +797,11 @@ public final class KeyChain {
     }
 
     /**
+     * Bind to KeyChainService in the target user.
+     * Caller should call unbindService on the result when finished.
+     *
+     * @throws InterruptedException if interrupted during binding.
+     * @throws AssertionError if unable to bind to KeyChainService.
      * @hide
      */
     @WorkerThread
@@ -814,6 +824,16 @@ public final class KeyChain {
                     }
                 }
             }
+            @Override public void onBindingDied(ComponentName name) {
+                if (!mConnectedAtLeastOnce) {
+                    mConnectedAtLeastOnce = true;
+                    try {
+                        q.put(null);
+                    } catch (InterruptedException e) {
+                        // will never happen, since the queue starts with one available slot
+                    }
+                }
+            }
             @Override public void onServiceDisconnected(ComponentName name) {}
         };
         Intent intent = new Intent(IKeyChainService.class.getName());
@@ -823,7 +843,13 @@ public final class KeyChain {
                 intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, user)) {
             throw new AssertionError("could not bind to KeyChainService");
         }
-        return new KeyChainConnection(context, keyChainServiceConnection, q.take());
+        IKeyChainService service = q.take();
+        if (service != null) {
+            return new KeyChainConnection(context, keyChainServiceConnection, service);
+        } else {
+            context.unbindService(keyChainServiceConnection);
+            throw new AssertionError("KeyChainService died while binding");
+        }
     }
 
     private static void ensureNotOnMainThread(@NonNull Context context) {
