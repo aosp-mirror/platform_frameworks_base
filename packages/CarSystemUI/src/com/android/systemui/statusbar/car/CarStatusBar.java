@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.PowerManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -107,6 +108,8 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.DozeScrimController;
+import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -295,6 +298,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
+            DozeServiceHost dozeServiceHost,
+            PowerManager powerManager,
+            DozeScrimController dozeScrimController,
 
             /* Car Settings injected components. */
             CarNavigationBarController carNavigationBarController) {
@@ -358,7 +364,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 dozeParameters,
                 scrimController,
                 lockscreenWallpaperLazy,
-                biometricUnlockControllerLazy);
+                biometricUnlockControllerLazy,
+                dozeServiceHost,
+                powerManager,
+                dozeScrimController);
         mScrimController = scrimController;
         mCarNavigationBarController = carNavigationBarController;
     }
