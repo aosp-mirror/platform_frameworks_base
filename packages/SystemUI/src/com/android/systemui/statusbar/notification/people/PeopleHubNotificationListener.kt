@@ -47,6 +47,7 @@ private const val MAX_STORED_INACTIVE_PEOPLE = 10
 interface NotificationPersonExtractor {
     fun extractPerson(sbn: StatusBarNotification): PersonModel?
     fun extractPersonKey(sbn: StatusBarNotification): String?
+    fun isPersonNotification(sbn: StatusBarNotification): Boolean
 }
 
 @Singleton
@@ -75,6 +76,9 @@ class NotificationPersonExtractorPluginBoundary @Inject constructor(
             }
 
     override fun extractPersonKey(sbn: StatusBarNotification) = plugin?.extractPersonKey(sbn)
+
+    override fun isPersonNotification(sbn: StatusBarNotification): Boolean =
+            plugin?.isPersonNotification(sbn) ?: false
 }
 
 @Singleton
@@ -180,8 +184,7 @@ private fun NotificationEntry.extractPerson(): PersonModel? {
     if (!isMessagingNotification()) {
         return null
     }
-    val clickIntent = sbn.notification.contentIntent
-            ?: return null
+    val clickIntent = sbn.notification.contentIntent ?: return null
     val extras = sbn.notification.extras
     val name = extras.getString(Notification.EXTRA_CONVERSATION_TITLE)
             ?: extras.getString(Notification.EXTRA_TITLE)

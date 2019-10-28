@@ -32,12 +32,13 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
 public interface NotificationPersonExtractorPlugin extends Plugin {
 
     String ACTION = "com.android.systemui.action.PEOPLE_HUB_PERSON_EXTRACTOR";
-    int VERSION = 0;
+    int VERSION = 1;
 
     /**
      * Attempts to extract a person from a notification. Returns {@code null} if one is not found.
      */
-    @Nullable PersonData extractPerson(StatusBarNotification sbn);
+    @Nullable
+    PersonData extractPerson(StatusBarNotification sbn);
 
     /**
      * Attempts to extract a person id from a notification. Returns {@code null} if one is not
@@ -48,6 +49,14 @@ public interface NotificationPersonExtractorPlugin extends Plugin {
     @Nullable
     default String extractPersonKey(StatusBarNotification sbn) {
         return extractPerson(sbn).key;
+    }
+
+    /**
+     * Determines whether or not a notification should be treated as having a person. Used for
+     * appropriate positioning in the notification shade.
+     */
+    default boolean isPersonNotification(StatusBarNotification sbn) {
+        return extractPersonKey(sbn) != null;
     }
 
     /** A person to be surfaced in PeopleHub. */
