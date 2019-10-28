@@ -650,6 +650,7 @@ bool getDoubleOrLong(const LogEvent& event, const Matcher& matcher, Value& ret) 
                     ret.setDouble(value.mValue.double_value);
                     break;
                 default:
+                    return false;
                     break;
             }
             return true;
