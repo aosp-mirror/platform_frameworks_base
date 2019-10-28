@@ -374,15 +374,38 @@ filegroup {
 }
 
 java_library {
-    name: "framework",
+    name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
+    installable: true,
     javac_shard_size: 150,
     required: [
         "framework-platform-compat-config",
         "libcore-platform-compat-config",
         "services-platform-compat-config",
     ],
+    // For backwards compatibility.
+    stem: "framework",
+}
+
+// This "framework" module is NOT installed to the device. It's
+// "framework-minus-apex" that gets installed to the device. Note that
+// the filename is still framework.jar (via the stem property) for
+// compatibility reason. The purpose of this module is to provide
+// framework APIs (both public and private) for bundled apps.
+// "framework-minus-apex" can't be used for the purpose because 1)
+// many apps have already hardcoded the name "framework" and
+// 2) it lacks API symbols from updatable modules - as it's clear from
+// its suffix "-minus-apex".
+java_library {
+    name: "framework",
+    defaults: ["framework-aidl-export-defaults"],
+    installable: false, // this lib is a build-only library
+    static_libs: [
+        "framework-minus-apex",
+        // TODO(jiyong): add stubs for APEXes here
+    ],
+    sdk_version: "core_platform",
 }
 
 java_library {
