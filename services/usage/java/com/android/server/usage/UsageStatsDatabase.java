@@ -373,7 +373,12 @@ public class UsageStatsDatabase {
                 Slog.e(TAG, "Failed read version upgrade breadcrumb");
                 throw new RuntimeException(e);
             }
-            continueUpgradeLocked(previousVersion, token);
+            if (mCurrentVersion >= 4) {
+                continueUpgradeLocked(previousVersion, token);
+            } else {
+                Slog.wtf(TAG, "Attempting to upgrade to an unsupported version: "
+                        + mCurrentVersion);
+            }
         }
 
         if (version != mCurrentVersion || mNewUpdate) {
@@ -487,6 +492,9 @@ public class UsageStatsDatabase {
     }
 
     private void continueUpgradeLocked(int version, long token) {
+        if (version <= 3) {
+            Slog.w(TAG, "Reading UsageStats as XML; current database version: " + mCurrentVersion);
+        }
         final File backupDir = new File(mBackupsDir, Long.toString(token));
 
         // Upgrade step logic for the entire usage stats directory, not individual interval dirs.
@@ -876,6 +884,10 @@ public class UsageStatsDatabase {
     }
 
     private void writeLocked(AtomicFile file, IntervalStats stats) throws IOException {
+        if (mCurrentVersion <= 3) {
+            Slog.wtf(TAG, "Attempting to write UsageStats as XML with version " + mCurrentVersion);
+            return;
+        }
         writeLocked(file, stats, mCurrentVersion, mPackagesTokenData);
     }
 
@@ -892,17 +904,13 @@ public class UsageStatsDatabase {
         }
     }
 
-    private void writeLocked(OutputStream out, IntervalStats stats) throws IOException {
-        writeLocked(out, stats, mCurrentVersion, mPackagesTokenData);
-    }
-
     private static void writeLocked(OutputStream out, IntervalStats stats, int version,
             PackagesTokenData packagesTokenData) throws IOException {
         switch (version) {
             case 1:
             case 2:
             case 3:
-                UsageStatsXml.write(out, stats);
+                Slog.wtf(TAG, "Attempting to write UsageStats as XML with version " + version);
                 break;
             case 4:
                 try {
@@ -927,6 +935,10 @@ public class UsageStatsDatabase {
     }
 
     private void readLocked(AtomicFile file, IntervalStats statsOut) throws IOException {
+        if (mCurrentVersion <= 3) {
+            Slog.wtf(TAG, "Reading UsageStats as XML; current database version: "
+                    + mCurrentVersion);
+        }
         readLocked(file, statsOut, mCurrentVersion, mPackagesTokenData);
     }
 
@@ -951,17 +963,18 @@ public class UsageStatsDatabase {
         }
     }
 
-    private void readLocked(InputStream in, IntervalStats statsOut) throws IOException {
-        readLocked(in, statsOut, mCurrentVersion, mPackagesTokenData);
-    }
-
     private static void readLocked(InputStream in, IntervalStats statsOut, int version,
             PackagesTokenData packagesTokenData) throws IOException {
         switch (version) {
             case 1:
             case 2:
             case 3:
-                UsageStatsXml.read(in, statsOut);
+                Slog.w(TAG, "Reading UsageStats as XML; database version: " + version);
+                try {
+                    UsageStatsXml.read(in, statsOut);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Unable to read interval stats from XML", e);
+                }
                 break;
             case 4:
                 try {
@@ -1076,6 +1089,10 @@ public class UsageStatsDatabase {
      */
     @VisibleForTesting
     public byte[] getBackupPayload(String key, int version) {
+        if (version >= 1 && version <= 3) {
+            Slog.wtf(TAG, "Attempting to backup UsageStats as XML with version " + version);
+            return null;
+        }
         synchronized (mLock) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if (KEY_USAGE_STATS.equals(key)) {
