@@ -277,7 +277,7 @@ public class RuntimeInit {
         result.append(System.getProperty("java.vm.version")); // such as 1.1.0
         result.append(" (Linux; U; Android ");
 
-        String version = Build.VERSION.RELEASE; // "1.0" or "3.4b5"
+        String version = Build.VERSION.RELEASE_OR_CODENAME; // "1.0" or "3.4b5"
         result.append(version.length() > 0 ? version : "1.0");
 
         // add the model for the release build

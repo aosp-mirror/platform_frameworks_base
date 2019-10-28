@@ -239,6 +239,13 @@ public class Build {
         public static final String RELEASE = getString("ro.build.version.release");
 
         /**
+         * The version string we show to the user; may be {@link #RELEASE} or
+         * {@link #CODENAME} if not a final release build.
+         */
+        @NonNull public static final String RELEASE_OR_CODENAME = getString(
+                "ro.build.version.release_or_codename");
+
+        /**
          * The base OS build the product is based on.
          */
         public static final String BASE_OS = SystemProperties.get("ro.build.version.base_os", "");
