@@ -110,6 +110,7 @@ android_library {
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
+        "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
         "metrics-helper-lib",

@@ -226,7 +226,7 @@
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="3191973083884253830">"없음"</item>
-    <item msgid="9089630089455370183">"로그캣"</item>
+    <item msgid="9089630089455370183">"Logcat"</item>
     <item msgid="5397807424362304288">"Systrace(그래픽)"</item>
     <item msgid="1340692776955662664">"glGetError의 스택 호출"</item>
   </string-array>

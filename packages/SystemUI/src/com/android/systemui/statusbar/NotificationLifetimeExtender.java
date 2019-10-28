@@ -27,18 +27,6 @@ public interface NotificationLifetimeExtender {
     boolean shouldExtendLifetime(@NonNull NotificationEntry entry);
 
     /**
-     * It's possible that a notification was canceled before it ever became visible. This callback
-     * gives lifetime extenders a chance to make sure it shows up. For example if a foreground
-     * service is canceled too quickly but we still want to make sure a FGS notification shows.
-     * @param pendingEntry the canceled (but pending) entry
-     * @return true if the notification lifetime should be extended
-     */
-    default boolean shouldExtendLifetimeForPendingNotification(
-            @NonNull NotificationEntry pendingEntry) {
-        return false;
-    }
-
-    /**
      * Sets whether or not the lifetime should be managed by the extender.  In practice, if
      * shouldManage is true, this is where the extender starts managing the entry internally and is
      * now responsible for calling {@link NotificationSafeToRemoveCallback#onSafeToRemove(String)}

@@ -30,6 +30,7 @@ import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -104,9 +105,10 @@ public class MobileSignalController extends SignalController<
         mDefaults = defaults;
         mSubscriptionInfo = info;
         mPhoneStateListener = new MobilePhoneStateListener(receiverLooper);
-        mNetworkNameSeparator = getStringIfExists(R.string.status_bar_network_name_separator);
+        mNetworkNameSeparator = getStringIfExists(R.string.status_bar_network_name_separator)
+                .toString();
         mNetworkNameDefault = getStringIfExists(
-                com.android.internal.R.string.lockscreen_carrier_default);
+                com.android.internal.R.string.lockscreen_carrier_default).toString();
 
         mapIconSets();
 
@@ -141,10 +143,6 @@ public class MobileSignalController extends SignalController<
         updateInflateSignalStrength();
         mapIconSets();
         updateTelephony();
-    }
-
-    public int getDataContentDescription() {
-        return getIcons().mDataContentDescription;
     }
 
     public void setAirplaneMode(boolean airplaneMode) {
@@ -294,7 +292,8 @@ public class MobileSignalController extends SignalController<
             }
             boolean dataDisabled = mCurrentState.userSetup
                     && (mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
-                    || mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA);
+                    || (mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA
+                            && mCurrentState.defaultDataOff));
             boolean noInternet = mCurrentState.inetCondition == 0;
             boolean cutOut = dataDisabled || noInternet;
             return SignalDrawable.getState(level, getNumLevels(), cutOut);
@@ -314,13 +313,19 @@ public class MobileSignalController extends SignalController<
     public void notifyListeners(SignalCallback callback) {
         MobileIconGroup icons = getIcons();
 
-        String contentDescription = getStringIfExists(getContentDescription());
-        String dataContentDescription = getStringIfExists(icons.mDataContentDescription);
+        String contentDescription = getStringIfExists(getContentDescription()).toString();
+        CharSequence dataContentDescriptionHtml = getStringIfExists(icons.mDataContentDescription);
+
+        //TODO: Hacky
+        // The data content description can sometimes be shown in a text view and might come to us
+        // as HTML. Strip any styling here so that listeners don't have to care
+        CharSequence dataContentDescription = Html.fromHtml(
+                dataContentDescriptionHtml.toString(), 0).toString();
         if (mCurrentState.inetCondition == 0) {
             dataContentDescription = mContext.getString(R.string.data_connection_no_internet);
         }
         final boolean dataDisabled = (mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
-                || mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA)
+                || (mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA))
                 && mCurrentState.userSetup;
 
         // Show icon in QS when we are connected or data is disabled.
@@ -330,7 +335,7 @@ public class MobileSignalController extends SignalController<
 
         int qsTypeIcon = 0;
         IconState qsIcon = null;
-        String description = null;
+        CharSequence description = null;
         // Only send data sim callbacks to QS.
         if (mCurrentState.dataSim) {
             qsTypeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.mQsDataType : 0;
@@ -347,8 +352,9 @@ public class MobileSignalController extends SignalController<
         showDataIcon &= mCurrentState.isDefault || dataDisabled;
         int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.mDataType : 0;
         callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
-                activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
-                mSubscriptionInfo.getSubscriptionId(), mCurrentState.roaming);
+                activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
+                description, icons.mIsWide, mSubscriptionInfo.getSubscriptionId(),
+                mCurrentState.roaming);
     }
 
     @Override
@@ -484,6 +490,7 @@ public class MobileSignalController extends SignalController<
             Log.d(mTag, "updateTelephonySignalStrength: hasService=" +
                     Utils.isInService(mServiceState) + " ss=" + mSignalStrength);
         }
+        checkDefaultData();
         mCurrentState.connected = Utils.isInService(mServiceState)
                 && mSignalStrength != null;
         if (mCurrentState.connected) {
@@ -538,6 +545,23 @@ public class MobileSignalController extends SignalController<
             mCurrentState.networkNameData = mServiceState.getDataOperatorAlphaShort();
         }
 
+        notifyListenersIfNecessary();
+    }
+
+    /**
+     * If we are controlling the NOT_DEFAULT_DATA icon, check the status of the other one
+     */
+    private void checkDefaultData() {
+        if (mCurrentState.iconGroup != TelephonyIcons.NOT_DEFAULT_DATA) {
+            mCurrentState.defaultDataOff = false;
+            return;
+        }
+
+        mCurrentState.defaultDataOff = mNetworkController.isDataControllerDisabled();
+    }
+
+    void onMobileDataChanged() {
+        checkDefaultData();
         notifyListenersIfNecessary();
     }
 
@@ -617,7 +641,7 @@ public class MobileSignalController extends SignalController<
         return candidateIconGroup;
     }
 
-    private boolean isDataDisabled() {
+    boolean isDataDisabled() {
         return !mPhone.isDataCapable();
     }
 
@@ -750,6 +774,7 @@ public class MobileSignalController extends SignalController<
         boolean isDefault;
         boolean userSetup;
         boolean roaming;
+        boolean defaultDataOff;  // Tracks the on/off state of the defaultDataSubscription
 
         @Override
         public void copyFrom(State s) {
@@ -765,6 +790,7 @@ public class MobileSignalController extends SignalController<
             carrierNetworkChangeMode = state.carrierNetworkChangeMode;
             userSetup = state.userSetup;
             roaming = state.roaming;
+            defaultDataOff = state.defaultDataOff;
         }
 
         @Override
@@ -781,7 +807,8 @@ public class MobileSignalController extends SignalController<
             builder.append("airplaneMode=").append(airplaneMode).append(',');
             builder.append("carrierNetworkChangeMode=").append(carrierNetworkChangeMode)
                     .append(',');
-            builder.append("userSetup=").append(userSetup);
+            builder.append("userSetup=").append(userSetup).append(',');
+            builder.append("defaultDataOff=").append(defaultDataOff);
         }
 
         @Override
@@ -796,7 +823,8 @@ public class MobileSignalController extends SignalController<
                     && ((MobileState) o).carrierNetworkChangeMode == carrierNetworkChangeMode
                     && ((MobileState) o).userSetup == userSetup
                     && ((MobileState) o).isDefault == isDefault
-                    && ((MobileState) o).roaming == roaming;
+                    && ((MobileState) o).roaming == roaming
+                    && ((MobileState) o).defaultDataOff == defaultDataOff;
         }
     }
 }

@@ -79,23 +79,24 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     /**
      * When both scrims have 0 alpha.
      */
-    public static final int VISIBILITY_FULLY_TRANSPARENT = 0;
+    public static final int TRANSPARENT = 0;
     /**
      * When scrims aren't transparent (alpha 0) but also not opaque (alpha 1.)
      */
-    public static final int VISIBILITY_SEMI_TRANSPARENT = 1;
+    public static final int SEMI_TRANSPARENT = 1;
     /**
      * When at least 1 scrim is fully opaque (alpha set to 1.)
      */
-    public static final int VISIBILITY_FULLY_OPAQUE = 2;
+    public static final int OPAQUE = 2;
 
-    @IntDef(prefix = { "VISIBILITY_" }, value = {
-            VISIBILITY_FULLY_TRANSPARENT,
-            VISIBILITY_SEMI_TRANSPARENT,
-            VISIBILITY_FULLY_OPAQUE
+    @IntDef(prefix = {"VISIBILITY_"}, value = {
+            TRANSPARENT,
+            SEMI_TRANSPARENT,
+            OPAQUE
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ScrimVisibility {}
+    public @interface ScrimVisibility {
+    }
 
     /**
      * Default alpha value for most scrims.
@@ -123,8 +124,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     private ScrimState mState = ScrimState.UNINITIALIZED;
     private final Context mContext;
-    protected final ScrimView mScrimBehind;
+
     protected final ScrimView mScrimInFront;
+    protected final ScrimView mScrimBehind;
+    protected final ScrimView mScrimForBubble;
+
     private final UnlockMethodCache mUnlockMethodCache;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
@@ -153,10 +157,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private Runnable mOnAnimationFinished;
     private boolean mDeferFinishedListener;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
-    private float mCurrentInFrontAlpha  = NOT_INITIALIZED;
-    private float mCurrentBehindAlpha = NOT_INITIALIZED;
-    private int mCurrentInFrontTint;
-    private int mCurrentBehindTint;
+
+    private float mInFrontAlpha = NOT_INITIALIZED;
+    private float mBehindAlpha = NOT_INITIALIZED;
+    private float mBubbleAlpha = NOT_INITIALIZED;
+
+    private int mInFrontTint;
+    private int mBehindTint;
+    private int mBubbleTint;
+
     private boolean mWallpaperVisibilityTimedOut;
     private int mScrimsVisibility;
     private final TriConsumer<ScrimState, Float, GradientColors> mScrimStateListener;
@@ -175,14 +184,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private boolean mWakeLockHeld;
     private boolean mKeyguardOccluded;
 
-    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
+    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront, ScrimView scrimForBubble,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
             AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
+        mScrimForBubble = scrimForBubble;
+
         mScrimStateListener = scrimStateListener;
         mScrimVisibleListener = scrimVisibleListener;
+
         mContext = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
         mDarkenWhileDragging = !mUnlockMethodCache.canSkipBouncer();
@@ -213,12 +225,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         final ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {
-            states[i].init(mScrimInFront, mScrimBehind, mDozeParameters);
+            states[i].init(mScrimInFront, mScrimBehind, mScrimForBubble, mDozeParameters);
             states[i].setScrimBehindAlphaKeyguard(mScrimBehindAlphaKeyguard);
         }
 
         mScrimBehind.setDefaultFocusHighlightEnabled(false);
         mScrimInFront.setDefaultFocusHighlightEnabled(false);
+        mScrimForBubble.setDefaultFocusHighlightEnabled(false);
 
         updateScrims();
     }
@@ -257,10 +270,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         mBlankScreen = state.getBlanksScreen();
         mAnimateChange = state.getAnimateChange();
         mAnimationDuration = state.getAnimationDuration();
-        mCurrentInFrontTint = state.getFrontTint();
-        mCurrentBehindTint = state.getBehindTint();
-        mCurrentInFrontAlpha = state.getFrontAlpha();
-        mCurrentBehindAlpha = state.getBehindAlpha();
+
+        mInFrontTint = state.getFrontTint();
+        mBehindTint = state.getBehindTint();
+        mBubbleTint = state.getBubbleTint();
+
+        mInFrontAlpha = state.getFrontAlpha();
+        mBehindAlpha = state.getBehindAlpha();
+        mBubbleAlpha = state.getBubbleAlpha();
         applyExpansionToAlpha();
 
         // Scrim might acquire focus when user is navigating with a D-pad or a keyboard.
@@ -393,21 +410,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         if (mExpansionFraction != fraction) {
             mExpansionFraction = fraction;
 
-            final boolean keyguardOrUnlocked = mState == ScrimState.UNLOCKED
-                    || mState == ScrimState.KEYGUARD || mState == ScrimState.PULSING;
-            if (!keyguardOrUnlocked || !mExpansionAffectsAlpha) {
+            boolean relevantState = (mState == ScrimState.UNLOCKED
+                    || mState == ScrimState.KEYGUARD
+                    || mState == ScrimState.PULSING
+                    || mState == ScrimState.BUBBLE_EXPANDED);
+            if (!(relevantState && mExpansionAffectsAlpha)) {
                 return;
             }
-
             applyExpansionToAlpha();
-
             if (mUpdatePending) {
                 return;
             }
-
             setOrAdaptCurrentAnimation(mScrimBehind);
             setOrAdaptCurrentAnimation(mScrimInFront);
-
+            setOrAdaptCurrentAnimation(mScrimForBubble);
             dispatchScrimState(mScrimBehind.getViewAlpha());
 
             // Reset wallpaper timeout if it's already timeout like expanding panel while PULSING
@@ -421,11 +437,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     private void setOrAdaptCurrentAnimation(View scrim) {
-        if (!isAnimating(scrim)) {
-            updateScrimColor(scrim, getCurrentScrimAlpha(scrim), getCurrentScrimTint(scrim));
-        } else {
+        float alpha = getCurrentScrimAlpha(scrim);
+        if (isAnimating(scrim)) {
+            // Adapt current animation.
             ValueAnimator previousAnimator = (ValueAnimator) scrim.getTag(TAG_KEY_ANIM);
-            float alpha = getCurrentScrimAlpha(scrim);
             float previousEndValue = (Float) scrim.getTag(TAG_END_ALPHA);
             float previousStartValue = (Float) scrim.getTag(TAG_START_ALPHA);
             float relativeDiff = alpha - previousEndValue;
@@ -433,6 +448,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             scrim.setTag(TAG_START_ALPHA, newStartValue);
             scrim.setTag(TAG_END_ALPHA, alpha);
             previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
+        } else {
+            // Set animation.
+            updateScrimColor(scrim, alpha, getCurrentScrimTint(scrim));
         }
     }
 
@@ -441,27 +459,27 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             return;
         }
 
-        if (mState == ScrimState.UNLOCKED) {
+        if (mState == ScrimState.UNLOCKED || mState == ScrimState.BUBBLE_EXPANDED) {
             // Darken scrim as you pull down the shade when unlocked
             float behindFraction = getInterpolatedFraction();
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
-            mCurrentBehindAlpha = behindFraction * GRADIENT_SCRIM_ALPHA_BUSY;
-            mCurrentInFrontAlpha = 0;
+            mBehindAlpha = behindFraction * GRADIENT_SCRIM_ALPHA_BUSY;
+            mInFrontAlpha = 0;
         } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.PULSING) {
             // Either darken of make the scrim transparent when you
             // pull down the shade
             float interpolatedFract = getInterpolatedFraction();
             float alphaBehind = mState.getBehindAlpha();
             if (mDarkenWhileDragging) {
-                mCurrentBehindAlpha = MathUtils.lerp(GRADIENT_SCRIM_ALPHA_BUSY, alphaBehind,
+                mBehindAlpha = MathUtils.lerp(GRADIENT_SCRIM_ALPHA_BUSY, alphaBehind,
                         interpolatedFract);
-                mCurrentInFrontAlpha = 0;
+                mInFrontAlpha = mState.getFrontAlpha();
             } else {
-                mCurrentBehindAlpha = MathUtils.lerp(0 /* start */, alphaBehind,
+                mBehindAlpha = MathUtils.lerp(0 /* start */, alphaBehind,
                         interpolatedFract);
-                mCurrentInFrontAlpha = 0;
+                mInFrontAlpha = mState.getFrontAlpha();
             }
-            mCurrentBehindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
+            mBehindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
                     mState.getBehindTint(), interpolatedFract);
         }
     }
@@ -485,13 +503,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * device is dozing when the light sensor is on.
      */
     public void setAodFrontScrimAlpha(float alpha) {
-        if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()
-                && mCurrentInFrontAlpha != alpha) {
-            mCurrentInFrontAlpha = alpha;
+        if (((mState == ScrimState.AOD && mDozeParameters.getAlwaysOn())
+                || mState == ScrimState.PULSING) && mInFrontAlpha != alpha) {
+            mInFrontAlpha = alpha;
             updateScrims();
         }
 
         mState.AOD.setAodFrontScrimAlpha(alpha);
+        mState.PULSING.setAodFrontScrimAlpha(alpha);
     }
 
     /**
@@ -499,10 +518,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * away once the display turns on.
      */
     public void prepareForGentleWakeUp() {
-        if (mState == ScrimState.AOD) {
-            mCurrentInFrontAlpha = 1f;
-            mCurrentInFrontTint = Color.BLACK;
-            mCurrentBehindTint = Color.BLACK;
+        if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()) {
+            mInFrontAlpha = 1f;
+            mInFrontTint = Color.BLACK;
+            mBehindTint = Color.BLACK;
             mAnimateChange = false;
             updateScrims();
             mAnimateChange = true;
@@ -520,8 +539,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         if (mState == ScrimState.PULSING) {
             float newBehindAlpha = mState.getBehindAlpha();
-            if (mCurrentBehindAlpha != newBehindAlpha) {
-                mCurrentBehindAlpha = newBehindAlpha;
+            if (mBehindAlpha != newBehindAlpha) {
+                mBehindAlpha = newBehindAlpha;
                 updateScrims();
             }
         }
@@ -543,8 +562,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // Only animate scrim color if the scrim view is actually visible
             boolean animateScrimInFront = mScrimInFront.getViewAlpha() != 0 && !mBlankScreen;
             boolean animateScrimBehind = mScrimBehind.getViewAlpha() != 0 && !mBlankScreen;
+            boolean animateScrimForBubble = mScrimForBubble.getViewAlpha() != 0 && !mBlankScreen;
+
             mScrimInFront.setColors(mColors, animateScrimInFront);
             mScrimBehind.setColors(mColors, animateScrimBehind);
+            mScrimForBubble.setColors(mColors, animateScrimForBubble);
 
             // Calculate minimum scrim opacity for white or black text.
             int textColor = mColors.supportsDarkText() ? Color.BLACK : Color.WHITE;
@@ -563,12 +585,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         boolean occludedKeyguard = (mState == ScrimState.PULSING || mState == ScrimState.AOD)
                 && mKeyguardOccluded;
         if (aodWallpaperTimeout || occludedKeyguard) {
-            mCurrentBehindAlpha = 1;
+            mBehindAlpha = 1;
         }
-
-        setScrimInFrontAlpha(mCurrentInFrontAlpha);
-        setScrimBehindAlpha(mCurrentBehindAlpha);
-
+        setScrimAlpha(mScrimInFront, mInFrontAlpha);
+        setScrimAlpha(mScrimBehind, mBehindAlpha);
+        setScrimAlpha(mScrimForBubble, mBubbleAlpha);
+        // The animation could have all already finished, let's call onFinished just in case
+        onFinished();
         dispatchScrimsVisible();
     }
 
@@ -579,11 +602,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private void dispatchScrimsVisible() {
         final int currentScrimVisibility;
         if (mScrimInFront.getViewAlpha() == 1 || mScrimBehind.getViewAlpha() == 1) {
-            currentScrimVisibility = VISIBILITY_FULLY_OPAQUE;
+            currentScrimVisibility = OPAQUE;
         } else if (mScrimInFront.getViewAlpha() == 0 && mScrimBehind.getViewAlpha() == 0) {
-            currentScrimVisibility = VISIBILITY_FULLY_TRANSPARENT;
+            currentScrimVisibility = TRANSPARENT;
         } else {
-            currentScrimVisibility = VISIBILITY_SEMI_TRANSPARENT;
+            currentScrimVisibility = SEMI_TRANSPARENT;
         }
 
         if (mScrimsVisibility != currentScrimVisibility) {
@@ -600,16 +623,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             return 0;
         } else {
             // woo, special effects
-            return (float)(1f-0.5f*(1f-Math.cos(3.14159f * Math.pow(1f-frac, 2f))));
+            return (float) (1f - 0.5f * (1f - Math.cos(3.14159f * Math.pow(1f - frac, 2f))));
         }
-    }
-
-    private void setScrimBehindAlpha(float alpha) {
-        setScrimAlpha(mScrimBehind, alpha);
-    }
-
-    private void setScrimInFrontAlpha(float alpha) {
-        setScrimAlpha(mScrimInFront, alpha);
     }
 
     private void setScrimAlpha(ScrimView scrim, float alpha) {
@@ -622,17 +637,26 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         updateScrim(scrim, alpha);
     }
 
+    private String getScrimName(ScrimView scrim) {
+        if (scrim == mScrimInFront) {
+            return "front_scrim";
+        } else if (scrim == mScrimBehind) {
+            return "back_scrim";
+        } else if (scrim == mScrimForBubble) {
+            return "bubble_scrim";
+        }
+        return "unknown_scrim";
+    }
+
     private void updateScrimColor(View scrim, float alpha, int tint) {
         alpha = Math.max(0, Math.min(1.0f, alpha));
         if (scrim instanceof ScrimView) {
             ScrimView scrimView = (ScrimView) scrim;
 
-            Trace.traceCounter(Trace.TRACE_TAG_APP,
-                    scrim == mScrimInFront ? "front_scrim_alpha" : "back_scrim_alpha",
+            Trace.traceCounter(Trace.TRACE_TAG_APP, getScrimName(scrimView) + "_alpha",
                     (int) (alpha * 255));
 
-            Trace.traceCounter(Trace.TRACE_TAG_APP,
-                    scrim == mScrimInFront ? "front_scrim_tint" : "back_scrim_tint",
+            Trace.traceCounter(Trace.TRACE_TAG_APP, getScrimName(scrimView) + "_tint",
                     Color.alpha(tint));
 
             scrimView.setTint(tint);
@@ -666,9 +690,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                scrim.setTag(TAG_KEY_ANIM, null);
                 onFinished(lastCallback);
 
-                scrim.setTag(TAG_KEY_ANIM, null);
                 dispatchScrimsVisible();
 
                 if (!mDeferFinishedListener && mOnAnimationFinished != null) {
@@ -689,9 +713,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     private float getCurrentScrimAlpha(View scrim) {
         if (scrim == mScrimInFront) {
-            return mCurrentInFrontAlpha;
+            return mInFrontAlpha;
         } else if (scrim == mScrimBehind) {
-            return mCurrentBehindAlpha;
+            return mBehindAlpha;
+        } else if (scrim == mScrimForBubble) {
+            return mBubbleAlpha;
         } else {
             throw new IllegalArgumentException("Unknown scrim view");
         }
@@ -699,9 +725,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     private int getCurrentScrimTint(View scrim) {
         if (scrim == mScrimInFront) {
-            return mCurrentInFrontTint;
+            return mInFrontTint;
         } else if (scrim == mScrimBehind) {
-            return mCurrentBehindTint;
+            return mBehindTint;
+        } else if (scrim == mScrimForBubble) {
+            return mBubbleTint;
         } else {
             throw new IllegalArgumentException("Unknown scrim view");
         }
@@ -728,6 +756,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     private void onFinished(Callback callback) {
+        if (isAnimating(mScrimBehind)
+            || isAnimating(mScrimInFront)
+            || isAnimating(mScrimForBubble)) {
+            if (callback != null && callback != mCallback) {
+                // Since we only notify the callback that we're finished once everything has
+                // finished, we need to make sure that any changing callbacks are also invoked
+                callback.onFinished();
+            }
+            return;
+        }
         if (mWakeLockHeld) {
             mWakeLock.release(TAG);
             mWakeLockHeld = false;
@@ -744,8 +782,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // When unlocking with fingerprint, we'll fade the scrims from black to transparent.
         // At the end of the animation we need to remove the tint.
         if (mState == ScrimState.UNLOCKED) {
-            mCurrentInFrontTint = Color.TRANSPARENT;
-            mCurrentBehindTint = Color.TRANSPARENT;
+            mInFrontTint = Color.TRANSPARENT;
+            mBehindTint = Color.TRANSPARENT;
+            mBubbleTint = Color.TRANSPARENT;
+            updateScrimColor(mScrimInFront, mInFrontAlpha, mInFrontTint);
+            updateScrimColor(mScrimBehind, mBehindAlpha, mBehindTint);
+            updateScrimColor(mScrimForBubble, mBubbleAlpha, mBubbleTint);
         }
     }
 
@@ -804,10 +846,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             } else {
                 // update the alpha directly
                 updateScrimColor(scrim, alpha, getCurrentScrimTint(scrim));
-                onFinished();
             }
-        } else {
-            onFinished();
         }
     }
 
@@ -850,6 +889,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     /**
      * Executes a callback after the frame has hit the display.
+     *
      * @param callback What to run.
      */
     @VisibleForTesting
@@ -893,16 +933,35 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(" ScrimController: ");
-        pw.print("  state: "); pw.println(mState);
-        pw.print("  frontScrim:"); pw.print(" viewAlpha="); pw.print(mScrimInFront.getViewAlpha());
-        pw.print(" alpha="); pw.print(mCurrentInFrontAlpha);
-        pw.print(" tint=0x"); pw.println(Integer.toHexString(mScrimInFront.getTint()));
+        pw.print("  state: ");
+        pw.println(mState);
 
-        pw.print("  backScrim:"); pw.print(" viewAlpha="); pw.print(mScrimBehind.getViewAlpha());
-        pw.print(" alpha="); pw.print(mCurrentBehindAlpha);
-        pw.print(" tint=0x"); pw.println(Integer.toHexString(mScrimBehind.getTint()));
+        pw.print("  frontScrim:");
+        pw.print(" viewAlpha=");
+        pw.print(mScrimInFront.getViewAlpha());
+        pw.print(" alpha=");
+        pw.print(mInFrontAlpha);
+        pw.print(" tint=0x");
+        pw.println(Integer.toHexString(mScrimInFront.getTint()));
 
-        pw.print("   mTracking="); pw.println(mTracking);
+        pw.print("  backScrim:");
+        pw.print(" viewAlpha=");
+        pw.print(mScrimBehind.getViewAlpha());
+        pw.print(" alpha=");
+        pw.print(mBehindAlpha);
+        pw.print(" tint=0x");
+        pw.println(Integer.toHexString(mScrimBehind.getTint()));
+
+        pw.print("  bubbleScrim:");
+        pw.print(" viewAlpha=");
+        pw.print(mScrimForBubble.getViewAlpha());
+        pw.print(" alpha=");
+        pw.print(mBubbleAlpha);
+        pw.print(" tint=0x");
+        pw.println(Integer.toHexString(mScrimForBubble.getTint()));
+
+        pw.print("   mTracking=");
+        pw.println(mTracking);
     }
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
@@ -949,8 +1008,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // in this case, back-scrim needs to be re-evaluated
         if (mState == ScrimState.AOD || mState == ScrimState.PULSING) {
             float newBehindAlpha = mState.getBehindAlpha();
-            if (mCurrentBehindAlpha != newBehindAlpha) {
-                mCurrentBehindAlpha = newBehindAlpha;
+            if (mBehindAlpha != newBehindAlpha) {
+                mBehindAlpha = newBehindAlpha;
                 updateScrims();
             }
         }
@@ -971,10 +1030,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     public interface Callback {
         default void onStart() {
         }
+
         default void onDisplayBlanked() {
         }
+
         default void onFinished() {
         }
+
         default void onCancelled() {
         }
         /** Returns whether to timeout wallpaper or not. */

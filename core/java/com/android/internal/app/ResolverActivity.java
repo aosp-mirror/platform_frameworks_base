@@ -361,9 +361,6 @@ public class ResolverActivity extends Activity {
 
         initSuspendedColorMatrix();
 
-        if (isVoiceInteraction()) {
-            onSetupVoiceInteraction();
-        }
         final Set<String> categories = intent.getCategories();
         MetricsLogger.action(this, mAdapter.hasFilteredItem()
                 ? MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_APP_FEATURED
@@ -391,21 +388,24 @@ public class ResolverActivity extends Activity {
         mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
                 mSystemWindowInsets.right, 0);
 
-        View emptyView = findViewById(R.id.empty);
-        if (emptyView != null) {
-            emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
-                    + getResources().getDimensionPixelSize(
-                            R.dimen.chooser_edge_margin_normal) * 2);
-        }
-
-        if (mFooterSpacer == null) {
-            mFooterSpacer = new Space(getApplicationContext());
+        // Need extra padding so the list can fully scroll up
+        if (useLayoutWithDefault()) {
+            if (mFooterSpacer == null) {
+                mFooterSpacer = new Space(getApplicationContext());
+            } else {
+                ((ListView) mAdapterView).removeFooterView(mFooterSpacer);
+            }
+            mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
+                                                                       mSystemWindowInsets.bottom));
+            ((ListView) mAdapterView).addFooterView(mFooterSpacer);
         } else {
-            ((ListView) mAdapterView).removeFooterView(mFooterSpacer);
+            View emptyView = findViewById(R.id.empty);
+            if (emptyView != null) {
+                emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
+                                     + getResources().getDimensionPixelSize(
+                                             R.dimen.chooser_edge_margin_normal) * 2);
+            }
         }
-        mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
-                mSystemWindowInsets.bottom));
-        ((ListView) mAdapterView).addFooterView(mFooterSpacer);
 
         resetButtonBar();
 
@@ -442,24 +442,21 @@ public class ResolverActivity extends Activity {
         mSuspendedMatrixColorFilter = new ColorMatrixColorFilter(matrix);
     }
 
-    /**
-     * Perform any initialization needed for voice interaction.
-     */
-    public void onSetupVoiceInteraction() {
-        // Do it right now. Subclasses may delay this and send it later.
-        sendVoiceChoicesIfNeeded();
-    }
-
     public void sendVoiceChoicesIfNeeded() {
         if (!isVoiceInteraction()) {
             // Clearly not needed.
             return;
         }
 
-
         final Option[] options = new Option[mAdapter.getCount()];
         for (int i = 0, N = options.length; i < N; i++) {
-            options[i] = optionForChooserTarget(mAdapter.getItem(i), i);
+            TargetInfo target = mAdapter.getItem(i);
+            if (target == null) {
+                // If this occurs, a new set of targets is being loaded. Let that complete,
+                // and have the next call to send voice choices proceed instead.
+                return;
+            }
+            options[i] = optionForChooserTarget(target, i);
         }
 
         mPickOptionRequest = new PickTargetOptionRequest(
@@ -567,7 +564,7 @@ public class ResolverActivity extends Activity {
                         intent.getData().getHost(),
                         mAdapter.getFilteredItem().getDisplayLabel());
             } else if (mAdapter.areAllTargetsBrowsers()) {
-                dialogTitle =  getString(ActionTitle.BROWSABLE_TITLE_RES);
+                dialogTitle = getString(ActionTitle.BROWSABLE_TITLE_RES);
             } else {
                 dialogTitle = getString(ActionTitle.BROWSABLE_HOST_TITLE_RES,
                         intent.getData().getHost());
@@ -1310,6 +1307,7 @@ public class ResolverActivity extends Activity {
         // In case this method is called again (due to activity recreation), avoid adding a new
         // header if one is already present.
         if (useHeader && listView != null && listView.getHeaderViewsCount() == 0) {
+            listView.setHeaderDividersEnabled(true);
             listView.addHeaderView(LayoutInflater.from(this).inflate(
                     R.layout.resolver_different_item_header, listView, false));
         }
@@ -1352,11 +1350,13 @@ public class ResolverActivity extends Activity {
         final ViewGroup buttonLayout = findViewById(R.id.button_bar);
         if (buttonLayout != null) {
             buttonLayout.setVisibility(View.VISIBLE);
-            int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
-            buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
-                    buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
-                        R.dimen.resolver_button_bar_spacing) + inset);
 
+            if (!useLayoutWithDefault()) {
+                int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
+                buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
+                        buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
+                                R.dimen.resolver_button_bar_spacing) + inset);
+            }
             mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
             mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
 
@@ -1872,7 +1872,7 @@ public class ResolverActivity extends Activity {
                 }
             }
 
-
+            sendVoiceChoicesIfNeeded();
             postListReadyRunnable();
         }
 
@@ -2063,7 +2063,9 @@ public class ResolverActivity extends Activity {
             CharSequence subLabel = info.getExtendedInfo();
             if (TextUtils.equals(label, subLabel)) subLabel = null;
 
-            if (!TextUtils.equals(holder.text2.getText(), subLabel)) {
+            if (!TextUtils.equals(holder.text2.getText(), subLabel)
+                    && !TextUtils.isEmpty(subLabel)) {
+                holder.text2.setVisibility(View.VISIBLE);
                 holder.text2.setText(subLabel);
             }
 

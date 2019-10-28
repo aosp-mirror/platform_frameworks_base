@@ -421,7 +421,7 @@ public class NotificationGuts extends FrameLayout {
     }
 
     /** Listener for animations executed in {@link #animateClose(int, int, boolean)}. */
-    private static class AnimateCloseListener extends AnimatorListenerAdapter {
+    private class AnimateCloseListener extends AnimatorListenerAdapter {
         final View mView;
         private final GutsContent mGutsContent;
 
@@ -433,8 +433,10 @@ public class NotificationGuts extends FrameLayout {
         @Override
         public void onAnimationEnd(Animator animation) {
             super.onAnimationEnd(animation);
-            mView.setVisibility(View.GONE);
-            mGutsContent.onFinishedClosing();
+            if (!isExposed()) {
+                mView.setVisibility(View.GONE);
+                mGutsContent.onFinishedClosing();
+            }
         }
     }
 }

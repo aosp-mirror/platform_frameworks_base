@@ -16,6 +16,8 @@
 
 package com.android.systemui.assist;
 
+import static com.android.systemui.assist.AssistModule.ASSIST_HANDLE_THREAD_NAME;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
@@ -28,20 +30,21 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.Dependency;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ScreenDecorations;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 
 /**
  * A class for managing Assistant handle logic.
@@ -49,6 +52,7 @@ import java.util.function.Supplier;
  * Controls when visual handles for Assistant gesture affordance should be shown or hidden using an
  * {@link AssistHandleBehavior}.
  */
+@Singleton
 public final class AssistHandleBehaviorController implements AssistHandleCallbacks, Dumpable {
 
     private static final String TAG = "AssistHandleBehavior";
@@ -67,10 +71,9 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     private final Handler mHandler;
     private final Runnable mHideHandles = this::hideHandles;
     private final Runnable mShowAndGo = this::showAndGoInternal;
-    private final Supplier<ScreenDecorations> mScreenDecorationsSupplier;
+    private final Provider<ScreenDecorations> mScreenDecorations;
     private final PhenotypeHelper mPhenotypeHelper;
-    private final Map<AssistHandleBehavior, BehaviorController> mBehaviorMap =
-            new EnumMap<>(AssistHandleBehavior.class);
+    private final Map<AssistHandleBehavior, BehaviorController> mBehaviorMap;
 
     private boolean mHandlesShowing = false;
     private long mHandlesLastHiddenAt;
@@ -82,41 +85,25 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     private AssistHandleBehavior mCurrentBehavior = AssistHandleBehavior.OFF;
     private boolean mInGesturalMode;
 
-    AssistHandleBehaviorController(Context context, AssistUtils assistUtils, Handler handler) {
-        this(
-                context,
-                assistUtils,
-                handler,
-                () -> SysUiServiceProvider.getComponent(context, ScreenDecorations.class),
-                new PhenotypeHelper(),
-                /* testBehavior = */ null);
-    }
-
-    @VisibleForTesting
+    @Inject
     AssistHandleBehaviorController(
             Context context,
             AssistUtils assistUtils,
-            Handler handler,
-            Supplier<ScreenDecorations> screenDecorationsSupplier,
+            @Named(ASSIST_HANDLE_THREAD_NAME) Handler handler,
+            Provider<ScreenDecorations> screenDecorations,
             PhenotypeHelper phenotypeHelper,
-            @Nullable BehaviorController testBehavior) {
+            Map<AssistHandleBehavior, BehaviorController> behaviorMap,
+            NavigationModeController navigationModeController,
+            DumpController dumpController) {
         mContext = context;
         mAssistUtils = assistUtils;
         mHandler = handler;
-        mScreenDecorationsSupplier = screenDecorationsSupplier;
+        mScreenDecorations = screenDecorations;
         mPhenotypeHelper = phenotypeHelper;
-        mBehaviorMap.put(AssistHandleBehavior.OFF, new AssistHandleOffBehavior());
-        mBehaviorMap.put(AssistHandleBehavior.LIKE_HOME, new AssistHandleLikeHomeBehavior());
-        mBehaviorMap.put(
-                AssistHandleBehavior.REMINDER_EXP,
-                new AssistHandleReminderExpBehavior(handler, phenotypeHelper));
-        if (testBehavior != null) {
-            mBehaviorMap.put(AssistHandleBehavior.TEST, testBehavior);
-        }
+        mBehaviorMap = behaviorMap;
 
         mInGesturalMode = QuickStepContract.isGesturalMode(
-                Dependency.get(NavigationModeController.class)
-                        .addListener(this::handleNavigationModeChange));
+                navigationModeController.addListener(this::handleNavigationModeChange));
 
         setBehavior(getBehaviorMode());
         mPhenotypeHelper.addOnPropertiesChangedListener(
@@ -128,7 +115,8 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
                                 SystemUiDeviceConfigFlags.ASSIST_HANDLES_BEHAVIOR_MODE, null));
                     }
                 });
-        Dependency.get(DumpController.class).addListener(this);
+
+        dumpController.addListener(this);
     }
 
     @Override // AssistHandleCallbacks
@@ -241,7 +229,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         }
 
         if (handlesUnblocked(ignoreThreshold)) {
-            ScreenDecorations screenDecorations = mScreenDecorationsSupplier.get();
+            ScreenDecorations screenDecorations = mScreenDecorations.get();
             if (screenDecorations == null) {
                 Log.w(TAG, "Couldn't show handles, ScreenDecorations unavailable");
             } else {
@@ -256,7 +244,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
             return;
         }
 
-        ScreenDecorations screenDecorations = mScreenDecorationsSupplier.get();
+        ScreenDecorations screenDecorations = mScreenDecorations.get();
         if (screenDecorations == null) {
             Log.w(TAG, "Couldn't hide handles, ScreenDecorations unavailable");
         } else {

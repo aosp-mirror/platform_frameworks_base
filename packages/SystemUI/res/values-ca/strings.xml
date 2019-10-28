@@ -125,7 +125,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Cara autenticada"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmat"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Toca Confirma per completar"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor d\'empremtes digitals"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor d\'empremtes dactilars"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona d\'empremta digital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"S\'està cercant la teva cara…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Icona facial"</string>
@@ -458,7 +458,7 @@
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Es mostra informació sensible durant l\'emissió o la gravació"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Esborra-ho tot"</string>
-    <string name="manage_notifications_text" msgid="2386728145475108753">"Gestió"</string>
+    <string name="manage_notifications_text" msgid="2386728145475108753">"Gestiona"</string>
     <string name="notification_section_header_gentle" msgid="4372438504154095677">"Notificacions silencioses"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Esborra totes les notificacions silencioses"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notificacions pausades pel mode No molestis"</string>
@@ -524,7 +524,7 @@
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"El dispositiu continuarà bloquejat fins que no el desbloquegis manualment."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Rep notificacions més ràpidament"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Mostra-les abans de desbloquejar"</string>
-    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"No"</string>
+    <string name="hidden_notifications_cancel" msgid="3690709735122344913">"No, gràcies"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Configura"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Desactiva ara"</string>
@@ -904,7 +904,7 @@
     <string name="slice_permission_deny" msgid="7683681514008048807">"Denega"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Toca per programar l\'estalvi de bateria"</string>
     <string name="auto_saver_text" msgid="2563289953551438248">"Activa\'l quan sigui probable que et quedis sense bateria"</string>
-    <string name="no_auto_saver_action" msgid="8086002101711328500">"No"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"No, gràcies"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"S\'ha activat la programació de l\'estalvi de bateria"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"L\'estalvi de bateria s\'activarà automàticament quan el nivell de bateria sigui inferior al <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Configuració"</string>

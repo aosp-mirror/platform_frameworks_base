@@ -811,6 +811,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
+
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
         mZenController.addCallback(this);
         NotificationListContainer notifListContainer = (NotificationListContainer) mStackScroller;
@@ -931,8 +932,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         ScrimView scrimBehind = mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = mStatusBarWindow.findViewById(R.id.scrim_in_front);
+        ScrimView scrimForBubble = mStatusBarWindow.findViewById(R.id.scrim_for_bubble);
+
         mScrimController = SystemUIFactory.getInstance().createScrimController(
-                scrimBehind, scrimInFront, mLockscreenWallpaper,
+                scrimBehind, scrimInFront, scrimForBubble, mLockscreenWallpaper,
                 (state, alpha, color) -> mLightBarController.setScrimState(state, alpha, color),
                 scrimsVisible -> {
                     if (mStatusBarWindowController != null) {
@@ -2401,6 +2404,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             mGroupManager.dump(fd, pw, args);
         } else {
             pw.println("  mGroupManager: null");
+        }
+
+        if (mBubbleController != null) {
+            mBubbleController.dump(fd, pw, args);
         }
 
         if (mLightBarController != null) {

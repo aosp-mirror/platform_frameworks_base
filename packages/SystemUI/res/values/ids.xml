@@ -137,6 +137,7 @@
     <item type="id" name="scale_x_dynamicanimation_tag"/>
     <item type="id" name="scale_y_dynamicanimation_tag"/>
     <item type="id" name="physics_animator_tag"/>
+    <item type="id" name="target_animator_tag" />
 
     <!-- Global Actions Menu -->
     <item type="id" name="global_actions_view" />

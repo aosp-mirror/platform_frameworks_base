@@ -4590,13 +4590,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         .show(mSplitScreenDividerAnchor);
                 scheduleAnimation();
             } else {
-                mAppAnimationLayer.remove();
+                mWmService.mTransactionFactory.make()
+                        .remove(mAppAnimationLayer)
+                        .remove(mBoostedAppAnimationLayer)
+                        .remove(mHomeAppAnimationLayer)
+                        .remove(mSplitScreenDividerAnchor)
+                        .apply();
                 mAppAnimationLayer = null;
-                mBoostedAppAnimationLayer.remove();
                 mBoostedAppAnimationLayer = null;
-                mHomeAppAnimationLayer.remove();
                 mHomeAppAnimationLayer = null;
-                mSplitScreenDividerAnchor.remove();
                 mSplitScreenDividerAnchor = null;
             }
         }

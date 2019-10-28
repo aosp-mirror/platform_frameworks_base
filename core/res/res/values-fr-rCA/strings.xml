@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Mode TTY HCO demandé par un pair"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Mode TTY VCO demandé par un pair"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Mode TTY DÉSACTIVÉ demandé par un pair"</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"Google Voice"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"Voix"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Données"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"Télécopie"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
@@ -527,9 +527,9 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Données biométriques non reconnues"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Authentification annulée"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Aucun NIP, schéma ou mot de passe défini"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partielle détectée. Veuillez essayer de nouveau."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partielle détectée. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le capteur d\'empreintes digitales est sale. Veuillez le nettoyer et essayer de nouveau."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le capteur d\'empreintes digitales est sale. Veuillez le nettoyer et réessayer."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Vous avez déplacé votre doigt trop rapidement. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Vous avez déplacé votre doigt trop lentement. Veuillez réessayer."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -537,10 +537,10 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Visage authentifié, veuillez appuyer sur le bouton Confirmer"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte numérique indisponible."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte digitale numérique indisponible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empreinte digitale ne peut pas être enregistrée. Veuillez supprimer une empreinte existante."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Le temps attribué pour lire l\'empreinte est écoulé. Veuillez essayer de nouveau."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Opération d\'empreinte numérique annulée."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Le temps attribué pour lire l\'empreinte digitale est écoulé. Veuillez réessayer."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Opération d\'empreinte digitale numérique annulée."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"L\'opération d\'empreinte digitale a été annulée par l\'utilisateur."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Trop de tentatives. Veuillez réessayer plus tard."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Trop de tentatives. Capteur d\'empreintes digitales désactivé."</string>
@@ -1577,8 +1577,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Expire le :"</string>
     <string name="serial_number" msgid="758814067660862493">"Numéro de série :"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Empreintes :"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Empreinte SHA-256 :"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Empreinte SHA-1 :"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Empreinte digitale SHA-256 :"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Empreinte digitale SHA-1 :"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Tout afficher"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Sélectionnez une activité"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Partagez avec"</string>
@@ -1670,10 +1670,10 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Le raccourci d\'accessibilité a désactivé la fonction <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Maintenez enfoncées les deux touches de volume pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Choisissez un service à utiliser lorsque vous touchez le bouton d\'accessibilité :"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Choisissez un service à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer deux doigts du bas de l\'écran vers le haut) :"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Choisissez un service à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer trois doigts du bas de l\'écran vers le haut) :"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Choisissez un service à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer l\'écran de bas en haut avec deux doigts) :"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Choisissez un service à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer l\'écran de bas en haut avec trois doigts) :"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Pour basculer entre les services, maintenez le doigt sur le bouton d\'accessibilité."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Pour basculer entre les services, balayez deux doigts vers le haut et maintenez-les sur l\'écran."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Pour basculer entre les services, balayez l\'écrfan vers le haut avec deux doigts et maintenez-les-y."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Pour changer de service, balayez trois doigts vers le haut et maintenez-les sur l\'écran."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Zoom"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Sans catégorie"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Vous définissez l\'importance de ces notifications."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ces notifications sont importantes en raison des participants."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil d\'utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil d\'utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Un utilisateur associé à ce compte existe déjà.)"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un utilisateur <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Un utilisateur est déjà associé à ce compte)"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil d\'utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Ajouter une langue"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Entrez la langue"</string>

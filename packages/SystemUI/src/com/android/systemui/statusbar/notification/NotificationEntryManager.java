@@ -281,24 +281,10 @@ public class NotificationEntryManager implements
         }
 
         final NotificationEntry entry = mNotificationData.get(key);
+
+        abortExistingInflation(key);
+
         boolean lifetimeExtended = false;
-
-        // Notification was canceled before it got inflated
-        if (entry == null) {
-            NotificationEntry pendingEntry = mPendingNotifications.get(key);
-            if (pendingEntry != null) {
-                for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
-                    if (extender.shouldExtendLifetimeForPendingNotification(pendingEntry)) {
-                        extendLifetime(pendingEntry, extender);
-                        lifetimeExtended = true;
-                    }
-                }
-            }
-        }
-
-        if (!lifetimeExtended) {
-            abortExistingInflation(key);
-        }
 
         if (entry != null) {
             // If a manager needs to keep the notification around for whatever reason, we
