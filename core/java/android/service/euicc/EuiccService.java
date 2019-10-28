@@ -516,7 +516,7 @@ public abstract class EuiccService extends Service {
      * @see android.telephony.euicc.EuiccManager#eraseSubscriptions
      *
      * @deprecated From R, callers should specify a flag for specific set of subscriptions to erase
-     * and use @link{onEraseSubscriptionsWithOptions} instead
+     * and use {@link #onEraseSubscriptionsWithOptions(int, int)} instead
      */
     @Deprecated
     public abstract int onEraseSubscriptions(int slotId);
