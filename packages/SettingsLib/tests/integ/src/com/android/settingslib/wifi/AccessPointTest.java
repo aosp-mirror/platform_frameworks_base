@@ -459,10 +459,11 @@ public class AccessPointTest {
 
     @Test
     public void testSummaryString_showsWrongPasswordLabel() {
-        WifiConfiguration configuration = createWifiConfiguration();
-        configuration.getNetworkSelectionStatus().setNetworkSelectionStatus(
-                WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_PERMANENTLY_DISABLED);
-        configuration.getNetworkSelectionStatus().setNetworkSelectionDisableReason(
+        WifiConfiguration configuration = spy(createWifiConfiguration());
+        WifiConfiguration.NetworkSelectionStatus status =
+                mock(WifiConfiguration.NetworkSelectionStatus.class);
+        when(configuration.getNetworkSelectionStatus()).thenReturn(status);
+        when(status.getNetworkSelectionDisableReason()).thenReturn(
                 WifiConfiguration.NetworkSelectionStatus.DISABLED_BY_WRONG_PASSWORD);
         AccessPoint ap = new AccessPoint(mContext, configuration);
 

@@ -5140,24 +5140,94 @@ package android.net.wifi {
   }
 
   @Deprecated public class WifiConfiguration implements android.os.Parcelable {
+    method @Deprecated public int getAuthType();
+    method @Deprecated @NonNull public android.net.IpConfiguration.IpAssignment getIpAssignment();
+    method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus getNetworkSelectionStatus();
+    method @Deprecated @NonNull public String getPrintableSsid();
+    method @Deprecated @NonNull public android.net.IpConfiguration.ProxySettings getProxySettings();
+    method @Deprecated @Nullable public android.net.StaticIpConfiguration getStaticIpConfiguration();
     method @Deprecated public boolean hasNoInternetAccess();
     method @Deprecated public boolean isEphemeral();
+    method @Deprecated public static boolean isMetered(@Nullable android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiInfo);
     method @Deprecated public boolean isNoInternetAccessExpected();
+    method @Deprecated public void setIpConfiguration(@Nullable android.net.IpConfiguration);
+    method @Deprecated public void setProxy(@NonNull android.net.IpConfiguration.ProxySettings, @NonNull android.net.ProxyInfo);
+    field @Deprecated public static final int AP_BAND_2GHZ = 0; // 0x0
+    field @Deprecated public static final int AP_BAND_5GHZ = 1; // 0x1
+    field @Deprecated public static final int AP_BAND_ANY = -1; // 0xffffffff
+    field @Deprecated public static final int INVALID_NETWORK_ID = -1; // 0xffffffff
+    field @Deprecated public static final int METERED_OVERRIDE_METERED = 1; // 0x1
+    field @Deprecated public static final int METERED_OVERRIDE_NONE = 0; // 0x0
+    field @Deprecated public static final int METERED_OVERRIDE_NOT_METERED = 2; // 0x2
+    field @Deprecated public static final int RANDOMIZATION_NONE = 0; // 0x0
+    field @Deprecated public static final int RANDOMIZATION_PERSISTENT = 1; // 0x1
     field @Deprecated public boolean allowAutojoin;
+    field @Deprecated public int apBand;
     field @Deprecated public int carrierId;
     field @Deprecated public String creatorName;
     field @Deprecated public int creatorUid;
+    field @Deprecated public boolean fromWifiNetworkSpecifier;
+    field @Deprecated public boolean fromWifiNetworkSuggestion;
     field @Deprecated public String lastUpdateName;
     field @Deprecated public int lastUpdateUid;
+    field @Deprecated public int macRandomizationSetting;
     field @Deprecated public boolean meteredHint;
+    field @Deprecated public int meteredOverride;
     field @Deprecated public int numAssociation;
     field @Deprecated public int numScorerOverride;
     field @Deprecated public int numScorerOverrideAndSwitchedNetwork;
+    field @Deprecated @NonNull public final android.net.wifi.WifiConfiguration.RecentFailure recentFailure;
+    field @Deprecated public boolean requirePMF;
+    field @Deprecated @Nullable public String saePasswordId;
+    field @Deprecated public boolean shared;
     field @Deprecated public boolean useExternalScores;
   }
 
   @Deprecated public static class WifiConfiguration.KeyMgmt {
     field @Deprecated public static final int WPA2_PSK = 4; // 0x4
+  }
+
+  @Deprecated public static class WifiConfiguration.NetworkSelectionStatus {
+    method @Deprecated public int getDisableReasonCounter(int);
+    method @Deprecated public long getDisableTime();
+    method @Deprecated public boolean getHasEverConnected();
+    method @Deprecated @Nullable public static String getNetworkDisableReasonString(int);
+    method @Deprecated public int getNetworkSelectionDisableReason();
+    method @Deprecated @NonNull public String getNetworkStatusString();
+    method @Deprecated public boolean isNetworkEnabled();
+    method @Deprecated public boolean isNetworkPermanentlyDisabled();
+    field @Deprecated public static final int DISABLED_ASSOCIATION_REJECTION = 1; // 0x1
+    field @Deprecated public static final int DISABLED_AUTHENTICATION_FAILURE = 2; // 0x2
+    field @Deprecated public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 5; // 0x5
+    field @Deprecated public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 9; // 0x9
+    field @Deprecated public static final int DISABLED_BY_WIFI_MANAGER = 7; // 0x7
+    field @Deprecated public static final int DISABLED_BY_WRONG_PASSWORD = 8; // 0x8
+    field @Deprecated public static final int DISABLED_DHCP_FAILURE = 3; // 0x3
+    field @Deprecated public static final int DISABLED_NO_INTERNET_PERMANENT = 6; // 0x6
+    field @Deprecated public static final int DISABLED_NO_INTERNET_TEMPORARY = 4; // 0x4
+    field @Deprecated public static final int NETWORK_SELECTION_DISABLED_MAX = 10; // 0xa
+    field @Deprecated public static final int NETWORK_SELECTION_ENABLE = 0; // 0x0
+  }
+
+  @Deprecated public static class WifiConfiguration.RecentFailure {
+    method @Deprecated public int getAssociationStatus();
+    field @Deprecated public static final int NONE = 0; // 0x0
+    field @Deprecated public static final int STATUS_AP_UNABLE_TO_HANDLE_NEW_STA = 17; // 0x11
+  }
+
+  public class WifiEnterpriseConfig implements android.os.Parcelable {
+    method @Nullable public String[] getCaCertificateAliases();
+    method @NonNull public String getCaPath();
+    method @NonNull public String getClientCertificateAlias();
+    method public int getOcsp();
+    method public void setCaCertificateAliases(@Nullable String[]);
+    method public void setCaPath(@Nullable String);
+    method public void setClientCertificateAlias(@Nullable String);
+    method public void setOcsp(int);
+    field public static final int OCSP_NONE = 0; // 0x0
+    field public static final int OCSP_REQUEST_CERT_STATUS = 1; // 0x1
+    field public static final int OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS = 3; // 0x3
+    field public static final int OCSP_REQUIRE_CERT_STATUS = 2; // 0x2
   }
 
   public class WifiFrameworkInitializer {
