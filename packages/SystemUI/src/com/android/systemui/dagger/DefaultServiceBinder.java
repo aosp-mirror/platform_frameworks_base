@@ -31,7 +31,7 @@ import dagger.multibindings.IntoMap;
  * Services that are injectable should go here.
  */
 @Module
-public abstract class ServiceBinder {
+public abstract class DefaultServiceBinder {
     /** */
     @Binds
     @IntoMap

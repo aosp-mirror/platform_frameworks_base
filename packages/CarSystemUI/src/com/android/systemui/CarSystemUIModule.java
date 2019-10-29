@@ -46,8 +46,6 @@ import javax.inject.Singleton;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ClassKey;
-import dagger.multibindings.IntoMap;
 
 @Module
 abstract class CarSystemUIModule {
@@ -103,11 +101,6 @@ abstract class CarSystemUIModule {
 
     @Binds
     public abstract StatusBar bindStatusBar(CarStatusBar statusBar);
-
-    @Binds
-    @IntoMap
-    @ClassKey(StatusBar.class)
-    public abstract SystemUI providesStatusBar(CarStatusBar statusBar);
 
     @Binds
     abstract VolumeDialogComponent bindVolumeDialogComponent(

@@ -29,6 +29,7 @@ import dagger.Component;
 @Singleton
 @Component(
         modules = {
+                CarComponentBinder.class,
                 DependencyProvider.class,
                 DependencyBinder.class,
                 SystemUIFactory.ContextHolder.class,

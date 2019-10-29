@@ -21,7 +21,6 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
 import androidx.annotation.Nullable;
 
-import com.android.systemui.SystemUI;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.power.EnhancedEstimates;
@@ -39,8 +38,6 @@ import javax.inject.Singleton;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ClassKey;
-import dagger.multibindings.IntoMap;
 
 /**
  * A dagger module for injecting default implementations of components of System UI that may be
@@ -73,11 +70,6 @@ abstract class SystemUIDefaultModule {
 
     @Binds
     abstract ShadeController provideShadeController(StatusBar statusBar);
-
-    @Binds
-    @IntoMap
-    @ClassKey(StatusBar.class)
-    public abstract SystemUI providesStatusBar(StatusBar statusBar);
 
     @Singleton
     @Provides
