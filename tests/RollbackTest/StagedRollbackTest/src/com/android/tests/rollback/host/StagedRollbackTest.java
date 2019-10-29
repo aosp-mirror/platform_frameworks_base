@@ -125,7 +125,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testNetworkFailedRollback_Phase1");
         // Reduce health check deadline
         getDevice().executeShellCommand("device_config put rollback "
-                + "watchdog_request_timeout_millis 300000");
+                + "watchdog_request_timeout_millis 120000");
         // Simulate re-installation of new NetworkStack with rollbacks enabled
         getDevice().executeShellCommand("pm install -r --staged --enable-rollback "
                 + "/system/priv-app/NetworkStack/NetworkStack.apk");

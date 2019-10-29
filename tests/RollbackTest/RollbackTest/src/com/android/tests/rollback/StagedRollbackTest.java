@@ -243,7 +243,7 @@ public class StagedRollbackTest {
         // The device is expected to reboot during sleeping. This device method will fail and
         // the host will catch the assertion. If reboot doesn't happen, the host will fail the
         // assertion.
-        Thread.sleep(TimeUnit.SECONDS.toMillis(260));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(120));
     }
 
     @Test
