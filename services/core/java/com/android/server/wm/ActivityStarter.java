@@ -2354,7 +2354,7 @@ class ActivityStarter {
                     mMovedToFront = true;
                 }
 
-                if (launchStack.topTask() == null) {
+                if (launchStack != null && launchStack.topTask() == null) {
                     // The task does not need to be reparented to the launch stack. Remove the
                     // launch stack if there is no activity in it.
                     Slog.w(TAG, "Removing an empty stack: " + launchStack);
