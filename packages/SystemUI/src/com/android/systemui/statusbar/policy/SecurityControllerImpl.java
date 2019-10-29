@@ -123,6 +123,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null,
                 bgHandler);
 
@@ -298,14 +299,11 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         } else {
             mVpnUserId = mCurrentUserId;
         }
-        refreshCACerts();
         fireCallbacks();
     }
 
-    private void refreshCACerts() {
-        new CACertLoader().execute(mCurrentUserId);
-        int workProfileId = getWorkProfileUserId(mCurrentUserId);
-        if (workProfileId != UserHandle.USER_NULL) new CACertLoader().execute(workProfileId);
+    private void refreshCACerts(int userId) {
+        new CACertLoader().execute(userId);
     }
 
     private String getNameForVpnConfig(VpnConfig cfg, UserHandle user) {
@@ -401,7 +399,10 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override public void onReceive(Context context, Intent intent) {
             if (KeyChain.ACTION_TRUST_STORE_CHANGED.equals(intent.getAction())) {
-                refreshCACerts();
+                refreshCACerts(getSendingUserId());
+            } else if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                if (userId != UserHandle.USER_NULL) refreshCACerts(userId);
             }
         }
     };
@@ -416,9 +417,6 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
                 return new Pair<Integer, Boolean>(userId[0], hasCACerts);
             } catch (RemoteException | InterruptedException | AssertionError e) {
                 Log.i(TAG, "failed to get CA certs", e);
-                mBgHandler.postDelayed(
-                        () -> new CACertLoader().execute(userId[0]),
-                        CA_CERT_LOADING_RETRY_TIME_IN_MS);
                 return new Pair<Integer, Boolean>(userId[0], null);
             }
         }
