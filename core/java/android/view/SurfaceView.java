@@ -712,6 +712,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         mSurfaceAlpha = 1f;
 
         synchronized (mSurfaceControlLock) {
+            mSurface.release();
+
             if (mRtHandlingPositionUpdates) {
                 mRtReleaseSurfaces = true;
                 return;
@@ -725,7 +727,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mTmpTransaction.remove(mBackgroundControl);
                 mBackgroundControl = null;
             }
-            mSurface.release();
             mTmpTransaction.apply();
         }
     }
@@ -1198,7 +1199,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     mRtTransaction.remove(mBackgroundControl);
                     mSurfaceControl = null;
                     mBackgroundControl = null;
-                    mSurface.release();
                 }
                 mRtHandlingPositionUpdates = false;
             }
