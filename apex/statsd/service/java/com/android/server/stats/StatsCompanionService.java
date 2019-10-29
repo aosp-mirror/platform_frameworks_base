@@ -156,8 +156,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -2071,9 +2069,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
             CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
             HistoricalOpsRequest histOpsRequest =
-                    new HistoricalOpsRequest.Builder(
-                            Instant.now().minus(1, ChronoUnit.HOURS).toEpochMilli(),
-                            Long.MAX_VALUE).build();
+                    new HistoricalOpsRequest.Builder(0, Long.MAX_VALUE).build();
             appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
 
             HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
