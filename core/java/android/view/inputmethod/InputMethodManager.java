@@ -358,7 +358,7 @@ public final class InputMethodManager {
     boolean mActive = false;
 
     /**
-     * {@code true} if next {@link #onPostWindowFocus(View, View, int, boolean, int)} needs to
+     * {@code true} if next {@link #onPostWindowFocus(View, View, int, int)} needs to
      * restart input.
      */
     boolean mRestartOnNextWindowFocus = true;
@@ -1925,13 +1925,12 @@ public final class InputMethodManager {
      * @hide
      */
     public void onPostWindowFocus(View rootView, View focusedView,
-            @SoftInputModeFlags int softInputMode, boolean first, int windowFlags) {
+            @SoftInputModeFlags int softInputMode, int windowFlags) {
         boolean forceNewFocus = false;
         synchronized (mH) {
             if (DEBUG) Log.v(TAG, "onWindowFocus: " + focusedView
                     + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
-                    + " first=" + first + " flags=#"
-                    + Integer.toHexString(windowFlags));
+                    + " flags=#" + Integer.toHexString(windowFlags));
             if (mRestartOnNextWindowFocus) {
                 if (DEBUG) Log.v(TAG, "Restarting due to mRestartOnNextWindowFocus");
                 mRestartOnNextWindowFocus = false;
@@ -1946,9 +1945,6 @@ public final class InputMethodManager {
             if (focusedView.onCheckIsTextEditor()) {
                 startInputFlags |= StartInputFlags.IS_TEXT_EDITOR;
             }
-        }
-        if (first) {
-            startInputFlags |= StartInputFlags.FIRST_WINDOW_FOCUS_GAIN;
         }
 
         if (checkFocusNoStartInput(forceNewFocus)) {

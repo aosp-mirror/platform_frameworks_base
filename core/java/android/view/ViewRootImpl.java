@@ -439,7 +439,6 @@ public final class ViewRootImpl implements ViewParent,
     boolean mReportNextDraw;
     boolean mFullRedrawNeeded;
     boolean mNewSurfaceNeeded;
-    boolean mHasHadWindowFocus;
     boolean mLastWasImTarget;
     boolean mForceNextWindowRelayout;
     CountDownLatch mWindowDrawCountDown;
@@ -2123,11 +2122,6 @@ public final class ViewRootImpl implements ViewParent,
                 endDragResizing();
                 destroyHardwareResources();
             }
-            if (viewVisibility == View.GONE) {
-                // After making a window gone, we will count it as being
-                // shown for the first time the next time it gets focus.
-                mHasHadWindowFocus = false;
-            }
         }
 
         // Non-visible windows can't hold accessibility focus.
@@ -2823,8 +2817,7 @@ public final class ViewRootImpl implements ViewParent,
                 if (imm != null && imTarget) {
                     imm.onPreWindowFocus(mView, hasWindowFocus);
                     imm.onPostWindowFocus(mView, mView.findFocus(),
-                            mWindowAttributes.softInputMode,
-                            !mHasHadWindowFocus, mWindowAttributes.flags);
+                            mWindowAttributes.softInputMode, mWindowAttributes.flags);
                 }
             }
         }
@@ -3017,8 +3010,7 @@ public final class ViewRootImpl implements ViewParent,
             if (hasWindowFocus) {
                 if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
                     imm.onPostWindowFocus(mView, mView.findFocus(),
-                            mWindowAttributes.softInputMode,
-                            !mHasHadWindowFocus, mWindowAttributes.flags);
+                            mWindowAttributes.softInputMode, mWindowAttributes.flags);
                 }
                 // Clear the forward bit.  We can just do this directly, since
                 // the window manager doesn't care about it.
@@ -3028,7 +3020,6 @@ public final class ViewRootImpl implements ViewParent,
                         .softInputMode &=
                         ~WindowManager.LayoutParams
                                 .SOFT_INPUT_IS_FORWARD_NAVIGATION;
-                mHasHadWindowFocus = true;
 
                 // Refocusing a window that has a focused view should fire a
                 // focus event for the view since the global focused view changed.
