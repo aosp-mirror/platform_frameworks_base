@@ -98,6 +98,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -178,6 +179,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private final AccessibilityWindowManager mA11yWindowManager;
 
     private final AccessibilityDisplayListener mA11yDisplayListener;
+
+    private final ActivityTaskManagerInternal mActivityTaskManagerService;
 
     private final MainHandler mMainHandler;
 
@@ -260,6 +263,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mWindowManagerService, this, mSecurityPolicy, this);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
         mSecurityPolicy.setAccessibilityWindowManager(mA11yWindowManager);
+        mActivityTaskManagerService = LocalServices.getService(ActivityTaskManagerInternal.class);
 
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
@@ -1435,7 +1439,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     service = new AccessibilityServiceConnection(userState, mContext, componentName,
                             installedService, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
                             this, mWindowManagerService, mSystemActionPerformer,
-                            mA11yWindowManager);
+                            mA11yWindowManager, mActivityTaskManagerService);
                 } else if (userState.mBoundServices.contains(service)) {
                     continue;
                 }
@@ -2411,7 +2415,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState, mContext,
                     COMPONENT_NAME, info, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
                     AccessibilityManagerService.this, mWindowManagerService,
-                    mSystemActionPerformer, mA11yWindowManager) {
+                    mSystemActionPerformer, mA11yWindowManager, mActivityTaskManagerService) {
                 @Override
                 public boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
                     return true;
