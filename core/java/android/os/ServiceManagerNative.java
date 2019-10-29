@@ -86,6 +86,10 @@ class ServiceManagerProxy implements IServiceManager {
         throw new RemoteException();
     }
 
+    public boolean isDeclared(String name) throws RemoteException {
+        throw new RemoteException();
+    }
+
     /**
      * Same as mServiceManager but used by apps.
      *
