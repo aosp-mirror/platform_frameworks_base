@@ -19,9 +19,11 @@ package com.android.server.pm;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.parsing.AndroidPackage;
+import android.util.ArraySet;
 import android.util.SparseArray;
 
 import java.io.File;
+import java.util.Map;
 
 public class PackageSettingBuilder {
     private String mName;
@@ -38,6 +40,7 @@ public class PackageSettingBuilder {
     private int mSharedUserId;
     private String[] mUsesStaticLibraries;
     private long[] mUsesStaticLibrariesVersions;
+    private Map<String, ArraySet<String>> mMimeGroups;
     private String mVolumeUuid;
     private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
     private AndroidPackage mPkg;
@@ -127,6 +130,11 @@ public class PackageSettingBuilder {
         return this;
     }
 
+    public PackageSettingBuilder setMimeGroups(Map<String, ArraySet<String>> mimeGroups) {
+        this.mMimeGroups = mimeGroups;
+        return this;
+    }
+
     public PackageSettingBuilder setVolumeUuid(String volumeUuid) {
         this.mVolumeUuid = volumeUuid;
         return this;
@@ -156,7 +164,7 @@ public class PackageSettingBuilder {
                 new File(mCodePath), new File(mResourcePath),
                 mLegacyNativeLibraryPathString, mPrimaryCpuAbiString, mSecondaryCpuAbiString,
                 mCpuAbiOverrideString, mPVersionCode, mPkgFlags, mPrivateFlags, mSharedUserId,
-                mUsesStaticLibraries, mUsesStaticLibrariesVersions);
+                mUsesStaticLibraries, mUsesStaticLibrariesVersions, mMimeGroups);
         packageSetting.signatures = mSigningDetails != null
                 ? new PackageSignatures(mSigningDetails)
                 : new PackageSignatures();

@@ -23,6 +23,7 @@ import static java.util.Collections.emptyMap;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -36,6 +37,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
+import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
 import android.content.pm.parsing.ComponentParseUtils.ParsedFeature;
 import android.content.pm.parsing.ComponentParseUtils.ParsedInstrumentation;
 import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
@@ -290,6 +292,9 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     private List<SharedLibraryInfo> usesLibraryInfos;
     private String zygotePreloadName;
     private boolean preserveLegacyExternalStorage;
+
+    @Nullable
+    private ArraySet<String> mimeGroups;
 
     @VisibleForTesting
     public PackageImpl(
@@ -872,24 +877,28 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     @Override
     public ParsingPackage addActivity(ParsedActivity parsedActivity) {
         this.activities = ArrayUtils.add(this.activities, parsedActivity);
+        addMimeGroupsFromComponent(parsedActivity);
         return this;
     }
 
     @Override
     public ParsingPackage addReceiver(ParsedActivity parsedReceiver) {
         this.receivers = ArrayUtils.add(this.receivers, parsedReceiver);
+        addMimeGroupsFromComponent(parsedReceiver);
         return this;
     }
 
     @Override
     public ParsingPackage addService(ParsedService parsedService) {
         this.services = ArrayUtils.add(this.services, parsedService);
+        addMimeGroupsFromComponent(parsedService);
         return this;
     }
 
     @Override
     public ParsingPackage addProvider(ParsedProvider parsedProvider) {
         this.providers = ArrayUtils.add(this.providers, parsedProvider);
+        addMimeGroupsFromComponent(parsedProvider);
         return this;
     }
 
@@ -2989,6 +2998,21 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         return appMetaData;
     }
 
+    private void addMimeGroupsFromComponent(ParsedComponent<?> component) {
+        for (int i = component.intents.size() - 1; i >= 0; i--) {
+            IntentFilter filter = component.intents.get(i);
+            for (int groupIndex = filter.countMimeGroups() - 1; groupIndex >= 0; groupIndex--) {
+                mimeGroups = ArrayUtils.add(mimeGroups, filter.getMimeGroup(groupIndex));
+            }
+        }
+    }
+
+    @Override
+    @Nullable
+    public Set<String> getMimeGroups() {
+        return mimeGroups;
+    }
+
     @Override
     @Nullable
     public List<Intent> getQueriesIntents() {
@@ -3173,6 +3197,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         dest.writeIntArray(this.splitFlags);
         dest.writeStringArray(this.splitNames);
         dest.writeIntArray(this.splitRevisionCodes);
+        dest.writeArraySet(this.mimeGroups);
     }
 
     public PackageImpl(Parcel in) {
@@ -3337,6 +3362,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         this.splitFlags = in.createIntArray();
         this.splitNames = in.createStringArray();
         this.splitRevisionCodes = in.createIntArray();
+        this.mimeGroups = (ArraySet<String>) in.readArraySet(boot);
     }
 
     public static final Creator<PackageImpl> CREATOR = new Creator<PackageImpl>() {

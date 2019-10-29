@@ -40,7 +40,7 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
         return new PackageSetting(name, name, new File(mContext.getCacheDir(), "fakeCodePath"),
                 new File(mContext.getCacheDir(), "fakeResPath"), "", "", "",
                 "", 1, 0, 0, 0 /*sharedUserId*/, null /*usesStaticLibraries*/,
-                null /*usesStaticLibrariesVersions*/);
+                null /*usesStaticLibrariesVersions*/, null /*mimeGroups*/);
     }
 
     @Override

@@ -749,4 +749,11 @@ interface IPackageManager {
     // a large change that modifies many repos.
     //------------------------------------------------------------------------
     int checkUidPermission(String permName, int uid);
+
+    void setMimeGroup(String packageName, String group, in List<String> mimeTypes);
+
+    void clearMimeGroup(String packageName, String group);
+
+    List<String> getMimeGroup(String packageName, String group);
+
 }

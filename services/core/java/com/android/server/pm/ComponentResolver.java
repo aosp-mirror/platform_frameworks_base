@@ -39,6 +39,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
+import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProviderIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedService;
@@ -1142,8 +1143,84 @@ public class ComponentResolver {
         }
     }
 
+    private abstract static class MimeGroupsAwareIntentResolver<F extends ParsedIntentInfo, R>
+            extends IntentResolver<F, R> {
+        private ArrayMap<String, F[]> mMimeGroupToFilter = new ArrayMap<>();
+        private boolean mIsUpdatingMimeGroup = false;
+
+        @Override
+        public void addFilter(F f) {
+            applyMimeGroups(f);
+            super.addFilter(f);
+
+            if (!mIsUpdatingMimeGroup) {
+                register_intent_filter(f, f.mimeGroupsIterator(), mMimeGroupToFilter,
+                        "      MimeGroup: ");
+            }
+        }
+
+        @Override
+        protected void removeFilterInternal(F f) {
+            if (!mIsUpdatingMimeGroup) {
+                unregister_intent_filter(f, f.mimeGroupsIterator(), mMimeGroupToFilter,
+                        "      MimeGroup: ");
+            }
+
+            super.removeFilterInternal(f);
+            f.clearDynamicDataTypes();
+        }
+
+        /**
+         * Updates MIME group by applying changes to all IntentFilters
+         * that contain the group and repopulating m*ToFilter maps accordingly
+         *
+         * @param packageName package to which MIME group belongs
+         * @param mimeGroup MIME group to update
+         */
+        public void updateMimeGroup(String packageName, String mimeGroup) {
+            F[] filters = mMimeGroupToFilter.get(mimeGroup);
+            int n = filters != null ? filters.length : 0;
+
+            mIsUpdatingMimeGroup = true;
+            F filter;
+            for (int i = 0; i < n && (filter = filters[i]) != null; i++) {
+                if (isPackageForFilter(packageName, filter)) {
+                    updateFilter(filter);
+                }
+            }
+            mIsUpdatingMimeGroup = false;
+        }
+
+        private void updateFilter(F filter) {
+            removeFilter(filter);
+            addFilter(filter);
+        }
+
+
+        private void applyMimeGroups(F filter) {
+            String packageName = filter.getPackageName();
+
+            for (int i = filter.countMimeGroups() - 1; i >= 0; i--) {
+                List<String> mimeTypes = sPackageManagerInternal.getMimeGroup(packageName,
+                        filter.getMimeGroup(i));
+
+                for (int typeIndex = mimeTypes.size() - 1; typeIndex >= 0; typeIndex--) {
+                    String mimeType = mimeTypes.get(typeIndex);
+
+                    try {
+                        filter.addDynamicDataType(mimeType);
+                    } catch (IntentFilter.MalformedMimeTypeException e) {
+                        if (DEBUG) {
+                            Slog.w(TAG, "Malformed mime type: " + mimeType, e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private static class ActivityIntentResolver
-            extends IntentResolver<ParsedActivityIntentInfo, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<ParsedActivityIntentInfo, ResolveInfo> {
 
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
@@ -1477,7 +1554,7 @@ public class ComponentResolver {
     }
 
     private static final class ProviderIntentResolver
-            extends IntentResolver<ParsedProviderIntentInfo, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<ParsedProviderIntentInfo, ResolveInfo> {
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -1743,7 +1820,7 @@ public class ComponentResolver {
     }
 
     private static final class ServiceIntentResolver
-            extends IntentResolver<ParsedServiceIntentInfo, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<ParsedServiceIntentInfo, ResolveInfo> {
         @Override
         public List<ResolveInfo> queryIntent(Intent intent, String resolvedType,
                 boolean defaultOnly, int userId) {
@@ -2114,5 +2191,15 @@ public class ComponentResolver {
         public Iterator<IntentFilter.AuthorityEntry> generate(ParsedActivityIntentInfo info) {
             return info.authoritiesIterator();
         }
+    }
+
+    /**
+     * Removes MIME type from the group, by delegating to IntentResolvers
+     */
+    void updateMimeGroup(String packageName, String group) {
+        mActivities.updateMimeGroup(packageName, group);
+        mProviders.updateMimeGroup(packageName, group);
+        mReceivers.updateMimeGroup(packageName, group);
+        mServices.updateMimeGroup(packageName, group);
     }
 }

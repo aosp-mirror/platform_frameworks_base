@@ -42,6 +42,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * Structured description of Intent values to be matched.  An IntentFilter can
@@ -153,6 +154,7 @@ public class IntentFilter implements Parcelable {
     private static final String AUTH_STR = "auth";
     private static final String SSP_STR = "ssp";
     private static final String SCHEME_STR = "scheme";
+    private static final String STATIC_TYPE_STR = "staticType";
     private static final String TYPE_STR = "type";
     private static final String GROUP_STR = "group";
     private static final String CAT_STR = "cat";
@@ -281,9 +283,11 @@ public class IntentFilter implements Parcelable {
     private ArrayList<PatternMatcher> mDataSchemeSpecificParts = null;
     private ArrayList<AuthorityEntry> mDataAuthorities = null;
     private ArrayList<PatternMatcher> mDataPaths = null;
+    private ArrayList<String> mStaticDataTypes = null;
     private ArrayList<String> mDataTypes = null;
     private ArrayList<String> mMimeGroups = null;
-    private boolean mHasPartialTypes = false;
+    private boolean mHasStaticPartialTypes = false;
+    private boolean mHasDynamicPartialTypes = false;
 
     private static final int STATE_VERIFY_AUTO         = 0x00000001;
     private static final int STATE_NEED_VERIFY         = 0x00000010;
@@ -456,6 +460,9 @@ public class IntentFilter implements Parcelable {
         if (o.mCategories != null) {
             mCategories = new ArrayList<String>(o.mCategories);
         }
+        if (o.mStaticDataTypes != null) {
+            mStaticDataTypes = new ArrayList<String>(o.mStaticDataTypes);
+        }
         if (o.mDataTypes != null) {
             mDataTypes = new ArrayList<String>(o.mDataTypes);
         }
@@ -474,7 +481,8 @@ public class IntentFilter implements Parcelable {
         if (o.mMimeGroups != null) {
             mMimeGroups = new ArrayList<String>(o.mMimeGroups);
         }
-        mHasPartialTypes = o.mHasPartialTypes;
+        mHasStaticPartialTypes = o.mHasStaticPartialTypes;
+        mHasDynamicPartialTypes = o.mHasDynamicPartialTypes;
         mVerifyState = o.mVerifyState;
         mInstantAppVisibility = o.mInstantAppVisibility;
     }
@@ -781,25 +789,108 @@ public class IntentFilter implements Parcelable {
      */
     public final void addDataType(String type)
         throws MalformedMimeTypeException {
+        processMimeType(type, (internalType, isPartial) -> {
+            if (mDataTypes == null) {
+                mDataTypes = new ArrayList<>();
+            }
+            if (mStaticDataTypes == null) {
+                mStaticDataTypes = new ArrayList<>();
+            }
+
+            if (mDataTypes.contains(internalType)) {
+                return;
+            }
+
+            mDataTypes.add(internalType.intern());
+            mStaticDataTypes.add(internalType.intern());
+            mHasStaticPartialTypes = mHasStaticPartialTypes || isPartial;
+        });
+    }
+
+    /**
+     * Add a new Intent data type <em>from MIME group</em> to match against.  If any types are
+     * included in the filter, then an Intent's data must be <em>either</em>
+     * one of these types <em>or</em> a matching scheme.  If no data types
+     * are included, then an Intent will only match if it specifies no data.
+     *
+     * <p><em>Note: MIME type matching in the Android framework is
+     * case-sensitive, unlike formal RFC MIME types.  As a result,
+     * you should always write your MIME types with lower case letters,
+     * and any MIME types you receive from outside of Android should be
+     * converted to lower case before supplying them here.</em></p>
+     *
+     * <p>Throws {@link MalformedMimeTypeException} if the given MIME type is
+     * not syntactically correct.
+     *
+     * @param type Name of the data type to match, such as "vnd.android.cursor.dir/person".
+     *
+     * @see #clearDynamicDataTypes()
+     * @hide
+     */
+    public final void addDynamicDataType(String type)
+            throws MalformedMimeTypeException {
+        processMimeType(type, (internalType, isPartial) -> {
+            if (mDataTypes == null) {
+                mDataTypes = new ArrayList<>();
+            }
+
+            if (!mDataTypes.contains(internalType)) {
+                mDataTypes.add(internalType.intern());
+
+                mHasDynamicPartialTypes = mHasDynamicPartialTypes || isPartial;
+            }
+        });
+    }
+
+    /**
+     * Process mime type - convert to representation used internally and check if type is partial,
+     * and then call provided action
+     */
+    private void processMimeType(String type, BiConsumer<String, Boolean> action)
+            throws MalformedMimeTypeException {
         final int slashpos = type.indexOf('/');
         final int typelen = type.length();
-        if (slashpos > 0 && typelen >= slashpos+2) {
-            if (mDataTypes == null) mDataTypes = new ArrayList<String>();
-            if (typelen == slashpos+2 && type.charAt(slashpos+1) == '*') {
-                String str = type.substring(0, slashpos);
-                if (!mDataTypes.contains(str)) {
-                    mDataTypes.add(str.intern());
-                }
-                mHasPartialTypes = true;
-            } else {
-                if (!mDataTypes.contains(type)) {
-                    mDataTypes.add(type.intern());
-                }
-            }
+        if (slashpos <= 0 || typelen < slashpos + 2) {
+            throw new MalformedMimeTypeException(type);
+        }
+
+        String internalType = type;
+        boolean isPartialType = false;
+        if (typelen == slashpos + 2 && type.charAt(slashpos + 1) == '*') {
+            internalType = type.substring(0, slashpos);
+            isPartialType = true;
+        }
+
+        action.accept(internalType, isPartialType);
+    }
+
+    /**
+     * Remove all previously added Intent data types from IntentFilter.
+     *
+     * @see #addDynamicDataType(String)
+     * @hide
+     */
+    public final void clearDynamicDataTypes() {
+        if (mDataTypes == null) {
             return;
         }
 
-        throw new MalformedMimeTypeException(type);
+        if (mStaticDataTypes != null) {
+            mDataTypes.clear();
+            mDataTypes.addAll(mStaticDataTypes);
+        } else {
+            mDataTypes = null;
+        }
+
+        mHasDynamicPartialTypes = false;
+    }
+
+    /**
+     * Return the number of static data types in the filter.
+     * @hide
+     */
+    public int countStaticDataTypes() {
+        return mStaticDataTypes != null ? mStaticDataTypes.size() : 0;
     }
 
     /**
@@ -818,6 +909,16 @@ public class IntentFilter implements Parcelable {
     @UnsupportedAppUsage
     public final boolean hasExactDataType(String type) {
         return mDataTypes != null && mDataTypes.contains(type);
+    }
+
+    /** @hide */
+    public final boolean hasExactDynamicDataType(String type) {
+        return hasExactDataType(type) && !hasExactStaticDataType(type);
+    }
+
+    /** @hide */
+    public final boolean hasExactStaticDataType(String type) {
+        return mStaticDataTypes != null && mStaticDataTypes.contains(type);
     }
 
     /**
@@ -1652,14 +1753,7 @@ public class IntentFilter implements Parcelable {
             serializer.attribute(null, NAME_STR, mCategories.get(i));
             serializer.endTag(null, CAT_STR);
         }
-        N = countDataTypes();
-        for (int i=0; i<N; i++) {
-            serializer.startTag(null, TYPE_STR);
-            String type = mDataTypes.get(i);
-            if (type.indexOf('/') < 0) type = type + "/*";
-            serializer.attribute(null, NAME_STR, type);
-            serializer.endTag(null, TYPE_STR);
-        }
+        writeDataTypesToXml(serializer);
         N = countMimeGroups();
         for (int i=0; i<N; i++) {
             serializer.startTag(null, GROUP_STR);
@@ -1724,6 +1818,46 @@ public class IntentFilter implements Parcelable {
         }
     }
 
+    /**
+     * Write data types (both static and dynamic) to XML.
+     * In implementation we rely on two facts:
+     * - {@link #mStaticDataTypes} is subsequence of {@link #mDataTypes}
+     * - both {@link #mStaticDataTypes} and {@link #mDataTypes} does not contain duplicates
+     */
+    private void writeDataTypesToXml(XmlSerializer serializer) throws IOException {
+        if (mStaticDataTypes == null) {
+            return;
+        }
+
+        int i = 0;
+        for (String staticType: mStaticDataTypes) {
+            while (!mDataTypes.get(i).equals(staticType)) {
+                writeDataTypeToXml(serializer, mDataTypes.get(i), TYPE_STR);
+                i++;
+            }
+
+            writeDataTypeToXml(serializer, staticType, STATIC_TYPE_STR);
+            i++;
+        }
+
+        while (i < mDataTypes.size()) {
+            writeDataTypeToXml(serializer, mDataTypes.get(i), TYPE_STR);
+            i++;
+        }
+    }
+
+    private void writeDataTypeToXml(XmlSerializer serializer, String type, String tag)
+            throws IOException {
+        serializer.startTag(null, tag);
+
+        if (type.indexOf('/') < 0) {
+            type = type + "/*";
+        }
+
+        serializer.attribute(null, NAME_STR, type);
+        serializer.endTag(null, tag);
+    }
+
     public void readFromXml(XmlPullParser parser) throws XmlPullParserException,
             IOException {
         String autoVerify = parser.getAttributeValue(null, AUTO_VERIFY_STR);
@@ -1750,11 +1884,19 @@ public class IntentFilter implements Parcelable {
                 if (name != null) {
                     addCategory(name);
                 }
-            } else if (tagName.equals(TYPE_STR)) {
+            } else if (tagName.equals(STATIC_TYPE_STR)) {
                 String name = parser.getAttributeValue(null, NAME_STR);
                 if (name != null) {
                     try {
                         addDataType(name);
+                    } catch (MalformedMimeTypeException e) {
+                    }
+                }
+            } else if (tagName.equals(TYPE_STR)) {
+                String name = parser.getAttributeValue(null, NAME_STR);
+                if (name != null) {
+                    try {
+                        addDynamicDataType(name);
                     } catch (MalformedMimeTypeException e) {
                     }
                 }
@@ -1854,9 +1996,9 @@ public class IntentFilter implements Parcelable {
                 proto.write(IntentFilterProto.MIME_GROUPS, it.next());
             }
         }
-        if (mPriority != 0 || mHasPartialTypes) {
+        if (mPriority != 0 || hasPartialTypes()) {
             proto.write(IntentFilterProto.PRIORITY, mPriority);
-            proto.write(IntentFilterProto.HAS_PARTIAL_TYPES, mHasPartialTypes);
+            proto.write(IntentFilterProto.HAS_PARTIAL_TYPES, hasPartialTypes());
         }
         proto.write(IntentFilterProto.GET_AUTO_VERIFY, getAutoVerify());
         proto.end(token);
@@ -1923,12 +2065,26 @@ public class IntentFilter implements Parcelable {
                 du.println(sb.toString());
             }
         }
+        if (mStaticDataTypes != null) {
+            Iterator<String> it = mStaticDataTypes.iterator();
+            while (it.hasNext()) {
+                sb.setLength(0);
+                sb.append(prefix); sb.append("StaticType: \"");
+                sb.append(it.next()); sb.append("\"");
+                du.println(sb.toString());
+            }
+        }
         if (mDataTypes != null) {
             Iterator<String> it = mDataTypes.iterator();
             while (it.hasNext()) {
+                String dataType = it.next();
+                if (hasExactStaticDataType(dataType)) {
+                    continue;
+                }
+
                 sb.setLength(0);
                 sb.append(prefix); sb.append("Type: \"");
-                        sb.append(it.next()); sb.append("\"");
+                sb.append(dataType); sb.append("\"");
                 du.println(sb.toString());
             }
         }
@@ -1941,11 +2097,13 @@ public class IntentFilter implements Parcelable {
                 du.println(sb.toString());
             }
         }
-        if (mPriority != 0 || mOrder != 0 || mHasPartialTypes) {
+        if (mPriority != 0 || mOrder != 0 || hasPartialTypes()) {
             sb.setLength(0);
-            sb.append(prefix); sb.append("mPriority="); sb.append(mPriority);
-                    sb.append(", mOrder="); sb.append(mOrder);
-                    sb.append(", mHasPartialTypes="); sb.append(mHasPartialTypes);
+            sb.append(prefix);
+            sb.append("mPriority="); sb.append(mPriority);
+            sb.append(", mOrder="); sb.append(mOrder);
+            sb.append(", mHasStaticPartialTypes="); sb.append(mHasStaticPartialTypes);
+            sb.append(", mHasDynamicPartialTypes="); sb.append(mHasDynamicPartialTypes);
             du.println(sb.toString());
         }
         if (getAutoVerify()) {
@@ -1981,6 +2139,12 @@ public class IntentFilter implements Parcelable {
         if (mDataSchemes != null) {
             dest.writeInt(1);
             dest.writeStringList(mDataSchemes);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mStaticDataTypes != null) {
+            dest.writeInt(1);
+            dest.writeStringList(mStaticDataTypes);
         } else {
             dest.writeInt(0);
         }
@@ -2024,7 +2188,8 @@ public class IntentFilter implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(mPriority);
-        dest.writeInt(mHasPartialTypes ? 1 : 0);
+        dest.writeInt(mHasStaticPartialTypes ? 1 : 0);
+        dest.writeInt(mHasDynamicPartialTypes ? 1 : 0);
         dest.writeInt(getAutoVerify() ? 1 : 0);
         dest.writeInt(mInstantAppVisibility);
         dest.writeInt(mOrder);
@@ -2069,6 +2234,10 @@ public class IntentFilter implements Parcelable {
             source.readStringList(mDataSchemes);
         }
         if (source.readInt() != 0) {
+            mStaticDataTypes = new ArrayList<String>();
+            source.readStringList(mStaticDataTypes);
+        }
+        if (source.readInt() != 0) {
             mDataTypes = new ArrayList<String>();
             source.readStringList(mDataTypes);
         }
@@ -2098,10 +2267,15 @@ public class IntentFilter implements Parcelable {
             }
         }
         mPriority = source.readInt();
-        mHasPartialTypes = source.readInt() > 0;
+        mHasStaticPartialTypes = source.readInt() > 0;
+        mHasDynamicPartialTypes = source.readInt() > 0;
         setAutoVerify(source.readInt() > 0);
         setVisibilityToInstantApp(source.readInt());
         mOrder = source.readInt();
+    }
+
+    private boolean hasPartialTypes() {
+        return mHasStaticPartialTypes || mHasDynamicPartialTypes;
     }
 
     private final boolean findMimeType(String type) {
@@ -2122,13 +2296,13 @@ public class IntentFilter implements Parcelable {
         }
 
         // Deal with this IntentFilter wanting to match every Intent type.
-        if (mHasPartialTypes && t.contains("*")) {
+        if (hasPartialTypes() && t.contains("*")) {
             return true;
         }
 
         final int slashpos = type.indexOf('/');
         if (slashpos > 0) {
-            if (mHasPartialTypes && t.contains(type.substring(0, slashpos))) {
+            if (hasPartialTypes() && t.contains(type.substring(0, slashpos))) {
                 return true;
             }
             if (typeLength == slashpos+2 && type.charAt(slashpos+1) == '*') {
