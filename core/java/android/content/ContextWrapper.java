@@ -16,7 +16,9 @@
 
 package android.content;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -62,12 +64,12 @@ public class ContextWrapper extends Context {
     public ContextWrapper(Context base) {
         mBase = base;
     }
-    
+
     /**
      * Set the base context for this ContextWrapper.  All calls will then be
      * delegated to the base context.  Throws
      * IllegalStateException if a base context has already been set.
-     * 
+     *
      * @param base The new base context for this wrapper.
      */
     protected void attachBaseContext(Context base) {
@@ -118,7 +120,7 @@ public class ContextWrapper extends Context {
     public Context getApplicationContext() {
         return mBase.getApplicationContext();
     }
-    
+
     @Override
     public void setTheme(int resid) {
         mBase.setTheme(resid);
@@ -169,7 +171,7 @@ public class ContextWrapper extends Context {
     public ApplicationInfo getApplicationInfo() {
         return mBase.getApplicationInfo();
     }
-    
+
     @Override
     public String getPackageResourcePath() {
         return mBase.getPackageResourcePath();
@@ -209,13 +211,13 @@ public class ContextWrapper extends Context {
 
     @Override
     public FileInputStream openFileInput(String name)
-        throws FileNotFoundException {
+            throws FileNotFoundException {
         return mBase.openFileInput(name);
     }
 
     @Override
     public FileOutputStream openFileOutput(String name, int mode)
-        throws FileNotFoundException {
+            throws FileNotFoundException {
         return mBase.openFileOutput(name, mode);
     }
 
@@ -449,7 +451,7 @@ public class ContextWrapper extends Context {
         mBase.startIntentSender(intent, fillInIntent, flagsMask,
                 flagsValues, extraFlags, options);
     }
-    
+
     @Override
     public void sendBroadcast(Intent intent) {
         mBase.sendBroadcast(intent);
@@ -494,9 +496,9 @@ public class ContextWrapper extends Context {
 
     @Override
     public void sendOrderedBroadcast(
-        Intent intent, String receiverPermission, BroadcastReceiver resultReceiver,
-        Handler scheduler, int initialCode, String initialData,
-        Bundle initialExtras) {
+            Intent intent, String receiverPermission, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission,
                 resultReceiver, scheduler, initialCode,
                 initialData, initialExtras);
@@ -506,7 +508,8 @@ public class ContextWrapper extends Context {
     @SystemApi
     @Override
     public void sendOrderedBroadcast(
-            Intent intent, String receiverPermission, Bundle options, BroadcastReceiver resultReceiver,
+            Intent intent, String receiverPermission, Bundle options,
+            BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData,
             Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission,
@@ -517,9 +520,9 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     public void sendOrderedBroadcast(
-        Intent intent, String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
-        Handler scheduler, int initialCode, String initialData,
-        Bundle initialExtras) {
+            Intent intent, String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission, appOp,
                 resultReceiver, scheduler, initialCode,
                 initialData, initialExtras);
@@ -574,6 +577,15 @@ public class ContextWrapper extends Context {
             Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
         mBase.sendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp, options,
                 resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
+    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
+            @Nullable String receiverPermission, @Nullable String receiverAppOp,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
+        mBase.sendOrderedBroadcast(intent, receiverPermission, receiverAppOp, resultReceiver,
+                scheduler, initialCode, initialData, initialExtras);
     }
 
     @Override
