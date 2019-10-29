@@ -1835,7 +1835,7 @@ public class LocationManager {
         }
 
         try {
-            return mGnssStatusListenerManager.addListener(listener, new Handler());
+            return mGnssStatusListenerManager.addListener(listener, Runnable::run);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2694,9 +2694,9 @@ public class LocationManager {
             return mTtff;
         }
 
-        public boolean addListener(@NonNull GpsStatus.Listener listener, @NonNull Handler handler)
+        public boolean addListener(@NonNull GpsStatus.Listener listener, @NonNull Executor executor)
                 throws RemoteException {
-            return addInternal(listener, handler);
+            return addInternal(listener, executor);
         }
 
         public boolean addListener(@NonNull OnNmeaMessageListener listener,
