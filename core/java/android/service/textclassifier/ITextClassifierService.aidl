@@ -74,4 +74,6 @@ oneway interface ITextClassifierService {
             in TextClassificationSessionId sessionId,
             in ConversationActions.Request request,
             in ITextClassifierCallback callback);
+
+    void onConnectedStateChanged(int connected);
 }

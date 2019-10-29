@@ -6962,9 +6962,11 @@ package android.service.textclassifier {
     method @Deprecated public final android.view.textclassifier.TextClassifier getLocalTextClassifier();
     method @Nullable public final android.os.IBinder onBind(android.content.Intent);
     method @MainThread public abstract void onClassifyText(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassification.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
+    method public void onConnected();
     method @MainThread public void onCreateTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationContext, @NonNull android.view.textclassifier.TextClassificationSessionId);
     method @MainThread public void onDestroyTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationSessionId);
     method @MainThread public void onDetectLanguage(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextLanguage.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLanguage>);
+    method public void onDisconnected();
     method @MainThread public abstract void onGenerateLinks(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextLinks.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
     method @Deprecated @MainThread public void onSelectionEvent(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.SelectionEvent);
     method @MainThread public void onSuggestConversationActions(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.ConversationActions.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.ConversationActions>);
