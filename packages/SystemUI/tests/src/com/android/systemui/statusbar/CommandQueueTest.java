@@ -15,8 +15,8 @@
 package com.android.systemui.statusbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -136,7 +136,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowTransient() {
-        int[] types = new int[]{ TYPE_TOP_BAR, TYPE_NAVIGATION_BAR };
+        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
         mCommandQueue.showTransient(DEFAULT_DISPLAY, types);
         waitForIdleSync();
         verify(mCallbacks).showTransient(eq(DEFAULT_DISPLAY), eq(types));
@@ -144,7 +144,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowTransientForSecondaryDisplay() {
-        int[] types = new int[]{ TYPE_TOP_BAR, TYPE_NAVIGATION_BAR };
+        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
         mCommandQueue.showTransient(SECONDARY_DISPLAY, types);
         waitForIdleSync();
         verify(mCallbacks).showTransient(eq(SECONDARY_DISPLAY), eq(types));
@@ -152,7 +152,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testAbortTransient() {
-        int[] types = new int[]{ TYPE_TOP_BAR, TYPE_NAVIGATION_BAR };
+        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
         mCommandQueue.abortTransient(DEFAULT_DISPLAY, types);
         waitForIdleSync();
         verify(mCallbacks).abortTransient(eq(DEFAULT_DISPLAY), eq(types));
@@ -160,7 +160,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testAbortTransientForSecondaryDisplay() {
-        int[] types = new int[]{ TYPE_TOP_BAR, TYPE_NAVIGATION_BAR };
+        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
         mCommandQueue.abortTransient(SECONDARY_DISPLAY, types);
         waitForIdleSync();
         verify(mCallbacks).abortTransient(eq(SECONDARY_DISPLAY), eq(types));

@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import android.inputmethodservice.InputMethodService;
-import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowInsets.Type.InsetsType;
 
 /**
  * Generalization of an object that can control insets state.
@@ -31,7 +31,7 @@ interface InsetsControlTarget {
      * @param types to specify which types of insets source window should be shown.
      * @param fromIme {@code true} if IME show request originated from {@link InputMethodService}.
      */
-    default void showInsets(@InsetType int types, boolean fromIme) {
+    default void showInsets(@InsetsType int types, boolean fromIme) {
     }
 
     /**
@@ -40,7 +40,7 @@ interface InsetsControlTarget {
      * @param types to specify which types of insets source window should be hidden.
      * @param fromIme {@code true} if IME hide request originated from {@link InputMethodService}.
      */
-    default void hideInsets(@InsetType int types, boolean fromIme) {
+    default void hideInsets(@InsetsType int types, boolean fromIme) {
     }
 
     /**

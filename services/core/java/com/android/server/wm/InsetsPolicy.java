@@ -20,8 +20,8 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
@@ -30,7 +30,7 @@ import android.annotation.Nullable;
 import android.app.StatusBarManager;
 import android.util.IntArray;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.ViewRootImpl;
 
 /**
@@ -66,13 +66,13 @@ class InsetsPolicy {
         }
         mTopBar.setVisible(focusedWin == null
                 || focusedWin != getTopControlTarget(focusedWin)
-                || focusedWin.getClientInsetsState().getSource(TYPE_TOP_BAR).isVisible());
+                || focusedWin.getClientInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
         mNavBar.setVisible(focusedWin == null
                 || focusedWin != getNavControlTarget(focusedWin)
-                || focusedWin.getClientInsetsState().getSource(TYPE_NAVIGATION_BAR).isVisible());
+                || focusedWin.getClientInsetsState().getSource(ITYPE_NAVIGATION_BAR).isVisible());
     }
 
-    boolean isHidden(@InternalInsetType int type) {
+    boolean isHidden(@InternalInsetsType int type) {
         final InsetsSourceProvider provider =  mStateController.peekSourceProvider(type);
         return provider != null && provider.hasWindow() && !provider.getSource().isVisible();
     }
@@ -131,10 +131,10 @@ class InsetsPolicy {
             return;
         }
         if (windowState == getTopControlTarget(mFocusedWin)) {
-            mTopBar.setVisible(state.getSource(TYPE_TOP_BAR).isVisible());
+            mTopBar.setVisible(state.getSource(ITYPE_STATUS_BAR).isVisible());
         }
         if (windowState == getNavControlTarget(mFocusedWin)) {
-            mNavBar.setVisible(state.getSource(TYPE_NAVIGATION_BAR).isVisible());
+            mNavBar.setVisible(state.getSource(ITYPE_NAVIGATION_BAR).isVisible());
         }
     }
 
@@ -165,21 +165,21 @@ class InsetsPolicy {
     }
 
     private @Nullable InsetsControlTarget getFakeTopControlTarget(@Nullable WindowState focused) {
-        if (mShowingTransientTypes.indexOf(TYPE_TOP_BAR) != -1) {
+        if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
             return focused;
         }
         return null;
     }
 
     private @Nullable InsetsControlTarget getFakeNavControlTarget(@Nullable WindowState focused) {
-        if (mShowingTransientTypes.indexOf(TYPE_NAVIGATION_BAR) != -1) {
+        if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1) {
             return focused;
         }
         return null;
     }
 
     private @Nullable InsetsControlTarget getTopControlTarget(@Nullable WindowState focusedWin) {
-        if (mShowingTransientTypes.indexOf(TYPE_TOP_BAR) != -1) {
+        if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
             return mTransientControlTarget;
         }
         if (areSystemBarsForciblyVisible() || isStatusBarForciblyVisible()) {
@@ -189,7 +189,7 @@ class InsetsPolicy {
     }
 
     private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin) {
-        if (mShowingTransientTypes.indexOf(TYPE_NAVIGATION_BAR) != -1) {
+        if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1) {
             return mTransientControlTarget;
         }
         if (areSystemBarsForciblyVisible() || isNavBarForciblyVisible()) {

@@ -20,7 +20,7 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 
 /**
  * Represents a parcelable object to allow controlling a single {@link InsetsSource}.
@@ -28,11 +28,11 @@ import android.view.InsetsState.InternalInsetType;
  */
 public class InsetsSourceControl implements Parcelable {
 
-    private final @InternalInsetType int mType;
+    private final @InternalInsetsType int mType;
     private final @Nullable SurfaceControl mLeash;
     private final Point mSurfacePosition;
 
-    public InsetsSourceControl(@InternalInsetType int type, @Nullable SurfaceControl leash,
+    public InsetsSourceControl(@InternalInsetsType int type, @Nullable SurfaceControl leash,
             Point surfacePosition) {
         mType = type;
         mLeash = leash;

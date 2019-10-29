@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.TYPE_IME;
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 
@@ -30,7 +30,7 @@ import android.util.SparseArray;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -84,9 +84,9 @@ class InsetsStateController {
         state.removeSource(type);
 
         // Navigation bar doesn't get influenced by anything else
-        if (type == TYPE_NAVIGATION_BAR) {
-            state.removeSource(TYPE_IME);
-            state.removeSource(TYPE_TOP_BAR);
+        if (type == ITYPE_NAVIGATION_BAR) {
+            state.removeSource(ITYPE_IME);
+            state.removeSource(ITYPE_STATUS_BAR);
         }
         return state;
     }
@@ -107,8 +107,8 @@ class InsetsStateController {
     /**
      * @return The provider of a specific type.
      */
-    InsetsSourceProvider getSourceProvider(@InternalInsetType int type) {
-        if (type == TYPE_IME) {
+    InsetsSourceProvider getSourceProvider(@InternalInsetsType int type) {
+        if (type == ITYPE_IME) {
             return mProviders.computeIfAbsent(type,
                     key -> new ImeInsetsSourceProvider(
                             mState.getSource(key), this, mDisplayContent));
@@ -119,13 +119,13 @@ class InsetsStateController {
     }
 
     ImeInsetsSourceProvider getImeSourceProvider() {
-        return (ImeInsetsSourceProvider) getSourceProvider(TYPE_IME);
+        return (ImeInsetsSourceProvider) getSourceProvider(ITYPE_IME);
     }
 
     /**
      * @return The provider of a specific type or null if we don't have it.
      */
-    @Nullable InsetsSourceProvider peekSourceProvider(@InternalInsetType int type) {
+    @Nullable InsetsSourceProvider peekSourceProvider(@InternalInsetsType int type) {
         return mProviders.get(type);
     }
 
@@ -159,12 +159,12 @@ class InsetsStateController {
         }
     }
 
-    boolean isFakeTarget(@InternalInsetType int type, InsetsControlTarget target) {
+    boolean isFakeTarget(@InternalInsetsType int type, InsetsControlTarget target) {
         return mTypeFakeControlTargetMap.get(type) == target;
     }
 
     void onImeTargetChanged(@Nullable InsetsControlTarget imeTarget) {
-        onControlChanged(TYPE_IME, imeTarget);
+        onControlChanged(ITYPE_IME, imeTarget);
         notifyPendingInsetsControlChanged();
     }
 
@@ -180,10 +180,10 @@ class InsetsStateController {
             @Nullable InsetsControlTarget fakeTopControlling,
             @Nullable InsetsControlTarget navControlling,
             @Nullable InsetsControlTarget fakeNavControlling) {
-        onControlChanged(TYPE_TOP_BAR, topControlling);
-        onControlChanged(TYPE_NAVIGATION_BAR, navControlling);
-        onControlFakeTargetChanged(TYPE_TOP_BAR, fakeTopControlling);
-        onControlFakeTargetChanged(TYPE_NAVIGATION_BAR, fakeNavControlling);
+        onControlChanged(ITYPE_STATUS_BAR, topControlling);
+        onControlChanged(ITYPE_NAVIGATION_BAR, navControlling);
+        onControlFakeTargetChanged(ITYPE_STATUS_BAR, fakeTopControlling);
+        onControlFakeTargetChanged(ITYPE_NAVIGATION_BAR, fakeNavControlling);
         notifyPendingInsetsControlChanged();
     }
 
@@ -193,7 +193,7 @@ class InsetsStateController {
                 false /* fake */);
     }
 
-    private void onControlChanged(@InternalInsetType int type,
+    private void onControlChanged(@InternalInsetsType int type,
             @Nullable InsetsControlTarget target) {
         final InsetsControlTarget previous = mTypeControlTargetMap.get(type);
         if (target == previous) {
@@ -223,7 +223,7 @@ class InsetsStateController {
      * showing/hiding. For example, when the transient bars are showing, and the fake target
      * requests to show system bars, the transient state will be aborted.
      */
-    void onControlFakeTargetChanged(@InternalInsetType  int type,
+    void onControlFakeTargetChanged(@InternalInsetsType int type,
             @Nullable InsetsControlTarget fakeTarget) {
         if (sNewInsetsMode != NEW_INSETS_MODE_FULL) {
             return;
@@ -248,7 +248,7 @@ class InsetsStateController {
     }
 
     private void removeFromControlMaps(@NonNull InsetsControlTarget target,
-            @InternalInsetType int type, boolean fake) {
+            @InternalInsetsType int type, boolean fake) {
         final ArrayList<Integer> array = mControlTargetTypeMap.get(target);
         if (array == null) {
             return;
@@ -265,7 +265,7 @@ class InsetsStateController {
     }
 
     private void addToControlMaps(@NonNull InsetsControlTarget target,
-            @InternalInsetType int type, boolean fake) {
+            @InternalInsetsType int type, boolean fake) {
         final ArrayList<Integer> array = mControlTargetTypeMap.computeIfAbsent(target,
                 key -> new ArrayList<>());
         array.add(type);

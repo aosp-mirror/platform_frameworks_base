@@ -16,10 +16,10 @@
 
 package android.view;
 
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.WindowInsets.Type.sideBars;
+import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static org.junit.Assert.assertEquals;
@@ -100,21 +100,22 @@ public class InsetsAnimationControlImplTest {
                 .setName("testSurface")
                 .build();
         mInsetsState = new InsetsState();
-        mInsetsState.getSource(TYPE_TOP_BAR).setFrame(new Rect(0, 0, 500, 100));
-        mInsetsState.getSource(TYPE_NAVIGATION_BAR).setFrame(new Rect(400, 0, 500, 500));
-        InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(TYPE_TOP_BAR, mInsetsState,
+        mInsetsState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 500, 100));
+        mInsetsState.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(400, 0, 500, 500));
+        InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, mInsetsState,
                 () -> mMockTransaction, mMockController);
-        topConsumer.setControl(new InsetsSourceControl(TYPE_TOP_BAR, mTopLeash, new Point(0, 0)));
+        topConsumer.setControl(
+                new InsetsSourceControl(ITYPE_STATUS_BAR, mTopLeash, new Point(0, 0)));
 
-        InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(TYPE_NAVIGATION_BAR,
+        InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ITYPE_NAVIGATION_BAR,
                 mInsetsState, () -> mMockTransaction, mMockController);
         navConsumer.hide();
-        navConsumer.setControl(new InsetsSourceControl(TYPE_NAVIGATION_BAR, mNavLeash,
+        navConsumer.setControl(new InsetsSourceControl(ITYPE_NAVIGATION_BAR, mNavLeash,
                 new Point(400, 0)));
 
         SparseArray<InsetsSourceConsumer> consumers = new SparseArray<>();
-        consumers.put(TYPE_TOP_BAR, topConsumer);
-        consumers.put(TYPE_NAVIGATION_BAR, navConsumer);
+        consumers.put(ITYPE_STATUS_BAR, topConsumer);
+        consumers.put(ITYPE_NAVIGATION_BAR, navConsumer);
         mController = new InsetsAnimationControlImpl(consumers,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
                 () -> mMockTransactionApplier, mMockController);
@@ -149,12 +150,12 @@ public class InsetsAnimationControlImplTest {
     @Test
     public void testFinishing() {
         when(mMockController.getState()).thenReturn(mInsetsState);
-        mController.finish(sideBars());
+        mController.finish(navigationBars());
         mController.applyChangeInsets(mInsetsState);
-        assertFalse(mInsetsState.getSource(TYPE_TOP_BAR).isVisible());
-        assertTrue(mInsetsState.getSource(TYPE_NAVIGATION_BAR).isVisible());
+        assertFalse(mInsetsState.getSource(ITYPE_STATUS_BAR).isVisible());
+        assertTrue(mInsetsState.getSource(ITYPE_NAVIGATION_BAR).isVisible());
         assertEquals(Insets.of(0, 0, 100, 0), mController.getCurrentInsets());
-        verify(mMockController).notifyFinished(eq(mController), eq(sideBars()));
+        verify(mMockController).notifyFinished(eq(mController), eq(navigationBars()));
     }
 
     @Test
@@ -166,7 +167,7 @@ public class InsetsAnimationControlImplTest {
         } catch (IllegalStateException ignored) {
         }
         verify(mMockListener).onCancelled();
-        mController.finish(sideBars());
+        mController.finish(navigationBars());
     }
 
     private void assertPosition(Matrix m, Rect original, Rect transformed) {

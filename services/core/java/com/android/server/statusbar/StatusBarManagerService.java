@@ -46,7 +46,7 @@ import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.R;
@@ -482,7 +482,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void showTransient(int displayId, @InternalInsetType int[] types) {
+        public void showTransient(int displayId, @InternalInsetsType int[] types) {
             getUiState(displayId).showTransient(types);
             if (mBar != null) {
                 try {
@@ -492,7 +492,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void abortTransient(int displayId, @InternalInsetType int[] types) {
+        public void abortTransient(int displayId, @InternalInsetsType int[] types) {
             getUiState(displayId).clearTransient(types);
             if (mBar != null) {
                 try {
@@ -966,13 +966,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             return true;
         }
 
-        private void showTransient(@InternalInsetType int[] types) {
+        private void showTransient(@InternalInsetsType int[] types) {
             for (int type : types) {
                 mTransientBarTypes.add(type);
             }
         }
 
-        private void clearTransient(@InternalInsetType int[] types) {
+        private void clearTransient(@InternalInsetsType int[] types) {
             for (int type : types) {
                 mTransientBarTypes.remove(type);
             }

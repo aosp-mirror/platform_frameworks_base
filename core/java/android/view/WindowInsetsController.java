@@ -21,7 +21,7 @@ import static android.view.WindowInsets.Type.ime;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.graphics.Insets;
-import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowInsets.Type.InsetsType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,16 +35,16 @@ import java.lang.annotation.RetentionPolicy;
 public interface WindowInsetsController {
 
     /**
-     * Makes the top bars become opaque with solid dark background and light foreground.
+     * Makes status bars become opaque with solid dark background and light foreground.
      * @hide
      */
-    int APPEARANCE_OPAQUE_TOP_BAR = 1;
+    int APPEARANCE_OPAQUE_STATUS_BARS = 1;
 
     /**
-     * Makes the side bars become opaque with solid dark background and light foreground.
+     * Makes navigation bars become opaque with solid dark background and light foreground.
      * @hide
      */
-    int APPEARANCE_OPAQUE_SIDE_BARS = 1 << 1;
+    int APPEARANCE_OPAQUE_NAVIGATION_BARS = 1 << 1;
 
     /**
      * Makes items on system bars become less noticeable without changing the layout of the bars.
@@ -53,34 +53,35 @@ public interface WindowInsetsController {
     int APPEARANCE_LOW_PROFILE_BARS = 1 << 2;
 
     /**
-     * Changes the foreground color for the light top bar so that the items on the bar can be read
+     * Changes the foreground color for light status bars so that the items on the bar can be read
      * clearly.
      */
-    int APPEARANCE_LIGHT_TOP_BAR = 1 << 3;
+    int APPEARANCE_LIGHT_STATUS_BARS = 1 << 3;
 
     /**
-     * Changes the foreground color for the light side bars so that the items on the bar can be read
-     * clearly.
+     * Changes the foreground color for light navigation bars so that the items on the bar can be
+     * read clearly.
      */
-    int APPEARANCE_LIGHT_SIDE_BARS = 1 << 4;
+    int APPEARANCE_LIGHT_NAVIGATION_BARS = 1 << 4;
 
     /** Determines the appearance of system bars. */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {APPEARANCE_OPAQUE_TOP_BAR, APPEARANCE_OPAQUE_SIDE_BARS,
-            APPEARANCE_LOW_PROFILE_BARS, APPEARANCE_LIGHT_TOP_BAR, APPEARANCE_LIGHT_SIDE_BARS})
+    @IntDef(flag = true, value = {APPEARANCE_OPAQUE_STATUS_BARS, APPEARANCE_OPAQUE_NAVIGATION_BARS,
+            APPEARANCE_LOW_PROFILE_BARS, APPEARANCE_LIGHT_STATUS_BARS,
+            APPEARANCE_LIGHT_NAVIGATION_BARS})
     @interface Appearance {
     }
 
     /**
-     * The default option for {@link #setSystemBarsBehavior(int)}. The side bars will be forcibly
-     * shown by the system on any user interaction on the corresponding display if the side bars are
-     * hidden by {@link #hide(int)} or {@link WindowInsetsAnimationController#changeInsets(Insets)}.
+     * The default option for {@link #setSystemBarsBehavior(int)}. System bars will be forcibly
+     * shown on any user interaction on the corresponding display if navigation bars are hidden by
+     * {@link #hide(int)} or {@link WindowInsetsAnimationController#changeInsets(Insets)}.
      */
-    int BEHAVIOR_SHOW_SIDE_BARS_BY_TOUCH = 0;
+    int BEHAVIOR_SHOW_BARS_BY_TOUCH = 0;
 
     /**
      * Option for {@link #setSystemBarsBehavior(int)}: Window would like to remain interactive when
-     * hiding the side bars by calling {@link #hide(int)} or
+     * hiding navigation bars by calling {@link #hide(int)} or
      * {@link WindowInsetsAnimationController#changeInsets(Insets)}.
      *
      * <p>When system bars are hidden in this mode, they can be revealed with system gestures, such
@@ -90,7 +91,7 @@ public interface WindowInsetsController {
 
     /**
      * Option for {@link #setSystemBarsBehavior(int)}: Window would like to remain interactive when
-     * hiding the side bars by calling {@link #hide(int)} or
+     * hiding navigation bars by calling {@link #hide(int)} or
      * {@link WindowInsetsAnimationController#changeInsets(Insets)}.
      *
      * <p>When system bars are hidden in this mode, they can be revealed temporarily with system
@@ -102,7 +103,7 @@ public interface WindowInsetsController {
 
     /** Determines the behavior of system bars when hiding them by calling {@link #hide}. */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {BEHAVIOR_SHOW_SIDE_BARS_BY_TOUCH, BEHAVIOR_SHOW_BARS_BY_SWIPE,
+    @IntDef(value = {BEHAVIOR_SHOW_BARS_BY_TOUCH, BEHAVIOR_SHOW_BARS_BY_SWIPE,
             BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE})
     @interface Behavior {
     }
@@ -114,11 +115,11 @@ public interface WindowInsetsController {
      * change as soon as the window gains control. The app can listen to the event by observing
      * {@link View#onApplyWindowInsets} and checking visibility with {@link WindowInsets#isVisible}.
      *
-     * @param types A bitmask of {@link WindowInsets.Type.InsetType} specifying what windows the app
+     * @param types A bitmask of {@link InsetsType} specifying what windows the app
      *              would like to make appear on screen.
      * @hide
      */
-    void show(@InsetType int types);
+    void show(@InsetsType int types);
 
     /**
      * Makes a set of windows causing insets disappear.
@@ -127,22 +128,22 @@ public interface WindowInsetsController {
      * change as soon as the window gains control. The app can listen to the event by observing
      * {@link View#onApplyWindowInsets} and checking visibility with {@link WindowInsets#isVisible}.
      *
-     * @param types A bitmask of {@link WindowInsets.Type.InsetType} specifying what windows the app
+     * @param types A bitmask of {@link InsetsType} specifying what windows the app
      *              would like to make disappear.
      * @hide
      */
-    void hide(@InsetType int types);
+    void hide(@InsetsType int types);
 
     /**
      * Lets the application control window inset animations in a frame-by-frame manner by modifying
      * the position of the windows in the system causing insets directly.
      *
-     * @param types The {@link InsetType}s the application has requested to control.
+     * @param types The {@link InsetsType}s the application has requested to control.
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 windows are ready to be controlled, among other callbacks.
      * @hide
      */
-    void controlWindowInsetsAnimation(@InsetType int types,
+    void controlWindowInsetsAnimation(@InsetsType int types,
             @NonNull WindowInsetsAnimationControlListener listener);
 
     /**

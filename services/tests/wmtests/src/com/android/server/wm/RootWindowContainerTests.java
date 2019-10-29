@@ -83,10 +83,11 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testIsAnyNonToastWindowVisibleForUid_aFewNonToastButNoneVisible() {
-        final WindowState topBar = createWindow(null, TYPE_STATUS_BAR, "topBar", FAKE_CALLING_UID);
+        final WindowState statusBar =
+                createWindow(null, TYPE_STATUS_BAR, "statusBar", FAKE_CALLING_UID);
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app", FAKE_CALLING_UID);
 
-        assertFalse(topBar.isVisibleNow());
+        assertFalse(statusBar.isVisibleNow());
         assertFalse(app.isVisibleNow());
         assertFalse(mWm.mRoot.isAnyNonToastWindowVisibleForUid(FAKE_CALLING_UID));
     }

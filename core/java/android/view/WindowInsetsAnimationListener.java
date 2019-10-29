@@ -61,7 +61,7 @@ public interface WindowInsetsAnimationListener {
      */
     class InsetsAnimation {
 
-        private final @WindowInsets.Type.InsetType int mTypeMask;
+        private final @WindowInsets.Type.InsetsType int mTypeMask;
         private final Insets mLowerBound;
         private final Insets mUpperBound;
 
@@ -75,9 +75,9 @@ public interface WindowInsetsAnimationListener {
         }
 
         /**
-         * @return The bitmask of {@link WindowInsets.Type.InsetType}s that are animating.
+         * @return The bitmask of {@link WindowInsets.Type.InsetsType}s that are animating.
          */
-        public @WindowInsets.Type.InsetType int getTypeMask() {
+        public @WindowInsets.Type.InsetsType int getTypeMask() {
             return mTypeMask;
         }
 

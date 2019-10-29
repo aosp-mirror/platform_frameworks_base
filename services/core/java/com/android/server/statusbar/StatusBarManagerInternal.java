@@ -17,7 +17,7 @@
 package com.android.server.statusbar;
 
 import android.os.Bundle;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.view.AppearanceRegion;
@@ -119,8 +119,8 @@ public interface StatusBarManagerInternal {
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme);
 
     /** @see com.android.internal.statusbar.IStatusBar#showTransient */
-    void showTransient(int displayId, @InternalInsetType int[] types);
+    void showTransient(int displayId, @InternalInsetsType int[] types);
 
     /** @see com.android.internal.statusbar.IStatusBar#abortTransient */
-    void abortTransient(int displayId, @InternalInsetType int[] types);
+    void abortTransient(int displayId, @InternalInsetsType int[] types);
 }
