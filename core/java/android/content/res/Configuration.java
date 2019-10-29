@@ -66,7 +66,6 @@ import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -2640,76 +2639,5 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
         // For persistence, we don't care about assetsSeq and WindowConfiguration, so do not read it
         // out.
-    }
-
-
-    /**
-     * Writes the Configuration's member fields as attributes into the XmlSerializer.
-     * The serializer is expected to have already started a tag so that attributes can be
-     * immediately written.
-     *
-     * @param xml The serializer to which to write the attributes.
-     * @param config The Configuration whose member fields to write.
-     * {@hide}
-     */
-    public static void writeXmlAttrs(XmlSerializer xml, Configuration config) throws IOException {
-        XmlUtils.writeIntAttribute(xml, XML_ATTR_FONT_SCALE,
-                Float.floatToIntBits(config.fontScale));
-        if (config.mcc != 0) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_MCC, config.mcc);
-        }
-        if (config.mnc != 0) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_MNC, config.mnc);
-        }
-        config.fixUpLocaleList();
-        if (!config.mLocaleList.isEmpty()) {
-           XmlUtils.writeStringAttribute(xml, XML_ATTR_LOCALES, config.mLocaleList.toLanguageTags());
-        }
-        if (config.touchscreen != TOUCHSCREEN_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_TOUCHSCREEN, config.touchscreen);
-        }
-        if (config.keyboard != KEYBOARD_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_KEYBOARD, config.keyboard);
-        }
-        if (config.keyboardHidden != KEYBOARDHIDDEN_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_KEYBOARD_HIDDEN, config.keyboardHidden);
-        }
-        if (config.hardKeyboardHidden != HARDKEYBOARDHIDDEN_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_HARD_KEYBOARD_HIDDEN,
-                    config.hardKeyboardHidden);
-        }
-        if (config.navigation != NAVIGATION_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_NAVIGATION, config.navigation);
-        }
-        if (config.navigationHidden != NAVIGATIONHIDDEN_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_NAVIGATION_HIDDEN, config.navigationHidden);
-        }
-        if (config.orientation != ORIENTATION_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_ORIENTATION, config.orientation);
-        }
-        if (config.screenLayout != SCREENLAYOUT_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_LAYOUT, config.screenLayout);
-        }
-        if (config.colorMode != COLOR_MODE_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_COLOR_MODE, config.colorMode);
-        }
-        if (config.uiMode != 0) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_UI_MODE, config.uiMode);
-        }
-        if (config.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_WIDTH, config.screenWidthDp);
-        }
-        if (config.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_SCREEN_HEIGHT, config.screenHeightDp);
-        }
-        if (config.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_SMALLEST_WIDTH, config.smallestScreenWidthDp);
-        }
-        if (config.densityDpi != DENSITY_DPI_UNDEFINED) {
-            XmlUtils.writeIntAttribute(xml, XML_ATTR_DENSITY, config.densityDpi);
-        }
-
-        // For persistence, we do not care about assetsSeq and window configuration, so do not write
-        // it out.
     }
 }

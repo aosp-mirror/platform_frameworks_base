@@ -162,6 +162,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * State and management of a single stack of activities.
@@ -2118,14 +2119,21 @@ class ActivityStack extends ConfigurationContainer {
                     }
                     aboveTop = false;
 
+                    final boolean reallyVisible = r.shouldBeVisible(behindFullscreenActivity,
+                            false /* ignoringKeyguard */);
                     // Check whether activity should be visible without Keyguard influence
-                    final boolean visibleIgnoringKeyguard = r.shouldBeVisibleIgnoringKeyguard(
-                            behindFullscreenActivity);
-                    final boolean reallyVisible = r.shouldBeVisible(behindFullscreenActivity);
-                    if (visibleIgnoringKeyguard) {
-                        behindFullscreenActivity = updateBehindFullscreen(!stackShouldBeVisible,
-                                behindFullscreenActivity, r);
+                    if (r.visibleIgnoringKeyguard) {
+                        if (r.occludesParent()) {
+                            // At this point, nothing else needs to be shown in this task.
+                            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
+                                    + " stackVisible=" + stackShouldBeVisible
+                                    + " behindFullscreen=" + behindFullscreenActivity);
+                            behindFullscreenActivity = true;
+                        } else {
+                            behindFullscreenActivity = false;
+                        }
                     }
+
                     if (reallyVisible) {
                         if (r.finishing) {
                             continue;
@@ -2338,18 +2346,6 @@ class ActivityStack extends ConfigurationContainer {
         return false;
     }
 
-    private boolean updateBehindFullscreen(boolean stackInvisible, boolean behindFullscreenActivity,
-            ActivityRecord r) {
-        if (r.occludesParent()) {
-            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
-                        + " stackInvisible=" + stackInvisible
-                        + " behindFullscreenActivity=" + behindFullscreenActivity);
-            // At this point, nothing else needs to be shown in this task.
-            behindFullscreenActivity = true;
-        }
-        return behindFullscreenActivity;
-    }
-
     void convertActivityToTranslucent(ActivityRecord r) {
         mTranslucentActivityWaiting = r;
         mUndrawnActivitiesBelowTopTranslucent.clear();
@@ -2400,14 +2396,22 @@ class ActivityStack extends ConfigurationContainer {
         }
     }
 
-    /** If any activities below the top running one are in the INITIALIZING state and they have a
-     * starting window displayed then remove that starting window. It is possible that the activity
-     * in this state will never resumed in which case that starting window will be orphaned. */
+    /** @see ActivityRecord#cancelInitializing() */
     void cancelInitializingActivities() {
-        final ActivityRecord topActivity = topRunningActivityLocked();
-        boolean aboveTop = true;
         // We don't want to clear starting window for activities that aren't behind fullscreen
         // activities as we need to display their starting window until they are done initializing.
+        checkBehindFullscreenActivity(null /* toCheck */, ActivityRecord::cancelInitializing);
+    }
+
+    /**
+     * If an activity {@param toCheck} is given, this method returns {@code true} if the activity
+     * is occluded by any fullscreen activity. If there is no {@param toCheck} and the handling
+     * function {@param handleBehindFullscreenActivity} is given, this method will pass all occluded
+     * activities to the function.
+     */
+    boolean checkBehindFullscreenActivity(ActivityRecord toCheck,
+            Consumer<ActivityRecord> handleBehindFullscreenActivity) {
+        boolean aboveTop = true;
         boolean behindFullscreenActivity = false;
 
         if (!shouldBeVisible(null)) {
@@ -2417,22 +2421,40 @@ class ActivityStack extends ConfigurationContainer {
             behindFullscreenActivity = true;
         }
 
+        final boolean handlingOccluded = toCheck == null && handleBehindFullscreenActivity != null;
+        if (!handlingOccluded && behindFullscreenActivity) {
+            return true;
+        }
+
+        final ActivityRecord topActivity = topRunningActivityLocked();
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
             for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = task.getChildAt(activityNdx);
                 if (aboveTop) {
                     if (r == topActivity) {
+                        if (r == toCheck) {
+                            // It is the top activity in a visible stack.
+                            return false;
+                        }
                         aboveTop = false;
                     }
                     behindFullscreenActivity |= r.occludesParent();
                     continue;
                 }
 
-                r.removeOrphanedStartingWindow(behindFullscreenActivity);
+                if (handlingOccluded) {
+                    handleBehindFullscreenActivity.accept(r);
+                } else if (r == toCheck) {
+                    return behindFullscreenActivity;
+                } else if (behindFullscreenActivity) {
+                    // It is occluded before {@param toCheck} is found.
+                    return true;
+                }
                 behindFullscreenActivity |= r.occludesParent();
             }
         }
+        return behindFullscreenActivity;
     }
 
     /**

@@ -2032,13 +2032,17 @@ public class SyncStorageEngine {
             int token;
             while ((token=in.readInt()) != STATUS_FILE_END) {
                 if (token == STATUS_FILE_ITEM) {
-                    SyncStatusInfo status = new SyncStatusInfo(in);
-                    if (mAuthorities.indexOfKey(status.authorityId) >= 0) {
-                        status.pending = false;
-                        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                            Slog.v(TAG_FILE, "Adding status for id " + status.authorityId);
+                    try {
+                        SyncStatusInfo status = new SyncStatusInfo(in);
+                        if (mAuthorities.indexOfKey(status.authorityId) >= 0) {
+                            status.pending = false;
+                            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                                Slog.v(TAG_FILE, "Adding status for id " + status.authorityId);
+                            }
+                            mSyncStatus.put(status.authorityId, status);
                         }
-                        mSyncStatus.put(status.authorityId, status);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Unable to parse some sync status.", e);
                     }
                 } else {
                     // Ooops.

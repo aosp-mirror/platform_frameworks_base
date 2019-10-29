@@ -21,6 +21,7 @@ import static android.app.usage.UsageEvents.Event.MAX_EVENT_TYPE;
 import static junit.framework.TestCase.fail;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents.Event;
@@ -35,6 +36,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -423,6 +425,11 @@ public class UsageStatsDatabaseTest {
         prevDB.putUsageStats(UsageStatsManager.INTERVAL_DAILY, mIntervalStats);
         // Create a backup with a specific version
         byte[] blob = prevDB.getBackupPayload(KEY_USAGE_STATS, version);
+        if (version >= 1 && version <= 3) {
+            assertFalse(blob != null && blob.length != 0,
+                    "UsageStatsDatabase shouldn't be able to write backups as XML");
+            return;
+        }
 
         clearUsageStatsFiles();
 
@@ -434,11 +441,9 @@ public class UsageStatsDatabaseTest {
         List<IntervalStats> stats = newDB.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, 0, mEndTime,
                 mIntervalStatsVerifier);
 
-
-        if (version > newDB.BACKUP_VERSION || version < 1) {
-            if (stats != null && stats.size() != 0) {
-                fail("UsageStatsDatabase should ne be able to restore from unknown data versions");
-            }
+        if (version > UsageStatsDatabase.BACKUP_VERSION || version < 1) {
+            assertFalse(stats != null && !stats.isEmpty(),
+                    "UsageStatsDatabase shouldn't be able to restore from unknown data versions");
             return;
         }
 
@@ -455,9 +460,12 @@ public class UsageStatsDatabaseTest {
 
     /**
      * Test the version upgrade from 3 to 4
+     *
+     * Ignored - version 3 is now deprecated.
      */
+    @Ignore
     @Test
-    public void testVersionUpgradeFrom3to4() throws IOException {
+    public void ignore_testVersionUpgradeFrom3to4() throws IOException {
         runVersionChangeTest(3, 4, UsageStatsManager.INTERVAL_DAILY);
         runVersionChangeTest(3, 4, UsageStatsManager.INTERVAL_WEEKLY);
         runVersionChangeTest(3, 4, UsageStatsManager.INTERVAL_MONTHLY);
@@ -477,9 +485,12 @@ public class UsageStatsDatabaseTest {
 
     /**
      * Test the version upgrade from 3 to 5
+     *
+     * Ignored - version 3 is now deprecated.
      */
+    @Ignore
     @Test
-    public void testVersionUpgradeFrom3to5() throws IOException {
+    public void ignore_testVersionUpgradeFrom3to5() throws IOException {
         runVersionChangeTest(3, 5, UsageStatsManager.INTERVAL_DAILY);
         runVersionChangeTest(3, 5, UsageStatsManager.INTERVAL_WEEKLY);
         runVersionChangeTest(3, 5, UsageStatsManager.INTERVAL_MONTHLY);
@@ -488,12 +499,14 @@ public class UsageStatsDatabaseTest {
 
 
     /**
-     * Test the version upgrade from 3 to 4
+     * Test backup/restore
      */
     @Test
     public void testBackupRestore() throws IOException {
-        runBackupRestoreTest(1);
         runBackupRestoreTest(4);
+
+        // test deprecated versions
+        runBackupRestoreTest(1);
 
         // test invalid backup versions as well
         runBackupRestoreTest(0);

@@ -297,10 +297,10 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.R;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
@@ -2676,10 +2676,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(b/137329632): Exclude current activity when looking for the next one with
         //  ActivityDisplay#topRunningActivity().
         final ActivityRecord next = display.topRunningActivity();
-        final boolean isLastStackOverUnreadyHome = display.getHomeStack() != null
-                && (next == null || (next.isActivityTypeHome() && !next.isState(RESUMED)))
-                && stack.isFocusedStackOnDisplay();
-        if (isLastStackOverUnreadyHome) {
+        final boolean isLastStackOverEmptyHome =
+                next == null && stack.isFocusedStackOnDisplay() && display.getHomeStack() != null;
+        if (isLastStackOverEmptyHome) {
             // Don't destroy activity immediately if this is the last activity on the display and
             // the display contains home stack. Although there is no next activity at the moment,
             // another home activity should be started later. Keep this activity alive until next
@@ -4440,34 +4439,30 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         removeStartingWindow();
     }
 
-    void notifyUnknownVisibilityLaunched() {
-
+    /**
+     * Suppress transition until the new activity becomes ready, otherwise the keyguard can appear
+     * for a short amount of time before the new process with the new activity had the ability to
+     * set its showWhenLocked flags.
+     */
+    void notifyUnknownVisibilityLaunchedForKeyguardTransition() {
         // No display activities never add a window, so there is no point in waiting them for
         // relayout.
-        if (!noDisplay && getDisplayContent() != null) {
-            getDisplayContent().mUnknownAppVisibilityController.notifyLaunched(this);
-        }
-    }
-
-    /**
-     * @return true if the input activity should be made visible, ignoring any effect Keyguard
-     * might have on the visibility
-     *
-     * TODO(b/123540470): Combine this method and {@link #shouldBeVisible(boolean)}.
-     *
-     * @see {@link ActivityStack#checkKeyguardVisibility}
-     */
-    boolean shouldBeVisibleIgnoringKeyguard(boolean behindFullscreenActivity) {
-        if (!okToShowLocked()) {
-            return false;
+        if (noDisplay || !mStackSupervisor.getKeyguardController().isKeyguardLocked()) {
+            return;
         }
 
-        return !behindFullscreenActivity || mLaunchTaskBehind;
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(this);
     }
 
-    boolean shouldBeVisible(boolean behindFullscreenActivity) {
+    /** @return {@code true} if this activity should be made visible. */
+    boolean shouldBeVisible(boolean behindFullscreenActivity, boolean ignoringKeyguard) {
         // Check whether activity should be visible without Keyguard influence
-        visibleIgnoringKeyguard = shouldBeVisibleIgnoringKeyguard(behindFullscreenActivity);
+        visibleIgnoringKeyguard = (!behindFullscreenActivity || mLaunchTaskBehind)
+                && okToShowLocked();
+
+        if (ignoringKeyguard) {
+            return visibleIgnoringKeyguard;
+        }
 
         final ActivityStack stack = getActivityStack();
         if (stack == null) {
@@ -4496,9 +4491,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // TODO: Use real value of behindFullscreenActivity calculated using the same logic in
-        // ActivityStack#ensureActivitiesVisibleLocked().
-        return shouldBeVisible(!stack.shouldBeVisible(null /* starting */));
+        final boolean behindFullscreenActivity = stack.checkBehindFullscreenActivity(
+                this, null /* handleBehindFullscreenActivity */);
+        return shouldBeVisible(behindFullscreenActivity, false /* ignoringKeyguard */);
     }
 
     void makeVisibleIfNeeded(ActivityRecord starting, boolean reportToClient) {
@@ -5539,11 +5534,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void removeOrphanedStartingWindow(boolean behindFullscreenActivity) {
-        if (mStartingWindowState == STARTING_WINDOW_SHOWN && behindFullscreenActivity) {
+    /**
+     * If any activities below the top running one are in the INITIALIZING state and they have a
+     * starting window displayed then remove that starting window. It is possible that the activity
+     * in this state will never resumed in which case that starting window will be orphaned.
+     * <p>
+     * It should only be called if this activity is behind other fullscreen activity.
+     */
+    void cancelInitializing() {
+        if (mStartingWindowState == STARTING_WINDOW_SHOWN) {
+            // Remove orphaned starting window.
             if (DEBUG_VISIBILITY) Slog.w(TAG_VISIBILITY, "Found orphaned starting window " + this);
             mStartingWindowState = STARTING_WINDOW_REMOVED;
             removeStartingWindow();
+        }
+        if (isState(INITIALIZING) && !shouldBeVisible(
+                true /* behindFullscreenActivity */, true /* ignoringKeyguard */)) {
+            // Remove the unknown visibility record because an invisible activity shouldn't block
+            // the keyguard transition.
+            mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
         }
     }
 

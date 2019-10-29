@@ -1061,7 +1061,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setStartFlags(startFlags)
                 .setProfilerInfo(profilerInfo)
                 .setActivityOptions(bOptions)
-                .setMayWait(userId)
+                .setUserId(userId)
                 .execute();
 
     }
@@ -1232,7 +1232,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setRequestCode(requestCode)
                     .setStartFlags(startFlags)
                     .setActivityOptions(bOptions)
-                    .setMayWait(userId)
+                    .setUserId(userId)
                     .setProfilerInfo(profilerInfo)
                     .setWaitResult(res)
                     .execute();
@@ -1259,7 +1259,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setStartFlags(startFlags)
                     .setGlobalConfiguration(config)
                     .setActivityOptions(bOptions)
-                    .setMayWait(userId)
+                    .setUserId(userId)
                     .execute();
         }
     }
@@ -1389,7 +1389,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setRequestCode(requestCode)
                     .setStartFlags(startFlags)
                     .setActivityOptions(bOptions)
-                    .setMayWait(userId)
+                    .setUserId(userId)
                     .setIgnoreTargetSecurity(ignoreTargetSecurity)
                     .setFilterCallingUid(isResolver ? 0 /* system */ : targetUid)
                     // The target may well be in the background, which would normally prevent it
@@ -1437,7 +1437,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setStartFlags(startFlags)
                 .setProfilerInfo(profilerInfo)
                 .setActivityOptions(bOptions)
-                .setMayWait(userId)
+                .setUserId(userId)
                 .setAllowBackgroundActivityStart(true)
                 .execute();
     }
@@ -1453,7 +1453,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setCallingPackage(callingPackage)
                 .setResolvedType(resolvedType)
                 .setActivityOptions(bOptions)
-                .setMayWait(userId)
+                .setUserId(userId)
                 .setAllowBackgroundActivityStart(true)
                 .execute();
     }

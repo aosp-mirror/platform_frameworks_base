@@ -284,7 +284,7 @@ public class ActivityStartController {
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
                 .setActivityOptions(options)
-                .setMayWait(userId)
+                .setUserId(userId)
                 .setInTask(inTask)
                 .setOriginatingPendingIntent(originatingPendingIntent)
                 .setAllowBackgroundActivityStart(allowBackgroundActivityStart)

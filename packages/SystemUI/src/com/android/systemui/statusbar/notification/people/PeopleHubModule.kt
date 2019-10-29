@@ -23,7 +23,7 @@ import dagger.Module
 abstract class PeopleHubModule {
 
     @Binds
-    abstract fun peopleHubSectionFooterViewController(
+    abstract fun peopleHubSectionFooterViewAdapter(
         impl: PeopleHubSectionFooterViewAdapterImpl
     ): PeopleHubSectionFooterViewAdapter
 
