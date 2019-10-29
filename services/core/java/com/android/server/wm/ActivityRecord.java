@@ -2472,7 +2472,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final ActivityStack stack = getActivityStack();
-        final boolean mayAdjustFocus = (isState(RESUMED) || stack.mResumedActivity == null)
+        final boolean mayAdjustTop = (isState(RESUMED) || stack.mResumedActivity == null)
+                && stack.isFocusedStackOnDisplay();
+        final boolean shouldAdjustGlobalFocus = mayAdjustTop
                 // It must be checked before {@link #makeFinishingLocked} is called, because a stack
                 // is not visible if it only contains finishing activities.
                 && mRootActivityContainer.isTopDisplayFocusedStack(stack);
@@ -2500,9 +2502,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             // We are finishing the top focused activity and its stack has nothing to be focused so
             // the next focusable stack should be focused.
-            if (mayAdjustFocus
+            if (mayAdjustTop
                     && (stack.topRunningActivityLocked() == null || !stack.isFocusable())) {
-                stack.adjustFocusToNextFocusableStack("finish-top");
+                if (shouldAdjustGlobalFocus) {
+                    // Move the entire hierarchy to top with updating global top resumed activity
+                    // and focused application if needed.
+                    stack.adjustFocusToNextFocusableStack("finish-top");
+                } else {
+                    // Only move the next stack to top in its display.
+                    final ActivityDisplay display = stack.getDisplay();
+                    final ActivityRecord next = display.topRunningActivity();
+                    if (next != null) {
+                        display.positionChildAtTop(next.getActivityStack(),
+                                false /* includingParents */, "finish-display-top");
+                    }
+                }
             }
 
             finishActivityResults(resultCode, resultData);
@@ -2632,20 +2646,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // implied that the current finishing activity should be added into stopping list rather
         // than destroy immediately.
         final boolean isNextNotYetVisible = next != null && (!next.nowVisible || !next.visible);
-        final boolean notGlobalFocusedStack =
-                getActivityStack() != mRootActivityContainer.getTopDisplayFocusedStack();
         if (isVisible && isNextNotYetVisible) {
             // Add this activity to the list of stopping activities. It will be processed and
             // destroyed when the next activity reports idle.
             addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
                     "completeFinishing");
             setState(STOPPING, "completeFinishing");
-            if (notGlobalFocusedStack) {
-                // Ensuring visibility and configuration only for non-focused stacks since this
-                // method call is relatively expensive and not necessary for focused stacks.
-                mRootActivityContainer.ensureVisibilityAndConfig(next, getDisplayId(),
-                        false /* markFrozenIfConfigChanged */, true /* deferResume */);
-            }
         } else if (addToFinishingAndWaitForIdle()) {
             // We added this activity to the finishing list and something else is becoming resumed.
             // The activity will complete finishing when the next activity reports idle. No need to
