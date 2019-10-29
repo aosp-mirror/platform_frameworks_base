@@ -20,6 +20,7 @@ import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_SUCCESS;
 
 import static junit.framework.Assert.assertEquals;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -65,8 +66,16 @@ public class AuthServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        // Dummy test config
+        final String[] config = {
+                "0:2:15", // ID0:Fingerprint:Strong
+                "1:4:15", // ID1:Iris:Strong
+                "2:8:15", // ID2:Face:Strong
+        };
+
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mInjector.getBiometricService()).thenReturn(mBiometricService);
+        when(mInjector.getConfiguration(any())).thenReturn(config);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT))
                 .thenReturn(true);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_IRIS)).thenReturn(true);
@@ -76,8 +85,7 @@ public class AuthServiceTest {
 
     // TODO(b/141025588): Check that an exception is thrown when the userId != callingUserId
     @Test
-    public void testAuthenticate_callsBiometricServiceAuthenticate() throws
-            Exception {
+    public void testAuthenticate_callsBiometricServiceAuthenticate() throws Exception {
         mAuthService = new AuthService(mContext, mInjector);
         mAuthService.onStart();
 

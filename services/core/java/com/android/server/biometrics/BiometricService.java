@@ -35,7 +35,6 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -229,6 +228,8 @@ public class BiometricService extends SystemService {
     // polymorphism :/
     final ArrayList<AuthenticatorWrapper> mAuthenticators = new ArrayList<>();
 
+    BiometricStrengthController mBiometricStrengthController;
+
     // The current authentication session, null if idle/done. We need to track both the current
     // and pending sessions since errors may be sent to either.
     @VisibleForTesting
@@ -349,16 +350,49 @@ public class BiometricService extends SystemService {
     @VisibleForTesting
     public static final class AuthenticatorWrapper {
         public final int id;
-        public final int strength;
+        public final int OEMStrength; // strength as configured by the OEM
+        private int updatedStrength; // strength updated by BiometricStrengthController
         public final int modality;
         public final IBiometricAuthenticator impl;
 
-        AuthenticatorWrapper(int id, int strength, int modality,
+        AuthenticatorWrapper(int id, int modality, int strength,
                 IBiometricAuthenticator impl) {
             this.id = id;
-            this.strength = strength;
             this.modality = modality;
+            this.OEMStrength = strength;
+            this.updatedStrength = strength;
             this.impl = impl;
+        }
+
+        /**
+         * Returns the actual strength, taking any updated strengths into effect. Since more bits
+         * means lower strength, the resulting strength is never stronger than the OEM's configured
+         * strength.
+         * @return a bitfield, see {@link Authenticators}
+         */
+        public int getActualStrength() {
+            return OEMStrength | updatedStrength;
+        }
+
+        /**
+         * Stores the updated strength, which takes effect whenever {@link #getActualStrength()}
+         * is checked.
+         * @param newStrength
+         */
+        public void updateStrength(int newStrength) {
+            String log = "updateStrength: Before(" + toString() + ")";
+            updatedStrength = newStrength;
+            log += " After(" + toString() + ")";
+            Slog.d(TAG, log);
+        }
+
+        @Override
+        public String toString() {
+            return "ID(" + id + ")"
+                    + " OEMStrength: " + OEMStrength
+                    + " updatedStrength: " + updatedStrength
+                    + " modality " + modality
+                    + " authenticator: " + impl;
         }
     }
 
@@ -712,11 +746,15 @@ public class BiometricService extends SystemService {
         }
 
         @Override
-        public void registerAuthenticator(int id, int strength, int modality,
+        public void registerAuthenticator(int id, int modality, int strength,
                 IBiometricAuthenticator authenticator) {
             checkInternalPermission();
 
-            mAuthenticators.add(new AuthenticatorWrapper(id, strength, modality, authenticator));
+            Slog.d(TAG, "Registering ID: " + id
+                    + " Modality: " + modality
+                    + " Strength: " + strength);
+
+            mAuthenticators.add(new AuthenticatorWrapper(id, modality, strength, authenticator));
         }
 
         @Override // Binder call
@@ -829,6 +867,15 @@ public class BiometricService extends SystemService {
         public void publishBinderService(BiometricService service, IBiometricService.Stub impl) {
             service.publishBinderService(Context.BIOMETRIC_SERVICE, impl);
         }
+
+        /**
+         * Allows to mock BiometricStrengthController for testing.
+         */
+        @VisibleForTesting
+        public BiometricStrengthController getBiometricStrengthController(
+                BiometricService service) {
+            return new BiometricStrengthController(service);
+        }
     }
 
     /**
@@ -875,12 +922,18 @@ public class BiometricService extends SystemService {
         mStatusBarService = mInjector.getStatusBarService();
         mTrustManager = mInjector.getTrustManager();
         mInjector.publishBinderService(this, mImpl);
+        mBiometricStrengthController = mInjector.getBiometricStrengthController(this);
+        mBiometricStrengthController.startListening();
     }
 
     /**
      * Checks if there are any available biometrics, and returns the modality. This method also
      * returns errors through the callback (no biometric feature, hardware not detected, no
      * templates enrolled, etc). This service must not start authentication if errors are sent.
+     *
+     * @param userId the user to check for
+     * @param bundle passed from {@link BiometricPrompt}
+     * @param opPackageName see {@link android.app.AppOpsManager}
      *
      * @return A pair [Modality, Error] with Modality being one of
      * {@link BiometricAuthenticator#TYPE_NONE},
@@ -915,7 +968,7 @@ public class BiometricService extends SystemService {
         int modality = TYPE_NONE;
         int firstHwAvailable = TYPE_NONE;
         for (AuthenticatorWrapper authenticator : mAuthenticators) {
-            final int actualStrength = authenticator.strength;
+            final int actualStrength = authenticator.getActualStrength();
             final int requestedStrength = Utils.getBiometricStrength(bundle);
             if (Utils.isAtLeastStrength(actualStrength, requestedStrength)) {
                 hasSufficientStrength = true;

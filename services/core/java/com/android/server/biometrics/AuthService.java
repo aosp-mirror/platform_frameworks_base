@@ -31,6 +31,7 @@ import static android.hardware.biometrics.BiometricManager.Authenticators;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.IAuthService;
+import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -44,6 +45,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 import com.android.server.biometrics.face.FaceAuthenticator;
@@ -58,9 +60,6 @@ public class AuthService extends SystemService {
     private static final String TAG = "AuthService";
     private static final boolean DEBUG = false;
 
-    private final boolean mHasFeatureFace;
-    private final boolean mHasFeatureFingerprint;
-    private final boolean mHasFeatureIris;
     private final Injector mInjector;
 
     private IBiometricService mBiometricService;
@@ -89,6 +88,16 @@ public class AuthService extends SystemService {
         @VisibleForTesting
         public void publishBinderService(AuthService service, IAuthService.Stub impl) {
             service.publishBinderService(Context.AUTH_SERVICE, impl);
+        }
+
+        /**
+         * Allows to test with various device sensor configurations.
+         * @param context
+         * @return
+         */
+        @VisibleForTesting
+        public String[] getConfiguration(Context context) {
+            return context.getResources().getStringArray(R.array.config_biometric_sensors);
         }
     }
 
@@ -170,47 +179,63 @@ public class AuthService extends SystemService {
         mInjector = injector;
         mImpl = new AuthServiceImpl();
         final PackageManager pm = context.getPackageManager();
-        mHasFeatureFace = pm.hasSystemFeature(PackageManager.FEATURE_FACE);
-        mHasFeatureFingerprint = pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
-        mHasFeatureIris = pm.hasSystemFeature(PackageManager.FEATURE_IRIS);
+    }
+
+    /**
+     * @param id must be unique per device
+     * @param modality one of {@link BiometricAuthenticator} types
+     * @param strength as defined in {@link Authenticators}
+     */
+    private void registerAuthenticator(int id, int modality, int strength) throws RemoteException {
+
+        Slog.d(TAG, "Registering ID: " + id + " Modality: " + modality + " Strength: " + strength);
+
+        final IBiometricAuthenticator.Stub authenticator;
+
+        switch (modality) {
+            case TYPE_FINGERPRINT:
+                authenticator = new FingerprintAuthenticator(IFingerprintService.Stub.asInterface(
+                        ServiceManager.getService(Context.FINGERPRINT_SERVICE)));
+                break;
+
+            case TYPE_FACE:
+                authenticator = new FaceAuthenticator(IFaceService.Stub.asInterface(
+                        ServiceManager.getService(Context.FACE_SERVICE)));
+                break;
+
+            case TYPE_IRIS:
+                authenticator = new IrisAuthenticator(IIrisService.Stub.asInterface(
+                        ServiceManager.getService(Context.IRIS_SERVICE)));
+                break;
+
+            default:
+                Slog.e(TAG, "Unknown modality: " + modality);
+                return;
+        }
+
+        mBiometricService.registerAuthenticator(id, modality, strength, authenticator);
     }
 
     @Override
     public void onStart() {
         mBiometricService = mInjector.getBiometricService();
 
-        if (mHasFeatureFace) {
-            final FaceAuthenticator faceAuthenticator = new FaceAuthenticator(
-                    IFaceService.Stub.asInterface(ServiceManager.getService(Context.FACE_SERVICE)));
+        final String[] configs = mInjector.getConfiguration(getContext());
+
+        for (int i = 0; i < configs.length; i++) {
+            String[] elems = configs[i].split(":");
+            final int id = Integer.parseInt(elems[0]);
+            final int modality = Integer.parseInt(elems[1]);
+            final int strength = Integer.parseInt(elems[2]);
+
             try {
-                // TODO(b/141025588): Pass down the real id, strength, and modality.
-                mBiometricService.registerAuthenticator(0, 0, TYPE_FACE, faceAuthenticator);
+                registerAuthenticator(id, modality, strength);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
             }
+
         }
-        if (mHasFeatureFingerprint) {
-            final FingerprintAuthenticator fingerprintAuthenticator = new FingerprintAuthenticator(
-                    IFingerprintService.Stub.asInterface(
-                            ServiceManager.getService(Context.FINGERPRINT_SERVICE)));
-            try {
-                // TODO(b/141025588): Pass down the real id, strength, and modality.
-                mBiometricService.registerAuthenticator(1, 0, TYPE_FINGERPRINT,
-                        fingerprintAuthenticator);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
-        }
-        if (mHasFeatureIris) {
-            final IrisAuthenticator irisAuthenticator = new IrisAuthenticator(
-                    IIrisService.Stub.asInterface(ServiceManager.getService(Context.IRIS_SERVICE)));
-            try {
-                // TODO(b/141025588): Pass down the real id, strength, and modality.
-                mBiometricService.registerAuthenticator(2, 0, TYPE_IRIS, irisAuthenticator);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception", e);
-            }
-        }
+
         mInjector.publishBinderService(this, mImpl);
     }
 

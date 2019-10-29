@@ -43,7 +43,7 @@ interface IBiometricService {
     // Registers an authenticator (e.g. face, fingerprint, iris).
     // Id must be unique, whereas strength and modality don't need to be.
     // TODO(b/123321528): Turn strength and modality into enums.
-    void registerAuthenticator(int id, int strength, int modality,
+    void registerAuthenticator(int id, int modality, int strength,
             IBiometricAuthenticator authenticator);
 
     // Register callback for when keyguard biometric eligibility changes.

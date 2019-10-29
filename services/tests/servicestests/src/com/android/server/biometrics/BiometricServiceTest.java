@@ -19,6 +19,7 @@ package com.android.server.biometrics;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertNotNull;
 
 import static org.junit.Assert.assertNotEquals;
@@ -117,6 +118,8 @@ public class BiometricServiceTest {
                 .thenReturn(mock(BiometricService.SettingObserver.class));
         when(mInjector.getKeyStore()).thenReturn(mock(KeyStore.class));
         when(mInjector.isDebugEnabled(any(), anyInt())).thenReturn(false);
+        when(mInjector.getBiometricStrengthController(any()))
+                .thenReturn(mock(BiometricStrengthController.class));
         when(mInjector.getTrustManager()).thenReturn(mTrustManager);
 
         when(mResources.getString(R.string.biometric_error_hw_unavailable))
@@ -190,8 +193,9 @@ public class BiometricServiceTest {
 
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
-        mBiometricService.mImpl.registerAuthenticator(0 /* id */, Authenticators.BIOMETRIC_STRONG,
-                BiometricAuthenticator.TYPE_FINGERPRINT, mFingerprintAuthenticator);
+        mBiometricService.mImpl.registerAuthenticator(0 /* id */,
+                BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
+                mFingerprintAuthenticator);
 
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 null /* authenticators */);
@@ -258,8 +262,9 @@ public class BiometricServiceTest {
 
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
-        mBiometricService.mImpl.registerAuthenticator(0 /* id */, Authenticators.BIOMETRIC_STRONG,
-                BiometricAuthenticator.TYPE_FINGERPRINT, mFingerprintAuthenticator);
+        mBiometricService.mImpl.registerAuthenticator(0 /* id */,
+                BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
+                mFingerprintAuthenticator);
 
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 null /* authenticators */);
@@ -1045,6 +1050,108 @@ public class BiometricServiceTest {
                 invokeCanAuthenticate(mBiometricService, authenticators));
     }
 
+    @Test
+    public void testAuthenticatorActualStrength() {
+        // Tuple of OEM config, updatedStrength, and expectedStrength
+        final int[][] testCases = {
+                // Downgrades to the specified strength
+                {Authenticators.BIOMETRIC_STRONG, Authenticators.BIOMETRIC_WEAK,
+                        Authenticators.BIOMETRIC_WEAK},
+
+                // Cannot be upgraded
+                {Authenticators.BIOMETRIC_WEAK, Authenticators.BIOMETRIC_STRONG,
+                        Authenticators.BIOMETRIC_WEAK},
+
+                // Downgrades to convenience
+                {Authenticators.BIOMETRIC_WEAK, Authenticators.BIOMETRIC_CONVENIENCE,
+                        Authenticators.BIOMETRIC_CONVENIENCE},
+
+                // EMPTY_SET does not modify specified strength
+                {Authenticators.BIOMETRIC_WEAK, Authenticators.EMPTY_SET,
+                        Authenticators.BIOMETRIC_WEAK},
+        };
+
+        for (int i = 0; i < testCases.length; i++) {
+            final BiometricService.AuthenticatorWrapper authenticator =
+                    new BiometricService.AuthenticatorWrapper(0 /* id */,
+                            BiometricAuthenticator.TYPE_FINGERPRINT,
+                            testCases[i][0],
+                            null /* impl */);
+            authenticator.updateStrength(testCases[i][1]);
+            assertEquals(testCases[i][2], authenticator.getActualStrength());
+        }
+    }
+
+    @Test
+    public void testWithDowngradedAuthenticator() throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        final int testId = 0;
+
+        when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any()))
+                .thenReturn(true);
+        when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
+        mBiometricService.mImpl.registerAuthenticator(testId /* id */,
+                BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
+                mFingerprintAuthenticator);
+
+        // Downgrade the authenticator
+        for (BiometricService.AuthenticatorWrapper wrapper : mBiometricService.mAuthenticators) {
+            if (wrapper.id == testId) {
+                wrapper.updateStrength(Authenticators.BIOMETRIC_WEAK);
+            }
+        }
+
+        // STRONG-only auth is not available
+        int authenticators = Authenticators.BIOMETRIC_STRONG;
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
+                authenticators);
+        waitForIdle();
+        verify(mReceiver1).onError(
+                eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricPrompt.BIOMETRIC_ERROR_HW_NOT_PRESENT),
+                eq(0) /* vendorCode */);
+
+        // Request for weak auth works
+        resetReceiver();
+        authenticators = Authenticators.BIOMETRIC_WEAK;
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */,
+                authenticators);
+        waitForIdle();
+        verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
+                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                any(IBiometricServiceReceiverInternal.class),
+                eq(BiometricAuthenticator.TYPE_FINGERPRINT /* biometricModality */),
+                anyBoolean() /* requireConfirmation */,
+                anyInt() /* userId */,
+                eq(TEST_PACKAGE_NAME));
+
+        // Requesting strong and credential, when credential is setup
+        resetReceiver();
+        authenticators = Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL;
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */,
+                authenticators);
+        waitForIdle();
+        assertTrue(Utils.isDeviceCredentialAllowed(mBiometricService.mCurrentAuthSession.mBundle));
+        verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
+                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                any(IBiometricServiceReceiverInternal.class),
+                eq(BiometricAuthenticator.TYPE_NONE /* biometricModality */),
+                anyBoolean() /* requireConfirmation */,
+                anyInt() /* userId */,
+                eq(TEST_PACKAGE_NAME));
+    }
+
     // Helper methods
 
     private int invokeCanAuthenticate(BiometricService service, int authenticators)
@@ -1066,14 +1173,14 @@ public class BiometricServiceTest {
             when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any()))
                     .thenReturn(enrolled);
             when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
-            mBiometricService.mImpl.registerAuthenticator(0 /* id */, strength, modality,
+            mBiometricService.mImpl.registerAuthenticator(0 /* id */, modality, strength,
                     mFingerprintAuthenticator);
         }
 
         if ((modality & BiometricAuthenticator.TYPE_FACE) != 0) {
             when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(enrolled);
             when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
-            mBiometricService.mImpl.registerAuthenticator(0 /* id */, strength, modality,
+            mBiometricService.mImpl.registerAuthenticator(0 /* id */, modality, strength,
                     mFaceAuthenticator);
         }
     }
@@ -1096,14 +1203,14 @@ public class BiometricServiceTest {
                 when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any()))
                         .thenReturn(true);
                 when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
-                mBiometricService.mImpl.registerAuthenticator(0 /* id */, strength, modality,
+                mBiometricService.mImpl.registerAuthenticator(0 /* id */, modality, strength,
                         mFingerprintAuthenticator);
             }
 
             if ((modality & BiometricAuthenticator.TYPE_FACE) != 0) {
                 when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
                 when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
-                mBiometricService.mImpl.registerAuthenticator(0 /* id */, strength, modality,
+                mBiometricService.mImpl.registerAuthenticator(0 /* id */, modality, strength,
                         mFaceAuthenticator);
             }
         }

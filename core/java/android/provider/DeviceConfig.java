@@ -349,6 +349,15 @@ public final class DeviceConfig {
     public static final String NAMESPACE_PRIVACY = "privacy";
 
     /**
+     * Namespace for biometrics related features
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String NAMESPACE_BIOMETRICS = "biometrics";
+
+    /**
      * Permission related properties definitions.
      *
      * @hide
