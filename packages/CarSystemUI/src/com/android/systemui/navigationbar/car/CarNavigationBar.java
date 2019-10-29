@@ -25,6 +25,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -291,7 +292,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         }
 
         boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
-        mCarNavigationBarController.setBottomWindowVisibility(!isKeyboardVisible);
+        mCarNavigationBarController.setBottomWindowVisibility(
+                isKeyboardVisible ? View.GONE : View.VISIBLE);
     }
 
     private void updateNavBarForKeyguardContent() {
