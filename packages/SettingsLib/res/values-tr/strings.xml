@@ -43,6 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s üzerinden kullanılabilir"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Kaydolmak için dokunun"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Bağlı, internet yok"</string>
+    <string name="private_dns_broken" msgid="7356676011023412490">"Gizli DNS sunucusuna erişilemiyor"</string>
     <string name="wifi_limited_connection" msgid="7717855024753201527">"Sınırlı bağlantı"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"İnternet yok"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Oturum açılması gerekiyor"</string>
