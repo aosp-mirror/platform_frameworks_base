@@ -24,12 +24,12 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
-import static com.android.internal.app.ChooserActivity.CALLER_TARGET_SCORE_BOOST;
-import static com.android.internal.app.ChooserActivity.SHORTCUT_TARGET_SCORE_BOOST;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_CHOOSER_TARGET;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_DEFAULT;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE;
 import static com.android.internal.app.ChooserActivity.TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER;
+import static com.android.internal.app.ChooserListAdapter.CALLER_TARGET_SCORE_BOOST;
+import static com.android.internal.app.ChooserListAdapter.SHORTCUT_TARGET_SCORE_BOOST;
 import static com.android.internal.app.ChooserWrapperActivity.sOverrides;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -69,6 +69,7 @@ import androidx.test.rule.ActivityTestRule;
 
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -819,17 +820,18 @@ public class ChooserActivityTest {
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
-        when(sOverrides.resolverListController.getScore(Mockito.isA(
-                ResolverActivity.DisplayResolveInfo.class))).thenReturn(testBaseScore);
+        when(sOverrides.resolverListController.getScore(Mockito.isA(DisplayResolveInfo.class)))
+                .thenReturn(testBaseScore);
 
         final ChooserWrapperActivity activity = mActivityRule
                 .launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
 
-        final ResolverActivity.DisplayResolveInfo testDri =
+        final DisplayResolveInfo testDri =
                 activity.createTestDisplayResolveInfo(sendIntent,
-                ResolverDataProvider.createResolveInfo(3, 0), "testLabel", "testInfo", sendIntent);
-        final ChooserActivity.ChooserListAdapter adapter = activity.getAdapter();
+                ResolverDataProvider.createResolveInfo(3, 0), "testLabel", "testInfo", sendIntent,
+                /* resolveInfoPresentationGetter */ null);
+        final ChooserListAdapter adapter = activity.getAdapter();
 
         assertThat(adapter.getBaseScore(null, 0), is(CALLER_TARGET_SCORE_BOOST));
         assertThat(adapter.getBaseScore(testDri, TARGET_TYPE_DEFAULT), is(testBaseScore));
@@ -970,7 +972,8 @@ public class ChooserActivityTest {
                                 ri,
                                 "testLabel",
                                 "testInfo",
-                                sendIntent),
+                                sendIntent,
+                                /* resolveInfoPresentationGetter */ null),
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET)
         );
@@ -1036,7 +1039,8 @@ public class ChooserActivityTest {
                                 ri,
                                 "testLabel",
                                 "testInfo",
-                                sendIntent),
+                                sendIntent,
+                                /* resolveInfoPresentationGetter */ null),
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET)
         );
@@ -1097,7 +1101,8 @@ public class ChooserActivityTest {
                                 ri,
                                 "testLabel",
                                 "testInfo",
-                                sendIntent),
+                                sendIntent,
+                                /* resolveInfoPresentationGetter */ null),
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET)
         );

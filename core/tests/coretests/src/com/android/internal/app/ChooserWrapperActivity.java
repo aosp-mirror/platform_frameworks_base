@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import static org.mockito.Mockito.mock;
 
+import android.annotation.Nullable;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,6 +31,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Size;
 
+import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
+import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.app.chooser.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -64,7 +68,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
     }
 
     @Override
-    public void safelyStartActivity(TargetInfo cti) {
+    public void safelyStartActivity(com.android.internal.app.chooser.TargetInfo cti) {
         if (sOverrides.onSafelyStartCallback != null &&
                 sOverrides.onSafelyStartCallback.apply(cti)) {
             return;
@@ -133,8 +137,10 @@ public class ChooserWrapperActivity extends ChooserActivity {
     }
 
     public DisplayResolveInfo createTestDisplayResolveInfo(Intent originalIntent, ResolveInfo pri,
-            CharSequence pLabel, CharSequence pInfo, Intent pOrigIntent) {
-        return new DisplayResolveInfo(originalIntent, pri, pLabel, pInfo, pOrigIntent);
+            CharSequence pLabel, CharSequence pInfo, Intent replacementIntent,
+            @Nullable ResolveInfoPresentationGetter resolveInfoPresentationGetter) {
+        return new DisplayResolveInfo(originalIntent, pri, pLabel, pInfo, replacementIntent,
+                resolveInfoPresentationGetter);
     }
 
     /**

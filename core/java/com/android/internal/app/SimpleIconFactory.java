@@ -214,7 +214,7 @@ public class SimpleIconFactory {
      * @deprecated Do not use, functionality will be replaced by iconloader lib eventually.
      */
     @Deprecated
-    Bitmap createAppBadgedIconBitmap(@Nullable Drawable icon, Bitmap renderedAppIcon) {
+    public Bitmap createAppBadgedIconBitmap(@Nullable Drawable icon, Bitmap renderedAppIcon) {
         // If no icon is provided use the system default
         if (icon == null) {
             icon = getFullResDefaultActivityIcon(mFillResIconDpi);

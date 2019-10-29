@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.chooser.DisplayResolveInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -332,7 +333,7 @@ public class ResolverListController {
     }
 
     @VisibleForTesting
-    public float getScore(ResolverActivity.DisplayResolveInfo target) {
+    public float getScore(DisplayResolveInfo target) {
         return mResolverComparator.getScore(target.getResolvedComponentName());
     }
 
