@@ -160,6 +160,7 @@ public final class PermissionManager {
      * Grant default permissions to currently active LUI app
      * @param packageName The package name for the LUI app
      * @param user The user handle
+     * @param executor The executor for the callback
      * @param callback The callback provided by caller to be notified when grant completes
      * @hide
      */
@@ -181,6 +182,7 @@ public final class PermissionManager {
      * Revoke default permissions to currently active LUI app
      * @param packageNames The package names for the LUI apps
      * @param user The user handle
+     * @param executor The executor for the callback
      * @param callback The callback provided by caller to be notified when grant completes
      * @hide
      */
@@ -191,6 +193,72 @@ public final class PermissionManager {
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         try {
             mPermissionManager.revokeDefaultPermissionsFromLuiApps(
+                    packageNames, user.getIdentifier());
+            executor.execute(() -> callback.accept(true));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Grant default permissions to currently active Ims services
+     * @param packageNames The package names for the Ims services
+     * @param user The user handle
+     * @param executor The executor for the callback
+     * @param callback The callback provided by caller to be notified when grant completes
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
+    public void grantDefaultPermissionsToEnabledImsServices(
+            @NonNull String[] packageNames, @NonNull UserHandle user,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        try {
+            mPermissionManager.grantDefaultPermissionsToEnabledImsServices(
+                    packageNames, user.getIdentifier());
+            executor.execute(() -> callback.accept(true));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Grant default permissions to currently enabled telephony data services
+     * @param packageNames The package name for the services
+     * @param user The user handle
+     * @param executor The executor for the callback
+     * @param callback The callback provided by caller to be notified when grant completes
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
+    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
+            @NonNull String[] packageNames, @NonNull UserHandle user,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        try {
+            mPermissionManager.grantDefaultPermissionsToEnabledTelephonyDataServices(
+                    packageNames, user.getIdentifier());
+            executor.execute(() -> callback.accept(true));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Revoke default permissions to currently active telephony data services
+     * @param packageNames The package name for the services
+     * @param user The user handle
+     * @param executor The executor for the callback
+     * @param callback The callback provided by caller to be notified when revoke completes
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
+    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+            @NonNull String[] packageNames, @NonNull UserHandle user,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        try {
+            mPermissionManager.revokeDefaultPermissionsFromDisabledTelephonyDataServices(
                     packageNames, user.getIdentifier());
             executor.execute(() -> callback.accept(true));
         } catch (RemoteException e) {
