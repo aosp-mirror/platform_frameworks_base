@@ -154,6 +154,7 @@ public class IntentFilter implements Parcelable {
     private static final String SSP_STR = "ssp";
     private static final String SCHEME_STR = "scheme";
     private static final String TYPE_STR = "type";
+    private static final String GROUP_STR = "group";
     private static final String CAT_STR = "cat";
     private static final String NAME_STR = "name";
     private static final String ACTION_STR = "action";
@@ -281,6 +282,7 @@ public class IntentFilter implements Parcelable {
     private ArrayList<AuthorityEntry> mDataAuthorities = null;
     private ArrayList<PatternMatcher> mDataPaths = null;
     private ArrayList<String> mDataTypes = null;
+    private ArrayList<String> mMimeGroups = null;
     private boolean mHasPartialTypes = false;
 
     private static final int STATE_VERIFY_AUTO         = 0x00000001;
@@ -468,6 +470,9 @@ public class IntentFilter implements Parcelable {
         }
         if (o.mDataPaths != null) {
             mDataPaths = new ArrayList<PatternMatcher>(o.mDataPaths);
+        }
+        if (o.mMimeGroups != null) {
+            mMimeGroups = new ArrayList<String>(o.mMimeGroups);
         }
         mHasPartialTypes = o.mHasPartialTypes;
         mVerifyState = o.mVerifyState;
@@ -834,6 +839,36 @@ public class IntentFilter implements Parcelable {
      */
     public final Iterator<String> typesIterator() {
         return mDataTypes != null ? mDataTypes.iterator() : null;
+    }
+
+    /** @hide */
+    public final void addMimeGroup(String name) {
+        if (mMimeGroups == null) {
+            mMimeGroups = new ArrayList<>();
+        }
+        if (!mMimeGroups.contains(name)) {
+            mMimeGroups.add(name);
+        }
+    }
+
+    /** @hide */
+    public final boolean hasMimeGroup(String name) {
+        return mMimeGroups != null && mMimeGroups.contains(name);
+    }
+
+    /** @hide */
+    public final String getMimeGroup(int index) {
+        return mMimeGroups.get(index);
+    }
+
+    /** @hide */
+    public final int countMimeGroups() {
+        return mMimeGroups != null ? mMimeGroups.size() : 0;
+    }
+
+    /** @hide */
+    public final Iterator<String> mimeGroupsIterator() {
+        return mMimeGroups != null ? mMimeGroups.iterator() : null;
     }
 
     /**
@@ -1625,6 +1660,12 @@ public class IntentFilter implements Parcelable {
             serializer.attribute(null, NAME_STR, type);
             serializer.endTag(null, TYPE_STR);
         }
+        N = countMimeGroups();
+        for (int i=0; i<N; i++) {
+            serializer.startTag(null, GROUP_STR);
+            serializer.attribute(null, NAME_STR, mMimeGroups.get(i));
+            serializer.endTag(null, GROUP_STR);
+        }
         N = countDataSchemes();
         for (int i=0; i<N; i++) {
             serializer.startTag(null, SCHEME_STR);
@@ -1717,6 +1758,11 @@ public class IntentFilter implements Parcelable {
                     } catch (MalformedMimeTypeException e) {
                     }
                 }
+            } else if (tagName.equals(GROUP_STR)) {
+                String name = parser.getAttributeValue(null, NAME_STR);
+                if (name != null) {
+                    addMimeGroup(name);
+                }
             } else if (tagName.equals(SCHEME_STR)) {
                 String name = parser.getAttributeValue(null, NAME_STR);
                 if (name != null) {
@@ -1802,6 +1848,12 @@ public class IntentFilter implements Parcelable {
                 proto.write(IntentFilterProto.DATA_TYPES, it.next());
             }
         }
+        if (mMimeGroups != null) {
+            Iterator<String> it = mMimeGroups.iterator();
+            while (it.hasNext()) {
+                proto.write(IntentFilterProto.MIME_GROUPS, it.next());
+            }
+        }
         if (mPriority != 0 || mHasPartialTypes) {
             proto.write(IntentFilterProto.PRIORITY, mPriority);
             proto.write(IntentFilterProto.HAS_PARTIAL_TYPES, mHasPartialTypes);
@@ -1880,6 +1932,15 @@ public class IntentFilter implements Parcelable {
                 du.println(sb.toString());
             }
         }
+        if (mMimeGroups != null) {
+            Iterator<String> it = mMimeGroups.iterator();
+            while (it.hasNext()) {
+                sb.setLength(0);
+                sb.append(prefix); sb.append("MimeGroup: \"");
+                sb.append(it.next()); sb.append("\"");
+                du.println(sb.toString());
+            }
+        }
         if (mPriority != 0 || mOrder != 0 || mHasPartialTypes) {
             sb.setLength(0);
             sb.append(prefix); sb.append("mPriority="); sb.append(mPriority);
@@ -1926,6 +1987,12 @@ public class IntentFilter implements Parcelable {
         if (mDataTypes != null) {
             dest.writeInt(1);
             dest.writeStringList(mDataTypes);
+        } else {
+            dest.writeInt(0);
+        }
+        if (mMimeGroups != null) {
+            dest.writeInt(1);
+            dest.writeStringList(mMimeGroups);
         } else {
             dest.writeInt(0);
         }
@@ -2004,6 +2071,10 @@ public class IntentFilter implements Parcelable {
         if (source.readInt() != 0) {
             mDataTypes = new ArrayList<String>();
             source.readStringList(mDataTypes);
+        }
+        if (source.readInt() != 0) {
+            mMimeGroups = new ArrayList<String>();
+            source.readStringList(mMimeGroups);
         }
         int N = source.readInt();
         if (N > 0) {

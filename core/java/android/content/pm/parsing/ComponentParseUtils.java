@@ -3642,6 +3642,12 @@ public class ComponentParseUtils {
                 }
 
                 str = sa.getNonConfigurationString(
+                        R.styleable.AndroidManifestData_mimeGroup, 0);
+                if (str != null) {
+                    intentInfo.addMimeGroup(str);
+                }
+
+                str = sa.getNonConfigurationString(
                         R.styleable.AndroidManifestData_scheme, 0);
                 if (str != null) {
                     intentInfo.addDataScheme(str);
