@@ -59,6 +59,10 @@ FileDescriptorWhitelist* FileDescriptorWhitelist::Get() {
   return instance_;
 }
 
+static bool IsMemfd(const std::string& path) {
+  return android::base::StartsWith(path, "/memfd:");
+}
+
 bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
   // Check the static whitelist path.
   for (const auto& whitelist_path : kPathWhitelist) {
@@ -84,6 +88,11 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
   static const char* kArtApexPrefix = "/apex/com.android.art/javalib/";
   if (android::base::StartsWith(path, kArtApexPrefix)
       && android::base::EndsWith(path, kJarSuffix)) {
+    return true;
+  }
+
+  // In-memory files created through memfd_create are allowed.
+  if (IsMemfd(path)) {
     return true;
   }
 
@@ -310,6 +319,11 @@ bool FileDescriptorInfo::RefersToSameFile() const {
 void FileDescriptorInfo::ReopenOrDetach(fail_fn_t fail_fn) const {
   if (is_sock) {
     return DetachSocket(fail_fn);
+  }
+
+  // Children can directly use in-memory files created through memfd_create.
+  if (IsMemfd(file_path)) {
+    return;
   }
 
   // NOTE: This might happen if the file was unlinked after being opened.
