@@ -47,7 +47,7 @@ public abstract class GnssMeasurementsProvider
     }
 
     @VisibleForTesting
-    GnssMeasurementsProvider(
+    public GnssMeasurementsProvider(
             Context context, Handler handler, GnssMeasurementProviderNative aNative) {
         super(context, handler, TAG);
         mNative = aNative;
@@ -158,7 +158,7 @@ public abstract class GnssMeasurementsProvider
     }
 
     @VisibleForTesting
-    static class GnssMeasurementProviderNative {
+    public static class GnssMeasurementProviderNative {
         public boolean isMeasurementSupported() {
             return native_is_measurement_supported();
         }
