@@ -1274,6 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 沒有網際網路連線"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"輕觸即可查看選項"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"這個行動網路沒有網際網路連線"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"這個網路沒有網際網路連線"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"無法存取私人 DNS 伺服器"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"已連線"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 的連線能力受限"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"輕觸即可繼續連線"</string>
@@ -1961,9 +1964,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"儲存"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"不用了，謝謝"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"更新"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"繼續"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"密碼"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"地址"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"信用卡"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"簽帳金融卡"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"付款卡"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"卡片"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"使用者名稱"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"電子郵件地址"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"請保持冷靜並尋找附近的避難地點。"</string>

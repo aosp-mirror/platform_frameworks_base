@@ -301,7 +301,7 @@
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"身体活動"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"身体活動にアクセス"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"身体活動へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"身体活動データへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真と動画の撮影"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"写真と動画の撮影を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
@@ -1274,6 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> はインターネットにアクセスできません"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"タップしてその他のオプションを表示"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"モバイル ネットワークがインターネットに接続されていません"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"ネットワークがインターネットに接続されていません"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"プライベート DNS サーバーにアクセスできません"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"接続しました"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> の接続が制限されています"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"接続するにはタップしてください"</string>
@@ -1961,9 +1964,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"はい"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"いいえ"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"更新"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"続行"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"パスワード"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"住所"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"クレジット カード"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"デビットカード"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"支払いカード"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"カード"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"ユーザー名"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"メールアドレス"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"強い揺れに備えてください"</string>

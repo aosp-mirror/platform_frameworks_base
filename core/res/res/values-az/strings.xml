@@ -1274,6 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> üçün internet girişi əlçatan deyil"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Seçimlər üçün tıklayın"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"Mobil şəbəkənin internetə girişi yoxdur"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"Şəbəkənin internetə girişi yoxdur"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"Özəl DNS serverinə giriş mümkün deyil"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Qoşuldu"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> bağlantını məhdudlaşdırdı"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"İstənilən halda klikləyin"</string>
@@ -1961,9 +1964,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"Yadda saxlayın"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Xeyr, çox sağ olun"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Yeniləyin"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"Davam edin"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"parol"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"ünvan"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"kredit kartı"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"debet kart"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"ödəniş kartı"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"kart"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"istifadəçi adı"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"e-poçt ünvanı"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Sakit qalın və yaxınlıqda sığınacaq axtarın."</string>

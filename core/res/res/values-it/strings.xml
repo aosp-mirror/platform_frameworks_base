@@ -283,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai tuoi contatti?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizz."</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione del dispositivo?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione del dispositivo?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"L\'app avrà accesso alla posizione soltanto quando la usi"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere &lt;b&gt;sempre&lt;/b&gt; alla posizione di questo dispositivo?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"L\'app al momento può accedere alla posizione soltanto mentre la usi"</string>
@@ -301,7 +301,7 @@
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di registrare audio?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Attività fisica"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"Consente di accedere all\'attività fisica"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Vuoi consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla tua attività fisica?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla tua attività fisica?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"scattare foto e registrare video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di scattare foto e registrare video?"</string>
@@ -1274,6 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> non ha accesso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tocca per le opzioni"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"La rete mobile non ha accesso a Internet"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"La rete non ha accesso a Internet"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"Non è possibile accedere al server DNS privato"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Connesso"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ha una connettività limitata"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Tocca per connettere comunque"</string>
@@ -1961,9 +1964,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"Salva"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No, grazie"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Aggiorna"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"Continua"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"password"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"indirizzo"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"carta di credito"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"carta di debito"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"carta di pagamento"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"carta"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"nome utente"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"indirizzo email"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Mantieni la calma e cerca riparo nelle vicinanze."</string>

@@ -1276,6 +1276,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> හට අන්තර්ජාල ප්‍රවේශය නැත"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"විකල්ප සඳහා තට්ටු කරන්න"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"ජංගම ජාලවලට අන්තර්ජාල ප්‍රවේශය නැත"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"ජාලයට අන්තර්ජාල ප්‍රවේශය නැත"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"පුද්ගලික DNS සේවාදායකයට ප්‍රවේශ වීමට නොහැකිය"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"සම්බන්ධයි"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> හට සීමිත සබැඳුම් හැකියාවක් ඇත"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"කෙසේ වෙතත් ඉදිරියට යාමට තට්ටු කරන්න"</string>
@@ -1963,9 +1966,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"සුරකින්න"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"එපා ස්තූතියි"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"යාවත්කාලීන කරන්න"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"ඉදිරියට යන්න"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"මුරපදය"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"ලිපිනය"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"ණය කාඩ්පත"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"හර කාඩ්පත"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"ගෙවීම් කාඩ්පත"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"කාඩ්පත"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"පරිශීලක නාමය"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"ඊ-තැපැල් ලිපිනය"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"සන්සුන්ව ඉන්න සහ අවට ඇති නවාතැන් පහසුකම් බලන්න."</string>

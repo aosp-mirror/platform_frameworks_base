@@ -1318,6 +1318,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> не мае доступу ў інтэрнэт"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Дакраніцеся, каб убачыць параметры"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"Мабільная сетка не мае доступу ў інтэрнэт"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"Сетка не мае доступу ў інтэрнэт"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"Не ўдалося атрымаць доступ да прыватнага DNS-сервера"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Падключана"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> мае абмежаваную магчымасць падключэння"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Націсніце, каб падключыцца"</string>
@@ -2031,9 +2034,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"Захаваць"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Не, дзякуй"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Абнавіць"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"Працягнуць"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"пароль"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"адрас"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"крэдытная картка"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"дэбетовая картка"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"плацежная картка"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"картка"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"карыстальнік"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"адрас электроннай пошты"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Заставайцеся спакойнымі і пашукайце прытулак паблізу."</string>
