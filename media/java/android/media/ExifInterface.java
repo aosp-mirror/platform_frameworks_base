@@ -507,6 +507,15 @@ public class ExifInterface {
     private static final int PNG_CHUNK_LENGTH_BYTE_LENGTH = 4;
     private static final int PNG_CHUNK_CRC_BYTE_LENGTH = 4;
 
+    // See https://developers.google.com/speed/webp/docs/riff_container, Section "WebP File Header"
+    private static final byte[] WEBP_SIGNATURE_1 = new byte[] {'R', 'I', 'F', 'F'};
+    private static final byte[] WEBP_SIGNATURE_2 = new byte[] {'W', 'E', 'B', 'P'};
+    private static final int WEBP_FILE_SIZE_BYTE_LENGTH = 4;
+    private static final byte[] WEBP_CHUNK_TYPE_EXIF = new byte[]{(byte) 0x45, (byte) 0x58,
+            (byte) 0x49, (byte) 0x46};
+    private static final int WEBP_CHUNK_TYPE_BYTE_LENGTH = 4;
+    private static final int WEBP_CHUNK_SIZE_BYTE_LENGTH = 4;
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static SimpleDateFormat sFormatter;
     private static SimpleDateFormat sFormatterTz;
@@ -1325,6 +1334,7 @@ public class ExifInterface {
     private static final int IMAGE_TYPE_SRW = 11;
     private static final int IMAGE_TYPE_HEIF = 12;
     private static final int IMAGE_TYPE_PNG = 13;
+    private static final int IMAGE_TYPE_WEBP = 14;
 
     static {
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
@@ -1867,6 +1877,10 @@ public class ExifInterface {
                     }
                     case IMAGE_TYPE_PNG: {
                         getPngAttributes(inputStream);
+                        break;
+                    }
+                    case IMAGE_TYPE_WEBP: {
+                        getWebpAttributes(inputStream);
                         break;
                     }
                     case IMAGE_TYPE_ARW:
@@ -2431,6 +2445,8 @@ public class ExifInterface {
             return IMAGE_TYPE_RW2;
         } else if (isPngFormat(signatureCheckBytes)) {
             return IMAGE_TYPE_PNG;
+        } else if (isWebpFormat(signatureCheckBytes)) {
+            return IMAGE_TYPE_WEBP;
         }
         // Certain file formats (PEF) are identified in readImageFileDirectory()
         return IMAGE_TYPE_UNKNOWN;
@@ -2603,6 +2619,26 @@ public class ExifInterface {
     private boolean isPngFormat(byte[] signatureCheckBytes) throws IOException {
         for (int i = 0; i < PNG_SIGNATURE.length; i++) {
             if (signatureCheckBytes[i] != PNG_SIGNATURE[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * WebP's file signature is composed of 12 bytes:
+     *   'RIFF' (4 bytes) + file length value (4 bytes) + 'WEBP' (4 bytes)
+     * See https://developers.google.com/speed/webp/docs/riff_container, Section "WebP File Header"
+     */
+    private boolean isWebpFormat(byte[] signatureCheckBytes) throws IOException {
+        for (int i = 0; i < WEBP_SIGNATURE_1.length; i++) {
+            if (signatureCheckBytes[i] != WEBP_SIGNATURE_1[i]) {
+                return false;
+            }
+        }
+        for (int i = 0; i < WEBP_SIGNATURE_2.length; i++) {
+            if (signatureCheckBytes[i + WEBP_SIGNATURE_1.length + WEBP_FILE_SIZE_BYTE_LENGTH]
+                    != WEBP_SIGNATURE_2[i]) {
                 return false;
             }
         }
@@ -3146,7 +3182,7 @@ public class ExifInterface {
         int bytesRead = 0;
 
         // Skip the signature bytes
-        in.seek(PNG_SIGNATURE.length);
+        in.skipBytes(PNG_SIGNATURE.length);
         bytesRead += PNG_SIGNATURE.length;
 
         try {
@@ -3197,6 +3233,75 @@ public class ExifInterface {
             // Should not reach here. Will only reach here if the file is corrupted or
             // does not follow the PNG specifications
             throw new IOException("Encountered corrupt PNG file.");
+        }
+    }
+
+    // WebP contains EXIF data as a RIFF File Format Chunk
+    // All references below can be found in the following link.
+    // https://developers.google.com/speed/webp/docs/riff_container
+    private void getWebpAttributes(ByteOrderedDataInputStream in) throws IOException {
+        if (DEBUG) {
+            Log.d(TAG, "getWebpAttributes starting with: " + in);
+        }
+        // WebP uses little-endian by default.
+        // See Section "Terminology & Basics"
+        in.setByteOrder(ByteOrder.LITTLE_ENDIAN);
+        in.skipBytes(WEBP_SIGNATURE_1.length);
+        // File size corresponds to the size of the entire file from offset 8.
+        // See Section "WebP File Header"
+        int fileSize = in.readInt() + 8;
+        int bytesRead = 8;
+        bytesRead += in.skipBytes(WEBP_SIGNATURE_2.length);
+        try {
+            while (true) {
+                // Each chunk is made up of three parts:
+                //   1) Chunk FourCC: 4-byte concatenating four ASCII characters.
+                //   2) Chunk Size: 4-byte unsigned integer indicating the size of the chunk.
+                //                  Excludes Chunk FourCC and Chunk Size bytes.
+                //   3) Chunk Payload: data payload. A single padding byte ('0') is added if
+                //                     Chunk Size is odd.
+                // See Section "RIFF File Format"
+                byte[] code = new byte[WEBP_CHUNK_TYPE_BYTE_LENGTH];
+                if (in.read(code) != code.length) {
+                    throw new IOException("Encountered invalid length while parsing WebP chunk"
+                            + "type");
+                }
+                bytesRead += 4;
+                int chunkSize = in.readInt();
+                bytesRead += 4;
+                if (Arrays.equals(WEBP_CHUNK_TYPE_EXIF, code)) {
+                    // TODO: Need to handle potential OutOfMemoryError
+                    byte[] payload = new byte[chunkSize];
+                    if (in.read(payload) != chunkSize) {
+                        throw new IOException("Failed to read given length for given PNG chunk "
+                                + "type: " + byteArrayToHexString(code));
+                    }
+                    readExifSegment(payload, IFD_TYPE_PRIMARY);
+                    break;
+                } else {
+                    // Add a single padding byte at end if chunk size is odd
+                    chunkSize = (chunkSize % 2 == 1) ? chunkSize + 1 : chunkSize;
+                    // Check if skipping to next chunk is necessary
+                    if (bytesRead + chunkSize == fileSize) {
+                        // Reached end of file
+                        break;
+                    } else if (bytesRead + chunkSize > fileSize) {
+                        throw new IOException("Encountered WebP file with invalid chunk size");
+                    }
+                    // Skip to next chunk
+                    int skipped = in.skipBytes(chunkSize);
+                    if (skipped != chunkSize) {
+                        throw new IOException("Encountered WebP file with invalid chunk size");
+                    }
+                    bytesRead += skipped;
+                }
+            }
+            // Save offset values for handleThumbnailFromJfif() function
+            mExifOffset = bytesRead;
+        } catch (EOFException e) {
+            // Should not reach here. Will only reach here if the file is corrupted or
+            // does not follow the WebP specifications
+            throw new IOException("Encountered corrupt WebP file.");
         }
     }
 
@@ -3684,12 +3789,18 @@ public class ExifInterface {
             int thumbnailOffset = jpegInterchangeFormatAttribute.getIntValue(mExifByteOrder);
             int thumbnailLength = jpegInterchangeFormatLengthAttribute.getIntValue(mExifByteOrder);
 
-            if (mMimeType == IMAGE_TYPE_JPEG || mMimeType == IMAGE_TYPE_RAF
-                    || mMimeType == IMAGE_TYPE_RW2 || mMimeType == IMAGE_TYPE_PNG) {
-                thumbnailOffset += mExifOffset;
-            } else if (mMimeType == IMAGE_TYPE_ORF) {
-                // Update offset value since RAF files have IFD data preceding MakerNote data.
-                thumbnailOffset += mOrfMakerNoteOffset;
+            switch (mMimeType) {
+                case IMAGE_TYPE_JPEG:
+                case IMAGE_TYPE_RAF:
+                case IMAGE_TYPE_RW2:
+                case IMAGE_TYPE_PNG:
+                case IMAGE_TYPE_WEBP:
+                    thumbnailOffset += mExifOffset;
+                    break;
+                case IMAGE_TYPE_ORF:
+                    // Update offset value since RAF files have IFD data preceding MakerNote data.
+                    thumbnailOffset += mOrfMakerNoteOffset;
+                    break;
             }
             // The following code limits the size of thumbnail size not to overflow EXIF data area.
             thumbnailLength = Math.min(thumbnailLength, in.getLength() - thumbnailOffset);
