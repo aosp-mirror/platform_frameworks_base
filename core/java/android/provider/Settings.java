@@ -8269,6 +8269,12 @@ public final class Settings {
         public static final String AWARE_LOCK_ENABLED = "aware_lock_enabled";
 
         /**
+         * Controls whether tap gesture is enabled.
+         * @hide
+         */
+        public static final String TAP_GESTURE = "tap_gesture";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
