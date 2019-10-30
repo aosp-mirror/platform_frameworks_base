@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dagger;
+package com.android.systemui;
 
-import dagger.Binds;
+import com.android.systemui.dagger.DefaultActivityBinder;
+import com.android.systemui.dagger.DefaultServiceBinder;
+
 import dagger.Module;
 
 /**
- * Dagger Module that collects related sub-modules together.
+ * Supply Activities, Services, and SystemUI Objects for CarSystemUI.
  */
-@Module(includes = {ActivityBinder.class, ServiceBinder.class, SystemUIBinder.class})
-public abstract class ComponentBinder {
-    /** */
-    @Binds
-    public abstract ContextComponentHelper bindComponentHelper(
-            ContextComponentResolver componentHelper);
+@Module(includes = {
+        DefaultActivityBinder.class,
+        DefaultServiceBinder.class,
+        CarSystemUIBinder.class})
+public class CarComponentBinder {
 }

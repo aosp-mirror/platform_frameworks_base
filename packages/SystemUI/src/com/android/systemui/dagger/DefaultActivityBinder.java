@@ -30,7 +30,7 @@ import dagger.multibindings.IntoMap;
  * Services and Activities that are injectable should go here.
  */
 @Module
-public abstract class ActivityBinder {
+public abstract class DefaultActivityBinder {
     /** Inject into TunerActivity. */
     @Binds
     @IntoMap
