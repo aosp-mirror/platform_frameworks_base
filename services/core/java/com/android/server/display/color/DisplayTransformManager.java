@@ -111,6 +111,8 @@ public class DisplayTransformManager {
     @GuardedBy("mDaltonizerModeLock")
     private int mDaltonizerMode = -1;
 
+    private static final IBinder sFlinger = ServiceManager.getService(SURFACE_FLINGER);
+
     /* package */ DisplayTransformManager() {
     }
 
@@ -195,25 +197,22 @@ public class DisplayTransformManager {
      * Propagates the provided color transformation matrix to the SurfaceFlinger.
      */
     private static void applyColorMatrix(float[] m) {
-        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
-        if (flinger != null) {
-            final Parcel data = Parcel.obtain();
-            data.writeInterfaceToken("android.ui.ISurfaceComposer");
-            if (m != null) {
-                data.writeInt(1);
-                for (int i = 0; i < 16; i++) {
-                    data.writeFloat(m[i]);
-                }
-            } else {
-                data.writeInt(0);
+        final Parcel data = Parcel.obtain();
+        data.writeInterfaceToken("android.ui.ISurfaceComposer");
+        if (m != null) {
+            data.writeInt(1);
+            for (int i = 0; i < 16; i++) {
+                data.writeFloat(m[i]);
             }
-            try {
-                flinger.transact(SURFACE_FLINGER_TRANSACTION_COLOR_MATRIX, data, null, 0);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to set color transform", ex);
-            } finally {
-                data.recycle();
-            }
+        } else {
+            data.writeInt(0);
+        }
+        try {
+            sFlinger.transact(SURFACE_FLINGER_TRANSACTION_COLOR_MATRIX, data, null, 0);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Failed to set color transform", ex);
+        } finally {
+            data.recycle();
         }
     }
 
@@ -221,18 +220,15 @@ public class DisplayTransformManager {
      * Propagates the provided Daltonization mode to the SurfaceFlinger.
      */
     private static void applyDaltonizerMode(int mode) {
-        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
-        if (flinger != null) {
-            final Parcel data = Parcel.obtain();
-            data.writeInterfaceToken("android.ui.ISurfaceComposer");
-            data.writeInt(mode);
-            try {
-                flinger.transact(SURFACE_FLINGER_TRANSACTION_DALTONIZER, data, null, 0);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to set Daltonizer mode", ex);
-            } finally {
-                data.recycle();
-            }
+        final Parcel data = Parcel.obtain();
+        data.writeInterfaceToken("android.ui.ISurfaceComposer");
+        data.writeInt(mode);
+        try {
+            sFlinger.transact(SURFACE_FLINGER_TRANSACTION_DALTONIZER, data, null, 0);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Failed to set Daltonizer mode", ex);
+        } finally {
+            data.recycle();
         }
     }
 
@@ -286,20 +282,17 @@ public class DisplayTransformManager {
      * #SURFACE_FLINGER_TRANSACTION_QUERY_COLOR_MANAGED}.
      */
     public boolean isDeviceColorManaged() {
-        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
-        if (flinger != null) {
-            final Parcel data = Parcel.obtain();
-            final Parcel reply = Parcel.obtain();
-            data.writeInterfaceToken("android.ui.ISurfaceComposer");
-            try {
-                flinger.transact(SURFACE_FLINGER_TRANSACTION_QUERY_COLOR_MANAGED, data, reply, 0);
-                return reply.readBoolean();
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to query wide color support", ex);
-            } finally {
-                data.recycle();
-                reply.recycle();
-            }
+        final Parcel data = Parcel.obtain();
+        final Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken("android.ui.ISurfaceComposer");
+        try {
+            sFlinger.transact(SURFACE_FLINGER_TRANSACTION_QUERY_COLOR_MANAGED, data, reply, 0);
+            return reply.readBoolean();
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Failed to query wide color support", ex);
+        } finally {
+            data.recycle();
+            reply.recycle();
         }
         return false;
     }
@@ -309,18 +302,15 @@ public class DisplayTransformManager {
      */
     private void applySaturation(float saturation) {
         SystemProperties.set(PERSISTENT_PROPERTY_SATURATION, Float.toString(saturation));
-        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
-        if (flinger != null) {
-            final Parcel data = Parcel.obtain();
-            data.writeInterfaceToken("android.ui.ISurfaceComposer");
-            data.writeFloat(saturation);
-            try {
-                flinger.transact(SURFACE_FLINGER_TRANSACTION_SATURATION, data, null, 0);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to set saturation", ex);
-            } finally {
-                data.recycle();
-            }
+        final Parcel data = Parcel.obtain();
+        data.writeInterfaceToken("android.ui.ISurfaceComposer");
+        data.writeFloat(saturation);
+        try {
+            sFlinger.transact(SURFACE_FLINGER_TRANSACTION_SATURATION, data, null, 0);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Failed to set saturation", ex);
+        } finally {
+            data.recycle();
         }
     }
 
@@ -334,21 +324,18 @@ public class DisplayTransformManager {
                 Integer.toString(compositionColorMode));
         }
 
-        final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);
-        if (flinger != null) {
-            final Parcel data = Parcel.obtain();
-            data.writeInterfaceToken("android.ui.ISurfaceComposer");
-            data.writeInt(color);
-            if (compositionColorMode != Display.COLOR_MODE_INVALID) {
-                data.writeInt(compositionColorMode);
-            }
-            try {
-                flinger.transact(SURFACE_FLINGER_TRANSACTION_DISPLAY_COLOR, data, null, 0);
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "Failed to set display color", ex);
-            } finally {
-                data.recycle();
-            }
+        final Parcel data = Parcel.obtain();
+        data.writeInterfaceToken("android.ui.ISurfaceComposer");
+        data.writeInt(color);
+        if (compositionColorMode != Display.COLOR_MODE_INVALID) {
+            data.writeInt(compositionColorMode);
+        }
+        try {
+            sFlinger.transact(SURFACE_FLINGER_TRANSACTION_DISPLAY_COLOR, data, null, 0);
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "Failed to set display color", ex);
+        } finally {
+            data.recycle();
         }
     }
 

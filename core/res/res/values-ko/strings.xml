@@ -1274,6 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>이(가) 인터넷에 액세스할 수 없습니다."</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"탭하여 옵션 보기"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"모바일 네트워크에 인터넷이 연결되어 있지 않습니다."</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"네트워크에 인터넷이 연결되어 있지 않습니다."</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"비공개 DNS 서버에 액세스할 수 없습니다."</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"연결되었습니다."</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>에서 연결을 제한했습니다."</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"계속 연결하려면 탭하세요."</string>
@@ -1961,9 +1964,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"저장"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"사용 안함"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"업데이트"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"계속"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"비밀번호"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"주소"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"신용카드"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"체크카드"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"결제 카드"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"카드"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"사용자 이름"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"이메일 주소"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"침착하게 가까운 대피소를 찾으세요."</string>

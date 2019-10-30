@@ -42,11 +42,15 @@ import java.util.function.BiConsumer;
 /**
  * System level service for managing companion devices
  *
+ * See <a href="{@docRoot}guide/topics/connectivity/companion-device-pairing">this guide</a>
+ * for a usage example.
+ *
  * <p>To obtain an instance call {@link Context#getSystemService}({@link
  * Context#COMPANION_DEVICE_SERVICE}) Then, call {@link #associate(AssociationRequest,
  * Callback, Handler)} to initiate the flow of associating current package with a
  * device selected by user.</p>
  *
+ * @see CompanionDeviceManager#associate
  * @see AssociationRequest
  */
 @SystemService(Context.COMPANION_DEVICE_SERVICE)

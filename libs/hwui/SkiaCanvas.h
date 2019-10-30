@@ -136,7 +136,6 @@ public:
                                const Paint* paint) override;
     virtual double drawAnimatedImage(AnimatedImageDrawable* imgDrawable) override;
 
-    virtual bool drawTextAbsolutePos() const override { return true; }
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 
     virtual void drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,

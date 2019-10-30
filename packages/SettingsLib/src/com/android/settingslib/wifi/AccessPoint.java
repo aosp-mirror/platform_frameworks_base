@@ -143,6 +143,16 @@ public class AccessPoint implements Comparable<AccessPoint> {
         int VERY_FAST = 30;
     }
 
+    @IntDef({PasspointConfigurationVersion.INVALID,
+            PasspointConfigurationVersion.NO_OSU_PROVISIONED,
+            PasspointConfigurationVersion.OSU_PROVISIONED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PasspointConfigurationVersion {
+        int INVALID = 0;
+        int NO_OSU_PROVISIONED = 1; // R1.
+        int OSU_PROVISIONED = 2;    // R2 or R3.
+    }
+
     /** The underlying set of scan results comprising this AccessPoint. */
     @GuardedBy("mLock")
     private final ArraySet<ScanResult> mScanResults = new ArraySet<>();
@@ -177,6 +187,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     static final String KEY_CARRIER_AP_EAP_TYPE = "key_carrier_ap_eap_type";
     static final String KEY_CARRIER_NAME = "key_carrier_name";
     static final String KEY_EAPTYPE = "eap_psktype";
+    static final String KEY_SUBSCRIPTION_EXPIRATION_TIME_IN_MILLIS  =
+            "key_subscription_expiration_time_in_millis";
+    static final String KEY_PASSPOINT_CONFIGURATION_VERSION = "key_passpoint_configuration_version";
     static final AtomicInteger sLastId = new AtomicInteger(0);
 
     /*
@@ -251,6 +264,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private String mFqdn;
     private String mProviderFriendlyName;
     private boolean mIsRoaming = false;
+    private long mSubscriptionExpirationTimeInMillis;
+    @PasspointConfigurationVersion private int mPasspointConfigurationVersion =
+            PasspointConfigurationVersion.INVALID;
 
     private boolean mIsCarrierAp = false;
 
@@ -323,6 +339,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
         if (savedState.containsKey(KEY_CARRIER_NAME)) {
             mCarrierName = savedState.getString(KEY_CARRIER_NAME);
         }
+        if (savedState.containsKey(KEY_SUBSCRIPTION_EXPIRATION_TIME_IN_MILLIS)) {
+            mSubscriptionExpirationTimeInMillis =
+                    savedState.getLong(KEY_SUBSCRIPTION_EXPIRATION_TIME_IN_MILLIS);
+        }
+        if (savedState.containsKey(KEY_PASSPOINT_CONFIGURATION_VERSION)) {
+            mPasspointConfigurationVersion = savedState.getInt(KEY_PASSPOINT_CONFIGURATION_VERSION);
+        }
         update(mConfig, mInfo, mNetworkInfo);
 
         // Calculate required fields
@@ -348,6 +371,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mContext = context;
         mFqdn = config.getHomeSp().getFqdn();
         mProviderFriendlyName = config.getHomeSp().getFriendlyName();
+        mSubscriptionExpirationTimeInMillis = config.getSubscriptionExpirationTimeInMillis();
+        if (config.isOsuProvisioned()) {
+            mPasspointConfigurationVersion = PasspointConfigurationVersion.OSU_PROVISIONED;
+        } else {
+            mPasspointConfigurationVersion = PasspointConfigurationVersion.NO_OSU_PROVISIONED;
+        }
         updateKey();
     }
 
@@ -991,6 +1020,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 return mContext.getString(R.string.saved_network, appInfo.loadLabel(pm));
             }
         }
+
+        if (isPasspointConfigurationR1() && isExpired()) {
+            return mContext.getString(R.string.wifi_passpoint_expired);
+        }
         return "";
     }
 
@@ -1021,6 +1054,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * Returns the summary for the AccessPoint.
      */
     public String getSettingsSummary(boolean convertSavedAsDisconnected) {
+        if (isPasspointConfigurationR1() && isExpired()) {
+            return mContext.getString(R.string.wifi_passpoint_expired);
+        }
+
         // Update to new summary
         StringBuilder summary = new StringBuilder();
 
@@ -1167,6 +1204,30 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     /**
+     * Return true if this AccessPoint is expired.
+     */
+    public boolean isExpired() {
+        if (mSubscriptionExpirationTimeInMillis <= 0) {
+            // Expiration time not specified.
+            return false;
+        } else {
+            return System.currentTimeMillis() >= mSubscriptionExpirationTimeInMillis;
+        }
+    }
+
+    public boolean isPasspointConfigurationR1() {
+        return mPasspointConfigurationVersion == PasspointConfigurationVersion.NO_OSU_PROVISIONED;
+    }
+
+    /**
+     * Return true if {@link PasspointConfiguration#isOsuProvisioned} is true, this may refer to R2
+     * or R3.
+     */
+    public boolean isPasspointConfigurationOsuProvisioned() {
+        return mPasspointConfigurationVersion == PasspointConfigurationVersion.OSU_PROVISIONED;
+    }
+
+    /**
      * Starts the OSU Provisioning flow.
      */
     public void startOsuProvisioning(@Nullable WifiManager.ActionListener connectListener) {
@@ -1264,6 +1325,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
         savedState.putBoolean(KEY_IS_CARRIER_AP, mIsCarrierAp);
         savedState.putInt(KEY_CARRIER_AP_EAP_TYPE, mCarrierApEapType);
         savedState.putString(KEY_CARRIER_NAME, mCarrierName);
+        savedState.putLong(KEY_SUBSCRIPTION_EXPIRATION_TIME_IN_MILLIS,
+                mSubscriptionExpirationTimeInMillis);
+        savedState.putInt(KEY_PASSPOINT_CONFIGURATION_VERSION, mPasspointConfigurationVersion);
     }
 
     public void setListener(AccessPointListener listener) {

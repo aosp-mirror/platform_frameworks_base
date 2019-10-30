@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.BackupUtils;
 import android.util.Log;
@@ -730,6 +731,14 @@ public class WifiConfiguration implements Parcelable {
     public String lastUpdateName;
 
     /**
+     * The carrier ID identifies the operator who provides this network configuration.
+     *    see {@link TelephonyManager#getSimCarrierId()}
+     * @hide
+     */
+    @SystemApi
+    public int carrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
+
+    /**
      * @hide
      * Status of user approval for connection
      */
@@ -1046,10 +1055,10 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
-     * The wall clock time of when |mRandomizedMacAddress| last changed.
-     * Used to determine when we should re-randomize in aggressive mode.
+     * The wall clock time of when |mRandomizedMacAddress| should be re-randomized in aggressive
+     * randomization mode.
      */
-    public long randomizedMacLastModifiedTimeMs = 0;
+    public long randomizedMacExpirationTimeMs = 0;
 
     /**
      * @hide
@@ -1850,6 +1859,7 @@ public class WifiConfiguration implements Parcelable {
                 .append(" PRIO: ").append(this.priority)
                 .append(" HIDDEN: ").append(this.hiddenSSID)
                 .append(" PMF: ").append(this.requirePMF)
+                .append("CarrierId: ").append(this.carrierId)
                 .append('\n');
 
 
@@ -1910,8 +1920,9 @@ public class WifiConfiguration implements Parcelable {
         }
         sbuf.append(" macRandomizationSetting: ").append(macRandomizationSetting).append("\n");
         sbuf.append(" mRandomizedMacAddress: ").append(mRandomizedMacAddress).append("\n");
-        sbuf.append(" randomizedMacLastModifiedTimeMs: ").append(randomizedMacLastModifiedTimeMs)
-                .append("\n");
+        sbuf.append(" randomizedMacExpirationTimeMs: ")
+                .append(randomizedMacExpirationTimeMs == 0 ? "<none>"
+                        : TimeUtils.logTimeOfDay(randomizedMacExpirationTimeMs)).append("\n");
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
             if (this.allowedKeyManagement.get(k)) {
@@ -2439,9 +2450,10 @@ public class WifiConfiguration implements Parcelable {
             recentFailure.setAssociationStatus(source.recentFailure.getAssociationStatus());
             mRandomizedMacAddress = source.mRandomizedMacAddress;
             macRandomizationSetting = source.macRandomizationSetting;
-            randomizedMacLastModifiedTimeMs = source.randomizedMacLastModifiedTimeMs;
+            randomizedMacExpirationTimeMs = source.randomizedMacExpirationTimeMs;
             requirePMF = source.requirePMF;
             updateIdentifier = source.updateIdentifier;
+            carrierId = source.carrierId;
         }
     }
 
@@ -2515,7 +2527,8 @@ public class WifiConfiguration implements Parcelable {
         dest.writeParcelable(mRandomizedMacAddress, flags);
         dest.writeInt(macRandomizationSetting);
         dest.writeInt(osu ? 1 : 0);
-        dest.writeLong(randomizedMacLastModifiedTimeMs);
+        dest.writeLong(randomizedMacExpirationTimeMs);
+        dest.writeInt(carrierId);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -2591,7 +2604,8 @@ public class WifiConfiguration implements Parcelable {
                 config.mRandomizedMacAddress = in.readParcelable(null);
                 config.macRandomizationSetting = in.readInt();
                 config.osu = in.readInt() != 0;
-                config.randomizedMacLastModifiedTimeMs = in.readLong();
+                config.randomizedMacExpirationTimeMs = in.readLong();
+                config.carrierId = in.readInt();
                 return config;
             }
 

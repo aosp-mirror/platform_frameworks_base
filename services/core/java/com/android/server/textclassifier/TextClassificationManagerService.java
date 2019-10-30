@@ -30,6 +30,7 @@ import android.os.UserHandle;
 import android.service.textclassifier.ITextClassifierCallback;
 import android.service.textclassifier.ITextClassifierService;
 import android.service.textclassifier.TextClassifierService;
+import android.service.textclassifier.TextClassifierService.ConnectionState;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -127,6 +128,10 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     private TextClassificationManagerService(Context context) {
         mContext = Preconditions.checkNotNull(context);
         mLock = new Object();
+    }
+
+    @Override
+    public void onConnectedStateChanged(@ConnectionState int connected) {
     }
 
     @Override
@@ -579,6 +584,11 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 init(ITextClassifierService.Stub.asInterface(service));
+                try {
+                    mService.onConnectedStateChanged(TextClassifierService.CONNECTED);
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "error in onConnectedStateChanged");
+                }
             }
 
             @Override

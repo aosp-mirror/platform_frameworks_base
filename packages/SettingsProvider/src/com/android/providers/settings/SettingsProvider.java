@@ -1080,6 +1080,9 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getAllConfigFlags() for " + prefix);
         }
 
+        DeviceConfig.enforceReadPermission(getContext(),
+                prefix != null ? prefix.split("/")[0] : null);
+
         synchronized (mLock) {
             // Get the settings.
             SettingsState settingsState = mSettingsRegistry.getSettingsLocked(

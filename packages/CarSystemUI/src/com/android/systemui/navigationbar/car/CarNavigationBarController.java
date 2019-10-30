@@ -98,31 +98,30 @@ public class CarNavigationBarController {
     }
 
     /** Toggles the bottom nav bar visibility. */
-    public boolean setBottomWindowVisibility(boolean isVisible) {
-        return setWindowVisibility(getBottomWindow(), isVisible);
+    public boolean setBottomWindowVisibility(@View.Visibility int visibility) {
+        return setWindowVisibility(getBottomWindow(), visibility);
     }
 
     /** Toggles the left nav bar visibility. */
-    public boolean setLeftWindowVisibility(boolean isVisible) {
-        return setWindowVisibility(getLeftWindow(), isVisible);
+    public boolean setLeftWindowVisibility(@View.Visibility int visibility) {
+        return setWindowVisibility(getLeftWindow(), visibility);
     }
 
     /** Toggles the right nav bar visibility. */
-    public boolean setRightWindowVisibility(boolean isVisible) {
-        return setWindowVisibility(getRightWindow(), isVisible);
+    public boolean setRightWindowVisibility(@View.Visibility int visibility) {
+        return setWindowVisibility(getRightWindow(), visibility);
     }
 
-    private boolean setWindowVisibility(ViewGroup window, boolean isVisible) {
+    private boolean setWindowVisibility(ViewGroup window, @View.Visibility int visibility) {
         if (window == null) {
             return false;
         }
 
-        int newVisibility = isVisible ? View.VISIBLE : View.GONE;
-        if (window.getVisibility() == newVisibility) {
+        if (window.getVisibility() == visibility) {
             return false;
         }
 
-        window.setVisibility(newVisibility);
+        window.setVisibility(visibility);
         return true;
     }
 
@@ -228,6 +227,63 @@ public class CarNavigationBarController {
         }
     }
 
+    /**
+     * Shows all of the keyguard specific buttons on the valid instances of
+     * {@link CarNavigationBarView}.
+     */
+    public void showAllKeyguardButtons(boolean isSetUp) {
+        checkAllBars(isSetUp);
+        if (mTopView != null) {
+            mTopView.showKeyguardButtons();
+        }
+        if (mBottomView != null) {
+            mBottomView.showKeyguardButtons();
+        }
+        if (mLeftView != null) {
+            mLeftView.showKeyguardButtons();
+        }
+        if (mRightView != null) {
+            mRightView.showKeyguardButtons();
+        }
+    }
+
+    /**
+     * Hides all of the keyguard specific buttons on the valid instances of
+     * {@link CarNavigationBarView}.
+     */
+    public void hideAllKeyguardButtons(boolean isSetUp) {
+        checkAllBars(isSetUp);
+        if (mTopView != null) {
+            mTopView.hideKeyguardButtons();
+        }
+        if (mBottomView != null) {
+            mBottomView.hideKeyguardButtons();
+        }
+        if (mLeftView != null) {
+            mLeftView.hideKeyguardButtons();
+        }
+        if (mRightView != null) {
+            mRightView.hideKeyguardButtons();
+        }
+    }
+
+    /** Toggles whether the notifications icon has an unseen indicator or not. */
+    public void toggleAllNotificationsUnseenIndicator(boolean isSetUp, boolean hasUnseen) {
+        checkAllBars(isSetUp);
+        if (mTopView != null) {
+            mTopView.toggleNotificationUnseenIndicator(hasUnseen);
+        }
+        if (mBottomView != null) {
+            mBottomView.toggleNotificationUnseenIndicator(hasUnseen);
+        }
+        if (mLeftView != null) {
+            mLeftView.toggleNotificationUnseenIndicator(hasUnseen);
+        }
+        if (mRightView != null) {
+            mRightView.toggleNotificationUnseenIndicator(hasUnseen);
+        }
+    }
+
     /** Interface for controlling the notifications shade. */
     public interface NotificationsShadeController {
         /** Toggles the visibility of the notifications shade. */
@@ -243,5 +299,12 @@ public class CarNavigationBarController {
                 addTemperatureViewToController(viewGroup.getChildAt(i));
             }
         }
+    }
+
+    private void checkAllBars(boolean isSetUp) {
+        mTopView = getTopBar(isSetUp);
+        mBottomView = getBottomBar(isSetUp);
+        mLeftView = getLeftBar(isSetUp);
+        mRightView = getRightBar(isSetUp);
     }
 }

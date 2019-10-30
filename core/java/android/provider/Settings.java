@@ -1722,6 +1722,20 @@ public final class Settings {
             = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
 
     /**
+     * Activity Action: Show Work Policy info.
+     * DPC apps can implement an activity that handles this intent in order to show device policies
+     * associated with the work profile or managed device.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_WORK_POLICY_INFO =
+            "android.settings.SHOW_WORK_POLICY_INFO";
+
+    /**
      * Activity Action: Show screen that let user select its Autofill Service.
      * <p>
      * Input: Intent's data URI set with an application name, using the

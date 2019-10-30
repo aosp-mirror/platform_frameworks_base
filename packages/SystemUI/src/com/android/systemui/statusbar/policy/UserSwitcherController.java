@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
+
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
@@ -196,7 +198,10 @@ public class UserSwitcherController implements Dumpable {
                 }
                 ArrayList<UserRecord> records = new ArrayList<>(infos.size());
                 int currentId = ActivityManager.getCurrentUser();
-                boolean canSwitchUsers = mUserManager.canSwitchUsers();
+                // Check user switchability of the foreground user since SystemUI is running in
+                // User 0
+                boolean canSwitchUsers = mUserManager.getUserSwitchability(
+                        UserHandle.of(ActivityManager.getCurrentUser())) == SWITCHABILITY_STATUS_OK;
                 UserInfo currentUserInfo = null;
                 UserRecord guestRecord = null;
 

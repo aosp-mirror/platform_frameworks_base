@@ -229,13 +229,21 @@ public class StagedRollbackTest {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                         getNetworkStackPackageName())).isNotNull();
+
+        // Sleep for < health check deadline
+        Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+        // Verify rollback was not executed before health check deadline
+        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                        getNetworkStackPackageName())).isNull();
     }
 
     @Test
     public void testNetworkFailedRollback_Phase3() throws Exception {
-        RollbackManager rm = RollbackUtils.getRollbackManager();
-        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
-                        getNetworkStackPackageName())).isNull();
+        // Sleep for > health check deadline
+        // The device is expected to reboot during sleeping. This device method will fail and
+        // the host will catch the assertion. If reboot doesn't happen, the host will fail the
+        // assertion.
+        Thread.sleep(TimeUnit.SECONDS.toMillis(120));
     }
 
     @Test

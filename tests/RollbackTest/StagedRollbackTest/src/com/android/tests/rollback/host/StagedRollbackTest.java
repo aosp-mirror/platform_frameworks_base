@@ -17,6 +17,7 @@
 package com.android.tests.rollback.host;
 
 import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertThrows;
 
 import com.android.ddmlib.Log.LogLevel;
 import com.android.tradefed.log.LogUtil.CLog;
@@ -124,7 +125,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testNetworkFailedRollback_Phase1");
         // Reduce health check deadline
         getDevice().executeShellCommand("device_config put rollback "
-                + "watchdog_request_timeout_millis 300000");
+                + "watchdog_request_timeout_millis 120000");
         // Simulate re-installation of new NetworkStack with rollbacks enabled
         getDevice().executeShellCommand("pm install -r --staged --enable-rollback "
                 + "/system/priv-app/NetworkStack/NetworkStack.apk");
@@ -136,22 +137,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Verify rollback was enabled
         runPhase("testNetworkFailedRollback_Phase2");
-
-        // Sleep for < health check deadline
-        Thread.sleep(5000);
-        // Verify rollback was not executed before health check deadline
-        runPhase("testNetworkFailedRollback_Phase3");
-        try {
-            // This is expected to fail due to the device being rebooted out
-            // from underneath the test. If this fails for reasons other than
-            // the device reboot, those failures should result in failure of
-            // the testNetworkFailedRollback_Phase4 phase.
-            CLog.logAndDisplay(LogLevel.INFO, "Sleep and expect to fail while sleeping");
-            // Sleep for > health check deadline
-            Thread.sleep(260000);
-        } catch (AssertionError e) {
-            // AssertionError is expected.
-        }
+        assertThrows(AssertionError.class, () -> runPhase("testNetworkFailedRollback_Phase3"));
 
         getDevice().waitForDeviceAvailable();
         // Verify rollback was executed after health check deadline

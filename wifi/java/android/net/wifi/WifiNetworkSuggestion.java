@@ -21,12 +21,15 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.net.MacAddress;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import java.nio.charset.CharsetEncoder;
@@ -107,6 +110,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
          */
         private int mPriority;
 
+        /**
+         * The carrier ID identifies the operator who provides this network configuration.
+         *    see {@link TelephonyManager#getSimCarrierId()}
+         */
+        private int mCarrierId;
+
         public Builder() {
             mSsid = null;
             mBssid =  null;
@@ -121,6 +130,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mIsUserInteractionRequired = false;
             mIsMetered = false;
             mPriority = UNASSIGNED_PRIORITY;
+            mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
         }
 
         /**
@@ -258,6 +268,23 @@ public final class WifiNetworkSuggestion implements Parcelable {
         }
 
         /**
+         * Set the carrier ID of the network operator. The carrier ID associates a Suggested
+         * network with a specific carrier (and therefore SIM). The carrier ID must be provided
+         * for any network which uses the SIM-based authentication: e.g. EAP-SIM, EAP-AKA,
+         * EAP-AKA', and EAP-PEAP with SIM-based phase 2 authentication.
+         * @param carrierId see {@link TelephonyManager#getSimCarrierId()}.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.NETWORK_CARRIER_PROVISIONING)
+        public @NonNull Builder setCarrierId(int carrierId) {
+            mCarrierId = carrierId;
+            return this;
+        }
+
+        /**
          * Specifies whether this represents a hidden network.
          * <p>
          * <li>If not set, defaults to false (i.e not a hidden network).</li>
@@ -380,6 +407,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.meteredOverride =
                     mIsMetered ? WifiConfiguration.METERED_OVERRIDE_METERED
                             : WifiConfiguration.METERED_OVERRIDE_NONE;
+            wifiConfiguration.carrierId = mCarrierId;
             return wifiConfiguration;
         }
 
@@ -405,6 +433,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             wifiConfiguration.meteredOverride =
                     mIsMetered ? WifiConfiguration.METERED_OVERRIDE_METERED
                             : WifiConfiguration.METERED_OVERRIDE_NONE;
+            mPasspointConfiguration.setCarrierId(mCarrierId);
             return wifiConfiguration;
         }
 

@@ -1263,4 +1263,23 @@ public class WifiEnterpriseConfig implements Parcelable {
     public @Ocsp int getOcsp() {
         return mOcsp;
     }
+
+    /**
+     * If the current authentication method needs SIM card.
+     * @return true if the credential information require SIM card for current authentication
+     * method, otherwise it returns false.
+     * @hide
+     */
+    public boolean requireSimCredential() {
+        if (mEapMethod == Eap.SIM || mEapMethod == Eap.AKA || mEapMethod == Eap.AKA_PRIME) {
+            return true;
+        }
+        if (mEapMethod == Eap.PEAP) {
+            if (mPhase2Method == Phase2.SIM || mPhase2Method == Phase2.AKA
+                    || mPhase2Method == Phase2.AKA_PRIME) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

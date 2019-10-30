@@ -73,7 +73,8 @@ public:
 
                         ~Visualizer();
 
-    virtual status_t    setEnabled(bool enabled);
+    // Declared 'final' because we call this in ~Visualizer().
+    status_t    setEnabled(bool enabled) final;
 
     // maximum capture size in samples
     static uint32_t getMaxCaptureSize() { return VISUALIZER_CAPTURE_SIZE_MAX; }

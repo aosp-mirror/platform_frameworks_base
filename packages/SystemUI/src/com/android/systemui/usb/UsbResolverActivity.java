@@ -35,6 +35,7 @@ import android.util.Log;
 import android.widget.CheckBox;
 
 import com.android.internal.app.ResolverActivity;
+import com.android.internal.app.chooser.TargetInfo;
 import com.android.systemui.R;
 
 import java.util.ArrayList;

@@ -253,15 +253,6 @@ public:
     virtual void drawPicture(const SkPicture& picture) = 0;
 
     /**
-     * Specifies if the positions passed to ::drawText are absolute or relative
-     * to the (x,y) value provided.
-     *
-     * If true the (x,y) values are ignored. Otherwise, those (x,y) values need
-     * to be added to each glyph's position to get its absolute position.
-     */
-    virtual bool drawTextAbsolutePos() const = 0;
-
-    /**
      * Draws a VectorDrawable onto the canvas.
      */
     virtual void drawVectorDrawable(VectorDrawableRoot* tree) = 0;

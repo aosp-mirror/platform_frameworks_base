@@ -41,7 +41,6 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.FgThread;
-import com.android.server.compat.CompatConfig;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -131,11 +130,11 @@ public class AppsFilter {
 
     private static class FeatureConfigImpl implements FeatureConfig {
         private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
+        private final PackageManagerService.Injector mInjector;
         private volatile boolean mFeatureEnabled = false;
-        private CompatConfig mCompatibility;
 
         private FeatureConfigImpl(PackageManagerService.Injector injector) {
-            mCompatibility = injector.getCompatibility();
+            mInjector = injector;
         }
 
         @Override
@@ -158,7 +157,7 @@ public class AppsFilter {
 
         @Override
         public boolean packageIsEnabled(PackageParser.Package pkg) {
-            return mCompatibility.isChangeEnabled(
+            return mInjector.getCompatibility().isChangeEnabled(
                     PackageManager.FILTER_APPLICATION_QUERY, pkg.applicationInfo);
         }
     }
@@ -263,10 +262,10 @@ public class AppsFilter {
      * Grants access based on an interaction between a calling and target package, granting
      * visibility of the caller from the target.
      *
-     * @param callingPackage    the package initiating the interaction
-     * @param targetPackage     the package being interacted with and thus gaining visibility of the
-     *                          initiating package.
-     * @param userId            the user in which this interaction was taking place
+     * @param callingPackage the package initiating the interaction
+     * @param targetPackage  the package being interacted with and thus gaining visibility of the
+     *                       initiating package.
+     * @param userId         the user in which this interaction was taking place
      */
     public void grantImplicitAccess(
             String callingPackage, String targetPackage, int userId) {

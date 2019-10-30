@@ -43,10 +43,10 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
-import com.android.internal.app.ResolverActivity.ActivityInfoPresentationGetter;
-import com.android.internal.app.ResolverActivity.ResolveInfoPresentationGetter;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.ResolverDataProvider.PackageManagerMockedInfo;
+import com.android.internal.app.ResolverListAdapter.ActivityInfoPresentationGetter;
+import com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
 import com.android.internal.widget.ResolverDrawerLayout;
 
 import org.junit.Before;
@@ -83,7 +83,7 @@ public class ResolverActivityTest {
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
-        Espresso.registerIdlingResources(activity.getLabelIdlingResource());
+        Espresso.registerIdlingResources(activity.getAdapter().getLabelIdlingResource());
         waitForIdle();
 
         assertThat(activity.getAdapter().getCount(), is(2));
@@ -216,7 +216,7 @@ public class ResolverActivityTest {
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
-        Espresso.registerIdlingResources(activity.getLabelIdlingResource());
+        Espresso.registerIdlingResources(activity.getAdapter().getLabelIdlingResource());
         waitForIdle();
 
         // The other entry is filtered to the last used slot
@@ -254,7 +254,7 @@ public class ResolverActivityTest {
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
-        Espresso.registerIdlingResources(activity.getLabelIdlingResource());
+        Espresso.registerIdlingResources(activity.getAdapter().getLabelIdlingResource());
         waitForIdle();
 
         // The other entry is filtered to the other profile slot
@@ -300,7 +300,7 @@ public class ResolverActivityTest {
                 .thenReturn(resolvedComponentInfos.get(1).getResolveInfoAt(0));
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
-        Espresso.registerIdlingResources(activity.getLabelIdlingResource());
+        Espresso.registerIdlingResources(activity.getAdapter().getLabelIdlingResource());
         waitForIdle();
 
         // The other entry is filtered to the other profile slot

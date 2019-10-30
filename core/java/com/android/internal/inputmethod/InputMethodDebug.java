@@ -168,9 +168,6 @@ public final class InputMethodDebug {
         if ((startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0) {
             joiner.add("IS_TEXT_EDITOR");
         }
-        if ((startInputFlags & StartInputFlags.FIRST_WINDOW_FOCUS_GAIN) != 0) {
-            joiner.add("FIRST_WINDOW_FOCUS_GAIN");
-        }
         if ((startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0) {
             joiner.add("INITIAL_CONNECTION");
         }

@@ -25,6 +25,7 @@ java_test_host {
     name: "StagedRollbackTest",
     srcs: ["StagedRollbackTest/src/**/*.java"],
     libs: ["tradefed"],
+    static_libs: ["testng"],
     test_suites: ["general-tests"],
     test_config: "StagedRollbackTest.xml",
 }

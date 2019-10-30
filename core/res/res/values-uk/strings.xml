@@ -1318,6 +1318,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"Мережа <xliff:g id="NETWORK_SSID">%1$s</xliff:g> не має доступу до Інтернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Торкніться, щоб відкрити опції"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"Мобільна мережа не має доступу до Інтернету"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"Мережа не має доступу до Інтернету"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"Немає доступу до приватного DNS-сервера"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Підключено"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"Підключення до мережі <xliff:g id="NETWORK_SSID">%1$s</xliff:g> обмежено"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Натисніть, щоб усе одно підключитися"</string>
@@ -1714,14 +1717,14 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Вилучити"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Збільшити гучність понад рекомендований рівень?\n\nЯкщо слухати надто гучну музику тривалий час, можна пошкодити слух."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Використовувати ярлик спеціальних можливостей?"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Використовувати швидке ввімкнення?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Коли ярлик увімкнено, після натискання обох клавіш гучності й утримування їх протягом 3 секунд увімкнеться функція спеціальних можливостей.\n\n Поточна функція спеціальних можливостей:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Цю функцію можна змінити в меню \"Налаштування\" &gt; \"Спеціальні можливості\"."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Вимкнути ярлик"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Використовувати ярлик"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Інверсія кольорів"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Корекція кольорів"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Ярлик спеціальних можливостей увімкнув <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Ярлик спеціальних можливостей вимкнув <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Сервіс <xliff:g id="SERVICE_NAME">%1$s</xliff:g> увімкнено"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Сервіс <xliff:g id="SERVICE_NAME">%1$s</xliff:g> вимкнено"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Щоб скористатися службою <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, утримуйте обидві клавіші гучності впродовж трьох секунд"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Виберіть сервіс для кнопки спеціальних можливостей:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Виберіть сервіс для жесту спеціальних можливостей (проведення двома пальцями знизу вгору):"</string>
@@ -2031,9 +2034,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"Зберегти"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ні, дякую"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Оновити"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"Продовжити"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"пароль"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"адреса"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"кредитна картка"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"дебетова картка"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"платіжна картка"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"картка"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"ім’я користувача"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"електронна адреса"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Не хвилюйтеся та знайдіть прихисток поблизу."</string>

@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.PowerManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -107,6 +108,8 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.DozeScrimController;
+import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -134,12 +137,14 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /**
  * A status bar tailored for the automotive use case.
  */
+@Singleton
 public class CarStatusBar extends StatusBar implements CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
     // used to calculate how fast to open or close the window
@@ -153,6 +158,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private float mOpeningVelocity = DEFAULT_FLING_VELOCITY;
     private float mClosingVelocity = DEFAULT_FLING_VELOCITY;
 
+    private float mBackgroundAlphaDiff;
+    private float mInitialBackgroundAlpha;
+
     private FullscreenUserSwitcher mFullscreenUserSwitcher;
 
     private CarBatteryController mCarBatteryController;
@@ -160,13 +168,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private Drawable mNotificationPanelBackground;
 
     private ViewGroup mTopNavigationBarContainer;
-    private ViewGroup mNavigationBarWindow;
-    private ViewGroup mLeftNavigationBarWindow;
-    private ViewGroup mRightNavigationBarWindow;
     private CarNavigationBarView mTopNavigationBarView;
-    private CarNavigationBarView mNavigationBarView;
-    private CarNavigationBarView mLeftNavigationBarView;
-    private CarNavigationBarView mRightNavigationBarView;
 
     private final Object mQueueLock = new Object();
     private final CarNavigationBarController mCarNavigationBarController;
@@ -295,6 +297,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
+            DozeServiceHost dozeServiceHost,
+            PowerManager powerManager,
+            DozeScrimController dozeScrimController,
 
             /* Car Settings injected components. */
             CarNavigationBarController carNavigationBarController) {
@@ -358,7 +363,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 dozeParameters,
                 scrimController,
                 lockscreenWallpaperLazy,
-                biometricUnlockControllerLazy);
+                biometricUnlockControllerLazy,
+                dozeServiceHost,
+                powerManager,
+                dozeScrimController);
         mScrimController = scrimController;
         mCarNavigationBarController = carNavigationBarController;
     }
@@ -374,6 +382,25 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // created.
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
         mScreenLifecycle.addObserver(mScreenObserver);
+
+      	// Notification bar related setup.
+        mInitialBackgroundAlpha = (float) mContext.getResources().getInteger(
+            R.integer.config_initialNotificationBackgroundAlpha) / 100;
+        if (mInitialBackgroundAlpha < 0 || mInitialBackgroundAlpha > 100) {
+            throw new RuntimeException(
+              "Unable to setup notification bar due to incorrect initial background alpha"
+                      + " percentage");
+        }
+        float finalBackgroundAlpha = Math.max(
+            mInitialBackgroundAlpha,
+            (float) mContext.getResources().getInteger(
+                R.integer.config_finalNotificationBackgroundAlpha) / 100);
+        if (finalBackgroundAlpha < 0 || finalBackgroundAlpha > 100) {
+            throw new RuntimeException(
+              "Unable to setup notification bar due to incorrect final background alpha"
+                      + " percentage");
+        }
+        mBackgroundAlphaDiff = finalBackgroundAlpha - mInitialBackgroundAlpha;
 
         super.start();
 
@@ -392,12 +419,12 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 new DeviceProvisionedController.DeviceProvisionedListener() {
                     @Override
                     public void onUserSetupChanged() {
-                        mHandler.post(() -> restartNavBarsIfNecessary());
+                        mHandler.post(() -> resetSystemBarsIfNecessary());
                     }
 
                     @Override
                     public void onUserSwitched() {
-                        mHandler.post(() -> restartNavBarsIfNecessary());
+                        mHandler.post(() -> resetSystemBarsIfNecessary());
                     }
                 });
 
@@ -411,11 +438,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
     }
 
-    private void restartNavBarsIfNecessary() {
+    private void resetSystemBarsIfNecessary() {
         boolean currentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
         if (mDeviceIsSetUpForUser != currentUserSetup) {
             mDeviceIsSetUpForUser = currentUserSetup;
-            restartNavBars();
+            resetSystemBars();
         }
     }
 
@@ -423,18 +450,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      * Remove all content from navbars and rebuild them. Used to allow for different nav bars
      * before and after the device is provisioned. . Also for change of density and font size.
      */
-    private void restartNavBars() {
+    private void resetSystemBars() {
         mCarFacetButtonController.removeAll();
-
-        if (mNavigationBarWindow != null) {
-            mNavigationBarView = null;
-        }
-        if (mLeftNavigationBarWindow != null) {
-            mLeftNavigationBarView = null;
-        }
-        if (mRightNavigationBarWindow != null) {
-            mRightNavigationBarView = null;
-        }
 
         buildNavBarContent();
         // CarFacetButtonController was reset therefore we need to re-add the status bar elements
@@ -447,51 +464,22 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      * the full screen user selector is shown.
      */
     void setNavBarVisibility(@View.Visibility int visibility) {
-        if (mNavigationBarWindow != null) {
-            mNavigationBarWindow.setVisibility(visibility);
-        }
-        if (mLeftNavigationBarWindow != null) {
-            mLeftNavigationBarWindow.setVisibility(visibility);
-        }
-        if (mRightNavigationBarWindow != null) {
-            mRightNavigationBarWindow.setVisibility(visibility);
-        }
+        mCarNavigationBarController.setBottomWindowVisibility(visibility);
+        mCarNavigationBarController.setLeftWindowVisibility(visibility);
+        mCarNavigationBarController.setRightWindowVisibility(visibility);
     }
 
     @Override
     public boolean hideKeyguard() {
         boolean result = super.hideKeyguard();
-        if (mNavigationBarView != null) {
-            mNavigationBarView.hideKeyguardButtons();
-        }
-        if (mLeftNavigationBarView != null) {
-            mLeftNavigationBarView.hideKeyguardButtons();
-        }
-        if (mRightNavigationBarView != null) {
-            mRightNavigationBarView.hideKeyguardButtons();
-        }
+        mCarNavigationBarController.hideAllKeyguardButtons(mDeviceIsSetUpForUser);
         return result;
     }
 
     @Override
     public void showKeyguard() {
         super.showKeyguard();
-        updateNavBarForKeyguardContent();
-    }
-
-    /**
-     * Switch to the keyguard applicable content contained in the nav bars
-     */
-    private void updateNavBarForKeyguardContent() {
-        if (mNavigationBarView != null) {
-            mNavigationBarView.showKeyguardButtons();
-        }
-        if (mLeftNavigationBarView != null) {
-            mLeftNavigationBarView.showKeyguardButtons();
-        }
-        if (mRightNavigationBarView != null) {
-            mRightNavigationBarView.showKeyguardButtons();
-        }
+        mCarNavigationBarController.showAllKeyguardButtons(mDeviceIsSetUpForUser);
     }
 
     @Override
@@ -595,20 +583,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mNotificationDataManager = new NotificationDataManager();
         mNotificationDataManager.setOnUnseenCountUpdateListener(
                 () -> {
-                    if (mNavigationBarView != null && mNotificationDataManager != null) {
-                        Boolean hasUnseen =
+                    if (mNotificationDataManager != null) {
+                        boolean hasUnseen =
                                 mNotificationDataManager.getUnseenNotificationCount() > 0;
-                        if (mNavigationBarView != null) {
-                            mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
-
-                        if (mLeftNavigationBarView != null) {
-                            mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
-
-                        if (mRightNavigationBarView != null) {
-                            mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
+                        mCarNavigationBarController.toggleAllNotificationsUnseenIndicator(
+                                mDeviceIsSetUpForUser, hasUnseen);
                     }
                 });
 
@@ -862,35 +841,25 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Override
     protected void createNavigationBar(@Nullable RegisterStatusBarResult result) {
-        buildNavBarWindows();
+        mTopNavigationBarContainer = mStatusBarWindow
+                .findViewById(R.id.car_top_navigation_bar_container);
+
         buildNavBarContent();
     }
 
     private void buildNavBarContent() {
         buildTopBar();
 
-        mNavigationBarView = mCarNavigationBarController.getBottomBar(mDeviceIsSetUpForUser);
         mCarNavigationBarController.registerBottomBarTouchListener(
                 mNavBarNotificationTouchListener);
 
-        mLeftNavigationBarView = mCarNavigationBarController.getLeftBar(mDeviceIsSetUpForUser);
         mCarNavigationBarController.registerLeftBarTouchListener(
                 mNavBarNotificationTouchListener);
 
-        mRightNavigationBarView = mCarNavigationBarController.getLeftBar(mDeviceIsSetUpForUser);
         mCarNavigationBarController.registerRightBarTouchListener(
                 mNavBarNotificationTouchListener);
 
         mCarNavigationBarController.registerNotificationController(() -> togglePanel());
-    }
-
-    private void buildNavBarWindows() {
-        mTopNavigationBarContainer = mStatusBarWindow
-                .findViewById(R.id.car_top_navigation_bar_container);
-
-        mNavigationBarWindow = mCarNavigationBarController.getBottomWindow();
-        mLeftNavigationBarWindow = mCarNavigationBarController.getLeftWindow();
-        mRightNavigationBarWindow = mCarNavigationBarController.getRightWindow();
     }
 
     private void buildTopBar() {
@@ -1066,7 +1035,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     @Override
     public void onDensityOrFontScaleChanged() {
         super.onDensityOrFontScaleChanged();
-        restartNavBars();
+        resetSystemBars();
         // Need to update the background on density changed in case the change was due to night
         // mode.
         mNotificationPanelBackground = getDefaultWallpaper();
@@ -1094,15 +1063,20 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             mHandleBar.setTranslationY(height - mHandleBar.getHeight() - lp.bottomMargin);
         }
         if (mNotificationView.getHeight() > 0) {
-            // Calculates the alpha value for the background based on how much of the notification
-            // shade is visible to the user. When the notification shade is completely open then
-            // alpha value will be 1.
-            float alpha = (float) height / mNotificationView.getHeight();
             Drawable background = mNotificationView.getBackground().mutate();
-
-            background.setAlpha((int) (alpha * 255));
+            background.setAlpha((int) (getBackgroundAlpha(height) * 255));
             mNotificationView.setBackground(background);
         }
+    }
+
+    /**
+     * Calculates the alpha value for the background based on how much of the notification
+     * shade is visible to the user. When the notification shade is completely open then
+     * alpha value will be 1.
+     */
+    private float getBackgroundAlpha(int height) {
+        return mInitialBackgroundAlpha +
+            ((float) height / mNotificationView.getHeight() * mBackgroundAlphaDiff);
     }
 
     @Override

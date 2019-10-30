@@ -43,6 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Pasiekiama naudojant „%1$s“"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Palieskite, kad prisiregistruotumėte"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Prisijungta, nėra interneto"</string>
+    <string name="private_dns_broken" msgid="7356676011023412490">"Privataus DNS serverio negalima pasiekti"</string>
     <string name="wifi_limited_connection" msgid="7717855024753201527">"Ribotas ryšys"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Nėra interneto ryšio"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Reikia prisijungti"</string>

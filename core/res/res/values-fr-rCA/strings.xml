@@ -1274,6 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"Le réseau <xliff:g id="NETWORK_SSID">%1$s</xliff:g> n\'offre aucun accès à Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Touchez pour afficher les options"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"Le réseau cellulaire n\'offre aucun accès à Internet"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"Le réseau n\'offre aucun accès à Internet"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"Impossible d\'accéder au serveur DNS privé"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Connecté"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"Le réseau <xliff:g id="NETWORK_SSID">%1$s</xliff:g> offre une connectivité limitée"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Touchez pour vous connecter quand même"</string>
@@ -1961,9 +1964,13 @@
     <string name="autofill_save_yes" msgid="6398026094049005921">"Enregistrer"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Non, merci"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Mettre à jour"</string>
+    <string name="autofill_continue_yes" msgid="7473570809545975068">"Continuer"</string>
     <string name="autofill_save_type_password" msgid="5288448918465971568">"mot de passe"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"adresse"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"carte de crédit"</string>
+    <string name="autofill_save_type_debit_card" msgid="177366134636469277">"carte de débit"</string>
+    <string name="autofill_save_type_payment_card" msgid="446631844461198737">"carte de paiement"</string>
+    <string name="autofill_save_type_generic_card" msgid="5898375974937018019">"carte"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"nom d\'utilisateur"</string>
     <string name="autofill_save_type_email_address" msgid="5752949432129262174">"adresse de courriel"</string>
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"Restez calme et cherchez un abri à proximité."</string>
