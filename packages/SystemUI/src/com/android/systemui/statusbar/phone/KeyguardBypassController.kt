@@ -20,17 +20,20 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricSourceType
 import android.provider.Settings
+import com.android.systemui.DumpController
+import com.android.systemui.Dumpable
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
+import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class KeyguardBypassController {
+class KeyguardBypassController : Dumpable {
 
     private val mKeyguardStateController: KeyguardStateController
     private val statusBarStateController: StatusBarStateController
@@ -68,7 +71,8 @@ class KeyguardBypassController {
         tunerService: TunerService,
         statusBarStateController: StatusBarStateController,
         lockscreenUserManager: NotificationLockscreenUserManager,
-        keyguardStateController: KeyguardStateController
+        keyguardStateController: KeyguardStateController,
+        dumpController: DumpController
     ) {
         this.mKeyguardStateController = keyguardStateController
         this.statusBarStateController = statusBarStateController
@@ -78,6 +82,7 @@ class KeyguardBypassController {
             return
         }
 
+        dumpController.registerDumpable("KeyguardBypassController", this)
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onStateChanged(newState: Int) {
                 if (newState != StatusBarState.KEYGUARD) {
@@ -155,16 +160,16 @@ class KeyguardBypassController {
         pendingUnlockType = null
     }
 
-    fun dump(pw: PrintWriter) {
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("KeyguardBypassController:")
-        pw.print("  pendingUnlockType: "); pw.println(pendingUnlockType)
-        pw.print("  bypassEnabled: "); pw.println(bypassEnabled)
-        pw.print("  canBypass: "); pw.println(canBypass())
-        pw.print("  bouncerShowing: "); pw.println(bouncerShowing)
-        pw.print("  isPulseExpanding: "); pw.println(isPulseExpanding)
-        pw.print("  launchingAffordance: "); pw.println(launchingAffordance)
-        pw.print("  qSExpanded: "); pw.println(qSExpanded)
-        pw.print("  hasFaceFeature: "); pw.println(hasFaceFeature)
+        pw.println("  pendingUnlockType: $pendingUnlockType")
+        pw.println("  bypassEnabled: $bypassEnabled")
+        pw.println("  canBypass: ${canBypass()}")
+        pw.println("  bouncerShowing: $bouncerShowing")
+        pw.println("  isPulseExpanding: $isPulseExpanding")
+        pw.println("  launchingAffordance: $launchingAffordance")
+        pw.println("  qSExpanded: $qSExpanded")
+        pw.println("  hasFaceFeature: $hasFaceFeature")
     }
 
     companion object {

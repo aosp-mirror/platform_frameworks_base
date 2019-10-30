@@ -56,6 +56,7 @@ import android.testing.TestableLooper;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
@@ -86,6 +87,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             TEST_CARRIER, TEST_CARRIER_2, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "",
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", true, TEST_GROUP_UUID,
             TEST_CARRIER_ID, 0);
+    @Mock
+    private DumpController mDumpController;
     @Mock
     private KeyguardUpdateMonitor.StrongAuthTracker mStrongAuthTracker;
     @Mock
@@ -515,7 +518,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         AtomicBoolean mSimStateChanged = new AtomicBoolean(false);
 
         protected TestableKeyguardUpdateMonitor(Context context) {
-            super(context, TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper());
+            super(context, TestableLooper.get(KeyguardUpdateMonitorTest.this)
+                    .getLooper(), mDumpController);
             context.unregisterReceiver(mBroadcastReceiver);
             context.unregisterReceiver(mBroadcastAllReceiver);
             mStrongAuthTracker = KeyguardUpdateMonitorTest.this.mStrongAuthTracker;

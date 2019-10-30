@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.DumpController;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -54,12 +55,13 @@ public abstract class SystemUIModule {
     static KeyguardLiftController provideKeyguardLiftController(Context context,
             StatusBarStateController statusBarStateController,
             AsyncSensorManager asyncSensorManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DumpController dumpController) {
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
             return null;
         }
         return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
-                keyguardUpdateMonitor);
+                keyguardUpdateMonitor, dumpController);
     }
 
     @Singleton

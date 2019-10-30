@@ -356,6 +356,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     protected LockscreenWallpaper mLockscreenWallpaper;
     private final AutoHideController mAutoHideController;
+    @Nullable
+    private final KeyguardLiftController mKeyguardLiftController;
 
     private int mNaturalBarHeight = -1;
 
@@ -689,6 +691,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotifLog notifLog,
             DozeParameters dozeParameters,
             ScrimController scrimController,
+            @Nullable KeyguardLiftController keyguardLiftController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
@@ -754,6 +757,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
         mScrimController = scrimController;
+        mKeyguardLiftController = keyguardLiftController;
         mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
@@ -2518,10 +2522,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mDozeLog.dump(pw);
 
-        if (mBiometricUnlockController != null) {
-            mBiometricUnlockController.dump(pw);
-        }
-
         if (mKeyguardIndicationController != null) {
             mKeyguardIndicationController.dump(fd, pw, args);
         }
@@ -2573,14 +2573,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (mLightBarController != null) {
             mLightBarController.dump(fd, pw, args);
-        }
-
-        if (mKeyguardBypassController != null) {
-            mKeyguardBypassController.dump(pw);
-        }
-
-        if (mKeyguardUpdateMonitor != null) {
-            mKeyguardUpdateMonitor.dump(fd, pw, args);
         }
 
         mFalsingManager.dump(pw);
