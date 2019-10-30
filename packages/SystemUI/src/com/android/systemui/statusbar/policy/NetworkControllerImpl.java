@@ -276,7 +276,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // exclusively for status bar icons.
         mConnectivityManager.registerDefaultNetworkCallback(callback, mReceiverHandler);
         // Register the listener on our bg looper
-        mPhoneStateListener = new PhoneStateListener(bgLooper) {
+        mPhoneStateListener = new PhoneStateListener(mReceiverHandler::post) {
             @Override
             public void onActiveDataSubscriptionIdChanged(int subId) {
                 mActiveMobileDataSubscription = subId;
