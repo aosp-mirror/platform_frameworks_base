@@ -95,18 +95,10 @@ public:
 
     void operator()(size_t start, size_t end) {
         auto glyphFunc = [&](uint16_t* text, float* positions) {
-            if (canvas->drawTextAbsolutePos()) {
-                for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
-                    text[textIndex++] = layout.getGlyphId(i);
-                    positions[posIndex++] = x + layout.getX(i);
-                    positions[posIndex++] = y + layout.getY(i);
-                }
-            } else {
-                for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
-                    text[textIndex++] = layout.getGlyphId(i);
-                    positions[posIndex++] = layout.getX(i);
-                    positions[posIndex++] = layout.getY(i);
-                }
+            for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
+                text[textIndex++] = layout.getGlyphId(i);
+                positions[posIndex++] = x + layout.getX(i);
+                positions[posIndex++] = y + layout.getY(i);
             }
         };
 
@@ -166,9 +158,6 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
 
     minikin::MinikinRect bounds;
     layout.getBounds(&bounds);
-    if (!drawTextAbsolutePos()) {
-        bounds.offset(x, y);
-    }
 
     // Set align to left for drawing, as we don't want individual
     // glyphs centered or right-aligned; the offset above takes
