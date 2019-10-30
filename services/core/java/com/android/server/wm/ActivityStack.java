@@ -4112,9 +4112,13 @@ class ActivityStack extends ConfigurationContainer {
         final ActivityDisplay display = getDisplay();
         final ActivityRecord next = display.topRunningActivity(true /* considerKeyguardState */);
         final boolean isFloating = r.getConfiguration().windowConfiguration.tasksAreFloating();
-
-        if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)
-                && next != null && !next.nowVisible && !isFloating) {
+        // isNextNotYetVisible is to check if the next activity is invisible, or it has been
+        // requested to be invisible but its windows haven't reported as invisible. If so, it
+        // implied that the current finishing activity should be added into stopping list rather
+        // than destroying it immediately.
+        final boolean isNextNotYetVisible = next != null && (!next.nowVisible || !next.visible);
+        if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible) && isNextNotYetVisible
+                && !isFloating) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
                 addToStopping(r, false /* scheduleIdle */, false /* idleDelayed */,
                         "finishCurrentActivityLocked");
