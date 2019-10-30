@@ -16,8 +16,8 @@
 
 package android.media;
 
-import android.content.Context;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
@@ -206,12 +206,13 @@ class Utils {
     }
 
     static Size parseSize(Object o, Size fallback) {
+        if (o == null) {
+            return fallback;
+        }
         try {
             return Size.parseSize((String) o);
         } catch (ClassCastException e) {
         } catch (NumberFormatException e) {
-        } catch (NullPointerException e) {
-            return fallback;
         }
         Log.w(TAG, "could not parse size '" + o + "'");
         return fallback;
@@ -226,14 +227,15 @@ class Utils {
             return Integer.parseInt(s);
         } catch (ClassCastException e) {
         } catch (NumberFormatException e) {
-        } catch (NullPointerException e) {
-            return fallback;
         }
         Log.w(TAG, "could not parse integer '" + o + "'");
         return fallback;
     }
 
     static Range<Integer> parseIntRange(Object o, Range<Integer> fallback) {
+        if (o == null) {
+            return fallback;
+        }
         try {
             String s = (String)o;
             int ix = s.indexOf('-');
@@ -246,8 +248,6 @@ class Utils {
             return Range.create(value, value);
         } catch (ClassCastException e) {
         } catch (NumberFormatException e) {
-        } catch (NullPointerException e) {
-            return fallback;
         } catch (IllegalArgumentException e) {
         }
         Log.w(TAG, "could not parse integer range '" + o + "'");
@@ -255,6 +255,9 @@ class Utils {
     }
 
     static Range<Long> parseLongRange(Object o, Range<Long> fallback) {
+        if (o == null) {
+            return fallback;
+        }
         try {
             String s = (String)o;
             int ix = s.indexOf('-');
@@ -267,8 +270,6 @@ class Utils {
             return Range.create(value, value);
         } catch (ClassCastException e) {
         } catch (NumberFormatException e) {
-        } catch (NullPointerException e) {
-            return fallback;
         } catch (IllegalArgumentException e) {
         }
         Log.w(TAG, "could not parse long range '" + o + "'");
@@ -276,6 +277,9 @@ class Utils {
     }
 
     static Range<Rational> parseRationalRange(Object o, Range<Rational> fallback) {
+        if (o == null) {
+            return fallback;
+        }
         try {
             String s = (String)o;
             int ix = s.indexOf('-');
@@ -288,8 +292,6 @@ class Utils {
             return Range.create(value, value);
         } catch (ClassCastException e) {
         } catch (NumberFormatException e) {
-        } catch (NullPointerException e) {
-            return fallback;
         } catch (IllegalArgumentException e) {
         }
         Log.w(TAG, "could not parse rational range '" + o + "'");
@@ -297,6 +299,9 @@ class Utils {
     }
 
     static Pair<Size, Size> parseSizeRange(Object o) {
+        if (o == null) {
+            return null;
+        }
         try {
             String s = (String)o;
             int ix = s.indexOf('-');
@@ -309,8 +314,6 @@ class Utils {
             return Pair.create(value, value);
         } catch (ClassCastException e) {
         } catch (NumberFormatException e) {
-        } catch (NullPointerException e) {
-            return null;
         } catch (IllegalArgumentException e) {
         }
         Log.w(TAG, "could not parse size range '" + o + "'");
