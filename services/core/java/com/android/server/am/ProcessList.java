@@ -22,6 +22,7 @@ import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
+import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.getFreeMemory;
@@ -62,6 +63,8 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.os.AppZygote;
 import android.os.Binder;
 import android.os.Build;
@@ -113,6 +116,7 @@ import com.android.server.wm.WindowManagerService;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -282,6 +286,10 @@ public final class ProcessList {
     private static final String PROPERTY_USE_APP_IMAGE_STARTUP_CACHE =
             "persist.device_config.runtime_native.use_app_image_startup_cache";
 
+    // The socket path for zygote to send unsolicited msg.
+    // Must keep sync with com_android_internal_os_Zygote.cpp.
+    private static final String UNSOL_ZYGOTE_MSG_SOCKET_PATH = "/data/system/unsolzygotesocket";
+
     // Low Memory Killer Daemon command codes.
     // These must be kept in sync with lmk_cmd definitions in lmkd.h
     //
@@ -438,6 +446,28 @@ public final class ProcessList {
             new ArrayMap<AppZygote, ArrayList<ProcessRecord>>();
 
     private PlatformCompat mPlatformCompat = null;
+
+    /**
+     * The server socket in system_server, zygote will connect to it
+     * in order to send unsolicited messages to system_server.
+     */
+    private LocalSocket mSystemServerSocketForZygote;
+
+    /**
+     * Maximum number of bytes that an incoming unsolicited zygote message could be.
+     * To be updated if new message type needs to be supported.
+     */
+    private static final int MAX_ZYGOTE_UNSOLICITED_MESSAGE_SIZE = 16;
+
+    /**
+     * The buffer to be used to receive the incoming unsolicited zygote message.
+     */
+    private final byte[] mZygoteUnsolicitedMessage = new byte[MAX_ZYGOTE_UNSOLICITED_MESSAGE_SIZE];
+
+    /**
+     * The buffer to be used to receive the SIGCHLD data, it includes pid/uid/status.
+     */
+    private final int[] mZygoteSigChldMessage = new int[3];
 
     interface LmkdKillListener {
         /**
@@ -702,6 +732,13 @@ public final class ProcessList {
                         }
                     }
             );
+            // Start listening on incoming connections from zygotes.
+            mSystemServerSocketForZygote = createSystemServerSocketForZygote();
+            if (mSystemServerSocketForZygote != null) {
+                sKillHandler.getLooper().getQueue().addOnFileDescriptorEventListener(
+                        mSystemServerSocketForZygote.getFileDescriptor(),
+                        EVENT_INPUT, this::handleZygoteMessages);
+            }
         }
     }
 
@@ -3559,5 +3596,67 @@ public final class ProcessList {
                 mService.mHandler.post(()-> listener.onLmkdKillOccurred(pid, uid));
             }
         }
+    }
+
+    private void handleZygoteSigChld(int pid, int uid, int status) {
+        // Just log it now.
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "Got SIGCHLD from zygote: pid=" + pid + ", uid=" + uid
+                    + ", status=" + Integer.toHexString(status));
+        }
+    }
+
+    /**
+     * Create a server socket in system_server, zygote will connect to it
+     * in order to send unsolicited messages to system_server.
+     */
+    private LocalSocket createSystemServerSocketForZygote() {
+        // The file system entity for this socket is created with 0666 perms, owned
+        // by system:system. selinux restricts things so that only zygotes can
+        // access it.
+        final File socketFile = new File(UNSOL_ZYGOTE_MSG_SOCKET_PATH);
+        if (socketFile.exists()) {
+            socketFile.delete();
+        }
+
+        LocalSocket serverSocket = null;
+        try {
+            serverSocket = new LocalSocket(LocalSocket.SOCKET_DGRAM);
+            serverSocket.bind(new LocalSocketAddress(
+                    UNSOL_ZYGOTE_MSG_SOCKET_PATH, LocalSocketAddress.Namespace.FILESYSTEM));
+            Os.chmod(UNSOL_ZYGOTE_MSG_SOCKET_PATH, 0666);
+        } catch (Exception e) {
+            if (serverSocket != null) {
+                try {
+                    serverSocket.close();
+                } catch (IOException ex) {
+                }
+                serverSocket = null;
+            }
+        }
+        return serverSocket;
+    }
+
+    /**
+     * Handle the unsolicited message from zygote.
+     */
+    private int handleZygoteMessages(FileDescriptor fd, int events) {
+        final int eventFd = fd.getInt$();
+        if ((events & EVENT_INPUT) != 0) {
+            // An incoming message from zygote
+            try {
+                final int len = Os.read(fd, mZygoteUnsolicitedMessage, 0,
+                        mZygoteUnsolicitedMessage.length);
+                if (len > 0 && mZygoteSigChldMessage.length == Zygote.nativeParseSigChld(
+                        mZygoteUnsolicitedMessage, len, mZygoteSigChldMessage)) {
+                    handleZygoteSigChld(mZygoteSigChldMessage[0] /* pid */,
+                            mZygoteSigChldMessage[1] /* uid */,
+                            mZygoteSigChldMessage[2] /* status */);
+                }
+            } catch (Exception e) {
+                Slog.w(TAG, "Exception in reading unsolicited zygote message: " + e);
+            }
+        }
+        return EVENT_INPUT;
     }
 }
