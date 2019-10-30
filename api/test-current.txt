@@ -2066,6 +2066,8 @@ package android.os {
     method @NonNull public static String get(@NonNull String);
     method @NonNull public static String get(@NonNull String, @Nullable String);
     method public static boolean getBoolean(@NonNull String, boolean);
+    method public static int getInt(@NonNull String, int);
+    method public static long getLong(@NonNull String, long);
   }
 
   public final class UserHandle implements android.os.Parcelable {
