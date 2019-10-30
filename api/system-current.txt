@@ -4855,7 +4855,7 @@ package android.net.wifi {
   public class WifiScanner {
     method @Deprecated public void configureWifiChange(int, int, int, int, int, android.net.wifi.WifiScanner.BssidInfo[]);
     method @Deprecated public void configureWifiChange(android.net.wifi.WifiScanner.WifiChangeSettings);
-    method @Nullable @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<java.lang.Integer> getAvailableChannels(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<java.lang.Integer> getAvailableChannels(int);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean getScanResults();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener, android.os.WorkSource);
