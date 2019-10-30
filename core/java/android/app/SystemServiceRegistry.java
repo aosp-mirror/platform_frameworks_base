@@ -23,6 +23,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
+import android.app.job.JobSchedulerFrameworkInitializer;
 import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
@@ -153,7 +154,6 @@ import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
 import android.os.storage.StorageManager;
-import android.telephony.TelephonyRegistryManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
@@ -167,6 +167,7 @@ import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.TelephonyRegistryManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.RcsMessageManager;
@@ -1298,6 +1299,9 @@ public final class SystemServiceRegistry {
                                 IBatteryStats.Stub.asInterface(b));
                     }});
         //CHECKSTYLE:ON IndentationCheck
+
+        JobSchedulerFrameworkInitializer.initialize();
+        DeviceIdleFrameworkInitializer.initialize();
     }
 
     /**
