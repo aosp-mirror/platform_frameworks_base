@@ -2750,9 +2750,14 @@ public class LocationManager {
         protected boolean registerService() throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
-            mListenerTransport = new GnssStatusListener();
-            return mService.registerGnssStatusCallback(mListenerTransport,
-                    mContext.getPackageName(), mContext.getFeatureId());
+            GnssStatusListener transport = new GnssStatusListener();
+            if (mService.registerGnssStatusCallback(transport, mContext.getPackageName(),
+                    mContext.getFeatureId())) {
+                mListenerTransport = transport;
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
@@ -2810,10 +2815,14 @@ public class LocationManager {
         protected boolean registerService() throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
-            mListenerTransport = new GnssMeasurementsListener();
-            return mService.addGnssMeasurementsListener(mListenerTransport,
-                    mContext.getPackageName(), mContext.getFeatureId(),
-                    "gnss measurement callback");
+            GnssMeasurementsListener transport = new GnssMeasurementsListener();
+            if (mService.addGnssMeasurementsListener(transport, mContext.getPackageName(),
+                    mContext.getFeatureId(), "gnss measurement callback")) {
+                mListenerTransport = transport;
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
@@ -2847,10 +2856,14 @@ public class LocationManager {
         protected boolean registerService() throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
-            mListenerTransport = new GnssNavigationMessageListener();
-            return mService.addGnssNavigationMessageListener(mListenerTransport,
-                    mContext.getPackageName(), mContext.getFeatureId(),
-                    "gnss navigation callback");
+            GnssNavigationMessageListener transport = new GnssNavigationMessageListener();
+            if (mService.addGnssNavigationMessageListener(transport, mContext.getPackageName(),
+                    mContext.getFeatureId(), "gnss navigation callback")) {
+                mListenerTransport = transport;
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
@@ -2884,9 +2897,14 @@ public class LocationManager {
         protected boolean registerService() throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
-            mListenerTransport = new BatchedLocationCallback();
-            return mService.addGnssBatchingCallback(mListenerTransport, mContext.getPackageName(),
-                     mContext.getFeatureId(), "batched location callback");
+            BatchedLocationCallback transport = new BatchedLocationCallback();
+            if (mService.addGnssBatchingCallback(transport, mContext.getPackageName(),
+                     mContext.getFeatureId(), "batched location callback")) {
+                mListenerTransport = transport;
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
