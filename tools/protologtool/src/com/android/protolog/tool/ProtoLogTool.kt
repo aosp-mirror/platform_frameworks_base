@@ -60,7 +60,7 @@ object ProtoLogTool {
                 val outSrc = try {
                     val code = tryParse(text, path)
                     if (containsProtoLogText(text, command.protoLogClassNameArg)) {
-                        transformer.processClass(text, path, code)
+                        transformer.processClass(text, path, packagePath(file, code), code)
                     } else {
                         text
                     }
@@ -157,10 +157,7 @@ ${updates.replaceIndent("                    ")}
                 if (containsProtoLogText(text, command.protoLogClassNameArg)) {
                     try {
                         val code = tryParse(text, path)
-                        val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
-                                .get().nameAsString else ""
-                        val newPath = pack.replace('.', '/') + '/' + file.name
-                        builder.findLogCalls(code, newPath)
+                        builder.findLogCalls(code, path, packagePath(file, code))
                     } catch (ex: ParsingException) {
                         // If we cannot parse this file, skip it (and log why). Compilation will fail
                         // in a subsequent build step.
@@ -180,6 +177,13 @@ ${updates.replaceIndent("                    ")}
         val out = FileOutputStream(command.viewerConfigJsonArg)
         out.write(builder.build().toByteArray())
         out.close()
+    }
+
+    private fun packagePath(file: File, code: CompilationUnit): String {
+        val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
+                .get().nameAsString else ""
+        val packagePath = pack.replace('.', '/') + '/' + file.name
+        return packagePath
     }
 
     private fun read(command: CommandOptions) {
