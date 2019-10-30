@@ -5307,6 +5307,32 @@ package android.net.wifi {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApInfo> CREATOR;
   }
 
+  public final class WifiActivityEnergyInfo implements android.os.Parcelable {
+    ctor public WifiActivityEnergyInfo(long, int, long, long, long, long, long);
+    method public int describeContents();
+    method public long getControllerEnergyUsedMicroJoules();
+    method public long getControllerIdleDurationMillis();
+    method public long getControllerRxDurationMillis();
+    method public long getControllerScanDurationMillis();
+    method public long getControllerTxDurationMillis();
+    method public int getStackState();
+    method public long getTimeSinceBootMillis();
+    method public boolean isValid();
+    method public void setControllerEnergyUsedMicroJoules(long);
+    method public void setControllerIdleDurationMillis(long);
+    method public void setControllerRxDurationMillis(long);
+    method public void setControllerScanDurationMillis(long);
+    method public void setControllerTxDurationMillis(long);
+    method public void setStackState(int);
+    method public void setTimeSinceBootMillis(long);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiActivityEnergyInfo> CREATOR;
+    field public static final int STACK_STATE_INVALID = 0; // 0x0
+    field public static final int STACK_STATE_STATE_ACTIVE = 1; // 0x1
+    field public static final int STACK_STATE_STATE_IDLE = 3; // 0x3
+    field public static final int STACK_STATE_STATE_SCANNING = 2; // 0x2
+  }
+
   public final class WifiClient implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.net.MacAddress getMacAddress();
