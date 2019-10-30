@@ -67,13 +67,11 @@ public class SystemUIService extends Service {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (args != null && args.length > 0 && args[0].equals("--config")) {
-            dumpConfig(pw);
-            return;
-        }
-
         dumpServices(((SystemUIApplication) getApplication()).getServices(), fd, pw, args);
-        dumpConfig(pw);
+
+        if (args == null || args.length == 0 || args[0].equals("--config")) {
+            dumpConfig(pw);
+        }
     }
 
     static void dumpServices(
