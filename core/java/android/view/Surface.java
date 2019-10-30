@@ -23,7 +23,6 @@ import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
-import android.graphics.HardwareRenderer;
 import android.graphics.Matrix;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
@@ -926,7 +925,7 @@ public class Surface implements Parcelable {
 
     private final class HwuiContext {
         private final RenderNode mRenderNode;
-        private HardwareRenderer mHardwareRenderer;
+        private long mHwuiRenderer;
         private RecordingCanvas mCanvas;
         private final boolean mIsWideColorGamut;
 
@@ -935,12 +934,8 @@ public class Surface implements Parcelable {
             mRenderNode.setClipToBounds(false);
             mRenderNode.setForceDarkAllowed(false);
             mIsWideColorGamut = isWideColorGamut;
-            mHardwareRenderer = new HardwareRenderer();
-            mHardwareRenderer.setSurface(Surface.this, true);
-            mHardwareRenderer.loadSystemProperties();
-            mHardwareRenderer.setWideGamut(isWideColorGamut);
-            mHardwareRenderer.setLightSourceAlpha(0.0f, 0.0f);
-            mHardwareRenderer.setLightSourceGeometry(0.0f, 0.0f, 0.0f, 0.0f);
+            mHwuiRenderer = nHwuiCreate(mRenderNode.mNativeRenderNode, mNativeObject,
+                    isWideColorGamut);
         }
 
         Canvas lockCanvas(int width, int height) {
@@ -958,20 +953,27 @@ public class Surface implements Parcelable {
             }
             mRenderNode.endRecording();
             mCanvas = null;
-            mHardwareRenderer.drawRenderNode(mRenderNode);
-            // TODO unable to set FrameInfoFlags::SurfaceCanvas on the draw
+            nHwuiDraw(mHwuiRenderer);
         }
 
         void updateSurface() {
-            mHardwareRenderer.setSurface(Surface.this);
+            nHwuiSetSurface(mHwuiRenderer, mNativeObject);
         }
 
         void destroy() {
-            mHardwareRenderer.destroy();
+            if (mHwuiRenderer != 0) {
+                nHwuiDestroy(mHwuiRenderer);
+                mHwuiRenderer = 0;
+            }
         }
 
         boolean isWideColorGamut() {
             return mIsWideColorGamut;
         }
     }
+
+    private static native long nHwuiCreate(long rootNode, long surface, boolean isWideColorGamut);
+    private static native void nHwuiSetSurface(long renderer, long surface);
+    private static native void nHwuiDraw(long renderer);
+    private static native void nHwuiDestroy(long renderer);
 }
