@@ -230,7 +230,7 @@ public class LocationManager {
     public static final String METADATA_SETTINGS_FOOTER_STRING =
             "com.android.settings.location.FOOTER_STRING";
 
-    private static final long GET_CURRENT_LOCATION_TIMEOUT_MS = 30 * 1000;
+    private static final long GET_CURRENT_LOCATION_MAX_TIMEOUT_MS = 30 * 1000;
 
     private final Context mContext;
 
@@ -630,7 +630,10 @@ public class LocationManager {
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Location> consumer) {
         LocationRequest currentLocationRequest = new LocationRequest(locationRequest)
-                .setNumUpdates(1).setExpireIn(GET_CURRENT_LOCATION_TIMEOUT_MS);
+                .setNumUpdates(1);
+        if (currentLocationRequest.getExpireIn() > GET_CURRENT_LOCATION_MAX_TIMEOUT_MS) {
+            currentLocationRequest.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
+        }
 
         GetCurrentLocationTransport listenerTransport = new GetCurrentLocationTransport(executor,
                 consumer);
@@ -684,6 +687,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 provider, 0, 0, true);
+        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
         requestLocationUpdates(request, listener, looper);
     }
 
@@ -714,6 +718,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
                 criteria, 0, 0, true);
+        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
         requestLocationUpdates(request, listener, looper);
     }
 
@@ -740,6 +745,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 provider, 0, 0, true);
+        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
         requestLocationUpdates(request, pendingIntent);
     }
 
@@ -767,6 +773,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
                 criteria, 0, 0, true);
+        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
         requestLocationUpdates(request, pendingIntent);
     }
 
@@ -2422,7 +2429,7 @@ public class LocationManager {
             mAlarmManager = alarmManager;
             mAlarmManager.set(
                     ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + GET_CURRENT_LOCATION_TIMEOUT_MS,
+                    SystemClock.elapsedRealtime() + GET_CURRENT_LOCATION_MAX_TIMEOUT_MS,
                     "GetCurrentLocation",
                     this,
                     null);
