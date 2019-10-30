@@ -508,7 +508,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.insert(resolveCallingPackage(), mUri, mContentValues);
+            provider.insert(resolveCallingPackage(), null, mUri, mContentValues);
         }
     }
 
@@ -522,7 +522,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.delete(resolveCallingPackage(), mUri, mWhere, null);
+            provider.delete(resolveCallingPackage(), null, mUri, mWhere, null);
         }
     }
 
@@ -557,7 +557,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Bundle result = provider.call(null, mUri.getAuthority(), mMethod, mArg, mExtras);
+            Bundle result = provider.call(null, null, mUri.getAuthority(), mMethod, mArg, mExtras);
             if (result != null) {
                 result.size(); // unpack
             }
@@ -584,7 +584,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            try (ParcelFileDescriptor fd = provider.openFile(null, mUri, "r", null, null)) {
+            try (ParcelFileDescriptor fd = provider.openFile(null, null, mUri, "r", null, null)) {
                 FileUtils.copy(fd.getFileDescriptor(), FileDescriptor.out);
             }
         }
@@ -597,7 +597,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            try (ParcelFileDescriptor fd = provider.openFile(null, mUri, "w", null, null)) {
+            try (ParcelFileDescriptor fd = provider.openFile(null, null, mUri, "w", null, null)) {
                 FileUtils.copy(FileDescriptor.in, fd.getFileDescriptor());
             }
         }
@@ -616,7 +616,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Cursor cursor = provider.query(resolveCallingPackage(), mUri, mProjection,
+            Cursor cursor = provider.query(resolveCallingPackage(), null, mUri, mProjection,
                     ContentResolver.createSqlQueryBundle(mWhere, null, mSortOrder), null);
             if (cursor == null) {
                 System.out.println("No result found.");
@@ -679,7 +679,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.update(resolveCallingPackage(), mUri, mContentValues, mWhere, null);
+            provider.update(resolveCallingPackage(), null, mUri, mContentValues, mWhere, null);
         }
     }
 

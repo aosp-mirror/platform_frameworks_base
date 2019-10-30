@@ -82,7 +82,8 @@ public class ContentResolverTest {
 
         final AssetFileDescriptor afd = new AssetFileDescriptor(
                 new ParcelFileDescriptor(mImage.getFileDescriptor()), 0, mSize, null);
-        when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any())).thenReturn(afd);
+        when(mProvider.openTypedAssetFile(any(), any(), any(), any(), any(), any())).thenReturn(
+                afd);
     }
 
     private static void assertImageAspectAndContents(Bitmap bitmap) {

@@ -83,6 +83,7 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     data.enforceInterface(IContentProvider.descriptor);
 
                     String callingPkg = data.readString();
+                    String callingFeatureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
 
                     // String[] projection
@@ -101,7 +102,8 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     ICancellationSignal cancellationSignal = ICancellationSignal.Stub.asInterface(
                             data.readStrongBinder());
 
-                    Cursor cursor = query(callingPkg, url, projection, queryArgs, cancellationSignal);
+                    Cursor cursor = query(callingPkg, callingFeatureId, url, projection, queryArgs,
+                            cancellationSignal);
                     if (cursor != null) {
                         CursorToBulkCursorAdaptor adaptor = null;
 
@@ -148,10 +150,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     ContentValues values = ContentValues.CREATOR.createFromParcel(data);
 
-                    Uri out = insert(callingPkg, url, values);
+                    Uri out = insert(callingPkg, featureId, url, values);
                     reply.writeNoException();
                     Uri.writeToParcel(reply, out);
                     return true;
@@ -161,10 +164,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     ContentValues[] values = data.createTypedArray(ContentValues.CREATOR);
 
-                    int count = bulkInsert(callingPkg, url, values);
+                    int count = bulkInsert(callingPkg, featureId, url, values);
                     reply.writeNoException();
                     reply.writeInt(count);
                     return true;
@@ -174,6 +178,7 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     String authority = data.readString();
                     final int numOperations = data.readInt();
                     final ArrayList<ContentProviderOperation> operations =
@@ -181,8 +186,8 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     for (int i = 0; i < numOperations; i++) {
                         operations.add(i, ContentProviderOperation.CREATOR.createFromParcel(data));
                     }
-                    final ContentProviderResult[] results = applyBatch(callingPkg, authority,
-                            operations);
+                    final ContentProviderResult[] results = applyBatch(callingPkg, featureId,
+                            authority, operations);
                     reply.writeNoException();
                     reply.writeTypedArray(results, 0);
                     return true;
@@ -192,11 +197,12 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     String selection = data.readString();
                     String[] selectionArgs = data.readStringArray();
 
-                    int count = delete(callingPkg, url, selection, selectionArgs);
+                    int count = delete(callingPkg, featureId, url, selection, selectionArgs);
 
                     reply.writeNoException();
                     reply.writeInt(count);
@@ -207,12 +213,14 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     ContentValues values = ContentValues.CREATOR.createFromParcel(data);
                     String selection = data.readString();
                     String[] selectionArgs = data.readStringArray();
 
-                    int count = update(callingPkg, url, values, selection, selectionArgs);
+                    int count = update(callingPkg, featureId, url, values, selection,
+                            selectionArgs);
 
                     reply.writeNoException();
                     reply.writeInt(count);
@@ -223,6 +231,7 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     String mode = data.readString();
                     ICancellationSignal signal = ICancellationSignal.Stub.asInterface(
@@ -230,7 +239,7 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     IBinder callerToken = data.readStrongBinder();
 
                     ParcelFileDescriptor fd;
-                    fd = openFile(callingPkg, url, mode, signal, callerToken);
+                    fd = openFile(callingPkg, featureId, url, mode, signal, callerToken);
                     reply.writeNoException();
                     if (fd != null) {
                         reply.writeInt(1);
@@ -246,13 +255,14 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     String mode = data.readString();
                     ICancellationSignal signal = ICancellationSignal.Stub.asInterface(
                             data.readStrongBinder());
 
                     AssetFileDescriptor fd;
-                    fd = openAssetFile(callingPkg, url, mode, signal);
+                    fd = openAssetFile(callingPkg, featureId, url, mode, signal);
                     reply.writeNoException();
                     if (fd != null) {
                         reply.writeInt(1);
@@ -269,12 +279,14 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     data.enforceInterface(IContentProvider.descriptor);
 
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     String authority = data.readString();
                     String method = data.readString();
                     String stringArg = data.readString();
                     Bundle args = data.readBundle();
 
-                    Bundle responseBundle = call(callingPkg, authority, method, stringArg, args);
+                    Bundle responseBundle = call(callingPkg, featureId, authority, method,
+                            stringArg, args);
 
                     reply.writeNoException();
                     reply.writeBundle(responseBundle);
@@ -297,6 +309,7 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     String mimeType = data.readString();
                     Bundle opts = data.readBundle();
@@ -304,7 +317,7 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                             data.readStrongBinder());
 
                     AssetFileDescriptor fd;
-                    fd = openTypedAssetFile(callingPkg, url, mimeType, opts, signal);
+                    fd = openTypedAssetFile(callingPkg, featureId, url, mimeType, opts, signal);
                     reply.writeNoException();
                     if (fd != null) {
                         reply.writeInt(1);
@@ -330,9 +343,10 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
 
-                    Uri out = canonicalize(callingPkg, url);
+                    Uri out = canonicalize(callingPkg, featureId, url);
                     reply.writeNoException();
                     Uri.writeToParcel(reply, out);
                     return true;
@@ -342,9 +356,10 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
 
-                    Uri out = uncanonicalize(callingPkg, url);
+                    Uri out = uncanonicalize(callingPkg, featureId, url);
                     reply.writeNoException();
                     Uri.writeToParcel(reply, out);
                     return true;
@@ -353,12 +368,13 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 case REFRESH_TRANSACTION: {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     Bundle args = data.readBundle();
                     ICancellationSignal signal = ICancellationSignal.Stub.asInterface(
                             data.readStrongBinder());
 
-                    boolean out = refresh(callingPkg, url, args, signal);
+                    boolean out = refresh(callingPkg, featureId, url, args, signal);
                     reply.writeNoException();
                     reply.writeInt(out ? 0 : -1);
                     return true;
@@ -367,11 +383,12 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                 case CHECK_URI_PERMISSION_TRANSACTION: {
                     data.enforceInterface(IContentProvider.descriptor);
                     String callingPkg = data.readString();
+                    String featureId = data.readString();
                     Uri uri = Uri.CREATOR.createFromParcel(data);
                     int uid = data.readInt();
                     int modeFlags = data.readInt();
 
-                    int out = checkUriPermission(callingPkg, uri, uid, modeFlags);
+                    int out = checkUriPermission(callingPkg, featureId, uri, uid, modeFlags);
                     reply.writeNoException();
                     reply.writeInt(out);
                     return true;
@@ -407,8 +424,9 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public Cursor query(String callingPkg, Uri url, @Nullable String[] projection,
-            @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal)
+    public Cursor query(String callingPkg, @Nullable String featureId, Uri url,
+            @Nullable String[] projection, @Nullable Bundle queryArgs,
+            @Nullable ICancellationSignal cancellationSignal)
             throws RemoteException {
         BulkCursorToCursorAdaptor adaptor = new BulkCursorToCursorAdaptor();
         Parcel data = Parcel.obtain();
@@ -417,6 +435,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             int length = 0;
             if (projection != null) {
@@ -478,7 +497,8 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public Uri insert(String callingPkg, Uri url, ContentValues values) throws RemoteException
+    public Uri insert(String callingPkg, @Nullable String featureId, Uri url,
+            ContentValues values) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -486,6 +506,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             values.writeToParcel(data, 0);
 
@@ -501,13 +522,15 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public int bulkInsert(String callingPkg, Uri url, ContentValues[] values) throws RemoteException {
+    public int bulkInsert(String callingPkg, @Nullable String featureId, Uri url,
+            ContentValues[] values) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             data.writeTypedArray(values, 0);
 
@@ -523,14 +546,15 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public ContentProviderResult[] applyBatch(String callingPkg, String authority,
-            ArrayList<ContentProviderOperation> operations)
-                    throws RemoteException, OperationApplicationException {
+    public ContentProviderResult[] applyBatch(String callingPkg, @Nullable String featureId,
+            String authority, ArrayList<ContentProviderOperation> operations)
+            throws RemoteException, OperationApplicationException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
             data.writeString(callingPkg);
+            data.writeString(featureId);
             data.writeString(authority);
             data.writeInt(operations.size());
             for (ContentProviderOperation operation : operations) {
@@ -549,14 +573,15 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public int delete(String callingPkg, Uri url, String selection, String[] selectionArgs)
-            throws RemoteException {
+    public int delete(String callingPkg, @Nullable String featureId, Uri url, String selection,
+            String[] selectionArgs) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             data.writeString(selection);
             data.writeStringArray(selectionArgs);
@@ -573,14 +598,15 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public int update(String callingPkg, Uri url, ContentValues values, String selection,
-            String[] selectionArgs) throws RemoteException {
+    public int update(String callingPkg, @Nullable String featureId, Uri url,
+            ContentValues values, String selection, String[] selectionArgs) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             values.writeToParcel(data, 0);
             data.writeString(selection);
@@ -598,8 +624,8 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public ParcelFileDescriptor openFile(
-            String callingPkg, Uri url, String mode, ICancellationSignal signal, IBinder token)
+    public ParcelFileDescriptor openFile(String callingPkg, @Nullable String featureId, Uri url,
+            String mode, ICancellationSignal signal, IBinder token)
             throws RemoteException, FileNotFoundException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -607,6 +633,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             data.writeString(mode);
             data.writeStrongBinder(signal != null ? signal.asBinder() : null);
@@ -626,8 +653,8 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public AssetFileDescriptor openAssetFile(
-            String callingPkg, Uri url, String mode, ICancellationSignal signal)
+    public AssetFileDescriptor openAssetFile(String callingPkg, @Nullable String featureId,
+            Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -635,6 +662,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             data.writeString(mode);
             data.writeStrongBinder(signal != null ? signal.asBinder() : null);
@@ -653,14 +681,15 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public Bundle call(String callingPkg, String authority, String method, String request,
-            Bundle args) throws RemoteException {
+    public Bundle call(String callingPkg, @Nullable String featureId, String authority,
+            String method, String request, Bundle args) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             data.writeString(authority);
             data.writeString(method);
             data.writeString(request);
@@ -700,14 +729,16 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri url, String mimeType,
-            Bundle opts, ICancellationSignal signal) throws RemoteException, FileNotFoundException {
+    public AssetFileDescriptor openTypedAssetFile(String callingPkg, @Nullable String featureId,
+            Uri url, String mimeType, Bundle opts, ICancellationSignal signal)
+            throws RemoteException, FileNotFoundException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             data.writeString(mimeType);
             data.writeBundle(opts);
@@ -747,14 +778,15 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public Uri canonicalize(String callingPkg, Uri url) throws RemoteException
-    {
+    public Uri canonicalize(String callingPkg, @Nullable String featureId, Uri url)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
 
             mRemote.transact(IContentProvider.CANONICALIZE_TRANSACTION, data, reply, 0);
@@ -769,13 +801,15 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public Uri uncanonicalize(String callingPkg, Uri url) throws RemoteException {
+    public Uri uncanonicalize(String callingPkg, @Nullable String featureId, Uri url)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
 
             mRemote.transact(IContentProvider.UNCANONICALIZE_TRANSACTION, data, reply, 0);
@@ -790,14 +824,15 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public boolean refresh(String callingPkg, Uri url, Bundle args, ICancellationSignal signal)
-            throws RemoteException {
+    public boolean refresh(String callingPkg, @Nullable String featureId, Uri url, Bundle args,
+            ICancellationSignal signal) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             data.writeBundle(args);
             data.writeStrongBinder(signal != null ? signal.asBinder() : null);
@@ -814,14 +849,15 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public int checkUriPermission(String callingPkg, Uri url, int uid, int modeFlags)
-            throws RemoteException {
+    public int checkUriPermission(String callingPkg, @Nullable String featureId, Uri url, int uid,
+            int modeFlags) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
             data.writeInterfaceToken(IContentProvider.descriptor);
 
             data.writeString(callingPkg);
+            data.writeString(featureId);
             url.writeToParcel(data, 0);
             data.writeInt(uid);
             data.writeInt(modeFlags);

@@ -62,7 +62,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
-
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
 import android.util.ArrayMap;
@@ -162,11 +161,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(testContentProvider.getIContentProvider()).thenReturn(mTestIContentProvider);
         contentResolver.addProvider(TEST_AUTHORITY, testContentProvider);
 
-        when(mTestIContentProvider.canonicalize(any(), eq(SOUND_URI)))
+        when(mTestIContentProvider.canonicalize(any(), any(), eq(SOUND_URI)))
                 .thenReturn(CANONICAL_SOUND_URI);
-        when(mTestIContentProvider.canonicalize(any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.canonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(CANONICAL_SOUND_URI);
-        when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(SOUND_URI);
 
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0,
@@ -465,7 +464,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         // Testing that in restore we are given the canonical version
         loadStreamXml(baos, true, UserHandle.USER_SYSTEM);
-        verify(mTestIContentProvider).uncanonicalize(any(), eq(CANONICAL_SOUND_URI));
+        verify(mTestIContentProvider).uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI));
     }
 
     @Test
@@ -475,11 +474,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .appendQueryParameter("title", "Test")
                 .appendQueryParameter("canonical", "1")
                 .build();
-        when(mTestIContentProvider.canonicalize(any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.canonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(canonicalBasedOnLocal);
-        when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(localUri);
-        when(mTestIContentProvider.uncanonicalize(any(), eq(canonicalBasedOnLocal)))
+        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(canonicalBasedOnLocal)))
                 .thenReturn(localUri);
 
         NotificationChannel channel =
@@ -499,9 +498,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testRestoreXml_withNonExistentCanonicalizedSoundUri() throws Exception {
         Thread.sleep(3000);
-        when(mTestIContentProvider.canonicalize(any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.canonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(null);
-        when(mTestIContentProvider.uncanonicalize(any(), eq(CANONICAL_SOUND_URI)))
+        when(mTestIContentProvider.uncanonicalize(any(), any(), eq(CANONICAL_SOUND_URI)))
                 .thenReturn(null);
 
         NotificationChannel channel =
@@ -526,7 +525,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testRestoreXml_withUncanonicalizedNonLocalSoundUri() throws Exception {
         // Not a local uncanonicalized uri, simulating that it fails to exist locally
-        when(mTestIContentProvider.canonicalize(any(), eq(SOUND_URI))).thenReturn(null);
+        when(mTestIContentProvider.canonicalize(any(), any(), eq(SOUND_URI))).thenReturn(null);
         String id = "id";
         String backupWithUncanonicalizedSoundUri = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_N_MR1 + "\" show_badge=\"true\">\n"

@@ -649,6 +649,7 @@ public abstract class ContentResolver implements ContentInterface {
     public ContentResolver(@Nullable Context context, @Nullable ContentInterface wrapped) {
         mContext = context != null ? context : ActivityThread.currentApplication();
         mPackageName = mContext.getOpPackageName();
+        mFeatureId = mContext.getFeatureId();
         mTargetSdkVersion = mContext.getApplicationInfo().targetSdkVersion;
         mWrapped = wrapped;
     }
@@ -968,7 +969,7 @@ public abstract class ContentResolver implements ContentInterface {
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
             try {
-                qCursor = unstableProvider.query(mPackageName, uri, projection,
+                qCursor = unstableProvider.query(mPackageName, mFeatureId, uri, projection,
                         queryArgs, remoteCancellationSignal);
             } catch (DeadObjectException e) {
                 // The remote process has died...  but we only hold an unstable
@@ -979,8 +980,8 @@ public abstract class ContentResolver implements ContentInterface {
                 if (stableProvider == null) {
                     return null;
                 }
-                qCursor = stableProvider.query(
-                        mPackageName, uri, projection, queryArgs, remoteCancellationSignal);
+                qCursor = stableProvider.query(mPackageName, mFeatureId, uri, projection,
+                        queryArgs, remoteCancellationSignal);
             }
             if (qCursor == null) {
                 return null;
@@ -1070,7 +1071,7 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         try {
-            return provider.canonicalize(mPackageName, url);
+            return provider.canonicalize(mPackageName, mFeatureId, url);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -1114,7 +1115,7 @@ public abstract class ContentResolver implements ContentInterface {
         }
 
         try {
-            return provider.uncanonicalize(mPackageName, url);
+            return provider.uncanonicalize(mPackageName, mFeatureId, url);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -1163,7 +1164,8 @@ public abstract class ContentResolver implements ContentInterface {
                 remoteCancellationSignal = provider.createCancellationSignal();
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
-            return provider.refresh(mPackageName, url, args, remoteCancellationSignal);
+            return provider.refresh(mPackageName, mFeatureId, url, args,
+                    remoteCancellationSignal);
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
@@ -1564,7 +1566,7 @@ public abstract class ContentResolver implements ContentInterface {
 
                     try {
                         fd = unstableProvider.openAssetFile(
-                                mPackageName, uri, mode, remoteCancellationSignal);
+                                mPackageName, mFeatureId, uri, mode, remoteCancellationSignal);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
@@ -1579,7 +1581,7 @@ public abstract class ContentResolver implements ContentInterface {
                             throw new FileNotFoundException("No content provider: " + uri);
                         }
                         fd = stableProvider.openAssetFile(
-                                mPackageName, uri, mode, remoteCancellationSignal);
+                                mPackageName, mFeatureId, uri, mode, remoteCancellationSignal);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
@@ -1730,7 +1732,7 @@ public abstract class ContentResolver implements ContentInterface {
 
             try {
                 fd = unstableProvider.openTypedAssetFile(
-                        mPackageName, uri, mimeType, opts, remoteCancellationSignal);
+                        mPackageName, mFeatureId, uri, mimeType, opts, remoteCancellationSignal);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
                     return null;
@@ -1745,7 +1747,7 @@ public abstract class ContentResolver implements ContentInterface {
                     throw new FileNotFoundException("No content provider: " + uri);
                 }
                 fd = stableProvider.openTypedAssetFile(
-                        mPackageName, uri, mimeType, opts, remoteCancellationSignal);
+                        mPackageName, mFeatureId, uri, mimeType, opts, remoteCancellationSignal);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
                     return null;
@@ -1870,7 +1872,7 @@ public abstract class ContentResolver implements ContentInterface {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            Uri createdRow = provider.insert(mPackageName, url, values);
+            Uri createdRow = provider.insert(mPackageName, mFeatureId, url, values);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "insert", null /* where */);
             return createdRow;
@@ -1951,7 +1953,7 @@ public abstract class ContentResolver implements ContentInterface {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            int rowsCreated = provider.bulkInsert(mPackageName, url, values);
+            int rowsCreated = provider.bulkInsert(mPackageName, mFeatureId, url, values);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "bulkinsert", null /* where */);
             return rowsCreated;
@@ -1991,7 +1993,8 @@ public abstract class ContentResolver implements ContentInterface {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            int rowsDeleted = provider.delete(mPackageName, url, where, selectionArgs);
+            int rowsDeleted = provider.delete(mPackageName, mFeatureId, url, where,
+                    selectionArgs);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, url, "delete", where);
             return rowsDeleted;
@@ -2035,7 +2038,8 @@ public abstract class ContentResolver implements ContentInterface {
         }
         try {
             long startTime = SystemClock.uptimeMillis();
-            int rowsUpdated = provider.update(mPackageName, uri, values, where, selectionArgs);
+            int rowsUpdated = provider.update(mPackageName, mFeatureId, uri, values, where,
+                    selectionArgs);
             long durationMillis = SystemClock.uptimeMillis() - startTime;
             maybeLogUpdateToEventLog(durationMillis, uri, "update", where);
             return rowsUpdated;
@@ -2084,7 +2088,8 @@ public abstract class ContentResolver implements ContentInterface {
             throw new IllegalArgumentException("Unknown authority " + authority);
         }
         try {
-            final Bundle res = provider.call(mPackageName, authority, method, arg, extras);
+            final Bundle res = provider.call(mPackageName, mFeatureId, authority, method, arg,
+                    extras);
             Bundle.setDefusable(res, true);
             return res;
         } catch (RemoteException e) {
@@ -3436,6 +3441,11 @@ public abstract class ContentResolver implements ContentInterface {
         return mPackageName;
     }
 
+    /** @hide */
+    public @Nullable String getFeatureId() {
+        return mFeatureId;
+    }
+
     @UnsupportedAppUsage
     private static volatile IContentService sContentService;
     @UnsupportedAppUsage
@@ -3443,6 +3453,7 @@ public abstract class ContentResolver implements ContentInterface {
 
     @UnsupportedAppUsage
     final String mPackageName;
+    final @Nullable String mFeatureId;
     final int mTargetSdkVersion;
     final ContentInterface mWrapped;
 
