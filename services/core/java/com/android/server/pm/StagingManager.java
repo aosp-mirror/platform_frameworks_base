@@ -21,10 +21,12 @@ import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
@@ -73,12 +75,16 @@ public class StagingManager {
     private final PackageInstallerService mPi;
     private final ApexManager mApexManager;
     private final PowerManager mPowerManager;
+    private final Context mContext;
     private final Handler mBgHandler;
+    private PackageInstallerSession mPendingSession;
+    private boolean mIsReady;
 
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
     StagingManager(PackageInstallerService pi, ApexManager am, Context context) {
+        mContext = context;
         mPi = pi;
         mApexManager = am;
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -204,6 +210,11 @@ public class StagingManager {
 
     private void preRebootVerification(@NonNull PackageInstallerSession session) {
         try {
+            if (!mIsReady) {
+                mPendingSession = session;
+                return;
+            }
+
             boolean success = true;
 
             final ApexInfoList apexInfoList = new ApexInfoList();
@@ -688,6 +699,28 @@ public class StagingManager {
                         "Staged install failed due to unhandled exception: " + e));
 
             }
+        }
+    }
+
+    void systemReady() {
+        // Register the receiver of boot completed intent for staging manager.
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context ctx, Intent intent) {
+                readyToStart();
+                ctx.unregisterReceiver(this);
+            }
+        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+    }
+
+    // Notify the handler that system is ready, and reschedule the pre-reboot verifications.
+    private synchronized void readyToStart() {
+        mIsReady = true;
+        if (mPendingSession != null) {
+            mBgHandler.post(() -> {
+                preRebootVerification(mPendingSession);
+                mPendingSession = null;
+            });
         }
     }
 
