@@ -759,6 +759,46 @@ cc_library {
     },
 }
 
+filegroup {
+    name: "incremental_aidl",
+    srcs: [
+        "core/java/android/os/incremental/IIncrementalService.aidl",
+        "core/java/android/os/incremental/IIncrementalServiceProxy.aidl",
+        "core/java/android/os/incremental/IncrementalDataLoaderParamsParcel.aidl",
+        "core/java/android/os/incremental/IncrementalFileSystemControlParcel.aidl",
+        "core/java/android/os/incremental/NamedParcelFileDescriptor.aidl",
+    ],
+    path: "core/java",
+}
+
+filegroup {
+    name: "incremental_data_loader_aidl",
+    srcs: [
+        "core/java/android/service/incremental/IIncrementalDataLoaderStatusListener.aidl",
+        "core/java/android/service/incremental/IIncrementalDataLoaderService.aidl",
+    ],
+    path: "core/java",
+}
+
+aidl_interface {
+    name: "libincremental_aidl",
+    srcs: [
+        ":incremental_aidl",
+        ":incremental_data_loader_aidl",
+    ],
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+        cpp: {
+            enabled: true,
+        },
+        ndk: {
+            enabled: true,
+        },
+    },
+    api_dir: "aidl/incremental",
+}
 
 gensrcs {
     name: "gen-platform-proto-constants",
