@@ -2751,8 +2751,18 @@ public class UserManagerService extends IUserManager.Stub {
             }
             if (preCreatedUserData != null) {
                 final UserInfo preCreatedUser = preCreatedUserData.info;
-                Log.i(LOG_TAG, "Reusing pre-created user " + preCreatedUser.id + " for flags + "
-                        + UserInfo.flagsToString(flags));
+                if (UserInfo.isGuest(flags) && areGuestUsersEphemeral()) {
+                    // TODO(b/143092698): this pre-created user has (persisted) storage keys
+                    // that will be removed when the user is stopped and ideally we should
+                    // remove them from storage right now, but that's not possible with the
+                    // current StorageManager APIs (there are just a
+                    // createUserKey(userId, serial, isEphemeral) and destroyUserKey(userId)
+                    // methods; we would need a makeUserKeyEphemeral(userId) method)
+                    preCreatedUserData.info.flags |= UserInfo.FLAG_EPHEMERAL;
+                }
+                Log.i(LOG_TAG, "Reusing pre-created user " + preCreatedUser.id + " for flags "
+                        + UserInfo.flagsToString(flags) + "; new flags: "
+                        + UserInfo.flagsToString(preCreatedUserData.info.flags));
                 if (DBG) {
                     Log.d(LOG_TAG, "pre-created user flags: "
                             + UserInfo.flagsToString(preCreatedUser.flags)
@@ -2845,8 +2855,9 @@ public class UserManagerService extends IUserManager.Stub {
 
                 synchronized (mUsersLock) {
                     // Add ephemeral flag to guests/users if required. Also inherit it from parent.
-                    if ((isGuest && ephemeralGuests) || mForceEphemeralUsers
-                            || (parent != null && parent.info.isEphemeral())) {
+                    if (!preCreate && ((isGuest && ephemeralGuests)
+                            || mForceEphemeralUsers
+                            || (parent != null && parent.info.isEphemeral()))) {
                         flags |= UserInfo.FLAG_EPHEMERAL;
                     }
 
@@ -2966,13 +2977,7 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mUsersLock")
     private @Nullable UserData getPreCreatedUserLU(@UserInfoFlag int flags) {
         if (DBG) {
-            Slog.d(LOG_TAG, "getPreCreatedUser(): initialFlags= " + UserInfo.flagsToString(flags));
-        }
-        if (UserInfo.isGuest(flags) && areGuestUsersEphemeral()) {
-            flags |= UserInfo.FLAG_EPHEMERAL;
-        }
-        if (DBG) {
-            Slog.d(LOG_TAG, "getPreCreatedUser(): targetFlags= " + UserInfo.flagsToString(flags));
+            Slog.d(LOG_TAG, "getPreCreatedUser(): flags= " + UserInfo.flagsToString(flags));
         }
         final int userSize = mUsers.size();
         for (int i = 0; i < userSize; i++) {
