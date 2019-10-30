@@ -25,10 +25,13 @@
 
 #pragma GCC diagnostic ignored "-Wunused-function"
 
+using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
+using ::android::hardware::tv::tuner::V1_0::Result;
 
 struct fields_t {
     jfieldID context;
+    jmethodID frontendInitID;
 };
 
 static fields_t gFields;
@@ -69,6 +72,50 @@ sp<ITuner> JTuner::getTunerService() {
     return mTuner;
 }
 
+jobject JTuner::getFrontendIds() {
+    ALOGD("JTuner::getFrontendIds()");
+    hidl_vec<FrontendId> feIds;
+    mTuner->getFrontendIds([&](Result, const hidl_vec<FrontendId>& frontendIds) {
+        feIds = frontendIds;
+    });
+    if (feIds.size() == 0) {
+        ALOGW("Frontend isn't available");
+        return NULL;
+    }
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass arrayListClazz = env->FindClass("java/util/ArrayList");
+    jmethodID arrayListAdd = env->GetMethodID(arrayListClazz, "add", "(Ljava/lang/Object;)Z");
+    jobject obj = env->NewObject(arrayListClazz, env->GetMethodID(arrayListClazz, "<init>", "()V"));
+
+    jclass integerClazz = env->FindClass("java/lang/Integer");
+    jmethodID intInit = env->GetMethodID(integerClazz, "<init>", "(I)V");
+
+    for (int i=0; i < feIds.size(); i++) {
+       jobject idObj = env->NewObject(integerClazz, intInit, feIds[i]);
+       env->CallBooleanMethod(obj, arrayListAdd, idObj);
+    }
+    return obj;
+}
+
+jobject JTuner::openFrontendById(int id) {
+    mTuner->openFrontendById(id, [&](Result, const sp<IFrontend>& frontend) {
+        mFe = frontend;
+    });
+    if (mFe == nullptr) {
+        ALOGE("Failed to open frontend");
+        return NULL;
+    }
+
+    jint jId = (jint) id;
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    // TODO: add more fields to frontend
+    return env->NewObject(
+            env->FindClass("android/media/tv/tuner/Tuner$Frontend"),
+            gFields.frontendInitID,
+            (jint) jId);
+}
+
 }  // namespace android
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -99,6 +146,9 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
 
     gFields.context = env->GetFieldID(clazz, "mNativeContext", "J");
     CHECK(gFields.context != NULL);
+
+    jclass frontendClazz = env->FindClass("android/media/tv/tuner/Tuner$Frontend");
+    gFields.frontendInitID = env->GetMethodID(frontendClazz, "<init>", "(I)V");
 }
 
 static void android_media_tv_Tuner_native_setup(JNIEnv *env, jobject thiz) {
@@ -106,9 +156,23 @@ static void android_media_tv_Tuner_native_setup(JNIEnv *env, jobject thiz) {
     setTuner(env,thiz, tuner);
 }
 
+static jobject android_media_tv_Tuner_get_frontend_ids(JNIEnv *env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->getFrontendIds();
+}
+
+static jobject android_media_tv_Tuner_open_frontend_by_id(JNIEnv *env, jobject thiz, jint id) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->openFrontendById(id);
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeInit", "()V", (void *)android_media_tv_Tuner_native_init },
     { "nativeSetup", "()V", (void *)android_media_tv_Tuner_native_setup },
+    { "nativeGetFrontendIds", "()Ljava/util/List;",
+            (void *)android_media_tv_Tuner_get_frontend_ids },
+    { "nativeOpenFrontendById", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
+            (void *)android_media_tv_Tuner_open_frontend_by_id },
 };
 
 static int register_android_media_tv_Tuner(JNIEnv *env) {
