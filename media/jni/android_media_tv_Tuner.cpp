@@ -31,6 +31,9 @@ using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
 using ::android::hardware::tv::tuner::V1_0::DemuxMmtpPid;
 using ::android::hardware::tv::tuner::V1_0::DemuxTpid;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
+using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSettings;
+using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSifStandard;
+using ::android::hardware::tv::tuner::V1_0::FrontendAnalogType;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
 using ::android::hardware::tv::tuner::V1_0::Result;
 
@@ -263,6 +266,15 @@ jobject JTuner::openLnbById(int id) {
             id);
 }
 
+int JTuner::tune(const FrontendSettings& settings) {
+    if (mFe == NULL) {
+        ALOGE("frontend is not initialized");
+        return (int)Result::INVALID_STATE;
+    }
+    Result result = mFe->tune(settings);
+    return (int)result;
+}
+
 bool JTuner::openDemux() {
     if (mTuner == nullptr) {
         return false;
@@ -417,6 +429,32 @@ static DemuxPid getDemuxPid(int pidType, int pid) {
     return demuxPid;
 }
 
+static FrontendSettings getFrontendSettings(JNIEnv *env, int type, jobject settings) {
+    FrontendSettings frontendSettings;
+    jclass clazz = env->FindClass("android/media/tv/tuner/FrontendSettings");
+    jfieldID freqField = env->GetFieldID(clazz, "frequency", "I");
+    uint32_t freq = static_cast<uint32_t>(env->GetIntField(clazz, freqField));
+
+    // TODO: handle the other 8 types of settings
+    if (type == 1) {
+        // analog
+        clazz = env->FindClass("android/media/tv/tuner/FrontendSettings$FrontendAnalogSettings");
+        FrontendAnalogType analogType =
+                static_cast<FrontendAnalogType>(
+                        env->GetIntField(settings, env->GetFieldID(clazz, "mAnalogType", "I")));
+        FrontendAnalogSifStandard sifStandard =
+                static_cast<FrontendAnalogSifStandard>(
+                        env->GetIntField(settings, env->GetFieldID(clazz, "mSifStandard", "I")));
+        FrontendAnalogSettings frontendAnalogSettings {
+                .frequency = freq,
+                .type = analogType,
+                .sifStandard = sifStandard,
+        };
+        frontendSettings.analog(frontendAnalogSettings);
+    }
+    return frontendSettings;
+}
+
 static sp<IFilter> getFilter(JNIEnv *env, jobject filter) {
     return (IFilter *)env->GetLongField(filter, gFields.filterContext);
 }
@@ -474,6 +512,11 @@ static jobject android_media_tv_Tuner_get_frontend_ids(JNIEnv *env, jobject thiz
 static jobject android_media_tv_Tuner_open_frontend_by_id(JNIEnv *env, jobject thiz, jint id) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->openFrontendById(id);
+}
+
+static int android_media_tv_Tuner_tune(JNIEnv *env, jobject thiz, jint type, jobject settings) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->tune(getFrontendSettings(env, type, settings));
 }
 
 static jobject android_media_tv_Tuner_get_lnb_ids(JNIEnv *env, jobject thiz) {
@@ -612,6 +655,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_get_frontend_ids },
     { "nativeOpenFrontendById", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
             (void *)android_media_tv_Tuner_open_frontend_by_id },
+    { "nativeTune", "(ILandroid/media/tv/tuner/FrontendSettings;)I",
+            (void *)android_media_tv_Tuner_tune },
     { "nativeOpenFilter", "(III)Landroid/media/tv/tuner/Tuner$Filter;",
             (void *)android_media_tv_Tuner_open_filter },
     { "nativeGetLnbIds", "()Ljava/util/List;",

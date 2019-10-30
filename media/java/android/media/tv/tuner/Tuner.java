@@ -16,6 +16,7 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.tv.tuner.TunerConstants.DemuxPidType;
 import android.os.Handler;
@@ -78,6 +79,7 @@ public final class Tuner implements AutoCloseable  {
      * Native method to open frontend of the given ID.
      */
     private native Frontend nativeOpenFrontendById(int id);
+    private native int nativeTune(int type, FrontendSettings settings);
 
     private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
 
@@ -205,6 +207,13 @@ public final class Tuner implements AutoCloseable  {
             }
             mHandler = new EventHandler(looper);
         }
+    }
+
+    /**
+     * Tunes the frontend to using the settings given.
+     */
+    public int tune(@NonNull FrontendSettings settings) {
+        return nativeTune(settings.getType(), settings);
     }
 
     private List<Integer> getFrontendIds() {
