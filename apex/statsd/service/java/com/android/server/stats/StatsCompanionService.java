@@ -1163,12 +1163,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 final WifiActivityEnergyInfo wifiInfo = awaitControllerInfo(wifiReceiver);
                 StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
                         wallClockNanos);
-                e.writeLong(wifiInfo.getTimeStamp());
+                e.writeLong(wifiInfo.getTimeSinceBootMillis());
                 e.writeInt(wifiInfo.getStackState());
-                e.writeLong(wifiInfo.getControllerTxTimeMillis());
-                e.writeLong(wifiInfo.getControllerRxTimeMillis());
-                e.writeLong(wifiInfo.getControllerIdleTimeMillis());
-                e.writeLong(wifiInfo.getControllerEnergyUsed());
+                e.writeLong(wifiInfo.getControllerTxDurationMillis());
+                e.writeLong(wifiInfo.getControllerRxDurationMillis());
+                e.writeLong(wifiInfo.getControllerIdleDurationMillis());
+                e.writeLong(wifiInfo.getControllerEnergyUsedMicroJoules());
                 pulledData.add(e);
             } catch (RemoteException e) {
                 Slog.e(TAG,
