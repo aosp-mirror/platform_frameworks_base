@@ -20,6 +20,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.provider.Settings;
 import android.view.View;
 
 import com.android.systemui.SysUiServiceProvider;
@@ -124,4 +125,13 @@ public class Utils {
                 && QuickStepContract.isGesturalMode(navMode);
     }
 
+    /**
+     * Allow the media player to be shown in the QS area, controlled by 2 flags.
+     */
+    public static boolean useQsMediaPlayer(Context context) {
+        int flag = Settings.System.getInt(context.getContentResolver(), "qs_media_player", 0);
+        flag |= Settings.System.getInt(context.getContentResolver(), "npv_plugin_flag", 0);
+
+        return flag > 0;
+    }
 }

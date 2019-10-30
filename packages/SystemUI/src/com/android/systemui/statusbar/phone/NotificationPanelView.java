@@ -109,6 +109,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
+import com.android.systemui.util.Utils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -769,8 +770,7 @@ public class NotificationPanelView extends PanelView implements
         int sideMargin = res.getDimensionPixelOffset(R.dimen.notification_side_paddings);
         int topMargin =
                 res.getDimensionPixelOffset(com.android.internal.R.dimen.quick_qs_total_height);
-        int flag = Settings.System.getInt(mContext.getContentResolver(), "qs_media_player", 0);
-        if (flag == 1) {
+        if (Utils.useQsMediaPlayer(mContext)) {
             topMargin = res.getDimensionPixelOffset(
                     com.android.internal.R.dimen.quick_qs_total_height_with_media);
         }

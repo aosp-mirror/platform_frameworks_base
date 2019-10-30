@@ -28,7 +28,6 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.metrics.LogMaker;
 import android.os.Handler;
-import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +47,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.util.Utils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -182,8 +182,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         final MediaSession.Token token = mRow.getEntry().getSbn().getNotification().extras
                 .getParcelable(Notification.EXTRA_MEDIA_SESSION);
 
-        int flag = Settings.System.getInt(mContext.getContentResolver(), "qs_media_player", 0);
-        if (flag == 1) {
+        if (Utils.useQsMediaPlayer(mContext)) {
             StatusBarWindowController ctrl = Dependency.get(StatusBarWindowController.class);
             QuickQSPanel panel = ctrl.getStatusBarView().findViewById(
                     com.android.systemui.R.id.quick_qs_panel);

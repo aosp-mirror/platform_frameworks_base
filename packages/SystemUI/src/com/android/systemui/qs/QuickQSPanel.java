@@ -21,7 +21,6 @@ import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEX
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -36,6 +35,7 @@ import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,8 +72,7 @@ public class QuickQSPanel extends QSPanel {
             removeView((View) mTileLayout);
         }
 
-        int flag = Settings.System.getInt(context.getContentResolver(), "qs_media_player", 0);
-        if (flag == 1) {
+        if (Utils.useQsMediaPlayer(context)) {
             LinearLayout mHorizontalLinearLayout = new LinearLayout(mContext);
             mHorizontalLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
             mHorizontalLinearLayout.setClipChildren(false);

@@ -18,6 +18,7 @@ package com.android.systemui.qs;
 
 import static com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -150,8 +151,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         addDivider();
 
         // Add media carousel
-        int flag = Settings.System.getInt(context.getContentResolver(), "qs_media_player", 0);
-        if (flag == 1) {
+        if (useQsMediaPlayer(context)) {
             HorizontalScrollView mediaScrollView = new HorizontalScrollView(mContext);
             mediaScrollView.setHorizontalScrollBarEnabled(false);
             int playerHeight = (int) getResources().getDimension(R.dimen.qs_media_height);
@@ -201,8 +201,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
      */
     public void addMediaSession(MediaSession.Token token, Icon icon, int iconColor, int bgColor,
             View actionsContainer, StatusBarNotification notif) {
-        int flag = Settings.System.getInt(mContext.getContentResolver(), "qs_media_player", 0);
-        if (flag != 1) {
+        if (!useQsMediaPlayer(mContext)) {
             // Shouldn't happen, but just in case
             Log.e(TAG, "Tried to add media session without player!");
             return;
