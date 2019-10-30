@@ -1537,6 +1537,10 @@ droidstubs {
             api_file: "api/test-current.txt",
             removed_api_file: "api/test-removed.txt",
         },
+        api_lint: {
+            enabled: true,
+            baseline_file: "api/test-lint-baseline.txt",
+        },
     },
 }
 
