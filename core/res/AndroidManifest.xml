@@ -2030,6 +2030,11 @@
     <!-- =========================================== -->
     <eat-comment />
 
+    <!-- @SystemApi Allows granting runtime permissions to telephony related components.
+         @hide Used internally. -->
+    <permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS"
+        android:protectionLevel="signature|telephony" />
+
     <!-- Allows modification of the telephony state - power on, mmi, etc.
          Does not include placing calls.
          <p>Not for use by third-party applications. -->
