@@ -27,7 +27,6 @@ import android.car.Car;
 import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
-import android.car.trust.CarTrustAgentEnrollmentManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -220,6 +219,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private boolean mIsSwipingVerticallyToClose;
     // Whether heads-up notifications should be shown when shade is open.
     private boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
+
+    private CarUxRestrictionManagerWrapper mCarUxRestrictionManagerWrapper;
 
     private final CarPowerStateListener mCarPowerStateListener =
             (int state) -> {
@@ -428,14 +429,16 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     }
                 });
 
+        // Used by onDrivingStateChanged and it can be called inside
+        // DrivingStateHelper.connectToCarService()
+        mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
+
         // Register a listener for driving state changes.
         mDrivingStateHelper = new DrivingStateHelper(mContext, this::onDrivingStateChanged);
         mDrivingStateHelper.connectToCarService();
 
         mPowerManagerHelper = new PowerManagerHelper(mContext, mCarPowerStateListener);
         mPowerManagerHelper.connectToCarService();
-
-        mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
     }
 
     private void resetSystemBarsIfNecessary() {
@@ -572,13 +575,22 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 animateCollapsePanels();
             }
         });
-        Car car = Car.createCar(mContext);
-        CarUxRestrictionsManager carUxRestrictionsManager = (CarUxRestrictionsManager)
-                car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
         CarNotificationListener carNotificationListener = new CarNotificationListener();
-        CarUxRestrictionManagerWrapper carUxRestrictionManagerWrapper =
-                new CarUxRestrictionManagerWrapper();
-        carUxRestrictionManagerWrapper.setCarUxRestrictionsManager(carUxRestrictionsManager);
+        mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
+        // This can take time if car service is not ready up to this time.
+        // TODO(b/142808072) Refactor CarUxRestrictionManagerWrapper to allow setting
+        // CarUxRestrictionsManager later and switch to Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT.
+        Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_WAIT_FOREVER,
+                (car, ready) -> {
+                    if (!ready) {
+                        return;
+                    }
+                    CarUxRestrictionsManager carUxRestrictionsManager =
+                            (CarUxRestrictionsManager)
+                                    car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
+                    mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
+                            carUxRestrictionsManager);
+                });
 
         mNotificationDataManager = new NotificationDataManager();
         mNotificationDataManager.setOnUnseenCountUpdateListener(
@@ -598,7 +610,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                         mNotificationClickHandlerFactory, mNotificationDataManager);
         mNotificationClickHandlerFactory.setNotificationDataManager(mNotificationDataManager);
 
-        carNotificationListener.registerAsSystemService(mContext, carUxRestrictionManagerWrapper,
+        carNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
                 carHeadsUpNotificationManager, mNotificationDataManager);
 
         mNotificationView = mStatusBarWindow.findViewById(R.id.notification_view);
@@ -698,7 +710,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 mNotificationView,
                 PreprocessingManager.getInstance(mContext),
                 carNotificationListener,
-                carUxRestrictionManagerWrapper,
+                mCarUxRestrictionManagerWrapper,
                 mNotificationDataManager);
         mNotificationViewController.enable();
     }
@@ -947,12 +959,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         UserSwitcherController userSwitcherController =
                 Dependency.get(UserSwitcherController.class);
         if (userSwitcherController.useFullscreenUserSwitcher()) {
-            Car car = Car.createCar(mContext);
-            CarTrustAgentEnrollmentManager enrollmentManager = (CarTrustAgentEnrollmentManager) car
-                    .getCarManager(Car.CAR_TRUST_AGENT_ENROLLMENT_SERVICE);
             mFullscreenUserSwitcher = new FullscreenUserSwitcher(this,
-                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub),
-                    enrollmentManager, mContext);
+                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub), mContext);
         } else {
             super.createUserSwitcher();
         }
