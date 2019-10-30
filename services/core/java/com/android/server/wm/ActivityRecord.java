@@ -297,10 +297,10 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
-import com.android.internal.R;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
@@ -374,6 +374,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Value to increment the z-layer when boosting a layer during animations. BOOST in l33tsp34k.
      */
     @VisibleForTesting static final int Z_BOOST_BASE = 800570000;
+    static final int INVALID_PID = -1;
 
     final ActivityTaskManagerService mAtmService;
     final ActivityInfo info; // activity info provided by developer in AndroidManifest
@@ -5350,7 +5351,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             anrActivity = getWaitingHistoryRecordLocked();
             anrApp = app;
             windowFromSameProcessAsActivity =
-                    !hasProcess() || app.getPid() == windowPid || windowPid == -1;
+                    !hasProcess() || app.getPid() == windowPid || windowPid == INVALID_PID;
         }
 
         if (windowFromSameProcessAsActivity) {
