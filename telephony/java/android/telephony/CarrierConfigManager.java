@@ -3170,6 +3170,14 @@ public class CarrierConfigManager {
     public static final String KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY =
             "disconnect_cause_play_busytone_int_array";
 
+    /**
+     * Flag specifying whether to prevent sending CLIR activation("*31#") and deactivation("#31#")
+     * code only without dialing number.
+     * When {@code true}, these are prevented, {@code false} otherwise.
+     */
+    public static final String KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL =
+            "prevent_clir_activation_and_deactivation_code_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -3596,6 +3604,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, null);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
+        sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
     }
 
     /**
