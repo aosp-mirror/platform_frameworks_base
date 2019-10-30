@@ -27,6 +27,7 @@ import static com.android.server.utils.TimingsTraceAndSlog.SYSTEM_SERVER_TIMING_
 import android.annotation.NonNull;
 import android.annotation.StringRes;
 import android.app.ActivityThread;
+import android.app.AppCompatCallbacks;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -646,6 +647,7 @@ public final class SystemServer {
         ServiceManager.addService(Context.PLATFORM_COMPAT_SERVICE, platformCompat);
         ServiceManager.addService(Context.PLATFORM_COMPAT_NATIVE_SERVICE,
                 new PlatformCompatNative(platformCompat));
+        AppCompatCallbacks.install(new long[0]);
         t.traceEnd();
 
         // Wait for installd to finish starting up so that it has a chance to
