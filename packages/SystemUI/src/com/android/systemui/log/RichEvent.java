@@ -67,7 +67,7 @@ public abstract class RichEvent extends Event {
         private B mBuilder = getBuilder();
         protected int mType = UNINITIALIZED;
         protected String mReason;
-        protected @Level int mLogLevel;
+        protected @Level int mLogLevel = VERBOSE;
 
         /**
          * Get the log-specific builder.
