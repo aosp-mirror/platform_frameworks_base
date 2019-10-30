@@ -1920,10 +1920,18 @@ public class DisplayPolicy {
             vf.set(displayFrames.mStable);
 
             if (adjust == SOFT_INPUT_ADJUST_RESIZE) {
-                cf.bottom = displayFrames.mContent.bottom;
+                // cf.bottom should not be below the stable bottom, or the content might be obscured
+                // by the navigation bar.
+                if (cf.bottom > displayFrames.mContent.bottom) {
+                    cf.bottom = displayFrames.mContent.bottom;
+                }
             } else {
-                cf.bottom = displayFrames.mDock.bottom;
-                vf.bottom = displayFrames.mContent.bottom;
+                if (cf.bottom > displayFrames.mDock.bottom) {
+                    cf.bottom = displayFrames.mDock.bottom;
+                }
+                if (vf.bottom > displayFrames.mContent.bottom) {
+                    vf.bottom = displayFrames.mContent.bottom;
+                }
             }
         } else {
             dcf.set(displayFrames.mSystem);
