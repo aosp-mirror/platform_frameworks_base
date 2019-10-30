@@ -2220,6 +2220,10 @@ public class WifiManager {
     public static final long WIFI_FEATURE_DPP              = 0x80000000L; // DPP (Easy-Connect)
     /** @hide */
     public static final long WIFI_FEATURE_P2P_RAND_MAC    = 0x100000000L; // Random P2P MAC
+    /** @hide */
+    public static final long WIFI_FEATURE_CONNECTED_RAND_MAC    = 0x200000000L; // Random STA MAC
+    /** @hide */
+    public static final long WIFI_FEATURE_AP_RAND_MAC    = 0x400000000L; // Random AP MAC
 
     private long getSupportedFeatures() {
         try {
@@ -2342,6 +2346,24 @@ public class WifiManager {
      */
     public boolean isEnhancedPowerReportingSupported() {
         return isFeatureSupported(WIFI_FEATURE_LINK_LAYER_STATS);
+    }
+
+    /**
+     * @return true if this device supports connected MAC randomization.
+     * @hide
+     */
+    @SystemApi
+    public boolean isConnectedMacRandomizationSupported() {
+        return isFeatureSupported(WIFI_FEATURE_CONNECTED_RAND_MAC);
+    }
+
+    /**
+     * @return true if this device supports connected MAC randomization.
+     * @hide
+     */
+    @SystemApi
+    public boolean isApMacRandomizationSupported() {
+        return isFeatureSupported(WIFI_FEATURE_AP_RAND_MAC);
     }
 
     /**
