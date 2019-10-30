@@ -592,6 +592,13 @@ public class PipTouchHandler {
     }
 
     /**
+     * @return the unexpanded bounds.
+     */
+    public Rect getNormalBounds() {
+        return mNormalBounds;
+    }
+
+    /**
      * Gesture controlling normal movement of the PIP.
      */
     private PipTouchGesture mDefaultMovementGesture = new PipTouchGesture() {

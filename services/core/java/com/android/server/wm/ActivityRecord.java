@@ -3049,7 +3049,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Reset the last saved PiP snap fraction on removal.
-        mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(mActivityComponent);
+        mDisplayContent.mPinnedStackControllerLocked.resetReentryBounds(mActivityComponent);
 
         mRemovingFromDisplay = false;
     }
@@ -4300,7 +4300,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppStopped: %s", this);
         mAppStopped = true;
         // Reset the last saved PiP snap fraction on app stop.
-        mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(mActivityComponent);
+        mDisplayContent.mPinnedStackControllerLocked.resetReentryBounds(mActivityComponent);
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
@@ -6537,7 +6537,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             stackBounds = mTmpRect;
             pinnedStack.getBounds(stackBounds);
         }
-        mDisplayContent.mPinnedStackControllerLocked.saveReentrySnapFraction(
+        mDisplayContent.mPinnedStackControllerLocked.saveReentryBounds(
                 mActivityComponent, stackBounds);
     }
 

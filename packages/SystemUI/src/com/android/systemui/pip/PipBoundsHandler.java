@@ -64,6 +64,7 @@ public class PipBoundsHandler {
     private IPinnedStackController mPinnedStackController;
     private ComponentName mLastPipComponentName;
     private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
+    private Size mReentrySize = null;
 
     private float mDefaultAspectRatio;
     private float mMinAspectRatio;
@@ -162,7 +163,7 @@ public class PipBoundsHandler {
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
             Rect animatingBounds, DisplayInfo displayInfo) {
         getInsetBounds(insetBounds);
-        final Rect defaultBounds = getDefaultBounds(INVALID_SNAP_FRACTION);
+        final Rect defaultBounds = getDefaultBounds(INVALID_SNAP_FRACTION, null);
         normalBounds.set(defaultBounds);
         if (animatingBounds.isEmpty()) {
             animatingBounds.set(defaultBounds);
@@ -175,26 +176,28 @@ public class PipBoundsHandler {
     }
 
     /**
-     * Responds to IPinnedStackListener on saving reentry snap fraction
+     * Responds to IPinnedStackListener on saving reentry snap fraction and size
      * for a given {@link ComponentName}.
      */
-    public void onSaveReentrySnapFraction(ComponentName componentName, Rect bounds) {
+    public void onSaveReentryBounds(ComponentName componentName, Rect bounds) {
         mReentrySnapFraction = getSnapFraction(bounds);
+        mReentrySize = new Size(bounds.width(), bounds.height());
         mLastPipComponentName = componentName;
     }
 
     /**
-     * Responds to IPinnedStackListener on resetting reentry snap fraction
+     * Responds to IPinnedStackListener on resetting reentry snap fraction and size
      * for a given {@link ComponentName}.
      */
-    public void onResetReentrySnapFraction(ComponentName componentName) {
+    public void onResetReentryBounds(ComponentName componentName) {
         if (componentName.equals(mLastPipComponentName)) {
-            onResetReentrySnapFractionUnchecked();
+            onResetReentryBoundsUnchecked();
         }
     }
 
-    private void onResetReentrySnapFractionUnchecked() {
+    private void onResetReentryBoundsUnchecked() {
         mReentrySnapFraction = INVALID_SNAP_FRACTION;
+        mReentrySize = null;
         mLastPipComponentName = null;
     }
 
@@ -233,7 +236,7 @@ public class PipBoundsHandler {
     public void onPrepareAnimation(Rect sourceRectHint, float aspectRatio, Rect bounds) {
         final Rect destinationBounds;
         if (bounds == null) {
-            destinationBounds = getDefaultBounds(mReentrySnapFraction);
+            destinationBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
         } else {
             destinationBounds = new Rect(bounds);
         }
@@ -245,7 +248,7 @@ public class PipBoundsHandler {
             return;
         }
         mAspectRatio = aspectRatio;
-        onResetReentrySnapFractionUnchecked();
+        onResetReentryBoundsUnchecked();
         try {
             mPinnedStackController.startAnimation(destinationBounds, sourceRectHint,
                     -1 /* animationDuration */);
@@ -269,13 +272,14 @@ public class PipBoundsHandler {
      */
     private void transformBoundsToAspectRatio(Rect stackBounds, float aspectRatio,
             boolean useCurrentMinEdgeSize) {
-        // Save the snap fraction, calculate the aspect ratio based on screen size
+
+        // Save the snap fraction and adjust the size based on the new aspect ratio.
         final float snapFraction = mSnapAlgorithm.getSnapFraction(stackBounds,
                 getMovementBounds(stackBounds));
-
         final int minEdgeSize = useCurrentMinEdgeSize ? mCurrentMinSize : mDefaultMinSize;
-        final Size size = mSnapAlgorithm.getSizeForAspectRatio(aspectRatio, minEdgeSize,
-                mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+        final Size size = mSnapAlgorithm.getSizeForAspectRatio(
+                new Size(stackBounds.width(), stackBounds.height()), aspectRatio, minEdgeSize);
+
         final int left = (int) (stackBounds.centerX() - size.getWidth() / 2f);
         final int top = (int) (stackBounds.centerY() - size.getHeight() / 2f);
         stackBounds.set(left, top, left + size.getWidth(), top + size.getHeight());
@@ -286,21 +290,20 @@ public class PipBoundsHandler {
     }
 
     /**
-     * @return the default bounds to show the PIP, if a {@param snapFraction} is provided, then it
-     * will apply the default bounds to the provided snap fraction.
+     * @return the default bounds to show the PIP, if a {@param snapFraction} and {@param size} are
+     * provided, then it will apply the default bounds to the provided snap fraction and size.
      */
-    private Rect getDefaultBounds(float snapFraction) {
-        final Rect insetBounds = new Rect();
-        getInsetBounds(insetBounds);
-
+    private Rect getDefaultBounds(float snapFraction, Size size) {
         final Rect defaultBounds = new Rect();
-        final Size size = mSnapAlgorithm.getSizeForAspectRatio(mDefaultAspectRatio,
-                mDefaultMinSize, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
-        if (snapFraction != INVALID_SNAP_FRACTION) {
+        if (snapFraction != INVALID_SNAP_FRACTION && size != null) {
             defaultBounds.set(0, 0, size.getWidth(), size.getHeight());
             final Rect movementBounds = getMovementBounds(defaultBounds);
             mSnapAlgorithm.applySnapFraction(defaultBounds, movementBounds, snapFraction);
         } else {
+            final Rect insetBounds = new Rect();
+            getInsetBounds(insetBounds);
+            size = mSnapAlgorithm.getSizeForAspectRatio(mDefaultAspectRatio,
+                    mDefaultMinSize, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
             Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
                     0, Math.max(mIsImeShowing ? mImeHeight : 0,
                             mIsShelfShowing ? mShelfHeight : 0),
@@ -364,8 +367,16 @@ public class PipBoundsHandler {
      * @return the default snap fraction to apply instead of the default gravity when calculating
      *         the default stack bounds when first entering PiP.
      */
-    private float getSnapFraction(Rect stackBounds) {
+    public float getSnapFraction(Rect stackBounds) {
         return mSnapAlgorithm.getSnapFraction(stackBounds, getMovementBounds(stackBounds));
+    }
+
+    /**
+     * Applies the given snap fraction to the given stack bounds.
+     */
+    public void applySnapFraction(Rect stackBounds, float snapFraction) {
+        final Rect movementBounds = getMovementBounds(stackBounds);
+        mSnapAlgorithm.applySnapFraction(stackBounds, movementBounds, snapFraction);
     }
 
     /**

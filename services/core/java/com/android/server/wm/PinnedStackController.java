@@ -236,10 +236,10 @@ class PinnedStackController {
     /**
      * Saves the current snap fraction for re-entry of the current activity into PiP.
      */
-    void saveReentrySnapFraction(final ComponentName componentName, final Rect stackBounds) {
+    void saveReentryBounds(final ComponentName componentName, final Rect stackBounds) {
         if (mPinnedStackListener == null) return;
         try {
-            mPinnedStackListener.onSaveReentrySnapFraction(componentName, stackBounds);
+            mPinnedStackListener.onSaveReentryBounds(componentName, stackBounds);
         } catch (RemoteException e) {
             Slog.e(TAG_WM, "Error delivering save reentry fraction event.", e);
         }
@@ -248,10 +248,10 @@ class PinnedStackController {
     /**
      * Resets the last saved snap fraction so that the default bounds will be returned.
      */
-    void resetReentrySnapFraction(ComponentName componentName) {
+    void resetReentryBounds(ComponentName componentName) {
         if (mPinnedStackListener == null) return;
         try {
-            mPinnedStackListener.onResetReentrySnapFraction(componentName);
+            mPinnedStackListener.onResetReentryBounds(componentName);
         } catch (RemoteException e) {
             Slog.e(TAG_WM, "Error delivering reset reentry fraction event.", e);
         }

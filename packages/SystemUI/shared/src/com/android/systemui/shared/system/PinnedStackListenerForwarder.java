@@ -83,16 +83,16 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
     }
 
     @Override
-    public void onSaveReentrySnapFraction(ComponentName componentName, Rect bounds) {
+    public void onSaveReentryBounds(ComponentName componentName, Rect bounds) {
         for (PinnedStackListener listener : mListeners) {
-            listener.onSaveReentrySnapFraction(componentName, bounds);
+            listener.onSaveReentryBounds(componentName, bounds);
         }
     }
 
     @Override
-    public void onResetReentrySnapFraction(ComponentName componentName) {
+    public void onResetReentryBounds(ComponentName componentName) {
         for (PinnedStackListener listener : mListeners) {
-            listener.onResetReentrySnapFraction(componentName);
+            listener.onResetReentryBounds(componentName);
         }
     }
 
@@ -140,9 +140,9 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
 
         public void onActionsChanged(ParceledListSlice actions) {}
 
-        public void onSaveReentrySnapFraction(ComponentName componentName, Rect bounds) {}
+        public void onSaveReentryBounds(ComponentName componentName, Rect bounds) {}
 
-        public void onResetReentrySnapFraction(ComponentName componentName) {}
+        public void onResetReentryBounds(ComponentName componentName) {}
 
         public void onDisplayInfoChanged(DisplayInfo displayInfo) {}
 
