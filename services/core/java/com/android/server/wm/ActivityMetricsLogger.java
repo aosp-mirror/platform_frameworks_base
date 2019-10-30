@@ -478,13 +478,13 @@ class ActivityMetricsLogger {
     /**
      * Notifies the tracker that the starting window was drawn.
      */
-    void notifyStartingWindowDrawn(@WindowingMode int windowingMode, long timestamp) {
+    void notifyStartingWindowDrawn(@WindowingMode int windowingMode, long timestampNs) {
         final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
         if (info == null || info.loggedStartingWindowDrawn) {
             return;
         }
         info.loggedStartingWindowDrawn = true;
-        info.startingWindowDelayMs = calculateDelay(timestamp);
+        info.startingWindowDelayMs = calculateDelay(timestampNs);
     }
 
     /**
