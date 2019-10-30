@@ -47,6 +47,7 @@ import android.graphics.PostProcessor;
 import android.media.ExifInterface;
 import android.media.MediaFile;
 import android.media.MediaFormat;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -589,9 +590,7 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
-     * @removed
      */
-    @Deprecated
     public static @NonNull Uri setIncludeTrashed(@NonNull Uri uri) {
         return uri.buildUpon().appendQueryParameter(PARAM_INCLUDE_TRASHED, "1").build();
     }
@@ -830,9 +829,7 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
-     * @removed
      */
-    @Deprecated
     public static void trash(@NonNull Context context, @NonNull Uri uri) {
         trash(context, uri, 48 * DateUtils.HOUR_IN_MILLIS);
     }
@@ -850,9 +847,7 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
-     * @removed
      */
-    @Deprecated
     public static void trash(@NonNull Context context, @NonNull Uri uri,
             @DurationMillisLong long timeoutMillis) {
         if (timeoutMillis < 0) {
@@ -874,9 +869,7 @@ public final class MediaStore {
      * @see MediaStore#setIncludeTrashed(Uri)
      * @see MediaStore#trash(Context, Uri)
      * @see MediaStore#untrash(Context, Uri)
-     * @removed
      */
-    @Deprecated
     public static void untrash(@NonNull Context context, @NonNull Uri uri) {
         final ContentValues values = new ContentValues();
         values.put(MediaColumns.IS_TRASHED, 0);
@@ -907,26 +900,8 @@ public final class MediaStore {
         public static final String DATA = "_data";
 
         /**
-         * Hash of the media item on disk.
-         * <p>
-         * Contains a 20-byte binary blob which is the SHA-1 hash of the file as
-         * persisted on disk. For performance reasons, the hash may not be
-         * immediately available, in which case a {@code NULL} value will be
-         * returned. If the underlying file is modified, this value will be
-         * cleared and recalculated.
-         * <p>
-         * If you require the hash of a specific item, you can call
-         * {@link ContentResolver#canonicalize(Uri)}, which will block until the
-         * hash is calculated.
-         *
-         * @removed
-         */
-        @Deprecated
-        @Column(value = Cursor.FIELD_TYPE_BLOB, readOnly = true)
-        public static final String HASH = "_hash";
-
-        /**
-         * The size of the media item.
+         * Indexed value of {@link File#length()} extracted from this media
+         * item.
          */
         @BytesLong
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
@@ -943,12 +918,6 @@ public final class MediaStore {
         public static final String DISPLAY_NAME = "_display_name";
 
         /**
-         * The title of the media item.
-         */
-        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
-        public static final String TITLE = "title";
-
-        /**
          * The time the media item was first added.
          */
         @CurrentTimeSecondsLong
@@ -956,14 +925,22 @@ public final class MediaStore {
         public static final String DATE_ADDED = "date_added";
 
         /**
-         * The time the media item was last modified.
+         * Indexed value of {@link File#lastModified()} extracted from this
+         * media item.
          */
         @CurrentTimeSecondsLong
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
         public static final String DATE_MODIFIED = "date_modified";
 
         /**
-         * The time the media item was taken.
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_DATE} or
+         * {@link ExifInterface#TAG_DATETIME_ORIGINAL} extracted from this media
+         * item.
+         * <p>
+         * Note that images must define both
+         * {@link ExifInterface#TAG_DATETIME_ORIGINAL} and
+         * {@code ExifInterface#TAG_OFFSET_TIME_ORIGINAL} to reliably determine
+         * this value in relation to the epoch.
          */
         @CurrentTimeMillisLong
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
@@ -989,17 +966,6 @@ public final class MediaStore {
         public static final String MIME_TYPE = "mime_type";
 
         /**
-         * The MTP object handle of a newly transfered file.
-         * Used to pass the new file's object handle through the media scanner
-         * from MTP to the media provider
-         * For internal use only by MTP, media scanner and media provider.
-         * @hide
-         */
-        @Deprecated
-        // @Column(Cursor.FIELD_TYPE_INTEGER)
-        public static final String MEDIA_SCANNER_NEW_OBJECT_ID = "media_scanner_new_object_id";
-
-        /**
          * Non-zero if the media file is drm-protected
          * @hide
          */
@@ -1012,6 +978,10 @@ public final class MediaStore {
          * Flag indicating if a media item is pending, and still being inserted
          * by its owner. While this flag is set, only the owner of the item can
          * open the underlying file; requests from other apps will be rejected.
+         * <p>
+         * Pending items are retained either until they are published by setting
+         * the field to {@code 0}, or until they expire as defined by
+         * {@link #DATE_EXPIRES}.
          *
          * @see MediaStore#setIncludePending(Uri)
          */
@@ -1020,36 +990,52 @@ public final class MediaStore {
 
         /**
          * Flag indicating if a media item is trashed.
+         * <p>
+         * Trashed items are retained until they expire as defined by
+         * {@link #DATE_EXPIRES}.
          *
          * @see MediaColumns#IS_TRASHED
          * @see MediaStore#setIncludeTrashed(Uri)
          * @see MediaStore#trash(Context, Uri)
          * @see MediaStore#untrash(Context, Uri)
-         * @removed
          */
-        @Deprecated
         @Column(Cursor.FIELD_TYPE_INTEGER)
         public static final String IS_TRASHED = "is_trashed";
 
         /**
          * The time the media item should be considered expired. Typically only
-         * meaningful in the context of {@link #IS_PENDING}.
+         * meaningful in the context of {@link #IS_PENDING} or
+         * {@link #IS_TRASHED}.
          */
         @CurrentTimeSecondsLong
         @Column(Cursor.FIELD_TYPE_INTEGER)
         public static final String DATE_EXPIRES = "date_expires";
 
         /**
-         * The width of the media item, in pixels.
+         * Indexed value of
+         * {@link MediaMetadataRetriever#METADATA_KEY_VIDEO_WIDTH},
+         * {@link MediaMetadataRetriever#METADATA_KEY_IMAGE_WIDTH} or
+         * {@link ExifInterface#TAG_IMAGE_WIDTH} extracted from this media item.
          */
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
         public static final String WIDTH = "width";
 
         /**
-         * The height of the media item, in pixels.
+         * Indexed value of
+         * {@link MediaMetadataRetriever#METADATA_KEY_VIDEO_HEIGHT},
+         * {@link MediaMetadataRetriever#METADATA_KEY_IMAGE_HEIGHT} or
+         * {@link ExifInterface#TAG_IMAGE_LENGTH} extracted from this media
+         * item.
          */
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
         public static final String HEIGHT = "height";
+
+        /**
+         * Calculated value that combines {@link #WIDTH} and {@link #HEIGHT}
+         * into a user-presentable string.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String RESOLUTION = "resolution";
 
         /**
          * Package name that contributed this media. The value may be
@@ -1095,28 +1081,6 @@ public final class MediaStore {
          */
         @Column(Cursor.FIELD_TYPE_STRING)
         public static final String RELATIVE_PATH = "relative_path";
-
-        /**
-         * The primary directory name this media exists under. The value may be
-         * {@code NULL} if the media doesn't have a primary directory name.
-         *
-         * @removed
-         * @deprecated Replaced by {@link #RELATIVE_PATH}.
-         */
-        @Column(Cursor.FIELD_TYPE_STRING)
-        @Deprecated
-        public static final String PRIMARY_DIRECTORY = "primary_directory";
-
-        /**
-         * The secondary directory name this media exists under. The value may
-         * be {@code NULL} if the media doesn't have a secondary directory name.
-         *
-         * @removed
-         * @deprecated Replaced by {@link #RELATIVE_PATH}.
-         */
-        @Column(Cursor.FIELD_TYPE_STRING)
-        @Deprecated
-        public static final String SECONDARY_DIRECTORY = "secondary_directory";
 
         /**
          * The primary bucket ID of this media item. This can be useful to
@@ -1191,18 +1155,171 @@ public final class MediaStore {
         public static final String ORIGINAL_DOCUMENT_ID = "original_document_id";
 
         /**
-         * The duration of the media item.
+         * Indexed value of
+         * {@link MediaMetadataRetriever#METADATA_KEY_VIDEO_ROTATION},
+         * {@link MediaMetadataRetriever#METADATA_KEY_IMAGE_ROTATION}, or
+         * {@link ExifInterface#TAG_ORIENTATION} extracted from this media item.
+         * <p>
+         * For consistency the indexed value is expressed in degrees, such as 0,
+         * 90, 180, or 270.
+         */
+        @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+        public static final String ORIENTATION = "orientation";
+
+        /**
+         * Flag indicating if the media item has been marked as being a
+         * "favorite" by the user.
+         */
+        @Column(Cursor.FIELD_TYPE_INTEGER)
+        public static final String IS_FAVORITE = "is_favorite";
+
+        // =======================================
+        // ==== MediaMetadataRetriever values ====
+        // =======================================
+
+        /**
+         * Indexed value of
+         * {@link MediaMetadataRetriever#METADATA_KEY_CD_TRACK_NUMBER} extracted
+         * from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String CD_TRACK_NUMBER = "cd_track_number";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_ALBUM}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String ALBUM = "album";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_ARTIST}
+         * or {@link ExifInterface#TAG_ARTIST} extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String ARTIST = "artist";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_AUTHOR}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String AUTHOR = "author";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_COMPOSER}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String COMPOSER = "composer";
+
+        // METADATA_KEY_DATE is DATE_TAKEN
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_GENRE}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String GENRE = "genre";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_TITLE}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String TITLE = "title";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_YEAR}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+        public static final String YEAR = "year";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_DURATION}
+         * extracted from this media item.
          */
         @DurationMillisLong
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
         public static final String DURATION = "duration";
 
         /**
-         * The orientation for the media item, expressed in degrees. For
-         * example, 0, 90, 180, or 270 degrees.
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_NUM_TRACKS}
+         * extracted from this media item.
          */
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
-        public static final String ORIENTATION = "orientation";
+        public static final String NUM_TRACKS = "num_tracks";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_WRITER}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String WRITER = "writer";
+
+        // METADATA_KEY_MIMETYPE is MIME_TYPE
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_ALBUMARTIST}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String ALBUM_ARTIST = "album_artist";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_DISC_NUMBER}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String DISC_NUMBER = "disc_number";
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_COMPILATION}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+        public static final String COMPILATION = "compilation";
+
+        // HAS_AUDIO is ignored
+        // HAS_VIDEO is ignored
+        // VIDEO_WIDTH is WIDTH
+        // VIDEO_HEIGHT is HEIGHT
+
+        /**
+         * Indexed value of {@link MediaMetadataRetriever#METADATA_KEY_BITRATE}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+        public static final String BITRATE = "bitrate";
+
+        // TIMED_TEXT_LANGUAGES is ignored
+        // IS_DRM is ignored
+        // LOCATION is LATITUDE and LONGITUDE
+        // VIDEO_ROTATION is ORIENTATION
+
+        /**
+         * Indexed value of
+         * {@link MediaMetadataRetriever#METADATA_KEY_CAPTURE_FRAMERATE}
+         * extracted from this media item.
+         */
+        @Column(value = Cursor.FIELD_TYPE_FLOAT, readOnly = true)
+        public static final String CAPTURE_FRAMERATE = "capture_framerate";
+
+        // HAS_IMAGE is ignored
+        // IMAGE_COUNT is ignored
+        // IMAGE_PRIMARY is ignored
+        // IMAGE_WIDTH is WIDTH
+        // IMAGE_HEIGHT is HEIGHT
+        // IMAGE_ROTATION is ORIENTATION
+        // VIDEO_FRAME_COUNT is ignored
+        // EXIF_OFFSET is ignored
+        // EXIF_LENGTH is ignored
+        // COLOR_STANDARD is ignored
+        // COLOR_TRANSFER is ignored
+        // COLOR_RANGE is ignored
+        // SAMPLERATE is ignored
+        // BITS_PER_SAMPLE is ignored
     }
 
     /**
@@ -1331,10 +1448,7 @@ public final class MediaStore {
             @Column(Cursor.FIELD_TYPE_STRING)
             public static final String MIME_TYPE = "mime_type";
 
-            /**
-             * The title of the media item.
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String TITLE = "title";
 
             /**
@@ -1589,12 +1703,6 @@ public final class MediaStore {
          */
         public interface ImageColumns extends MediaColumns {
             /**
-             * The description of the image
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
-            public static final String DESCRIPTION = "description";
-
-            /**
              * The picasa id of the image
              *
              * @deprecated this value was only relevant for images hosted on
@@ -1656,6 +1764,34 @@ public final class MediaStore {
             public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
             /** @removed promoted to parent interface */
             public static final String GROUP_ID = "group_id";
+
+            /**
+             * Indexed value of {@link ExifInterface#TAG_IMAGE_DESCRIPTION}
+             * extracted from this media item.
+             */
+            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            public static final String DESCRIPTION = "description";
+
+            /**
+             * Indexed value of {@link ExifInterface#TAG_EXPOSURE_TIME}
+             * extracted from this media item.
+             */
+            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            public static final String EXPOSURE_TIME = "exposure_time";
+
+            /**
+             * Indexed value of {@link ExifInterface#TAG_F_NUMBER}
+             * extracted from this media item.
+             */
+            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            public static final String F_NUMBER = "f_number";
+
+            /**
+             * Indexed value of {@link ExifInterface#TAG_ISO_SPEED_RATINGS}
+             * extracted from this media item.
+             */
+            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            public static final String ISO = "iso";
         }
 
         public static final class Media implements ImageColumns {
@@ -2093,10 +2229,7 @@ public final class MediaStore {
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String ARTIST_ID = "artist_id";
 
-            /**
-             * The artist who created the audio file, if any
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String ARTIST = "artist";
 
             /**
@@ -2105,14 +2238,6 @@ public final class MediaStore {
              */
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String ALBUM_ARTIST = "album_artist";
-
-            /**
-             * Whether the song is part of a compilation
-             * @hide
-             */
-            @Deprecated
-            // @Column(Cursor.FIELD_TYPE_STRING)
-            public static final String COMPILATION = "compilation";
 
             /**
              * A non human readable key calculated from the ARTIST, used for
@@ -2131,10 +2256,7 @@ public final class MediaStore {
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String ARTIST_KEY = "artist_key";
 
-            /**
-             * The composer of the audio file, if any
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String COMPOSER = "composer";
 
             /**
@@ -2143,10 +2265,7 @@ public final class MediaStore {
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String ALBUM_ID = "album_id";
 
-            /**
-             * The album the audio file is from, if any
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String ALBUM = "album";
 
             /**
@@ -2973,23 +3092,11 @@ public final class MediaStore {
         public interface VideoColumns extends MediaColumns {
             /** @removed promoted to parent interface */
             public static final String DURATION = "duration";
-
-            /**
-             * The artist who created the video file, if any
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String ARTIST = "artist";
-
-            /**
-             * The album the video file is from, if any
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String ALBUM = "album";
-
-            /**
-             * The resolution of the video file, formatted as "XxY"
-             */
-            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            /** @removed promoted to parent interface */
             public static final String RESOLUTION = "resolution";
 
             /**
