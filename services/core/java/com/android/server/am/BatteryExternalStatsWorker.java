@@ -126,7 +126,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     // Keep the last WiFi stats so we can compute a delta.
     @GuardedBy("mWorkerLock")
     private WifiActivityEnergyInfo mLastInfo =
-            new WifiActivityEnergyInfo(0, 0, 0, new long[]{0}, 0, 0, 0, 0);
+            new WifiActivityEnergyInfo(0, 0, 0, 0, 0, 0, 0);
 
     /**
      * Timestamp at which all external stats were last collected in
@@ -548,42 +548,45 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
     @GuardedBy("mWorkerLock")
     private WifiActivityEnergyInfo extractDeltaLocked(WifiActivityEnergyInfo latest) {
-        final long timePeriodMs = latest.mTimestamp - mLastInfo.mTimestamp;
-        final long lastScanMs = mLastInfo.mControllerScanTimeMs;
-        final long lastIdleMs = mLastInfo.mControllerIdleTimeMs;
-        final long lastTxMs = mLastInfo.mControllerTxTimeMs;
-        final long lastRxMs = mLastInfo.mControllerRxTimeMs;
-        final long lastEnergy = mLastInfo.mControllerEnergyUsed;
+        final long timePeriodMs = latest.getTimeSinceBootMillis()
+                - mLastInfo.getTimeSinceBootMillis();
+        final long lastScanMs = mLastInfo.getControllerScanDurationMillis();
+        final long lastIdleMs = mLastInfo.getControllerIdleDurationMillis();
+        final long lastTxMs = mLastInfo.getControllerTxDurationMillis();
+        final long lastRxMs = mLastInfo.getControllerRxDurationMillis();
+        final long lastEnergy = mLastInfo.getControllerEnergyUsedMicroJoules();
 
         // We will modify the last info object to be the delta, and store the new
         // WifiActivityEnergyInfo object as our last one.
         final WifiActivityEnergyInfo delta = mLastInfo;
-        delta.mTimestamp = latest.getTimeStamp();
-        delta.mStackState = latest.getStackState();
+        delta.setTimeSinceBootMillis(latest.getTimeSinceBootMillis());
+        delta.setStackState(latest.getStackState());
 
-        final long txTimeMs = latest.mControllerTxTimeMs - lastTxMs;
-        final long rxTimeMs = latest.mControllerRxTimeMs - lastRxMs;
-        final long idleTimeMs = latest.mControllerIdleTimeMs - lastIdleMs;
-        final long scanTimeMs = latest.mControllerScanTimeMs - lastScanMs;
+        final long txTimeMs = latest.getControllerTxDurationMillis() - lastTxMs;
+        final long rxTimeMs = latest.getControllerRxDurationMillis() - lastRxMs;
+        final long idleTimeMs = latest.getControllerIdleDurationMillis() - lastIdleMs;
+        final long scanTimeMs = latest.getControllerScanDurationMillis() - lastScanMs;
 
         if (txTimeMs < 0 || rxTimeMs < 0 || scanTimeMs < 0 || idleTimeMs < 0) {
             // The stats were reset by the WiFi system (which is why our delta is negative).
             // Returns the unaltered stats. The total on time should not exceed the time
             // duartion between reports.
-            final long totalOnTimeMs = latest.mControllerTxTimeMs + latest.mControllerRxTimeMs
-                        + latest.mControllerIdleTimeMs;
+            final long totalOnTimeMs = latest.getControllerTxDurationMillis()
+                    + latest.getControllerRxDurationMillis()
+                    + latest.getControllerIdleDurationMillis();
             if (totalOnTimeMs <= timePeriodMs + MAX_WIFI_STATS_SAMPLE_ERROR_MILLIS) {
-                delta.mControllerEnergyUsed = latest.mControllerEnergyUsed;
-                delta.mControllerRxTimeMs = latest.mControllerRxTimeMs;
-                delta.mControllerTxTimeMs = latest.mControllerTxTimeMs;
-                delta.mControllerIdleTimeMs = latest.mControllerIdleTimeMs;
-                delta.mControllerScanTimeMs = latest.mControllerScanTimeMs;
+                delta.setControllerEnergyUsedMicroJoules(
+                        latest.getControllerEnergyUsedMicroJoules());
+                delta.setControllerRxDurationMillis(latest.getControllerRxDurationMillis());
+                delta.setControllerTxDurationMillis(latest.getControllerTxDurationMillis());
+                delta.setControllerIdleDurationMillis(latest.getControllerIdleDurationMillis());
+                delta.setControllerScanDurationMillis(latest.getControllerScanDurationMillis());
             } else {
-                delta.mControllerEnergyUsed = 0;
-                delta.mControllerRxTimeMs = 0;
-                delta.mControllerTxTimeMs = 0;
-                delta.mControllerIdleTimeMs = 0;
-                delta.mControllerScanTimeMs = 0;
+                delta.setControllerEnergyUsedMicroJoules(0);
+                delta.setControllerRxDurationMillis(0);
+                delta.setControllerTxDurationMillis(0);
+                delta.setControllerIdleDurationMillis(0);
+                delta.setControllerScanDurationMillis(0);
             }
             Slog.v(TAG, "WiFi energy data was reset, new WiFi energy data is " + delta);
         } else {
@@ -608,28 +611,30 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     sb.append(" e=").append(lastEnergy);
                     sb.append("\n");
                     sb.append("Current WiFi snapshot: ").append("idle=");
-                    TimeUtils.formatDuration(latest.mControllerIdleTimeMs, sb);
+                    TimeUtils.formatDuration(latest.getControllerIdleDurationMillis(), sb);
                     sb.append(" rx=");
-                    TimeUtils.formatDuration(latest.mControllerRxTimeMs, sb);
+                    TimeUtils.formatDuration(latest.getControllerRxDurationMillis(), sb);
                     sb.append(" tx=");
-                    TimeUtils.formatDuration(latest.mControllerTxTimeMs, sb);
-                    sb.append(" e=").append(latest.mControllerEnergyUsed);
+                    TimeUtils.formatDuration(latest.getControllerTxDurationMillis(), sb);
+                    sb.append(" e=").append(latest.getControllerEnergyUsedMicroJoules());
                     Slog.wtf(TAG, sb.toString());
                 }
             } else {
                 maxExpectedIdleTimeMs = timePeriodMs - totalActiveTimeMs;
             }
             // These times seem to be the most reliable.
-            delta.mControllerTxTimeMs = txTimeMs;
-            delta.mControllerRxTimeMs = rxTimeMs;
-            delta.mControllerScanTimeMs = scanTimeMs;
+            delta.setControllerTxDurationMillis(txTimeMs);
+            delta.setControllerRxDurationMillis(rxTimeMs);
+            delta.setControllerScanDurationMillis(scanTimeMs);
             // WiFi calculates the idle time as a difference from the on time and the various
             // Rx + Tx times. There seems to be some missing time there because this sometimes
             // becomes negative. Just cap it at 0 and ensure that it is less than the expected idle
             // time from the difference in timestamps.
             // b/21613534
-            delta.mControllerIdleTimeMs = Math.min(maxExpectedIdleTimeMs, Math.max(0, idleTimeMs));
-            delta.mControllerEnergyUsed = Math.max(0, latest.mControllerEnergyUsed - lastEnergy);
+            delta.setControllerIdleDurationMillis(
+                    Math.min(maxExpectedIdleTimeMs, Math.max(0, idleTimeMs)));
+            delta.setControllerEnergyUsedMicroJoules(
+                    Math.max(0, latest.getControllerEnergyUsedMicroJoules() - lastEnergy));
         }
 
         mLastInfo = latest;
