@@ -66,6 +66,7 @@ import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 /**
@@ -240,6 +241,8 @@ public class ProgressBar extends View {
     boolean mMirrorForRtl = false;
 
     private boolean mAggregatedIsVisible;
+
+    private CharSequence mCustomStateDescription = null;
 
     private final ArrayList<RefreshData> mRefreshData = new ArrayList<RefreshData>();
 
@@ -1551,9 +1554,54 @@ public class ProgressBar extends View {
         }
     }
 
+    private float getPercent(int progress) {
+        final float maxProgress = getMax();
+        final float minProgress = getMin();
+        final float currentProgress = progress;
+        final float diffProgress = maxProgress - minProgress;
+        if (diffProgress <= 0.0f) {
+            return 0.0f;
+        }
+        final float percent = (currentProgress - minProgress) / diffProgress;
+        return Math.max(0.0f, Math.min(1.0f, percent));
+    }
+
+    /**
+     * Default percentage format of the state description based on progress, for example,
+     * "50 percent".
+     *
+     * @param progress the progress value, between {@link #getMin()} and {@link #getMax()}
+     * @return state description based on progress
+     */
+    private CharSequence formatStateDescription(int progress) {
+        return NumberFormat.getPercentInstance(mContext.getResources().getConfiguration().locale)
+                .format(getPercent(progress));
+    }
+
+    /**
+     * This function is called when an instance or subclass sets the state description. Once this
+     * is called and the argument is not null, the app developer will be responsible for updating
+     * state description when progress changes and the default state description will not be used.
+     * App developers can restore the default behavior by setting the argument to null. If set
+     * progress is called first and then setStateDescription is called, two state change events
+     * will be merged by event throttling and we can still get the correct state description.
+     *
+     * @param stateDescription The state description.
+     */
+    @Override
+    public void setStateDescription(@Nullable CharSequence stateDescription) {
+        mCustomStateDescription = stateDescription;
+        if (stateDescription == null) {
+            super.setStateDescription(formatStateDescription(mProgress));
+        } else {
+            super.setStateDescription(stateDescription);
+        }
+    }
+
     void onProgressRefresh(float scale, boolean fromUser, int progress) {
-        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+        if (AccessibilityManager.getInstance(mContext).isEnabled()
+                && mCustomStateDescription == null) {
+            super.setStateDescription(formatStateDescription(mProgress));
         }
     }
 
