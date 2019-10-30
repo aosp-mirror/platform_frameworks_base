@@ -286,24 +286,10 @@ public class HardwareRenderer {
      *                non-null then {@link Surface#isValid()} must be true.
      */
     public void setSurface(@Nullable Surface surface) {
-        setSurface(surface, false);
-    }
-
-    /**
-     * See {@link #setSurface(Surface)}
-     *
-     * @hide
-     * @param discardBuffer determines whether the surface will attempt to preserve its contents
-     *                      between frames.  If set to true the renderer will attempt to preserve
-     *                      the contents of the buffer between frames if the implementation allows
-     *                      it.  If set to false no attempt will be made to preserve the buffer's
-     *                      contents between frames.
-     */
-    public void setSurface(@Nullable Surface surface, boolean discardBuffer) {
         if (surface != null && !surface.isValid()) {
             throw new IllegalArgumentException("Surface is invalid. surface.isValid() == false.");
         }
-        nSetSurface(mNativeProxy, surface, discardBuffer);
+        nSetSurface(mNativeProxy, surface);
     }
 
     /**
@@ -1098,7 +1084,7 @@ public class HardwareRenderer {
 
     private static native void nSetName(long nativeProxy, String name);
 
-    private static native void nSetSurface(long nativeProxy, Surface window, boolean discardBuffer);
+    private static native void nSetSurface(long nativeProxy, Surface window);
 
     private static native boolean nPause(long nativeProxy);
 
