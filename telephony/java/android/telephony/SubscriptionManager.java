@@ -2593,7 +2593,6 @@ public class SubscriptionManager {
      *
      * @param info The subscription to check.
      * @return whether the app is authorized to manage this subscription per its metadata.
-     * @throws IllegalArgumentException if this subscription is not embedded.
      */
     public boolean canManageSubscription(SubscriptionInfo info) {
         return canManageSubscription(info, mContext.getPackageName());
@@ -2609,22 +2608,20 @@ public class SubscriptionManager {
      * @param info The subscription to check.
      * @param packageName Package name of the app to check.
      * @return whether the app is authorized to manage this subscription per its access rules.
-     * @throws IllegalArgumentException if this subscription is not embedded.
      * @hide
      */
     public boolean canManageSubscription(SubscriptionInfo info, String packageName) {
-        if (!info.isEmbedded()) {
-            throw new IllegalArgumentException("Not an embedded subscription");
-        }
-        if (info.getAllAccessRules() == null) {
+        if (info == null || info.getAllAccessRules() == null) {
             return false;
         }
         PackageManager packageManager = mContext.getPackageManager();
         PackageInfo packageInfo;
         try {
-            packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            packageInfo = packageManager.getPackageInfo(packageName,
+                PackageManager.GET_SIGNING_CERTIFICATES);
         } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("Unknown package: " + packageName, e);
+            logd("Unknown package: " + packageName);
+            return false;
         }
         for (UiccAccessRule rule : info.getAllAccessRules()) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)
@@ -3017,7 +3014,7 @@ public class SubscriptionManager {
         // to the caller.
         boolean hasCarrierPrivilegePermission = TelephonyManager.from(mContext)
                 .hasCarrierPrivileges(info.getSubscriptionId())
-                || (info.isEmbedded() && canManageSubscription(info));
+                || canManageSubscription(info);
         return hasCarrierPrivilegePermission;
     }
 

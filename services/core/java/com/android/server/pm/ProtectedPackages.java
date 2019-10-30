@@ -92,6 +92,9 @@ public class ProtectedPackages {
         if (mDeviceOwnerUserId == userId) {
             return mDeviceOwnerPackage;
         }
+        if (mProfileOwnerPackages == null) {
+            return null;
+        }
         return mProfileOwnerPackages.get(userId);
     }
 

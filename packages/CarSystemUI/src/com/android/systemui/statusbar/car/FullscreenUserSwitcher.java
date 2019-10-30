@@ -18,29 +18,61 @@ package com.android.systemui.statusbar.car;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.car.trust.CarTrustAgentEnrollmentManager;
+import android.car.userlib.CarUserManagerHelper;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.UserInfo;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewStub;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.car.CarTrustAgentUnlockDialogHelper.OnHideListener;
+import com.android.systemui.statusbar.car.UserGridRecyclerView.UserRecord;
 
 /**
  * Manages the fullscreen user switcher.
  */
 public class FullscreenUserSwitcher {
+    private static final String TAG = FullscreenUserSwitcher.class.getSimpleName();
+    // Because user 0 is headless, user count for single user is 2
+    private static final int NUMBER_OF_BACKGROUND_USERS = 1;
     private final UserGridRecyclerView mUserGridView;
     private final View mParent;
     private final int mShortAnimDuration;
     private final CarStatusBar mStatusBar;
+    private final Context mContext;
+    private final UserManager mUserManager;
+    private final CarTrustAgentEnrollmentManager mEnrollmentManager;
+    private CarTrustAgentUnlockDialogHelper mUnlockDialogHelper;
+    private UserGridRecyclerView.UserRecord mSelectedUser;
+    private CarUserManagerHelper mCarUserManagerHelper;
+    private final BroadcastReceiver mUserUnlockReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "user 0 is unlocked, SharedPreference is accessible.");
+            }
+            showDialogForInitialUser();
+            mContext.unregisterReceiver(mUserUnlockReceiver);
+        }
+    };
 
-    public FullscreenUserSwitcher(CarStatusBar statusBar, ViewStub containerStub, Context context) {
+
+    public FullscreenUserSwitcher(CarStatusBar statusBar, ViewStub containerStub,
+            CarTrustAgentEnrollmentManager enrollmentManager, Context context) {
         mStatusBar = statusBar;
         mParent = containerStub.inflate();
-        // Hide the user grid by default. It will only be made visible by clicking on a cancel
-        // button in a bouncer.
-        hide();
+        mEnrollmentManager = enrollmentManager;
+        mContext = context;
+
         View container = mParent.findViewById(R.id.container);
 
         // Initialize user grid.
@@ -50,9 +82,51 @@ public class FullscreenUserSwitcher {
         mUserGridView.setLayoutManager(layoutManager);
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(this::onUserSelected);
+        mCarUserManagerHelper = new CarUserManagerHelper(context);
+        mUnlockDialogHelper = new CarTrustAgentUnlockDialogHelper(mContext);
+        mUserManager = mContext.getSystemService(UserManager.class);
 
         mShortAnimDuration = container.getResources()
                 .getInteger(android.R.integer.config_shortAnimTime);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
+        if (mUserManager.isUserUnlocked(UserHandle.USER_SYSTEM)) {
+            // User0 is unlocked, switched to the initial user
+            showDialogForInitialUser();
+        } else {
+            // listen to USER_UNLOCKED
+            mContext.registerReceiverAsUser(mUserUnlockReceiver,
+                    UserHandle.getUserHandleForUid(UserHandle.USER_SYSTEM),
+                    filter,
+                    /* broadcastPermission= */ null,
+                    /* scheduler */ null);
+        }
+    }
+
+    private void showDialogForInitialUser() {
+        int initialUser = mCarUserManagerHelper.getInitialUser();
+        UserInfo initialUserInfo = mUserManager.getUserInfo(initialUser);
+        mSelectedUser = new UserRecord(initialUserInfo,
+                /* isStartGuestSession= */ false,
+                /* isAddUser= */ false,
+                /* isForeground= */ true);
+        // For single user without trusted device, hide the user switcher.
+        if (!hasMultipleUsers() && !hasTrustedDevice(initialUser)) {
+            dismissUserSwitcher();
+            return;
+        }
+        // Show unlock dialog for initial user
+        if (hasTrustedDevice(initialUser)) {
+            mUnlockDialogHelper.showUnlockDialogAfterDelay(initialUser,
+                    mOnHideListener);
+        }
+    }
+
+    /**
+     * Check if there is only one possible user to login in.
+     * In a Multi-User system there is always one background user (user 0)
+     */
+    private boolean hasMultipleUsers() {
+        return mUserManager.getUserCount() > NUMBER_OF_BACKGROUND_USERS + 1;
     }
 
     /**
@@ -77,14 +151,33 @@ public class FullscreenUserSwitcher {
     }
 
     /**
-     * Every time user clicks on an item in the switcher, we hide the switcher, either
-     * gradually or immediately.
+     * Every time user clicks on an item in the switcher, if the clicked user has no trusted device,
+     * we hide the switcher, either gradually or immediately.
      *
-     * We dismiss the entire keyguard if user clicked on the foreground user (user we're already
-     * logged in as).
+     * If the user has trusted device, we show an unlock dialog to notify user the unlock state.
+     * When the unlock dialog is dismissed by user, we hide the unlock dialog and the switcher.
+     *
+     * We dismiss the entire keyguard when we hide the switcher if user clicked on the foreground
+     * user (user we're already logged in as).
      */
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
-        if (record.mIsForeground) {
+        mSelectedUser = record;
+        if (hasTrustedDevice(record.mInfo.id)) {
+            mUnlockDialogHelper.showUnlockDialog(record.mInfo.id, mOnHideListener);
+            return;
+        }
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "no trusted device enrolled for uid: " + record.mInfo.id);
+        }
+        dismissUserSwitcher();
+    }
+
+    private void dismissUserSwitcher() {
+        if (mSelectedUser == null) {
+            Log.e(TAG, "Request to dismiss user switcher, but no user selected");
+            return;
+        }
+        if (mSelectedUser.mIsForeground) {
             hide();
             mStatusBar.dismissKeyguard();
             return;
@@ -106,4 +199,22 @@ public class FullscreenUserSwitcher {
                 });
 
     }
+
+    private boolean hasTrustedDevice(int uid) {
+        return !mEnrollmentManager.getEnrolledDeviceInfoForUser(uid).isEmpty();
+    }
+
+    private OnHideListener mOnHideListener = new OnHideListener() {
+        @Override
+        public void onHide(boolean dismissUserSwitcher) {
+            if (dismissUserSwitcher) {
+                dismissUserSwitcher();
+            } else {
+                // Re-draw the parent view, otherwise the unlock dialog will not be removed from
+                // the screen immediately.
+                mParent.invalidate();
+            }
+
+        }
+    };
 }

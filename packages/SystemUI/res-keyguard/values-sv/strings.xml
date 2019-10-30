@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Fel pinkod."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Ogiltigt kort."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Fulladdad"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas trådlöst"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas trådlöst"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas snabbt"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laddas långsamt"</string>
@@ -151,7 +151,84 @@
       <item quantity="other">SIM-kortet är inaktiverat. Ange PUK-koden om du vill fortsätta. <xliff:g id="_NUMBER_1">%d</xliff:g> försök återstår innan SIM-kortet blir obrukbart. Kontakta operatören för mer information.</item>
       <item quantity="one">SIM-kortet är inaktiverat. Ange PUK-koden om du vill fortsätta. <xliff:g id="_NUMBER_0">%d</xliff:g> försök återstår innan SIM-kortet blir obrukbart. Kontakta operatören för mer information.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"Standard"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"Bubbla"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"Analog"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color"></annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color"></annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Tolv"</item>
+    <item msgid="7389464214252023751">"En"</item>
+    <item msgid="8803180377002008046">"Två"</item>
+    <item msgid="8614897059944644719">"Tre"</item>
+    <item msgid="2293058674782619556">"Fyra"</item>
+    <item msgid="4815402358455041664">"Fem"</item>
+    <item msgid="3325754778509665687">"Sex"</item>
+    <item msgid="5805551341866280575">"Sju"</item>
+    <item msgid="203334816668238610">"Åtta"</item>
+    <item msgid="4828052671464488923">"Nio"</item>
+    <item msgid="2233497913571137419">"Tio"</item>
+    <item msgid="5621554266768657830">"Elva"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"Klockan"</item>
+    <item msgid="8837126587669001578">"Noll ett"</item>
+    <item msgid="4294343372940455660">"Noll två"</item>
+    <item msgid="7129166637707421536">"Noll tre"</item>
+    <item msgid="7579404865008788673">"Noll fyra"</item>
+    <item msgid="3873924689207380586">"Noll fem"</item>
+    <item msgid="4849565597850069377">"Noll sex"</item>
+    <item msgid="4404219424523572364">"Noll sju"</item>
+    <item msgid="8740481214764087329">"Noll åtta"</item>
+    <item msgid="1713216865806811237">"Noll nio"</item>
+    <item msgid="3508406095411245038">"Tio"</item>
+    <item msgid="7161996337755311711">"Elva"</item>
+    <item msgid="4044549963329624197">"Tolv"</item>
+    <item msgid="333373157917379088">"Tretton"</item>
+    <item msgid="2631202907124819385">"Fjorton"</item>
+    <item msgid="6472396076858033453">"Femton"</item>
+    <item msgid="8656981856181581643">"Sexton"</item>
+    <item msgid="7289026608562030619">"Sjutton"</item>
+    <item msgid="3881477602692646573">"Arton"</item>
+    <item msgid="3358129827772984226">"Nitton"</item>
+    <item msgid="3308575407402865807">"Tjugo"</item>
+    <item msgid="5346560955382229629">"Tjugoett\n"</item>
+    <item msgid="226750304761473436">"Tjugotvå\n"</item>
+    <item msgid="616811325336838734">"Tjugotre\n"</item>
+    <item msgid="616346116869053440">"Tjugofyra\n"</item>
+    <item msgid="4642996410384042830">"Tjugofem\n"</item>
+    <item msgid="7506092849993571465">"Tjugosex\n"</item>
+    <item msgid="1915078191101042031">"Tjugosju\n"</item>
+    <item msgid="4292378641900520252">"Tjugoåtta\n"</item>
+    <item msgid="5339513901773103696">"Tjugonio\n"</item>
+    <item msgid="3574673250891657607">"Trettio"</item>
+    <item msgid="5796923836589110940">"Trettioett\n"</item>
+    <item msgid="5859323597571702052">"Trettiotvå\n"</item>
+    <item msgid="5133326723148876507">"Trettiotre\n"</item>
+    <item msgid="2693999494655663096">"Trettiofyra\n"</item>
+    <item msgid="3316754944962836197">"Trettiofem\n"</item>
+    <item msgid="816891008836796723">"Trettiosex\n"</item>
+    <item msgid="9158890488666520078">"Trettiosju\n"</item>
+    <item msgid="1894769703213894011">"Trettioåtta\n"</item>
+    <item msgid="5638820345598572399">"Trettionio\n"</item>
+    <item msgid="8838304023017895439">"Fyrtio"</item>
+    <item msgid="1834742948932559597">"Fyrtioett\n"</item>
+    <item msgid="6573707308847773944">"Fyrtiotvå\n"</item>
+    <item msgid="2450149950652678001">"Fyrtiotre\n"</item>
+    <item msgid="2874667401318178036">"Fyrtiofyra\n"</item>
+    <item msgid="3391101532763048862">"Fyrtiofem\n"</item>
+    <item msgid="1671489330863254362">"Fyrtiosex\n"</item>
+    <item msgid="5916017359554531038">"Fyrtiosju\n"</item>
+    <item msgid="8205413177993059967">"Fyrtioåtta\n"</item>
+    <item msgid="6607867415142171302">"Fyrtionio\n"</item>
+    <item msgid="8358850748472089162">"Femtio"</item>
+    <item msgid="3551313125255080234">"Femtioett\n"</item>
+    <item msgid="1559678130725716542">"Femtiotvå\n"</item>
+    <item msgid="431441994725492377">"Femtiotre\n"</item>
+    <item msgid="6345774640539623024">"Femtiofyra\n"</item>
+    <item msgid="8018192990793931120">"Femtiofem\n"</item>
+    <item msgid="6187650843754604534">"Femtiosex\n"</item>
+    <item msgid="8727240174015993259">"Femtiosju\n"</item>
+    <item msgid="848339003778952950">"Femtioåtta\n"</item>
+    <item msgid="5798985802835423618">"Femtionio\n"</item>
+  </string-array>
 </resources>

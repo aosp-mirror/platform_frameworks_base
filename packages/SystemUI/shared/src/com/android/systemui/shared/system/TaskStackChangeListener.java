@@ -72,6 +72,13 @@ public abstract class TaskStackChangeListener {
      */
     public void onSingleTaskDisplayDrawn(int displayId) { }
 
+    /**
+     * Called when the last task is removed from a display which can only contain one task.
+     *
+     * @param displayId the id of the display from which the window is removed.
+     */
+    public void onSingleTaskDisplayEmpty(int displayId) {}
+
     public void onTaskProfileLocked(int taskId, int userId) { }
     public void onTaskCreated(int taskId, ComponentName componentName) { }
     public void onTaskRemoved(int taskId) { }

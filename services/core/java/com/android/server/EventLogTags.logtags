@@ -39,6 +39,12 @@ option java_package com.android.server
 27391 user_activity_timeout_override (override|2|3)
 27392 battery_saver_setting (threshold|1)
 
+
+# ---------------------------
+# ThermalManagerService.java
+# ---------------------------
+2737 thermal_changed (name|3),(type|1|5),(temperature|5),(sensor_status|1|5),(previous_system_status|1|5)
+
 #
 # Leave IDs through 2740 for more power logs (2730 used by battery_discharge above)
 #

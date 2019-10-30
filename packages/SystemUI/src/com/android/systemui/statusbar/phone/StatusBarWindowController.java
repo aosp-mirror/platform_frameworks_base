@@ -39,9 +39,9 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.R;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -222,7 +222,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         }
 
         final boolean scrimsOccludingWallpaper =
-                state.scrimsVisibility == ScrimController.VISIBILITY_FULLY_OPAQUE;
+                state.scrimsVisibility == ScrimController.OPAQUE;
         final boolean keyguardOrAod = state.keyguardShowing
                 || (state.dozing && mDozeParameters.getAlwaysOn());
         if (keyguardOrAod && !state.backdropShowing && !scrimsOccludingWallpaper) {
@@ -308,7 +308,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
                 || state.headsUpShowing || state.bubblesShowing
-                || state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_TRANSPARENT);
+                || state.scrimsVisibility != ScrimController.TRANSPARENT);
     }
 
     private void applyFitsSystemWindows(State state) {

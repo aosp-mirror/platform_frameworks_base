@@ -22,11 +22,14 @@ import static android.telephony.SubscriptionManager.DATA_ROAMING_ENABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_DEFAULT_SOURCE;
 
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.TestCase.assertFalse;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -34,18 +37,22 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.Settings;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.text.TextUtils;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
@@ -80,6 +87,9 @@ public class CarrierTextControllerTest extends SysuiTestCase {
             TEST_CARRIER, TEST_CARRIER_2, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "",
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", true, TEST_GROUP_UUID,
             TEST_CARRIER_ID, 0);
+    private static final SubscriptionInfo TEST_SUBSCRIPTION_NULL = new SubscriptionInfo(0, "", 0,
+            TEST_CARRIER, null, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "", DATA_ROAMING_DISABLE,
+            null, null, null, null, false, null, "");
     private static final SubscriptionInfo TEST_SUBSCRIPTION_ROAMING = new SubscriptionInfo(0, "", 0,
             TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_DEFAULT_SOURCE, 0xFFFFFF, "",
             DATA_ROAMING_ENABLE, null, null, null, null, false, null, "");
@@ -282,6 +292,65 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         assertEquals(1, info.listOfCarriers.length);
         assertTrue(info.listOfCarriers[0].toString().contains(TEST_CARRIER));
         assertEquals(1, info.subscriptionIds.length);
+    }
+
+    @Test
+    public void testCarrierText_noTextOnReadySimWhenNull() {
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION_NULL);
+        when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
+        when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
+
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
+                ArgumentCaptor.forClass(
+                        CarrierTextController.CarrierTextCallbackInfo.class);
+
+        mCarrierTextController.updateCarrierText();
+        mTestableLooper.processAllMessages();
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+
+        assertTrue("Carrier text should be empty, instead it's " + captor.getValue().carrierText,
+                TextUtils.isEmpty(captor.getValue().carrierText));
+        assertFalse("No SIM should be available", captor.getValue().anySimReady);
+    }
+
+    @Test
+    public void testCarrierText_noTextOnReadySimWhenNull_airplaneMode_wifiOn() {
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 1);
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        list.add(TEST_SUBSCRIPTION_NULL);
+        when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(IccCardConstants.State.READY);
+        when(mKeyguardUpdateMonitor.getSubscriptionInfo(anyBoolean())).thenReturn(list);
+        mockWifi();
+
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+        ServiceState ss = mock(ServiceState.class);
+        when(ss.getDataRegState()).thenReturn(ServiceState.STATE_IN_SERVICE);
+        mKeyguardUpdateMonitor.mServiceStates.put(TEST_SUBSCRIPTION_NULL.getSubscriptionId(), ss);
+
+        ArgumentCaptor<CarrierTextController.CarrierTextCallbackInfo> captor =
+                ArgumentCaptor.forClass(
+                        CarrierTextController.CarrierTextCallbackInfo.class);
+
+        mCarrierTextController.updateCarrierText();
+        mTestableLooper.processAllMessages();
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+
+        assertFalse("No SIM should be available", captor.getValue().anySimReady);
+        // There's no airplane mode if at least one SIM is State.READY and there's wifi
+        assertFalse("Device should not be in airplane mode", captor.getValue().airplaneMode);
+        assertNotEquals(AIRPLANE_MODE_TEXT, captor.getValue().carrierText);
+    }
+
+    private void mockWifi() {
+        when(mWifiManager.isWifiEnabled()).thenReturn(true);
+        WifiInfo wifiInfo = mock(WifiInfo.class);
+        when(wifiInfo.getBSSID()).thenReturn("");
+        when(mWifiManager.getConnectionInfo()).thenReturn(wifiInfo);
     }
 
     @Test
