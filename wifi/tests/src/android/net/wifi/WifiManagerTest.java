@@ -173,7 +173,7 @@ public class WifiManagerTest {
     public void testCreationAndCloseOfLocalOnlyHotspotReservation() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(REQUEST_REGISTERED);
+                anyString(), eq(null))).thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
 
         callback.onStarted(mWifiManager.new LocalOnlyHotspotReservation(mApConfig));
@@ -191,7 +191,7 @@ public class WifiManagerTest {
             throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(REQUEST_REGISTERED);
+                anyString(), eq(null))).thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
 
         callback.onStarted(mWifiManager.new LocalOnlyHotspotReservation(mApConfig));
@@ -351,7 +351,7 @@ public class WifiManagerTest {
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
 
         verify(mWifiService)
-                .startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString());
+                .startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString(), eq(null));
     }
 
     /**
@@ -362,7 +362,7 @@ public class WifiManagerTest {
     public void testStartLocalOnlyHotspotThrowsSecurityException() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         doThrow(new SecurityException()).when(mWifiService)
-                .startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString());
+                .startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString(), eq(null));
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
     }
 
@@ -374,7 +374,7 @@ public class WifiManagerTest {
     public void testStartLocalOnlyHotspotThrowsIllegalStateException() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         doThrow(new IllegalStateException()).when(mWifiService)
-                .startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString());
+                .startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString(), eq(null));
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
     }
 
@@ -385,7 +385,7 @@ public class WifiManagerTest {
     public void testCorrectLooperIsUsedForHandler() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(ERROR_INCOMPATIBLE_MODE);
+                anyString(), eq(null))).thenReturn(ERROR_INCOMPATIBLE_MODE);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mLooper.dispatchAll();
         assertEquals(ERROR_INCOMPATIBLE_MODE, callback.mFailureReason);
@@ -404,7 +404,7 @@ public class WifiManagerTest {
         when(mContext.getMainExecutor()).thenReturn(altLooper.getNewExecutor());
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(ERROR_INCOMPATIBLE_MODE);
+                anyString(), eq(null))).thenReturn(ERROR_INCOMPATIBLE_MODE);
         mWifiManager.startLocalOnlyHotspot(callback, null);
         altLooper.dispatchAll();
         assertEquals(ERROR_INCOMPATIBLE_MODE, callback.mFailureReason);
@@ -423,7 +423,7 @@ public class WifiManagerTest {
         Handler callbackHandler = new Handler(callbackLooper.getLooper());
         ArgumentCaptor<ILocalOnlyHotspotCallback> internalCallback =
                 ArgumentCaptor.forClass(ILocalOnlyHotspotCallback.class);
-        when(mWifiService.startLocalOnlyHotspot(internalCallback.capture(), anyString()))
+        when(mWifiService.startLocalOnlyHotspot(internalCallback.capture(), anyString(), eq(null)))
                 .thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, callbackHandler);
         callbackLooper.dispatchAll();
@@ -449,7 +449,7 @@ public class WifiManagerTest {
         Handler callbackHandler = new Handler(callbackLooper.getLooper());
         ArgumentCaptor<ILocalOnlyHotspotCallback> internalCallback =
                 ArgumentCaptor.forClass(ILocalOnlyHotspotCallback.class);
-        when(mWifiService.startLocalOnlyHotspot(internalCallback.capture(), anyString()))
+        when(mWifiService.startLocalOnlyHotspot(internalCallback.capture(), anyString(), eq(null)))
                 .thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, callbackHandler);
         callbackLooper.dispatchAll();
@@ -474,7 +474,7 @@ public class WifiManagerTest {
         Handler callbackHandler = new Handler(callbackLooper.getLooper());
         ArgumentCaptor<ILocalOnlyHotspotCallback> internalCallback =
                 ArgumentCaptor.forClass(ILocalOnlyHotspotCallback.class);
-        when(mWifiService.startLocalOnlyHotspot(internalCallback.capture(), anyString()))
+        when(mWifiService.startLocalOnlyHotspot(internalCallback.capture(), anyString(), eq(null)))
                 .thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, callbackHandler);
         callbackLooper.dispatchAll();
@@ -497,7 +497,7 @@ public class WifiManagerTest {
         Handler callbackHandler = new Handler(callbackLooper.getLooper());
         ArgumentCaptor<ILocalOnlyHotspotCallback> internalCallback =
                 ArgumentCaptor.forClass(ILocalOnlyHotspotCallback.class);
-        when(mWifiService.startLocalOnlyHotspot(internalCallback.capture(), anyString()))
+        when(mWifiService.startLocalOnlyHotspot(internalCallback.capture(), anyString(), eq(null)))
                 .thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, callbackHandler);
         callbackLooper.dispatchAll();
@@ -517,7 +517,7 @@ public class WifiManagerTest {
     public void testLocalOnlyHotspotCallbackFullOnIncompatibleMode() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(ERROR_INCOMPATIBLE_MODE);
+                anyString(), eq(null))).thenReturn(ERROR_INCOMPATIBLE_MODE);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mLooper.dispatchAll();
         assertEquals(ERROR_INCOMPATIBLE_MODE, callback.mFailureReason);
@@ -533,7 +533,7 @@ public class WifiManagerTest {
     public void testLocalOnlyHotspotCallbackFullOnTetheringDisallowed() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(ERROR_TETHERING_DISALLOWED);
+                anyString(), eq(null))).thenReturn(ERROR_TETHERING_DISALLOWED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mLooper.dispatchAll();
         assertEquals(ERROR_TETHERING_DISALLOWED, callback.mFailureReason);
@@ -550,7 +550,7 @@ public class WifiManagerTest {
     public void testLocalOnlyHotspotCallbackFullOnSecurityException() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         doThrow(new SecurityException()).when(mWifiService)
-                .startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString());
+                .startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class), anyString(), eq(null));
         try {
             mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         } catch (SecurityException e) {
@@ -571,7 +571,7 @@ public class WifiManagerTest {
     public void testLocalOnlyHotspotCallbackFullOnNoChannelError() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(REQUEST_REGISTERED);
+                anyString(), eq(null))).thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mLooper.dispatchAll();
         //assertEquals(ERROR_NO_CHANNEL, callback.mFailureReason);
@@ -587,7 +587,7 @@ public class WifiManagerTest {
     public void testCancelLocalOnlyHotspotRequestCallsStopOnWifiService() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(REQUEST_REGISTERED);
+                anyString(), eq(null))).thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mWifiManager.cancelLocalOnlyHotspotRequest();
         verify(mWifiService).stopLocalOnlyHotspot();
@@ -609,7 +609,7 @@ public class WifiManagerTest {
     public void testCallbackAfterLocalOnlyHotspotWasCancelled() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(REQUEST_REGISTERED);
+                anyString(), eq(null))).thenReturn(REQUEST_REGISTERED);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mWifiManager.cancelLocalOnlyHotspotRequest();
         verify(mWifiService).stopLocalOnlyHotspot();
@@ -628,7 +628,7 @@ public class WifiManagerTest {
     public void testCancelAfterLocalOnlyHotspotCallbackTriggered() throws Exception {
         TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
         when(mWifiService.startLocalOnlyHotspot(any(ILocalOnlyHotspotCallback.class),
-                anyString())).thenReturn(ERROR_INCOMPATIBLE_MODE);
+                anyString(), eq(null))).thenReturn(ERROR_INCOMPATIBLE_MODE);
         mWifiManager.startLocalOnlyHotspot(callback, mHandler);
         mLooper.dispatchAll();
         assertEquals(ERROR_INCOMPATIBLE_MODE, callback.mFailureReason);
@@ -637,6 +637,17 @@ public class WifiManagerTest {
         assertEquals(null, callback.mRes);
         mWifiManager.cancelLocalOnlyHotspotRequest();
         verify(mWifiService, never()).stopLocalOnlyHotspot();
+    }
+
+    @Test
+    public void testStartLocalOnlyHotspotForwardsCustomConfig() throws Exception {
+        SoftApConfiguration customConfig = new SoftApConfiguration.Builder()
+                .setSsid("customSsid")
+                .build();
+        TestLocalOnlyHotspotCallback callback = new TestLocalOnlyHotspotCallback();
+        mWifiManager.startLocalOnlyHotspot(customConfig, mExecutor, callback);
+        verify(mWifiService).startLocalOnlyHotspot(
+                any(ILocalOnlyHotspotCallback.class), anyString(), eq(customConfig));
     }
 
     /**
