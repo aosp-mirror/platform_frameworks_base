@@ -155,7 +155,9 @@ public final class AudioDeviceInfo {
             TYPE_TV_TUNER }
     )
     @Retention(RetentionPolicy.SOURCE)
-    public @interface AudioDeviceType {}    /** @hide */
+    public @interface AudioDeviceType {}
+
+    /** @hide */
     @IntDef(flag = false, prefix = "TYPE", value = {
             TYPE_BUILTIN_MIC,
             TYPE_BLUETOOTH_SCO,

@@ -72,10 +72,12 @@ public final class AudioDeviceAddress implements Parcelable {
     private final @Role int mRole;
 
     /**
+     * @hide
      * Constructor from a valid {@link AudioDeviceInfo}
      * @param deviceInfo the connected audio device from which to obtain the device-identifying
      *                   type and address.
      */
+    @SystemApi
     public AudioDeviceAddress(@NonNull AudioDeviceInfo deviceInfo) {
         Objects.requireNonNull(deviceInfo);
         mRole = deviceInfo.isSink() ? ROLE_OUTPUT : ROLE_INPUT;
@@ -83,6 +85,14 @@ public final class AudioDeviceAddress implements Parcelable {
         mAddress = deviceInfo.getAddress();
     }
 
+    /**
+     * @hide
+     * Constructor from role, device type and address
+     * @param role indicates input or output role
+     * @param type the device type, as defined in {@link AudioDeviceInfo}
+     * @param address the address of the device, or an empty string for devices without one
+     */
+    @SystemApi
     public AudioDeviceAddress(@Role int role, @AudioDeviceInfo.AudioDeviceType int type,
                               @NonNull String address) {
         Objects.requireNonNull(address);
@@ -101,14 +111,38 @@ public final class AudioDeviceAddress implements Parcelable {
         mAddress = address;
     }
 
+    /*package*/ AudioDeviceAddress(int nativeType, @NonNull String address) {
+        mRole = (nativeType & AudioSystem.DEVICE_BIT_IN) != 0 ? ROLE_INPUT : ROLE_OUTPUT;
+        mType = AudioDeviceInfo.convertInternalDeviceToDeviceType(nativeType);
+        mAddress = address;
+    }
+
+    /**
+     * @hide
+     * Returns the role of a device
+     * @return the role
+     */
+    @SystemApi
     public @Role int getRole() {
         return mRole;
     }
 
+    /**
+     * @hide
+     * Returns the audio device type of a device
+     * @return the type, as defined in {@link AudioDeviceInfo}
+     */
+    @SystemApi
     public @AudioDeviceInfo.AudioDeviceType int getType() {
         return mType;
     }
 
+    /**
+     * @hide
+     * Returns the address of the audio device, or an empty string for devices without one
+     * @return the device address
+     */
+    @SystemApi
     public @NonNull String getAddress() {
         return mAddress;
     }

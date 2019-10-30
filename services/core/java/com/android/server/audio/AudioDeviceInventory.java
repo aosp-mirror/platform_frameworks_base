@@ -23,6 +23,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
+import android.media.AudioDeviceAddress;
 import android.media.AudioDevicePort;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -35,6 +36,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -42,6 +44,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -59,6 +62,9 @@ public class AudioDeviceInventory {
     // Actual list of connected devices
     // Key for map created from DeviceInfo.makeDeviceListKey()
     private final LinkedHashMap<String, DeviceInfo> mConnectedDevices = new LinkedHashMap<>();
+
+    // List of preferred devices for strategies
+    private final ArrayMap<Integer, AudioDeviceAddress> mPreferredDevices = new ArrayMap<>();
 
     private @NonNull AudioDeviceBroker mDeviceBroker;
 
@@ -140,12 +146,20 @@ public class AudioDeviceInventory {
     }
 
     //------------------------------------------------------------
+    /*package*/ void dump(PrintWriter pw, String prefix) {
+        pw.println("\n" + prefix + "Preferred devices for strategy:");
+        mPreferredDevices.forEach((strategy, device) -> {
+            pw.println("  " + prefix + "strategy:" + strategy + " device:" + device); });
+    }
+
+    //------------------------------------------------------------
     // Message handling from AudioDeviceBroker
 
     /**
      * Restore previously connected devices. Use in case of audio server crash
      * (see AudioService.onAudioServerDied() method)
      */
+    // Always executed on AudioDeviceBroker message queue
     /*package*/ void onRestoreDevices() {
         synchronized (mConnectedDevices) {
             for (DeviceInfo di : mConnectedDevices.values()) {
@@ -156,6 +170,11 @@ public class AudioDeviceInventory {
                         di.mDeviceName,
                         di.mDeviceCodecFormat);
             }
+        }
+
+        synchronized (mPreferredDevices) {
+            mPreferredDevices.forEach((strategy, device) -> {
+                AudioSystem.setPreferredDeviceForStrategy(strategy, device); });
         }
     }
 
@@ -431,8 +450,40 @@ public class AudioDeviceInventory {
                     "android"); // reconnect
         }
     }
+
+    /*package*/ void onSaveSetPreferredDevice(int strategy, @NonNull AudioDeviceAddress device) {
+        mPreferredDevices.put(strategy, device);
+    }
+
+    /*package*/ void onSaveRemovePreferredDevice(int strategy) {
+        mPreferredDevices.remove(strategy);
+    }
+
     //------------------------------------------------------------
     //
+
+    /*package*/ int setPreferredDeviceForStrategySync(int strategy,
+                                                      @NonNull AudioDeviceAddress device) {
+        final long identity = Binder.clearCallingIdentity();
+        final int status = AudioSystem.setPreferredDeviceForStrategy(strategy, device);
+        Binder.restoreCallingIdentity(identity);
+
+        if (status == AudioSystem.SUCCESS) {
+            mDeviceBroker.postSaveSetPreferredDeviceForStrategy(strategy, device);
+        }
+        return status;
+    }
+
+    /*package*/ int removePreferredDeviceForStrategySync(int strategy) {
+        final long identity = Binder.clearCallingIdentity();
+        final int status = AudioSystem.removePreferredDeviceForStrategy(strategy);
+        Binder.restoreCallingIdentity(identity);
+
+        if (status == AudioSystem.SUCCESS) {
+            mDeviceBroker.postSaveRemovePreferredDeviceForStrategy(strategy);
+        }
+        return status;
+    }
 
     /**
      * Implements the communication with AudioSystem to (dis)connect a device in the native layers
