@@ -5240,16 +5240,18 @@ public class WifiManager {
     /**
      * Add a listener for Scan Results. See {@link ScanResultsListener}.
      * Caller will receive the event when scan results are available.
-     * Caller should use {@link WifiManager#getScanResults()} to get the scan results.
+     * Caller should use {@link WifiManager#getScanResults()} requires
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} to get the scan results.
      * Caller can remove a previously registered listener using
      * {@link WifiManager#removeScanResultsListener(ScanResultsListener)}
+     * Same caller can add multiple listeners.
      * <p>
      * Applications should have the
      * {@link android.Manifest.permission#ACCESS_WIFI_STATE} permission. Callers
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
-     * @param executor  The executor to execute the listener of the {@code listener} object.
+     * @param executor The executor to execute the listener of the {@code listener} object.
      * @param listener listener for Scan Results events
      */
 
@@ -5267,7 +5269,7 @@ public class WifiManager {
             iWifiManager.registerScanResultsListener(
                     new Binder(),
                     new ScanResultsListenerProxy(executor, listener),
-                    mContext.getOpPackageName().hashCode());
+                    listener.hashCode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5289,7 +5291,7 @@ public class WifiManager {
             if (iWifiManager == null) {
                 throw new RemoteException("Wifi service is not running");
             }
-            iWifiManager.unregisterScanResultsListener(mContext.getOpPackageName().hashCode());
+            iWifiManager.unregisterScanResultsListener(listener.hashCode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
