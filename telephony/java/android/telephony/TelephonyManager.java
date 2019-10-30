@@ -9448,16 +9448,28 @@ public class TelephonyManager {
         return returnValue;
     }
 
-    private int getSubIdForPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
+    /**
+     * Returns the subscription ID for the given phone account handle.
+     *
+     * @param phoneAccountHandle the phone account handle for outgoing calls
+     * @return subscription ID for the given phone account handle; or
+     *         {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}
+     *         if not available; or throw a SecurityException if the caller doesn't have the
+     *         permission.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public int getSubIdForPhoneAccountHandle(@NonNull PhoneAccountHandle phoneAccountHandle) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
-            ITelecomService service = getTelecomService();
+            ITelephony service = getITelephony();
             if (service != null) {
-                retval = getSubIdForPhoneAccount(service.getPhoneAccount(phoneAccountHandle));
+                retval = service.getSubIdForPhoneAccountHandle(
+                        phoneAccountHandle, mContext.getOpPackageName());
             }
-        } catch (RemoteException e) {
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getSubIdForPhoneAccountHandle RemoteException", ex);
+            ex.rethrowAsRuntimeException();
         }
-
         return retval;
     }
 

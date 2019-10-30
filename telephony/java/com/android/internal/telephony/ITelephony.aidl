@@ -1309,6 +1309,12 @@ interface ITelephony {
     int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
 
     /**
+     * Returns the subscription ID associated with the specified PhoneAccountHandle.
+     */
+    int getSubIdForPhoneAccountHandle(in PhoneAccountHandle phoneAccountHandle,
+            String callingPackage);
+
+    /**
      * Returns the PhoneAccountHandle associated with a subscription ID.
      */
     PhoneAccountHandle getPhoneAccountHandleForSubscriptionId(int subscriptionId);
