@@ -23,7 +23,6 @@ import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Point;
 import android.os.Build;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -398,11 +397,7 @@ public class ViewConfiguration {
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
 
         // Size of the screen in bytes, in ARGB_8888 format
-        final WindowManager win = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        final Display display = win.getDefaultDisplay();
-        final Point size = new Point();
-        display.getRealSize(size);
-        mMaximumDrawingCacheSize = 4 * size.x * size.y;
+        mMaximumDrawingCacheSize = 4 * metrics.heightPixels * metrics.widthPixels;
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
@@ -842,6 +837,7 @@ public class ViewConfiguration {
      * The maximum drawing cache size expressed in bytes.
      *
      * @return the maximum size of View's drawing cache expressed in bytes
+     *
      */
     public int getScaledMaximumDrawingCacheSize() {
         return mMaximumDrawingCacheSize;
