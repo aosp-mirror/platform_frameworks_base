@@ -45,11 +45,6 @@
 
 #include <nativehelper/ScopedUtfChars.h>
 
-#include <AnimationContext.h>
-#include <FrameInfo.h>
-#include <RenderNode.h>
-#include <renderthread/RenderProxy.h>
-
 // ----------------------------------------------------------------------------
 
 namespace android {
@@ -189,21 +184,6 @@ static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jlong n
     return value;
 }
 
-static inline SkColorType convertPixelFormat(PixelFormat format) {
-    /* note: if PIXEL_FORMAT_RGBX_8888 means that all alpha bytes are 0xFF, then
-        we can map to kN32_SkColorType, and optionally call
-        bitmap.setAlphaType(kOpaque_SkAlphaType) on the resulting SkBitmap
-        (as an accelerator)
-    */
-    switch (format) {
-    case PIXEL_FORMAT_RGBX_8888:    return kN32_SkColorType;
-    case PIXEL_FORMAT_RGBA_8888:    return kN32_SkColorType;
-    case PIXEL_FORMAT_RGBA_FP16:    return kRGBA_F16_SkColorType;
-    case PIXEL_FORMAT_RGB_565:      return kRGB_565_SkColorType;
-    default:                        return kUnknown_SkColorType;
-    }
-}
-
 static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject canvasObj, jobject dirtyRectObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
@@ -213,7 +193,7 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         return 0;
     }
 
-    if (convertPixelFormat(ANativeWindow_getFormat(surface.get())) == kUnknown_SkColorType) {
+    if (ACanvas_isSupportedPixelFormat(ANativeWindow_getFormat(surface.get()))) {
         native_window_set_buffers_format(surface.get(), PIXEL_FORMAT_RGBA_8888);
     }
 
@@ -433,61 +413,7 @@ static jint nativeSetAutoRefreshEnabled(JNIEnv* env, jclass clazz, jlong nativeO
     return anw->perform(surface, NATIVE_WINDOW_SET_AUTO_REFRESH, int(enabled));
 }
 
-namespace uirenderer {
-
-using namespace android::uirenderer::renderthread;
-
-class ContextFactory : public IContextFactory {
-public:
-    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
-        return new AnimationContext(clock);
-    }
-};
-
-static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfacePtr,
-        jboolean isWideColorGamut) {
-    RenderNode* rootNode = reinterpret_cast<RenderNode*>(rootNodePtr);
-    sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
-    ContextFactory factory;
-    RenderProxy* proxy = new RenderProxy(false, rootNode, &factory);
-    proxy->loadSystemProperties();
-    if (isWideColorGamut) {
-        proxy->setWideGamut(true);
-    }
-    proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
-    proxy->setSurface(surface);
-    // Shadows can't be used via this interface, so just set the light source
-    // to all 0s.
-    proxy->setLightAlpha(0, 0);
-    proxy->setLightGeometry((Vector3){0, 0, 0}, 0);
-    return (jlong) proxy;
-}
-
-static void setSurface(JNIEnv* env, jclass clazz, jlong rendererPtr, jlong surfacePtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
-    sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
-    proxy->setSurface(surface);
-}
-
-static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
-    nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
-    UiFrameInfoBuilder(proxy->frameInfo())
-            .setVsync(vsync, vsync)
-            .addFlag(FrameInfoFlags::SurfaceCanvas);
-    proxy->syncAndDrawFrame();
-}
-
-static void destroy(JNIEnv* env, jclass clazz, jlong rendererPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
-    delete proxy;
-}
-
-} // uirenderer
-
 // ----------------------------------------------------------------------------
-
-namespace hwui = android::uirenderer;
 
 static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeCreateFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)J",
@@ -521,12 +447,6 @@ static const JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeAttachAndQueueBufferWithColorSpace},
     {"nativeSetSharedBufferModeEnabled", "(JZ)I", (void*)nativeSetSharedBufferModeEnabled},
     {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
-
-    // HWUI context
-    {"nHwuiCreate", "(JJZ)J", (void*) hwui::create },
-    {"nHwuiSetSurface", "(JJ)V", (void*) hwui::setSurface },
-    {"nHwuiDraw", "(J)V", (void*) hwui::draw },
-    {"nHwuiDestroy", "(J)V", (void*) hwui::destroy },
 };
 
 int register_android_view_Surface(JNIEnv* env)
