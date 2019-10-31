@@ -771,10 +771,11 @@ message ActivityManagerServiceDumpProcessesProto {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
             optional string proc_name = 1;
-            optional string file = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
+            reserved 2; // file, DEST_EXPLICIT
             optional int32 pid = 3;
             optional int32 uid = 4;
             optional bool is_user_initiated = 5;
+            optional string uri = 6 [ (.android.privacy).dest = DEST_EXPLICIT ];
         }
         optional Dump dump = 2;
     }
