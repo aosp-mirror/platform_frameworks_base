@@ -6958,14 +6958,18 @@ package android.telecom {
   public abstract class Conference extends android.telecom.Conferenceable {
     method @Deprecated public final android.telecom.AudioState getAudioState();
     method @Deprecated public final long getConnectTimeMillis();
+    method public final long getConnectionStartElapsedRealTime();
     method public android.telecom.Connection getPrimaryConnection();
+    method @NonNull public final String getTelecomCallId();
     method @Deprecated public void onAudioStateChanged(android.telecom.AudioState);
+    method public final void setAddress(@NonNull android.net.Uri, int);
+    method public final void setCallerDisplayName(@NonNull String, int);
+    method public void setConferenceState(boolean);
     method @Deprecated public final void setConnectTimeMillis(long);
   }
 
   public abstract class Connection extends android.telecom.Conferenceable {
     method @Deprecated public final android.telecom.AudioState getAudioState();
-    method public final int getCallRadioTech();
     method public final long getConnectElapsedTimeMillis();
     method public final long getConnectTimeMillis();
     method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
@@ -6973,7 +6977,6 @@ package android.telecom {
     method @Deprecated public void onAudioStateChanged(android.telecom.AudioState);
     method public final void resetConnectionTime();
     method public void setCallDirection(int);
-    method public final void setCallRadioTech(int);
     method public final void setConnectTimeMillis(long);
     method public final void setConnectionStartElapsedRealTime(long);
     method public void setPhoneAccountHandle(@NonNull android.telecom.PhoneAccountHandle);
@@ -6985,6 +6988,10 @@ package android.telecom {
     field public static final int PROPERTY_GENERIC_CONFERENCE = 2; // 0x2
     field public static final int PROPERTY_IS_DOWNGRADED_CONFERENCE = 64; // 0x40
     field public static final int PROPERTY_REMOTELY_HOSTED = 2048; // 0x800
+  }
+
+  public abstract class ConnectionService extends android.app.Service {
+    method public final void addExistingConnection(@NonNull android.telecom.PhoneAccountHandle, @NonNull android.telecom.Connection, @NonNull android.telecom.Conference);
   }
 
   public abstract class InCallService extends android.app.Service {
@@ -7118,6 +7125,10 @@ package android.telecom {
     field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
   }
 
+  public static class PhoneAccount.Builder {
+    method @NonNull public android.telecom.PhoneAccount.Builder setGroupId(@NonNull String);
+  }
+
   public class PhoneAccountSuggestionService extends android.app.Service {
     ctor public PhoneAccountSuggestionService();
     method public void onAccountSuggestionRequest(@NonNull String);
@@ -7188,6 +7199,7 @@ package android.telecom {
     method public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCurrentTtyMode();
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDefaultDialerPackage(int);
     method @Deprecated public android.content.ComponentName getDefaultPhoneApp();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(String);

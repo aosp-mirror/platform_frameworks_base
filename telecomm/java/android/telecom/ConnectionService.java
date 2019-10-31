@@ -16,7 +16,11 @@
 
 package android.telecom;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -2106,15 +2110,21 @@ public abstract class ConnectionService extends Service {
 
     /**
      * Adds a connection created by the {@link ConnectionService} and informs telecom of the new
-     * connection.
+     * connection, as well as adding that connection to the specified conference.
+     * <p>
+     * Note: This API is intended ONLY for use by the Telephony stack to provide an easy way to add
+     * IMS conference participants to be added to a conference in a single step; this helps ensure
+     * UI updates happen atomically, rather than adding the connection and then adding it to
+     * the conference in another step.
      *
      * @param phoneAccountHandle The phone account handle for the connection.
      * @param connection The connection to add.
      * @param conference The parent conference of the new connection.
      * @hide
      */
-    public final void addExistingConnection(PhoneAccountHandle phoneAccountHandle,
-            Connection connection, Conference conference) {
+    @SystemApi
+    public final void addExistingConnection(@NonNull PhoneAccountHandle phoneAccountHandle,
+            @NonNull Connection connection, @NonNull Conference conference) {
 
         String id = addExistingConnectionInternal(phoneAccountHandle, connection);
         if (id != null) {
