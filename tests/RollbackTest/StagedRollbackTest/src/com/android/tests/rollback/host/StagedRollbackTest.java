@@ -24,8 +24,7 @@ import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,20 +47,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         assertTrue(runDeviceTests("com.android.tests.rollback",
                     "com.android.tests.rollback.StagedRollbackTest",
                     phase));
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        // Disconnect internet so we can test network health triggered rollbacks
-        getDevice().executeShellCommand("svc wifi disable");
-        getDevice().executeShellCommand("svc data disable");
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        // Reconnect internet after testing network health triggered rollbacks
-        getDevice().executeShellCommand("svc wifi enable");
-        getDevice().executeShellCommand("svc data enable");
     }
 
     /**
@@ -121,6 +106,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testNetworkFailedRollback() throws Exception {
+        // Disconnect internet so we can test network health triggered rollbacks
+        getDevice().executeShellCommand("svc wifi disable");
+        getDevice().executeShellCommand("svc data disable");
+
         // Remove available rollbacks and uninstall NetworkStack on /data/
         runPhase("testNetworkFailedRollback_Phase1");
         // Reduce health check deadline
@@ -148,6 +137,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      * Tests passed network health check does not trigger watchdog staged rollbacks.
      */
     @Test
+    @Ignore("b/143514090")
     public void testNetworkPassedDoesNotRollback() throws Exception {
         // Remove available rollbacks and uninstall NetworkStack on /data/
         runPhase("testNetworkPassedDoesNotRollback_Phase1");
