@@ -118,7 +118,8 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private ComponentName mComponent;
         private String mTargetActivity;
         private TaskRecord mTaskRecord;
-        private int mUid;
+        private String mProcessName = "name";
+        private int mUid = 12345;
         private boolean mCreateTask;
         private ActivityStack mStack;
         private int mActivityFlags;
@@ -172,6 +173,11 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
         ActivityBuilder setCreateTask(boolean createTask) {
             mCreateTask = createTask;
+            return this;
+        }
+
+        ActivityBuilder setProcessName(String name) {
+            mProcessName = name;
             return this;
         }
 
@@ -235,6 +241,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             aInfo.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
+            aInfo.processName = mProcessName;
             aInfo.packageName = mComponent.getPackageName();
             if (mTargetActivity != null) {
                 aInfo.targetActivity = mTargetActivity;
@@ -268,7 +275,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             }
 
             final WindowProcessController wpc = new WindowProcessController(mService,
-                    mService.mContext.getApplicationInfo(), "name", 12345,
+                    mService.mContext.getApplicationInfo(), mProcessName, mUid,
                     UserHandle.getUserId(12345), mock(Object.class),
                     mock(WindowProcessListener.class));
             wpc.setThread(mock(IApplicationThread.class));
