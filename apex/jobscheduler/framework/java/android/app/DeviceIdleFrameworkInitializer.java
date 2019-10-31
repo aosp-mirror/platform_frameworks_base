@@ -32,7 +32,7 @@ import android.os.ServiceManager;
 public class DeviceIdleFrameworkInitializer {
     private static IDeviceIdleController sIDeviceIdleController;
 
-    static {
+    public static void initialize() {
         SystemServiceRegistry.registerCachedService(
                 Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
                 (context, b) -> new DeviceIdleManager(

@@ -28,7 +28,7 @@ import android.os.BatteryStats;
  * @hide
  */
 public class JobSchedulerFrameworkInitializer {
-    static {
+    public static void initialize() {
         SystemServiceRegistry.registerStaticService(
                 Context.JOB_SCHEDULER_SERVICE, JobScheduler.class,
                 (b) -> new JobSchedulerImpl(IJobScheduler.Stub.asInterface(b)));
