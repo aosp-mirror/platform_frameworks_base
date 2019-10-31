@@ -708,6 +708,7 @@ public class LocationManager {
      * @deprecated Use {@link #getCurrentLocation(String, CancellationSignal, Executor, Consumer)}
      * instead as it does not carry a risk of extreme battery drain.
      */
+    @Deprecated
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(
             @NonNull Criteria criteria,
@@ -737,6 +738,7 @@ public class LocationManager {
      * @deprecated Use {@link #getCurrentLocation(String, CancellationSignal, Executor, Consumer)}
      * instead as it does not carry a risk of extreme battery drain.
      */
+    @Deprecated
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(@NonNull String provider,
             @NonNull PendingIntent pendingIntent) {
@@ -765,6 +767,7 @@ public class LocationManager {
      * @deprecated Use {@link #getCurrentLocation(String, CancellationSignal, Executor, Consumer)}
      * instead as it does not carry a risk of extreme battery drain.
      */
+    @Deprecated
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(@NonNull Criteria criteria,
             @NonNull PendingIntent pendingIntent) {
