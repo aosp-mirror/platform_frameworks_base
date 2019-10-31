@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -925,6 +926,11 @@ public class ContextWrapper extends Context {
     @Override
     public Context createDisplayContext(Display display) {
         return mBase.createDisplayContext(display);
+    }
+
+    @Override
+    public @NonNull Context createFeatureContext(@Nullable String featureId) {
+        return mBase.createFeatureContext(featureId);
     }
 
     @Override

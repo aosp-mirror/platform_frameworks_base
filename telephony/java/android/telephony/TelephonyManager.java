@@ -110,6 +110,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -325,7 +326,11 @@ public class TelephonyManager {
         mSubId = subId;
         Context appContext = context.getApplicationContext();
         if (appContext != null) {
-            mContext = appContext;
+            if (Objects.equals(context.getFeatureId(), appContext.getFeatureId())) {
+                mContext = appContext;
+            } else {
+                mContext = appContext.createFeatureContext(context.getFeatureId());
+            }
         } else {
             mContext = context;
         }
