@@ -17,6 +17,7 @@ package com.android.server;
 
 import static androidx.test.InstrumentationRegistry.getContext;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
@@ -31,6 +32,7 @@ import static com.android.server.DeviceIdleController.LIGHT_STATE_INACTIVE;
 import static com.android.server.DeviceIdleController.LIGHT_STATE_OVERRIDE;
 import static com.android.server.DeviceIdleController.LIGHT_STATE_PRE_IDLE;
 import static com.android.server.DeviceIdleController.LIGHT_STATE_WAITING_FOR_NETWORK;
+import static com.android.server.DeviceIdleController.MSG_REPORT_STATIONARY_STATUS;
 import static com.android.server.DeviceIdleController.STATE_ACTIVE;
 import static com.android.server.DeviceIdleController.STATE_IDLE;
 import static com.android.server.DeviceIdleController.STATE_IDLE_MAINTENANCE;
@@ -51,6 +53,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -70,6 +73,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
@@ -85,11 +89,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 /**
  * Tests for {@link com.android.server.DeviceIdleController}.
@@ -97,6 +103,7 @@ import org.mockito.quality.Strictness;
 @RunWith(AndroidJUnit4.class)
 public class DeviceIdleControllerTest {
     private DeviceIdleController mDeviceIdleController;
+    private DeviceIdleController.MyHandler mHandler;
     private AnyMotionDetectorForTest mAnyMotionDetector;
     private AppStateTrackerForTest mAppStateTracker;
     private DeviceIdleController.Constants mConstants;
@@ -109,8 +116,6 @@ public class DeviceIdleControllerTest {
     private ConnectivityService mConnectivityService;
     @Mock
     private ContentResolver mContentResolver;
-    @Mock
-    private DeviceIdleController.MyHandler mHandler;
     @Mock
     private IActivityManager mIActivityManager;
     @Mock
@@ -128,6 +133,8 @@ public class DeviceIdleControllerTest {
         ConnectivityService connectivityService;
         LocationManager locationManager;
         ConstraintController constraintController;
+        // Freeze time for testing.
+        long nowElapsed;
 
         InjectorForTest(Context ctx) {
             super(ctx);
@@ -155,12 +162,34 @@ public class DeviceIdleControllerTest {
         }
 
         @Override
+        long getElapsedRealtime() {
+            return nowElapsed;
+        }
+
+        @Override
         LocationManager getLocationManager() {
             return locationManager;
         }
 
         @Override
         DeviceIdleController.MyHandler getHandler(DeviceIdleController controller) {
+            if (mHandler == null) {
+                mHandler = controller.new MyHandler(getContext().getMainLooper());
+                spyOn(mHandler);
+                doNothing().when(mHandler).handleMessage(argThat((message) ->
+                        message.what != MSG_REPORT_STATIONARY_STATUS));
+                doAnswer(new Answer<Boolean>() {
+                    @Override
+                    public Boolean answer(InvocationOnMock invocation) throws Throwable {
+                        Message msg = invocation.getArgument(0);
+                        mHandler.handleMessage(msg);
+                        return true;
+                    }
+                }).when(mHandler).sendMessageDelayed(
+                        argThat((message) -> message.what == MSG_REPORT_STATIONARY_STATUS),
+                        anyLong());
+            }
+
             return mHandler;
         }
 
@@ -226,6 +255,19 @@ public class DeviceIdleControllerTest {
         }
     }
 
+    private class StationaryListenerForTest implements DeviceIdleController.StationaryListener {
+        boolean motionExpected = false;
+        boolean isStationary = false;
+
+        @Override
+        public void onDeviceStationaryChanged(boolean isStationary) {
+            if (isStationary == motionExpected) {
+                fail("Unexpected device stationary status: " + isStationary);
+            }
+            this.isStationary = isStationary;
+        }
+    }
+
     @Before
     public void setUp() {
         mMockingSession = mockitoSession()
@@ -255,8 +297,6 @@ public class DeviceIdleControllerTest {
         doReturn(true).when(mSensorManager).registerListener(any(), any(), anyInt());
         mAppStateTracker = new AppStateTrackerForTest(getContext(), Looper.getMainLooper());
         mAnyMotionDetector = new AnyMotionDetectorForTest();
-        mHandler = mock(DeviceIdleController.MyHandler.class, Answers.RETURNS_DEEP_STUBS);
-        doNothing().when(mHandler).handleMessage(any());
         mInjector = new InjectorForTest(getContext());
         doNothing().when(mContentResolver).registerContentObserver(any(), anyBoolean(), any());
 
@@ -1605,6 +1645,86 @@ public class DeviceIdleControllerTest {
         float curfactor = mDeviceIdleController.getPreIdleTimeoutFactor();
         assertEquals("Pre idle time factor of mode default.",
                 1.0f, curfactor, delta);
+    }
+
+    @Test
+    public void testStationaryDetection_QuickDozeOff() {
+        setQuickDozeEnabled(false);
+        enterDeepState(STATE_IDLE);
+        // Regular progression through states, so time should have increased appropriately.
+        mInjector.nowElapsed += mConstants.IDLE_AFTER_INACTIVE_TIMEOUT + mConstants.SENSING_TIMEOUT
+                + mConstants.LOCATING_TIMEOUT;
+
+        StationaryListenerForTest stationaryListener = new StationaryListenerForTest();
+
+        mDeviceIdleController.registerStationaryListener(stationaryListener);
+
+        // Go to IDLE_MAINTENANCE
+        mDeviceIdleController.stepIdleStateLocked("testing");
+
+        // Back to IDLE
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        assertTrue(stationaryListener.isStationary);
+
+        // Test motion
+        stationaryListener.motionExpected = true;
+        mDeviceIdleController.mMotionListener.onTrigger(null);
+        assertFalse(stationaryListener.isStationary);
+    }
+
+    @Test
+    public void testStationaryDetection_QuickDozeOn() {
+        setAlarmSoon(false);
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE);
+        // Quick doze progression through states, so time should have increased appropriately.
+        mInjector.nowElapsed += mConstants.QUICK_DOZE_DELAY_TIMEOUT;
+        final ArgumentCaptor<AlarmManager.OnAlarmListener> alarmListener = ArgumentCaptor
+                .forClass(AlarmManager.OnAlarmListener.class);
+        doNothing().when(mAlarmManager).set(anyInt(), anyLong(), eq("DeviceIdleController.motion"),
+                alarmListener.capture(), any());
+
+        StationaryListenerForTest stationaryListener = new StationaryListenerForTest();
+
+        stationaryListener.motionExpected = true;
+        mDeviceIdleController.registerStationaryListener(stationaryListener);
+        assertFalse(stationaryListener.isStationary);
+
+        // Go to IDLE_MAINTENANCE
+        mDeviceIdleController.stepIdleStateLocked("testing");
+
+        mInjector.nowElapsed += mConstants.MOTION_INACTIVE_TIMEOUT / 2;
+
+        // Back to IDLE
+        mDeviceIdleController.stepIdleStateLocked("testing");
+
+        // Now enough time has passed.
+        mInjector.nowElapsed += mConstants.MOTION_INACTIVE_TIMEOUT / 2;
+        stationaryListener.motionExpected = false;
+        alarmListener.getValue().onAlarm();
+        assertTrue(stationaryListener.isStationary);
+
+        stationaryListener.motionExpected = true;
+        mDeviceIdleController.mMotionListener.onSensorChanged(null);
+        assertFalse(stationaryListener.isStationary);
+
+        // Since we're in quick doze, the device shouldn't stop idling.
+        verifyStateConditions(STATE_IDLE);
+
+        // Go to IDLE_MAINTENANCE
+        mDeviceIdleController.stepIdleStateLocked("testing");
+
+        mInjector.nowElapsed += mConstants.MOTION_INACTIVE_TIMEOUT / 2;
+
+        // Back to IDLE
+        mDeviceIdleController.stepIdleStateLocked("testing");
+
+        // Now enough time has passed.
+        mInjector.nowElapsed += mConstants.MOTION_INACTIVE_TIMEOUT / 2;
+        stationaryListener.motionExpected = false;
+        alarmListener.getValue().onAlarm();
+        assertTrue(stationaryListener.isStationary);
     }
 
     private void enterDeepState(int state) {
