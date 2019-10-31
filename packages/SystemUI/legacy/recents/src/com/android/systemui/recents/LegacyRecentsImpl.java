@@ -195,6 +195,7 @@ public class LegacyRecentsImpl implements RecentsImplementation {
                 mContext.getColor(R.color.recents_task_bar_default_background_color);
         final int defaultTaskViewBackgroundColor =
                 mContext.getColor(R.color.recents_task_view_default_background_color);
+        getComponent(Recents.class).putComponent(LegacyRecentsImpl.class, this);
         sDebugFlags = new RecentsDebugFlags();
         sSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         sConfiguration = new RecentsConfiguration(mContext);
