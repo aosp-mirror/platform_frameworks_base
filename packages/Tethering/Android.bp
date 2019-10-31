@@ -21,6 +21,7 @@ java_defaults {
         "src/**/*.java",
         ":framework-tethering-shared-srcs",
         ":services-tethering-shared-srcs",
+        ":servicescore-tethering-src",
     ],
     static_libs: [
         "androidx.annotation_annotation",
@@ -67,9 +68,17 @@ android_app {
 
 // This group will be removed when tethering migration is done.
 filegroup {
-    name: "tethering-services-srcs",
+    name: "tethering-servicescore-srcs",
     srcs: [
+        "src/com/android/server/connectivity/tethering/EntitlementManager.java",
         "src/com/android/server/connectivity/tethering/TetheringConfiguration.java",
+    ],
+}
+
+// This group will be removed when tethering migration is done.
+filegroup {
+    name: "tethering-servicesnet-srcs",
+    srcs: [
         "src/android/net/dhcp/DhcpServerCallbacks.java",
         "src/android/net/dhcp/DhcpServingParamsParcelExt.java",
         "src/android/net/ip/IpServer.java",
