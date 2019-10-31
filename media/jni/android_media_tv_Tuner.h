@@ -22,6 +22,8 @@
 
 #include "jni.h"
 
+using ::android::hardware::tv::tuner::V1_0::FrontendId;
+using ::android::hardware::tv::tuner::V1_0::IFrontend;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
 
 namespace android {
@@ -29,6 +31,8 @@ namespace android {
 struct JTuner : public RefBase {
     JTuner(JNIEnv *env, jobject thiz);
     sp<ITuner> getTunerService();
+    jobject getFrontendIds();
+    jobject openFrontendById(int id);
 protected:
     virtual ~JTuner();
 
@@ -36,6 +40,7 @@ private:
     jclass mClass;
     jweak mObject;
     static sp<ITuner> mTuner;
+    sp<IFrontend> mFe;
 };
 
 }  // namespace android

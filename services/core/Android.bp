@@ -80,6 +80,7 @@ java_library_static {
         ":vold_aidl",
         ":gsiservice_aidl",
         ":platform-compat-config",
+        ":tethering-servicescore-srcs",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
@@ -154,4 +155,12 @@ genrule {
 prebuilt_etc {
     name: "protolog.conf.json.gz",
     src: ":services.core.json.gz",
+}
+
+// TODO: this should be removed after tethering migration done.
+filegroup {
+    name: "servicescore-tethering-src",
+    srcs: [
+        "java/com/android/server/connectivity/MockableSystemProperties.java",
+    ],
 }

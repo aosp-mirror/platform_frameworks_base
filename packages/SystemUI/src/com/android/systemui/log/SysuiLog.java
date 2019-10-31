@@ -120,14 +120,21 @@ public class SysuiLog implements Dumpable {
     }
 
     /**
-     * @return user-readable string of the given event
+     * @return user-readable string of the given event with timestamp
      */
-    public String eventToString(Event event) {
+    public String eventToTimestampedString(Event event) {
         StringBuilder sb = new StringBuilder();
         sb.append(SysuiLog.DATE_FORMAT.format(event.getTimestamp()));
         sb.append(" ");
         sb.append(event.getMessage());
         return sb.toString();
+    }
+
+    /**
+     * @return user-readable string of the given event without a timestamp
+     */
+    public String eventToString(Event event) {
+        return event.getMessage();
     }
 
     /**
@@ -137,7 +144,7 @@ public class SysuiLog implements Dumpable {
         pw.println("\tTimeline:");
 
         for (Event event : mTimeline) {
-            pw.println("\t" + eventToString(event));
+            pw.println("\t" + eventToTimestampedString(event));
         }
     }
 

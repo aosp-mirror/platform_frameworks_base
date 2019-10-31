@@ -22,12 +22,14 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.os.Binder;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.RcsFeature;
 
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Manager for interfacing with the framework RCS services, including the User Capability Exchange
@@ -36,7 +38,7 @@ import java.util.concurrent.Executor;
  * Use {@link #createForSubscriptionId(Context, int)} to create an instance of this manager.
  * @hide
  */
-public class ImsRcsManager {
+public class ImsRcsManager implements RegistrationManager {
 
     /**
      * Receives RCS availability status updates from the ImsService.
@@ -135,6 +137,64 @@ public class ImsRcsManager {
         mContext = context;
         mSubId = subId;
     }
+
+    /**{@inheritDoc}*/
+    @Override
+    public void registerImsRegistrationCallback(
+            @NonNull RegistrationManager.RegistrationCallback c,
+            @NonNull @CallbackExecutor Executor executor)
+            throws ImsException {
+        if (c == null) {
+            throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        c.setExecutor(executor);
+        throw new UnsupportedOperationException("registerImsRegistrationCallback is not"
+                + "supported.");
+    }
+
+    /**{@inheritDoc}*/
+    @Override
+    public void unregisterImsRegistrationCallback(
+            @NonNull RegistrationManager.RegistrationCallback c) {
+        if (c == null) {
+            throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
+        }
+        throw new UnsupportedOperationException("unregisterImsRegistrationCallback is not"
+                + "supported.");
+    }
+
+    /**{@inheritDoc}*/
+    @Override
+    public void getRegistrationState(@NonNull @ImsRegistrationState Consumer<Integer> stateCallback,
+            @NonNull @CallbackExecutor Executor executor) {
+        if (stateCallback == null) {
+            throw new IllegalArgumentException("Must include a non-null stateCallback.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        throw new UnsupportedOperationException("getRegistrationState is not"
+                + "supported.");
+    }
+
+    /**{@inheritDoc}*/
+    @Override
+    public void getRegistrationTransportType(
+            @NonNull @AccessNetworkConstants.TransportType Consumer<Integer> transportTypeCallback,
+            @NonNull @CallbackExecutor Executor executor) {
+        if (transportTypeCallback == null) {
+            throw new IllegalArgumentException("Must include a non-null transportTypeCallback.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        throw new UnsupportedOperationException("getRegistrationTransportType is not"
+                + "supported.");
+    }
+
 
     /**
      * Registers an {@link AvailabilityCallback} with the system, which will provide RCS

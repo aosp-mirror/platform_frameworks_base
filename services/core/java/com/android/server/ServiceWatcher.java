@@ -51,6 +51,8 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Find the best Service, and bind to it.
@@ -64,6 +66,7 @@ public class ServiceWatcher implements ServiceConnection {
     public static final String EXTRA_SERVICE_VERSION = "serviceVersion";
     public static final String EXTRA_SERVICE_IS_MULTIUSER = "serviceIsMultiuser";
 
+    private static final long BLOCKING_BINDER_TIMEOUT_MS = 30 * 1000;
 
     /** Function to run on binder interface. */
     public interface BinderRunner {
@@ -402,7 +405,7 @@ public class ServiceWatcher implements ServiceConnection {
                     return defaultValue;
                 }
             });
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | TimeoutException e) {
             return defaultValue;
         }
     }
@@ -439,7 +442,8 @@ public class ServiceWatcher implements ServiceConnection {
         }
     }
 
-    private <T> T runOnHandlerBlocking(Callable<T> c) throws InterruptedException {
+    private <T> T runOnHandlerBlocking(Callable<T> c)
+            throws InterruptedException, TimeoutException {
         if (Looper.myLooper() == mHandler.getLooper()) {
             try {
                 return c.call();
@@ -451,7 +455,12 @@ public class ServiceWatcher implements ServiceConnection {
             FutureTask<T> task = new FutureTask<>(c);
             mHandler.post(task);
             try {
-                return task.get();
+                // timeout will unblock callers, in particular if the caller is a binder thread to
+                // help reduce binder contention. this will still result in blocking the handler
+                // thread which may result in ANRs, but should make problems slightly more rare.
+                // the underlying solution is simply not to use this API at all, but that would
+                // require large refactors to very legacy code.
+                return task.get(BLOCKING_BINDER_TIMEOUT_MS, TimeUnit.MILLISECONDS);
             } catch (ExecutionException e) {
                 // Function cannot throw exception, this should never happen
                 throw new IllegalStateException(e);

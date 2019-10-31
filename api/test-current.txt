@@ -1136,17 +1136,20 @@ package android.location {
   public final class LocationRequest implements android.os.Parcelable {
     method @NonNull public static android.location.LocationRequest create();
     method public int describeContents();
-    method public long getExpireAt();
+    method @Deprecated public long getExpireAt();
+    method public long getExpireIn();
     method public long getFastestInterval();
     method public long getInterval();
     method public int getNumUpdates();
     method public int getQuality();
     method public boolean isLocationSettingsIgnored();
-    method @NonNull public android.location.LocationRequest setExpireAt(long);
+    method public boolean isLowPowerMode();
+    method @Deprecated @NonNull public android.location.LocationRequest setExpireAt(long);
     method @NonNull public android.location.LocationRequest setExpireIn(long);
     method @NonNull public android.location.LocationRequest setFastestInterval(long);
     method @NonNull public android.location.LocationRequest setInterval(long);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @NonNull public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @NonNull public android.location.LocationRequest setLowPowerMode(boolean);
     method @NonNull public android.location.LocationRequest setNumUpdates(int);
     method @NonNull public android.location.LocationRequest setProvider(@NonNull String);
     method @NonNull public android.location.LocationRequest setQuality(int);
@@ -2063,6 +2066,8 @@ package android.os {
     method @NonNull public static String get(@NonNull String);
     method @NonNull public static String get(@NonNull String, @Nullable String);
     method public static boolean getBoolean(@NonNull String, boolean);
+    method public static int getInt(@NonNull String, int);
+    method public static long getLong(@NonNull String, long);
   }
 
   public final class UserHandle implements android.os.Parcelable {
@@ -2454,6 +2459,36 @@ package android.provider {
     field @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
+  }
+
+  public static final class Telephony.CellBroadcasts implements android.provider.BaseColumns {
+    field public static final String CID = "cid";
+    field public static final String CMAS_CATEGORY = "cmas_category";
+    field public static final String CMAS_CERTAINTY = "cmas_certainty";
+    field public static final String CMAS_MESSAGE_CLASS = "cmas_message_class";
+    field public static final String CMAS_RESPONSE_TYPE = "cmas_response_type";
+    field public static final String CMAS_SEVERITY = "cmas_severity";
+    field public static final String CMAS_URGENCY = "cmas_urgency";
+    field @NonNull public static final android.net.Uri CONTENT_URI;
+    field public static final String DEFAULT_SORT_ORDER = "date DESC";
+    field public static final String DELIVERY_TIME = "date";
+    field public static final String ETWS_WARNING_TYPE = "etws_warning_type";
+    field public static final String GEOGRAPHICAL_SCOPE = "geo_scope";
+    field public static final String GEOMETRIES = "geometries";
+    field public static final String LAC = "lac";
+    field public static final String LANGUAGE_CODE = "language";
+    field public static final String MAXIMUM_WAIT_TIME = "maximum_wait_time";
+    field public static final String MESSAGE_BODY = "body";
+    field public static final String MESSAGE_BROADCASTED = "message_broadcasted";
+    field public static final String MESSAGE_FORMAT = "format";
+    field @RequiresPermission(android.Manifest.permission.READ_CELL_BROADCASTS) @NonNull public static final android.net.Uri MESSAGE_HISTORY_URI;
+    field public static final String MESSAGE_PRIORITY = "priority";
+    field public static final String MESSAGE_READ = "read";
+    field public static final String PLMN = "plmn";
+    field public static final String RECEIVED_TIME = "received_time";
+    field public static final String SERIAL_NUMBER = "serial_number";
+    field public static final String SERVICE_CATEGORY = "service_category";
+    field public static final String SLOT_INDEX = "slot_index";
   }
 
   public static final class Telephony.Sms.Intents {

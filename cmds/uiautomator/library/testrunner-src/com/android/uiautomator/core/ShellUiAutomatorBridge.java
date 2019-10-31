@@ -67,7 +67,7 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
                     throw new IllegalStateException("Could not find provider: " + providerName);
                 }
                 provider = holder.provider;
-                cursor = provider.query(null, Settings.Secure.CONTENT_URI,
+                cursor = provider.query(null, null, Settings.Secure.CONTENT_URI,
                         new String[] {
                             Settings.Secure.VALUE
                         },

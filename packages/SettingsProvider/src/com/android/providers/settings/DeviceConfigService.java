@@ -248,7 +248,7 @@ public final class DeviceConfigService extends Binder {
                 Bundle args = new Bundle();
                 args.putInt(Settings.CALL_METHOD_USER_KEY,
                         ActivityManager.getService().getCurrentUser().id);
-                Bundle b = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                Bundle b = provider.call(resolveCallingPackage(), null, Settings.AUTHORITY,
                         Settings.CALL_METHOD_DELETE_CONFIG, compositeKey, args);
                 success = (b != null && b.getInt(SettingsProvider.RESULT_ROWS_DELETED) == 1);
             } catch (RemoteException e) {
@@ -264,7 +264,7 @@ public final class DeviceConfigService extends Binder {
                 Bundle args = new Bundle();
                 args.putInt(Settings.CALL_METHOD_USER_KEY,
                         ActivityManager.getService().getCurrentUser().id);
-                Bundle b = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                Bundle b = provider.call(resolveCallingPackage(), null, Settings.AUTHORITY,
                         Settings.CALL_METHOD_LIST_CONFIG, null, args);
                 if (b != null) {
                     Map<String, String> flagsToValues =

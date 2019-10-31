@@ -80,6 +80,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     private final IContentProvider mContentProvider;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mPackageName;
+    private final @Nullable String mFeatureId;
     private final String mAuthority;
     private final boolean mStable;
 
@@ -103,6 +104,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
         mContentResolver = contentResolver;
         mContentProvider = contentProvider;
         mPackageName = contentResolver.mPackageName;
+        mFeatureId = contentResolver.mFeatureId;
 
         mAuthority = authority;
         mStable = stable;
@@ -193,7 +195,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
             final Cursor cursor = mContentProvider.query(
-                    mPackageName, uri, projection, queryArgs, remoteCancellationSignal);
+                    mPackageName, mFeatureId, uri, projection, queryArgs, remoteCancellationSignal);
             if (cursor == null) {
                 return null;
             }
@@ -253,7 +255,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.canonicalize(mPackageName, url);
+            return mContentProvider.canonicalize(mPackageName, mFeatureId, url);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -271,7 +273,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.uncanonicalize(mPackageName, url);
+            return mContentProvider.uncanonicalize(mPackageName, mFeatureId, url);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -296,7 +298,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 remoteCancellationSignal = mContentProvider.createCancellationSignal();
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
-            return mContentProvider.refresh(mPackageName, url, args, remoteCancellationSignal);
+            return mContentProvider.refresh(mPackageName, mFeatureId, url, args,
+                    remoteCancellationSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -315,7 +318,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.checkUriPermission(mPackageName, uri, uid, modeFlags);
+            return mContentProvider.checkUriPermission(mPackageName, mFeatureId, uri, uid,
+                    modeFlags);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -334,7 +338,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.insert(mPackageName, url, initialValues);
+            return mContentProvider.insert(mPackageName, mFeatureId, url, initialValues);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -354,7 +358,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.bulkInsert(mPackageName, url, initialValues);
+            return mContentProvider.bulkInsert(mPackageName, mFeatureId, url, initialValues);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -373,7 +377,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.delete(mPackageName, url, selection, selectionArgs);
+            return mContentProvider.delete(mPackageName, mFeatureId, url, selection,
+                    selectionArgs);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -392,7 +397,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.update(mPackageName, url, values, selection, selectionArgs);
+            return mContentProvider.update(mPackageName, mFeatureId, url, values, selection,
+                    selectionArgs);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -436,7 +442,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 remoteSignal = mContentProvider.createCancellationSignal();
                 signal.setRemote(remoteSignal);
             }
-            return mContentProvider.openFile(mPackageName, url, mode, remoteSignal, null);
+            return mContentProvider.openFile(mPackageName, mFeatureId, url, mode, remoteSignal,
+                    null);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -480,7 +487,8 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 remoteSignal = mContentProvider.createCancellationSignal();
                 signal.setRemote(remoteSignal);
             }
-            return mContentProvider.openAssetFile(mPackageName, url, mode, remoteSignal);
+            return mContentProvider.openAssetFile(mPackageName, mFeatureId, url, mode,
+                    remoteSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -521,7 +529,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 signal.setRemote(remoteSignal);
             }
             return mContentProvider.openTypedAssetFile(
-                    mPackageName, uri, mimeTypeFilter, opts, remoteSignal);
+                    mPackageName, mFeatureId, uri, mimeTypeFilter, opts, remoteSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -548,7 +556,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.applyBatch(mPackageName, authority, operations);
+            return mContentProvider.applyBatch(mPackageName, mFeatureId, authority, operations);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -574,7 +582,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
         beforeRemote();
         try {
-            return mContentProvider.call(mPackageName, authority, method, arg, extras);
+            return mContentProvider.call(mPackageName, mFeatureId, authority, method, arg, extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);

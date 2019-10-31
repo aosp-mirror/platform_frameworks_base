@@ -30,6 +30,7 @@ import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import javax.inject.Singleton;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -38,9 +39,12 @@ import dagger.Provides;
  * implementation.
  */
 @Module(includes = {AssistModule.class,
-                    ComponentBinder.class,
                     PeopleHubModule.class})
 public abstract class SystemUIModule {
+    /** */
+    @Binds
+    public abstract ContextComponentHelper bindComponentHelper(
+            ContextComponentResolver componentHelper);
 
     @Singleton
     @Provides
@@ -55,7 +59,6 @@ public abstract class SystemUIModule {
         return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
                 keyguardUpdateMonitor);
     }
-
 
     @Singleton
     @Provides

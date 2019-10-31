@@ -586,9 +586,8 @@ public final class DeviceConfig {
     @RequiresPermission(WRITE_DEVICE_CONFIG)
     public static boolean setProperty(@NonNull String namespace, @NonNull String name,
             @Nullable String value, boolean makeDefault) {
-        String compositeName = createCompositeName(namespace, name);
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        return Settings.Config.putString(contentResolver, compositeName, value, makeDefault);
+        return Settings.Config.putString(contentResolver, namespace, name, value, makeDefault);
     }
 
     /**
@@ -670,12 +669,6 @@ public final class DeviceConfig {
                 sListeners.remove(onPropertiesChangedListener);
             }
         }
-    }
-
-    private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
-        Preconditions.checkNotNull(namespace);
-        Preconditions.checkNotNull(name);
-        return namespace + "/" + name;
     }
 
     private static Uri createNamespaceUri(@NonNull String namespace) {

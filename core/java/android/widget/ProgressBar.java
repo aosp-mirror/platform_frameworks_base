@@ -163,7 +163,6 @@ import java.util.ArrayList;
 public class ProgressBar extends View {
 
     private static final int MAX_LEVEL = 10000;
-    private static final int TIMEOUT_SEND_ACCESSIBILITY_EVENT = 200;
 
     /** Interpolator used for smooth progress animations. */
     private static final DecelerateInterpolator PROGRESS_ANIM_INTERPOLATOR =
@@ -243,8 +242,6 @@ public class ProgressBar extends View {
     private boolean mAggregatedIsVisible;
 
     private final ArrayList<RefreshData> mRefreshData = new ArrayList<RefreshData>();
-
-    private AccessibilityEventSender mAccessibilityEventSender;
 
     /**
      * Create a new progress bar with range 0...100 and initial progress of 0.
@@ -1556,7 +1553,7 @@ public class ProgressBar extends View {
 
     void onProgressRefresh(float scale, boolean fromUser, int progress) {
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-            scheduleAccessibilityEventSender();
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
         }
     }
 
@@ -2250,9 +2247,6 @@ public class ProgressBar extends View {
             removeCallbacks(mRefreshProgressRunnable);
             mRefreshIsPosted = false;
         }
-        if (mAccessibilityEventSender != null) {
-            removeCallbacks(mAccessibilityEventSender);
-        }
         // This should come after stopAnimation(), otherwise an invalidate message remains in the
         // queue, which can prevent the entire view hierarchy from being GC'ed during a rotation
         super.onDetachedFromWindow();
@@ -2285,22 +2279,6 @@ public class ProgressBar extends View {
         }
     }
 
-    /**
-     * Schedule a command for sending an accessibility event.
-     * </br>
-     * Note: A command is used to ensure that accessibility events
-     *       are sent at most one in a given time frame to save
-     *       system resources while the progress changes quickly.
-     */
-    private void scheduleAccessibilityEventSender() {
-        if (mAccessibilityEventSender == null) {
-            mAccessibilityEventSender = new AccessibilityEventSender();
-        } else {
-            removeCallbacks(mAccessibilityEventSender);
-        }
-        postDelayed(mAccessibilityEventSender, TIMEOUT_SEND_ACCESSIBILITY_EVENT);
-    }
-
     /** @hide */
     @Override
     protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
@@ -2322,15 +2300,6 @@ public class ProgressBar extends View {
      */
     public boolean isAnimating() {
         return isIndeterminate() && getWindowVisibility() == VISIBLE && isShown();
-    }
-
-    /**
-     * Command for sending an accessibility event.
-     */
-    private class AccessibilityEventSender implements Runnable {
-        public void run() {
-            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-        }
     }
 
     private static class ProgressTintInfo {

@@ -93,12 +93,14 @@ public class TestDocumentsProvider extends DocumentsProvider {
     }
 
     @Override
-    protected int enforceReadPermissionInner(Uri uri, String callingPkg, IBinder callerToken) {
+    protected int enforceReadPermissionInner(Uri uri, String callingPkg,
+            @Nullable String callingFeatureId, IBinder callerToken) {
         return AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
-    protected int enforceWritePermissionInner(Uri uri, String callingPkg, IBinder callerToken) {
+    protected int enforceWritePermissionInner(Uri uri, String callingPkg,
+            @Nullable String callingFeatureId, IBinder callerToken) {
         return AppOpsManager.MODE_ALLOWED;
     }
 

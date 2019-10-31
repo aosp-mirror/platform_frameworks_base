@@ -59,8 +59,8 @@ FileDescriptorWhitelist* FileDescriptorWhitelist::Get() {
   return instance_;
 }
 
-static bool IsMemfd(const std::string& path) {
-  return android::base::StartsWith(path, "/memfd:");
+static bool IsArtMemfd(const std::string& path) {
+  return android::base::StartsWith(path, "/memfd:/boot-image-methods.art");
 }
 
 bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
@@ -91,8 +91,8 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
     return true;
   }
 
-  // In-memory files created through memfd_create are allowed.
-  if (IsMemfd(path)) {
+  // the in-memory file created by ART through memfd_create is allowed.
+  if (IsArtMemfd(path)) {
     return true;
   }
 
@@ -321,8 +321,8 @@ void FileDescriptorInfo::ReopenOrDetach(fail_fn_t fail_fn) const {
     return DetachSocket(fail_fn);
   }
 
-  // Children can directly use in-memory files created through memfd_create.
-  if (IsMemfd(file_path)) {
+  // Children can directly use the in-memory file created by ART through memfd_create.
+  if (IsArtMemfd(file_path)) {
     return;
   }
 
@@ -545,6 +545,10 @@ FileDescriptorTable::FileDescriptorTable(
 }
 
 void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail_fn) {
+  // ART creates a file through memfd for optimization purposes. We make sure
+  // there is at most one being created.
+  bool art_memfd_seen = false;
+
   // Iterate through the list of file descriptors we've already recorded
   // and check whether :
   //
@@ -575,6 +579,14 @@ void FileDescriptorTable::RestatInternal(std::set<int>& open_fds, fail_fn_t fail
       } else {
         // It's the same file. Nothing to do here. Move on to the next open
         // FD.
+      }
+
+      if (IsArtMemfd(it->second->file_path)) {
+        if (art_memfd_seen) {
+          fail_fn("ART fd already seen: " + it->second->file_path);
+        } else {
+          art_memfd_seen = true;
+        }
       }
 
       ++it;

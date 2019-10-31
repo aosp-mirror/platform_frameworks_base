@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -464,6 +465,14 @@ public final class DropBoxManagerService extends SystemService {
     }
 
     private boolean checkPermission(int callingUid, String callingPackage) {
+        // If callers have this permission, then we don't need to check
+        // USAGE_STATS, because they are part of the system and have agreed to
+        // check USAGE_STATS before passing the data along.
+        if (getContext().checkCallingPermission(android.Manifest.permission.PEEK_DROPBOX_DATA)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
         // Callers always need this permission
         getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.READ_LOGS, TAG);

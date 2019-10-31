@@ -24,6 +24,7 @@ import com.android.systemui.pip.PipUI;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeUI;
 
@@ -79,6 +80,12 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(ScreenDecorations.class)
     public abstract SystemUI bindScreenDecorations(ScreenDecorations sysui);
+
+    /** Inject into StatusBar. */
+    @Binds
+    @IntoMap
+    @ClassKey(StatusBar.class)
+    public abstract SystemUI bindsStatusBar(StatusBar sysui);
 
     /** Inject into VolumeUI. */
     @Binds

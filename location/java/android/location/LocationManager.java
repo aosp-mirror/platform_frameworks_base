@@ -230,7 +230,7 @@ public class LocationManager {
     public static final String METADATA_SETTINGS_FOOTER_STRING =
             "com.android.settings.location.FOOTER_STRING";
 
-    private static final long GET_CURRENT_LOCATION_TIMEOUT_MS = 30 * 1000;
+    private static final long GET_CURRENT_LOCATION_MAX_TIMEOUT_MS = 30 * 1000;
 
     private final Context mContext;
 
@@ -630,7 +630,10 @@ public class LocationManager {
             @Nullable CancellationSignal cancellationSignal,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Location> consumer) {
         LocationRequest currentLocationRequest = new LocationRequest(locationRequest)
-                .setNumUpdates(1).setExpireIn(GET_CURRENT_LOCATION_TIMEOUT_MS);
+                .setNumUpdates(1);
+        if (currentLocationRequest.getExpireIn() > GET_CURRENT_LOCATION_MAX_TIMEOUT_MS) {
+            currentLocationRequest.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
+        }
 
         GetCurrentLocationTransport listenerTransport = new GetCurrentLocationTransport(executor,
                 consumer);
@@ -684,6 +687,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 provider, 0, 0, true);
+        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
         requestLocationUpdates(request, listener, looper);
     }
 
@@ -714,6 +718,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
                 criteria, 0, 0, true);
+        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
         requestLocationUpdates(request, listener, looper);
     }
 
@@ -740,6 +745,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedProvider(
                 provider, 0, 0, true);
+        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
         requestLocationUpdates(request, pendingIntent);
     }
 
@@ -767,6 +773,7 @@ public class LocationManager {
 
         LocationRequest request = LocationRequest.createFromDeprecatedCriteria(
                 criteria, 0, 0, true);
+        request.setExpireIn(GET_CURRENT_LOCATION_MAX_TIMEOUT_MS);
         requestLocationUpdates(request, pendingIntent);
     }
 
@@ -2422,7 +2429,7 @@ public class LocationManager {
             mAlarmManager = alarmManager;
             mAlarmManager.set(
                     ELAPSED_REALTIME,
-                    SystemClock.elapsedRealtime() + GET_CURRENT_LOCATION_TIMEOUT_MS,
+                    SystemClock.elapsedRealtime() + GET_CURRENT_LOCATION_MAX_TIMEOUT_MS,
                     "GetCurrentLocation",
                     this,
                     null);
@@ -2750,14 +2757,9 @@ public class LocationManager {
         protected boolean registerService() throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
-            GnssStatusListener transport = new GnssStatusListener();
-            if (mService.registerGnssStatusCallback(transport, mContext.getPackageName(),
-                    mContext.getFeatureId())) {
-                mListenerTransport = transport;
-                return true;
-            } else {
-                return false;
-            }
+            mListenerTransport = new GnssStatusListener();
+            return mService.registerGnssStatusCallback(mListenerTransport,
+                    mContext.getPackageName(), mContext.getFeatureId());
         }
 
         @Override
@@ -2815,14 +2817,10 @@ public class LocationManager {
         protected boolean registerService() throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
-            GnssMeasurementsListener transport = new GnssMeasurementsListener();
-            if (mService.addGnssMeasurementsListener(transport, mContext.getPackageName(),
-                    mContext.getFeatureId(), "gnss measurement callback")) {
-                mListenerTransport = transport;
-                return true;
-            } else {
-                return false;
-            }
+            mListenerTransport = new GnssMeasurementsListener();
+            return mService.addGnssMeasurementsListener(mListenerTransport,
+                    mContext.getPackageName(), mContext.getFeatureId(),
+                    "gnss measurement callback");
         }
 
         @Override
@@ -2856,14 +2854,10 @@ public class LocationManager {
         protected boolean registerService() throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
-            GnssNavigationMessageListener transport = new GnssNavigationMessageListener();
-            if (mService.addGnssNavigationMessageListener(transport, mContext.getPackageName(),
-                    mContext.getFeatureId(), "gnss navigation callback")) {
-                mListenerTransport = transport;
-                return true;
-            } else {
-                return false;
-            }
+            mListenerTransport = new GnssNavigationMessageListener();
+            return mService.addGnssNavigationMessageListener(mListenerTransport,
+                    mContext.getPackageName(), mContext.getFeatureId(),
+                    "gnss navigation callback");
         }
 
         @Override
@@ -2897,14 +2891,9 @@ public class LocationManager {
         protected boolean registerService() throws RemoteException {
             Preconditions.checkState(mListenerTransport == null);
 
-            BatchedLocationCallback transport = new BatchedLocationCallback();
-            if (mService.addGnssBatchingCallback(transport, mContext.getPackageName(),
-                     mContext.getFeatureId(), "batched location callback")) {
-                mListenerTransport = transport;
-                return true;
-            } else {
-                return false;
-            }
+            mListenerTransport = new BatchedLocationCallback();
+            return mService.addGnssBatchingCallback(mListenerTransport, mContext.getPackageName(),
+                     mContext.getFeatureId(), "batched location callback");
         }
 
         @Override

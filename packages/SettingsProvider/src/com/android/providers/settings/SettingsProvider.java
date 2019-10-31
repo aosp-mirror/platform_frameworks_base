@@ -2115,10 +2115,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private static String getSettingPrefix(Bundle args) {
-        String prefix = (args != null) ? args.getString(Settings.CALL_METHOD_PREFIX_KEY) : null;
-        // Append '/' to ensure we only match properties with this exact prefix.
-        // i.e. "foo" should match "foo/property" but not "foobar/property"
-        return prefix != null ? prefix + "/" : null;
+        return (args != null) ? args.getString(Settings.CALL_METHOD_PREFIX_KEY) : null;
     }
 
     private static boolean getSettingMakeDefault(Bundle args) {

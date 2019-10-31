@@ -50,19 +50,14 @@ class PeopleHubViewControllerTest : SysuiTestCase() {
     fun testBindViewModelToViewBoundary() {
         val fakePerson1 = fakePersonViewModel("name")
         val fakeViewModel = PeopleHubViewModel(sequenceOf(fakePerson1), true)
-
         val fakePersonViewAdapter1 = FakeDataListener<PersonViewModel?>()
         val fakePersonViewAdapter2 = FakeDataListener<PersonViewModel?>()
-
         val mockClickView = mock(View::class.java)
-
         `when`(mockViewBoundary.associatedViewForClickAnimation).thenReturn(mockClickView)
         `when`(mockViewBoundary.personViewAdapters)
                 .thenReturn(sequenceOf(fakePersonViewAdapter1, fakePersonViewAdapter2))
-
         val mockFactory = mock(PeopleHubViewModelFactory::class.java)
         `when`(mockFactory.createWithAssociatedClickView(any())).thenReturn(fakeViewModel)
-
         val mockSubscription = mock(Subscription::class.java)
         val fakeFactoryDataSource = object : DataSource<PeopleHubViewModelFactory> {
             override fun registerListener(
@@ -82,6 +77,7 @@ class PeopleHubViewControllerTest : SysuiTestCase() {
         verify(mockFactory).createWithAssociatedClickView(mockClickView)
     }
 
+    @Test
     fun testViewModelDataSourceTransformsModel() {
         val fakeClickIntent = PendingIntent.getActivity(context, 0, Intent("action"), 0)
         val fakePerson = fakePersonModel("id", "name", fakeClickIntent)
@@ -99,16 +95,17 @@ class PeopleHubViewControllerTest : SysuiTestCase() {
         val mockClickView = mock(View::class.java)
 
         factoryDataSource.registerListener(fakeListener)
+
         val viewModel = (fakeListener.lastSeen as Maybe.Just).value
                 .createWithAssociatedClickView(mockClickView)
         assertThat(viewModel.isVisible).isTrue()
-
         val people = viewModel.people.toList()
         assertThat(people.size).isEqualTo(1)
         assertThat(people[0].name).isEqualTo("name")
         assertThat(people[0].icon).isSameAs(fakePerson.avatar)
 
         people[0].onClick()
+
         verify(mockActivityStarter).startPendingIntentDismissingKeyguard(
                 same(fakeClickIntent),
                 any(),
@@ -117,16 +114,20 @@ class PeopleHubViewControllerTest : SysuiTestCase() {
     }
 }
 
+/** Works around Mockito matchers returning `null` and breaking non-nullable Kotlin code. */
 private inline fun <reified T : Any> any(): T {
     return Mockito.any() ?: createInstance(T::class)
 }
 
+/** Works around Mockito matchers returning `null` and breaking non-nullable Kotlin code. */
 private inline fun <reified T : Any> same(value: T): T {
     return Mockito.same(value) ?: createInstance(T::class)
 }
 
+/** Creates an instance of the given class. */
 private fun <T : Any> createInstance(clazz: KClass<T>): T = castNull()
 
+/** Tricks the Kotlin compiler into assigning `null` to a non-nullable variable. */
 @Suppress("UNCHECKED_CAST")
 private fun <T> castNull(): T = null as T
 

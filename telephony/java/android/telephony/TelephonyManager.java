@@ -9512,10 +9512,12 @@ public class TelephonyManager {
     }
 
     /**
-     * Resets telephony manager settings back to factory defaults.
+     * Resets Telephony and IMS settings back to factory defaults.
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONNECTIVITY_INTERNAL)
     public void factoryReset(int subId) {
         try {
             Log.d(TAG, "factoryReset: subId=" + subId);

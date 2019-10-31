@@ -37,6 +37,7 @@ import dagger.Component;
  */
 @Singleton
 @Component(modules = {
+        DefaultComponentBinder.class,
         DependencyProvider.class,
         DependencyBinder.class,
         SystemServicesModule.class,

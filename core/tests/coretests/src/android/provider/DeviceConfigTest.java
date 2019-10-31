@@ -388,6 +388,13 @@ public class DeviceConfigTest {
         assertThat(properties.getKeyset()).containsExactly(KEY, KEY2);
         assertThat(properties.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE3);
         assertThat(properties.getString(KEY2, DEFAULT_VALUE)).isEqualTo(VALUE2);
+
+        DeviceConfig.setProperty(NAMESPACE, KEY3, VALUE, false);
+        properties = DeviceConfig.getProperties(NAMESPACE);
+        assertThat(properties.getKeyset()).containsExactly(KEY, KEY2, KEY3);
+        assertThat(properties.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE3);
+        assertThat(properties.getString(KEY2, DEFAULT_VALUE)).isEqualTo(VALUE2);
+        assertThat(properties.getString(KEY3, DEFAULT_VALUE)).isEqualTo(VALUE);
     }
 
     @Test
