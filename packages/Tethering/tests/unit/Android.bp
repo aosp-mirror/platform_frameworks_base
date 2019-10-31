@@ -17,7 +17,10 @@
 android_test {
     name: "TetheringTests",
     certificate: "platform",
-    srcs: ["src/**/*.java"],
+    srcs: [
+        ":servicescore-tethering-src",
+        "src/**/*.java",
+    ],
     test_suites: ["device-tests"],
     static_libs: [
         "androidx.test.rules",
@@ -42,6 +45,7 @@ android_test {
 filegroup {
     name: "tethering-tests-src",
     srcs: [
+        "src/com/android/server/connectivity/tethering/EntitlementManagerTest.java",
         "src/com/android/server/connectivity/tethering/TetheringConfigurationTest.java",
         "src/android/net/dhcp/DhcpServingParamsParcelExtTest.java",
         "src/android/net/ip/IpServerTest.java",
