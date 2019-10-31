@@ -28,6 +28,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.icu.text.DisplayContext;
+import android.icu.text.RelativeDateTimeFormatter;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.os.Bundle;
@@ -1095,6 +1096,14 @@ class SimpleMonthView extends View {
 
             node.setText(getDayText(virtualViewId));
             node.setContentDescription(getDayDescription(virtualViewId));
+            if (virtualViewId == mToday) {
+                RelativeDateTimeFormatter fmt = RelativeDateTimeFormatter.getInstance();
+                node.setStateDescription(fmt.format(RelativeDateTimeFormatter.Direction.THIS,
+                        RelativeDateTimeFormatter.AbsoluteUnit.DAY));
+            }
+            if (virtualViewId == mActivatedDay) {
+                node.setSelected(true);
+            }
             node.setBoundsInParent(mTempRect);
 
             final boolean isDayEnabled = isDayEnabled(virtualViewId);
