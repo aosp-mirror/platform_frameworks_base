@@ -1871,6 +1871,17 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     @Override
+    void getAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
+            Rect outSurfaceInsets) {
+        final Task task = getTopChild();
+        if (task != null) {
+            task.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+        } else {
+            super.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+        }
+    }
+
+    @Override
     RemoteAnimationTarget createRemoteAnimationTarget(
             RemoteAnimationController.RemoteAnimationRecord record) {
         final Task task = getTopChild();

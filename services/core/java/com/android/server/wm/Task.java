@@ -471,6 +471,17 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         }
     }
 
+    @Override
+    void getAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
+            Rect outSurfaceInsets) {
+        final WindowState windowState = getTopVisibleAppMainWindow();
+        if (windowState != null) {
+            windowState.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+        } else {
+            super.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+        }
+    }
+
     /**
      * Calculate the maximum visible area of this task. If the task has only one app,
      * the result will be visible frame of that app. If the task has more than one apps,
