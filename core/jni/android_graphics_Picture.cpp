@@ -20,8 +20,11 @@
 #include "SkCanvas.h"
 #include "SkStream.h"
 #include "core_jni_helpers.h"
+#include "nativehelper/jni_macros.h"
 
 #include <jni.h>
+
+#include <array>
 
 namespace android {
 
@@ -91,20 +94,20 @@ static void android_graphics_Picture_endRecording(JNIEnv* env, jobject, jlong pi
     pict->endRecording();
 }
 
-static const JNINativeMethod gMethods[] = {
-    {"nativeGetWidth", "(J)I", (void*) android_graphics_Picture_getWidth},
-    {"nativeGetHeight", "(J)I", (void*) android_graphics_Picture_getHeight},
-    {"nativeConstructor", "(J)J", (void*) android_graphics_Picture_newPicture},
-    {"nativeCreateFromStream", "(Ljava/io/InputStream;[B)J", (void*)android_graphics_Picture_deserialize},
-    {"nativeBeginRecording", "(JII)J", (void*) android_graphics_Picture_beginRecording},
-    {"nativeEndRecording", "(J)V", (void*) android_graphics_Picture_endRecording},
-    {"nativeDraw", "(JJ)V", (void*) android_graphics_Picture_draw},
-    {"nativeWriteToStream", "(JLjava/io/OutputStream;[B)Z", (void*)android_graphics_Picture_serialize},
-    {"nativeDestructor","(J)V", (void*) android_graphics_Picture_killPicture}
+static const std::array gMethods = {
+    MAKE_JNI_NATIVE_METHOD("nativeGetWidth", "(J)I",  android_graphics_Picture_getWidth),
+    MAKE_JNI_NATIVE_METHOD("nativeGetHeight", "(J)I",  android_graphics_Picture_getHeight),
+    MAKE_JNI_NATIVE_METHOD("nativeConstructor", "(J)J",  android_graphics_Picture_newPicture),
+    MAKE_JNI_NATIVE_METHOD("nativeCreateFromStream", "(Ljava/io/InputStream;[B)J", android_graphics_Picture_deserialize),
+    MAKE_JNI_NATIVE_METHOD("nativeBeginRecording", "(JII)J",  android_graphics_Picture_beginRecording),
+    MAKE_JNI_NATIVE_METHOD("nativeEndRecording", "(J)V",  android_graphics_Picture_endRecording),
+    MAKE_JNI_NATIVE_METHOD("nativeDraw", "(JJ)V",  android_graphics_Picture_draw),
+    MAKE_JNI_NATIVE_METHOD("nativeWriteToStream", "(JLjava/io/OutputStream;[B)Z", android_graphics_Picture_serialize),
+    MAKE_JNI_NATIVE_METHOD("nativeDestructor","(J)V",  android_graphics_Picture_killPicture)
 };
 
 int register_android_graphics_Picture(JNIEnv* env) {
-    return RegisterMethodsOrDie(env, "android/graphics/Picture", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/graphics/Picture", gMethods.data(), gMethods.size());
 }
 
 }; // namespace android
