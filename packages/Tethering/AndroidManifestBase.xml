@@ -23,7 +23,6 @@
     <application
         android:label="Tethering"
         android:defaultToDeviceProtectedStorage="true"
-        android:directBootAware="true"
-        android:usesCleartextTraffic="true">
+        android:directBootAware="true">
     </application>
 </manifest>
