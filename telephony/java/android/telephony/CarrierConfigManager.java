@@ -1838,6 +1838,13 @@ public class CarrierConfigManager {
             "support_direct_fdn_dialing_bool";
 
     /**
+     * Int indicating the max number length for FDN
+     * @hide
+     */
+    public static final String KEY_FDN_NUMBER_LENGTH_LIMIT_INT =
+            "fdn_number_length_limit_int";
+
+    /**
      * Report IMEI as device id even if it's a CDMA/LTE phone.
      *
      * @hide
@@ -3428,6 +3435,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
+        sDefaults.putInt(KEY_FDN_NUMBER_LENGTH_LIMIT_INT, 20);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_DATA_ROAMING_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_SKIP_CF_FAIL_TO_DISABLE_DIALOG_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL, true);
