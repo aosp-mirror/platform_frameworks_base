@@ -56,8 +56,6 @@ class SettingsProtoDumpUtil {
                 ConfigSettingsProto.CONNECTIVITY_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ConfigSettingsProto.CONTENT_CAPTURE_SETTINGS);
-        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_DEX_BOOT,
-                ConfigSettingsProto.DEX_BOOT_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_GAME_DRIVER,
                 ConfigSettingsProto.GAME_DRIVER_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,

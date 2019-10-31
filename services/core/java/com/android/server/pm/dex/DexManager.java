@@ -16,8 +16,6 @@
 
 package com.android.server.pm.dex;
 
-import static android.provider.DeviceConfig.NAMESPACE_DEX_BOOT;
-
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
@@ -31,7 +29,6 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Slog;
 import android.util.jar.StrictJarFile;
@@ -71,10 +68,6 @@ public class DexManager {
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB = "pm.dexopt.priv-apps-oob";
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST =
             "pm.dexopt.priv-apps-oob-list";
-
-    // flags for Device Config API
-    private static final String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
-    private static final String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
 
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -717,24 +710,16 @@ public class DexManager {
         return isPackageSelectedToRunOobInternal(
                 SystemProperties.getBoolean(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB, false),
                 SystemProperties.get(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST, "ALL"),
-                DeviceConfig.getProperty(NAMESPACE_DEX_BOOT, PRIV_APPS_OOB_ENABLED),
-                DeviceConfig.getProperty(NAMESPACE_DEX_BOOT, PRIV_APPS_OOB_WHITELIST),
                 packageNamesInSameProcess);
     }
 
     @VisibleForTesting
-    /* package */ static boolean isPackageSelectedToRunOobInternal(
-            boolean isDefaultEnabled, String defaultWhitelist, String overrideEnabled,
-            String overrideWhitelist, Collection<String> packageNamesInSameProcess) {
-        // Allow experiment (if exists) to override device configuration.
-        boolean enabled = overrideEnabled != null ? overrideEnabled.equals("true")
-                : isDefaultEnabled;
-        if (!enabled) {
+    /* package */ static boolean isPackageSelectedToRunOobInternal(boolean isEnabled,
+            String whitelist, Collection<String> packageNamesInSameProcess) {
+        if (!isEnabled) {
             return false;
         }
 
-        // Similarly, experiment flag can override the whitelist.
-        String whitelist = overrideWhitelist != null ? overrideWhitelist : defaultWhitelist;
         if ("ALL".equals(whitelist)) {
             return true;
         }
