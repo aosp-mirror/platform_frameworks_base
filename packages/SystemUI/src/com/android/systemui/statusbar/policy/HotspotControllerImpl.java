@@ -22,6 +22,7 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiClient;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.UserManager;
 import android.util.Log;
 
@@ -110,7 +111,8 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             if (mWifiManager != null) {
                 if (mListening) {
                     if (mCallbacks.size() == 1) {
-                        mWifiManager.registerSoftApCallback(this, mMainHandler);
+                        mWifiManager.registerSoftApCallback(this,
+                                new HandlerExecutor(mMainHandler));
                     } else {
                         // mWifiManager#registerSoftApCallback triggers a call to
                         // onConnectedClientsChanged on the Main Handler. In order to always update
@@ -144,7 +146,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (mListening || !listening) return;
         mListening = true;
         if (mCallbacks.size() >= 1) {
-            mWifiManager.registerSoftApCallback(this, mMainHandler);
+            mWifiManager.registerSoftApCallback(this, new HandlerExecutor(mMainHandler));
         }
     }
 

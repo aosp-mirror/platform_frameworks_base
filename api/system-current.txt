@@ -4838,6 +4838,7 @@ package android.net.wifi {
     method public boolean isPortableHotspotSupported();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
+    method @RequiresPermission("android.permission.NETWORK_SETTINGS") public void registerSoftApCallback(@NonNull android.net.wifi.WifiManager.SoftApCallback, @Nullable java.util.concurrent.Executor);
     method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void removeOnWifiUsabilityStatsListener(@NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission("android.permission.WIFI_SET_DEVICE_MOBILITY_STATE") public void setDeviceMobilityState(int);
@@ -4895,6 +4896,12 @@ package android.net.wifi {
 
   public static interface WifiManager.OnWifiUsabilityStatsListener {
     method public void onWifiUsabilityStats(int, boolean, @NonNull android.net.wifi.WifiUsabilityStatsEntry);
+  }
+
+  public static interface WifiManager.SoftApCallback {
+    method public void onConnectedClientsChanged(@NonNull java.util.List<android.net.wifi.WifiClient>);
+    method public default void onInfoChanged(@NonNull android.net.wifi.SoftApInfo);
+    method public void onStateChanged(int, int);
   }
 
   public class WifiNetworkConnectionStatistics implements android.os.Parcelable {
