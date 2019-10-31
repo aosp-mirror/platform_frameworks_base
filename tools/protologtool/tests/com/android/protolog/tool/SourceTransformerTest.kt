@@ -186,7 +186,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE, PATH, code)
+        val out = sourceJarWriter.processClass(TEST_CODE, PATH, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
@@ -228,7 +228,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_MULTICALLS, PATH, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_MULTICALLS, PATH, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
@@ -266,7 +266,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, PATH, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, PATH, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
@@ -303,7 +303,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_NO_PARAMS, PATH, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_NO_PARAMS, PATH, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
@@ -337,7 +337,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE, PATH, code)
+        val out = sourceJarWriter.processClass(TEST_CODE, PATH, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
@@ -375,7 +375,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, PATH, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, PATH, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
@@ -413,7 +413,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE, PATH, code)
+        val out = sourceJarWriter.processClass(TEST_CODE, PATH, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
@@ -439,7 +439,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, PATH, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, PATH, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)

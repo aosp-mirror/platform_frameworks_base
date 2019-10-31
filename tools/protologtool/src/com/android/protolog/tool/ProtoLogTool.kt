@@ -24,6 +24,7 @@ import com.github.javaparser.ast.CompilationUnit
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.OutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.jar.JarOutputStream
@@ -42,9 +43,10 @@ object ProtoLogTool {
     }
 
     private fun processClasses(command: CommandOptions) {
-        val groups = ProtoLogGroupReader()
-                .loadFromJar(command.protoLogGroupsJarArg, command.protoLogGroupsClassNameArg)
-        val out = FileOutputStream(command.outputSourceJarArg)
+        val groups = injector.readLogGroups(
+                command.protoLogGroupsJarArg,
+                command.protoLogGroupsClassNameArg)
+        val out = injector.fileOutputStream(command.outputSourceJarArg)
         val outJar = JarOutputStream(out)
         val processor = ProtoLogCallProcessor(command.protoLogClassNameArg,
                 command.protoLogGroupsClassNameArg, groups)
@@ -56,7 +58,7 @@ object ProtoLogTool {
                 val transformer = SourceTransformer(command.protoLogImplClassNameArg,
                         command.protoLogCacheClassNameArg, processor)
                 val file = File(path)
-                val text = file.readText()
+                val text = injector.readText(file)
                 val outSrc = try {
                     val code = tryParse(text, path)
                     if (containsProtoLogText(text, command.protoLogClassNameArg)) {
@@ -67,7 +69,7 @@ object ProtoLogTool {
                 } catch (ex: ParsingException) {
                     // If we cannot parse this file, skip it (and log why). Compilation will fail
                     // in a subsequent build step.
-                    println("\n${ex.message}\n")
+                    injector.reportParseError(ex)
                     text
                 }
                 path to outSrc
@@ -142,8 +144,9 @@ ${updates.replaceIndent("                    ")}
     }
 
     private fun viewerConf(command: CommandOptions) {
-        val groups = ProtoLogGroupReader()
-                .loadFromJar(command.protoLogGroupsJarArg, command.protoLogGroupsClassNameArg)
+        val groups = injector.readLogGroups(
+                command.protoLogGroupsJarArg,
+                command.protoLogGroupsClassNameArg)
         val processor = ProtoLogCallProcessor(command.protoLogClassNameArg,
                 command.protoLogGroupsClassNameArg, groups)
         val builder = ViewerConfigBuilder(processor)
@@ -153,7 +156,7 @@ ${updates.replaceIndent("                    ")}
         command.javaSourceArgs.map { path ->
             executor.submitCallable {
                 val file = File(path)
-                val text = file.readText()
+                val text = injector.readText(file)
                 if (containsProtoLogText(text, command.protoLogClassNameArg)) {
                     try {
                         val code = tryParse(text, path)
@@ -161,7 +164,7 @@ ${updates.replaceIndent("                    ")}
                     } catch (ex: ParsingException) {
                         // If we cannot parse this file, skip it (and log why). Compilation will fail
                         // in a subsequent build step.
-                        println("\n${ex.message}\n")
+                        injector.reportParseError(ex)
                         null
                     }
                 } else {
@@ -174,7 +177,7 @@ ${updates.replaceIndent("                    ")}
 
         executor.shutdown()
 
-        val out = FileOutputStream(command.viewerConfigJsonArg)
+        val out = injector.fileOutputStream(command.viewerConfigJsonArg)
         out.write(builder.build().toByteArray())
         out.close()
     }
@@ -194,18 +197,9 @@ ${updates.replaceIndent("                    ")}
 
     @JvmStatic
     fun main(args: Array<String>) {
-        StaticJavaParser.setConfiguration(ParserConfiguration().apply {
-            setLanguageLevel(ParserConfiguration.LanguageLevel.RAW)
-            setAttributeComments(false)
-        })
-
         try {
             val command = CommandOptions(args)
-            when (command.command) {
-                CommandOptions.TRANSFORM_CALLS_CMD -> processClasses(command)
-                CommandOptions.GENERATE_CONFIG_CMD -> viewerConf(command)
-                CommandOptions.READ_LOG_CMD -> read(command)
-            }
+            invoke(command)
         } catch (ex: InvalidCommandException) {
             println("\n${ex.message}\n")
             showHelpAndExit()
@@ -213,6 +207,36 @@ ${updates.replaceIndent("                    ")}
             println("\n${ex.message}\n")
             exitProcess(1)
         }
+    }
+
+    fun invoke(command: CommandOptions) {
+        StaticJavaParser.setConfiguration(ParserConfiguration().apply {
+            setLanguageLevel(ParserConfiguration.LanguageLevel.RAW)
+            setAttributeComments(false)
+        })
+
+        when (command.command) {
+            CommandOptions.TRANSFORM_CALLS_CMD -> processClasses(command)
+            CommandOptions.GENERATE_CONFIG_CMD -> viewerConf(command)
+            CommandOptions.READ_LOG_CMD -> read(command)
+        }
+    }
+
+    var injector = object : Injector {
+        override fun fileOutputStream(file: String) = FileOutputStream(file)
+        override fun readText(file: File) = file.readText()
+        override fun readLogGroups(jarPath: String, className: String) =
+                ProtoLogGroupReader().loadFromJar(jarPath, className)
+        override fun reportParseError(ex: ParsingException) {
+            println("\n${ex.message}\n")
+        }
+    }
+
+    interface Injector {
+        fun fileOutputStream(file: String): OutputStream
+        fun readText(file: File): String
+        fun readLogGroups(jarPath: String, className: String): Map<String, LogGroup>
+        fun reportParseError(ex: ParsingException)
     }
 }
 
