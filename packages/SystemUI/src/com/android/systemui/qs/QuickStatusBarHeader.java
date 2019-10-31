@@ -17,6 +17,7 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.annotation.ColorInt;
 import android.app.ActivityManager;
@@ -393,11 +394,10 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
 
-        int flag = Settings.System.getInt(mContext.getContentResolver(), "qs_media_player", 0);
         if (mQsDisabled) {
             lp.height = resources.getDimensionPixelSize(
                     com.android.internal.R.dimen.quick_qs_offset_height);
-        } else if (flag == 1) {
+        } else if (useQsMediaPlayer(mContext)) {
             lp.height = Math.max(getMinimumHeight(),
                     resources.getDimensionPixelSize(
                             com.android.internal.R.dimen.quick_qs_total_height_with_media));

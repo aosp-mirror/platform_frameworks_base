@@ -20,7 +20,7 @@
     android:id="@+id/plugin_frame"
     android:theme="@style/qs_theme"
     android:layout_width="@dimen/qs_panel_width"
-    android:layout_height="105dp"
+    android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
     android:layout_marginTop="@dimen/notification_side_paddings"
     android:layout_marginLeft="@dimen/notification_side_paddings"

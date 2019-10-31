@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +39,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -146,9 +146,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         final int N = activeNotifications.size();
         for (int i = 0; i < N; i++) {
             NotificationEntry ent = activeNotifications.get(i);
-            int flag = Settings.System.getInt(mContext.getContentResolver(),
-                    "qs_media_player", 0);
-            boolean hideMedia = (flag == 1);
+            boolean hideMedia = Utils.useQsMediaPlayer(mContext);
             if (ent.isRowDismissed() || ent.isRowRemoved()
                     || (ent.isMediaNotification() && hideMedia)
                     || mBubbleController.isBubbleNotificationSuppressedFromShade(ent.getKey())) {
