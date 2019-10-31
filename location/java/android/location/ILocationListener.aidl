@@ -31,8 +31,6 @@ oneway interface ILocationListener
     void onProviderEnabled(String provider);
     @UnsupportedAppUsage
     void onProviderDisabled(String provider);
-
-    // --- deprecated ---
-    @UnsupportedAppUsage
-    void onStatusChanged(String provider, int status, in Bundle extras);
+    // called when the listener is removed from the server side; no further callbacks are expected
+    void onRemoved();
 }
