@@ -237,8 +237,6 @@ public class StagedRollbackTest {
                 Integer.toString(120000), false);
         // Simulate re-installation of new NetworkStack with rollbacks enabled
         installNetworkStackPackage();
-        // Sleep to allow writes to disk before reboot
-        Thread.sleep(TimeUnit.SECONDS.toMillis(5));
     }
 
     @Test
