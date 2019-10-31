@@ -5318,7 +5318,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     }
                 }
             } else if (w.isDrawnLw()) {
-                onStartingWindowDrawn(SystemClock.uptimeMillis());
+                onStartingWindowDrawn(SystemClock.elapsedRealtimeNanos());
                 startingDisplayed = true;
             }
         }
@@ -5327,10 +5327,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /** Called when the starting window for this container is drawn. */
-    private void onStartingWindowDrawn(long timestamp) {
+    private void onStartingWindowDrawn(long timestampNs) {
         synchronized (mAtmService.mGlobalLock) {
             mAtmService.mStackSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(
-                    getWindowingMode(), timestamp);
+                    getWindowingMode(), timestampNs);
         }
     }
 
