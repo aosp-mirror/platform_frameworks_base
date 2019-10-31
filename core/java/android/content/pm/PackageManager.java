@@ -3285,6 +3285,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
 
@@ -3297,6 +3298,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
 
@@ -3919,6 +3921,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @NonNull
     @TestApi
     public abstract String getPermissionControllerPackageName();
@@ -4625,6 +4628,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public abstract @NonNull String getServicesSystemSharedLibraryPackageName();
 
@@ -4635,6 +4639,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public abstract @NonNull String getSharedSystemSharedLibraryPackageName();
 

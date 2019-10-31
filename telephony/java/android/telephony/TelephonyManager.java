@@ -4095,6 +4095,7 @@ public class TelephonyManager {
      * @hide
      * nobody seems to call this.
      */
+    @UnsupportedAppUsage
     @TestApi
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getLine1AlphaTag() {
@@ -10602,6 +10603,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public int getCarrierIdListVersion() {
         try {
@@ -11490,6 +11492,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public Pair<Integer, Integer> getRadioHalVersion() {
         try {

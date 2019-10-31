@@ -24700,6 +24700,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param isRoot true if the view belongs to the root namespace, false
      *        otherwise
      */
+    @UnsupportedAppUsage
     @TestApi
     public void setIsRootNamespace(boolean isRoot) {
         if (isRoot) {
