@@ -25,10 +25,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
+import android.app.PictureInPictureParams;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ClientTransaction;
@@ -332,6 +334,50 @@ public class ActivityThreadTest {
         assertThat(activity.isResumed()).isTrue();
     }
 
+    @Test
+    public void testHandlePictureInPictureRequested_overriddenToEnter() {
+        final Intent startIntent = new Intent();
+        startIntent.putExtra(TestActivity.PIP_REQUESTED_OVERRIDE_ENTER, true);
+        final TestActivity activity = mActivityTestRule.launchActivity(startIntent);
+        final ActivityThread activityThread = activity.getActivityThread();
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            activityThread.handlePictureInPictureRequested(activity.getActivityToken());
+        });
+
+        assertTrue(activity.pipRequested());
+        assertTrue(activity.enteredPip());
+    }
+
+    @Test
+    public void testHandlePictureInPictureRequested_overriddenToSkip() {
+        final Intent startIntent = new Intent();
+        startIntent.putExtra(TestActivity.PIP_REQUESTED_OVERRIDE_SKIP, true);
+        final TestActivity activity = mActivityTestRule.launchActivity(startIntent);
+        final ActivityThread activityThread = activity.getActivityThread();
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            activityThread.handlePictureInPictureRequested(activity.getActivityToken());
+        });
+
+        assertTrue(activity.pipRequested());
+        assertTrue(activity.enterPipSkipped());
+    }
+
+    @Test
+    public void testHandlePictureInPictureRequested_notOverridden() {
+        final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
+        final ActivityThread activityThread = activity.getActivityThread();
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            activityThread.handlePictureInPictureRequested(activity.getActivityToken());
+        });
+
+        assertTrue(activity.pipRequested());
+        assertFalse(activity.enteredPip());
+        assertFalse(activity.enterPipSkipped());
+    }
+
     /**
      * Calls {@link ActivityThread#handleActivityConfigurationChanged(IBinder, Configuration, int)}
      * to try to push activity configuration to the activity for the given sequence number.
@@ -428,8 +474,15 @@ public class ActivityThreadTest {
 
     // Test activity
     public static class TestActivity extends Activity {
+        static final String PIP_REQUESTED_OVERRIDE_ENTER = "pip_requested_override_enter";
+        static final String PIP_REQUESTED_OVERRIDE_SKIP = "pip_requested_override_skip";
+
         int mNumOfConfigChanges;
         final Configuration mConfig = new Configuration();
+
+        private boolean mPipRequested;
+        private boolean mPipEntered;
+        private boolean mPipEnterSkipped;
 
         /**
          * A latch used to notify tests that we're about to wait for configuration latch. This
@@ -459,6 +512,30 @@ public class ActivityThreadTest {
                     throw new IllegalStateException(e);
                 }
             }
+        }
+
+        @Override
+        public void onPictureInPictureRequested() {
+            mPipRequested = true;
+            if (getIntent().getBooleanExtra(PIP_REQUESTED_OVERRIDE_ENTER, false)) {
+                enterPictureInPictureMode(new PictureInPictureParams.Builder().build());
+                mPipEntered = true;
+            } else if (getIntent().getBooleanExtra(PIP_REQUESTED_OVERRIDE_SKIP, false)) {
+                mPipEnterSkipped = true;
+            }
+            super.onPictureInPictureRequested();
+        }
+
+        boolean pipRequested() {
+            return mPipRequested;
+        }
+
+        boolean enteredPip() {
+            return mPipEntered;
+        }
+
+        boolean enterPipSkipped() {
+            return mPipEnterSkipped;
         }
     }
 }

@@ -105,6 +105,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public boolean moveTopActivityToPinnedStack(int, android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeStacksInWindowingModes(int[]) throws java.lang.SecurityException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void removeStacksWithActivityTypes(int[]) throws java.lang.SecurityException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void requestPictureInPictureMode(@NonNull android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizeDockedStack(android.graphics.Rect, android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizePinnedStack(int, android.graphics.Rect, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS) public void resizeTask(int, android.graphics.Rect);

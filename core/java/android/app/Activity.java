@@ -2837,6 +2837,17 @@ public class Activity extends ContextThemeWrapper
         return getPackageManager().hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE);
     }
 
+    /**
+     * Called by the system when picture in picture mode should be entered if supported.
+     */
+    public void onPictureInPictureRequested() {
+        // Previous recommendation was for apps to enter picture-in-picture in onUserLeaveHint()
+        // which is sent after onPause(). This new method allows the system to request the app to
+        // go into picture-in-picture decoupling it from life cycle events. For backwards
+        // compatibility we schedule the life cycle events if the app didn't override this method.
+        mMainThread.schedulePauseAndReturnToCurrentState(mToken);
+    }
+
     void dispatchMovedToDisplay(int displayId, Configuration config) {
         updateDisplay(displayId);
         onMovedToDisplay(displayId, config);

@@ -20,20 +20,30 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
+import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.EnterPipRequestedItem;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.view.IDisplayWindowListener;
 import android.view.WindowContainerTransaction;
 
@@ -42,6 +52,7 @@ import androidx.test.filters.MediumTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
@@ -55,6 +66,9 @@ import java.util.ArrayList;
 @MediumTest
 @RunWith(WindowTestRunner.class)
 public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
+
+    private final ArgumentCaptor<ClientTransaction> mClientTransactionCaptor =
+            ArgumentCaptor.forClass(ClientTransaction.class);
 
     @Before
     public void setUp() throws Exception {
@@ -75,6 +89,39 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         assertTrue("Duplicate activity finish request must also return 'true'",
                 mService.finishActivity(activity.appToken, 0 /* resultCode */,
                         null /* resultData */, Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
+    }
+
+    @Test
+    public void testOnPictureInPictureRequested() throws RemoteException {
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
+        doNothing().when(lifecycleManager).scheduleTransaction(any());
+        doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+
+        mService.requestPictureInPictureMode(activity.token);
+
+        verify(lifecycleManager).scheduleTransaction(mClientTransactionCaptor.capture());
+        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        // Check that only an enter pip request item callback was scheduled.
+        assertEquals(1, transaction.getCallbacks().size());
+        assertTrue(transaction.getCallbacks().get(0) instanceof EnterPipRequestedItem);
+        // Check the activity lifecycle state remains unchanged.
+        assertNull(transaction.getLifecycleStateRequest());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
+        doNothing().when(lifecycleManager).scheduleTransaction(any());
+        doReturn(false).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+
+        mService.requestPictureInPictureMode(activity.token);
+
+        // Check enter no transactions with enter pip requests are made.
+        verify(lifecycleManager, times(0)).scheduleTransaction(any());
     }
 
     @Test

@@ -1399,6 +1399,7 @@
         </activity>
 
         <activity android:name="android.app.activity.ActivityThreadTest$TestActivity"
+            android:supportsPictureInPicture="true"
             android:exported="true">
         </activity>
 
