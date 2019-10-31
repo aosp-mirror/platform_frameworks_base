@@ -1189,6 +1189,9 @@ public class Editor {
     }
 
     public boolean performLongClick(boolean handled) {
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("performLongClick", "handled=%s", handled);
+        }
         // Long press in empty space moves cursor and starts the insertion action mode.
         if (!handled && !isPositionOnText(mLastDownPositionX, mLastDownPositionY)
                 && mInsertionControllerEnabled) {
@@ -1252,6 +1255,10 @@ public class Editor {
     }
 
     void onFocusChanged(boolean focused, int direction) {
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("onFocusChanged", "focused=%s", focused);
+        }
+
         mShowCursor = SystemClock.uptimeMillis();
         ensureEndedBatchEdit();
 
@@ -1450,12 +1457,22 @@ public class Editor {
                 } else {
                     mTapState = TAP_STATE_TRIPLE_CLICK;
                 }
+                if (TextView.DEBUG_CURSOR) {
+                    logCursor("updateTapState", "ACTION_DOWN: %s tap detected",
+                            (mTapState == TAP_STATE_DOUBLE_TAP ? "double" : "triple"));
+                }
             } else {
                 mTapState = TAP_STATE_FIRST_TAP;
+                if (TextView.DEBUG_CURSOR) {
+                    logCursor("updateTapState", "ACTION_DOWN: first tap detected");
+                }
             }
         }
         if (action == MotionEvent.ACTION_UP) {
             mLastTouchUpTime = SystemClock.uptimeMillis();
+            if (TextView.DEBUG_CURSOR) {
+                logCursor("updateTapState", "ACTION_UP");
+            }
         }
     }
 
@@ -2354,6 +2371,9 @@ public class Editor {
     }
 
     void onTouchUpEvent(MotionEvent event) {
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("onTouchUpEvent", null);
+        }
         if (getSelectionActionModeHelper().resetSelection(
                 getTextView().getOffsetForPosition(event.getX(), event.getY()))) {
             return;
@@ -2481,6 +2501,9 @@ public class Editor {
         loadCursorDrawable();
         final int left = clampHorizontalPosition(mDrawableForCursor, horizontal);
         final int width = mDrawableForCursor.getIntrinsicWidth();
+        if (TextView.DEBUG_CURSOR) {
+            logCursor("updateCursorPosition", "left=%s, top=%s", left, (top - mTempRect.top));
+        }
         mDrawableForCursor.setBounds(left, top - mTempRect.top, left + width,
                 bottom + mTempRect.bottom);
     }
@@ -4621,6 +4644,11 @@ public class Editor {
         }
 
         public void show() {
+            if (TextView.DEBUG_CURSOR) {
+                logCursor(getClass().getSimpleName() + ": HandleView: show()", "offset=%s",
+                        getCurrentCursorOffset());
+            }
+
             if (isShowing()) return;
 
             getPositionListener().addSubscriber(this, true /* local position may change */);
@@ -4637,6 +4665,11 @@ public class Editor {
         }
 
         public void hide() {
+            if (TextView.DEBUG_CURSOR) {
+                logCursor(getClass().getSimpleName() + ": HandleView: hide()", "offset=%s",
+                        getCurrentCursorOffset());
+            }
+
             dismiss();
 
             getPositionListener().removeSubscriber(this);
@@ -5033,6 +5066,11 @@ public class Editor {
 
         @Override
         public boolean onTouchEvent(MotionEvent ev) {
+            if (TextView.DEBUG_CURSOR) {
+                logCursor(this.getClass().getSimpleName() + ": HandleView: onTouchEvent",
+                        MotionEvent.actionToString(ev.getActionMasked()));
+            }
+
             updateFloatingToolbarVisibility(ev);
 
             switch (ev.getActionMasked()) {
@@ -5951,6 +5989,10 @@ public class Editor {
                                         distanceSquared < doubleTapSlop * doubleTapSlop;
 
                                 if (stayedInArea && (isMouse || isPositionOnText(eventX, eventY))) {
+                                    if (TextView.DEBUG_CURSOR) {
+                                        logCursor("SelectionModifierCursorController: onTouchEvent",
+                                                "ACTION_DOWN: select and start drag");
+                                    }
                                     if (mTapState == TAP_STATE_DOUBLE_TAP) {
                                         selectCurrentWordAndStartDrag();
                                     } else if (mTapState == TAP_STATE_TRIPLE_CLICK) {
@@ -6028,6 +6070,9 @@ public class Editor {
                     break;
 
                 case MotionEvent.ACTION_UP:
+                    if (TextView.DEBUG_CURSOR) {
+                        logCursor("SelectionModifierCursorController: onTouchEvent", "ACTION_UP");
+                    }
                     if (!isDragAcceleratorActive()) {
                         break;
                     }
@@ -7117,6 +7162,14 @@ public class Editor {
 
         private CharSequence getLabel(ResolveInfo resolveInfo) {
             return resolveInfo.loadLabel(mPackageManager);
+        }
+    }
+
+    private static void logCursor(String location, @Nullable String msgFormat, Object ... msgArgs) {
+        if (msgFormat == null) {
+            Log.d(TAG, location);
+        } else {
+            Log.d(TAG, location + ": " + String.format(msgFormat, msgArgs));
         }
     }
 }
