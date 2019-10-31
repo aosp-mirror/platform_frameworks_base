@@ -36,6 +36,7 @@ import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
+import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
@@ -1708,6 +1709,30 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private void switchUserAndWaitForComplete(int userId) throws RemoteException {
+        // Register switch observer.
+        final CountDownLatch switchLatch = new CountDownLatch(1);
+        mInterface.registerUserSwitchObserver(
+                new UserSwitchObserver() {
+                    @Override
+                    public void onUserSwitchComplete(int newUserId) {
+                        if (userId == newUserId) {
+                            switchLatch.countDown();
+                        }
+                    }
+                }, ActivityManagerShellCommand.class.getName());
+
+        // Switch.
+        mInterface.switchUser(userId);
+
+        // Wait.
+        try {
+            switchLatch.await(USER_OPERATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            getErrPrintWriter().println("Thread interrupted unexpectedly.");
+        }
+    }
+
     int runSwitchUser(PrintWriter pw) throws RemoteException {
         UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
         final int userSwitchable = userManager.getUserSwitchability();
@@ -1715,8 +1740,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: " + userSwitchable);
             return -1;
         }
-        String user = getNextArgRequired();
-        mInterface.switchUser(Integer.parseInt(user));
+        boolean wait = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if ("-w".equals(opt)) {
+                wait = true;
+            } else {
+                getErrPrintWriter().println("Error: unknown option: " + opt);
+                return -1;
+            }
+        }
+
+        int userId = Integer.parseInt(getNextArgRequired());
+        if (wait) {
+            switchUserAndWaitForComplete(userId);
+        } else {
+            mInterface.switchUser(userId);
+        }
         return 0;
     }
 
