@@ -823,7 +823,14 @@ class ActivityMetricsLogger {
             return StatsLog.APP_START_OCCURRED__TYPE__HOT;
         }
         return StatsLog.APP_START_OCCURRED__TYPE__UNKNOWN;
-     }
+    }
+
+    /** @return the last known window drawn delay of the given windowing mode. */
+    int getLastDrawnDelayMs(@WindowingMode int windowingMode) {
+        final WindowingModeTransitionInfo info = mLastWindowingModeTransitionInfo.get(
+                windowingMode);
+        return info != null ? info.windowsDrawnDelayMs : INVALID_DELAY;
+    }
 
     WindowingModeTransitionInfoSnapshot logAppTransitionReportedDrawn(ActivityRecord r,
             boolean restoredFromBundle) {
