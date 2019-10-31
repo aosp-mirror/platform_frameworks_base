@@ -56,6 +56,16 @@ public interface Indexable {
         List<SearchIndexableRaw> getRawDataToIndex(Context context, boolean enabled);
 
         /**
+         * Return a list of dynamic raw data for indexing. See {@link SearchIndexableRaw}
+         *
+         * @param context the context.
+         * @param enabled hint telling if the data needs to be considered into the search results
+         *                or not.
+         * @return a list of {@link SearchIndexableRaw} references. Can be null.
+         */
+        List<SearchIndexableRaw> getDynamicRawDataToIndex(Context context, boolean enabled);
+
+        /**
          * Return a list of data keys that cannot be indexed. See {@link SearchIndexableRaw}
          *
          * @param context the context.
