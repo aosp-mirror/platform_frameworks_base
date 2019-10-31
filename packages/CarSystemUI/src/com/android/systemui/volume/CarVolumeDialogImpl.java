@@ -24,12 +24,10 @@ import android.annotation.Nullable;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.car.Car;
-import android.car.CarNotConnectedException;
+import android.car.Car.CarServiceLifecycleListener;
 import android.car.media.CarAudioManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.ServiceConnection;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Color;
@@ -39,7 +37,6 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Debug;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -146,42 +143,30 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private boolean mDismissing;
     private boolean mExpanded;
     private View mExpandIcon;
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            try {
-                mExpanded = false;
-                mCarAudioManager = (CarAudioManager) mCar.getCarManager(Car.AUDIO_SERVICE);
-                int volumeGroupCount = mCarAudioManager.getVolumeGroupCount();
-                // Populates volume slider items from volume groups to UI.
-                for (int groupId = 0; groupId < volumeGroupCount; groupId++) {
-                    VolumeItem volumeItem = getVolumeItemForUsages(
-                            mCarAudioManager.getUsagesForVolumeGroupId(groupId));
-                    mAvailableVolumeItems.add(volumeItem);
-                    // The first one is the default item.
-                    if (groupId == 0) {
-                        setuptListItem(0);
-                    }
-                }
 
-                // If list is already initiated, update its content.
-                if (mVolumeItemsAdapter != null) {
-                    mVolumeItemsAdapter.notifyDataSetChanged();
-                }
-                mCarAudioManager.registerCarVolumeCallback(mVolumeChangeCallback);
-            } catch (CarNotConnectedException e) {
-                Log.e(TAG, "Car is not connected!", e);
+    private final CarServiceLifecycleListener mCarServiceLifecycleListener = (car, ready) -> {
+        if (!ready) {
+            return;
+        }
+        mExpanded = false;
+        mCarAudioManager = (CarAudioManager) car.getCarManager(Car.AUDIO_SERVICE);
+        int volumeGroupCount = mCarAudioManager.getVolumeGroupCount();
+        // Populates volume slider items from volume groups to UI.
+        for (int groupId = 0; groupId < volumeGroupCount; groupId++) {
+            VolumeItem volumeItem = getVolumeItemForUsages(
+                    mCarAudioManager.getUsagesForVolumeGroupId(groupId));
+            mAvailableVolumeItems.add(volumeItem);
+            // The first one is the default item.
+            if (groupId == 0) {
+                setuptListItem(0);
             }
         }
 
-        /**
-         * This does not get called when service is properly disconnected.
-         * So we need to also handle cleanups in destroy().
-         */
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            cleanupAudioManager();
+        // If list is already initiated, update its content.
+        if (mVolumeItemsAdapter != null) {
+            mVolumeItemsAdapter.notifyDataSetChanged();
         }
+        mCarAudioManager.registerCarVolumeCallback(mVolumeChangeCallback);
     };
 
     private void setuptListItem(int groupId) {
@@ -196,25 +181,14 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     public CarVolumeDialogImpl(Context context) {
         mContext = context;
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mCar = Car.createCar(mContext, mServiceConnection);
     }
 
     private static int getSeekbarValue(CarAudioManager carAudioManager, int volumeGroupId) {
-        try {
-            return carAudioManager.getGroupVolume(volumeGroupId);
-        } catch (CarNotConnectedException e) {
-            Log.e(TAG, "Car is not connected!", e);
-        }
-        return 0;
+        return carAudioManager.getGroupVolume(volumeGroupId);
     }
 
     private static int getMaxSeekbarValue(CarAudioManager carAudioManager, int volumeGroupId) {
-        try {
-            return carAudioManager.getGroupMaxVolume(volumeGroupId);
-        } catch (CarNotConnectedException e) {
-            Log.e(TAG, "Car is not connected!", e);
-        }
-        return 0;
+        return carAudioManager.getGroupMaxVolume(volumeGroupId);
     }
 
     /**
@@ -224,8 +198,8 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     @Override
     public void init(int windowType, Callback callback) {
         initDialog();
-
-        mCar.connect();
+        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
+                mCarServiceLifecycleListener);
     }
 
     @Override
@@ -235,7 +209,10 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         cleanupAudioManager();
         // unregisterVolumeCallback is not being called when disconnect car, so we manually cleanup
         // audio manager beforehand.
-        mCar.disconnect();
+        if (mCar != null) {
+            mCar.disconnect();
+            mCar = null;
+        }
     }
 
     private void initDialog() {
@@ -605,18 +582,14 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 // sent back down again.
                 return;
             }
-            try {
-                if (mCarAudioManager == null) {
-                    Log.w(TAG, "Ignoring volume change event because the car isn't connected");
-                    return;
-                }
-                mAvailableVolumeItems.get(mVolumeGroupId).progress = progress;
-                mAvailableVolumeItems.get(
-                        mVolumeGroupId).carVolumeItem.setProgress(progress);
-                mCarAudioManager.setGroupVolume(mVolumeGroupId, progress, 0);
-            } catch (CarNotConnectedException e) {
-                Log.e(TAG, "Car is not connected!", e);
+            if (mCarAudioManager == null) {
+                Log.w(TAG, "Ignoring volume change event because the car isn't connected");
+                return;
             }
+            mAvailableVolumeItems.get(mVolumeGroupId).progress = progress;
+            mAvailableVolumeItems.get(
+                    mVolumeGroupId).carVolumeItem.setProgress(progress);
+            mCarAudioManager.setGroupVolume(mVolumeGroupId, progress, 0);
         }
 
         @Override
