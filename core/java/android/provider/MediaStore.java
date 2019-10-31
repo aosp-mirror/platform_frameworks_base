@@ -2040,6 +2040,10 @@ public final class MediaStore {
              * generated. Callers are responsible for their own in-memory
              * caching of returned values.
              *
+             * As of {@link android.os.Build.VERSION_CODES#Q}, this output
+             * of the thumbnail has correct rotation, don't need to rotate
+             * it again.
+             *
              * @param imageId the image item to obtain a thumbnail for.
              * @param kind optimal thumbnail size desired.
              * @return decoded thumbnail, or {@code null} if problem was
@@ -2081,6 +2085,10 @@ public final class MediaStore {
              * thumbnail doesn't exist, this method will block until it's
              * generated. Callers are responsible for their own in-memory
              * caching of returned values.
+             *
+             * As of {@link android.os.Build.VERSION_CODES#Q}, this output
+             * of the thumbnail has correct rotation, don't need to rotate
+             * it again.
              *
              * @param imageId the image item to obtain a thumbnail for.
              * @param kind optimal thumbnail size desired.
@@ -2135,6 +2143,9 @@ public final class MediaStore {
              * apps should use
              * {@link ContentResolver#openFileDescriptor(Uri, String)} to gain
              * access.
+             *
+             * As of {@link android.os.Build.VERSION_CODES#Q}, this thumbnail
+             * has correct rotation, don't need to rotate it again.
              *
              * @deprecated Apps may not have filesystem permissions to directly
              *             access this path. Instead of trying to open this path
