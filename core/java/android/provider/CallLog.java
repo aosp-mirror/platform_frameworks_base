@@ -227,7 +227,7 @@ public class CallLog {
 
         /**
          * Indicates the call underwent Assisted Dialing.
-         * @hide
+         * @see TelecomManager#EXTRA_USE_ASSISTED_DIALING
          */
         public static final int FEATURES_ASSISTED_DIALING_USED = 1 << 4;
 
