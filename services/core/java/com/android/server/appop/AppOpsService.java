@@ -1182,8 +1182,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         } else {
             for (int j=0; j<ops.length; j++) {
-                int code = uidState.opModes.keyAt(j);
-                if (code >= 0) {
+                int code = ops[j];
+                if (uidState.opModes.indexOfKey(code) >= 0) {
                     if (resOps == null) {
                         resOps = new ArrayList<>();
                     }
