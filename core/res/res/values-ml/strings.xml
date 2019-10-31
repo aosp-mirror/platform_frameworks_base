@@ -278,7 +278,7 @@
     <string name="android_system_label" msgid="6577375335728551336">"Android സിസ്റ്റം"</string>
     <string name="user_owner_label" msgid="8836124313744349203">"വ്യക്തിഗത പ്രൊഫൈലിലേക്ക് മാറുക"</string>
     <string name="managed_profile_label" msgid="8947929265267690522">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് മാറുക"</string>
-    <string name="permgrouplab_contacts" msgid="3657758145679177612">"കോൺടാക്റ്റുകൾ"</string>
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"കോൺടാക്റ്റ്"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"നിങ്ങളുടെ കോണ്‍ടാക്റ്റുകള്‍ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ലൊക്കേഷൻ"</string>
@@ -299,19 +299,19 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"മൈക്രോഫോണ്‍"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ഓഡിയോ റെക്കോർഡ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"ശാരീരിക പ്രവർത്തനം"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"കായിക പ്രവർത്തനം"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"ശാരീരിക പ്രവർത്തനം ആക്‌സസ് ചെയ്യുക"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-നെ നിങ്ങളുടെ ശാരീരിക പ്രവർത്തനം ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ക്യാമറ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ചിത്രങ്ങളെടുത്ത് വീഡിയോ റെക്കോർഡുചെയ്യുക"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"ചിത്രം എടുക്കാനും വീഡിയോ റെക്കോർഡ് ചെയ്യാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"കോൾ ലോഗുകൾ"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"കോൾ ലോഗ്"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ഫോൺ കോൾ ലോഗ് വായിക്കുകയും എഴുതുകയും ചെയ്യുക"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"നിങ്ങളുടെ ഫോൺ കോൾ ലോഗുകൾ ആക്സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ഫോണ്‍"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ മാനേജ് ചെയ്യാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
-    <string name="permgrouplab_sensors" msgid="4838614103153567532">"ബോഡി സെൻസറുകൾ"</string>
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"ബോഡി സെൻസർ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"നിങ്ങളുടെ ജീവാധാര ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ വിവരങ്ങൾ ആക്സസ് ചെയ്യുക"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"നിങ്ങളുടെ ജീവധാരണ ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
