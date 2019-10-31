@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.car;
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.os.UserManager.DISALLOW_ADD_USER;
+import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -123,10 +124,12 @@ public class UserGridRecyclerView extends RecyclerView {
     }
 
     private List<UserRecord> createUserRecords(List<UserInfo> userInfoList) {
+        int fgUserId = ActivityManager.getCurrentUser();
+        UserHandle fgUserHandle = UserHandle.of(fgUserId);
         List<UserRecord> userRecords = new ArrayList<>();
 
         // If the foreground user CANNOT switch to other users, only display the foreground user.
-        if (!mCarUserManagerHelper.canForegroundUserSwitchUsers()) {
+        if (mUserManager.getUserSwitchability(fgUserHandle) != SWITCHABILITY_STATUS_OK) {
             userRecords.add(createForegroundUserRecord());
             return userRecords;
         }
@@ -137,7 +140,7 @@ public class UserGridRecyclerView extends RecyclerView {
                 continue;
             }
 
-            boolean isForeground = ActivityManager.getCurrentUser() == userInfo.id;
+            boolean isForeground = fgUserId == userInfo.id;
             UserRecord record = new UserRecord(userInfo, false /* isStartGuestSession */,
                     false /* isAddUser */, isForeground);
             userRecords.add(record);
@@ -147,7 +150,6 @@ public class UserGridRecyclerView extends RecyclerView {
         userRecords.add(createStartGuestUserRecord());
 
         // Add add user record if the foreground user can add users
-        UserHandle fgUserHandle = UserHandle.of(ActivityManager.getCurrentUser());
         if (!mUserManager.hasUserRestriction(DISALLOW_ADD_USER, fgUserHandle)) {
             userRecords.add(createAddUserRecord());
         }
