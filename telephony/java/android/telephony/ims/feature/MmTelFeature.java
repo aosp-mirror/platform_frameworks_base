@@ -362,6 +362,25 @@ public class MmTelFeature extends ImsFeature {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessCallResult {}
 
+    /**
+     * If the flag is present and true, it indicates that the incoming call is for USSD.
+     * <p>
+     * This is an optional boolean flag.
+     */
+    public static final String EXTRA_IS_USSD = "android.telephony.ims.feature.extra.IS_USSD";
+
+    /**
+     * If this flag is present and true, this call is marked as an unknown dialing call instead
+     * of an incoming call. An example of such a call is a call that is originated by sending
+     * commands (like AT commands) directly to the modem without Android involvement or dialing
+     * calls appearing over IMS when the modem does a silent redial from circuit-switched to IMS in
+     * certain situations.
+     * <p>
+     * This is an optional boolean flag.
+     */
+    public static final String EXTRA_IS_UNKNOWN_CALL =
+            "android.telephony.ims.feature.extra.IS_UNKNOWN_CALL";
+
     private IImsMmTelListener mListener;
 
     /**
@@ -410,6 +429,8 @@ public class MmTelFeature extends ImsFeature {
     /**
      * Notify the framework of an incoming call.
      * @param c The {@link ImsCallSessionImplBase} of the new incoming call.
+     * @param extras A bundle containing extra parameters related to the call. See
+     * {@link #EXTRA_IS_UNKNOWN_CALL} and {@link #EXTRA_IS_USSD} above.
      */
     public final void notifyIncomingCall(@NonNull ImsCallSessionImplBase c,
             @NonNull Bundle extras) {
