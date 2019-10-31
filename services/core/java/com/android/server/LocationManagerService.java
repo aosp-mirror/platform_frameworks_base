@@ -1453,6 +1453,16 @@ public class LocationManagerService extends ILocationManager.Stub {
             return true;
         }
 
+        public void callRemovedLocked() {
+            if (mListener != null) {
+                try {
+                    mListener.onRemoved();
+                } catch (RemoteException e) {
+                    // doesn't matter
+                }
+            }
+        }
+
         @Override
         public void binderDied() {
             if (D) Log.d(TAG, "Remote " + mListenerName + " died.");
@@ -3066,6 +3076,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             // track expired records
             if (r.mRealRequest.getNumUpdates() <= 0 || r.mRealRequest.getExpireAt() < now) {
+                // notify the client it can remove this listener
+                r.mReceiver.callRemovedLocked();
                 if (deadUpdateRecords == null) {
                     deadUpdateRecords = new ArrayList<>();
                 }
