@@ -110,17 +110,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().executeShellCommand("svc wifi disable");
         getDevice().executeShellCommand("svc data disable");
 
-        // Remove available rollbacks and uninstall NetworkStack on /data/
         runPhase("testNetworkFailedRollback_Phase1");
-        // Reduce health check deadline
-        getDevice().executeShellCommand("device_config put rollback "
-                + "watchdog_request_timeout_millis 120000");
-        // Simulate re-installation of new NetworkStack with rollbacks enabled
-        getDevice().executeShellCommand("pm install -r --staged --enable-rollback "
-                + "/system/priv-app/NetworkStack/NetworkStack.apk");
-
-        // Sleep to allow writes to disk before reboot
-        Thread.sleep(5000);
         // Reboot device to activate staged package
         getDevice().reboot();
 
