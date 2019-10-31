@@ -410,7 +410,7 @@ public class AppTransitionController {
             ActivityRecord activity = apps.valueAt(i);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now changing app %s", activity);
             activity.cancelAnimationOnly();
-            activity.applyAnimationLocked(null, transit, true, false);
+            activity.applyAnimation(null, transit, true, false);
             activity.updateReportedVisibilityLocked();
             mService.openSurfaceTransaction();
             try {

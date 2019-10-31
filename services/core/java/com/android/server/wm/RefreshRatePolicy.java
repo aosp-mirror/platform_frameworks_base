@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+
 import android.util.ArraySet;
 import android.view.Display.Mode;
 import android.view.DisplayInfo;
@@ -67,7 +70,7 @@ class RefreshRatePolicy {
 
         // If app is animating, it's not able to control refresh rate because we want the animation
         // to run in default refresh rate.
-        if (w.isAnimating()) {
+        if (w.isAnimating(TRANSITION | PARENTS)) {
             return 0;
         }
 

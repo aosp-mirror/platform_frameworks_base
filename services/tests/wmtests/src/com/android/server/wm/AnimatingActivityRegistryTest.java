@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyZeroInteractions;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -69,8 +70,8 @@ public class AnimatingActivityRegistryTest extends WindowTestsBase {
 
         activity1.startAnimation(activity1.getPendingTransaction(), mAdapter, false /* hidden */);
         activity2.startAnimation(activity1.getPendingTransaction(), mAdapter, false /* hidden */);
-        assertTrue(activity1.isSelfAnimating());
-        assertTrue(activity2.isSelfAnimating());
+        assertTrue(activity1.isAnimating(TRANSITION));
+        assertTrue(activity2.isAnimating(TRANSITION));
 
         // Make sure that first animation finish is deferred, second one is not deferred, and first
         // one gets cancelled.
@@ -92,8 +93,8 @@ public class AnimatingActivityRegistryTest extends WindowTestsBase {
 
         window1.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);
         window2.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);
-        assertTrue(window1.isSelfAnimating());
-        assertTrue(window2.isSelfAnimating());
+        assertTrue(window1.isAnimating(TRANSITION));
+        assertTrue(window2.isAnimating(TRANSITION));
 
         // Make sure that first animation finish is deferred, and removing the second window stops
         // finishes all pending deferred finishings.

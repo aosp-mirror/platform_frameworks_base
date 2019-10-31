@@ -231,7 +231,7 @@ message AppWindowTokenProto {
     optional WindowTokenProto window_token = 2;
     optional bool last_surface_showing = 3;
     optional bool is_waiting_for_transition_start = 4;
-    optional bool is_really_animating = 5;
+    optional bool is_animating = 5;
     optional AppWindowThumbnailProto thumbnail = 6;
     optional bool fills_parent = 7;
     optional bool app_stopped = 8;

@@ -94,6 +94,9 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.ProtoLogGroup.WM_ERROR;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
@@ -2418,7 +2421,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = true;
             win.mAnimatingExit = true;
-        } else if (win.isAnimating()) {
+        } else if (win.isAnimating(TRANSITION | PARENTS)) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;
@@ -7618,7 +7621,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void waitForAnimationsToComplete() {
         synchronized (mGlobalLock) {
             long timeoutRemaining = ANIMATION_COMPLETED_TIMEOUT_MS;
-            while (mRoot.isSelfOrChildAnimating() && timeoutRemaining > 0) {
+            while (mRoot.isAnimating(TRANSITION | CHILDREN) && timeoutRemaining > 0) {
                 long startTime = System.currentTimeMillis();
                 try {
                     mGlobalLock.wait(timeoutRemaining);
@@ -7627,7 +7630,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 timeoutRemaining -= (System.currentTimeMillis() - startTime);
             }
 
-            if (mRoot.isSelfOrChildAnimating()) {
+            if (mRoot.isAnimating(TRANSITION | CHILDREN)) {
                 Log.w(TAG, "Timed out waiting for animations to complete.");
             }
         }
