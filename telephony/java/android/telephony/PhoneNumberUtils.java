@@ -16,12 +16,12 @@
 
 package android.telephony;
 
-import com.android.i18n.phonenumbers.NumberParseException;
-import com.android.i18n.phonenumbers.PhoneNumberUtil;
-import com.android.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
-import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_IDP_STRING;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -42,7 +42,10 @@ import android.text.TextUtils;
 import android.text.style.TtsSpan;
 import android.util.SparseIntArray;
 
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_IDP_STRING;
+import com.android.i18n.phonenumbers.NumberParseException;
+import com.android.i18n.phonenumbers.PhoneNumberUtil;
+import com.android.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -2247,8 +2250,10 @@ public class PhoneNumberUtils {
      * to read the VM number.
      * @hide
      */
-    @UnsupportedAppUsage
-    public static boolean isVoiceMailNumber(Context context, int subId, String number) {
+    @SystemApi
+    @TestApi
+    public static boolean isVoiceMailNumber(@NonNull Context context, int subId,
+            @Nullable String number) {
         String vmNumber, mdn;
         try {
             final TelephonyManager tm;
@@ -2734,8 +2739,9 @@ public class PhoneNumberUtils {
      * @param number
      * @return true if number contains @
      */
-    @UnsupportedAppUsage
-    public static boolean isUriNumber(String number) {
+    @SystemApi
+    @TestApi
+    public static boolean isUriNumber(@Nullable String number) {
         // Note we allow either "@" or "%40" to indicate a URI, in case
         // the passed-in string is URI-escaped.  (Neither "@" nor "%40"
         // will ever be found in a legal PSTN number.)
@@ -2752,8 +2758,9 @@ public class PhoneNumberUtils {
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public static String getUsernameFromUriNumber(String number) {
+    @SystemApi
+    @TestApi
+    public static @NonNull String getUsernameFromUriNumber(@NonNull String number) {
         // The delimiter between username and domain name can be
         // either "@" or "%40" (the URI-escaped equivalent.)
         int delimiterIndex = number.indexOf('@');
