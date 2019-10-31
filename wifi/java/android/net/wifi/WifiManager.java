@@ -2246,11 +2246,15 @@ public class WifiManager {
     /** @hide */
     public static final long WIFI_FEATURE_DPP              = 0x80000000L; // DPP (Easy-Connect)
     /** @hide */
-    public static final long WIFI_FEATURE_P2P_RAND_MAC    = 0x100000000L; // Random P2P MAC
+    public static final long WIFI_FEATURE_P2P_RAND_MAC     = 0x100000000L; // Random P2P MAC
     /** @hide */
     public static final long WIFI_FEATURE_CONNECTED_RAND_MAC    = 0x200000000L; // Random STA MAC
     /** @hide */
-    public static final long WIFI_FEATURE_AP_RAND_MAC    = 0x400000000L; // Random AP MAC
+    public static final long WIFI_FEATURE_AP_RAND_MAC      = 0x400000000L; // Random AP MAC
+    /** @hide */
+    public static final long WIFI_FEATURE_MBO              = 0x800000000L; // MBO Support
+    /** @hide */
+    public static final long WIFI_FEATURE_OCE              = 0x1000000000L; // OCE Support
 
     private long getSupportedFeatures() {
         try {
