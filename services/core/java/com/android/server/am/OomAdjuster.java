@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
@@ -23,7 +26,6 @@ import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_EMPTY;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_RECENT;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
-import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
@@ -65,6 +67,7 @@ import android.app.ActivityManager;
 import android.app.usage.UsageEvents;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
+import android.os.Build;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -471,6 +474,7 @@ public final class OomAdjuster {
             app.containsCycle = false;
             app.setCurRawProcState(PROCESS_STATE_CACHED_EMPTY);
             app.setCurRawAdj(ProcessList.UNKNOWN_ADJ);
+            app.setCapability = PROCESS_CAPABILITY_NONE;
             app.resetCachedInfo();
         }
         for (int i = numProc - 1; i >= 0; i--) {
@@ -788,6 +792,7 @@ public final class OomAdjuster {
             if (app.hasForegroundServices()) {
                 uidRec.foregroundServices = true;
             }
+            uidRec.curCapability |= app.curCapability;
         }
     }
 
@@ -804,10 +809,13 @@ public final class OomAdjuster {
             int uidChange = UidRecord.CHANGE_PROCSTATE;
             if (uidRec.getCurProcState() != PROCESS_STATE_NONEXISTENT
                     && (uidRec.setProcState != uidRec.getCurProcState()
+                    || uidRec.setCapability != uidRec.curCapability
                     || uidRec.setWhitelist != uidRec.curWhitelist)) {
                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS, "Changes in " + uidRec
                         + ": proc state from " + uidRec.setProcState + " to "
-                        + uidRec.getCurProcState() + ", whitelist from " + uidRec.setWhitelist
+                        + uidRec.getCurProcState() + ", capability from "
+                        + uidRec.setCapability + " to " + uidRec.curCapability
+                        + ", whitelist from " + uidRec.setWhitelist
                         + " to " + uidRec.curWhitelist);
                 if (ActivityManager.isProcStateBackground(uidRec.getCurProcState())
                         && !uidRec.curWhitelist) {
@@ -845,11 +853,13 @@ public final class OomAdjuster {
                     uidChange |= isCached ? UidRecord.CHANGE_CACHED : UidRecord.CHANGE_UNCACHED;
                 }
                 uidRec.setProcState = uidRec.getCurProcState();
+                uidRec.setCapability = uidRec.curCapability;
                 uidRec.setWhitelist = uidRec.curWhitelist;
                 uidRec.setIdle = uidRec.idle;
                 mService.mAtmInternal.onUidProcStateChanged(uidRec.uid, uidRec.setProcState);
                 mService.enqueueUidChangeLocked(uidRec, -1, uidChange);
-                mService.noteUidProcessState(uidRec.uid, uidRec.getCurProcState());
+                mService.noteUidProcessState(uidRec.uid, uidRec.getCurProcState(),
+                        uidRec.curCapability);
                 if (uidRec.foregroundServices) {
                     mService.mServices.foregroundServiceProcStateChangedLocked(uidRec);
                 }
@@ -1016,6 +1026,7 @@ public final class OomAdjuster {
             app.curAdj = ProcessList.CACHED_APP_MAX_ADJ;
             app.setCurRawAdj(ProcessList.CACHED_APP_MAX_ADJ);
             app.completedAdjSeq = app.adjSeq;
+            app.curCapability = PROCESS_CAPABILITY_NONE;
             return false;
         }
 
@@ -1030,6 +1041,7 @@ public final class OomAdjuster {
 
         int prevAppAdj = app.curAdj;
         int prevProcState = app.getCurProcState();
+        int prevCapability = app.curCapability;
 
         if (app.maxAdj <= ProcessList.FOREGROUND_APP_ADJ) {
             // The max adjustment doesn't allow this app to be anything
@@ -1087,6 +1099,7 @@ public final class OomAdjuster {
         int schedGroup;
         int procState;
         int cachedAdjSeq;
+        int capability = 0;
 
         boolean foregroundActivities = false;
         if (PROCESS_STATE_CUR_TOP == PROCESS_STATE_TOP && app == topApp) {
@@ -1185,19 +1198,17 @@ public final class OomAdjuster {
             }
         }
 
+        if (app.hasLocationForegroundServices()) {
+            capability |= PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+        }
+
         if (adj > ProcessList.PERCEPTIBLE_APP_ADJ
-                || procState > PROCESS_STATE_FOREGROUND_SERVICE_LOCATION) {
+                || procState > PROCESS_STATE_FOREGROUND_SERVICE) {
             if (app.hasForegroundServices()) {
                 // The user is aware of this app, so make it visible.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
-                if (app.hasLocationForegroundServices()) {
-                    procState = PROCESS_STATE_FOREGROUND_SERVICE_LOCATION;
-                    app.adjType = "fg-service-location";
-
-                } else {
-                    procState = PROCESS_STATE_FOREGROUND_SERVICE;
-                    app.adjType = "fg-service";
-                }
+                procState = PROCESS_STATE_FOREGROUND_SERVICE;
+                app.adjType = "fg-service";
                 app.cached = false;
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
@@ -1437,6 +1448,10 @@ public final class OomAdjuster {
                             continue;
                         }
 
+                        if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
+                            capability |= client.curCapability;
+                        }
+
                         int clientAdj = client.getCurRawAdj();
                         int clientProcState = client.getCurRawProcState();
 
@@ -1549,25 +1564,31 @@ public final class OomAdjuster {
                                 // processes).  These should not bring the current process
                                 // into the top state, since they are not on top.  Instead
                                 // give them the best bound state after that.
-                                final int bestState = cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)
-                                        ? PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
-                                        : PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
-                                if ((cr.flags & Context.BIND_FOREGROUND_SERVICE) != 0) {
-                                    clientProcState = bestState;
+                                if (cr.hasFlag(Context.BIND_FOREGROUND_SERVICE)) {
+                                    clientProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;                                                                                                                       ;
                                 } else if (mService.mWakefulness
                                         == PowerManagerInternal.WAKEFULNESS_AWAKE
                                         && (cr.flags & Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE)
                                                 != 0) {
-                                    clientProcState = bestState;
+                                    clientProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
                                 } else {
                                     clientProcState =
                                             PROCESS_STATE_IMPORTANT_FOREGROUND;
                                 }
                             } else if (clientProcState == PROCESS_STATE_TOP) {
-                                if (cr.notHasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
-                                    // Go at most to BOUND_TOP, unless requested to elevate
-                                    // to client's state.
-                                    clientProcState = PROCESS_STATE_BOUND_TOP;
+                                // Go at most to BOUND_TOP, unless requested to elevate
+                                // to client's state.
+                                clientProcState = PROCESS_STATE_BOUND_TOP;
+                                if (client.info.targetSdkVersion >= Build.VERSION_CODES.R) {
+                                    if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
+                                        // TOP process passes all capabilities to the service.
+                                        capability = PROCESS_CAPABILITY_ALL;
+                                    } else {
+                                        // TOP process passes no capability to the service.
+                                    }
+                                } else {
+                                    // TOP process passes all capabilities to the service.
+                                    capability = PROCESS_CAPABILITY_ALL;
                                 }
                             } else if (clientProcState
                                     <= PROCESS_STATE_FOREGROUND_SERVICE) {
@@ -1852,12 +1873,18 @@ public final class OomAdjuster {
             }
         }
 
+        // TOP process has all capabilities.
+        if (procState <= PROCESS_STATE_TOP) {
+            capability = PROCESS_CAPABILITY_ALL;
+        }
+
         // Do final modification to adj.  Everything we do between here and applying
         // the final setAdj must be done in this function, because we will also use
         // it when computing the final cached adj later.  Note that we don't need to
         // worry about this for max adj above, since max adj will always be used to
         // keep it out of the cached vaues.
         app.curAdj = app.modifyRawOomAdj(adj);
+        app.curCapability = capability;
         app.setCurrentSchedulingGroup(schedGroup);
         app.setCurProcState(procState);
         app.setCurRawProcState(procState);
@@ -1865,7 +1892,8 @@ public final class OomAdjuster {
         app.completedAdjSeq = mAdjSeq;
 
         // if curAdj or curProcState improved, then this process was promoted
-        return app.curAdj < prevAppAdj || app.getCurProcState() < prevProcState;
+        return app.curAdj < prevAppAdj || app.getCurProcState() < prevProcState
+                || app.curCapability != prevCapability ;
     }
 
     /**
@@ -2175,6 +2203,11 @@ public final class OomAdjuster {
             maybeUpdateUsageStatsLocked(app, nowElapsed);
         }
 
+        if (app.curCapability != app.setCapability) {
+            changes |= ActivityManagerService.ProcessChangeItem.CHANGE_CAPABILITY;
+            app.setCapability = app.curCapability;
+        }
+
         if (changes != 0) {
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
                     "Changes in " + app + ": " + changes);
@@ -2182,12 +2215,13 @@ public final class OomAdjuster {
                     mService.enqueueProcessChangeItemLocked(app.pid, app.info.uid);
             item.changes = changes;
             item.foregroundActivities = app.repForegroundActivities;
+            item.capability = app.setCapability;
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
                     "Item " + Integer.toHexString(System.identityHashCode(item))
                             + " " + app.toShortString() + ": changes=" + item.changes
                             + " foreground=" + item.foregroundActivities
                             + " type=" + app.adjType + " source=" + app.adjSource
-                            + " target=" + app.adjTarget);
+                            + " target=" + app.adjTarget + " capability=" + item.capability);
         }
 
         return success;

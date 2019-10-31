@@ -1378,10 +1378,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
         static final int CHANGE_FOREGROUND_SERVICES = 1<<1;
+        static final int CHANGE_CAPABILITY = 1<<2;
         int changes;
         int uid;
         int pid;
         int processState;
+        int capability;
         boolean foregroundActivities;
         int foregroundServiceTypes;
     }
@@ -3336,6 +3338,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         validateUid.idle = false;
                     }
                     validateUid.setCurProcState(validateUid.setProcState = item.processState);
+                    validateUid.curCapability = validateUid.setCapability = item.capability;
                     validateUid.lastDispatchedProcStateSeq = item.procStateSeq;
                 }
             }
@@ -3401,7 +3404,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if ((reg.which & ActivityManager.UID_OBSERVER_PROCSTATE) != 0) {
                         if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                                 "UID CHANGED uid=" + item.uid
-                                        + ": " + item.processState);
+                                        + ": " + item.processState + ": " + item.capability);
                         boolean doReport = true;
                         if (reg.cutpoint >= ActivityManager.MIN_PROCESS_STATE) {
                             final int lastState = reg.lastProcStates.get(item.uid,
@@ -3419,7 +3422,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 reg.lastProcStates.put(item.uid, item.processState);
                             }
                             observer.onUidStateChanged(item.uid, item.processState,
-                                    item.procStateSeq);
+                                    item.procStateSeq, item.capability);
                         }
                     }
                 }
@@ -16358,9 +16361,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void noteUidProcessState(final int uid, final int state) {
+    void noteUidProcessState(final int uid, final int state,
+                final @ActivityManager.ProcessCapability int capability) {
         mBatteryStatsService.noteUidProcessState(uid, state);
-        mAppOpsService.updateUidProcState(uid, state);
+        mAppOpsService.updateUidProcState(uid, state, capability);
         if (mTrackingAssociations) {
             for (int i1=0, N1=mAssociations.size(); i1<N1; i1++) {
                 ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> targetComponents
@@ -16878,6 +16882,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         pendingChange.change = change;
         pendingChange.processState = uidRec != null ? uidRec.setProcState : PROCESS_STATE_NONEXISTENT;
+        pendingChange.capability = uidRec != null ? uidRec.setCapability : 0;
         pendingChange.ephemeral = uidRec != null ? uidRec.ephemeral : isEphemeralLocked(uid);
         pendingChange.procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
         if (uidRec != null) {

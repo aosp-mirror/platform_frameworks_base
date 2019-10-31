@@ -181,7 +181,7 @@ public class OomAdjusterTests {
     @Test
     public void testMaybeUpdateUsageStats_ProcStateFGSLocation() {
         final long elapsedTime = ZERO;
-        mProcessRecord.setCurProcState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION);
+        mProcessRecord.setCurProcState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         sService.mOomAdjuster.maybeUpdateUsageStats(mProcessRecord, elapsedTime);
 
         assertProcessRecordState(elapsedTime, false, ZERO);

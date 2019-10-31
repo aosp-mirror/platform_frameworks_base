@@ -810,9 +810,6 @@ public final class ProcessList {
             case ActivityManager.PROCESS_STATE_TOP:
                 procState = "TOP ";
                 break;
-            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION:
-                procState = "FGSL";
-                break;
             case ActivityManager.PROCESS_STATE_BOUND_TOP:
                 procState = "BTOP";
                 break;
@@ -882,8 +879,6 @@ public final class ProcessList {
                 return AppProtoEnums.PROCESS_STATE_PERSISTENT_UI;
             case ActivityManager.PROCESS_STATE_TOP:
                 return AppProtoEnums.PROCESS_STATE_TOP;
-            case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION:
-                return AppProtoEnums.PROCESS_STATE_FOREGROUND_SERVICE;
             case ActivityManager.PROCESS_STATE_BOUND_TOP:
                 return AppProtoEnums.PROCESS_STATE_BOUND_TOP;
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
@@ -1014,7 +1009,6 @@ public final class ProcessList {
         PROC_MEM_PERSISTENT,            // ActivityManager.PROCESS_STATE_PERSISTENT
         PROC_MEM_PERSISTENT,            // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_TOP
-        PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
         PROC_MEM_TOP,                   // ActivityManager.PROCESS_STATE_BOUND_TOP
         PROC_MEM_IMPORTANT,             // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
@@ -2303,7 +2297,8 @@ public final class ProcessList {
             uidRec.updateHasInternetPermission();
             mActiveUids.put(proc.uid, uidRec);
             EventLogTags.writeAmUidRunning(uidRec.uid);
-            mService.noteUidProcessState(uidRec.uid, uidRec.getCurProcState());
+            mService.noteUidProcessState(uidRec.uid, uidRec.getCurProcState(),
+                    uidRec.curCapability);
         }
         proc.uidRecord = uidRec;
 
@@ -2405,7 +2400,8 @@ public final class ProcessList {
                 mService.enqueueUidChangeLocked(old.uidRecord, -1, UidRecord.CHANGE_GONE);
                 EventLogTags.writeAmUidStopped(uid);
                 mActiveUids.remove(uid);
-                mService.noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT);
+                mService.noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT,
+                        ActivityManager.PROCESS_CAPABILITY_NONE);
             }
             old.uidRecord = null;
         }

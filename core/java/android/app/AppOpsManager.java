@@ -282,10 +282,14 @@ public class AppOpsManager {
     /**
      * Uid state: The UID is running a foreground service of location type.
      * The lower the UID state the more important the UID is for the user.
+     * This uid state is a counterpart to PROCESS_STATE_FOREGROUND_SERVICE_LOCATION which has been
+     * deprecated.
      * @hide
+     * @deprecated
      */
     @TestApi
     @SystemApi
+    @Deprecated
     public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300;
 
     /**
@@ -298,13 +302,6 @@ public class AppOpsManager {
     public static final int UID_STATE_FOREGROUND_SERVICE = 400;
 
     /**
-     * The max, which is min priority, UID state for which any app op
-     * would be considered as performed in the foreground.
-     * @hide
-     */
-    public static final int UID_STATE_MAX_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE;
-
-    /**
      * Uid state: The UID is a foreground app. The lower the UID
      * state the more important the UID is for the user.
      * @hide
@@ -312,6 +309,13 @@ public class AppOpsManager {
     @TestApi
     @SystemApi
     public static final int UID_STATE_FOREGROUND = 500;
+
+    /**
+     * The max, which is min priority, UID state for which any app op
+     * would be considered as performed in the foreground.
+     * @hide
+     */
+    public static final int UID_STATE_MAX_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND;
 
     /**
      * Uid state: The UID is a background app. The lower the UID
@@ -344,47 +348,25 @@ public class AppOpsManager {
     public static final int MIN_PRIORITY_UID_STATE = UID_STATE_CACHED;
 
     /**
-     * Resolves the first unrestricted state given an app op. Location is
-     * special as we want to allow its access only if a dedicated location
-     * foreground service is running. For other ops we consider any foreground
-     * service as a foreground state.
-     *
+     * Resolves the first unrestricted state given an app op.
      * @param op The op to resolve.
      * @return The last restricted UID state.
      *
      * @hide
      */
     public static int resolveFirstUnrestrictedUidState(int op) {
-        switch (op) {
-            case OP_FINE_LOCATION:
-            case OP_COARSE_LOCATION:
-            case OP_MONITOR_LOCATION:
-            case OP_MONITOR_HIGH_POWER_LOCATION: {
-                return UID_STATE_FOREGROUND_SERVICE_LOCATION;
-            }
-        }
-        return UID_STATE_FOREGROUND_SERVICE;
+        return UID_STATE_FOREGROUND;
     }
 
     /**
-     * Resolves the last restricted state given an app op. Location is
-     * special as we want to allow its access only if a dedicated location
-     * foreground service is running. For other ops we consider any foreground
-     * service as a foreground state.
-     *
+     * Resolves the last restricted state given an app op.
      * @param op The op to resolve.
      * @return The last restricted UID state.
      *
      * @hide
      */
     public static int resolveLastRestrictedUidState(int op) {
-        switch (op) {
-            case OP_FINE_LOCATION:
-            case OP_COARSE_LOCATION: {
-                return UID_STATE_FOREGROUND_SERVICE;
-            }
-        }
-        return UID_STATE_FOREGROUND;
+        return UID_STATE_BACKGROUND;
     }
 
     /** @hide Note: Keep these sorted */
@@ -4603,7 +4585,6 @@ public class AppOpsManager {
          *
          * @param fromUidState The UID state from which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
-         * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
          * @param toUidState The UID state to which to query.
@@ -4664,7 +4645,6 @@ public class AppOpsManager {
          *
          * @param fromUidState The UID state from which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
-         * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
          * @param toUidState The UID state to which to query.
@@ -4728,7 +4708,6 @@ public class AppOpsManager {
          *
          * @param fromUidState The UID state from which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
-         * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
          * @param toUidState The UID state from which to query.

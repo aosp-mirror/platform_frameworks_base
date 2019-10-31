@@ -400,7 +400,7 @@ public class UsageStatsService extends SystemService implements
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
         }
 
@@ -411,7 +411,8 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public void onUidGone(int uid, boolean disabled) {
-            onUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT, 0);
+            onUidStateChanged(uid, ActivityManager.PROCESS_STATE_NONEXISTENT, 0,
+                    ActivityManager.PROCESS_CAPABILITY_NONE);
         }
 
         @Override

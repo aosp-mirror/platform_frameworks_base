@@ -71,6 +71,9 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
+    field public static final int PROCESS_CAPABILITY_ALL = 1; // 0x1
+    field public static final int PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1; // 0x1
+    field public static final int PROCESS_CAPABILITY_NONE = 0; // 0x0
   }
 
   public static interface ActivityManager.OnUidImportanceListener {
@@ -233,7 +236,7 @@ package android.app {
     field public static final int UID_STATE_CACHED = 700; // 0x2bc
     field public static final int UID_STATE_FOREGROUND = 500; // 0x1f4
     field public static final int UID_STATE_FOREGROUND_SERVICE = 400; // 0x190
-    field public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300; // 0x12c
+    field @Deprecated public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300; // 0x12c
     field public static final int UID_STATE_PERSISTENT = 100; // 0x64
     field public static final int UID_STATE_TOP = 200; // 0xc8
   }
@@ -2422,6 +2425,7 @@ package android.provider {
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final String APP_OPS_CONSTANTS = "app_ops_constants";
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final String AUTOMATIC_POWER_SAVE_MODE = "automatic_power_save_mode";
     field public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";

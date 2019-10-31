@@ -333,8 +333,8 @@ public final class PinnerService extends SystemService {
                 }
 
                 @Override
-                public void onUidStateChanged(int uid, int procState, long procStateSeq)
-                        throws RemoteException {
+                public void onUidStateChanged(int uid, int procState, long procStateSeq,
+                        int capability) throws RemoteException {
                 }
 
                 @Override
