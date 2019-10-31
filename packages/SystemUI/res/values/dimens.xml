@@ -285,8 +285,18 @@
     <!-- the padding between dots in the icon overflow -->
     <dimen name="overflow_icon_dot_padding">3dp</dimen>
 
+    <!-- Dimensions related to screenshots -->
+
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
+    <dimen name="screenshot_action_container_corner_radius">10dp</dimen>
+    <dimen name="screenshot_action_container_padding">20dp</dimen>
+    <!-- Radius of the chip background on global screenshot actions -->
+    <dimen name="screenshot_button_corner_radius">20dp</dimen>
+    <dimen name="screenshot_action_chip_margin_horizontal">10dp</dimen>
+    <dimen name="screenshot_action_chip_padding_vertical">10dp</dimen>
+    <dimen name="screenshot_action_chip_padding_horizontal">15dp</dimen>
+
 
     <!-- The width of the view containing navigation buttons -->
     <dimen name="navigation_key_width">70dp</dimen>

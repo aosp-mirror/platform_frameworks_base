@@ -19,6 +19,7 @@ package com.android.systemui.screenshot;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
+import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_CORNER_FLOW;
@@ -69,6 +70,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -89,7 +92,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -110,7 +112,7 @@ public class GlobalScreenshot {
         public Bitmap image;
         public Uri imageUri;
         public Consumer<Uri> finisher;
-        public Function<PendingIntent, Void> onEditReady;
+        public GlobalScreenshot.ActionsReadyListener mActionsReadyListener;
         public int iconSize;
         public int previewWidth;
         public int previewheight;
@@ -125,6 +127,10 @@ public class GlobalScreenshot {
         void clearContext() {
             context = null;
         }
+    }
+
+    abstract static class ActionsReadyListener {
+        abstract void onActionsReady(PendingIntent shareAction, PendingIntent editAction);
     }
 
     // These strings are used for communicating the action invoked to
@@ -175,6 +181,10 @@ public class GlobalScreenshot {
     private ImageView mBackgroundView;
     private ImageView mScreenshotView;
     private ImageView mScreenshotFlash;
+    private LinearLayout mActionsView;
+    private TextView mShareAction;
+    private TextView mEditAction;
+    private TextView mScrollAction;
 
     private AnimatorSet mScreenshotAnimation;
 
@@ -211,17 +221,31 @@ public class GlobalScreenshot {
         mScreenshotLayout = layoutInflater.inflate(R.layout.global_screenshot, null);
         mBackgroundView = mScreenshotLayout.findViewById(R.id.global_screenshot_background);
         mScreenshotView = mScreenshotLayout.findViewById(R.id.global_screenshot);
+        mActionsView = mScreenshotLayout.findViewById(R.id.global_screenshot_actions);
+
+        mShareAction = (TextView) layoutInflater.inflate(
+                R.layout.global_screenshot_action_chip, mActionsView, false);
+        mEditAction = (TextView) layoutInflater.inflate(
+                R.layout.global_screenshot_action_chip, mActionsView, false);
+        mScrollAction = (TextView) layoutInflater.inflate(
+                R.layout.global_screenshot_action_chip, mActionsView, false);
+
+        mShareAction.setText(com.android.internal.R.string.share);
+        mEditAction.setText(com.android.internal.R.string.screenshot_edit);
+        mScrollAction.setText("Scroll"); // TODO (mkephart): Add to resources and translate
+
+        mActionsView.addView(mShareAction);
+        mActionsView.addView(mEditAction);
+        mActionsView.addView(mScrollAction);
+
         mScreenshotFlash = mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
         mScreenshotSelectorView = mScreenshotLayout.findViewById(R.id.global_screenshot_selector);
         mScreenshotLayout.setFocusable(true);
         mScreenshotSelectorView.setFocusable(true);
         mScreenshotSelectorView.setFocusableInTouchMode(true);
-        mScreenshotLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                // Intercept and ignore all touch events
-                return true;
-            }
+        mScreenshotLayout.setOnTouchListener((v, event) -> {
+            // Intercept and ignore all touch events
+            return true;
         });
 
         // Setup the window that we are going to use
@@ -271,13 +295,13 @@ public class GlobalScreenshot {
      * Creates a new worker thread and saves the screenshot to the media store.
      */
     private void saveScreenshotInWorkerThread(
-            Consumer<Uri> finisher, @Nullable Function<PendingIntent, Void> onEditReady) {
+            Consumer<Uri> finisher, @Nullable ActionsReadyListener actionsReadyListener) {
         SaveImageInBackgroundData data = new SaveImageInBackgroundData();
         data.context = mContext;
         data.image = mScreenBitmap;
         data.iconSize = mNotificationIconSize;
         data.finisher = finisher;
-        data.onEditReady = onEditReady;
+        data.mActionsReadyListener = actionsReadyListener;
         data.previewWidth = mPreviewWidth;
         data.previewheight = mPreviewHeight;
         if (mSaveInBgTask != null) {
@@ -395,6 +419,7 @@ public class GlobalScreenshot {
         // Clear any references to the bitmap
         mScreenBitmap = null;
         mScreenshotView.setImageBitmap(null);
+        mActionsView.setVisibility(View.GONE);
         mBackgroundView.setVisibility(View.GONE);
         mScreenshotView.setVisibility(View.GONE);
         mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, null);
@@ -441,24 +466,13 @@ public class GlobalScreenshot {
                     saveScreenshotInWorkerThread(finisher);
                     clearScreenshot();
                 } else {
-                    mScreenshotView.requestFocus();
-                    mScreenshotView.setOnClickListener((v) -> {
-                        // TODO: remove once we have a better UI to show that we aren't ready yet
-                        Toast notReadyToast = Toast.makeText(
-                                mContext, "Screenshot is not ready yet", Toast.LENGTH_SHORT);
-                        notReadyToast.show();
-                    });
-                    saveScreenshotInWorkerThread(finisher, intent -> {
-                        mScreenshotHandler.post(() -> mScreenshotView.setOnClickListener(v -> {
-                            try {
-                                intent.send();
-                                clearScreenshot();
-                            } catch (PendingIntent.CanceledException e) {
-                                Log.e(TAG, "Edit intent cancelled", e);
-                            }
-                            mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
-                        }));
-                        return null;
+                    saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
+                        @Override
+                        void onActionsReady(PendingIntent shareAction, PendingIntent editAction) {
+                            mScreenshotHandler.post(() ->
+                                    createScreenshotActionsShadeAnimation(shareAction, editAction)
+                                            .start());
+                        }
                     });
                     mScreenshotHandler.sendMessageDelayed(
                             mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
@@ -662,6 +676,49 @@ public class GlobalScreenshot {
             mScreenshotView.setTranslationY(t * finalPos.y);
         });
         return anim;
+    }
+
+    private ValueAnimator createScreenshotActionsShadeAnimation(
+            PendingIntent shareAction, PendingIntent editAction) {
+        ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+        mActionsView.setY(mDisplayMetrics.heightPixels);
+        mActionsView.setVisibility(VISIBLE);
+        mActionsView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        float actionsViewHeight = mActionsView.getMeasuredHeight();
+        float screenshotStartHeight = mScreenshotView.getTranslationY();
+
+        animator.addUpdateListener(animation -> {
+            float t = animation.getAnimatedFraction();
+            mScreenshotView.setTranslationY(screenshotStartHeight - actionsViewHeight * t);
+            mActionsView.setY(mDisplayMetrics.heightPixels - actionsViewHeight * t);
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                mScreenshotView.requestFocus();
+                mShareAction.setOnClickListener(v -> {
+                    try {
+                        shareAction.send();
+                        clearScreenshot();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.e(TAG, "Share intent cancelled", e);
+                    }
+                });
+                mEditAction.setOnClickListener(v -> {
+                    try {
+                        editAction.send();
+                        clearScreenshot();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.e(TAG, "Edit intent cancelled", e);
+                    }
+                });
+                Toast scrollNotImplemented = Toast.makeText(
+                        mContext, "Not implemented", Toast.LENGTH_SHORT);
+                mScrollAction.setOnClickListener(v -> scrollNotImplemented.show());
+            }
+        });
+        return animator;
     }
 
     static void notifyScreenshotError(Context context, NotificationManager nManager, int msgResId) {

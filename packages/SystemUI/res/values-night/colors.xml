@@ -78,6 +78,11 @@
     <!-- The color of the text in the Global Actions menu -->
     <color name="global_actions_alert_text">@color/GM2_red_300</color>
 
+    <!-- Global screenshot actions -->
+    <color name="global_screenshot_button_background">@color/GM2_grey_900</color>
+    <color name="global_screenshot_button_ripple">#42FFFFFF</color>
+    <color name="global_screenshot_button_text">@color/GM2_blue_300</color>
+
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_gray">#ff888888</color>
     <color name="biometric_dialog_accent">#ff80cbc4</color> <!-- light teal -->
