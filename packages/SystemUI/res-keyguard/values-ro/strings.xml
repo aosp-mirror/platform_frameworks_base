@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Cod PIN incorect."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Card nevalid"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Complet încărcată"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă wireless"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Încărcare Wireless"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă rapid"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se încarcă lent"</string>
@@ -159,7 +159,85 @@
       <item quantity="other">Cardul SIM este dezactivat acum. Introduceți codul PUK pentru a continua. V-au mai rămas <xliff:g id="_NUMBER_1">%d</xliff:g> de încercări până când cardul SIM va deveni inutilizabil definitiv. Contactați operatorul pentru detalii.</item>
       <item quantity="one">Cardul SIM este dezactivat acum. Introduceți codul PUK pentru a continua. V-a mai rămas <xliff:g id="_NUMBER_0">%d</xliff:g> încercare până când cardul SIM va deveni inutilizabil definitiv. Contactați operatorul pentru detalii.</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"Prestabilit"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"Balon"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"Analogic"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="few">"<annotation name="color">"Este"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Este"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Este"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Douăsprezece"</item>
+    <item msgid="7389464214252023751">"Unu"</item>
+    <item msgid="8803180377002008046">"Două"</item>
+    <item msgid="8614897059944644719">"Trei"</item>
+    <item msgid="2293058674782619556">"Patru"</item>
+    <item msgid="4815402358455041664">"Cinci"</item>
+    <item msgid="3325754778509665687">"Șase"</item>
+    <item msgid="5805551341866280575">"Șapte"</item>
+    <item msgid="203334816668238610">"Opt"</item>
+    <item msgid="4828052671464488923">"Nouă"</item>
+    <item msgid="2233497913571137419">"Zece"</item>
+    <item msgid="5621554266768657830">"Unsprezece"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"."</item>
+    <item msgid="8837126587669001578">"și unu"</item>
+    <item msgid="4294343372940455660">"și două"</item>
+    <item msgid="7129166637707421536">"și trei"</item>
+    <item msgid="7579404865008788673">"și patru"</item>
+    <item msgid="3873924689207380586">"și cinci"</item>
+    <item msgid="4849565597850069377">"și șase"</item>
+    <item msgid="4404219424523572364">"și șapte"</item>
+    <item msgid="8740481214764087329">"și opt"</item>
+    <item msgid="1713216865806811237">"și nouă"</item>
+    <item msgid="3508406095411245038">"Zece"</item>
+    <item msgid="7161996337755311711">"Unsprezece"</item>
+    <item msgid="4044549963329624197">"Douăsprezece"</item>
+    <item msgid="333373157917379088">"Treisprezece"</item>
+    <item msgid="2631202907124819385">"Paisprezece"</item>
+    <item msgid="6472396076858033453">"Cincisprezece"</item>
+    <item msgid="8656981856181581643">"Șaisprezece"</item>
+    <item msgid="7289026608562030619">"Șaptesprezece"</item>
+    <item msgid="3881477602692646573">"Optsprezece"</item>
+    <item msgid="3358129827772984226">"Nouăsprezece"</item>
+    <item msgid="3308575407402865807">"Douăzeci"</item>
+    <item msgid="5346560955382229629">"Douăzeci\nși unu"</item>
+    <item msgid="226750304761473436">"Douăzeci\nși doi"</item>
+    <item msgid="616811325336838734">"Douăzeci\nși trei"</item>
+    <item msgid="616346116869053440">"Douăzeci\nși patru"</item>
+    <item msgid="4642996410384042830">"Douăzeci\nși cinci"</item>
+    <item msgid="7506092849993571465">"Douăzeci\nși șase"</item>
+    <item msgid="1915078191101042031">"Douăzeci\nși șapte"</item>
+    <item msgid="4292378641900520252">"Douăzeci\nși opt"</item>
+    <item msgid="5339513901773103696">"Douăzeci\nși nouă"</item>
+    <item msgid="3574673250891657607">"Treizeci"</item>
+    <item msgid="5796923836589110940">"Treizeci\nși unu"</item>
+    <item msgid="5859323597571702052">"Treizeci\nși două"</item>
+    <item msgid="5133326723148876507">"Treizeci\nși trei"</item>
+    <item msgid="2693999494655663096">"Treizeci\nși patru"</item>
+    <item msgid="3316754944962836197">"Treizeci\nși cinci"</item>
+    <item msgid="816891008836796723">"Treizeci\nși șase"</item>
+    <item msgid="9158890488666520078">"Treizeci\nși șapte"</item>
+    <item msgid="1894769703213894011">"Treizeci\nși opt"</item>
+    <item msgid="5638820345598572399">"Treizeci\nși nouă"</item>
+    <item msgid="8838304023017895439">"Patruzeci"</item>
+    <item msgid="1834742948932559597">"Patruzeci\nși unu"</item>
+    <item msgid="6573707308847773944">"Patruzeci\nși două"</item>
+    <item msgid="2450149950652678001">"Patruzeci\nși trei"</item>
+    <item msgid="2874667401318178036">"Patruzeci\nși patru"</item>
+    <item msgid="3391101532763048862">"Patruzeci\nși cinci"</item>
+    <item msgid="1671489330863254362">"Patruzeci\nși șase"</item>
+    <item msgid="5916017359554531038">"Patruzeci\nși șapte"</item>
+    <item msgid="8205413177993059967">"Patruzeci\nși opt"</item>
+    <item msgid="6607867415142171302">"Patruzeci\nși nouă"</item>
+    <item msgid="8358850748472089162">"Cincizeci"</item>
+    <item msgid="3551313125255080234">"Cincizeci\nși unu"</item>
+    <item msgid="1559678130725716542">"Cincizeci\nși doi"</item>
+    <item msgid="431441994725492377">"Cincizeci\nși trei"</item>
+    <item msgid="6345774640539623024">"Cincizeci\nși patru"</item>
+    <item msgid="8018192990793931120">"Cincizeci\nși cinci"</item>
+    <item msgid="6187650843754604534">"Cincizeci\nși șase"</item>
+    <item msgid="8727240174015993259">"Cincizeci\nși șapte"</item>
+    <item msgid="848339003778952950">"Cincizeci\nși opt"</item>
+    <item msgid="5798985802835423618">"Cincizeci\nși nouă"</item>
+  </string-array>
 </resources>

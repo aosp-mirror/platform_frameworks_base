@@ -35,7 +35,7 @@
     <string name="recents_stack_action_button_label" msgid="1974273390109881497">"အားလုံး ဖယ်ရှားရန်"</string>
     <string name="recents_drag_hint_message" msgid="610417221848280136">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းကို အသုံးပြုရန် ဤနေရာသို့ ဖိဆွဲပါ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"အလျားလိုက် ခွဲရန်"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"ဒေါင်လိုက် ခွဲရန်"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"ထောင်လိုက် ခွဲရန်"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="7368405969130304811">"စိတ်ကြိုက် ခွဲရန်"</string>
     <string name="recents_accessibility_split_screen_top" msgid="8773505308411722524">"မျက်နှာပြင်ကို အပေါ်သို့ ခွဲရန်"</string>
     <string name="recents_accessibility_split_screen_left" msgid="722594718192007972">"မျက်နှာပြင်ကို ဘယ်ဘက်သို့ ခွဲရန်"</string>

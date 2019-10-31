@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ভুল পিন ক\'ড।"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ব্যৱহাৰৰ অযোগ্য ছিম কাৰ্ড"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"পূৰ্ণৰূপে চ্চাৰ্জ হৈছে"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • বেতাঁৰৰ জৰিয়তে চাৰ্জ কৰি থকা হৈছে"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • বেঁতাৰৰ জৰিয়তে চ্চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চ্চার্জ কৰি থকা হৈছে"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • দ্ৰুত গতিৰে চ্চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • লাহে লাহে চ্চাৰ্জ কৰি থকা হৈছে"</string>
@@ -151,7 +151,84 @@
       <item quantity="one">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
       <item quantity="other">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"ডিফ’ল্ট"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"বাবল"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"এনাল’গ"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"এতিয়া সময়"</annotation>\n"^1\n^2 হৈছে</item>
+      <item quantity="other">"<annotation name="color">"এতিয়া সময়"</annotation>\n"^1\n^2 হৈছে</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"বাৰ"</item>
+    <item msgid="7389464214252023751">"এক"</item>
+    <item msgid="8803180377002008046">"দুই"</item>
+    <item msgid="8614897059944644719">"তিনি"</item>
+    <item msgid="2293058674782619556">"চাৰি"</item>
+    <item msgid="4815402358455041664">"পাঁচ"</item>
+    <item msgid="3325754778509665687">"ছয়"</item>
+    <item msgid="5805551341866280575">"সাত"</item>
+    <item msgid="203334816668238610">"আঠ"</item>
+    <item msgid="4828052671464488923">"ন"</item>
+    <item msgid="2233497913571137419">"দহ"</item>
+    <item msgid="5621554266768657830">"এঘাৰ"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"বাজিছে"</item>
+    <item msgid="8837126587669001578">"এক"</item>
+    <item msgid="4294343372940455660">"দুই"</item>
+    <item msgid="7129166637707421536">"তিনি"</item>
+    <item msgid="7579404865008788673">"চাৰি"</item>
+    <item msgid="3873924689207380586">"পাঁচ"</item>
+    <item msgid="4849565597850069377">"ছয়"</item>
+    <item msgid="4404219424523572364">"সাত"</item>
+    <item msgid="8740481214764087329">"আঠ"</item>
+    <item msgid="1713216865806811237">"ন"</item>
+    <item msgid="3508406095411245038">"দহ"</item>
+    <item msgid="7161996337755311711">"এঘাৰ"</item>
+    <item msgid="4044549963329624197">"বাৰ"</item>
+    <item msgid="333373157917379088">"তেৰ"</item>
+    <item msgid="2631202907124819385">"চৈধ্য"</item>
+    <item msgid="6472396076858033453">"পোন্ধৰ"</item>
+    <item msgid="8656981856181581643">"ষোল্ল"</item>
+    <item msgid="7289026608562030619">"সোতৰ"</item>
+    <item msgid="3881477602692646573">"ওঠৰ"</item>
+    <item msgid="3358129827772984226">"ঊনৈছ"</item>
+    <item msgid="3308575407402865807">"বিছ"</item>
+    <item msgid="5346560955382229629">"একৈছ\n"</item>
+    <item msgid="226750304761473436">"বাইছ\n"</item>
+    <item msgid="616811325336838734">"তেইছ\n"</item>
+    <item msgid="616346116869053440">"চৌবিছ\n"</item>
+    <item msgid="4642996410384042830">"পঁচিছ\n"</item>
+    <item msgid="7506092849993571465">"ছাব্বিছ\n"</item>
+    <item msgid="1915078191101042031">"সাতাইছ\n"</item>
+    <item msgid="4292378641900520252">"আঠাইছ\n"</item>
+    <item msgid="5339513901773103696">"ঊনত্ৰিছ\n"</item>
+    <item msgid="3574673250891657607">"ত্ৰিছ"</item>
+    <item msgid="5796923836589110940">"একত্ৰিছ\n"</item>
+    <item msgid="5859323597571702052">"বত্ৰিছ\n"</item>
+    <item msgid="5133326723148876507">"তেত্ৰিছ\n"</item>
+    <item msgid="2693999494655663096">"চৌত্ৰিছ\n"</item>
+    <item msgid="3316754944962836197">"পঁইত্ৰিছ\n"</item>
+    <item msgid="816891008836796723">"ছয়ত্ৰিছ\n"</item>
+    <item msgid="9158890488666520078">"সাতত্ৰিছ\n"</item>
+    <item msgid="1894769703213894011">"আঠত্ৰিছ\n"</item>
+    <item msgid="5638820345598572399">"ঊনচল্লিছ\n"</item>
+    <item msgid="8838304023017895439">"চল্লিছ"</item>
+    <item msgid="1834742948932559597">"একচল্লিছ\n"</item>
+    <item msgid="6573707308847773944">"বিয়াল্লিছ\n"</item>
+    <item msgid="2450149950652678001">"তিয়াল্লিছ\n"</item>
+    <item msgid="2874667401318178036">"চৌৰাল্লিছ\n"</item>
+    <item msgid="3391101532763048862">"পঞ্চলিছ\n"</item>
+    <item msgid="1671489330863254362">"ছয়চল্লিছ\n"</item>
+    <item msgid="5916017359554531038">"সাতচল্লিছ\n"</item>
+    <item msgid="8205413177993059967">"আঠচল্লিছ\n"</item>
+    <item msgid="6607867415142171302">"ঊনপঞ্চাছ\n"</item>
+    <item msgid="8358850748472089162">"পঞ্চাছ"</item>
+    <item msgid="3551313125255080234">"একাৱন\n"</item>
+    <item msgid="1559678130725716542">"বাৱন\n"</item>
+    <item msgid="431441994725492377">"তেৱন\n"</item>
+    <item msgid="6345774640539623024">"চৌৱন\n"</item>
+    <item msgid="8018192990793931120">"পঁচপন\n"</item>
+    <item msgid="6187650843754604534">"ছাপন\n"</item>
+    <item msgid="8727240174015993259">"সাতাৱন\n"</item>
+    <item msgid="848339003778952950">"আঠাৱন\n"</item>
+    <item msgid="5798985802835423618">"ঊনষাঠি\n"</item>
+  </string-array>
 </resources>

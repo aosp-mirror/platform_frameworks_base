@@ -97,7 +97,8 @@ public class DataConnectionStats extends BroadcastReceiver {
         if (DEBUG) Log.d(TAG, String.format("Noting data connection for network type %s: %svisible",
                 networkType, visible ? "" : "not "));
         try {
-            mBatteryStats.notePhoneDataConnectionState(networkType, visible);
+            mBatteryStats.notePhoneDataConnectionState(networkType, visible,
+                    mServiceState.getState());
         } catch (RemoteException e) {
             Log.w(TAG, "Error noting data connection state", e);
         }

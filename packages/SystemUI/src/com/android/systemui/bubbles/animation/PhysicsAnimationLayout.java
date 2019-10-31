@@ -16,7 +16,14 @@
 
 package com.android.systemui.bubbles.animation;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.content.Context;
+import android.graphics.Path;
+import android.graphics.PointF;
+import android.util.FloatProperty;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -160,7 +167,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** Whether this controller is the currently active controller for its associated layout. */
         protected boolean isActiveController() {
-            return this == mLayout.mController;
+            return mLayout != null && this == mLayout.mController;
         }
 
         protected void setLayout(PhysicsAnimationLayout layout) {
@@ -232,7 +239,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 }
 
                 if (endActions != null) {
-                    mLayout.setEndActionForMultipleProperties(
+                    setEndActionForMultipleProperties(
                             runAllEndActions,
                             allAnimatedProperties.toArray(
                                     new DynamicAnimation.ViewProperty[0]));
@@ -242,6 +249,44 @@ public class PhysicsAnimationLayout extends FrameLayout {
                     childAnim.start();
                 }
             };
+        }
+
+        /**
+         * Sets an end action that will be run when all child animations for a given property have
+         * stopped running.
+         */
+        protected void setEndActionForProperty(
+                Runnable action, DynamicAnimation.ViewProperty property) {
+            mLayout.mEndActionForProperty.put(property, action);
+        }
+
+        /**
+         * Sets an end action that will be run when all child animations for all of the given
+         * properties have stopped running.
+         */
+        protected void setEndActionForMultipleProperties(
+                Runnable action, DynamicAnimation.ViewProperty... properties) {
+            final Runnable checkIfAllFinished = () -> {
+                if (!mLayout.arePropertiesAnimating(properties)) {
+                    action.run();
+
+                    for (DynamicAnimation.ViewProperty property : properties) {
+                        removeEndActionForProperty(property);
+                    }
+                }
+            };
+
+            for (DynamicAnimation.ViewProperty property : properties) {
+                setEndActionForProperty(checkIfAllFinished, property);
+            }
+        }
+
+        /**
+         * Removes the end listener that would have been called when all child animations for a
+         * given property stopped running.
+         */
+        protected void removeEndActionForProperty(DynamicAnimation.ViewProperty property) {
+            mLayout.mEndActionForProperty.remove(property);
         }
     }
 
@@ -273,43 +318,6 @@ public class PhysicsAnimationLayout extends FrameLayout {
         for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
             setUpAnimationsForProperty(property);
         }
-    }
-
-    /**
-     * Sets an end action that will be run when all child animations for a given property have
-     * stopped running.
-     */
-    public void setEndActionForProperty(Runnable action, DynamicAnimation.ViewProperty property) {
-        mEndActionForProperty.put(property, action);
-    }
-
-    /**
-     * Sets an end action that will be run when all child animations for all of the given properties
-     * have stopped running.
-     */
-    public void setEndActionForMultipleProperties(
-            Runnable action, DynamicAnimation.ViewProperty... properties) {
-        final Runnable checkIfAllFinished = () -> {
-            if (!arePropertiesAnimating(properties)) {
-                action.run();
-
-                for (DynamicAnimation.ViewProperty property : properties) {
-                    removeEndActionForProperty(property);
-                }
-            }
-        };
-
-        for (DynamicAnimation.ViewProperty property : properties) {
-            setEndActionForProperty(checkIfAllFinished, property);
-        }
-    }
-
-    /**
-     * Removes the end listener that would have been called when all child animations for a given
-     * property stopped running.
-     */
-    public void removeEndActionForProperty(DynamicAnimation.ViewProperty property) {
-        mEndActionForProperty.remove(property);
     }
 
     @Override
@@ -372,9 +380,20 @@ public class PhysicsAnimationLayout extends FrameLayout {
     /** Checks whether any animations of the given properties are running on the given view. */
     public boolean arePropertiesAnimatingOnView(
             View view, DynamicAnimation.ViewProperty... properties) {
+        final ObjectAnimator targetAnimator = getTargetAnimatorFromView(view);
         for (DynamicAnimation.ViewProperty property : properties) {
             final SpringAnimation animation = getAnimationFromView(property, view);
             if (animation != null && animation.isRunning()) {
+                return true;
+            }
+
+            // If the target animator is running, its update listener will trigger the translation
+            // physics animations at some point. We should consider the translation properties to be
+            // be animating in this case, even if the physics animations haven't been started yet.
+            final boolean isTranslation =
+                    property.equals(DynamicAnimation.TRANSLATION_X)
+                            || property.equals(DynamicAnimation.TRANSLATION_Y);
+            if (isTranslation && targetAnimator != null && targetAnimator.isRunning()) {
                 return true;
             }
         }
@@ -388,8 +407,18 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return;
         }
 
+        cancelAllAnimationsOfProperties(
+                mController.getAnimatedProperties().toArray(new DynamicAnimation.ViewProperty[]{}));
+    }
+
+    /** Cancels all animations that are running on all child views, for the given properties. */
+    public void cancelAllAnimationsOfProperties(DynamicAnimation.ViewProperty... properties) {
+        if (mController == null) {
+            return;
+        }
+
         for (int i = 0; i < getChildCount(); i++) {
-            for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
+            for (DynamicAnimation.ViewProperty property : properties) {
                 final DynamicAnimation anim = getAnimationAtIndex(property, i);
                 if (anim != null) {
                     anim.cancel();
@@ -400,6 +429,14 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
     /** Cancels all of the physics animations running on the given view. */
     public void cancelAnimationsOnView(View view) {
+        // If present, cancel the target animator so it doesn't restart the translation physics
+        // animations.
+        final ObjectAnimator targetAnimator = getTargetAnimatorFromView(view);
+        if (targetAnimator != null) {
+            targetAnimator.cancel();
+        }
+
+        // Cancel physics animations on the view.
         for (DynamicAnimation.ViewProperty property : mController.getAnimatedProperties()) {
             getAnimationFromView(property, view).cancel();
         }
@@ -468,6 +505,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
     private SpringAnimation getAnimationFromView(
             DynamicAnimation.ViewProperty property, View view) {
         return (SpringAnimation) view.getTag(getTagIdForProperty(property));
+    }
+
+    /** Retrieves the target animator from the view via the view tag system. */
+    @Nullable private ObjectAnimator getTargetAnimatorFromView(View view) {
+        return (ObjectAnimator) view.getTag(R.id.target_animator_tag);
     }
 
     /** Sets up SpringAnimations of the given property for each child view in the layout. */
@@ -587,7 +629,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
          * End actions to call when both TRANSLATION_X and TRANSLATION_Y animations have completed,
          * if {@link #position} was used to animate TRANSLATION_X and TRANSLATION_Y simultaneously.
          */
-        private Runnable[] mPositionEndActions;
+        @Nullable private Runnable[] mPositionEndActions;
 
         /**
          * All of the properties that have been set and will animate when {@link #start} is called.
@@ -602,6 +644,46 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** The animation controller that last retrieved this animator instance. */
         private PhysicsAnimationController mAssociatedController;
+
+        /**
+         * Animator used to traverse the path provided to {@link #followAnimatedTargetAlongPath}. As
+         * the path is traversed, the view's translation spring animation final positions are
+         * updated such that the view 'follows' the current position on the path.
+         */
+        @Nullable private ObjectAnimator mPathAnimator;
+
+        /** Current position on the path. This is animated by {@link #mPathAnimator}. */
+        private PointF mCurrentPointOnPath = new PointF();
+
+        /**
+         * FloatProperty instances that can be passed to {@link ObjectAnimator} to animate the value
+         * of {@link #mCurrentPointOnPath}.
+         */
+        private final FloatProperty<PhysicsPropertyAnimator> mCurrentPointOnPathXProperty =
+                new FloatProperty<PhysicsPropertyAnimator>("PathX") {
+            @Override
+            public void setValue(PhysicsPropertyAnimator object, float value) {
+                mCurrentPointOnPath.x = value;
+            }
+
+            @Override
+            public Float get(PhysicsPropertyAnimator object) {
+                return mCurrentPointOnPath.x;
+            }
+        };
+
+        private final FloatProperty<PhysicsPropertyAnimator> mCurrentPointOnPathYProperty =
+                new FloatProperty<PhysicsPropertyAnimator>("PathY") {
+            @Override
+            public void setValue(PhysicsPropertyAnimator object, float value) {
+                mCurrentPointOnPath.y = value;
+            }
+
+            @Override
+            public Float get(PhysicsPropertyAnimator object) {
+                return mCurrentPointOnPath.y;
+            }
+        };
 
         protected PhysicsPropertyAnimator(View view) {
             this.mView = view;
@@ -628,6 +710,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** Animate the view's translationX value to the provided value. */
         public PhysicsPropertyAnimator translationX(float translationX, Runnable... endActions) {
+            mPathAnimator = null; // We aren't using the path anymore if we're translating.
             return property(DynamicAnimation.TRANSLATION_X, translationX, endActions);
         }
 
@@ -640,6 +723,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** Animate the view's translationY value to the provided value. */
         public PhysicsPropertyAnimator translationY(float translationY, Runnable... endActions) {
+            mPathAnimator = null; // We aren't using the path anymore if we're translating.
             return property(DynamicAnimation.TRANSLATION_Y, translationY, endActions);
         }
 
@@ -659,6 +743,46 @@ public class PhysicsAnimationLayout extends FrameLayout {
             mPositionEndActions = endActions;
             translationX(translationX);
             return translationY(translationY);
+        }
+
+        /**
+         * Animates a 'target' point that moves along the given path, using the provided duration
+         * and interpolator to animate the target. The view itself is animated using physics-based
+         * animations, whose final positions are updated to the target position as it animates. This
+         * results in the view 'following' the target in a realistic way.
+         *
+         * This method will override earlier calls to {@link #translationX}, {@link #translationY},
+         * or {@link #position}, ultimately animating the view's position to the final point on the
+         * given path.
+         *
+         * Any provided end listeners will be called when the physics-based animations kicked off by
+         * the moving target have completed - not when the target animation completes.
+         */
+        public PhysicsPropertyAnimator followAnimatedTargetAlongPath(
+                Path path,
+                int targetAnimDuration,
+                TimeInterpolator targetAnimInterpolator,
+                Runnable... endActions) {
+            mPathAnimator = ObjectAnimator.ofFloat(
+                    this, mCurrentPointOnPathXProperty, mCurrentPointOnPathYProperty, path);
+            mPathAnimator.setDuration(targetAnimDuration);
+            mPathAnimator.setInterpolator(targetAnimInterpolator);
+
+            mPositionEndActions = endActions;
+
+            // Remove translation related values since we're going to ignore them and follow the
+            // path instead.
+            clearTranslationValues();
+            return this;
+        }
+
+        private void clearTranslationValues() {
+            mAnimatedProperties.remove(DynamicAnimation.TRANSLATION_X);
+            mAnimatedProperties.remove(DynamicAnimation.TRANSLATION_Y);
+            mInitialPropertyValues.remove(DynamicAnimation.TRANSLATION_X);
+            mInitialPropertyValues.remove(DynamicAnimation.TRANSLATION_Y);
+            mEndActionForProperty.remove(DynamicAnimation.TRANSLATION_X);
+            mEndActionForProperty.remove(DynamicAnimation.TRANSLATION_Y);
         }
 
         /** Animate the view's scaleX value to the provided value. */
@@ -742,7 +866,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
             if (after != null && after.length > 0) {
                 final DynamicAnimation.ViewProperty[] propertiesArray =
                         properties.toArray(new DynamicAnimation.ViewProperty[0]);
-                setEndActionForMultipleProperties(() -> {
+                mAssociatedController.setEndActionForMultipleProperties(() -> {
                     for (Runnable callback : after) {
                         callback.run();
                     }
@@ -774,8 +898,20 @@ public class PhysicsAnimationLayout extends FrameLayout {
                         new Runnable[]{waitForBothXAndY});
             }
 
+            if (mPathAnimator != null) {
+                startPathAnimation();
+            }
+
             // Actually start the animations.
             for (DynamicAnimation.ViewProperty property : properties) {
+                // Don't start translation animations if we're using a path animator, the update
+                // listeners added to that animator will take care of that.
+                if (mPathAnimator != null
+                        && (property.equals(DynamicAnimation.TRANSLATION_X)
+                            || property.equals(DynamicAnimation.TRANSLATION_Y))) {
+                    return;
+                }
+
                 if (mInitialPropertyValues.containsKey(property)) {
                     property.setValue(mView, mInitialPropertyValues.get(property));
                 }
@@ -797,7 +933,16 @@ public class PhysicsAnimationLayout extends FrameLayout {
 
         /** Returns the set of properties that will animate once {@link #start} is called. */
         protected Set<DynamicAnimation.ViewProperty> getAnimatedProperties() {
-            return mAnimatedProperties.keySet();
+            final HashSet<DynamicAnimation.ViewProperty> animatedProperties = new HashSet<>(
+                    mAnimatedProperties.keySet());
+
+            // If we're using a path animator, it'll kick off translation animations.
+            if (mPathAnimator != null) {
+                animatedProperties.add(DynamicAnimation.TRANSLATION_X);
+                animatedProperties.add(DynamicAnimation.TRANSLATION_Y);
+            }
+
+            return animatedProperties;
         }
 
         /**
@@ -812,7 +957,7 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 long startDelay,
                 float stiffness,
                 float dampingRatio,
-                Runnable[] afterCallbacks) {
+                Runnable... afterCallbacks) {
             if (view != null) {
                 final SpringAnimation animation =
                         (SpringAnimation) view.getTag(getTagIdForProperty(property));
@@ -855,6 +1000,92 @@ public class PhysicsAnimationLayout extends FrameLayout {
             }
         }
 
+        /**
+         * Updates the final position of a view's animation, without changing any of the animation's
+         * other settings. Calling this before an initial call to {@link #animateValueForChild} will
+         * work, but result in unknown values for stiffness, etc. and is not recommended.
+         */
+        private void updateValueForChild(
+                DynamicAnimation.ViewProperty property, View view, float position) {
+            if (view != null) {
+                final SpringAnimation animation =
+                        (SpringAnimation) view.getTag(getTagIdForProperty(property));
+                final SpringForce animationSpring = animation.getSpring();
+
+                if (animationSpring == null) {
+                    return;
+                }
+
+                animationSpring.setFinalPosition(position);
+                animation.start();
+            }
+        }
+
+        /**
+         * Configures the path animator to respect the settings passed into the animation builder
+         * and adds update listeners that update the translation physics animations. Then, starts
+         * the path animation.
+         */
+        protected void startPathAnimation() {
+            final SpringForce defaultSpringForceX = mController.getSpringForce(
+                    DynamicAnimation.TRANSLATION_X, mView);
+            final SpringForce defaultSpringForceY = mController.getSpringForce(
+                    DynamicAnimation.TRANSLATION_Y, mView);
+
+            if (mStartDelay > 0) {
+                mPathAnimator.setStartDelay(mStartDelay);
+            }
+
+            final Runnable updatePhysicsAnims = () -> {
+                updateValueForChild(
+                        DynamicAnimation.TRANSLATION_X, mView, mCurrentPointOnPath.x);
+                updateValueForChild(
+                        DynamicAnimation.TRANSLATION_Y, mView, mCurrentPointOnPath.y);
+            };
+
+            mPathAnimator.addUpdateListener(pathAnim -> updatePhysicsAnims.run());
+            mPathAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    animateValueForChild(
+                            DynamicAnimation.TRANSLATION_X,
+                            mView,
+                            mCurrentPointOnPath.x,
+                            mDefaultStartVelocity,
+                            0 /* startDelay */,
+                            mStiffness >= 0 ? mStiffness : defaultSpringForceX.getStiffness(),
+                            mDampingRatio >= 0
+                                    ? mDampingRatio
+                                    : defaultSpringForceX.getDampingRatio());
+
+                    animateValueForChild(
+                            DynamicAnimation.TRANSLATION_Y,
+                            mView,
+                            mCurrentPointOnPath.y,
+                            mDefaultStartVelocity,
+                            0 /* startDelay */,
+                            mStiffness >= 0 ? mStiffness : defaultSpringForceY.getStiffness(),
+                            mDampingRatio >= 0
+                                    ? mDampingRatio
+                                    : defaultSpringForceY.getDampingRatio());
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    updatePhysicsAnims.run();
+                }
+            });
+
+            // If there's a target animator saved for the view, make sure it's not running.
+            final ObjectAnimator targetAnimator = getTargetAnimatorFromView(mView);
+            if (targetAnimator != null) {
+                targetAnimator.cancel();
+            }
+
+            mView.setTag(R.id.target_animator_tag, mPathAnimator);
+            mPathAnimator.start();
+        }
+
         private void clearAnimator() {
             mInitialPropertyValues.clear();
             mAnimatedProperties.clear();
@@ -864,6 +1095,8 @@ public class PhysicsAnimationLayout extends FrameLayout {
             mStiffness = -1;
             mDampingRatio = -1;
             mEndActionsForProperty.clear();
+            mPathAnimator = null;
+            mPositionEndActions = null;
         }
 
         /**

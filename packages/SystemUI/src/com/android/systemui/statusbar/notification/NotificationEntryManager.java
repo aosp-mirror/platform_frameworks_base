@@ -54,11 +54,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * NotificationEntryManager is responsible for the adding, removing, and updating of notifications.
  * It also handles tasks such as their inflation and their interaction with other
  * Notification.*Manager objects.
  */
+@Singleton
 public class NotificationEntryManager implements
         Dumpable,
         NotificationContentInflater.InflationCallback,
@@ -118,6 +122,7 @@ public class NotificationEntryManager implements
         }
     }
 
+    @Inject
     public NotificationEntryManager(Context context) {
         mNotificationData = new NotificationData();
     }

@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ។"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"បណ្ណមិនត្រឹមត្រូវទេ។"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"បានសាក​ថ្មពេញ"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុងសាកថ្ម​ឥតខ្សែ"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម​ឥតខ្សែ"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
@@ -151,7 +151,84 @@
       <item quantity="other">ឥឡូវនេះស៊ីមត្រូវបានបិទ។ សូមបញ្ចូលកូដ PUK ដើម្បីបន្ត។ អ្នកនៅសល់ការព្យាយាម <xliff:g id="_NUMBER_1">%d</xliff:g> ដងទៀត​មុនពេល​ស៊ីម​មិនអាច​ប្រើបាន​ជា​អចិន្ត្រៃយ៍។ ទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​សម្រាប់ព័ត៌មានលម្អិត។</item>
       <item quantity="one">ឥឡូវនេះស៊ីមត្រូវបានបិទ។ សូមបញ្ចូលកូដ PUK ដើម្បីបន្ត។ អ្នកនៅសល់ការព្យាយាម <xliff:g id="_NUMBER_0">%d</xliff:g> ដងទៀតមុនពេលស៊ីមមិនអាចប្រើបានជាអចិន្ត្រៃយ៍។ ទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​សម្រាប់​ព័ត៌មាន​លម្អិត។</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"លំនាំដើម"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"ពពុះ"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"អាណាឡូក"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"ម៉ោង"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"ម៉ោង"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"ដប់ពីរ"</item>
+    <item msgid="7389464214252023751">"មួយ"</item>
+    <item msgid="8803180377002008046">"ពីរ"</item>
+    <item msgid="8614897059944644719">"បី"</item>
+    <item msgid="2293058674782619556">"បួន"</item>
+    <item msgid="4815402358455041664">"ប្រាំ"</item>
+    <item msgid="3325754778509665687">"ប្រាំមួយ"</item>
+    <item msgid="5805551341866280575">"ប្រាំពីរ"</item>
+    <item msgid="203334816668238610">"ប្រាំបី"</item>
+    <item msgid="4828052671464488923">"ប្រាំបួន"</item>
+    <item msgid="2233497913571137419">"ដប់"</item>
+    <item msgid="5621554266768657830">"ដប់មួយ"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"ម៉ោង"</item>
+    <item msgid="8837126587669001578">"មួយ"</item>
+    <item msgid="4294343372940455660">"ពីរ"</item>
+    <item msgid="7129166637707421536">"បី"</item>
+    <item msgid="7579404865008788673">"បួន"</item>
+    <item msgid="3873924689207380586">"ប្រាំ"</item>
+    <item msgid="4849565597850069377">"ប្រាំមួយ"</item>
+    <item msgid="4404219424523572364">"ប្រាំពីរ"</item>
+    <item msgid="8740481214764087329">"ប្រាំបី"</item>
+    <item msgid="1713216865806811237">"ប្រាំបួន"</item>
+    <item msgid="3508406095411245038">"ដប់"</item>
+    <item msgid="7161996337755311711">"ដប់មួយ"</item>
+    <item msgid="4044549963329624197">"ដប់ពីរ"</item>
+    <item msgid="333373157917379088">"ដប់បី"</item>
+    <item msgid="2631202907124819385">"ដប់បួន"</item>
+    <item msgid="6472396076858033453">"ដប់ប្រាំ"</item>
+    <item msgid="8656981856181581643">"ដប់ប្រាំមួយ"</item>
+    <item msgid="7289026608562030619">"ដប់ប្រាំពីរ"</item>
+    <item msgid="3881477602692646573">"ដប់​ប្រាំបី"</item>
+    <item msgid="3358129827772984226">"ដប់​ប្រាំបួន"</item>
+    <item msgid="3308575407402865807">"ម្ភៃ"</item>
+    <item msgid="5346560955382229629">"ម្ភៃ\nមួយ"</item>
+    <item msgid="226750304761473436">"ម្ភៃ\nពីរ"</item>
+    <item msgid="616811325336838734">"ម្ភៃ\nបី"</item>
+    <item msgid="616346116869053440">"ម្ភៃ\nបួន"</item>
+    <item msgid="4642996410384042830">"ម្ភៃ\nប្រាំ"</item>
+    <item msgid="7506092849993571465">"ម្ភៃ\nប្រាំមួយ"</item>
+    <item msgid="1915078191101042031">"ម្ភៃ\nប្រាំពីរ"</item>
+    <item msgid="4292378641900520252">"ម្ភៃ\nប្រាំបី"</item>
+    <item msgid="5339513901773103696">"ម្ភៃ\nប្រាំបួន"</item>
+    <item msgid="3574673250891657607">"សាមសិប"</item>
+    <item msgid="5796923836589110940">"សាមសិប\nមួយ"</item>
+    <item msgid="5859323597571702052">"សាមសិប\nពីរ"</item>
+    <item msgid="5133326723148876507">"សាមសិប\nបី"</item>
+    <item msgid="2693999494655663096">"សាមសិប\nបួន"</item>
+    <item msgid="3316754944962836197">"សាមសិប\nប្រាំ"</item>
+    <item msgid="816891008836796723">"សាមសិប\nប្រាំមួយ"</item>
+    <item msgid="9158890488666520078">"សាមសិប\nប្រាំពីរ"</item>
+    <item msgid="1894769703213894011">"សាមសិប\nប្រាំបី"</item>
+    <item msgid="5638820345598572399">"សាមសិប\nប្រាំបួន"</item>
+    <item msgid="8838304023017895439">"សែសិប"</item>
+    <item msgid="1834742948932559597">"សែសិប\nមួយ"</item>
+    <item msgid="6573707308847773944">"សែសិប\nពីរ"</item>
+    <item msgid="2450149950652678001">"សែសិប\nបី"</item>
+    <item msgid="2874667401318178036">"សែសិប\nបួន"</item>
+    <item msgid="3391101532763048862">"សែសិប\nប្រាំ"</item>
+    <item msgid="1671489330863254362">"សែសិប\nប្រាំមួយ"</item>
+    <item msgid="5916017359554531038">"សែសិប\nប្រាំពីរ"</item>
+    <item msgid="8205413177993059967">"សែសិប\nប្រាំបី"</item>
+    <item msgid="6607867415142171302">"សែសិប\nប្រាំបួន"</item>
+    <item msgid="8358850748472089162">"ហាសិប"</item>
+    <item msgid="3551313125255080234">"ហាសិប\nមួយ"</item>
+    <item msgid="1559678130725716542">"ហាសិប\nពីរ"</item>
+    <item msgid="431441994725492377">"ហាសិប\nបី"</item>
+    <item msgid="6345774640539623024">"ហាសិប\nបួន"</item>
+    <item msgid="8018192990793931120">"ហាសិប\nប្រាំ"</item>
+    <item msgid="6187650843754604534">"ហាសិប\nប្រាំមួយ"</item>
+    <item msgid="8727240174015993259">"ហាសិប\nប្រាំពីរ"</item>
+    <item msgid="848339003778952950">"ហាសិប\nប្រាំបី"</item>
+    <item msgid="5798985802835423618">"ហាសិប\nប្រាំបួន"</item>
+  </string-array>
 </resources>

@@ -44,6 +44,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
@@ -210,7 +211,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             BiometricUnlockController biometricUnlockController,
             DismissCallbackRegistry dismissCallbackRegistry,
             ViewGroup lockIconContainer, View notificationContainer,
-            KeyguardBypassController bypassController) {
+            KeyguardBypassController bypassController, FalsingManager falsingManager) {
         mStatusBar = statusBar;
         mContainer = container;
         mLockIconContainer = lockIconContainer;
@@ -220,7 +221,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mBiometricUnlockController = biometricUnlockController;
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
                 mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
-                mExpansionCallback, bypassController);
+                mExpansionCallback, falsingManager, bypassController);
         mNotificationPanelView = notificationPanelView;
         notificationPanelView.addExpansionListener(this);
         mBypassController = bypassController;

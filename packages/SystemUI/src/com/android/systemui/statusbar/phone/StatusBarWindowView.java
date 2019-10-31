@@ -62,7 +62,6 @@ import com.android.internal.widget.FloatingToolbar;
 import com.android.systemui.Dependency;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -157,7 +156,7 @@ public class StatusBarWindowView extends FrameLayout {
         setMotionEventSplittingEnabled(false);
         mTransparentSrcPaint.setColor(0);
         mTransparentSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
-        mFalsingManager = FalsingManagerFactory.getInstance(context);
+        mFalsingManager = Dependency.get(FalsingManager.class);  // TODO: inject into a controller.
         mGestureDetector = new GestureDetector(context, mGestureListener);
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         Dependency.get(TunerService.class).addTunable(mTunable,
@@ -291,7 +290,7 @@ public class StatusBarWindowView extends FrameLayout {
         ExpandHelper.Callback expandHelperCallback = stackScrollLayout.getExpandHelperCallback();
         DragDownHelper.DragDownCallback dragDownCallback = stackScrollLayout.getDragDownCallback();
         setDragDownHelper(new DragDownHelper(getContext(), this, expandHelperCallback,
-                dragDownCallback));
+                dragDownCallback, mFalsingManager));
     }
 
     @VisibleForTesting

@@ -25,6 +25,7 @@ import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 
+import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.BG_HANDLER;
 import static com.android.systemui.Dependency.MAIN_HANDLER;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
@@ -147,7 +148,6 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
-import com.android.systemui.classifier.FalsingManagerFactory;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -239,6 +239,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import dagger.Subcomponent;
 
@@ -383,6 +384,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Nullable
     @Inject
     protected KeyguardLiftController mKeyguardLiftController;
+    @Inject
+    @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
+    boolean mAllowNotificationLongPress;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -701,6 +705,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mRecents = getComponent(Recents.class);
 
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mFalsingManager = Dependency.get(FalsingManager.class);
 
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
@@ -776,7 +781,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         putComponent(DozeHost.class, mDozeServiceHost);
 
         mScreenPinningRequest = new ScreenPinningRequest(mContext);
-        mFalsingManager = FalsingManagerFactory.getInstance(mContext);
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
@@ -807,6 +811,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
+
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
         mZenController.addCallback(this);
         NotificationListContainer notifListContainer = (NotificationListContainer) mStackScroller;
@@ -927,8 +932,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         ScrimView scrimBehind = mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = mStatusBarWindow.findViewById(R.id.scrim_in_front);
+        ScrimView scrimForBubble = mStatusBarWindow.findViewById(R.id.scrim_for_bubble);
+
         mScrimController = SystemUIFactory.getInstance().createScrimController(
-                scrimBehind, scrimInFront, mLockscreenWallpaper,
+                scrimBehind, scrimInFront, scrimForBubble, mLockscreenWallpaper,
                 (state, alpha, color) -> mLightBarController.setScrimState(state, alpha, color),
                 scrimsVisible -> {
                     if (mStatusBarWindowController != null) {
@@ -1065,7 +1072,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final NotificationRowBinderImpl rowBinder =
                 new NotificationRowBinderImpl(
                         mContext,
-                        SystemUIFactory.getInstance().provideAllowNotificationLongPress(),
+                        mAllowNotificationLongPress,
                         mKeyguardBypassController,
                         mStatusBarStateController);
 
@@ -1243,7 +1250,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController,
                 mStatusBarWindow.findViewById(R.id.lock_icon_container), mStackScroller,
-                mKeyguardBypassController);
+                mKeyguardBypassController, mFalsingManager);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
@@ -2399,6 +2406,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             pw.println("  mGroupManager: null");
         }
 
+        if (mBubbleController != null) {
+            mBubbleController.dump(fd, pw, args);
+        }
+
         if (mLightBarController != null) {
             mLightBarController.dump(fd, pw, args);
         }
@@ -2415,7 +2426,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mKeyguardUpdateMonitor.dump(fd, pw, args);
         }
 
-        FalsingManagerFactory.getInstance(mContext).dump(pw);
+        Dependency.get(FalsingManager.class).dump(pw);
         FalsingLog.dump(pw);
 
         pw.println("SharedPreferences:");

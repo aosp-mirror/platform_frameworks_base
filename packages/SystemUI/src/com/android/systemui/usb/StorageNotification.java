@@ -628,6 +628,14 @@ public class StorageNotification extends SystemUI {
             final int requestKey = vol.getId().hashCode();
             return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
                     PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+        } else if (isAutomotive()) {
+            intent.setClassName("com.android.car.settings",
+                    "com.android.car.settings.storage.StorageUnmountReceiver");
+            intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+            final int requestKey = vol.getId().hashCode();
+            return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
+                    PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
         } else {
             intent.setClassName("com.android.settings",
                     "com.android.settings.deviceinfo.StorageUnmountReceiver");
@@ -747,6 +755,11 @@ public class StorageNotification extends SystemUI {
         final int requestKey = disk.getId().hashCode();
         return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private boolean isAutomotive() {
+        PackageManager packageManager = mContext.getPackageManager();
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     private boolean isTv() {

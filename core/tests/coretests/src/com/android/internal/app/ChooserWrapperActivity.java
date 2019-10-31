@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -82,6 +83,14 @@ public class ChooserWrapperActivity extends ChooserActivity {
             return sOverrides.createPackageManager.apply(super.getPackageManager());
         }
         return super.getPackageManager();
+    }
+
+    @Override
+    public Resources getResources() {
+        if (sOverrides.resources != null) {
+            return sOverrides.resources;
+        }
+        return super.getResources();
     }
 
     @Override
@@ -145,6 +154,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public Bitmap previewThumbnail;
         public MetricsLogger metricsLogger;
         public int alternateProfileSetting;
+        public Resources resources;
 
         public void reset() {
             onSafelyStartCallback = null;
@@ -157,6 +167,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
             resolverListController = mock(ResolverListController.class);
             metricsLogger = mock(MetricsLogger.class);
             alternateProfileSetting = 0;
+            resources = null;
         }
     }
 }

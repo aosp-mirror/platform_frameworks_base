@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ပင်နံပါတ် မှားနေသည်။"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ကတ် မမှန်ကန်ပါ။"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"အားအပြည့်သွင်းထားသည်"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ကြိုးမဲ့ အားသွင်းနေသည်"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ကြိုးမဲ့ အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အမြန်အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည်"</string>
@@ -141,8 +141,8 @@
       <item quantity="other">စက်ပစ္စည်းကို <xliff:g id="NUMBER_1">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ စကားဝှက်အား အတည်ပြုပါ။</item>
       <item quantity="one">စက်ပစ္စည်းကို <xliff:g id="NUMBER_0">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ စကားဝှက်အား အတည်ပြုပါ။</item>
     </plurals>
-    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"မသိ"</string>
-    <string name="kg_face_not_recognized" msgid="6382535088345875294">"မသိ"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"မသိပါ"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"မသိပါ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">ဆင်းမ်ကဒ် ပင်နံပါတ် ထည့်ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
       <item quantity="one">ဆင်းမ်ကဒ် ပင်နံပါတ် ထည့်ပါ။ သင့်စက်ကို လော့ခ်ဖွင့်ပေးရန်အတွက် ဝန်ဆောင်မှုပေးသူသို့ မဆက်သွယ်မီ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
@@ -151,7 +151,84 @@
       <item quantity="other">ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကဒ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
       <item quantity="one">ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကဒ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
     </plurals>
-    <string name="clock_title_default" msgid="6645600990069154049">"မူလ"</string>
-    <string name="clock_title_bubble" msgid="1286365278681892114">"ပူဖောင်းကွက်"</string>
-    <string name="clock_title_analog" msgid="4047401488577315053">"လက်တံနာရီ"</string>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"၎င်းသည်"</annotation>\n"^1\n^2 ဖြစ်သည်</item>
+      <item quantity="one">"<annotation name="color">"၎င်းသည်"</annotation>\n"^1\n^2 ဖြစ်သည်</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"ဆယ့်နှစ်"</item>
+    <item msgid="7389464214252023751">"တစ်"</item>
+    <item msgid="8803180377002008046">"နှစ်"</item>
+    <item msgid="8614897059944644719">"သုံး"</item>
+    <item msgid="2293058674782619556">"လေး"</item>
+    <item msgid="4815402358455041664">"ငါး"</item>
+    <item msgid="3325754778509665687">"ခြောက်"</item>
+    <item msgid="5805551341866280575">"ခုနစ်"</item>
+    <item msgid="203334816668238610">"ရှစ်"</item>
+    <item msgid="4828052671464488923">"ကိုး"</item>
+    <item msgid="2233497913571137419">"တစ်ဆယ်"</item>
+    <item msgid="5621554266768657830">"ဆယ့်တစ်"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"နာရီ"</item>
+    <item msgid="8837126587669001578">"တစ်"</item>
+    <item msgid="4294343372940455660">"နှစ်"</item>
+    <item msgid="7129166637707421536">"သုံး"</item>
+    <item msgid="7579404865008788673">"လေး"</item>
+    <item msgid="3873924689207380586">"ငါး"</item>
+    <item msgid="4849565597850069377">"ခြောက်"</item>
+    <item msgid="4404219424523572364">"ခုနစ်"</item>
+    <item msgid="8740481214764087329">"ရှစ်"</item>
+    <item msgid="1713216865806811237">"ကိုး"</item>
+    <item msgid="3508406095411245038">"တစ်ဆယ်"</item>
+    <item msgid="7161996337755311711">"တစ်ဆယ့်တစ်"</item>
+    <item msgid="4044549963329624197">"တစ်ဆယ့်နှစ်"</item>
+    <item msgid="333373157917379088">"တစ်ဆယ့်သုံး"</item>
+    <item msgid="2631202907124819385">"တစ်ဆယ့်လေး"</item>
+    <item msgid="6472396076858033453">"တစ်ဆယ့်ငါး"</item>
+    <item msgid="8656981856181581643">"တစ်ဆယ့်ခြောက်"</item>
+    <item msgid="7289026608562030619">"တစ်ဆယ့်ခုနစ်"</item>
+    <item msgid="3881477602692646573">"တစ်ဆယ့်ရှစ်"</item>
+    <item msgid="3358129827772984226">"တစ်ဆယ့်ကိုး"</item>
+    <item msgid="3308575407402865807">"နှစ်ဆယ်"</item>
+    <item msgid="5346560955382229629">"နှစ်ဆယ့်\nတစ်"</item>
+    <item msgid="226750304761473436">"နှစ်ဆယ့်\nနှစ်"</item>
+    <item msgid="616811325336838734">"နှစ်ဆယ့်\nသုံး"</item>
+    <item msgid="616346116869053440">"နှစ်ဆယ့်\nလေး"</item>
+    <item msgid="4642996410384042830">"နှစ်ဆယ့်\nငါး"</item>
+    <item msgid="7506092849993571465">"နှစ်ဆယ့်\nခြောက်"</item>
+    <item msgid="1915078191101042031">"နှစ်ဆယ့်\nခုနစ်"</item>
+    <item msgid="4292378641900520252">"နှစ်ဆယ့်\nရှစ်"</item>
+    <item msgid="5339513901773103696">"နှစ်ဆယ့်\nကိုး"</item>
+    <item msgid="3574673250891657607">"သုံးဆယ်"</item>
+    <item msgid="5796923836589110940">"သုံးဆယ့်\nတစ်"</item>
+    <item msgid="5859323597571702052">"သုံးဆယ့်\nနှစ်"</item>
+    <item msgid="5133326723148876507">"သုံးဆယ့်\nသုံး"</item>
+    <item msgid="2693999494655663096">"သုံးဆယ့်\nလေး"</item>
+    <item msgid="3316754944962836197">"သုံးဆယ့်\nငါး"</item>
+    <item msgid="816891008836796723">"သုံးဆယ့်\nခြောက်"</item>
+    <item msgid="9158890488666520078">"သုံးဆယ့်\nခုနစ်"</item>
+    <item msgid="1894769703213894011">"သုံးဆယ့်\nရှစ်"</item>
+    <item msgid="5638820345598572399">"သုံးဆယ့်\nကိုး"</item>
+    <item msgid="8838304023017895439">"လေးဆယ်"</item>
+    <item msgid="1834742948932559597">"လေးဆယ့်\nတစ်"</item>
+    <item msgid="6573707308847773944">"လေးဆယ့်\nနှစ်"</item>
+    <item msgid="2450149950652678001">"လေးဆယ့်\nသုံး"</item>
+    <item msgid="2874667401318178036">"လေးဆယ့်\nလေး"</item>
+    <item msgid="3391101532763048862">"လေးဆယ့်\nငါး"</item>
+    <item msgid="1671489330863254362">"လေးဆယ့်\nခြောက်"</item>
+    <item msgid="5916017359554531038">"လေးဆယ့်\nခုနစ်"</item>
+    <item msgid="8205413177993059967">"လေးဆယ့်\nရှစ်"</item>
+    <item msgid="6607867415142171302">"လေးဆယ့်\nကိုး"</item>
+    <item msgid="8358850748472089162">"ငါးဆယ်"</item>
+    <item msgid="3551313125255080234">"ငါးဆယ့်\nတစ်"</item>
+    <item msgid="1559678130725716542">"ငါးဆယ့်\nနှစ်"</item>
+    <item msgid="431441994725492377">"ငါးဆယ့်\nသုံး"</item>
+    <item msgid="6345774640539623024">"ငါးဆယ့်\nလေး"</item>
+    <item msgid="8018192990793931120">"ငါးဆယ့်\nငါး"</item>
+    <item msgid="6187650843754604534">"ငါးဆယ့်\nခြောက်"</item>
+    <item msgid="8727240174015993259">"ငါးဆယ့်\nခုနစ်"</item>
+    <item msgid="848339003778952950">"ငါးဆယ့်\nရှစ်"</item>
+    <item msgid="5798985802835423618">"ငါးဆယ့်\nကိုး"</item>
+  </string-array>
 </resources>

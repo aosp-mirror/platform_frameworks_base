@@ -17,6 +17,7 @@
 package com.android.server.accounts;
 
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 
@@ -83,7 +84,7 @@ final class AccountManagerServiceShellCommand extends ShellCommand {
                 return null;
             }
         }
-        return UserHandle.USER_SYSTEM;
+        return ActivityManager.getCurrentUser();
     }
 
     @Override
@@ -92,9 +93,11 @@ final class AccountManagerServiceShellCommand extends ShellCommand {
         pw.println("Account manager service commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  set-bind-instant-service-allowed [--user <USER_ID>] true|false ");
+        pw.println("  set-bind-instant-service-allowed "
+                + "[--user <USER_ID> (current user if not specified)] true|false ");
         pw.println("    Set whether binding to services provided by instant apps is allowed.");
-        pw.println("  get-bind-instant-service-allowed [--user <USER_ID>]");
+        pw.println("  get-bind-instant-service-allowed "
+                + "[--user <USER_ID> (current user if not specified)]");
         pw.println("    Get whether binding to services provided by instant apps is allowed.");
     }
 }

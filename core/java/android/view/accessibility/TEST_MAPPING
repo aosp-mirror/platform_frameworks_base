@@ -30,9 +30,6 @@
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-filter": "android.view.textclassifier.TextClassifierTest#testSuggetsConversationActions_deduplicate"
         }
       ]
     }
