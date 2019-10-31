@@ -586,7 +586,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private long mLastTransactionSequence = Long.MIN_VALUE;
     private int mNumInterestingWindows;
     private int mNumDrawnWindows;
-    boolean inPendingTransaction;
     boolean allDrawn;
     private boolean mLastAllDrawn;
 
@@ -875,14 +874,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(prefix); pw.print("mNumInterestingWindows=");
             pw.print(mNumInterestingWindows);
             pw.print(" mNumDrawnWindows="); pw.print(mNumDrawnWindows);
-            pw.print(" inPendingTransaction="); pw.print(inPendingTransaction);
             pw.print(" allDrawn="); pw.print(allDrawn);
             pw.print(" lastAllDrawn="); pw.print(mLastAllDrawn);
             pw.println(")");
-        }
-        if (inPendingTransaction) {
-            pw.print(prefix); pw.print("inPendingTransaction=");
-            pw.println(inPendingTransaction);
         }
         if (mStartingData != null || removed || firstWindowDrawn || mIsExiting) {
             pw.print(prefix); pw.print("startingData="); pw.print(mStartingData);
@@ -4035,7 +4029,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If we are preparing an app transition, then delay changing
         // the visibility of this token until we execute that transition.
         if (okToAnimate() && appTransition.isTransitionSet()) {
-            inPendingTransaction = true;
             if (visible) {
                 displayContent.mOpeningApps.add(this);
                 mEnteringAnimation = true;
@@ -4069,7 +4062,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             boolean visible, int transit, boolean performLayout, boolean isVoiceInteraction) {
 
         boolean delayed = false;
-        inPendingTransaction = false;
         // Reset the state of mHiddenSetFromTransferredStartingWindow since visibility is actually
         // been set by the app now.
         mHiddenSetFromTransferredStartingWindow = false;
