@@ -134,16 +134,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /**
  * A status bar tailored for the automotive use case.
  */
-@Singleton
 public class CarStatusBar extends StatusBar implements CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
     // used to calculate how fast to open or close the window
@@ -236,7 +233,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 }
             };
 
-    @Inject
     public CarStatusBar(
             Context context,
             FeatureFlags featureFlags,
