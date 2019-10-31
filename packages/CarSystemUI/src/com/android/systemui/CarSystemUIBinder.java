@@ -42,6 +42,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NavigationBarController;
@@ -275,6 +276,7 @@ public abstract class CarSystemUIBinder {
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
+            PluginManager pluginManager,
             CarNavigationBarController carNavigationBarController) {
         return new CarStatusBar(
                 context,
@@ -341,6 +343,7 @@ public abstract class CarSystemUIBinder {
                 powerManager,
                 dozeScrimController,
                 commandQueue,
+                pluginManager,
                 carNavigationBarController);
     }
 }

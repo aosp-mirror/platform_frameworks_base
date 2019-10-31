@@ -24,23 +24,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 
 import com.android.systemui.dagger.ContextComponentHelper;
-import com.android.systemui.plugins.OverlayPlugin;
-import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
@@ -224,65 +215,6 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
         }
         Dependency.get(InitController.class).executePostInitTasks();
         log.traceEnd();
-        final Handler mainHandler = new Handler(Looper.getMainLooper());
-        Dependency.get(PluginManager.class).addPluginListener(
-                new PluginListener<OverlayPlugin>() {
-                    private ArraySet<OverlayPlugin> mOverlays = new ArraySet<>();
-
-                    @Override
-                    public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
-                        mainHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                StatusBar statusBar = getComponent(StatusBar.class);
-                                if (statusBar != null) {
-                                    plugin.setup(statusBar.getStatusBarWindow(),
-                                            statusBar.getNavigationBarView(), new Callback(plugin),
-                                            Dependency.get(DozeParameters.class));
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onPluginDisconnected(OverlayPlugin plugin) {
-                        mainHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mOverlays.remove(plugin);
-                                Dependency.get(StatusBarWindowController.class).setForcePluginOpen(
-                                        mOverlays.size() != 0);
-                            }
-                        });
-                    }
-
-                    class Callback implements OverlayPlugin.Callback {
-                        private final OverlayPlugin mPlugin;
-
-                        Callback(OverlayPlugin plugin) {
-                            mPlugin = plugin;
-                        }
-
-                        @Override
-                        public void onHoldStatusBarOpenChange() {
-                            if (mPlugin.holdStatusBarOpen()) {
-                                mOverlays.add(mPlugin);
-                            } else {
-                                mOverlays.remove(mPlugin);
-                            }
-                            mainHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Dependency.get(StatusBarWindowController.class)
-                                            .setStateListener(b -> mOverlays.forEach(
-                                                    o -> o.setCollapseDesired(b)));
-                                    Dependency.get(StatusBarWindowController.class)
-                                            .setForcePluginOpen(mOverlays.size() != 0);
-                                }
-                            });
-                        }
-                    }
-                }, OverlayPlugin.class, true /* Allow multiple plugins */);
 
         mServicesStarted = true;
     }
