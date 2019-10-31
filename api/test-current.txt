@@ -793,8 +793,8 @@ package android.content.rollback {
   public final class RollbackManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void reloadPersistedData();
     field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.rollback.extra.STATUS_MESSAGE";
@@ -1078,7 +1078,7 @@ package android.location {
     method @NonNull public android.location.LocationRequest setExpireIn(long);
     method @NonNull public android.location.LocationRequest setFastestInterval(long);
     method @NonNull public android.location.LocationRequest setInterval(long);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @NonNull public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
     method @NonNull public android.location.LocationRequest setNumUpdates(int);
     method @NonNull public android.location.LocationRequest setProvider(@NonNull String);
     method @NonNull public android.location.LocationRequest setQuality(int);
@@ -1852,8 +1852,8 @@ package android.os {
     method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void cancelAuthorization(android.os.IncidentManager.AuthListener);
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void deleteIncidentReports(android.net.Uri);
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public void denyReport(android.net.Uri);
-    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) @Nullable public android.os.IncidentManager.IncidentReport getIncidentReport(android.net.Uri);
-    method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) @NonNull public java.util.List<android.net.Uri> getIncidentReportList(String);
+    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public android.os.IncidentManager.IncidentReport getIncidentReport(android.net.Uri);
+    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public java.util.List<android.net.Uri> getIncidentReportList(String);
     method @RequiresPermission(android.Manifest.permission.APPROVE_INCIDENT_REPORTS) public java.util.List<android.os.IncidentManager.PendingReport> getPendingReports();
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void reportIncident(android.os.IncidentReportArgs);
     method @RequiresPermission("android.permission.REQUEST_INCIDENT_REPORT_APPROVAL") public void requestAuthorization(int, String, int, android.os.IncidentManager.AuthListener);
@@ -2398,7 +2398,7 @@ package android.security {
 package android.security.keystore {
 
   public abstract class AttestationUtils {
-    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") @NonNull public static java.security.cert.X509Certificate[] attestDeviceIds(android.content.Context, @NonNull int[], @NonNull byte[]) throws android.security.keystore.DeviceIdAttestationException;
+    method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public static java.security.cert.X509Certificate[] attestDeviceIds(android.content.Context, @NonNull int[], @NonNull byte[]) throws android.security.keystore.DeviceIdAttestationException;
     field public static final int ID_TYPE_IMEI = 2; // 0x2
     field public static final int ID_TYPE_MEID = 3; // 0x3
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
