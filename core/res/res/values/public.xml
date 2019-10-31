@@ -3002,6 +3002,8 @@
       <public name="forceQueryable" />
       <!-- @hide @SystemApi -->
       <public name="resourcesMap" />
+      <public name="animatedImageDrawable"/>
+      <public name="htmlDescription"/>
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">

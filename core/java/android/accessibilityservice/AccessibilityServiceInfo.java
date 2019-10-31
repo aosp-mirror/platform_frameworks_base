@@ -21,6 +21,8 @@ import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
 import android.accessibilityservice.AccessibilityButtonController.AccessibilityButtonCallback;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -522,6 +524,21 @@ public class AccessibilityServiceInfo implements Parcelable {
     private static final long REQUEST_ACCESSIBILITY_BUTTON_CHANGE = 136293963L;
 
     /**
+     * Resource id of the animated image of the accessibility service.
+     */
+    private int mAnimatedImageRes;
+
+    /**
+     * Resource id of the html description of the accessibility service.
+     */
+    private int mHtmlDescriptionRes;
+
+    /**
+     * Non localized html description of the accessibility service.
+     */
+    private String mNonLocalizedHtmlDescription;
+
+    /**
      * Creates a new instance.
      */
     public AccessibilityServiceInfo() {
@@ -636,6 +653,20 @@ public class AccessibilityServiceInfo implements Parcelable {
                     mNonLocalizedSummary = nonLocalizedSummary.toString().trim();
                 }
             }
+            peekedValue = asAttributes.peekValue(
+                    com.android.internal.R.styleable.AccessibilityService_animatedImageDrawable);
+            if (peekedValue != null) {
+                mAnimatedImageRes = peekedValue.resourceId;
+            }
+            peekedValue = asAttributes.peekValue(
+                    com.android.internal.R.styleable.AccessibilityService_htmlDescription);
+            if (peekedValue != null) {
+                mHtmlDescriptionRes = peekedValue.resourceId;
+                final CharSequence nonLocalizedHtmlDescription = peekedValue.coerceToString();
+                if (nonLocalizedHtmlDescription != null) {
+                    mNonLocalizedHtmlDescription = nonLocalizedHtmlDescription.toString().trim();
+                }
+            }
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException( "Unable to create context for: "
@@ -735,6 +766,18 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public String getSettingsActivityName() {
         return mSettingsActivityName;
+    }
+
+    /**
+     * The animated image resource id.
+     * <p>
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return The animated image resource id.
+     */
+    public int getAnimatedImageRes() {
+        return mAnimatedImageRes;
     }
 
     /**
@@ -844,6 +887,29 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
+     * The localized html description of the accessibility service.
+     * <p>
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return The localized html description.
+     */
+    @Nullable
+    public String loadHtmlDescription(@NonNull PackageManager packageManager) {
+        if (mHtmlDescriptionRes == 0) {
+            return mNonLocalizedHtmlDescription;
+        }
+
+        final ServiceInfo serviceInfo = mResolveInfo.serviceInfo;
+        final CharSequence htmlDescription = packageManager.getText(serviceInfo.packageName,
+                mHtmlDescriptionRes, serviceInfo.applicationInfo);
+        if (htmlDescription != null) {
+            return htmlDescription.toString().trim();
+        }
+        return null;
+    }
+
+    /**
      * Set the recommended time that non-interactive controls need to remain on the screen to
      * support the user.
      * <p>
@@ -926,7 +992,10 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(mSummaryResId);
         parcel.writeString(mNonLocalizedSummary);
         parcel.writeInt(mDescriptionResId);
+        parcel.writeInt(mAnimatedImageRes);
+        parcel.writeInt(mHtmlDescriptionRes);
         parcel.writeString(mNonLocalizedDescription);
+        parcel.writeString(mNonLocalizedHtmlDescription);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -945,7 +1014,10 @@ public class AccessibilityServiceInfo implements Parcelable {
         mSummaryResId = parcel.readInt();
         mNonLocalizedSummary = parcel.readString();
         mDescriptionResId = parcel.readInt();
+        mAnimatedImageRes = parcel.readInt();
+        mHtmlDescriptionRes = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
+        mNonLocalizedHtmlDescription = parcel.readString();
     }
 
     @Override
