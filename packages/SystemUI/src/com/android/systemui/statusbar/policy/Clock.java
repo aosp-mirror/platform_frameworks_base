@@ -45,7 +45,6 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
@@ -81,6 +80,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private static final String VISIBILITY = "visibility";
 
     private final CurrentUserTracker mCurrentUserTracker;
+    private final CommandQueue mCommandQueue;
     private int mCurrentUserId;
 
     private boolean mClockVisibleByPolicy = true;
@@ -116,18 +116,19 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     public Clock(Context context, AttributeSet attrs) {
-        this(context, attrs, null);
+        this(context, attrs, null, Dependency.get(CommandQueue.class));
     }
 
     @Inject
     public Clock(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            BroadcastDispatcher broadcastDispatcher) {
-        this(context, attrs, 0, broadcastDispatcher);
+            BroadcastDispatcher broadcastDispatcher, CommandQueue commandQueue) {
+        this(context, attrs, 0, broadcastDispatcher, commandQueue);
     }
 
     public Clock(Context context, AttributeSet attrs, int defStyle,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher, CommandQueue commandQueue) {
         super(context, attrs, defStyle);
+        mCommandQueue = commandQueue;
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
                 R.styleable.Clock,
@@ -200,7 +201,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                     null, Dependency.get(Dependency.TIME_TICK_HANDLER));
             Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS,
                     StatusBarIconController.ICON_BLACKLIST);
-            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallback(this);
+            mCommandQueue.addCallback(this);
             if (mShowDark) {
                 Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
             }
@@ -227,8 +228,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             getContext().unregisterReceiver(mIntentReceiver);
             mAttached = false;
             Dependency.get(TunerService.class).removeTunable(this);
-            SysUiServiceProvider.getComponent(getContext(), CommandQueue.class)
-                    .removeCallback(this);
+            mCommandQueue.removeCallback(this);
             if (mShowDark) {
                 Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(this);
             }

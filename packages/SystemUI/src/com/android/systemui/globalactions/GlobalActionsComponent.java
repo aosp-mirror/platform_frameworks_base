@@ -20,7 +20,6 @@ import android.os.ServiceManager;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUI;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
@@ -29,14 +28,24 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ * Manages power menu plugins and communicates power menu actions to the StatusBar.
+ */
+@Singleton
 public class GlobalActionsComponent extends SystemUI implements Callbacks, GlobalActionsManager {
 
+    private final CommandQueue mCommandQueue;
     private GlobalActions mPlugin;
     private Extension<GlobalActions> mExtension;
     private IStatusBarService mBarService;
 
-    public GlobalActionsComponent(Context context) {
+    @Inject
+    public GlobalActionsComponent(Context context, CommandQueue commandQueue) {
         super(context);
+        mCommandQueue = commandQueue;
     }
 
     @Override
@@ -45,11 +54,11 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mExtension = Dependency.get(ExtensionController.class).newExtension(GlobalActions.class)
                 .withPlugin(GlobalActions.class)
-                .withDefault(() -> new GlobalActionsImpl(mContext))
+                .withDefault(() -> new GlobalActionsImpl(mContext, mCommandQueue))
                 .withCallback(this::onExtensionCallback)
                 .build();
         mPlugin = mExtension.get();
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
+        mCommandQueue.addCallback(this);
     }
 
     private void onExtensionCallback(GlobalActions newPlugin) {

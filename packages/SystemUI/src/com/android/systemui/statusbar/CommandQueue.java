@@ -56,11 +56,13 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
-import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * This class takes the functions from IStatusBar that come in on
@@ -69,6 +71,7 @@ import java.util.ArrayList;
  * coalescing these calls so they don't stack up.  For the calls
  * are coalesced, note that they are all idempotent.
  */
+@Singleton
 public class CommandQueue extends IStatusBar.Stub implements CallbackController<Callbacks>,
         DisplayManager.DisplayListener {
     private static final int INDEX_MASK = 0xffff;
@@ -305,6 +308,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @VisibleForTesting
+    @Inject
     public CommandQueue(Context context) {
         context.getSystemService(DisplayManager.class).registerDisplayListener(this, mHandler);
         // We always have default display.
@@ -1184,19 +1188,6 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     break;
                 }
             }
-        }
-    }
-
-    // Need this class since CommandQueue already extends IStatusBar.Stub, so CommandQueueStart
-    // is needed so it can extend SystemUI.
-    public static class CommandQueueStart extends SystemUI {
-        public CommandQueueStart(Context context) {
-            super(context);
-        }
-
-        @Override
-        public void start() {
-            putComponent(CommandQueue.class, new CommandQueue(mContext));
         }
     }
 }

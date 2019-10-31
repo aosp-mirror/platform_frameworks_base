@@ -23,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.view.View;
 
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 
@@ -53,25 +52,25 @@ public class Utils {
             View.OnAttachStateChangeListener {
         private final int mMask1;
         private final int mMask2;
+        private final CommandQueue mCommandQueue;
         private View mView;
         private boolean mDisabled;
 
-        public DisableStateTracker(int disableMask, int disable2Mask) {
+        public DisableStateTracker(int disableMask, int disable2Mask, CommandQueue commandQueue) {
             mMask1 = disableMask;
             mMask2 = disable2Mask;
+            mCommandQueue = commandQueue;
         }
 
         @Override
         public void onViewAttachedToWindow(View v) {
             mView = v;
-            SysUiServiceProvider.getComponent(v.getContext(), CommandQueue.class)
-                    .addCallback(this);
+            mCommandQueue.addCallback(this);
         }
 
         @Override
         public void onViewDetachedFromWindow(View v) {
-            SysUiServiceProvider.getComponent(mView.getContext(), CommandQueue.class)
-                    .removeCallback(this);
+            mCommandQueue.removeCallback(this);
             mView = null;
         }
 

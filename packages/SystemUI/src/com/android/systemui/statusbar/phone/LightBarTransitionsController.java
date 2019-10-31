@@ -27,7 +27,6 @@ import android.util.TimeUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -49,6 +48,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     private final DarkIntensityApplier mApplier;
     private final KeyguardStateController mKeyguardStateController;
     private final StatusBarStateController mStatusBarStateController;
+    private final CommandQueue mCommandQueue;
 
     private boolean mTransitionDeferring;
     private long mTransitionDeferringStartTime;
@@ -70,13 +70,14 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
 
     private final Context mContext;
 
-    public LightBarTransitionsController(Context context, DarkIntensityApplier applier) {
+    public LightBarTransitionsController(Context context, DarkIntensityApplier applier,
+            CommandQueue commandQueue) {
         mApplier = applier;
         mHandler = new Handler();
         mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
-        SysUiServiceProvider.getComponent(context, CommandQueue.class)
-                .addCallback(this);
+        mCommandQueue = commandQueue;
+        mCommandQueue.addCallback(this);
         mStatusBarStateController.addCallback(this);
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mContext = context;
@@ -84,8 +85,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     }
 
     public void destroy(Context context) {
-        SysUiServiceProvider.getComponent(context, CommandQueue.class)
-                .removeCallback(this);
+        mCommandQueue.removeCallback(this);
         mStatusBarStateController.removeCallback(this);
     }
 

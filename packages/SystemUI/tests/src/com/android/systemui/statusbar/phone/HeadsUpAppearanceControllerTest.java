@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -63,6 +64,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     private KeyguardBypassController mBypassController;
     private NotificationWakeUpCoordinator mWakeUpCoordinator;
     private KeyguardStateController mKeyguardStateController;
+    private CommandQueue mCommandQueue;
 
     @Before
     public void setUp() throws Exception {
@@ -78,6 +80,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mBypassController = mock(KeyguardBypassController.class);
         mWakeUpCoordinator = mock(NotificationWakeUpCoordinator.class);
         mKeyguardStateController = mock(KeyguardStateController.class);
+        mCommandQueue = mock(CommandQueue.class);
         mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                 mock(NotificationIconAreaController.class),
                 mHeadsUpManager,
@@ -85,6 +88,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mBypassController,
                 mWakeUpCoordinator,
                 mKeyguardStateController,
+                mCommandQueue,
                 mHeadsUpStatusBarView,
                 mStackScroller,
                 mPanelView,
@@ -163,6 +167,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mBypassController,
                 mWakeUpCoordinator,
                 mKeyguardStateController,
+                mCommandQueue,
                 mHeadsUpStatusBarView,
                 mStackScroller,
                 mPanelView,

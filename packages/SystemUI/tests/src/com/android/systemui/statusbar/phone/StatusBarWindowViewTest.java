@@ -31,6 +31,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
@@ -96,7 +97,8 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mStatusBarStateController,
                 mDozeLog,
-                mDozeParameters)
+                mDozeParameters,
+                new CommandQueue(mContext))
                 .setShadeController(mShadeController)
                 .setStatusBarWindowView(mView)
                 .build();

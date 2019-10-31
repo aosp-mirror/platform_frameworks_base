@@ -54,11 +54,10 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
         mDependency.injectMockDependency(StatusBarStateController.class);
         mDependency.injectMockDependency(KeyguardStateController.class);
 
-        mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         NavigationBarView navBar = spy(new NavigationBarView(mContext, null));
         when(navBar.getCurrentView()).thenReturn(navBar);
         when(navBar.findViewById(anyInt())).thenReturn(navBar);
-        mTransitions = new NavigationBarTransitions(navBar);
+        mTransitions = new NavigationBarTransitions(navBar, mock(CommandQueue.class));
     }
 
     @Test

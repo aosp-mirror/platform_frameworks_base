@@ -86,7 +86,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mCommandQueue = new CommandQueue(mContext);
-        mContext.putComponent(CommandQueue.class, mCommandQueue);
         mDependency.injectTestDependency(StatusBarStateController.class,
                 mock(SysuiStatusBarStateController.class));
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
@@ -115,7 +114,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(DozeScrimController.class), mock(ScrimController.class),
                 mock(ActivityLaunchAnimator.class), mock(DynamicPrivacyController.class),
                 mock(NotificationAlertingManager.class),
-                mock(NotificationRowBinderImpl.class), mock(KeyguardStateController.class));
+                mock(NotificationRowBinderImpl.class), mock(KeyguardStateController.class),
+                mCommandQueue);
     }
 
     @Test

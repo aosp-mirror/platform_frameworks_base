@@ -16,7 +16,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.content.Intent.ACTION_DEVICE_LOCKED_CHANGED;
 
-import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION;
 
 import android.app.ActivityManager;
@@ -80,7 +79,8 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
-            ActivityStarter activityStarter, ShadeController shadeController) {
+            ActivityStarter activityStarter, ShadeController shadeController,
+            CommandQueue commandQueue) {
         mContext = context;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
                 new IntentFilter(ACTION_DEVICE_LOCKED_CHANGED), null, null);
@@ -91,7 +91,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         mActivityStarter = activityStarter;
         mStatusBarStateController.addCallback(this);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
-        mCommandQueue = getComponent(context, CommandQueue.class);
+        mCommandQueue = commandQueue;
         mCommandQueue.addCallback(this);
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mGroupManager = groupManager;

@@ -165,7 +165,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private Recents mRecents;
     private Divider mDivider;
     private WindowManager mWindowManager;
-    private CommandQueue mCommandQueue;
+    private final CommandQueue mCommandQueue;
     private long mLastLockToAppLongPress;
 
     private Locale mLocale;
@@ -265,7 +265,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             NavigationModeController navigationModeController,
             StatusBarStateController statusBarStateController,
             SysUiState sysUiFlagsContainer,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            CommandQueue commandQueue) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mStatusBarStateController = statusBarStateController;
@@ -277,6 +278,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mNavigationModeController = navigationModeController;
         mNavBarMode = navigationModeController.addListener(this);
         mBroadcastDispatcher = broadcastDispatcher;
+        mCommandQueue = commandQueue;
     }
 
     // ----- Fragment Lifecycle Callbacks -----
@@ -284,7 +286,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCommandQueue = SysUiServiceProvider.getComponent(getContext(), CommandQueue.class);
         mCommandQueue.observe(getLifecycle(), this);
         mStatusBar = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
         mRecents = SysUiServiceProvider.getComponent(getContext(), Recents.class);

@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,10 +50,10 @@ public class LightBarTransitionsControllerTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectMockDependency(StatusBarStateController.class);
-        mLightBarTransitionsController = new LightBarTransitionsController(mContext, mApplier);
+        mLightBarTransitionsController = new LightBarTransitionsController(mContext, mApplier,
+                new CommandQueue(mContext));
     }
 
     @Test

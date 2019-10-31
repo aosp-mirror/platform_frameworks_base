@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
-import static com.android.systemui.SysUiServiceProvider.getComponent;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -95,7 +94,7 @@ public class PhoneStatusBarView extends PanelBar {
         super(context, attrs);
 
         mBarTransitions = new PhoneStatusBarTransitions(this);
-        mCommandQueue = getComponent(context, CommandQueue.class);
+        mCommandQueue = Dependency.get(CommandQueue.class);
     }
 
     public BarTransitions getBarTransitions() {

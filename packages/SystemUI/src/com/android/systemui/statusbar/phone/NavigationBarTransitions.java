@@ -34,6 +34,7 @@ import android.view.View;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,12 +79,13 @@ public final class NavigationBarTransitions extends BarTransitions implements
         }
     };
 
-    public NavigationBarTransitions(NavigationBarView view) {
+    public NavigationBarTransitions(NavigationBarView view, CommandQueue commandQueue) {
         super(view, R.drawable.nav_background);
         mView = view;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mLightTransitionsController = new LightBarTransitionsController(view.getContext(), this);
+        mLightTransitionsController = new LightBarTransitionsController(
+                view.getContext(), this, commandQueue);
         mAllowAutoDimWallpaperNotVisible = view.getContext().getResources()
                 .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
         mDarkIntensityListeners = new ArrayList();

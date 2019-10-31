@@ -88,7 +88,6 @@ public class AuthControllerTest extends SysuiTestCase {
         TestableContext context = spy(mContext);
 
         mContext.putComponent(StatusBar.class, mock(StatusBar.class));
-        mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
 
         when(context.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE))
@@ -102,7 +101,8 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
         when(mDialog2.isAllowDeviceCredentials()).thenReturn(false);
 
-        mAuthController = new TestableAuthController(context, new MockInjector());
+        mAuthController = new TestableAuthController(
+                context, mock(CommandQueue.class), new MockInjector());
         mAuthController.mComponents = mContext.getComponents();
 
         mAuthController.start();
@@ -435,8 +435,8 @@ public class AuthControllerTest extends SysuiTestCase {
         private int mBuildCount = 0;
         private Bundle mLastBiometricPromptBundle;
 
-        TestableAuthController(Context context, Injector injector) {
-            super(context, injector);
+        TestableAuthController(Context context, CommandQueue commandQueue, Injector injector) {
+            super(context, commandQueue, injector);
         }
 
         @Override
