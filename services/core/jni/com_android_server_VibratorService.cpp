@@ -17,6 +17,9 @@
 #define LOG_TAG "VibratorService"
 
 #include <android/hardware/vibrator/1.4/IVibrator.h>
+#include <android/hardware/vibrator/BnVibratorCallback.h>
+#include <android/hardware/vibrator/IVibrator.h>
+#include <binder/IServiceManager.h>
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
@@ -41,10 +44,146 @@ namespace V1_1 = android::hardware::vibrator::V1_1;
 namespace V1_2 = android::hardware::vibrator::V1_2;
 namespace V1_3 = android::hardware::vibrator::V1_3;
 namespace V1_4 = android::hardware::vibrator::V1_4;
+namespace aidl = android::hardware::vibrator;
 
 namespace android {
 
 static jmethodID sMethodIdOnComplete;
+
+// TODO(b/141828236): remove HIDL 1.4 and re-write all of this code to remove
+// shim
+class VibratorShim : public V1_4::IVibrator {
+  public:
+    VibratorShim(const sp<aidl::IVibrator>& vib) : mVib(vib) {}
+
+    Return<V1_0::Status> on(uint32_t timeoutMs) override {
+        return on_1_4(timeoutMs, nullptr);
+    }
+
+    Return<V1_0::Status> off() override {
+        return toHidlStatus(mVib->off());
+    }
+
+    Return<bool> supportsAmplitudeControl() override {
+        int32_t cap = 0;
+        if (!mVib->getCapabilities(&cap).isOk()) return false;
+        return (cap & aidl::IVibrator::CAP_AMPLITUDE_CONTROL) > 0;
+    }
+
+    Return<V1_0::Status> setAmplitude(uint8_t amplitude) override {
+        return toHidlStatus(mVib->setAmplitude(amplitude));
+    }
+
+    Return<void> perform(V1_0::Effect effect, V1_0::EffectStrength strength,
+                         perform_cb _hidl_cb) override {
+        return perform_1_4(static_cast<V1_3::Effect>(effect), strength, nullptr, _hidl_cb);
+    }
+
+    Return<void> perform_1_1(V1_1::Effect_1_1 effect, V1_0::EffectStrength strength,
+                             perform_1_1_cb _hidl_cb) override {
+        return perform_1_4(static_cast<V1_3::Effect>(effect), strength, nullptr, _hidl_cb);
+    }
+
+    Return<void> perform_1_2(V1_2::Effect effect, V1_0::EffectStrength strength,
+                             perform_1_2_cb _hidl_cb) override {
+        return perform_1_4(static_cast<V1_3::Effect>(effect), strength, nullptr, _hidl_cb);
+    }
+
+    Return<bool> supportsExternalControl() override {
+        int32_t cap = 0;
+        if (!mVib->getCapabilities(&cap).isOk()) return false;
+        return (cap & aidl::IVibrator::CAP_EXTERNAL_CONTROL) > 0;
+    }
+
+    Return<V1_0::Status> setExternalControl(bool enabled) override {
+        return toHidlStatus(mVib->setExternalControl(enabled));
+    }
+
+    Return<void> perform_1_3(V1_3::Effect effect, V1_0::EffectStrength strength,
+                             perform_1_3_cb _hidl_cb) override {
+        return perform_1_4(static_cast<V1_3::Effect>(effect), strength, nullptr, _hidl_cb);
+    }
+
+    Return<uint32_t> getCapabilities() override {
+        static_assert(static_cast<int32_t>(V1_4::Capabilities::ON_COMPLETION_CALLBACK) ==
+                      static_cast<int32_t>(aidl::IVibrator::CAP_ON_CALLBACK));
+        static_assert(static_cast<int32_t>(V1_4::Capabilities::PERFORM_COMPLETION_CALLBACK) ==
+                      static_cast<int32_t>(aidl::IVibrator::CAP_PERFORM_CALLBACK));
+
+        int32_t cap;
+        if (!mVib->getCapabilities(&cap).isOk()) return 0;
+        return (cap & (aidl::IVibrator::CAP_ON_CALLBACK |
+                       aidl::IVibrator::CAP_PERFORM_CALLBACK)) > 0;
+    }
+
+    Return<V1_0::Status> on_1_4(uint32_t timeoutMs,
+                                const sp<V1_4::IVibratorCallback>& callback) override {
+        sp<aidl::IVibratorCallback> cb = callback ? new CallbackShim(callback) : nullptr;
+        return toHidlStatus(mVib->on(timeoutMs, cb));
+    }
+
+    Return<void> perform_1_4(V1_3::Effect effect, V1_0::EffectStrength strength,
+                             const sp<V1_4::IVibratorCallback>& callback,
+                             perform_1_4_cb _hidl_cb) override {
+        static_assert(static_cast<uint8_t>(V1_0::EffectStrength::LIGHT) ==
+                      static_cast<uint8_t>(aidl::EffectStrength::LIGHT));
+        static_assert(static_cast<uint8_t>(V1_0::EffectStrength::MEDIUM) ==
+                      static_cast<uint8_t>(aidl::EffectStrength::MEDIUM));
+        static_assert(static_cast<uint8_t>(V1_0::EffectStrength::STRONG) ==
+                      static_cast<uint8_t>(aidl::EffectStrength::STRONG));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::CLICK) ==
+                      static_cast<uint8_t>(aidl::Effect::CLICK));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::DOUBLE_CLICK) ==
+                      static_cast<uint8_t>(aidl::Effect::DOUBLE_CLICK));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::TICK) ==
+                      static_cast<uint8_t>(aidl::Effect::TICK));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::THUD) ==
+                      static_cast<uint8_t>(aidl::Effect::THUD));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::POP) ==
+                      static_cast<uint8_t>(aidl::Effect::POP));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::HEAVY_CLICK) ==
+                      static_cast<uint8_t>(aidl::Effect::HEAVY_CLICK));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_1) ==
+                      static_cast<uint8_t>(aidl::Effect::RINGTONE_1));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_2) ==
+                      static_cast<uint8_t>(aidl::Effect::RINGTONE_2));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_15) ==
+                      static_cast<uint8_t>(aidl::Effect::RINGTONE_15));
+        static_assert(static_cast<uint8_t>(V1_3::Effect::TEXTURE_TICK) ==
+                      static_cast<uint8_t>(aidl::Effect::TEXTURE_TICK));
+
+        sp<aidl::IVibratorCallback> cb = callback ? new CallbackShim(callback) : nullptr;
+        int timeoutMs = 0;
+        V1_0::Status status = toHidlStatus(
+            mVib->perform(static_cast<aidl::Effect>(effect),
+                          static_cast<aidl::EffectStrength>(strength), cb, &timeoutMs));
+        _hidl_cb(status, timeoutMs);
+        return android::hardware::Status::ok();
+    }
+  private:
+    sp<aidl::IVibrator> mVib;
+
+    V1_0::Status toHidlStatus(const android::binder::Status& status) {
+        switch(status.exceptionCode()) {
+            using android::hardware::Status;
+            case Status::EX_NONE: return V1_0::Status::OK;
+            case Status::EX_ILLEGAL_ARGUMENT: return V1_0::Status::BAD_VALUE;
+            case Status::EX_UNSUPPORTED_OPERATION: return V1_0::Status::UNSUPPORTED_OPERATION;
+        }
+        return V1_0::Status::UNKNOWN_ERROR;
+    }
+
+    class CallbackShim : public aidl::BnVibratorCallback {
+      public:
+        CallbackShim(const sp<V1_4::IVibratorCallback>& cb) : mCb(cb) {}
+        binder::Status onComplete() {
+            mCb->onComplete();
+            return binder::Status::ok(); // oneway, local call
+        }
+      private:
+        sp<V1_4::IVibratorCallback> mCb;
+    };
+};
 
 class VibratorCallback : public V1_4::IVibratorCallback {
     public:
@@ -79,6 +218,11 @@ template <typename I>
 class HalWrapper {
   public:
     static std::unique_ptr<HalWrapper> Create() {
+        sp<aidl::IVibrator> aidlVib = waitForVintfService<aidl::IVibrator>();
+        if (aidlVib) {
+            return std::unique_ptr<HalWrapper>(new HalWrapper(new VibratorShim(aidlVib)));
+        }
+
         // Assume that if getService returns a nullptr, HAL is not available on the
         // device.
         auto hal = I::getService();
