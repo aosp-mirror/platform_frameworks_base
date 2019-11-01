@@ -47,7 +47,7 @@ import java.util.function.Predicate;
  * Test class for {@link TaskSnapshotPersister} and {@link TaskSnapshotLoader}
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskSnapshotPersisterLoaderTest
+ *  atest WmTests:TaskSnapshotPersisterLoaderTest
  */
 @MediumTest
 @Presubmit

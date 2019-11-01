@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  * Tests for {@link WindowContainer#forAllWindows} and various implementations.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WindowContainerTraversalTests
+ *  atest WmTests:WindowContainerTraversalTests
  */
 @SmallTest
 @Presubmit

@@ -53,7 +53,7 @@ import org.mockito.Mockito;
  * Test class for {@link TaskSnapshotController}.
  *
  * Build/Install/Run:
- *  *  atest FrameworksServicesTests:TaskSnapshotControllerTest
+ *  *  atest WmTests:TaskSnapshotControllerTest
  */
 @SmallTest
 @Presubmit

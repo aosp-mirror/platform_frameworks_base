@@ -92,7 +92,7 @@ import java.util.List;
  * Tests for the {@link WindowState} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WindowStateTests
+ *  atest WmTests:WindowStateTests
  */
 @SmallTest
 @Presubmit

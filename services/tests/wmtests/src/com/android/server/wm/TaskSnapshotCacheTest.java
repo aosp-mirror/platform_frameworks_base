@@ -38,7 +38,7 @@ import org.mockito.MockitoAnnotations;
  * Test class for {@link TaskSnapshotCache}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskSnapshotCacheTest
+ *  atest WmTests:TaskSnapshotCacheTest
  */
 @SmallTest
 @Presubmit
