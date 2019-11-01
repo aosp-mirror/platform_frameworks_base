@@ -296,7 +296,6 @@
   <java-symbol type="bool" name="config_hotswapCapable" />
   <java-symbol type="bool" name="config_mms_content_disposition_support" />
   <java-symbol type="string" name="config_ims_package" />
-  <java-symbol type="bool" name="config_dynamic_bind_ims" />
   <java-symbol type="string" name="config_wwan_network_service_package" />
   <java-symbol type="string" name="config_wlan_network_service_package" />
   <java-symbol type="string" name="config_wwan_network_service_class" />
