@@ -124,10 +124,14 @@ package android.media.midi;
         // timestamp is at end of the packet
         int offset = bufferLength;
         long timestamp = 0;
-
-        for (int i = 0; i < TIMESTAMP_SIZE; i++) {
-            int b = (int)buffer[--offset] & 0xFF;
-            timestamp = (timestamp << 8) | b;
+        try {
+            for (int i = 0; i < TIMESTAMP_SIZE; i++) {
+                int b = (int)buffer[--offset] & 0xFF;
+                timestamp = (timestamp << 8) | b;
+            }
+        }
+        catch(ArrayIndexOutOfBoundsException e) {
+            return 0;
         }
         return timestamp;
     }
