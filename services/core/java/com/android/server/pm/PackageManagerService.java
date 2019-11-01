@@ -9334,6 +9334,16 @@ public class PackageManagerService extends IPackageManager.Stub
             pkgSetting = originalPkgSetting == null ? installedPkgSetting : originalPkgSetting;
             pkgAlreadyExists = pkgSetting != null;
             final String disabledPkgName = pkgAlreadyExists ? pkgSetting.name : pkg.packageName;
+            if (scanSystemPartition && !pkgAlreadyExists
+                    && mSettings.getDisabledSystemPkgLPr(disabledPkgName) != null) {
+                // The updated-package data for /system apk remains inconsistently
+                // after the package data for /data apk is lost accidentally.
+                // To recover it, enable /system apk and install it as non-updated system app.
+                Slog.w(TAG, "Inconsistent package setting of updated system app for "
+                        + disabledPkgName + ". To recover it, enable the system app"
+                        + "and install it as non-updated system app.");
+                mSettings.removeDisabledSystemPackageLPw(disabledPkgName);
+            }
             disabledPkgSetting = mSettings.getDisabledSystemPkgLPr(disabledPkgName);
             isSystemPkgUpdated = disabledPkgSetting != null;
 
