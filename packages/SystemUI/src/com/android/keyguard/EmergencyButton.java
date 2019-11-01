@@ -50,14 +50,6 @@ import com.android.systemui.util.EmergencyDialerConstants;
  * allows the user to return to the call.
  */
 public class EmergencyButton extends Button {
-    private static final Intent INTENT_EMERGENCY_DIAL = new Intent()
-            .setAction(EmergencyDialerConstants.ACTION_DIAL)
-            .setPackage("com.android.phone")
-            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
-                    | Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
-                    EmergencyDialerConstants.ENTRY_TYPE_LOCKSCREEN_BUTTON);
 
     private static final String LOG_TAG = "EmergencyButton";
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
@@ -189,7 +181,15 @@ public class EmergencyButton extends Button {
         } else {
             Dependency.get(KeyguardUpdateMonitor.class).reportEmergencyCallAction(
                     true /* bypassHandler */);
-            getContext().startActivityAsUser(INTENT_EMERGENCY_DIAL,
+            Intent emergencyDialIntent =
+                    getTelecommManager().createLaunchEmergencyDialerIntent(null /* number*/)
+                            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                                    | Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                            .putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
+                                    EmergencyDialerConstants.ENTRY_TYPE_LOCKSCREEN_BUTTON);
+
+            getContext().startActivityAsUser(emergencyDialIntent,
                     ActivityOptions.makeCustomAnimation(getContext(), 0, 0).toBundle(),
                     new UserHandle(KeyguardUpdateMonitor.getCurrentUser()));
         }
