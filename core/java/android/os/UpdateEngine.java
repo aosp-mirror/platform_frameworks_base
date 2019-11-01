@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.content.res.AssetFileDescriptor;
 import android.os.IUpdateEngine;
 import android.os.IUpdateEngineCallback;
 import android.os.RemoteException;
@@ -313,16 +314,17 @@ public class UpdateEngine {
     }
 
     /**
-     * Applies the payload passed as ParcelFileDescriptor {@code pfd} instead of
-     * using the {@code file://} scheme.
+     * Applies the payload passed as AssetFileDescriptor {@code assetFd}
+     * instead of using the {@code file://} scheme.
      *
      * <p>See {@link #applyPayload(String)} for {@code offset}, {@code size} and
      * {@code headerKeyValuePairs} parameters.
      */
-    public void applyPayload(@NonNull ParcelFileDescriptor pfd, long offset, long size,
+    public void applyPayload(@NonNull AssetFileDescriptor assetFd,
             @NonNull String[] headerKeyValuePairs) {
         try {
-            mUpdateEngine.applyPayloadFd(pfd, offset, size, headerKeyValuePairs);
+            mUpdateEngine.applyPayloadFd(assetFd.getParcelFileDescriptor(),
+                    assetFd.getStartOffset(), assetFd.getLength(), headerKeyValuePairs);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
