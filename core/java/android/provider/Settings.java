@@ -1261,6 +1261,33 @@ public final class Settings {
             = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
     /**
+     * Activity Action: Show notification listener permission settings page for app.
+     * <p>
+     * Users can grant and deny access to notifications for a {@link ComponentName} from here.
+     * See
+     * {@link android.app.NotificationManager#isNotificationListenerAccessGranted(ComponentName)}
+     * for more details.
+     * <p>
+     * Input: The extra {@link #EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME} containing the name
+     * of the component to grant or revoke notification listener access to.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS =
+            "android.settings.NOTIFICATION_LISTENER_DETAIL_SETTINGS";
+
+    /**
+     * Activity Extra: What component name to show the notification listener permission
+     * page for.
+     * <p>
+     * A string extra containing a {@link ComponentName}. This must be passed as an extra field to
+     * {@link #ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS}.
+     */
+    public static final String EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME =
+            "android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME";
+
+    /**
      * Activity Action: Show Do Not Disturb access settings.
      * <p>
      * Users can grant and deny access to Do Not Disturb configuration from here. Managed
