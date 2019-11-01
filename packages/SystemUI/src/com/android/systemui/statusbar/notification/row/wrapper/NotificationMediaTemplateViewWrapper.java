@@ -167,12 +167,6 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         mContext = ctx;
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         mMetricsLogger = Dependency.get(MetricsLogger.class);
-
-        if (mView instanceof MediaNotificationView) {
-            MediaNotificationView mediaView = (MediaNotificationView) mView;
-            mediaView.addVisibilityListener(mVisibilityListener);
-            mView.addOnAttachStateChangeListener(mAttachStateListener);
-        }
     }
 
     private void resolveViews() {
@@ -210,13 +204,13 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         }
 
         // Check for existing media controller and clean up / create as necessary
-        boolean controllerUpdated = false;
+        boolean shouldUpdateListeners = false;
         if (mMediaController == null || !mMediaController.getSessionToken().equals(token)) {
             if (mMediaController != null) {
                 mMediaController.unregisterCallback(mMediaCallback);
             }
             mMediaController = new MediaController(mContext, token);
-            controllerUpdated = true;
+            shouldUpdateListeners = true;
         }
 
         mMediaMetadata = mMediaController.getMetadata();
@@ -228,7 +222,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                     mSeekBarView.setVisibility(View.GONE);
                     mMetricsLogger.write(newLog(MetricsEvent.TYPE_CLOSE));
                     clearTimer();
-                } else if (mSeekBarView == null && controllerUpdated) {
+                } else if (mSeekBarView == null && shouldUpdateListeners) {
                     // Only log if the controller changed, otherwise we would log multiple times for
                     // the same notification when user pauses/resumes
                     mMetricsLogger.write(newLog(MetricsEvent.TYPE_CLOSE));
@@ -257,6 +251,16 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
 
             mSeekBarElapsedTime = mSeekBarView.findViewById(R.id.notification_media_elapsed_time);
             mSeekBarTotalTime = mSeekBarView.findViewById(R.id.notification_media_total_time);
+
+            shouldUpdateListeners = true;
+        }
+
+        if (shouldUpdateListeners) {
+            if (mView instanceof MediaNotificationView) {
+                MediaNotificationView mediaView = (MediaNotificationView) mView;
+                mediaView.addVisibilityListener(mVisibilityListener);
+                mView.addOnAttachStateChangeListener(mAttachStateListener);
+            }
 
             if (mSeekBarTimer == null) {
                 if (mMediaController != null && canSeekMedia(mMediaController.getPlaybackState())) {
