@@ -410,6 +410,13 @@ public final class OomAdjuster {
             mAdjSeq--;
             // Update these reachable processes
             updateOomAdjLockedInner(oomAdjReason, topApp, processes, uids, false);
+        } else if (app.getCurRawAdj() == ProcessList.UNKNOWN_ADJ) {
+            // In case the app goes from non-cached to cached but it doesn't have other reachable
+            // processes, its adj could be still unknown as of now, assign one.
+            processes.add(app);
+            assignCachedAdjIfNecessary(processes);
+            applyOomAdjLocked(app, false, SystemClock.uptimeMillis(),
+                    SystemClock.elapsedRealtime());
         }
         mService.mOomAdjProfiler.oomAdjEnded();
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -490,7 +497,7 @@ public final class OomAdjuster {
             }
         }
 
-        assignCachedAdjIfNecessary();
+        assignCachedAdjIfNecessary(mProcessList.mLruProcesses);
 
         if (fullUpdate) { // There won't be cycles if we didn't compute clients above.
             // Cycle strategy:
@@ -564,8 +571,7 @@ public final class OomAdjuster {
         }
     }
 
-    private void assignCachedAdjIfNecessary() {
-        ArrayList<ProcessRecord> lruList = mProcessList.mLruProcesses;
+    private void assignCachedAdjIfNecessary(ArrayList<ProcessRecord> lruList) {
         final int numLru = lruList.size();
 
         // First update the OOM adjustment for each of the
