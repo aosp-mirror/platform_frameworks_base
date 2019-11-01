@@ -72,7 +72,7 @@ class SourceTransformer(
         }
         val ifStmt: IfStmt
         if (group.enabled) {
-            val hash = CodeUtils.hash(fileName, messageString, level, group)
+            val hash = CodeUtils.hash(packagePath, messageString, level, group)
             val newCall = call.clone()
             if (!group.textEnabled) {
                 // Remove message string if text logging is not enabled by default.
@@ -97,7 +97,7 @@ class SourceTransformer(
             if (argTypes.size != call.arguments.size - 2) {
                 throw InvalidProtoLogCallException(
                         "Number of arguments (${argTypes.size} does not mach format" +
-                                " string in: $call", ParsingContext(fileName, call))
+                                " string in: $call", ParsingContext(path, call))
             }
             val blockStmt = BlockStmt()
             if (argTypes.isNotEmpty()) {
@@ -214,18 +214,23 @@ class SourceTransformer(
             StaticJavaParser.parseExpression<FieldAccessExpr>(protoLogCacheClassName)
     private var processedCode: MutableList<String> = mutableListOf()
     private var offsets: IntArray = IntArray(0)
-    private var fileName: String = ""
+    /** The path of the file being processed, relative to $ANDROID_BUILD_TOP */
+    private var path: String = ""
+    /** The path of the file being processed, relative to the root package */
+    private var packagePath: String = ""
 
     fun processClass(
         code: String,
         path: String,
+        packagePath: String,
         compilationUnit: CompilationUnit =
                StaticJavaParser.parse(code)
     ): String {
-        fileName = path
+        this.path = path
+        this.packagePath = packagePath
         processedCode = code.split('\n').toMutableList()
         offsets = IntArray(processedCode.size)
-        protoLogCallProcessor.process(compilationUnit, this, fileName)
+        protoLogCallProcessor.process(compilationUnit, this, path)
         return processedCode.joinToString("\n")
     }
 }
