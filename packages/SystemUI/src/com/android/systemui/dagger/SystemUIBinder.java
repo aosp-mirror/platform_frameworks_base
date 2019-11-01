@@ -22,6 +22,8 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.ForegroundServiceController;
@@ -71,6 +73,7 @@ import com.android.systemui.statusbar.phone.DozeScrimController;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
@@ -226,6 +229,7 @@ public abstract class SystemUIBinder {
             NotifLog notifLog,
             DozeParameters dozeParameters,
             ScrimController scrimController,
+            @Nullable KeyguardLiftController keyguardLiftController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
@@ -290,6 +294,7 @@ public abstract class SystemUIBinder {
                 notifLog,
                 dozeParameters,
                 scrimController,
+                keyguardLiftController,
                 lockscreenWallpaperLazy,
                 biometricUnlockControllerLazy,
                 dozeServiceHost,

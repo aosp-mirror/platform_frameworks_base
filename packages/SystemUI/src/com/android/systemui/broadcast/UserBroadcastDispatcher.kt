@@ -149,11 +149,11 @@ class UserBroadcastDispatcher(
         }
     }
 
-    override fun dump(fd: FileDescriptor?, pw: PrintWriter?, args: Array<out String>?) {
-        pw?.println("  Registered=${registered.get()}")
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+        pw.println("  Registered=${registered.get()}")
         actionsToReceivers.forEach { (action, list) ->
-            pw?.println("    $action:")
-            list.forEach { pw?.println("      ${it.receiver}") }
+            pw.println("    $action:")
+            list.forEach { pw.println("      ${it.receiver}") }
         }
     }
 

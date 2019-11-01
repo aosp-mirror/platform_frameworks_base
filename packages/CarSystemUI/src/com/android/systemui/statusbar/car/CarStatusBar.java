@@ -359,6 +359,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notifLog,
                 dozeParameters,
                 scrimController,
+                null /* keyguardLiftController */,
                 lockscreenWallpaperLazy,
                 biometricUnlockControllerLazy,
                 dozeServiceHost,

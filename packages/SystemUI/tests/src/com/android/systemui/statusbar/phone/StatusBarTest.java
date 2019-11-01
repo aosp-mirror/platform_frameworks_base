@@ -229,6 +229,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DozeServiceHost mDozeServiceHost;
     @Mock private LinearLayout mLockIconContainer;
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
+    @Mock private KeyguardLiftController mKeyguardLiftController;
 
     @Before
     public void setup() throws Exception {
@@ -360,6 +361,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotifLog,
                 mDozeParameters,
                 mScrimController,
+                mKeyguardLiftController,
                 mLockscreenWallpaperLazy,
                 mBiometricUnlockControllerLazy,
                 mDozeServiceHost,

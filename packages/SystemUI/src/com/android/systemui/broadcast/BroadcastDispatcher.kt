@@ -133,10 +133,10 @@ open class BroadcastDispatcher @Inject constructor (
     protected open fun createUBRForUser(userId: Int) =
             UserBroadcastDispatcher(context, userId, mainHandler, bgLooper)
 
-    override fun dump(fd: FileDescriptor?, pw: PrintWriter?, args: Array<out String>?) {
-        pw?.println("Broadcast dispatcher:")
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+        pw.println("Broadcast dispatcher:")
         for (index in 0 until receiversByUser.size()) {
-            pw?.println("  User ${receiversByUser.keyAt(index)}")
+            pw.println("  User ${receiversByUser.keyAt(index)}")
             receiversByUser.valueAt(index).dump(fd, pw, args)
         }
     }

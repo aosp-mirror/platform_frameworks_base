@@ -99,6 +99,8 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.MainLooper;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -126,7 +128,7 @@ import javax.inject.Singleton;
  * to be updated.
  */
 @Singleton
-public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
+public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpable {
 
     private static final String TAG = "KeyguardUpdateMonitor";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -1499,11 +1501,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     @VisibleForTesting
     @Inject
-    protected KeyguardUpdateMonitor(Context context, @MainLooper Looper mainLooper) {
+    protected KeyguardUpdateMonitor(Context context, @MainLooper Looper mainLooper,
+            DumpController dumpController) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         mStrongAuthTracker = new StrongAuthTracker(context, this::notifyStrongAuthStateChanged);
+        dumpController.registerDumpable(this);
 
         mHandler = new Handler(mainLooper) {
             @Override
@@ -2787,6 +2791,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("KeyguardUpdateMonitor state:");
         pw.println("  SIM States:");
