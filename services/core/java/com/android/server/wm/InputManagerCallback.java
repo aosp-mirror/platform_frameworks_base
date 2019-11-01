@@ -4,6 +4,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import static com.android.server.wm.ActivityRecord.INVALID_PID;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -14,6 +15,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.IWindow;
+import android.view.InputApplicationHandle;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
@@ -80,7 +82,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      * Called by the InputManager.
      */
     @Override
-    public long notifyANR(IBinder token, String reason) {
+    public long notifyANR(InputApplicationHandle inputApplicationHandle,
+            IBinder token, String reason) {
         ActivityRecord activity = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
@@ -91,6 +94,10 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                 if (windowState != null) {
                     activity = windowState.mActivityRecord;
                 }
+            }
+
+            if (activity == null && inputApplicationHandle != null) {
+                activity = ActivityRecord.forTokenLocked(inputApplicationHandle.token);
             }
 
             if (windowState != null) {
@@ -122,7 +129,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
             final boolean abort = activity.keyDispatchingTimedOut(reason,
-                    windowState.mSession.mPid);
+                    (windowState != null) ? windowState.mSession.mPid : INVALID_PID);
             if (!abort) {
                 // The activity manager declined to abort dispatching.
                 // Wait a bit longer and timeout again later.
