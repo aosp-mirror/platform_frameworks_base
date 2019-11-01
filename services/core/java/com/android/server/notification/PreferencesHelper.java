@@ -138,12 +138,27 @@ public class PreferencesHelper implements RankingConfig {
     private boolean mAreChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
 
+    private static final String BADGING_FORCED_TRUE = "force_badging_true_for_bug";
+
+    // STOPSHIP (b/142218092) this should be removed before ship
+    static boolean wasBadgingForcedTrue(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(), BADGING_FORCED_TRUE, 0) != 0;
+    }
+
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper) {
         mContext = context;
         mZenModeHelper = zenHelper;
         mRankingHandler = rankingHandler;
         mPm = pm;
+
+        // STOPSHIP (b/142218092) this should be removed before ship
+        if (!wasBadgingForcedTrue(context)) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.NOTIFICATION_BADGING,
+                    DEFAULT_SHOW_BADGE ? 1 : 0);
+            Settings.Secure.putInt(context.getContentResolver(), BADGING_FORCED_TRUE, 1);
+        }
 
         updateBadgingEnabled();
         updateBubblesEnabled();
