@@ -75,8 +75,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
     private static final String XML_TAG_VOLUME_ITEMS = "carVolumeItems";
     private static final String XML_TAG_VOLUME_ITEM = "item";
-    private static final int HOVERING_TIMEOUT = 16000;
-    private static final int NORMAL_TIMEOUT = 3000;
     private static final int LISTVIEW_ANIMATION_DURATION_IN_MILLIS = 250;
     private static final int DISMISS_DELAY_IN_MILLIS = 50;
     private static final int ARROW_FADE_IN_START_DELAY_IN_MILLIS = 100;
@@ -90,6 +88,8 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     // Volume items in the RecyclerView.
     private final List<CarVolumeItem> mCarVolumeLineItems = new ArrayList<>();
     private final KeyguardManager mKeyguard;
+    private final int mNormalTimeout;
+    private final int mHoveringTimeout;
 
     private Window mWindow;
     private CustomDialog mDialog;
@@ -175,6 +175,10 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     public CarVolumeDialogImpl(Context context) {
         mContext = context;
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mNormalTimeout = mContext.getResources().getInteger(
+                R.integer.car_volume_dialog_display_normal_timeout);
+        mHoveringTimeout = mContext.getResources().getInteger(
+                R.integer.car_volume_dialog_display_hovering_timeout);
     }
 
     private static int getSeekbarValue(CarAudioManager carAudioManager, int volumeGroupId) {
@@ -315,7 +319,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     private int computeTimeoutH() {
-        return mHovering ? HOVERING_TIMEOUT : NORMAL_TIMEOUT;
+        return mHovering ? mHoveringTimeout : mNormalTimeout;
     }
 
     private void dismissH(int reason) {
