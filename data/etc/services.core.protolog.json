@@ -301,12 +301,6 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
-    "-1483752006": {
-      "message": "  THUMBNAIL %s: CREATE",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/AppWindowThumbnail.java"
-    },
     "-1471946192": {
       "message": "Marking app token %s with replacing child windows.",
       "level": "DEBUG",
@@ -1302,6 +1296,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransition.java"
+    },
+    "531242746": {
+      "message": "  THUMBNAIL %s: CREATE",
+      "level": "INFO",
+      "group": "WM_SHOW_TRANSACTIONS",
+      "at": "com\/android\/server\/wm\/WindowContainerThumbnail.java"
     },
     "539077569": {
       "message": "Clear freezing of %s force=%b",

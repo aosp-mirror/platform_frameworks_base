@@ -37,27 +37,27 @@ import org.junit.runner.RunWith;
  * Test class for {@link TaskSnapshotSurface}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTest:AppWindowThumbnailTest
+ *  atest WmTests:WindowContainerThumbnailTest
  *
  */
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class AppWindowThumbnailTest extends WindowTestsBase {
-    private AppWindowThumbnail buildThumbnail() {
+public class WindowContainerThumbnailTest extends WindowTestsBase {
+    private WindowContainerThumbnail buildThumbnail() {
         final GraphicBuffer buffer = GraphicBuffer.create(1, 1, PixelFormat.RGBA_8888,
                 GraphicBuffer.USAGE_SW_READ_RARELY | GraphicBuffer.USAGE_SW_WRITE_NEVER);
         final ActivityRecord mockAr = mock(ActivityRecord.class);
         when(mockAr.getPendingTransaction()).thenReturn(new StubTransaction());
         when(mockAr.makeSurface()).thenReturn(new MockSurfaceControlBuilder());
-        return new AppWindowThumbnail(new StubTransaction(), mockAr,
+        return new WindowContainerThumbnail(new StubTransaction(), mockAr,
                 buffer, false, mock(Surface.class), mock(SurfaceAnimator.class));
     }
 
     @Test
     @FlakyTest(bugId = 131005232)
     public void testDestroy_nullsSurface() {
-        final AppWindowThumbnail t = buildThumbnail();
+        final WindowContainerThumbnail t = buildThumbnail();
         assertNotNull(t.getSurfaceControl());
         t.destroy();
         assertNull(t.getSurfaceControl());

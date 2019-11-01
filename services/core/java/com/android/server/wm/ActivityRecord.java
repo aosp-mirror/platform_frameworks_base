@@ -5814,7 +5814,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mWmService.mTaskSnapshotController.createTaskSnapshot(
                             task, 1 /* scaleFraction */);
             if (snapshot != null) {
-                mThumbnail = new AppWindowThumbnail(mWmService.mSurfaceFactory, t, this,
+                mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory, t, this,
                         snapshot.getGraphicBuffer(), true /* relative */);
             }
         }
@@ -5923,8 +5923,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         clearThumbnail();
-        mThumbnail = new AppWindowThumbnail(mWmService.mSurfaceFactory, getPendingTransaction(),
-                this, thumbnailHeader);
+        mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory,
+                getPendingTransaction(), this, thumbnailHeader);
         mThumbnail.startAnimation(getPendingTransaction(), loadThumbnailAnimation(thumbnailHeader));
     }
 
@@ -5952,7 +5952,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (thumbnail == null) {
             return;
         }
-        mThumbnail = new AppWindowThumbnail(mWmService.mSurfaceFactory,
+        mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory,
                 getPendingTransaction(), this, thumbnail);
         final Animation animation =
                 getDisplayContent().mAppTransition.createCrossProfileAppsThumbnailAnimationLocked(
@@ -6100,7 +6100,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @VisibleForTesting
-    AppWindowThumbnail getThumbnail() {
+    WindowContainerThumbnail getThumbnail() {
         return mThumbnail;
     }
 
