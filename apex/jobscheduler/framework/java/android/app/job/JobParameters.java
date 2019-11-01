@@ -68,7 +68,11 @@ public class JobParameters implements Parcelable {
             REASON_DEVICE_THERMAL,
     };
 
-    /** @hide */
+    /**
+     * @hide
+     * @deprecated use {@link #getReasonCodeDescription(int)}
+     */
+    @Deprecated
     public static String getReasonName(int reason) {
         switch (reason) {
             case REASON_CANCELED: return "canceled";
@@ -79,6 +83,20 @@ public class JobParameters implements Parcelable {
             case REASON_DEVICE_THERMAL: return "thermal";
             default: return "unknown:" + reason;
         }
+    }
+
+    /** @hide */
+    // @SystemApi TODO make it a system api for mainline
+    @NonNull
+    public static int[] getJobStopReasonCodes() {
+        return JOB_STOP_REASON_CODES;
+    }
+
+    /** @hide */
+    // @SystemApi TODO make it a system api for mainline
+    @NonNull
+    public static String getReasonCodeDescription(int reasonCode) {
+        return getReasonName(reasonCode);
     }
 
     @UnsupportedAppUsage
