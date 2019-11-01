@@ -129,6 +129,14 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "privapp_whitelist_com.android.wallpaper",
+    product_specific: true,
+    sub_dir: "permissions",
+    src: "com.android.wallpaper.xml",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "com.android.timezone.updater.xml",
     sub_dir: "permissions",
     src: "com.android.timezone.updater.xml",
