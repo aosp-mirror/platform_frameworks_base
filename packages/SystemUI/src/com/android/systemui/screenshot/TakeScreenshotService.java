@@ -27,10 +27,15 @@ import android.os.UserManager;
 import android.util.Log;
 import android.view.WindowManager;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class TakeScreenshotService extends Service {
     private static final String TAG = "TakeScreenshotService";
 
-    private static GlobalScreenshot mScreenshot;
+    private final GlobalScreenshot mScreenshot;
+    private final UserManager mUserManager;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -50,14 +55,10 @@ public class TakeScreenshotService extends Service {
             // If the storage for this user is locked, we have no place to store
             // the screenshot, so skip taking it instead of showing a misleading
             // animation and error notification.
-            if (!getSystemService(UserManager.class).isUserUnlocked()) {
+            if (!mUserManager.isUserUnlocked()) {
                 Log.w(TAG, "Skipping screenshot because storage is locked!");
                 post(finisher);
                 return;
-            }
-
-            if (mScreenshot == null) {
-                mScreenshot = new GlobalScreenshot(TakeScreenshotService.this);
             }
 
             switch (msg.what) {
@@ -72,6 +73,12 @@ public class TakeScreenshotService extends Service {
             }
         }
     };
+
+    @Inject
+    public TakeScreenshotService(GlobalScreenshot globalScreenshot, UserManager userManager) {
+        mScreenshot = globalScreenshot;
+        mUserManager = userManager;
+    }
 
     @Override
     public IBinder onBind(Intent intent) {

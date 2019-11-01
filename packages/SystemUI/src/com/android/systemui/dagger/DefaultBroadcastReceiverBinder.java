@@ -16,16 +16,24 @@
 
 package com.android.systemui.dagger;
 
+import android.content.BroadcastReceiver;
+
+import com.android.systemui.screenshot.GlobalScreenshot.ActionProxyReceiver;
+
+import dagger.Binds;
 import dagger.Module;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 /**
- * Dagger Module that collects related sub-modules together.
- *
- * See {@link ContextComponentResolver}
+ * BroadcastReceivers that are injectable should go here.
  */
-@Module(includes = {DefaultActivityBinder.class,
-                    DefaultBroadcastReceiverBinder.class,
-                    DefaultServiceBinder.class,
-                    SystemUIBinder.class})
-public abstract class DefaultComponentBinder {
+@Module
+public abstract class DefaultBroadcastReceiverBinder {
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(ActionProxyReceiver.class)
+    public abstract BroadcastReceiver bindActionProxyReceiver(
+            ActionProxyReceiver broadcastReceiver);
 }
