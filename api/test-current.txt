@@ -1654,7 +1654,8 @@ package android.net.util {
     method public static void closeSocket(@Nullable java.io.FileDescriptor) throws java.io.IOException;
     method @NonNull public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
     method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int);
-    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
+    method @Deprecated @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int, @NonNull byte[]);
   }
 
 }
