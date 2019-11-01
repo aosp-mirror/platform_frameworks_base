@@ -1274,12 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ಆಯ್ಕೆಗಳಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <!-- no translation found for mobile_no_internet (1445208572588803493) -->
-    <skip />
-    <!-- no translation found for other_networks_no_internet (1553338015597653827) -->
-    <skip />
-    <!-- no translation found for private_dns_broken_detailed (4293356177543535578) -->
-    <skip />
+    <string name="mobile_no_internet" msgid="1445208572588803493">"ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"ನೆಟ್‌ವರ್ಕ್‌ ಇಂಟರ್ನೆಟ್‌ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"ಖಾಸಗಿ DNS ಸರ್ವರ್ ಅನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ಸೀಮಿತ ಸಂಪರ್ಕ ಕಲ್ಪಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿದೆ"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"ಹೇಗಾದರೂ ಸಂಪರ್ಕಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
