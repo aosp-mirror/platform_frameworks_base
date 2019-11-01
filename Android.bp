@@ -919,6 +919,7 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide-package com.android.org.conscrypt --hide-package com.android.server " +
     "--error UnhiddenSystemApi " +
     "--hide RequiresPermission " +
+    "--hide CallbackInterface " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo "
