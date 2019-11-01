@@ -33,7 +33,6 @@ import com.android.internal.colorextraction.drawable.ScrimDrawable;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
@@ -54,17 +53,19 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final ExtensionController.Extension<GlobalActionsPanelPlugin> mPanelExtension;
     private GlobalActionsPanelPlugin mPlugin;
+    private final CommandQueue mCommandQueue;
     private GlobalActionsDialog mGlobalActions;
     private boolean mDisabled;
     private final PluginManager mPluginManager;
     private final String mPluginPackageName;
 
-    public GlobalActionsImpl(Context context) {
+    public GlobalActionsImpl(Context context, CommandQueue commandQueue) {
         mContext = context;
         mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mPluginManager = Dependency.get(PluginManager.class);
-        SysUiServiceProvider.getComponent(context, CommandQueue.class).addCallback(this);
+        mCommandQueue = commandQueue;
+        mCommandQueue.addCallback(this);
         mPanelExtension = Dependency.get(ExtensionController.class)
                 .newExtension(GlobalActionsPanelPlugin.class)
                 .withPlugin(GlobalActionsPanelPlugin.class)
@@ -77,7 +78,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
 
     @Override
     public void destroy() {
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallback(this);
+        mCommandQueue.removeCallback(this);
         mPluginManager.removePluginListener(this);
         if (mPlugin != null) mPlugin.onDestroy();
         if (mGlobalActions != null) {

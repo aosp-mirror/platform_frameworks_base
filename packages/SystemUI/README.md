@@ -80,11 +80,6 @@ Provides custom dependency injection.
 
 Creates/initializes the channels sysui uses when posting notifications.
 
-### [com.android.systemui.statusbar.CommandQueue$CommandQueueStart](/packages/SystemUI/src/com/android/systemui/sstatusbar/CommandQueue.java)
-
-Creates CommandQueue and calls putComponent because its always been there
-and sysui expects it to be there :/
-
 ### [com.android.systemui.keyguard.KeyguardViewMediator](/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java)
 
 Manages keyguard view state.

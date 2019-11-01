@@ -696,7 +696,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
-            DozeScrimController dozeScrimController) {
+            DozeScrimController dozeScrimController,
+            CommandQueue commandQueue) {
         super(context);
         mFeatureFlags = featureFlags;
         mLightBarController = lightBarController;
@@ -761,6 +762,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
+        mCommandQueue = commandQueue;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
@@ -821,7 +823,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
 
         // Connect in to the status bar manager service
-        mCommandQueue = getComponent(CommandQueue.class);
         mCommandQueue.addCallback(this);
 
         RegisterStatusBarResult result = null;
@@ -904,7 +905,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // end old BaseStatusBar.start().
 
         // Lastly, call to the icon policy to install/update all the icons.
-        mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController);
+        mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController, mCommandQueue);
         mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
 
         mKeyguardStateController.addCallback(this);
@@ -1006,7 +1007,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                             mNotificationIconAreaController, mHeadsUpManager, mStatusBarWindow,
                             mStatusBarStateController, mKeyguardBypassController,
-                            mKeyguardStateController, mWakeUpCoordinator);
+                            mKeyguardStateController, mWakeUpCoordinator, mCommandQueue);
                     mHeadsUpAppearanceController.readFrom(oldController);
                     mStatusBarWindowViewController.setStatusBarView(mStatusBarView);
                     updateAreThereNotifications();
@@ -1212,7 +1213,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
-                mNotificationAlertingManager, rowBinder, mKeyguardStateController);
+                mNotificationAlertingManager, rowBinder, mKeyguardStateController, mCommandQueue);
 
         mNotificationListController =
                 new NotificationListController(
@@ -4082,7 +4083,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // Begin Extra BaseStatusBar methods.
 
-    protected CommandQueue mCommandQueue;
+    protected final CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
 
     // all notifications

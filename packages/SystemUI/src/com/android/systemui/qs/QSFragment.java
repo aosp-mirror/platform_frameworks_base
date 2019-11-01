@@ -38,7 +38,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.customize.QSCustomizer;
@@ -97,11 +96,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             InjectionInflationController injectionInflater,
             Context context,
             QSTileHost qsTileHost,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController, CommandQueue commandQueue) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mInjectionInflater = injectionInflater;
-        SysUiServiceProvider.getComponent(context, CommandQueue.class)
-                .observe(getLifecycle(), this);
+        commandQueue.observe(getLifecycle(), this);
         mHost = qsTileHost;
         mStatusBarStateController = statusBarStateController;
     }

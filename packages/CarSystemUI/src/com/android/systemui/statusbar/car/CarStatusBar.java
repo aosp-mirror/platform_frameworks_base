@@ -80,6 +80,7 @@ import com.android.systemui.navigationbar.car.CarNavigationBarView;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.NavigationBarController;
@@ -297,7 +298,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
-
+            CommandQueue commandQueue,
             /* Car Settings injected components. */
             CarNavigationBarController carNavigationBarController) {
         super(
@@ -364,7 +365,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 biometricUnlockControllerLazy,
                 dozeServiceHost,
                 powerManager,
-                dozeScrimController);
+                dozeScrimController,
+                commandQueue);
         mScrimController = scrimController;
         mCarNavigationBarController = carNavigationBarController;
     }

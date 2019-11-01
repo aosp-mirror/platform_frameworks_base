@@ -29,14 +29,17 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.LatencyTester;
 import com.android.systemui.ScreenDecorations;
+import com.android.systemui.SizeCompatModeActivityController;
 import com.android.systemui.SystemUI;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -45,6 +48,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
@@ -57,6 +61,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.InstantAppNotifier;
 import com.android.systemui.statusbar.notification.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -91,6 +96,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.tv.TvStatusBar;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeUI;
@@ -110,12 +116,29 @@ import dagger.multibindings.IntoMap;
  */
 @Module(includes = {RecentsModule.class})
 public abstract class SystemUIBinder {
+    /** Inject into AuthController. */
+    @Binds
+    @IntoMap
+    @ClassKey(AuthController.class)
+    public abstract SystemUI bindAuthController(AuthController service);
 
     /** Inject into GarbageMonitor.Service. */
     @Binds
     @IntoMap
     @ClassKey(GarbageMonitor.Service.class)
     public abstract SystemUI bindGarbageMonitorService(GarbageMonitor.Service service);
+
+    /** Inject into GlobalActionsComponent. */
+    @Binds
+    @IntoMap
+    @ClassKey(GlobalActionsComponent.class)
+    public abstract SystemUI bindGlobalActionsComponent(GlobalActionsComponent sysui);
+
+    /** Inject into InstantAppNotifier. */
+    @Binds
+    @IntoMap
+    @ClassKey(InstantAppNotifier.class)
+    public abstract SystemUI bindInstantAppNotifier(InstantAppNotifier sysui);
 
     /** Inject into KeyguardViewMediator. */
     @Binds
@@ -153,11 +176,24 @@ public abstract class SystemUIBinder {
     @ClassKey(ScreenDecorations.class)
     public abstract SystemUI bindScreenDecorations(ScreenDecorations sysui);
 
+    /** Inject into SizeCompatModeActivityController. */
+    @Binds
+    @IntoMap
+    @ClassKey(SizeCompatModeActivityController.class)
+    public abstract SystemUI bindsSizeCompatModeActivityController(
+            SizeCompatModeActivityController sysui);
+
     /** Inject into StatusBar. */
     @Binds
     @IntoMap
     @ClassKey(StatusBar.class)
     public abstract SystemUI bindsStatusBar(StatusBar sysui);
+
+    /** Inject into TvStatusBar. */
+    @Binds
+    @IntoMap
+    @ClassKey(TvStatusBar.class)
+    public abstract SystemUI bindsTvStatusBar(TvStatusBar sysui);
 
     /** Inject into VolumeUI. */
     @Binds
@@ -234,7 +270,8 @@ public abstract class SystemUIBinder {
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
-            DozeScrimController dozeScrimController) {
+            DozeScrimController dozeScrimController,
+            CommandQueue commandQueue) {
         return new StatusBar(
                 context,
                 featureFlags,
@@ -299,7 +336,8 @@ public abstract class SystemUIBinder {
                 biometricUnlockControllerLazy,
                 dozeServiceHost,
                 powerManager,
-                dozeScrimController);
+                dozeScrimController,
+                commandQueue);
     }
 
 }

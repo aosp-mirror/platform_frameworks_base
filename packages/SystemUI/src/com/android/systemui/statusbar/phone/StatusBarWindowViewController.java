@@ -39,6 +39,7 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
@@ -94,7 +95,8 @@ public class StatusBarWindowViewController {
             KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController,
             DozeLog dozeLog,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters,
+            CommandQueue commandQueue) {
         mView = view;
         mFalsingManager = falsingManager;
 
@@ -115,7 +117,8 @@ public class StatusBarWindowViewController {
                 keyguardStateController,
                 statusBarStateController,
                 dozeLog,
-                dozeParameters);
+                dozeParameters,
+                commandQueue);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         notificationPanelView.setVisibility(View.INVISIBLE);
@@ -488,6 +491,7 @@ public class StatusBarWindowViewController {
         private final NotificationEntryManager mNotificationEntryManager;
         private final DozeLog mDozeLog;
         private final DozeParameters mDozeParameters;
+        private final CommandQueue mCommandQueue;
         private StatusBarWindowView mView;
 
         @Inject
@@ -505,7 +509,8 @@ public class StatusBarWindowViewController {
                 KeyguardStateController keyguardStateController,
                 StatusBarStateController statusBarStateController,
                 DozeLog dozeLog,
-                DozeParameters dozeParameters) {
+                DozeParameters dozeParameters,
+                CommandQueue commandQueue) {
             mInjectionInflationController = injectionInflationController;
             mCoordinator = coordinator;
             mPulseExpansionHandler = pulseExpansionHandler;
@@ -520,6 +525,7 @@ public class StatusBarWindowViewController {
             mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
             mDozeLog = dozeLog;
             mDozeParameters = dozeParameters;
+            mCommandQueue = commandQueue;
         }
 
         /**
@@ -558,7 +564,8 @@ public class StatusBarWindowViewController {
                     mKeyguardStateController,
                     mStatusBarStateController,
                     mDozeLog,
-                    mDozeParameters);
+                    mDozeParameters,
+                    mCommandQueue);
         }
     }
 }

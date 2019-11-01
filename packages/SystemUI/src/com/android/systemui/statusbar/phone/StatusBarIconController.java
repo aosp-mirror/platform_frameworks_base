@@ -40,6 +40,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
@@ -96,8 +97,8 @@ public interface StatusBarIconController {
         private final DarkIconDispatcher mDarkIconDispatcher;
         private int mIconHPadding;
 
-        public DarkIconManager(LinearLayout linearLayout) {
-            super(linearLayout);
+        public DarkIconManager(LinearLayout linearLayout, CommandQueue commandQueue) {
+            super(linearLayout, commandQueue);
             mIconHPadding = mContext.getResources().getDimensionPixelSize(
                     R.dimen.status_bar_icon_padding);
             mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
@@ -156,8 +157,8 @@ public interface StatusBarIconController {
     public static class TintedIconManager extends IconManager {
         private int mColor;
 
-        public TintedIconManager(ViewGroup group) {
-            super(group);
+        public TintedIconManager(ViewGroup group, CommandQueue commandQueue) {
+            super(group, commandQueue);
         }
 
         @Override
@@ -203,14 +204,14 @@ public interface StatusBarIconController {
         private boolean mIsInDemoMode;
         protected DemoStatusIcons mDemoStatusIcons;
 
-        public IconManager(ViewGroup group) {
+        public IconManager(ViewGroup group, CommandQueue commandQueue) {
             mGroup = group;
             mContext = group.getContext();
             mIconSize = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.status_bar_icon_size);
 
             DisableStateTracker tracker =
-                    new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS);
+                    new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS, commandQueue);
             mGroup.addOnAttachStateChangeListener(tracker);
             if (mGroup.isAttachedToWindow()) {
                 // In case we miss the first onAttachedToWindow event

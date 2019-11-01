@@ -124,6 +124,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     public void setupFragment() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mCommandQueue = new CommandQueue(mContext);
         setupSysuiDependency();
         createRootView();
         mOverviewProxyService =
@@ -150,8 +151,6 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     private void setupSysuiDependency() {
-        mCommandQueue = new CommandQueue(mContext);
-        mSysuiContext.putComponent(CommandQueue.class, mCommandQueue);
         mSysuiContext.putComponent(StatusBar.class, mock(StatusBar.class));
         mSysuiContext.putComponent(Recents.class, mock(Recents.class));
         mSysuiContext.putComponent(Divider.class, mock(Divider.class));
@@ -160,7 +159,6 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS);
         mSysuiTestableContextExternal = (SysuiTestableContext) mSysuiContext.createDisplayContext(
                 display);
-        mSysuiTestableContextExternal.putComponent(CommandQueue.class, mCommandQueue);
         mSysuiTestableContextExternal.putComponent(StatusBar.class, mock(StatusBar.class));
         mSysuiTestableContextExternal.putComponent(Recents.class, mock(Recents.class));
         mSysuiTestableContextExternal.putComponent(Divider.class, mock(Divider.class));
@@ -252,7 +250,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 mock(NavigationModeController.class),
                 mock(StatusBarStateController.class),
                 mMockSysUiState,
-                mBroadcastDispatcher);
+                mBroadcastDispatcher,
+                mCommandQueue);
     }
 
     private class HostCallbacksForExternalDisplay extends

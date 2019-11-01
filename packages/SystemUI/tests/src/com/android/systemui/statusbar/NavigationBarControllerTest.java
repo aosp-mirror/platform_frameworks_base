@@ -62,9 +62,9 @@ public class NavigationBarControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         mNavigationBarController = spy(
-                new NavigationBarController(mContext, Dependency.get(Dependency.MAIN_HANDLER)));
+                new NavigationBarController(mContext, Dependency.get(Dependency.MAIN_HANDLER),
+                        mock(CommandQueue.class)));
         initializeNavigationBars();
     }
 

@@ -53,7 +53,6 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUI;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.CommandQueue;
@@ -62,9 +61,13 @@ import com.android.systemui.util.NotificationChannels;
 
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /** The class to show notification(s) of instant apps. This may show multiple notifications on
  * splitted screen.
  */
+@Singleton
 public class InstantAppNotifier extends SystemUI
         implements CommandQueue.Callbacks, KeyguardStateController.Callback {
     private static final String TAG = "InstantAppNotifier";
@@ -73,11 +76,14 @@ public class InstantAppNotifier extends SystemUI
     private final Handler mHandler = new Handler();
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
+    private final CommandQueue mCommandQueue;
     private boolean mDockedStackExists;
     private KeyguardStateController mKeyguardStateController;
 
-    public InstantAppNotifier(Context context) {
+    @Inject
+    public InstantAppNotifier(Context context, CommandQueue commandQueue) {
         super(context);
+        mCommandQueue = commandQueue;
     }
 
     @Override
@@ -91,7 +97,7 @@ public class InstantAppNotifier extends SystemUI
             // Ignore
         }
 
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
+        mCommandQueue.addCallback(this);
         mKeyguardStateController.addCallback(this);
 
         DockedStackExistsListener.register(

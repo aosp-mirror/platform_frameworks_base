@@ -83,7 +83,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mNetworkController = Dependency.get(NetworkController.class);
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         mStatusBarComponent = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
-        mCommandQueue = SysUiServiceProvider.getComponent(getContext(), CommandQueue.class);
+        mCommandQueue = Dependency.get(CommandQueue.class);
     }
 
     @Override
@@ -100,7 +100,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
         }
-        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons));
+        mDarkIconManager = new DarkIconManager(view.findViewById(R.id.statusIcons),
+                Dependency.get(CommandQueue.class));
         mDarkIconManager.setShouldLog(true);
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);

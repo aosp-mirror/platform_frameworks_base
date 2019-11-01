@@ -43,6 +43,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -181,8 +182,8 @@ public class DependencyProvider {
     @Singleton
     @Provides
     public NavigationBarController provideNavigationBarController(Context context,
-            @MainHandler Handler mainHandler) {
-        return new NavigationBarController(context, mainHandler);
+            @MainHandler Handler mainHandler, CommandQueue commandQueue) {
+        return new NavigationBarController(context, mainHandler, commandQueue);
     }
 
     @Singleton

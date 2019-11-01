@@ -42,6 +42,7 @@ import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
@@ -136,11 +137,14 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
+        CommandQueue commandQueue = new CommandQueue(context);
         return new QSFragment(
-                new RemoteInputQuickSettingsDisabler(context, mock(ConfigurationController.class)),
+                new RemoteInputQuickSettingsDisabler(context, mock(ConfigurationController.class),
+                        commandQueue),
                 new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
                 context,
                 mock(QSTileHost.class),
-                mock(StatusBarStateController.class));
+                mock(StatusBarStateController.class),
+                commandQueue);
     }
 }

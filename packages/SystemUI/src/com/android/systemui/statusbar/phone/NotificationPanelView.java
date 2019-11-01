@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
@@ -463,7 +462,7 @@ public class NotificationPanelView extends PanelView implements
             NotificationEntryManager notificationEntryManager,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController, DozeLog dozeLog,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters, CommandQueue commandQueue) {
         super(context, attrs, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController);
         setWillNotDraw(!DEBUG);
@@ -475,7 +474,7 @@ public class NotificationPanelView extends PanelView implements
         setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
         mAlphaPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.MULTIPLY));
         setPanelAlpha(255, false /* animate */);
-        mCommandQueue = getComponent(context, CommandQueue.class);
+        mCommandQueue = commandQueue;
         mDisplayId = context.getDisplayId();
         mPulseExpansionHandler = pulseExpansionHandler;
         mDozeParameters = dozeParameters;

@@ -47,16 +47,21 @@ import com.android.systemui.statusbar.CommandQueue;
 
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
  * appropriate biometric UI (e.g. BiometricDialogView).
  */
+@Singleton
 public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         AuthDialogCallback {
 
     private static final String TAG = "BiometricPrompt/AuthController";
     private static final boolean DEBUG = true;
 
+    private final CommandQueue mCommandQueue;
     private final Injector mInjector;
 
     // TODO: These should just be saved from onSaveState
@@ -189,13 +194,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     }
 
-    public AuthController(Context context) {
-        this(context, new Injector());
+    @Inject
+    public AuthController(Context context, CommandQueue commandQueue) {
+        this(context, commandQueue, new Injector());
     }
 
     @VisibleForTesting
-    AuthController(Context context, Injector injector) {
+    AuthController(Context context, CommandQueue commandQueue, Injector injector) {
         super(context);
+        mCommandQueue = commandQueue;
         mInjector = injector;
     }
 
@@ -205,7 +212,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         if (pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)
                 || pm.hasSystemFeature(PackageManager.FEATURE_FACE)
                 || pm.hasSystemFeature(PackageManager.FEATURE_IRIS)) {
-            getComponent(CommandQueue.class).addCallback(this);
+            mCommandQueue.addCallback(this);
             mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             mActivityTaskManager = mInjector.getActivityTaskManager();
 
