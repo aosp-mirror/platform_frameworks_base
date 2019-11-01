@@ -2016,14 +2016,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b "
                             + "mHasSurface=%b surfaceShowing=%b animating=%b app-animation=%b "
-                            + "mWillReplaceWindow=%b inPendingTransaction=%b mDisplayFrozen=%b "
-                            + "callers=%s",
+                            + "mWillReplaceWindow=%b mDisplayFrozen=%b callers=%s",
                     this, mWinAnimator.mSurfaceController, mAnimatingExit, mRemoveOnExit,
                     mHasSurface, mWinAnimator.getShown(),
                     isAnimating(TRANSITION | PARENTS),
                     mActivityRecord != null && mActivityRecord.isAnimating(TRANSITION),
                     mWillReplaceWindow,
-                    mActivityRecord != null && mActivityRecord.inPendingTransaction,
                     mWmService.mDisplayFrozen, Debug.getCallers(6));
 
             // Visibility of the removed window. Will be used later to update orientation later on.

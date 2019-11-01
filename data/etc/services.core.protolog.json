@@ -913,12 +913,6 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
-    "-121104356": {
-      "message": "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b mHasSurface=%b surfaceShowing=%b animating=%b app-animation=%b mWillReplaceWindow=%b inPendingTransaction=%b mDisplayFrozen=%b callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/WindowState.java"
-    },
     "-116086365": {
       "message": "******************** ENABLING SCREEN!",
       "level": "INFO",
@@ -1332,6 +1326,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "594260654": {
+      "message": "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b mHasSurface=%b surfaceShowing=%b animating=%b app-animation=%b mWillReplaceWindow=%b mDisplayFrozen=%b callers=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "600140673": {
       "message": "checkBootAnimationComplete: Waiting for anim complete",
