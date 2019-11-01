@@ -119,14 +119,14 @@ fun ClassPrinter.generateConstDef(consts: List<Pair<VariableDeclarator, FieldDec
     }
 }
 
-fun ClassPrinter.generateAidl(javaFile: File) {
-    val aidl = File(javaFile.path.substringBeforeLast(".java") + ".aidl")
+fun FileInfo.generateAidl() {
+    val aidl = File(file.path.substringBeforeLast(".java") + ".aidl")
     if (aidl.exists()) return
     aidl.writeText(buildString {
         sourceLines.dropLastWhile { !it.startsWith("package ") }.forEach {
             appendln(it)
         }
-        append("\nparcelable $ClassName;\n")
+        append("\nparcelable ${mainClass.nameAsString};\n")
     })
 }
 

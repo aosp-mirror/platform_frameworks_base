@@ -1,5 +1,6 @@
 package com.android.codegen
 
+import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.expr.ClassExpr
 import com.github.javaparser.ast.expr.Name
@@ -111,11 +112,12 @@ data class FieldInfo(
     val annotations by lazy {
         if (FieldClass in BUILTIN_SPECIAL_PARCELLINGS) {
             classPrinter {
-                fieldAst.addAnnotation(SingleMemberAnnotationExpr(
-                        Name(ParcelWith),
-                        ClassExpr(JAVA_PARSER
-                                .parseClassOrInterfaceType("$Parcelling.BuiltIn.For$FieldClass")
-                                .throwIfFailed())))
+                fileInfo.apply {
+                    fieldAst.addAnnotation(SingleMemberAnnotationExpr(
+                            Name(ParcelWith),
+                            ClassExpr(parseJava(JavaParser::parseClassOrInterfaceType,
+                                    "$Parcelling.BuiltIn.For$FieldClass"))))
+                }
             }
         }
         fieldAst.annotations.map { it.removeComment().toString() }
