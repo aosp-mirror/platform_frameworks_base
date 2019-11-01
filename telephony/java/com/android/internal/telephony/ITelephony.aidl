@@ -1796,6 +1796,16 @@ interface ITelephony {
     void unregisterImsRegistrationCallback(int subId, IImsRegistrationCallback c);
 
     /**
+     * Get the IMS service registration state for the MmTelFeature associated with this sub id.
+     */
+    void getImsMmTelRegistrationState(int subId, IIntegerConsumer consumer);
+
+    /**
+     * Get the transport type for the IMS service registration state.
+     */
+    void getImsMmTelRegistrationTransportType(int subId, IIntegerConsumer consumer);
+
+    /**
      * Adds an IMS MmTel capabilities callback for the subscription specified.
      */
     void registerMmTelCapabilityCallback(int subId, IImsCapabilityCallback c);

@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.RegistrationManager;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
@@ -72,9 +73,6 @@ public class ImsRegistrationImplBase {
     // with NOT_REGISTERED in the case where the ImsService has not updated the registration state
     // yet.
     private static final int REGISTRATION_STATE_UNKNOWN = -1;
-    private static final int REGISTRATION_STATE_NOT_REGISTERED = 0;
-    private static final int REGISTRATION_STATE_REGISTERING = 1;
-    private static final int REGISTRATION_STATE_REGISTERED = 2;
 
     private final IImsRegistration mBinder = new IImsRegistration.Stub() {
 
@@ -128,7 +126,7 @@ public class ImsRegistrationImplBase {
      * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
      */
     public final void onRegistered(@ImsRegistrationTech int imsRadioTech) {
-        updateToState(imsRadioTech, REGISTRATION_STATE_REGISTERED);
+        updateToState(imsRadioTech, RegistrationManager.REGISTRATION_STATE_REGISTERED);
         mCallbacks.broadcast((c) -> {
             try {
                 c.onRegistered(imsRadioTech);
@@ -146,7 +144,7 @@ public class ImsRegistrationImplBase {
      * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
      */
     public final void onRegistering(@ImsRegistrationTech int imsRadioTech) {
-        updateToState(imsRadioTech, REGISTRATION_STATE_REGISTERING);
+        updateToState(imsRadioTech, RegistrationManager.REGISTRATION_STATE_REGISTERING);
         mCallbacks.broadcast((c) -> {
             try {
                 c.onRegistering(imsRadioTech);
@@ -230,7 +228,8 @@ public class ImsRegistrationImplBase {
 
     private void updateToDisconnectedState(ImsReasonInfo info) {
         synchronized (mLock) {
-            updateToState(REGISTRATION_TECH_NONE, REGISTRATION_STATE_NOT_REGISTERED);
+            updateToState(REGISTRATION_TECH_NONE,
+                    RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED);
             if (info != null) {
                 mLastDisconnectCause = info;
             } else {
@@ -264,15 +263,15 @@ public class ImsRegistrationImplBase {
             disconnectInfo = mLastDisconnectCause;
         }
         switch (state) {
-            case REGISTRATION_STATE_NOT_REGISTERED: {
+            case RegistrationManager.REGISTRATION_STATE_NOT_REGISTERED: {
                 c.onDeregistered(disconnectInfo);
                 break;
             }
-            case REGISTRATION_STATE_REGISTERING: {
+            case RegistrationManager.REGISTRATION_STATE_REGISTERING: {
                 c.onRegistering(getConnectionType());
                 break;
             }
-            case REGISTRATION_STATE_REGISTERED: {
+            case RegistrationManager.REGISTRATION_STATE_REGISTERED: {
                 c.onRegistered(getConnectionType());
                 break;
             }
