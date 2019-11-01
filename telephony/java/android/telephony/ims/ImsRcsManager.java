@@ -141,8 +141,8 @@ public class ImsRcsManager implements RegistrationManager {
     /**{@inheritDoc}*/
     @Override
     public void registerImsRegistrationCallback(
-            @NonNull RegistrationManager.RegistrationCallback c,
-            @NonNull @CallbackExecutor Executor executor)
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull RegistrationCallback c)
             throws ImsException {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
@@ -168,8 +168,8 @@ public class ImsRcsManager implements RegistrationManager {
 
     /**{@inheritDoc}*/
     @Override
-    public void getRegistrationState(@NonNull @ImsRegistrationState Consumer<Integer> stateCallback,
-            @NonNull @CallbackExecutor Executor executor) {
+    public void getRegistrationState(@NonNull @CallbackExecutor Executor executor,
+            @NonNull @ImsRegistrationState Consumer<Integer> stateCallback) {
         if (stateCallback == null) {
             throw new IllegalArgumentException("Must include a non-null stateCallback.");
         }
@@ -182,9 +182,9 @@ public class ImsRcsManager implements RegistrationManager {
 
     /**{@inheritDoc}*/
     @Override
-    public void getRegistrationTransportType(
-            @NonNull @AccessNetworkConstants.TransportType Consumer<Integer> transportTypeCallback,
-            @NonNull @CallbackExecutor Executor executor) {
+    public void getRegistrationTransportType(@NonNull @CallbackExecutor Executor executor,
+            @NonNull @AccessNetworkConstants.TransportType
+                    Consumer<Integer> transportTypeCallback) {
         if (transportTypeCallback == null) {
             throw new IllegalArgumentException("Must include a non-null transportTypeCallback.");
         }
