@@ -75,7 +75,6 @@ public class KeyguardSecurityModel {
             return SecurityMode.SimPin;
         }
 
-        // TODO(b/140034863)
         final int security = whitelistIpcs(() ->
                 mLockPatternUtils.getActivePasswordQuality(userId));
         switch (security) {
