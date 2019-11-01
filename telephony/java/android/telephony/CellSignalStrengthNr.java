@@ -194,13 +194,13 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     /** @hide */
     @Override
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
-        if (mCsiRsrp == CellInfo.UNAVAILABLE) {
+        if (mSsRsrp == CellInfo.UNAVAILABLE) {
             mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        } else if (mCsiRsrp >= SIGNAL_GREAT_THRESHOLD) {
+        } else if (mSsRsrp >= SIGNAL_GREAT_THRESHOLD) {
             mLevel = SIGNAL_STRENGTH_GREAT;
-        } else if (mCsiRsrp >= SIGNAL_GOOD_THRESHOLD) {
+        } else if (mSsRsrp >= SIGNAL_GOOD_THRESHOLD) {
             mLevel = SIGNAL_STRENGTH_GOOD;
-        } else if (mCsiRsrp >= SIGNAL_MODERATE_THRESHOLD) {
+        } else if (mSsRsrp >= SIGNAL_MODERATE_THRESHOLD) {
             mLevel = SIGNAL_STRENGTH_MODERATE;
         } else {
             mLevel = SIGNAL_STRENGTH_POOR;
@@ -212,7 +212,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      *
      * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
      *
-     * @return RSCP in ASU 0..97, 255, or UNAVAILABLE
+     * @return RSRP in ASU 0..97, 255, or UNAVAILABLE
      */
     @Override
     public int getAsuLevel() {
@@ -231,11 +231,11 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     }
 
     /**
-     * Get the CSI-RSRP as dBm value -140..-44dBm or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
+     * Get the SS-RSRP as dBm value -140..-44dBm or {@link CellInfo#UNAVAILABLE UNAVAILABLE}.
      */
     @Override
     public int getDbm() {
-        return mCsiRsrp;
+        return mSsRsrp;
     }
 
     /** @hide */
