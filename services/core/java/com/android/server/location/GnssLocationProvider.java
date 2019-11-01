@@ -589,7 +589,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (sStaticTestOverride) {
             return true;
         }
+        ensureInitialized();
         return native_is_supported();
+    }
+
+    private static synchronized void ensureInitialized() {
+        if (!sIsInitialized) {
+            class_init_native();
+        }
+        sIsInitialized = true;
     }
 
     private void reloadGpsProperties() {
@@ -610,12 +618,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             Looper looper) {
         super(context, locationProviderManager);
 
-        synchronized (mLock) {
-            if (!sIsInitialized) {
-                class_init_native();
-            }
-            sIsInitialized = true;
-        }
+        ensureInitialized();
 
         mLooper = looper;
 
@@ -833,7 +836,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         int elapsedRealtimeFlags = ELAPSED_REALTIME_HAS_TIMESTAMP_NS
                 | (location.hasElapsedRealtimeUncertaintyNanos()
-                        ? ELAPSED_REALTIME_HAS_TIME_UNCERTAINTY_NS : 0);
+                ? ELAPSED_REALTIME_HAS_TIME_UNCERTAINTY_NS : 0);
         long elapsedRealtimeNanos = location.getElapsedRealtimeNanos();
         double elapsedRealtimeUncertaintyNanos = location.getElapsedRealtimeUncertaintyNanos();
 
@@ -1024,7 +1027,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         // .. but enable anyway, if there's an active settings-ignored request (e.g. ELS)
         enabled |= (mProviderRequest != null && mProviderRequest.reportLocation
-                        && mProviderRequest.locationSettingsIgnored);
+                && mProviderRequest.locationSettingsIgnored);
 
         // ... and, finally, disable anyway, if device is being shut down
         enabled &= !mShutdown;
