@@ -17,3 +17,4 @@
 package android.view.accessibility;
 
 parcelable AccessibilityNodeInfo;
+parcelable AccessibilityNodeInfo.AccessibilityAction;
