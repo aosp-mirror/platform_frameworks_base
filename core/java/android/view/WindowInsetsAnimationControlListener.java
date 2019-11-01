@@ -22,19 +22,17 @@ import android.view.inputmethod.EditorInfo;
 
 /**
  * Interface that informs the client about {@link WindowInsetsAnimationController} state changes.
- * @hide pending unhide
  */
 public interface WindowInsetsAnimationControlListener {
 
     /**
-     * Gets called as soon as the animation is ready to be controlled. This may be
-     * delayed when the IME needs to redraw because of an {@link EditorInfo} change, or when the
-     * window is starting up.
+     * Called when the animation is ready to be controlled. This may be delayed when the IME needs
+     * to redraw because of an {@link EditorInfo} change, or when the window is starting up.
      *
      * @param controller The controller to control the inset animation.
      * @param types The {@link InsetsType}s it was able to gain control over. Note that this may be
      *              different than the types passed into
-     *              {@link WindowInsetsController#controlWindowInsetsAnimation} in case the window
+     *              {@link WindowInsetsController#controlInputMethodAnimation} in case the window
      *              wasn't able to gain the controls because it wasn't the IME target or not
      *              currently the window that's controlling the system bars.
      */

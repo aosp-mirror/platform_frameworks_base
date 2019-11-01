@@ -2555,7 +2555,8 @@ public abstract class Window {
     /**
      * @return The {@link WindowInsetsController} associated with this window
      * @see View#getWindowInsetsController()
-     * @hide pending unhide
      */
-    public abstract @NonNull WindowInsetsController getInsetsController();
+    public @Nullable WindowInsetsController getInsetsController() {
+        return null;
+    }
 }

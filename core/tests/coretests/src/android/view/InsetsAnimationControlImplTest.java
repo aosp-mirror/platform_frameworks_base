@@ -19,11 +19,9 @@ package android.view;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
-import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -118,7 +116,7 @@ public class InsetsAnimationControlImplTest {
         consumers.put(ITYPE_NAVIGATION_BAR, navConsumer);
         mController = new InsetsAnimationControlImpl(consumers,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
-                () -> mMockTransactionApplier, mMockController);
+                () -> mMockTransactionApplier, mMockController, 10 /* durationMs */);
     }
 
     @Test
@@ -131,7 +129,8 @@ public class InsetsAnimationControlImplTest {
 
     @Test
     public void testChangeInsets() {
-        mController.changeInsets(Insets.of(0, 30, 40, 0));
+        mController.setInsetsAndAlpha(Insets.of(0, 30, 40, 0), 1f /* alpha */,
+                0f /* fraction */);
         mController.applyChangeInsets(new InsetsState());
         assertEquals(Insets.of(0, 30, 40, 0), mController.getCurrentInsets());
 
@@ -150,24 +149,24 @@ public class InsetsAnimationControlImplTest {
     @Test
     public void testFinishing() {
         when(mMockController.getState()).thenReturn(mInsetsState);
-        mController.finish(navigationBars());
+        mController.finish(true /* shown */);
         mController.applyChangeInsets(mInsetsState);
-        assertFalse(mInsetsState.getSource(ITYPE_STATUS_BAR).isVisible());
+        assertTrue(mInsetsState.getSource(ITYPE_STATUS_BAR).isVisible());
         assertTrue(mInsetsState.getSource(ITYPE_NAVIGATION_BAR).isVisible());
-        assertEquals(Insets.of(0, 0, 100, 0), mController.getCurrentInsets());
-        verify(mMockController).notifyFinished(eq(mController), eq(navigationBars()));
+        assertEquals(Insets.of(0, 100, 100, 0), mController.getCurrentInsets());
+        verify(mMockController).notifyFinished(eq(mController), eq(true /* shown */));
     }
 
     @Test
     public void testCancelled() {
         mController.onCancelled();
         try {
-            mController.changeInsets(Insets.NONE);
+            mController.setInsetsAndAlpha(Insets.NONE, 1f /*alpha */, 0f /* fraction */);
             fail("Expected exception to be thrown");
         } catch (IllegalStateException ignored) {
         }
         verify(mMockListener).onCancelled();
-        mController.finish(navigationBars());
+        mController.finish(true /* shown */);
     }
 
     private void assertPosition(Matrix m, Rect original, Rect transformed) {

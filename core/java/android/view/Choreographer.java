@@ -16,13 +16,13 @@
 
 package android.view;
 
-import static android.view.DisplayEventReceiver.CONFIG_CHANGED_EVENT_SUPPRESS;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_APP;
 import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.FrameInfo;
+import android.graphics.Insets;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
 import android.os.Handler;
@@ -219,9 +219,10 @@ public final class Choreographer {
     /**
      * Callback type: Animation callback to handle inset updates. This is separate from
      * {@link #CALLBACK_ANIMATION} as we need to "gather" all inset animation updates via
-     * {@link WindowInsetsAnimationController#changeInsets} for multiple ongoing animations but then
-     * update the whole view system with a single callback to {@link View#dispatchWindowInsetsAnimationProgress}
-     * that contains all the combined updated insets.
+     * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)} for multiple
+     * ongoing animations but then update the whole view system with a single callback to
+     * {@link View#dispatchWindowInsetsAnimationProgress} that contains all the combined updated
+     * insets.
      * <p>
      * Both input and animation may change insets, so we need to run this after these callbacks, but
      * before traversals.

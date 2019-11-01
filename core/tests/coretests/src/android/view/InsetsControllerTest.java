@@ -123,7 +123,7 @@ public class InsetsControllerTest {
 
         WindowInsetsAnimationControlListener mockListener =
                 mock(WindowInsetsAnimationControlListener.class);
-        mController.controlWindowInsetsAnimation(statusBars(), mockListener);
+        mController.controlWindowInsetsAnimation(statusBars(), 10 /* durationMs */, mockListener);
         verify(mockListener).onReady(any(), anyInt());
         mController.onControlsChanged(new InsetsSourceControl[0]);
         verify(mockListener).onCancelled();
@@ -135,7 +135,7 @@ public class InsetsControllerTest {
         mController.getState().setDisplayFrame(new Rect(0, 0, 200, 200));
         WindowInsetsAnimationControlListener controlListener =
                 mock(WindowInsetsAnimationControlListener.class);
-        mController.controlWindowInsetsAnimation(0, controlListener);
+        mController.controlWindowInsetsAnimation(0, 0 /* durationMs */, controlListener);
         verify(controlListener).onCancelled();
         verify(controlListener, never()).onReady(any(), anyInt());
     }
@@ -331,12 +331,13 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener mockListener =
                     mock(WindowInsetsAnimationControlListener.class);
-            mController.controlWindowInsetsAnimation(statusBars(), mockListener);
+            mController.controlWindowInsetsAnimation(statusBars(), 0 /* durationMs */,
+                    mockListener);
 
             ArgumentCaptor<WindowInsetsAnimationController> controllerCaptor =
                     ArgumentCaptor.forClass(WindowInsetsAnimationController.class);
             verify(mockListener).onReady(controllerCaptor.capture(), anyInt());
-            controllerCaptor.getValue().finish(0 /* shownTypes */);
+            controllerCaptor.getValue().finish(false /* shown */);
         });
         waitUntilNextFrame();
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {

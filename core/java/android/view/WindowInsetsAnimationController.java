@@ -16,48 +16,81 @@
 
 package android.view;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.graphics.Insets;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowInsetsAnimationListener.InsetsAnimation;
+import android.view.WindowInsetsAnimationCallback.AnimationBounds;
 
 /**
- * Interface to control a window inset animation frame-by-frame.
- * @hide pending unhide
+ * Controller for app-driven animation of system windows.
+ *  <p>
+ *  {@code WindowInsetsAnimationController} lets apps animate system windows such as
+ *  the {@link android.inputmethodservice.InputMethodService IME}. The animation is
+ *  synchronized, such that changes the system windows and the app's current frame
+ *  are rendered at the same time.
+ *  <p>
+ *  Control is obtained through {@link WindowInsetsController#controlInputMethodAnimation}.
  */
+@SuppressLint("NotClosable")
 public interface WindowInsetsAnimationController {
 
     /**
      * Retrieves the {@link Insets} when the windows this animation is controlling are fully hidden.
      * <p>
+     * Note that these insets are always relative to the window, which is the same as being relative
+     * to {@link View#getRootView}
+     * <p>
      * If there are any animation listeners registered, this value is the same as
-     * {@link InsetsAnimation#getLowerBound()} that will be passed into the callbacks.
+     * {@link AnimationBounds#getLowerBound()} that is being be passed into the root view of the
+     * hierarchy.
      *
      * @return Insets when the windows this animation is controlling are fully hidden.
      *
-     * @see InsetsAnimation#getLowerBound()
+     * @see AnimationBounds#getLowerBound()
      */
     @NonNull Insets getHiddenStateInsets();
 
     /**
      * Retrieves the {@link Insets} when the windows this animation is controlling are fully shown.
      * <p>
-     * In case the size of a window causing insets is changing in the middle of the animation, we
-     * execute that height change after this animation has finished.
+     * Note that these insets are always relative to the window, which is the same as being relative
+     * to {@link View#getRootView}
      * <p>
      * If there are any animation listeners registered, this value is the same as
-     * {@link InsetsAnimation#getUpperBound()} that will be passed into the callbacks.
+     * {@link AnimationBounds#getUpperBound()} that is being passed into the root view of hierarchy.
      *
      * @return Insets when the windows this animation is controlling are fully shown.
      *
-     * @see InsetsAnimation#getUpperBound()
+     * @see AnimationBounds#getUpperBound()
      */
     @NonNull Insets getShownStateInsets();
 
     /**
-     * @return The current insets on the window. These will follow any animation changes.
+     * Retrieves the current insets.
+     * <p>
+     * Note that these insets are always relative to the window, which is the same as
+     * being relative
+     * to {@link View#getRootView}
+     * @return The current insets on the currently showing frame. These insets will change as the
+     * animation progresses to reflect the current insets provided by the controlled window.
      */
     @NonNull Insets getCurrentInsets();
+
+    /**
+     *  Returns the progress as previously set by {@code fraction} in {@link #setInsetsAndAlpha}
+     *
+     *  @return the progress of the animation, where {@code 0} is fully hidden and {@code 1} is
+     *  fully shown.
+     * <p>
+     *  Note: this value represents raw overall progress of the animation
+     *  i.e. the combined progress of insets and alpha.
+     *  <p>
+     */
+    @FloatRange(from = 0f, to = 1f)
+    float getCurrentFraction();
 
     /**
      * @return The {@link InsetsType}s this object is currently controlling.
@@ -65,34 +98,45 @@ public interface WindowInsetsAnimationController {
     @InsetsType int getTypes();
 
     /**
-     * Modifies the insets by indirectly moving the windows around in the system that are causing
-     * window insets.
+     * Modifies the insets for the frame being drawn by indirectly moving the windows around in the
+     * system that are causing window insets.
      * <p>
-     * Note that this will <b>not</b> inform the view system of a full inset change via
+     * Note that these insets are always relative to the window, which is the same as being relative
+     * to {@link View#getRootView}
+     * <p>
+     * Also note that this will <b>not</b> inform the view system of a full inset change via
      * {@link View#dispatchApplyWindowInsets} in order to avoid a full layout pass during the
      * animation. If you'd like to animate views during a window inset animation, register a
-     * {@link WindowInsetsAnimationListener} by calling
-     * {@link View#setWindowInsetsAnimationListener(WindowInsetsAnimationListener)} that will be
-     * notified about any insets change via {@link WindowInsetsAnimationListener#onProgress} during
+     * {@link WindowInsetsAnimationCallback} by calling
+     * {@link View#setWindowInsetsAnimationCallback(WindowInsetsAnimationCallback)} that will be
+     * notified about any insets change via {@link WindowInsetsAnimationCallback#onProgress} during
      * the animation.
      * <p>
      * {@link View#dispatchApplyWindowInsets} will instead be called once the animation has
      * finished, i.e. once {@link #finish} has been called.
+     * Note: If there are no insets, alpha animation is still applied.
      *
      * @param insets The new insets to apply. Based on the requested insets, the system will
      *               calculate the positions of the windows in the system causing insets such that
      *               the resulting insets of that configuration will match the passed in parameter.
      *               Note that these insets are being clamped to the range from
-     *               {@link #getHiddenStateInsets} to {@link #getShownStateInsets}
+     *               {@link #getHiddenStateInsets} to {@link #getShownStateInsets}.
+     *               If you intend on changing alpha only, pass null or {@link #getCurrentInsets()}.
+     * @param alpha  The new alpha to apply to the inset side.
+     * @param fraction instantaneous animation progress. This value is dispatched to
+     *                 {@link WindowInsetsAnimationCallback}.
      *
-     * @see WindowInsetsAnimationListener
-     * @see View#setWindowInsetsAnimationListener(WindowInsetsAnimationListener)
+     * @see WindowInsetsAnimationCallback
+     * @see View#setWindowInsetsAnimationCallback(WindowInsetsAnimationCallback)
      */
-    void changeInsets(@NonNull Insets insets);
+    void setInsetsAndAlpha(@Nullable Insets insets, @FloatRange(from = 0f, to = 1f) float alpha,
+            @FloatRange(from = 0f, to = 1f) float fraction);
 
     /**
-     * @param shownTypes The list of windows causing insets that should remain shown after finishing
-     *                   the animation.
+     * Finishes the animation, and leaves the windows shown or hidden. After invoking
+     * {@link #finish(boolean)}, this instance is no longer valid.
+     * @param shown if {@code true}, the windows will be shown after finishing the
+     *              animation. Otherwise they will be hidden.
      */
-    void finish(@InsetsType int shownTypes);
+    void finish(boolean shown);
 }

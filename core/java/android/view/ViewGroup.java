@@ -51,7 +51,8 @@ import android.util.Pools;
 import android.util.Pools.SynchronizedPool;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.view.WindowInsetsAnimationListener.InsetsAnimation;
+import android.view.WindowInsetsAnimationCallback.AnimationBounds;
+import android.view.WindowInsetsAnimationCallback.InsetsAnimation;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -7198,16 +7199,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    void dispatchWindowInsetsAnimationStarted(InsetsAnimation animation) {
-        super.dispatchWindowInsetsAnimationStarted(animation);
+    @NonNull
+    public AnimationBounds dispatchWindowInsetsAnimationStarted(
+            @NonNull InsetsAnimation animation, @NonNull AnimationBounds bounds) {
+        super.dispatchWindowInsetsAnimationStarted(animation, bounds);
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
-            getChildAt(i).dispatchWindowInsetsAnimationStarted(animation);
+            getChildAt(i).dispatchWindowInsetsAnimationStarted(animation, bounds);
         }
+        return bounds;
     }
 
     @Override
-    WindowInsets dispatchWindowInsetsAnimationProgress(WindowInsets insets) {
+    @NonNull
+    public WindowInsets dispatchWindowInsetsAnimationProgress(@NonNull WindowInsets insets) {
         insets = super.dispatchWindowInsetsAnimationProgress(insets);
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
@@ -7217,7 +7222,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    void dispatchWindowInsetsAnimationFinished(InsetsAnimation animation) {
+    public void dispatchWindowInsetsAnimationFinished(@NonNull InsetsAnimation animation) {
         super.dispatchWindowInsetsAnimationFinished(animation);
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
