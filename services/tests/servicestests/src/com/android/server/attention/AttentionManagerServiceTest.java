@@ -16,6 +16,8 @@
 
 package com.android.server.attention;
 
+import static com.android.server.attention.AttentionManagerService.ATTENTION_CACHE_BUFFER_SIZE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +41,8 @@ import android.service.attention.IAttentionService;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.attention.AttentionManagerService.AttentionCheck;
+import com.android.server.attention.AttentionManagerService.AttentionCheckCache;
+import com.android.server.attention.AttentionManagerService.AttentionCheckCacheBuffer;
 import com.android.server.attention.AttentionManagerService.AttentionHandler;
 import com.android.server.attention.AttentionManagerService.UserState;
 
@@ -56,11 +60,16 @@ public class AttentionManagerServiceTest {
     private AttentionManagerService mSpyAttentionManager;
     private UserState mSpyUserState;
     private final int mTimeout = 1000;
-    @Mock private AttentionCallbackInternal mMockAttentionCallbackInternal;
-    @Mock private AttentionHandler mMockHandler;
-    @Mock private IAttentionCallback mMockIAttentionCallback;
-    @Mock private IPowerManager mMockIPowerManager;
-    @Mock Context mContext;
+    @Mock
+    private AttentionCallbackInternal mMockAttentionCallbackInternal;
+    @Mock
+    private AttentionHandler mMockHandler;
+    @Mock
+    private IAttentionCallback mMockIAttentionCallback;
+    @Mock
+    private IPowerManager mMockIPowerManager;
+    @Mock
+    Context mContext;
 
     @Before
     public void setUp() throws RemoteException {
@@ -140,12 +149,45 @@ public class AttentionManagerServiceTest {
         mSpyAttentionManager.onSwitchUser(userId);
     }
 
+    @Test
+    public void testAttentionCheckCacheBuffer_getLast_returnTheLastElement() {
+        AttentionCheckCacheBuffer buffer = new AttentionCheckCacheBuffer();
+        buffer.add(new AttentionCheckCache(0, 0, 1L));
+        AttentionCheckCache cache = new AttentionCheckCache(0, 0, 2L);
+        buffer.add(cache);
+        assertThat(buffer.getLast()).isEqualTo(cache);
+    }
+
+    @Test
+    public void testAttentionCheckCacheBuffer_get_returnNullWhenOutOfBoundary() {
+        AttentionCheckCacheBuffer buffer = new AttentionCheckCacheBuffer();
+        assertThat(buffer.get(1)).isNull();
+    }
+
+    @Test
+    public void testAttentionCheckCacheBuffer_get_handleCircularIndexing() {
+        AttentionCheckCacheBuffer buffer = new AttentionCheckCacheBuffer();
+        AttentionCheckCache cache = new AttentionCheckCache(0L, 0, 1L);
+        // Insert SIZE+1 elements.
+        for (int i = 0; i <= ATTENTION_CACHE_BUFFER_SIZE; i++) {
+            if (i == 1) {
+                buffer.add(cache);
+            } else {
+                buffer.add(new AttentionCheckCache(0L, 0, i));
+            }
+        }
+        // The element that was at index 1 should be at index 0 after inserting SIZE + 1 elements.
+        assertThat(buffer.get(0)).isEqualTo(cache);
+    }
+
     private class MockIAttentionService implements IAttentionService {
         public void checkAttention(IAttentionCallback callback) throws RemoteException {
             callback.onSuccess(0, 0);
         }
+
         public void cancelAttentionCheck(IAttentionCallback callback) {
         }
+
         public IBinder asBinder() {
             return null;
         }
