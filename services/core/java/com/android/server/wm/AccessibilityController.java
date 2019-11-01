@@ -132,17 +132,20 @@ final class AccessibilityController {
                 return false;
             }
 
-            if (mWindowsForAccessibilityObserver.get(displayId) != null) {
-                final Display display = dc.getDisplay();
-                if (display.getType() == Display.TYPE_VIRTUAL && dc.getParentWindow() != null) {
-                    // The window observer of this embedded display had been set from
-                    // window manager after setting its parent window.
-                    return false;
-                } else {
-                    throw new IllegalStateException(
-                            "Windows for accessibility callback of display "
-                                    + displayId + " already set!");
+            final Display display = dc.getDisplay();
+            if (display.getType() == Display.TYPE_VIRTUAL && dc.getParentWindow() != null) {
+                // If this display is an embedded one, its window observer should have been set from
+                // window manager after setting its parent window. But if its window observer is
+                // empty, that means this mapping didn't be set, and needs to do this again.
+                // This happened when accessibility window observer is disabled and enabled again.
+                if (mWindowsForAccessibilityObserver.get(displayId) == null) {
+                    handleWindowObserverOfEmbeddedDisplayLocked(displayId, dc.getParentWindow());
                 }
+                return false;
+            } else if (mWindowsForAccessibilityObserver.get(displayId) != null) {
+                throw new IllegalStateException(
+                        "Windows for accessibility callback of display "
+                                + displayId + " already set!");
             }
             mWindowsForAccessibilityObserver.put(displayId,
                     new WindowsForAccessibilityObserver(mService, displayId, callback));
