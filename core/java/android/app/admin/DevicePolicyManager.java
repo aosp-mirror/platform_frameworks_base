@@ -3499,24 +3499,25 @@ public class DevicePolicyManager {
      * Returns how complex the current user's screen lock is.
      *
      * <p>Note that when called from a profile which uses an unified challenge with its parent, the
-     * screen lock complexity of the parent will be returned. However, this API does not support
-     * explicitly querying the parent profile screen lock complexity via {@link
-     * #getParentProfileInstance}.
+     * screen lock complexity of the parent will be returned.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
      *
      * @throws IllegalStateException if the user is not unlocked.
-     * @throws SecurityException if the calling application does not have the permission
-     *                           {@link permission#REQUEST_PASSWORD_COMPLEXITY}
+     * @throws SecurityException     if the calling application does not have the permission
+     *                               {@link permission#REQUEST_PASSWORD_COMPLEXITY}
      */
     @PasswordComplexity
     @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
     public int getPasswordComplexity() {
-        throwIfParentInstance("getPasswordComplexity");
         if (mService == null) {
             return PASSWORD_COMPLEXITY_NONE;
         }
 
         try {
-            return mService.getPasswordComplexity();
+            return mService.getPasswordComplexity(mParentInstance);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -9254,6 +9255,7 @@ public class DevicePolicyManager {
      * <li>{@link #setPasswordExpirationTimeout}</li>
      * <li>{@link #getPasswordExpiration}</li>
      * <li>{@link #getPasswordMaximumLength}</li>
+     * <li>{@link #getPasswordComplexity}</li>
      * <li>{@link #isActivePasswordSufficient}</li>
      * <li>{@link #getCurrentFailedPasswordAttempts}</li>
      * <li>{@link #getMaximumFailedPasswordsForWipe}</li>

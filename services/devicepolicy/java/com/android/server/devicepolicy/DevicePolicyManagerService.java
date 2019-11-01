@@ -4928,21 +4928,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     @PasswordComplexity
-    public int getPasswordComplexity() {
+    public int getPasswordComplexity(boolean parent) {
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.GET_USER_PASSWORD_COMPLEXITY_LEVEL)
                 .setStrings(mInjector.getPackageManager()
                         .getPackagesForUid(mInjector.binderGetCallingUid()))
                 .write();
         final int callingUserId = mInjector.userHandleGetCallingUserId();
+
+        if (parent) {
+            enforceProfileOwnerOrSystemUser();
+        }
         enforceUserUnlocked(callingUserId);
         mContext.enforceCallingOrSelfPermission(
                 REQUEST_PASSWORD_COMPLEXITY,
                 "Must have " + REQUEST_PASSWORD_COMPLEXITY + " permission.");
 
         synchronized (getLockObject()) {
-            int targetUserId = getCredentialOwner(callingUserId, /* parent= */ false);
-            PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(targetUserId);
+            final int credentialOwner = getCredentialOwner(callingUserId, parent);
+            PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
             return metrics == null ? PASSWORD_COMPLEXITY_NONE : metrics.determineComplexity();
         }
     }
