@@ -5086,7 +5086,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final @LaunchState int launchState = info != null ? info.getLaunchState() : -1;
         mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
                 windowsDrawnDelayMs, launchState);
-        mStackSupervisor.stopWaitingForActivityVisible(this);
+        mStackSupervisor.stopWaitingForActivityVisible(this, windowsDrawnDelayMs);
         finishLaunchTickingLocked();
         if (task != null) {
             task.hasBeenVisible = true;

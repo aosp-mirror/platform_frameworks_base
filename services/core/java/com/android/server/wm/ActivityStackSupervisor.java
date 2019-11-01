@@ -562,8 +562,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return candidateTaskId;
     }
 
-    void waitActivityVisible(ComponentName name, WaitResult result, long startTimeMs) {
-        final WaitInfo waitInfo = new WaitInfo(name, result, startTimeMs);
+    void waitActivityVisible(ComponentName name, WaitResult result) {
+        final WaitInfo waitInfo = new WaitInfo(name, result);
         mWaitingForActivityVisible.add(waitInfo);
     }
 
@@ -573,10 +573,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // down to the max limit while they are still waiting to finish.
         mFinishingActivities.remove(r);
 
-        stopWaitingForActivityVisible(r);
+        stopWaitingForActivityVisible(r, WaitResult.INVALID_DELAY);
     }
 
     void stopWaitingForActivityVisible(ActivityRecord r) {
+        stopWaitingForActivityVisible(r,
+                getActivityMetricsLogger().getLastDrawnDelayMs(r.getWindowingMode()));
+    }
+
+    void stopWaitingForActivityVisible(ActivityRecord r, long totalTime) {
         boolean changed = false;
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
             final WaitInfo w = mWaitingForActivityVisible.get(i);
@@ -585,7 +590,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 changed = true;
                 result.timeout = false;
                 result.who = w.getComponent();
-                result.totalTime = SystemClock.uptimeMillis() - w.getStartTime();
+                result.totalTime = totalTime;
                 mWaitingForActivityVisible.remove(w);
             }
         }
@@ -2824,13 +2829,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     static class WaitInfo {
         private final ComponentName mTargetComponent;
         private final WaitResult mResult;
-        /** Time stamp when we started to wait for {@link WaitResult}. */
-        private final long mStartTimeMs;
 
-        WaitInfo(ComponentName targetComponent, WaitResult result, long startTimeMs) {
+        WaitInfo(ComponentName targetComponent, WaitResult result) {
             this.mTargetComponent = targetComponent;
             this.mResult = result;
-            this.mStartTimeMs = startTimeMs;
         }
 
         public boolean matches(ComponentName targetComponent) {
@@ -2839,10 +2841,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         public WaitResult getResult() {
             return mResult;
-        }
-
-        public long getStartTime() {
-            return mStartTimeMs;
         }
 
         public ComponentName getComponent() {
