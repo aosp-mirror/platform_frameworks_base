@@ -80,7 +80,8 @@ public final class LinkProperties implements Parcelable {
     private final transient boolean mParcelSensitiveFields;
 
     private static final int MIN_MTU    = 68;
-    private static final int MIN_MTU_V6 = 1280;
+    /* package-visibility - Used in other files (such as Ikev2VpnProfile) as minimum iface MTU. */
+    static final int MIN_MTU_V6 = 1280;
     private static final int MAX_MTU    = 10000;
 
     private static final int INET6_ADDR_LENGTH = 16;
