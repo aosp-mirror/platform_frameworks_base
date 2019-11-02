@@ -16,6 +16,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.google.android.collect.Sets;
 import java.util.function.Consumer;
 
@@ -30,8 +31,8 @@ public class LiveWallpaperScrimController extends ScrimController {
         REDUCED_SCRIM_WALLPAPERS = Sets.newArraySet(new ComponentName[]{new ComponentName("com.breel.geswallpapers", "com.breel.geswallpapers.wallpapers.EarthWallpaperService"), new ComponentName(str, "com.breel.wallpapers18.delight.wallpapers.DelightWallpaperV1"), new ComponentName(str, "com.breel.wallpapers18.delight.wallpapers.DelightWallpaperV2"), new ComponentName(str, "com.breel.wallpapers18.delight.wallpapers.DelightWallpaperV3"), new ComponentName(str, "com.breel.wallpapers18.surfandturf.wallpapers.variations.SurfAndTurfWallpaperV2"), new ComponentName(str, "com.breel.wallpapers18.cities.wallpapers.variations.SanFranciscoWallpaper"), new ComponentName(str, "com.breel.wallpapers18.cities.wallpapers.variations.NewYorkWallpaper")});
     }
 
-    public LiveWallpaperScrimController(ScrimView scrimView, ScrimView scrimView2, LockscreenWallpaper lockscreenWallpaper, TriConsumer<ScrimState, Float, GradientColors> triConsumer, Consumer<Integer> consumer, DozeParameters dozeParameters, AlarmManager alarmManager) {
-        super(scrimView, scrimView2, triConsumer, consumer, dozeParameters, alarmManager);
+    public LiveWallpaperScrimController(ScrimView scrimView, ScrimView scrimView2, LockscreenWallpaper lockscreenWallpaper, TriConsumer<ScrimState, Float, GradientColors> triConsumer, Consumer<Integer> consumer, DozeParameters dozeParameters, AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
+        super(scrimView, scrimView2, triConsumer, consumer, dozeParameters, alarmManager, keyguardMonitor);
         mLockscreenWallpaper = lockscreenWallpaper;
     }
 
