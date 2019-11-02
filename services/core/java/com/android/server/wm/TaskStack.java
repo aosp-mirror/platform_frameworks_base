@@ -52,6 +52,8 @@ import static com.android.server.wm.StackProto.ID;
 import static com.android.server.wm.StackProto.MINIMIZE_AMOUNT;
 import static com.android.server.wm.StackProto.TASKS;
 import static com.android.server.wm.StackProto.WINDOW_CONTAINER;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -69,6 +71,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -934,7 +937,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     void removeIfPossible() {
-        if (isSelfOrChildAnimating()) {
+        if (isAnimating(TRANSITION | CHILDREN)) {
             mDeferRemoval = true;
             return;
         }
@@ -1792,7 +1795,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     /** Returns true if a removal action is still being deferred. */
     boolean checkCompleteDeferredRemoval() {
-        if (isSelfOrChildAnimating()) {
+        if (isAnimating(TRANSITION | CHILDREN)) {
             return true;
         }
         if (mDeferRemoval) {
@@ -1865,5 +1868,23 @@ public class TaskStack extends WindowContainer<Task> implements
 
     AnimatingActivityRegistry getAnimatingActivityRegistry() {
         return mAnimatingActivityRegistry;
+    }
+
+    @Override
+    void getAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
+            Rect outSurfaceInsets) {
+        final Task task = getTopChild();
+        if (task != null) {
+            task.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+        } else {
+            super.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+        }
+    }
+
+    @Override
+    RemoteAnimationTarget createRemoteAnimationTarget(
+            RemoteAnimationController.RemoteAnimationRecord record) {
+        final Task task = getTopChild();
+        return task != null ? task.createRemoteAnimationTarget(record) : null;
     }
 }

@@ -106,6 +106,8 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
@@ -2363,7 +2365,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     void removeIfPossible() {
-        if (isAnimating()) {
+        if (isAnimating(TRANSITION | PARENTS)) {
             mDeferredRemoval = true;
             return;
         }
@@ -3165,13 +3167,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // to look at all windows below the current target that are in this app, finding the
                 // highest visible one in layering.
                 WindowState highestTarget = null;
-                if (activity.isSelfAnimating()) {
+                if (activity.isAnimating(TRANSITION)) {
                     highestTarget = activity.getHighestAnimLayerWindow(curTarget);
                 }
 
                 if (highestTarget != null) {
-                    if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, mAppTransition + " " + highestTarget
-                            + " animating=" + highestTarget.isAnimating());
+                    if (DEBUG_INPUT_METHOD) {
+                        Slog.v(TAG_WM, mAppTransition + " " + highestTarget + " animating="
+                                + highestTarget.isAnimating(TRANSITION | PARENTS));
+                    }
 
                     if (mAppTransition.isTransitionSet()) {
                         // If we are currently setting up for an animation, hold everything until we
@@ -4322,7 +4326,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     // The split screen divider anchor is located above the split screen window.
                     layerForSplitScreenDividerAnchor = layer++;
                 }
-                if (s.isTaskAnimating() || s.isAppAnimating()) {
+                if (s.isTaskAnimating() || s.isAppTransitioning()) {
                     // The animation layer is located above the highest animating stack and no
                     // higher.
                     layerForAnimationLayer = layer++;
@@ -4651,7 +4655,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // so it get's layered above the starting window.
         if (imeTarget != null
                 && !(imeTarget.mActivityRecord != null && imeTarget.mActivityRecord.hasStartingWindow())
-                && (!(imeTarget.inSplitScreenWindowingMode() || imeTarget.mToken.isAppAnimating())
+                && (!(imeTarget.inSplitScreenWindowingMode()
+                             || imeTarget.mToken.isAppTransitioning())
                 && (imeTarget.getSurfaceControl() != null))) {
             mImeWindowsContainers.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
                     // TODO: We need to use an extra level on the app surface to ensure

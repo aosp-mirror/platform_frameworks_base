@@ -3248,7 +3248,7 @@ public class AccountManagerService
             UserAccounts accounts = getUserAccounts(userId);
             logRecordWithUid(
                     accounts, AccountsDb.DEBUG_ACTION_CALLED_ACCOUNT_ADD, AccountsDb.TABLE_ACCOUNTS,
-                    userId);
+                    uid);
             new Session(accounts, response, accountType, expectActivityLaunch,
                     true /* stripAuthTokenFromResult */, null /* accountName */,
                     false /* authDetailsRequired */, true /* updateLastAuthenticationTime */) {

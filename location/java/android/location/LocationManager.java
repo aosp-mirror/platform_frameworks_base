@@ -708,6 +708,7 @@ public class LocationManager {
      * @deprecated Use {@link #getCurrentLocation(String, CancellationSignal, Executor, Consumer)}
      * instead as it does not carry a risk of extreme battery drain.
      */
+    @Deprecated
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(
             @NonNull Criteria criteria,
@@ -737,6 +738,7 @@ public class LocationManager {
      * @deprecated Use {@link #getCurrentLocation(String, CancellationSignal, Executor, Consumer)}
      * instead as it does not carry a risk of extreme battery drain.
      */
+    @Deprecated
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(@NonNull String provider,
             @NonNull PendingIntent pendingIntent) {
@@ -765,6 +767,7 @@ public class LocationManager {
      * @deprecated Use {@link #getCurrentLocation(String, CancellationSignal, Executor, Consumer)}
      * instead as it does not carry a risk of extreme battery drain.
      */
+    @Deprecated
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestSingleUpdate(@NonNull Criteria criteria,
             @NonNull PendingIntent pendingIntent) {
@@ -2481,15 +2484,17 @@ public class LocationManager {
         }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-        @Override
         public void onProviderEnabled(String provider) {}
 
         @Override
         public void onProviderDisabled(String provider) {
             // in the event of the provider being disabled it is unlikely that we will get further
             // locations, so fail early so the client isn't left waiting hopelessly
+            deliverResult(null);
+        }
+
+        @Override
+        public void onRemoved() {
             deliverResult(null);
         }
 
@@ -2568,37 +2573,6 @@ public class LocationManager {
         }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-            Executor currentExecutor = mExecutor;
-            if (currentExecutor == null) {
-                return;
-            }
-
-            try {
-                currentExecutor.execute(() -> {
-                    try {
-                        if (currentExecutor != mExecutor) {
-                            return;
-                        }
-
-                        // we may be under the binder identity if a direct executor is used
-                        long identity = Binder.clearCallingIdentity();
-                        try {
-                            mListener.onStatusChanged(provider, status, extras);
-                        } finally {
-                            Binder.restoreCallingIdentity(identity);
-                        }
-                    } finally {
-                        locationCallbackFinished();
-                    }
-                });
-            } catch (RejectedExecutionException e) {
-                locationCallbackFinished();
-                throw e;
-            }
-        }
-
-        @Override
         public void onProviderEnabled(String provider) {
             Executor currentExecutor = mExecutor;
             if (currentExecutor == null) {
@@ -2657,6 +2631,14 @@ public class LocationManager {
             } catch (RejectedExecutionException e) {
                 locationCallbackFinished();
                 throw e;
+            }
+        }
+
+        @Override
+        public void onRemoved() {
+            unregister();
+            synchronized (mListeners) {
+                mListeners.remove(mListener, this);
             }
         }
 

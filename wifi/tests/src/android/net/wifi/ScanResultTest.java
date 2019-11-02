@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.validateMockitoUsage;
 
+import android.net.wifi.ScanResult.InformationElement;
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
@@ -124,6 +125,25 @@ public class ScanResultTest {
     }
 
     /**
+     * Verify parcel read/write for ScanResult with Information Element
+     */
+    @Test
+    public void verifyScanResultParcelWithInformationElement() throws Exception {
+        ScanResult writeScanResult = createScanResult();
+        writeScanResult.informationElements = new ScanResult.InformationElement[2];
+        writeScanResult.informationElements[0] = new ScanResult.InformationElement();
+        writeScanResult.informationElements[0].id = InformationElement.EID_HT_OPERATION;
+        writeScanResult.informationElements[0].idExt = 0;
+        writeScanResult.informationElements[0].bytes = new byte[]{0x11, 0x22, 0x33};
+        writeScanResult.informationElements[1] = new ScanResult.InformationElement();
+        writeScanResult.informationElements[1].id = InformationElement.EID_EXTENSION_PRESENT;
+        writeScanResult.informationElements[1].idExt = InformationElement.EID_EXT_HE_OPERATION;
+        writeScanResult.informationElements[1].bytes = new byte[]{0x44, 0x55, 0x66};
+        ScanResult readScanResult = new ScanResult(writeScanResult);
+        assertScanResultEquals(writeScanResult, readScanResult);
+    }
+
+    /**
      * Verify toString for ScanResult.
      */
     @Test
@@ -188,5 +208,6 @@ public class ScanResultTest {
         assertEquals(expected.frequency, actual.frequency);
         assertEquals(expected.timestamp, actual.timestamp);
         assertArrayEquals(expected.radioChainInfos, actual.radioChainInfos);
+        assertArrayEquals(expected.informationElements, actual.informationElements);
     }
 }

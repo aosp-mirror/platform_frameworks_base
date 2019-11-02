@@ -1810,8 +1810,9 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private long notifyANR(IBinder token, String reason) {
-        return mWindowManagerCallbacks.notifyANR(
+    private long notifyANR(InputApplicationHandle inputApplicationHandle, IBinder token,
+            String reason) {
+        return mWindowManagerCallbacks.notifyANR(inputApplicationHandle,
                 token, reason);
     }
 
@@ -2055,7 +2056,12 @@ public class InputManagerService extends IInputManager.Stub
 
         public void notifyInputChannelBroken(IBinder token);
 
-        public long notifyANR(IBinder token, String reason);
+        /**
+         * Notifies the window manager about an application that is not responding.
+         * Returns a new timeout to continue waiting in nanoseconds, or 0 to abort dispatch.
+         */
+        long notifyANR(InputApplicationHandle inputApplicationHandle, IBinder token,
+                String reason);
 
         public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags);
 

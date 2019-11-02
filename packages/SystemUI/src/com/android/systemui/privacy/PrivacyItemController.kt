@@ -22,7 +22,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.*
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
+import android.os.UserHandle
+import android.os.UserManager
 import android.provider.DeviceConfig
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
@@ -248,20 +252,20 @@ class PrivacyItemController @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor?, pw: PrintWriter?, args: Array<out String>?) {
-        pw?.println("PrivacyItemController state:")
-        pw?.println("  Listening: $listening")
-        pw?.println("  Current user ids: $currentUserIds")
-        pw?.println("  Privacy Items:")
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+        pw.println("PrivacyItemController state:")
+        pw.println("  Listening: $listening")
+        pw.println("  Current user ids: $currentUserIds")
+        pw.println("  Privacy Items:")
         privacyList.forEach {
-            pw?.print("    ")
-            pw?.println(it.toString())
+            pw.print("    ")
+            pw.println(it.toString())
         }
-        pw?.println("  Callbacks:")
+        pw.println("  Callbacks:")
         callbacks.forEach {
             it.get()?.let {
-                pw?.print("    ")
-                pw?.println(it.toString())
+                pw.print("    ")
+                pw.println(it.toString())
             }
         }
     }

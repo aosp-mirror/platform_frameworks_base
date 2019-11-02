@@ -16,6 +16,7 @@
 
 package com.android.server.appop;
 
+import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.AppOpsManager.MAX_PRIORITY_UID_STATE;
 import static android.app.AppOpsManager.MIN_PRIORITY_UID_STATE;
 import static android.app.AppOpsManager.OP_CAMERA;
@@ -27,7 +28,6 @@ import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
-import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE_LOCATION;
 import static android.app.AppOpsManager.UID_STATE_MAX_LAST_NON_RESTRICTED;
 import static android.app.AppOpsManager.UID_STATE_PERSISTENT;
 import static android.app.AppOpsManager.UID_STATE_TOP;
@@ -119,12 +119,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 
-import libcore.util.EmptyArray;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -143,6 +137,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import libcore.util.EmptyArray;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 public class AppOpsService extends IAppOpsService.Stub {
     static final String TAG = "AppOps";
@@ -164,12 +164,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         UID_STATE_PERSISTENT,           // ActivityManager.PROCESS_STATE_PERSISTENT
         UID_STATE_PERSISTENT,           // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         UID_STATE_TOP,                  // ActivityManager.PROCESS_STATE_TOP
-        UID_STATE_FOREGROUND_SERVICE_LOCATION,
-                                        // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE_LOCATION
         UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_BOUND_TOP
         UID_STATE_FOREGROUND_SERVICE,   // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
         UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-        UID_STATE_FOREGROUND,           // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+        UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
         UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
         UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
         UID_STATE_BACKGROUND,           // ActivityManager.PROCESS_STATE_BACKUP
@@ -364,7 +362,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         public int state = UID_STATE_CACHED;
         public int pendingState = UID_STATE_CACHED;
         public long pendingStateCommitTime;
-
+        public int capability;
+        public int pendingCapability;
         // For all features combined
         public int startNesting;
 
@@ -393,8 +392,25 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         int evalMode(int op, int mode) {
             if (mode == AppOpsManager.MODE_FOREGROUND) {
-                return state <= AppOpsManager.resolveFirstUnrestrictedUidState(op)
-                        ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED;
+                if (state <= UID_STATE_TOP) {
+                    // process is in foreground.
+                    return AppOpsManager.MODE_ALLOWED;
+                } else if (state <= AppOpsManager.resolveFirstUnrestrictedUidState(op)) {
+                    // process is in foreground, check its capability.
+                    switch (op) {
+                        case AppOpsManager.OP_FINE_LOCATION:
+                        case AppOpsManager.OP_COARSE_LOCATION:
+                        case AppOpsManager.OP_MONITOR_LOCATION:
+                        case AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION:
+                            return ((capability & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0)
+                                ? AppOpsManager.MODE_ALLOWED : AppOpsManager.MODE_IGNORED;
+                        default:
+                            return AppOpsManager.MODE_ALLOWED;
+                    }
+                } else {
+                    // process is not in foreground.
+                    return AppOpsManager.MODE_IGNORED;
+                }
             }
             return mode;
         }
@@ -1062,19 +1078,25 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    public void updateUidProcState(int uid, int procState) {
+    public void updateUidProcState(int uid, int procState,
+            @ActivityManager.ProcessCapability int capability) {
         synchronized (this) {
             final UidState uidState = getUidStateLocked(uid, true);
-            int newState = PROCESS_STATE_TO_UID_STATE[procState];
-            if (uidState != null && uidState.pendingState != newState) {
+            final int newState = PROCESS_STATE_TO_UID_STATE[procState];
+            if (uidState != null && (uidState.pendingState != newState
+                    || uidState.pendingCapability != capability)) {
                 final int oldPendingState = uidState.pendingState;
                 uidState.pendingState = newState;
+                uidState.pendingCapability = capability;
                 if (newState < uidState.state
                         || (newState <= UID_STATE_MAX_LAST_NON_RESTRICTED
                                 && uidState.state > UID_STATE_MAX_LAST_NON_RESTRICTED)) {
                     // We are moving to a more important state, or the new state may be in the
                     // foreground and the old state is in the background, then always do it
                     // immediately.
+                    commitUidPendingStateLocked(uidState);
+                } else if (newState == uidState.state && capability != uidState.capability) {
+                    // No change on process state, but process capability has changed.
                     commitUidPendingStateLocked(uidState);
                 } else if (uidState.pendingStateCommitTime == 0) {
                     // We are moving to a less important state for the first time,
@@ -1182,8 +1204,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         } else {
             for (int j=0; j<ops.length; j++) {
-                int code = uidState.opModes.keyAt(j);
-                if (code >= 0) {
+                int code = ops[j];
+                if (uidState.opModes.indexOfKey(code) >= 0) {
                     if (resOps == null) {
                         resOps = new ArrayList<>();
                     }
@@ -2857,6 +2879,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
         uidState.state = uidState.pendingState;
+        uidState.capability = uidState.pendingCapability;
         uidState.pendingStateCommitTime = 0;
     }
 
@@ -4493,6 +4516,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (uidState.state != uidState.pendingState) {
                     pw.print("    pendingState=");
                     pw.println(AppOpsManager.getUidStateName(uidState.pendingState));
+                }
+                pw.print("    capability=");
+                pw.println(uidState.capability);
+                if (uidState.capability != uidState.pendingCapability) {
+                    pw.print("    pendingCapability=");
+                    pw.println(uidState.pendingCapability);
                 }
                 if (uidState.pendingStateCommitTime != 0) {
                     pw.print("    pendingStateCommitTime=");

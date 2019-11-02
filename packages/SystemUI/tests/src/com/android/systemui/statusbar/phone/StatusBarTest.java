@@ -91,6 +91,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -155,7 +156,6 @@ public class StatusBarTest extends SysuiTestCase {
     private FakeMetricsLogger mMetricsLogger;
     private PowerManager mPowerManager;
     private TestableNotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
-    private CommandQueue mCommandQueue;
 
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private LightBarController mLightBarController;
@@ -229,6 +229,9 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DozeServiceHost mDozeServiceHost;
     @Mock private LinearLayout mLockIconContainer;
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
+    @Mock private KeyguardLiftController mKeyguardLiftController;
+    @Mock private CommandQueue mCommandQueue;
+    @Mock private PluginManager mPluginManager;
 
     @Before
     public void setup() throws Exception {
@@ -256,9 +259,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mExpansionStateLogger);
         notificationLogger.setVisibilityReporter(mock(Runnable.class));
 
-        mCommandQueue = mock(CommandQueue.class);
         when(mCommandQueue.asBinder()).thenReturn(new Binder());
-        mContext.putComponent(CommandQueue.class, mCommandQueue);
 
         mContext.setTheme(R.style.Theme_SystemUI_Light);
 
@@ -320,7 +321,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 new RemoteInputQuickSettingsDisabler(
                         mContext,
-                        configurationController
+                        configurationController,
+                        mCommandQueue
                 ),
                 mNotificationGutsManager,
                 notificationLogger,
@@ -360,11 +362,14 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotifLog,
                 mDozeParameters,
                 mScrimController,
+                mKeyguardLiftController,
                 mLockscreenWallpaperLazy,
                 mBiometricUnlockControllerLazy,
                 mDozeServiceHost,
                 mPowerManager,
-                mDozeScrimController);
+                mDozeScrimController,
+                mCommandQueue,
+                mPluginManager);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);
@@ -382,7 +387,6 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mComponents = mContext.getComponents();
         mStatusBar.mStatusBarWindow = mStatusBarWindowView;
         mStatusBar.mNotificationPanel = mNotificationPanelView;
-        mStatusBar.mCommandQueue = mCommandQueue;
         mStatusBar.mDozeScrimController = mDozeScrimController;
         mStatusBar.mNotificationIconAreaController = mNotificationIconAreaController;
         mStatusBar.mPresenter = mNotificationPresenter;
@@ -391,7 +395,6 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mStackScroller = mStackScroller;
         mStatusBar.mStatusBarWindowViewController = mStatusBarWindowViewController;
         mStatusBar.startKeyguard();
-        mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
         entryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,
                 mHeadsUpManager);
@@ -401,7 +404,6 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Test
     public void testSetBouncerShowing_noCrash() {
-        mStatusBar.mCommandQueue = mock(CommandQueue.class);
         mStatusBar.setBouncerShowing(true);
     }
 

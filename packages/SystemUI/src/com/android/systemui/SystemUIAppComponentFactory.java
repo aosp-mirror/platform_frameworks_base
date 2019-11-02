@@ -19,6 +19,7 @@ package com.android.systemui;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.content.Intent;
@@ -123,6 +124,25 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
             return service;
         }
         return super.instantiateServiceCompat(cl, className, intent);
+    }
+
+    @NonNull
+    @Override
+    public BroadcastReceiver instantiateReceiverCompat(@NonNull ClassLoader cl,
+            @NonNull String className, @Nullable Intent intent)
+            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+        if (mComponentHelper == null) {
+            // This shouldn't happen, but does when a device is freshly formatted.
+            // Bug filed against framework to take a look: http://b/141008541
+            SystemUIFactory.getInstance().getRootComponent().inject(
+                    SystemUIAppComponentFactory.this);
+        }
+        BroadcastReceiver receiver = mComponentHelper.resolveBroadcastReceiver(className);
+        if (receiver != null) {
+            return receiver;
+        }
+
+        return super.instantiateReceiverCompat(cl, className, intent);
     }
 
     /**

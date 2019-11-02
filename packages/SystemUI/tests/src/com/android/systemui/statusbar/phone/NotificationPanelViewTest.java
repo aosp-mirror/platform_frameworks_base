@@ -45,6 +45,7 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -246,7 +247,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                     mock(KeyguardStateController.class),
                     statusBarStateController,
                     mock(DozeLog.class),
-                    mDozeParameters);
+                    mDozeParameters,
+                    new CommandQueue(NotificationPanelViewTest.this.mContext));
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
             mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;

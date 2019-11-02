@@ -16,6 +16,18 @@
 
 package android.content.res;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_ROTATION;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
+import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
+import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+import static android.view.Surface.ROTATION_90;
+
 import android.content.Context;
 import android.os.LocaleList;
 import android.platform.test.annotations.Presubmit;
@@ -102,6 +114,38 @@ public class ConfigurationTest extends TestCase {
                 read.getLocales().indexOf(urdu) != -1);
         assertTrue("Urdu locale with extensions not found in Configuration locale list.",
                 read.getLocales().indexOf(urduExtension) != -1);
+    }
+
+    @Test
+    public void testMaskedSet() {
+        Configuration config = new Configuration();
+        Configuration other = new Configuration();
+        config.smallestScreenWidthDp = 100;
+        config.orientation = ORIENTATION_LANDSCAPE;
+        config.windowConfiguration.setRotation(ROTATION_90);
+        other.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        other.orientation = ORIENTATION_PORTRAIT;
+
+        // no change
+        config.setTo(other, 0, 0);
+        assertEquals(100, config.smallestScreenWidthDp);
+        assertEquals(ORIENTATION_LANDSCAPE, config.orientation);
+        assertEquals(ROTATION_90, config.windowConfiguration.getRotation());
+
+        final int justOrientationAndWindowConfig = CONFIG_ORIENTATION | CONFIG_WINDOW_CONFIGURATION;
+        config.setTo(other, justOrientationAndWindowConfig, WINDOW_CONFIG_WINDOWING_MODE);
+        assertEquals(100, config.smallestScreenWidthDp);
+        assertEquals(other.orientation, config.orientation);
+        assertEquals(other.windowConfiguration.getWindowingMode(),
+                config.windowConfiguration.getWindowingMode());
+        assertEquals(ROTATION_90, config.windowConfiguration.getRotation());
+
+        // unset
+        final int justSmallestSwAndWindowConfig =
+                CONFIG_SMALLEST_SCREEN_SIZE | CONFIG_WINDOW_CONFIGURATION;
+        config.setTo(other, justSmallestSwAndWindowConfig, WINDOW_CONFIG_ROTATION);
+        assertEquals(ROTATION_UNDEFINED, config.windowConfiguration.getRotation());
+        assertEquals(SMALLEST_SCREEN_WIDTH_DP_UNDEFINED, config.smallestScreenWidthDp);
     }
 
     private void writeToProto(File f, Configuration config) throws Exception {

@@ -29,23 +29,27 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * A proxy to a Recents implementation.
  */
+@Singleton
 public class Recents extends SystemUI implements CommandQueue.Callbacks {
 
     private final RecentsImplementation mImpl;
+    private final CommandQueue mCommandQueue;
 
     @Inject
-    public Recents(Context context, RecentsImplementation impl) {
+    public Recents(Context context, RecentsImplementation impl, CommandQueue commandQueue) {
         super(context);
         mImpl = impl;
+        mCommandQueue = commandQueue;
     }
 
     @Override
     public void start() {
-        getComponent(CommandQueue.class).addCallback(this);
+        mCommandQueue.addCallback(this);
         putComponent(Recents.class, this);
         mImpl.onStart(mContext, this);
     }

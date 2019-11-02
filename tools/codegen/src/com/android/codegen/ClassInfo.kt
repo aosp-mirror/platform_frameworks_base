@@ -1,47 +1,15 @@
 package com.android.codegen
 
-import com.github.javaparser.ParseProblemException
-import com.github.javaparser.ParseResult
-import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 
-open class ClassInfo(val sourceLines: List<String>) {
+open class ClassInfo(val classAst: ClassOrInterfaceDeclaration, val fileInfo: FileInfo) {
 
-    private val userSourceCode = (sourceLines + "}").joinToString("\n")
-    val fileAst: CompilationUnit = try {
-        JAVA_PARSER.parse(userSourceCode).throwIfFailed()
-    } catch (e: ParseProblemException) {
-        throw parseFailed(cause = e)
-    }
+    val fileAst = fileInfo.fileAst
 
-    fun <T> ParseResult<T>.throwIfFailed(): T {
-        if (problems.isNotEmpty()) {
-            throw parseFailed(
-                    desc = this@throwIfFailed.problems.joinToString("\n"),
-                    cause = this@throwIfFailed.problems.mapNotNull { it.cause.orElse(null) }.firstOrNull())
-        }
-        return result.get()
-    }
-
-    private fun parseFailed(cause: Throwable? = null, desc: String = ""): RuntimeException {
-        return RuntimeException("Failed to parse code:\n" +
-                userSourceCode
-                        .lines()
-                        .mapIndexed { lnNum, ln -> "/*$lnNum*/$ln" }
-                        .joinToString("\n") + "\n$desc",
-                cause)
-    }
-
-    val classAst = fileAst.types[0] as ClassOrInterfaceDeclaration
     val nestedClasses = classAst.members.filterIsInstance<ClassOrInterfaceDeclaration>()
 
-    val superInterfaces = (fileAst.types[0] as ClassOrInterfaceDeclaration)
-            .implementedTypes.map { it.asString() }
-
-    val superClass = run {
-        val superClasses = (fileAst.types[0] as ClassOrInterfaceDeclaration).extendedTypes
-        if (superClasses.isNonEmpty) superClasses[0] else null
-    }
+    val superInterfaces = classAst.implementedTypes.map { it.asString() }
+    val superClass = classAst.extendedTypes.getOrNull(0)
 
     val ClassName = classAst.nameAsString
     private val genericArgsAst = classAst.typeParameters

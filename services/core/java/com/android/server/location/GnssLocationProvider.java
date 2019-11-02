@@ -67,6 +67,7 @@ import android.util.StatsLog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
@@ -303,6 +304,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private final ExponentialBackOff mPsdsBackOff = new ExponentialBackOff(RETRY_INTERVAL,
             MAX_RETRY_INTERVAL);
+
+    private static boolean sIsInitialized = false;
+    private static boolean sStaticTestOverride = false;
 
     // True if we are enabled
     @GuardedBy("mLock")
@@ -576,8 +580,24 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
+    @VisibleForTesting
+    public static void setIsSupportedForTest(boolean override) {
+        sStaticTestOverride = override;
+    }
+
     public static boolean isSupported() {
+        if (sStaticTestOverride) {
+            return true;
+        }
+        ensureInitialized();
         return native_is_supported();
+    }
+
+    private static synchronized void ensureInitialized() {
+        if (!sIsInitialized) {
+            class_init_native();
+        }
+        sIsInitialized = true;
     }
 
     private void reloadGpsProperties() {
@@ -597,6 +617,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     public GnssLocationProvider(Context context, LocationProviderManager locationProviderManager,
             Looper looper) {
         super(context, locationProviderManager);
+
+        ensureInitialized();
 
         mLooper = looper;
 
@@ -814,7 +836,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         int elapsedRealtimeFlags = ELAPSED_REALTIME_HAS_TIMESTAMP_NS
                 | (location.hasElapsedRealtimeUncertaintyNanos()
-                        ? ELAPSED_REALTIME_HAS_TIME_UNCERTAINTY_NS : 0);
+                ? ELAPSED_REALTIME_HAS_TIME_UNCERTAINTY_NS : 0);
         long elapsedRealtimeNanos = location.getElapsedRealtimeNanos();
         double elapsedRealtimeUncertaintyNanos = location.getElapsedRealtimeUncertaintyNanos();
 
@@ -1005,7 +1027,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         // .. but enable anyway, if there's an active settings-ignored request (e.g. ELS)
         enabled |= (mProviderRequest != null && mProviderRequest.reportLocation
-                        && mProviderRequest.locationSettingsIgnored);
+                && mProviderRequest.locationSettingsIgnored);
 
         // ... and, finally, disable anyway, if device is being shut down
         enabled &= !mShutdown;
@@ -2223,10 +2245,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
-
-    static {
-        class_init_native();
-    }
 
     private static native void class_init_native();
 

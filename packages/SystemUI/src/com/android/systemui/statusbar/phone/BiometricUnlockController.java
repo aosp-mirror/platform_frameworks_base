@@ -35,6 +35,8 @@ import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -42,6 +44,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -53,7 +56,7 @@ import javax.inject.Singleton;
  * Controller which coordinates all the biometric unlocking actions with the UI.
  */
 @Singleton
-public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
+public class BiometricUnlockController extends KeyguardUpdateMonitorCallback implements Dumpable {
 
     private static final String TAG = "BiometricUnlockCtrl";
     private static final boolean DEBUG_BIO_WAKELOCK = KeyguardConstants.DEBUG_BIOMETRIC_WAKELOCK;
@@ -160,7 +163,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             @MainResources Resources resources,
             KeyguardBypassController keyguardBypassController, DozeParameters dozeParameters,
-            MetricsLogger metricsLogger) {
+            MetricsLogger metricsLogger, DumpController dumpController) {
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -180,6 +183,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardBypassController.setUnlockController(this);
         mMetricsLogger = metricsLogger;
+        dumpController.registerDumpable(this);
     }
 
     public void setStatusBarKeyguardViewManager(
@@ -543,7 +547,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         return mHasScreenTurnedOnSinceAuthenticating;
     }
 
-    public void dump(PrintWriter pw) {
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(" BiometricUnlockController:");
         pw.print("   mMode="); pw.println(mMode);
         pw.print("   mWakeLock="); pw.println(mWakeLock);

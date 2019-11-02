@@ -130,8 +130,10 @@ public final class DeviceConfig {
     /**
      * Namespace for how dex runs. The feature requires a reboot to reach a clean state.
      *
+     * @deprecated No longer used
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final String NAMESPACE_DEX_BOOT = "dex_boot";
 

@@ -42,6 +42,7 @@ import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
 import "frameworks/base/core/proto/android/service/batterystats.proto";
 import "frameworks/base/core/proto/android/service/diskstats.proto";
+import "frameworks/base/core/proto/android/service/dropbox.proto";
 import "frameworks/base/core/proto/android/service/graphicsstats.proto";
 import "frameworks/base/core/proto/android/service/netstats.proto";
 import "frameworks/base/core/proto/android/service/notification.proto";
@@ -87,42 +88,80 @@ message IncidentProto {
 
     optional android.util.LogProto main_logs = 1101 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_MAIN"
+        (section).args = "main"
     ];
 
     optional android.util.LogProto radio_logs = 1102 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_RADIO"
+        (section).args = "radio"
     ];
 
     optional android.util.LogProto events_logs = 1103 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_EVENTS"
+        (section).args = "events"
     ];
 
     optional android.util.LogProto system_logs = 1104 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_SYSTEM"
+        (section).args = "system"
     ];
 
     optional android.util.LogProto crash_logs = 1105 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_CRASH"
+        (section).args = "crash"
     ];
 
     optional android.util.LogProto stats_logs = 1106 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_STATS"
+        (section).args = "stats"
     ];
 
     optional android.util.LogProto security_logs = 1107 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_SECURITY"
+        (section).args = "security"
     ];
 
     optional android.util.LogProto kernel_logs = 1108 [
         (section).type = SECTION_LOG,
-        (section).args = "LOG_ID_KERNEL"
+        (section).args = "kernel"
+    ];
+
+    // Last logcat sections.
+    // Note that kernel logs is not persisted since it's contained in last kmsg.
+    optional android.util.LogProto last_main_logs = 1109 [
+        (section).type = SECTION_LOG,
+        (section).args = "main -L"
+    ];
+
+    optional android.util.LogProto last_radio_logs = 1110 [
+        (section).type = SECTION_LOG,
+        (section).args = "radio -L"
+    ];
+
+    optional android.util.LogProto last_events_logs = 1111 [
+        (section).type = SECTION_LOG,
+        (section).args = "events -L"
+    ];
+
+    optional android.util.LogProto last_system_logs = 1112 [
+        (section).type = SECTION_LOG,
+        (section).args = "system -L"
+    ];
+
+    optional android.util.LogProto last_crash_logs = 1113 [
+        (section).type = SECTION_LOG,
+        (section).args = "crash -L"
+    ];
+
+    optional android.util.LogProto last_stats_logs = 1114 [
+        (section).type = SECTION_LOG,
+        (section).args = "stats -L"
+    ];
+
+    // security logs is only available with "Device Owner" mode
+    optional android.util.LogProto last_security_logs = 1115 [
+        (section).type = SECTION_LOG,
+        (section).args = "security -L"
     ];
 
     // Stack dumps
@@ -327,6 +366,22 @@ message IncidentProto {
         (section).args = "/data/misc/perfetto-traces/incident-trace",
         (privacy).dest = DEST_AUTOMATIC,
         (section).userdebug_and_eng_only = true
+    ];
+
+    // Dropbox entries split by tags.
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_crashes = 3027 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_anr = 3028 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_anr"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_native_crash = 3029 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_native_crash"
     ];
 
     // Reserved for OEMs.

@@ -1274,12 +1274,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> کو انٹرنیٹ تک رسائی حاصل نہیں ہے"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"اختیارات کیلئے تھپتھپائیں"</string>
-    <!-- no translation found for mobile_no_internet (1445208572588803493) -->
-    <skip />
-    <!-- no translation found for other_networks_no_internet (1553338015597653827) -->
-    <skip />
-    <!-- no translation found for private_dns_broken_detailed (4293356177543535578) -->
-    <skip />
+    <string name="mobile_no_internet" msgid="1445208572588803493">"موبائل نیٹ ورک کو انٹرنیٹ تک رسائی حاصل نہیں ہے"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"نیٹ ورک کو انٹرنیٹ تک رسائی حاصل نہیں ہے"</string>
+    <string name="private_dns_broken_detailed" msgid="4293356177543535578">"‏نجی DNS سرور تک رسائی حاصل نہیں کی جا سکی"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"منسلک ہے"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> کی کنیکٹوٹی محدود ہے"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"بہر حال منسلک کرنے کے لیے تھپتھپائیں"</string>

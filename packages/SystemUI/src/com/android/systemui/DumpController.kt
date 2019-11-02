@@ -47,6 +47,16 @@ class DumpController @Inject constructor() : Dumpable {
     /**
      * Adds a [Dumpable] dumpable to be dumped.
      *
+     * @param dumpable the [Dumpable] to be added
+     */
+    fun registerDumpable(dumpable: Dumpable) {
+        Preconditions.checkNotNull(dumpable, "The dumpable to be added cannot be null")
+        registerDumpable(dumpable.javaClass.simpleName, dumpable)
+    }
+
+    /**
+     * Adds a [Dumpable] dumpable to be dumped.
+     *
      * @param tag a string tag to associate with this dumpable. Tags must be globally unique; this
      *      method will throw if the same tag has already been registered. Tags can be used to
      *      filter output when debugging.
@@ -79,11 +89,11 @@ class DumpController @Inject constructor() : Dumpable {
     /**
      * Dump all the [Dumpable] registered with the controller
      */
-    override fun dump(fd: FileDescriptor?, pw: PrintWriter, args: Array<String>?) {
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
         pw.println("DumpController state:")
 
-        val filter = if (args != null && args.size >= 3 &&
-                args[0] == "dependency" && args[1] == "DumpController") {
+        val filter = if (args.size >= 3 && args[0].toLowerCase() == "dependency" &&
+                args[1] == "DumpController") {
             ArraySet(args[2].split(',').map { it.toLowerCase() })
         } else {
             null

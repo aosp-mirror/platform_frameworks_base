@@ -34,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,12 +63,22 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * method before the rest of the methods in this class. This method may be
      * time-consuming.
      *
-     * @param path The path of the input media file.
+     * @param path The path, or the URI (doesn't support streaming source currently)
+     * of the input media file.
      * @throws IllegalArgumentException If the path is invalid.
      */
     public void setDataSource(String path) throws IllegalArgumentException {
         if (path == null) {
             throw new IllegalArgumentException("null path");
+        }
+
+        final Uri uri = Uri.parse(path);
+        final String scheme = uri.getScheme();
+        if ("file".equals(scheme)) {
+            path = uri.getPath();
+        } else if (scheme != null) {
+            setDataSource(path, new HashMap<String, String>());
+            return;
         }
 
         try (FileInputStream is = new FileInputStream(path)) {

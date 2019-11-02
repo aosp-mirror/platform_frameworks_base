@@ -2669,4 +2669,74 @@ public final class SmsManager {
         }
         return SmsManager.SMS_CATEGORY_NOT_SHORT_CODE;
     }
+
+    /**
+     * Gets the SMSC address from (U)SIM.
+     *
+     * <p class="note"><strong>Note:</strong> Using this method requires that your app is the
+     * default SMS application, or READ_PRIVILEGED_PHONE_STATE permission, or has the carrier
+     * privileges.</p>
+     *
+     * <p class="note"><strong>Note:</strong> This method will never trigger an SMS disambiguation
+     * dialog. If this method is called on a device that has multiple active subscriptions, this
+     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
+     * default subscription is defined, the subscription ID associated with this method will be
+     * INVALID, which will result in the operation being completed on the subscription associated
+     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the operation
+     * is performed on the correct subscription.
+     * </p>
+     *
+     * @return the SMSC address string, null if failed.
+     */
+    @SuppressAutoDoc // for carrier privileges and default SMS application.
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable
+    public String getSmscAddress() {
+        String smsc = null;
+
+        try {
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                smsc = iSms.getSmscAddressFromIccEfForSubscriber(
+                        getSubscriptionId(), ActivityThread.currentPackageName());
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+        return smsc;
+    }
+
+    /**
+     * Sets the SMSC address on (U)SIM.
+     *
+     * <p class="note"><strong>Note:</strong> Using this method requires that your app is the
+     * default SMS application, or has {@link android.Manifest.permission#MODIFY_PHONE_STATE}
+     * permission, or has the carrier privileges.</p>
+     *
+     * <p class="note"><strong>Note:</strong> This method will never trigger an SMS disambiguation
+     * dialog. If this method is called on a device that has multiple active subscriptions, this
+     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
+     * default subscription is defined, the subscription ID associated with this method will be
+     * INVALID, which will result in the operation being completed on the subscription associated
+     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the operation
+     * is performed on the correct subscription.
+     * </p>
+     *
+     * @param smsc the SMSC address string.
+     * @return true for success, false otherwise.
+     */
+    @SuppressAutoDoc // for carrier privileges and default SMS application.
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean setSmscAddress(@NonNull String smsc) {
+        try {
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                return iSms.setSmscAddressOnIccEfForSubscriber(
+                        smsc, getSubscriptionId(), ActivityThread.currentPackageName());
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+        return false;
+    }
 }

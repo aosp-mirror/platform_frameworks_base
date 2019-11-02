@@ -466,7 +466,7 @@ public final class QuotaController extends StateController {
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.obtainMessage(MSG_UID_PROCESS_STATE_CHANGED, uid, procState).sendToTarget();
         }
 

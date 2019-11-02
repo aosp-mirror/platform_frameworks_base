@@ -580,7 +580,8 @@ public class AudioService extends IAudioService.Stub
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
-        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
+            int capability) {
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {
@@ -2784,6 +2785,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     public void setMasterMute(boolean mute, int flags, String callingPackage, int userId) {
+        enforceModifyAudioRoutingPermission();
         setMasterMuteInternal(mute, flags, callingPackage, Binder.getCallingUid(),
                 userId);
     }

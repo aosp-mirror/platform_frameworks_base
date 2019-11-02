@@ -1186,4 +1186,7 @@
 
     <!-- Name of the this device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name">This device</string>
+
+    <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
+    <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>
 </resources>

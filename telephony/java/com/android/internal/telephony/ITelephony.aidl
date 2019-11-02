@@ -295,7 +295,7 @@ interface ITelephony {
      */
     boolean isDataConnectivityPossible(int subId);
 
-    Bundle getCellLocation(String callingPkg);
+    Bundle getCellLocation(String callingPkg, String callingFeatureId);
 
     /**
      * Returns the ISO country code equivalent of the current registered
@@ -307,7 +307,7 @@ interface ITelephony {
     /**
      * Returns the neighboring cell information of the device.
      */
-    List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg);
+    List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg, String callingFeatureId);
 
     @UnsupportedAppUsage
     int getCallState();
@@ -556,13 +556,14 @@ interface ITelephony {
     /**
      * Returns all observed cell information of the device.
      */
-    List<CellInfo> getAllCellInfo(String callingPkg);
+    List<CellInfo> getAllCellInfo(String callingPkg, String callingFeatureId);
 
     /**
      * Request a cell information update for the specified subscription,
      * reported via the CellInfoCallback.
      */
-    void requestCellInfoUpdate(int subId, in ICellInfoCallback cb, String callingPkg);
+    void requestCellInfoUpdate(int subId, in ICellInfoCallback cb, String callingPkg,
+            String callingFeatureId);
 
     /**
      * Request a cell information update for the specified subscription,
@@ -570,8 +571,8 @@ interface ITelephony {
      *
      * @param workSource the requestor to whom the power consumption for this should be attributed.
      */
-    void requestCellInfoUpdateWithWorkSource(
-            int subId, in ICellInfoCallback cb, in String callingPkg, in WorkSource ws);
+    void requestCellInfoUpdateWithWorkSource(int subId, in ICellInfoCallback cb,
+            in String callingPkg, String callingFeatureId, in WorkSource ws);
 
     /**
      * Sets minimum time in milli-seconds between onCellInfoChanged
@@ -882,9 +883,12 @@ interface ITelephony {
      * Perform a radio scan and return the list of avialble networks.
      *
      * @param subId the id of the subscription.
+     * @param callingPackage the calling package
+     * @param callingFeatureId The feature in the package
      * @return CellNetworkScanResult containing status of scan and networks.
      */
-    CellNetworkScanResult getCellNetworkScanResults(int subId, String callingPackage);
+    CellNetworkScanResult getCellNetworkScanResults(int subId, String callingPackage,
+            String callingFeatureId);
 
     /**
      * Perform a radio network scan and return the id of this scan.
@@ -894,10 +898,11 @@ interface ITelephony {
      * @param messenger Callback messages will be sent using this messenger.
      * @param binder the binder object instantiated in TelephonyManager.
      * @param callingPackage the calling package
+     * @param callingFeatureId The feature in the package
      * @return An id for this scan.
      */
     int requestNetworkScan(int subId, in NetworkScanRequest request, in Messenger messenger,
-            in IBinder binder, in String callingPackage);
+            in IBinder binder, in String callingPackage, String callingFeatureId);
 
     /**
      * Stop an existing radio network scan.
@@ -1313,6 +1318,12 @@ interface ITelephony {
     int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
 
     /**
+     * Returns the subscription ID associated with the specified PhoneAccountHandle.
+     */
+    int getSubIdForPhoneAccountHandle(in PhoneAccountHandle phoneAccountHandle,
+            String callingPackage);
+
+    /**
      * Returns the PhoneAccountHandle associated with a subscription ID.
      */
     PhoneAccountHandle getPhoneAccountHandleForSubscriptionId(int subscriptionId);
@@ -1340,9 +1351,11 @@ interface ITelephony {
      * Get the service state on specified subscription
      * @param subId Subscription id
      * @param callingPackage The package making the call
+     * @param callingFeatureId The feature in the package
      * @return Service state on specified subscription.
      */
-    ServiceState getServiceStateForSubscriber(int subId, String callingPackage);
+    ServiceState getServiceStateForSubscriber(int subId, String callingPackage,
+            String callingFeatureId);
 
     /**
      * Returns the URI for the per-account voicemail ringtone set in Phone settings.

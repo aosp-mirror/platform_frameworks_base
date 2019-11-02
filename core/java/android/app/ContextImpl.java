@@ -73,6 +73,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
+import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -1338,6 +1339,19 @@ class ContextImpl extends Context {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    public void sendOrderedBroadcast(Intent intent, String receiverPermission,
+            String receiverAppOp, BroadcastReceiver resultReceiver, Handler scheduler,
+            int initialCode, String initialData, @Nullable Bundle initialExtras) {
+        int intAppOp = AppOpsManager.OP_NONE;
+        if (!TextUtils.isEmpty(receiverAppOp)) {
+            intAppOp = AppOpsManager.strOpToOp(receiverAppOp);
+        }
+        sendOrderedBroadcastAsUser(intent, getUser(),
+                receiverPermission, intAppOp, resultReceiver, scheduler, initialCode, initialData,
+                initialExtras);
     }
 
     @Override

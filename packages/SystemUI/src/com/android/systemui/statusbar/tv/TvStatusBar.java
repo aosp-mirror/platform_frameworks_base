@@ -24,6 +24,9 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 
 /**
  * Status bar implementation for "large screen" products that mostly present no on-screen nav.
@@ -34,10 +37,15 @@ import com.android.systemui.statusbar.CommandQueue;
  * recording, discloses the responsible applications </li>
  * </ul>
  */
+@Singleton
 public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
 
-    public TvStatusBar(Context context) {
+    private final CommandQueue mCommandQueue;
+
+    @Inject
+    public TvStatusBar(Context context, CommandQueue commandQueue) {
         super(context);
+        mCommandQueue = commandQueue;
     }
 
     @Override
@@ -46,10 +54,9 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
 
         final IStatusBarService barService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        final CommandQueue commandQueue = getComponent(CommandQueue.class);
-        commandQueue.addCallback(this);
+        mCommandQueue.addCallback(this);
         try {
-            barService.registerStatusBar(commandQueue);
+            barService.registerStatusBar(mCommandQueue);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }

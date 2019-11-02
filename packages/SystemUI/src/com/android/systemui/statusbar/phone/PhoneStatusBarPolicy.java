@@ -40,7 +40,6 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
@@ -138,7 +137,8 @@ public class PhoneStatusBarPolicy
     private BluetoothController mBluetooth;
     private AlarmManager.AlarmClockInfo mNextAlarm;
 
-    public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController) {
+    public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController,
+            CommandQueue commandQueue) {
         mContext = context;
         mIconController = iconController;
         mCast = Dependency.get(CastController.class);
@@ -261,7 +261,7 @@ public class PhoneStatusBarPolicy
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
 
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
+        commandQueue.addCallback(this);
     }
 
     @Override

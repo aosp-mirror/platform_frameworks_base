@@ -476,10 +476,27 @@ status_t DumpsysSection::BlockingCall(int pipeWriteFd) const {
 // initialization only once in Section.cpp.
 map<log_id_t, log_time> LogSection::gLastLogsRetrieved;
 
-LogSection::LogSection(int id, log_id_t logID) : WorkerThreadSection(id), mLogID(logID) {
-    name = "logcat ";
-    name += android_log_id_to_name(logID);
-    switch (logID) {
+LogSection::LogSection(int id, const char* logID, ...) : WorkerThreadSection(id), mLogMode(logModeBase) {
+    name = "logcat -b ";
+    name += logID;
+
+    va_list args;
+    va_start(args, logID);
+    mLogID = android_name_to_log_id(logID);
+    while(true) {
+        const char* arg = va_arg(args, const char*);
+        if (arg == NULL) {
+            break;
+        }
+        if (!strcmp(arg, "-L")) {
+          // Read from last logcat buffer
+          mLogMode = mLogMode | ANDROID_LOG_PSTORE;
+        }
+        name += " ";
+        name += arg;
+    }
+
+    switch (mLogID) {
         case LOG_ID_EVENTS:
         case LOG_ID_STATS:
         case LOG_ID_SECURITY:
@@ -512,9 +529,8 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
     // Open log buffer and getting logs since last retrieved time if any.
     unique_ptr<logger_list, void (*)(logger_list*)> loggers(
             gLastLogsRetrieved.find(mLogID) == gLastLogsRetrieved.end()
-                    ? android_logger_list_alloc(ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, 0, 0)
-                    : android_logger_list_alloc_time(ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK,
-                                                     gLastLogsRetrieved[mLogID], 0),
+                    ? android_logger_list_alloc(mLogMode, 0, 0)
+                    : android_logger_list_alloc_time(mLogMode, gLastLogsRetrieved[mLogID], 0),
             android_logger_list_free);
 
     if (android_logger_open(loggers.get(), mLogID) == NULL) {

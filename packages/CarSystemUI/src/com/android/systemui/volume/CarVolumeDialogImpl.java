@@ -62,7 +62,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -76,8 +75,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
     private static final String XML_TAG_VOLUME_ITEMS = "carVolumeItems";
     private static final String XML_TAG_VOLUME_ITEM = "item";
-    private static final int HOVERING_TIMEOUT = 16000;
-    private static final int NORMAL_TIMEOUT = 3000;
     private static final int LISTVIEW_ANIMATION_DURATION_IN_MILLIS = 250;
     private static final int DISMISS_DELAY_IN_MILLIS = 50;
     private static final int ARROW_FADE_IN_START_DELAY_IN_MILLIS = 100;
@@ -91,12 +88,23 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     // Volume items in the RecyclerView.
     private final List<CarVolumeItem> mCarVolumeLineItems = new ArrayList<>();
     private final KeyguardManager mKeyguard;
+    private final int mNormalTimeout;
+    private final int mHoveringTimeout;
+
     private Window mWindow;
     private CustomDialog mDialog;
     private RecyclerView mListView;
     private CarVolumeItemAdapter mVolumeItemsAdapter;
     private Car mCar;
     private CarAudioManager mCarAudioManager;
+    private boolean mHovering;
+    private int mCurrentlyDisplayingGroupId;
+    private int mPreviouslyDisplayingGroupId;
+    private boolean mShowing;
+    private boolean mDismissing;
+    private boolean mExpanded;
+    private View mExpandIcon;
+
     private final CarAudioManager.CarVolumeCallback mVolumeChangeCallback =
             new CarAudioManager.CarVolumeCallback() {
                 @Override
@@ -126,6 +134,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                         volumeItem.progress = value;
                     }
                     if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
+                        mPreviouslyDisplayingGroupId = mCurrentlyDisplayingGroupId;
                         mCurrentlyDisplayingGroupId = groupId;
                         mHandler.obtainMessage(H.SHOW,
                                 Events.SHOW_REASON_VOLUME_CHANGED).sendToTarget();
@@ -137,12 +146,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                     // ignored
                 }
             };
-    private boolean mHovering;
-    private int mCurrentlyDisplayingGroupId;
-    private boolean mShowing;
-    private boolean mDismissing;
-    private boolean mExpanded;
-    private View mExpandIcon;
 
     private final CarServiceLifecycleListener mCarServiceLifecycleListener = (car, ready) -> {
         if (!ready) {
@@ -158,7 +161,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             mAvailableVolumeItems.add(volumeItem);
             // The first one is the default item.
             if (groupId == 0) {
-                setuptListItem(0);
+                clearAllAndSetupDefaultCarVolumeLineItem(0);
             }
         }
 
@@ -169,18 +172,13 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mCarAudioManager.registerCarVolumeCallback(mVolumeChangeCallback);
     };
 
-    private void setuptListItem(int groupId) {
-        mCarVolumeLineItems.clear();
-        VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
-        volumeItem.defaultItem = true;
-        addCarVolumeListItem(volumeItem, /* volumeGroupId = */ groupId,
-                R.drawable.car_ic_keyboard_arrow_down, new ExpandIconListener()
-        );
-    }
-
     public CarVolumeDialogImpl(Context context) {
         mContext = context;
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mNormalTimeout = mContext.getResources().getInteger(
+                R.integer.car_volume_dialog_display_normal_timeout);
+        mHoveringTimeout = mContext.getResources().getInteger(
+                R.integer.car_volume_dialog_display_hovering_timeout);
     }
 
     private static int getSeekbarValue(CarAudioManager carAudioManager, int volumeGroupId) {
@@ -204,7 +202,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
     @Override
     public void destroy() {
-        mHandler.removeCallbacksAndMessages(null);
+        mHandler.removeCallbacksAndMessages(/* token= */ null);
 
         cleanupAudioManager();
         // unregisterVolumeCallback is not being called when disconnect car, so we manually cleanup
@@ -280,19 +278,36 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
         mHandler.removeMessages(H.SHOW);
         mHandler.removeMessages(H.DISMISS);
+
         rescheduleTimeoutH();
+
         // Refresh the data set before showing.
         mVolumeItemsAdapter.notifyDataSetChanged();
+
         if (mShowing) {
+            if (mPreviouslyDisplayingGroupId == mCurrentlyDisplayingGroupId || mExpanded) {
+                return;
+            }
+
+            clearAllAndSetupDefaultCarVolumeLineItem(mCurrentlyDisplayingGroupId);
             return;
         }
+
         mShowing = true;
-        setuptListItem(mCurrentlyDisplayingGroupId);
+        clearAllAndSetupDefaultCarVolumeLineItem(mCurrentlyDisplayingGroupId);
         mDialog.show();
         Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
     }
 
-    private void rescheduleTimeoutH() {
+    private void clearAllAndSetupDefaultCarVolumeLineItem(int groupId) {
+        mCarVolumeLineItems.clear();
+        VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
+        volumeItem.defaultItem = true;
+        addCarVolumeListItem(volumeItem, /* volumeGroupId = */ groupId,
+                R.drawable.car_ic_keyboard_arrow_down, new ExpandIconListener());
+    }
+
+    protected void rescheduleTimeoutH() {
         mHandler.removeMessages(H.DISMISS);
         final int timeout = computeTimeoutH();
         mHandler.sendMessageDelayed(mHandler
@@ -304,7 +319,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     private int computeTimeoutH() {
-        return mHovering ? HOVERING_TIMEOUT : NORMAL_TIMEOUT;
+        return mHovering ? mHoveringTimeout : mNormalTimeout;
     }
 
     private void dismissH(int reason) {
@@ -366,12 +381,13 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 if (XML_TAG_VOLUME_ITEM.equals(parser.getName())) {
                     TypedArray item = mContext.getResources().obtainAttributes(
                             attrs, R.styleable.carVolumeItems_item);
-                    int usage = item.getInt(R.styleable.carVolumeItems_item_usage, -1);
+                    int usage = item.getInt(R.styleable.carVolumeItems_item_usage,
+                            /* defValue= */ -1);
                     if (usage >= 0) {
                         VolumeItem volumeItem = new VolumeItem();
                         volumeItem.rank = rank;
-                        volumeItem.icon = item.getResourceId(R.styleable.carVolumeItems_item_icon,
-                                0);
+                        volumeItem.icon = item.getResourceId(
+                                R.styleable.carVolumeItems_item_icon, /* defValue= */ 0);
                         mVolumeItems.put(usage, volumeItem);
                         rank++;
                     }
@@ -396,22 +412,22 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         return result;
     }
 
-    private CarVolumeItem addCarVolumeListItem(VolumeItem volumeItem, int volumeGroupId,
-            int supplementalIconId,
+    private CarVolumeItem createCarVolumeListItem(VolumeItem volumeItem, int volumeGroupId,
+            Drawable supplementalIcon, int seekbarProgressValue,
             @Nullable View.OnClickListener supplementalIconOnClickListener) {
         CarVolumeItem carVolumeItem = new CarVolumeItem();
         carVolumeItem.setMax(getMaxSeekbarValue(mCarAudioManager, volumeGroupId));
-        int color = mContext.getResources().getColor(R.color.car_volume_dialog_tint);
-        int progress = getSeekbarValue(mCarAudioManager, volumeGroupId);
-        carVolumeItem.setProgress(progress);
+        carVolumeItem.setProgress(seekbarProgressValue);
         carVolumeItem.setOnSeekBarChangeListener(
                 new CarVolumeDialogImpl.VolumeSeekBarChangeListener(volumeGroupId,
                         mCarAudioManager));
-        Drawable primaryIcon = mContext.getResources().getDrawable(volumeItem.icon);
+        carVolumeItem.setGroupId(volumeGroupId);
+
+        int color = mContext.getColor(R.color.car_volume_dialog_tint);
+        Drawable primaryIcon = mContext.getDrawable(volumeItem.icon);
         primaryIcon.mutate().setTint(color);
         carVolumeItem.setPrimaryIcon(primaryIcon);
-        if (supplementalIconId != 0) {
-            Drawable supplementalIcon = mContext.getResources().getDrawable(supplementalIconId);
+        if (supplementalIcon != null) {
             supplementalIcon.mutate().setTint(color);
             carVolumeItem.setSupplementalIcon(supplementalIcon,
                     /* showSupplementalIconDivider= */ true);
@@ -420,21 +436,23 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             carVolumeItem.setSupplementalIcon(/* drawable= */ null,
                     /* showSupplementalIconDivider= */ false);
         }
-        carVolumeItem.setGroupId(volumeGroupId);
-        mCarVolumeLineItems.add(carVolumeItem);
+
         volumeItem.carVolumeItem = carVolumeItem;
-        volumeItem.progress = progress;
+        volumeItem.progress = seekbarProgressValue;
+
         return carVolumeItem;
     }
 
-    private VolumeItem findVolumeItem(CarVolumeItem targetItem) {
-        for (int i = 0; i < mVolumeItems.size(); ++i) {
-            VolumeItem volumeItem = mVolumeItems.valueAt(i);
-            if (volumeItem.carVolumeItem == targetItem) {
-                return volumeItem;
-            }
-        }
-        return null;
+    private CarVolumeItem addCarVolumeListItem(VolumeItem volumeItem, int volumeGroupId,
+            int supplementalIconId,
+            @Nullable View.OnClickListener supplementalIconOnClickListener) {
+        int seekbarProgressValue = getSeekbarValue(mCarAudioManager, volumeGroupId);
+        Drawable supplementalIcon = supplementalIconId == 0 ? null : mContext.getDrawable(
+                supplementalIconId);
+        CarVolumeItem carVolumeItem = createCarVolumeListItem(volumeItem, volumeGroupId,
+                supplementalIcon, seekbarProgressValue, supplementalIconOnClickListener);
+        mCarVolumeLineItems.add(carVolumeItem);
+        return carVolumeItem;
     }
 
     private void cleanupAudioManager() {
@@ -530,21 +548,15 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             for (int groupId = 0; groupId < mAvailableVolumeItems.size(); ++groupId) {
                 if (groupId != mCurrentlyDisplayingGroupId) {
                     VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
-                    addCarVolumeListItem(volumeItem, groupId, 0, null);
+                    addCarVolumeListItem(volumeItem, groupId, /* supplementalIconId= */ 0,
+                            /* supplementalIconOnClickListener= */ null);
                 }
             }
             inAnimator = AnimatorInflater.loadAnimator(
                     mContext, R.anim.car_arrow_fade_in_rotate_up);
 
         } else {
-            // Only keeping the default stream if it is not expended.
-            Iterator itr = mCarVolumeLineItems.iterator();
-            while (itr.hasNext()) {
-                CarVolumeItem carVolumeItem = (CarVolumeItem) itr.next();
-                if (carVolumeItem.getGroupId() != mCurrentlyDisplayingGroupId) {
-                    itr.remove();
-                }
-            }
+            clearAllAndSetupDefaultCarVolumeLineItem(mCurrentlyDisplayingGroupId);
             inAnimator = AnimatorInflater.loadAnimator(
                     mContext, R.anim.car_arrow_fade_in_rotate_down);
         }

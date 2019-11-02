@@ -44,7 +44,6 @@ import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.ui.DefaultUiController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
@@ -130,6 +129,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final CommandQueue mCommandQueue;
     protected final AssistUtils mAssistUtils;
     private final boolean mShouldEnableOrb;
 
@@ -160,9 +160,11 @@ public class AssistManager implements ConfigurationChangedReceiver {
             DeviceProvisionedController controller,
             Context context,
             AssistUtils assistUtils,
-            AssistHandleBehaviorController handleController) {
+            AssistHandleBehaviorController handleController,
+            CommandQueue commandQueue) {
         mContext = context;
         mDeviceProvisionedController = controller;
+        mCommandQueue = commandQueue;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = assistUtils;
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
@@ -339,7 +341,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
         }
 
         // Close Recent Apps if needed
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).animateCollapsePanels(
+        mCommandQueue.animateCollapsePanels(
                 CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL | CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
                 false /* force */);
 

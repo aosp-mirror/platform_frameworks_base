@@ -38,6 +38,7 @@ import android.testing.TestableResources;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -54,6 +55,8 @@ import org.mockito.MockitoAnnotations;
 @RunWithLooper
 public class BiometricsUnlockControllerTest extends SysuiTestCase {
 
+    @Mock
+    private DumpController mDumpController;
     @Mock
     private NotificationMediaManager mMediaManager;
     @Mock
@@ -101,7 +104,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mBiometricUnlockController = new BiometricUnlockController(mContext, mDozeScrimController,
                 mKeyguardViewMediator, mScrimController, mStatusBar, mKeyguardStateController,
                 mHandler, mUpdateMonitor, res.getResources(), mKeyguardBypassController,
-                mDozeParameters, mMetricsLogger);
+                mDozeParameters, mMetricsLogger, mDumpController);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
     }
 

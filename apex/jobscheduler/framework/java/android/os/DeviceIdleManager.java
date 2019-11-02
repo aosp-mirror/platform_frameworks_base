@@ -84,4 +84,17 @@ public class DeviceIdleManager {
             return 0;
         }
     }
+
+    /**
+     * Return whether a given package is in the power-save whitelist or not.
+     * @hide
+     */
+    public boolean isApplicationWhitelisted(@NonNull String packageName) {
+        try {
+            return mService.isPowerSaveWhitelistApp(packageName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
 }

@@ -709,6 +709,18 @@ void NativeInputManager::notifyConfigurationChanged(nsecs_t when) {
     checkAndClearExceptionFromCallback(env, "notifyConfigurationChanged");
 }
 
+static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
+        const sp<InputApplicationHandle>& inputApplicationHandle) {
+    if (inputApplicationHandle == nullptr) {
+        return nullptr;
+    }
+    NativeInputApplicationHandle* handle =
+            static_cast<NativeInputApplicationHandle*>(inputApplicationHandle.get());
+
+    return handle->getInputApplicationHandleObjLocalRef(env);
+}
+
+
 nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
         const sp<IBinder>& token, const std::string& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
@@ -719,12 +731,15 @@ nsecs_t NativeInputManager::notifyANR(const sp<InputApplicationHandle>& inputApp
     JNIEnv* env = jniEnv();
     ScopedLocalFrame localFrame(env);
 
+    jobject inputApplicationHandleObj =
+            getInputApplicationHandleObjLocalRef(env, inputApplicationHandle);
+
     jobject tokenObj = javaObjectForIBinder(env, token);
     jstring reasonObj = env->NewStringUTF(reason.c_str());
 
     jlong newTimeout = env->CallLongMethod(mServiceObj,
-                gServiceClassInfo.notifyANR, tokenObj,
-                reasonObj);
+            gServiceClassInfo.notifyANR, inputApplicationHandleObj, tokenObj,
+                 reasonObj);
     if (checkAndClearExceptionFromCallback(env, "notifyANR")) {
         newTimeout = 0; // abort dispatch
     } else {
@@ -1865,7 +1880,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",
-            "(Landroid/os/IBinder;Ljava/lang/String;)J");
+            "(Landroid/view/InputApplicationHandle;Landroid/os/IBinder;Ljava/lang/String;)J");
 
     GET_METHOD_ID(gServiceClassInfo.filterInputEvent, clazz,
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");

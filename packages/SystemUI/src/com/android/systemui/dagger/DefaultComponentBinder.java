@@ -23,6 +23,9 @@ import dagger.Module;
  *
  * See {@link ContextComponentResolver}
  */
-@Module(includes = {DefaultActivityBinder.class, DefaultServiceBinder.class, SystemUIBinder.class})
+@Module(includes = {DefaultActivityBinder.class,
+                    DefaultBroadcastReceiverBinder.class,
+                    DefaultServiceBinder.class,
+                    SystemUIBinder.class})
 public abstract class DefaultComponentBinder {
 }

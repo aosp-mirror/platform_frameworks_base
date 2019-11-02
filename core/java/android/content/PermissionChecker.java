@@ -114,6 +114,7 @@ public final class PermissionChecker {
      * @param uid The uid for which to check.
      * @param packageName The package name for which to check. If null the
      *     the first package for the calling UID will be used.
+     * @param featureId Feature in the package
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
      * @param message A message describing the reason the permission was checked
@@ -123,8 +124,8 @@ public final class PermissionChecker {
     @PermissionResult
     public static int checkPermissionForDataDelivery(@NonNull Context context,
             @NonNull String permission, int pid, int uid, @Nullable String packageName,
-            @Nullable String message) {
-        return checkPermissionCommon(context, permission, pid, uid, packageName, message,
+            @Nullable String featureId, @Nullable String message) {
+        return checkPermissionCommon(context, permission, pid, uid, packageName, featureId, message,
                 true /*forDataDelivery*/);
     }
 
@@ -161,8 +162,8 @@ public final class PermissionChecker {
     @PermissionResult
     public static int checkPermissionForPreflight(@NonNull Context context,
             @NonNull String permission, int pid, int uid, @Nullable String packageName) {
-        return checkPermissionCommon(context, permission, pid, uid, packageName, null /*message*/,
-                false /*forDataDelivery*/);
+        return checkPermissionCommon(context, permission, pid, uid, packageName, null /*featureId*/,
+                null /*message*/, false /*forDataDelivery*/);
     }
 
     /**
@@ -197,7 +198,7 @@ public final class PermissionChecker {
     public static int checkSelfPermissionForDataDelivery(@NonNull Context context,
             @NonNull String permission, @Nullable String message) {
         return checkPermissionForDataDelivery(context, permission, Process.myPid(),
-                Process.myUid(), context.getPackageName(), message);
+                Process.myUid(), context.getPackageName(), context.getFeatureId(), message);
     }
 
     /**
@@ -256,6 +257,7 @@ public final class PermissionChecker {
      * @param permission The permission to check.
      * @param packageName The package name making the IPC. If null the
      *     the first package for the calling UID will be used.
+     * @param featureId The feature inside of the app
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
      * @param message A message describing the reason the permission was checked
@@ -264,12 +266,13 @@ public final class PermissionChecker {
      */
     @PermissionResult
     public static int checkCallingPermissionForDataDelivery(@NonNull Context context,
-            @NonNull String permission, @Nullable String packageName, @Nullable String message) {
+            @NonNull String permission, @Nullable String packageName,
+            @Nullable String featureId, @Nullable String message) {
         if (Binder.getCallingPid() == Process.myPid()) {
             return PERMISSION_DENIED;
         }
         return checkPermissionForDataDelivery(context, permission, Binder.getCallingPid(),
-                Binder.getCallingUid(), packageName, message);
+                Binder.getCallingUid(), packageName, featureId, message);
     }
 
     /**
@@ -331,17 +334,20 @@ public final class PermissionChecker {
      * @param permission The permission to check.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
+     * @param featureId feature Id of caller (if not self)
      * @param message A message describing the reason the permission was checked
      *
      * @see #checkCallingOrSelfPermissionForPreflight(Context, String)
      */
     @PermissionResult
     public static int checkCallingOrSelfPermissionForDataDelivery(@NonNull Context context,
-            @NonNull String permission, @Nullable String message) {
+            @NonNull String permission, @Nullable String featureId, @Nullable String message) {
         String packageName = (Binder.getCallingPid() == Process.myPid())
                 ? context.getPackageName() : null;
+        featureId = (Binder.getCallingPid() == Process.myPid())
+                ? context.getFeatureId() : featureId;
         return checkPermissionForDataDelivery(context, permission, Binder.getCallingPid(),
-                Binder.getCallingUid(), packageName, message);
+                Binder.getCallingUid(), packageName, featureId, message);
     }
 
     /**
@@ -360,15 +366,15 @@ public final class PermissionChecker {
      * app's fg/gb state) and this check will not leave a trace that permission protected
      * data was delivered. When you are about to deliver the location data to a registered
      * listener you should use {@link #checkCallingOrSelfPermissionForDataDelivery(Context,
-     * String, String)} which will evaluate the permission access based on the current fg/bg state
-     * of the app and leave a record that the data was accessed.
+     * String, String, String)} which will evaluate the permission access based on the current
+     * fg/bg state of the app and leave a record that the data was accessed.
      *
      * @param context Context for accessing resources.
      * @param permission The permission to check.
      * @return The permission check result which is either {@link #PERMISSION_GRANTED}
      *     or {@link #PERMISSION_DENIED} or {@link #PERMISSION_DENIED_APP_OP}.
      *
-     * @see #checkCallingOrSelfPermissionForDataDelivery(Context, String, String)
+     * @see #checkCallingOrSelfPermissionForDataDelivery(Context, String, String, String)
      */
     @PermissionResult
     public static int checkCallingOrSelfPermissionForPreflight(@NonNull Context context,
@@ -380,8 +386,8 @@ public final class PermissionChecker {
     }
 
     private static int checkPermissionCommon(@NonNull Context context, @NonNull String permission,
-            int pid, int uid, @Nullable String packageName, @Nullable String message,
-            boolean forDataDelivery) {
+            int pid, int uid, @Nullable String packageName, @Nullable String featureId,
+            @Nullable String message, boolean forDataDelivery) {
         if (context.checkPermission(permission, pid, uid) == PackageManager.PERMISSION_DENIED) {
             return PERMISSION_DENIED;
         }
@@ -401,8 +407,7 @@ public final class PermissionChecker {
         }
 
         if (forDataDelivery) {
-            // TODO moltmann: Set correct feature id
-            if (appOpsManager.noteProxyOpNoThrow(op, packageName, uid, null, message)
+            if (appOpsManager.noteProxyOpNoThrow(op, packageName, uid, featureId, message)
                     != AppOpsManager.MODE_ALLOWED) {
                 return PERMISSION_DENIED_APP_OP;
             }

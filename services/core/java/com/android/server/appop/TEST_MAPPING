@@ -35,6 +35,9 @@
                     "include-filter": "android.permission.cts.SharedUidPermissionsTest"
                 }
             ]
+        },
+        {
+            "name": "CtsAppTestCases:ActivityManagerApi29Test"
         }
     ]
 }

@@ -67,7 +67,7 @@ import java.util.function.Function;
 
 /** Manages Gnss providers and related Gnss functions for LocationManagerService. */
 public class GnssManagerService {
-    private static final String TAG = "LocationManagerService";
+    private static final String TAG = "GnssManagerService";
     private static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
     // Providers
@@ -124,7 +124,7 @@ public class GnssManagerService {
 
     // Can use this constructor to inject GnssLocationProvider for testing
     @VisibleForTesting
-    GnssManagerService(LocationManagerService locationManagerService,
+    public GnssManagerService(LocationManagerService locationManagerService,
             Context context,
             GnssLocationProvider gnssLocationProvider,
             LocationUsageLogger locationUsageLogger) {
@@ -719,8 +719,10 @@ public class GnssManagerService {
      * @param listener called when navigation message is received
      */
     public void removeGnssNavigationMessageListener(IGnssNavigationMessageListener listener) {
-        removeGnssDataListener(
-                listener, mGnssNavigationMessageProvider, mGnssNavigationMessageListeners);
+        synchronized (mGnssNavigationMessageListeners) {
+            removeGnssDataListener(
+                    listener, mGnssNavigationMessageProvider, mGnssNavigationMessageListeners);
+        }
     }
 
     /**

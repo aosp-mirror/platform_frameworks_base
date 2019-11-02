@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
@@ -109,6 +108,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
+import com.android.systemui.util.Utils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -462,7 +462,7 @@ public class NotificationPanelView extends PanelView implements
             NotificationEntryManager notificationEntryManager,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController, DozeLog dozeLog,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters, CommandQueue commandQueue) {
         super(context, attrs, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController);
         setWillNotDraw(!DEBUG);
@@ -474,7 +474,7 @@ public class NotificationPanelView extends PanelView implements
         setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
         mAlphaPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.MULTIPLY));
         setPanelAlpha(255, false /* animate */);
-        mCommandQueue = getComponent(context, CommandQueue.class);
+        mCommandQueue = commandQueue;
         mDisplayId = context.getDisplayId();
         mPulseExpansionHandler = pulseExpansionHandler;
         mDozeParameters = dozeParameters;
@@ -769,8 +769,7 @@ public class NotificationPanelView extends PanelView implements
         int sideMargin = res.getDimensionPixelOffset(R.dimen.notification_side_paddings);
         int topMargin =
                 res.getDimensionPixelOffset(com.android.internal.R.dimen.quick_qs_total_height);
-        int flag = Settings.System.getInt(mContext.getContentResolver(), "qs_media_player", 0);
-        if (flag == 1) {
+        if (Utils.useQsMediaPlayer(mContext)) {
             topMargin = res.getDimensionPixelOffset(
                     com.android.internal.R.dimen.quick_qs_total_height_with_media);
         }

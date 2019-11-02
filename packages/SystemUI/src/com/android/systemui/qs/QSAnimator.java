@@ -14,7 +14,6 @@
 
 package com.android.systemui.qs;
 
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -31,6 +30,7 @@ import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -270,9 +270,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         }
 
 
-        int flag = Settings.System.getInt(mQsPanel.getContext().getContentResolver(),
-                "qs_media_player", 0);
-        if (flag == 1) {
+        if (Utils.useQsMediaPlayer(mQsPanel.getContext())) {
             View qsMediaView = mQsPanel.getMediaPanel();
             View qqsMediaView = mQuickQsPanel.getMediaPlayer().getView();
             translationXBuilder.addFloat(qsMediaView, "alpha", 0, 1);

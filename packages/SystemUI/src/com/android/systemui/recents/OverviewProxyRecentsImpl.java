@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
@@ -40,18 +41,34 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.phone.StatusBar;
 
+import java.util.Optional;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Lazy;
+
 /**
  * An implementation of the Recents interface which proxies to the OverviewProxyService.
  */
+@Singleton
 public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     private final static String TAG = "OverviewProxyRecentsImpl";
+    @Nullable
+    private final Lazy<StatusBar> mStatusBarLazy;
 
     private SysUiServiceProvider mSysUiServiceProvider;
     private Context mContext;
     private Handler mHandler;
     private TrustManager mTrustManager;
     private OverviewProxyService mOverviewProxyService;
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    @Inject
+    public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy) {
+        mStatusBarLazy = statusBarLazy.orElse(null);
+    }
 
     @Override
     public void onStart(Context context, SysUiServiceProvider sysUiServiceProvider) {
@@ -107,9 +124,8 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
                 }
             };
             // Preload only if device for current user is unlocked
-            final StatusBar statusBar = mSysUiServiceProvider.getComponent(StatusBar.class);
-            if (statusBar != null && statusBar.isKeyguardShowing()) {
-                statusBar.executeRunnableDismissingKeyguard(() -> {
+            if (mStatusBarLazy != null && mStatusBarLazy.get().isKeyguardShowing()) {
+                mStatusBarLazy.get().executeRunnableDismissingKeyguard(() -> {
                         // Flush trustmanager before checking device locked per user
                         mTrustManager.reportKeyguardShowingChanged();
                         mHandler.post(toggleRecents);

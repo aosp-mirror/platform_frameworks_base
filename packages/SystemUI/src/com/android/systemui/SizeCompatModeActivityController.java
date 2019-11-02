@@ -47,7 +47,11 @@ import com.android.systemui.statusbar.CommandQueue;
 
 import java.lang.ref.WeakReference;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /** Shows a restart-activity button when the foreground activity is in size compatibility mode. */
+@Singleton
 public class SizeCompatModeActivityController extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "SizeCompatMode";
 
@@ -55,17 +59,17 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
     private final SparseArray<RestartActivityButton> mActiveButtons = new SparseArray<>(1);
     /** Avoid creating display context frequently for non-default display. */
     private final SparseArray<WeakReference<Context>> mDisplayContextCache = new SparseArray<>(0);
+    private final CommandQueue mCommandQueue;
 
     /** Only show once automatically in the process life. */
     private boolean mHasShownHint;
 
-    public SizeCompatModeActivityController(Context context) {
-        this(context, ActivityManagerWrapper.getInstance());
-    }
-
     @VisibleForTesting
-    SizeCompatModeActivityController(Context context, ActivityManagerWrapper am) {
+    @Inject
+    SizeCompatModeActivityController(Context context, ActivityManagerWrapper am,
+            CommandQueue commandQueue) {
         super(context);
+        mCommandQueue = commandQueue;
         am.registerTaskStackListener(new TaskStackChangeListener() {
             @Override
             public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) {
@@ -77,7 +81,7 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
 
     @Override
     public void start() {
-        SysUiServiceProvider.getComponent(mContext, CommandQueue.class).addCallback(this);
+        mCommandQueue.addCallback(this);
     }
 
     @Override

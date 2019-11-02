@@ -19,35 +19,53 @@ package com.android.systemui.recents;
 import android.content.Context;
 
 import com.android.systemui.R;
+import com.android.systemui.dagger.ContextComponentHelper;
 
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 /**
  * Dagger injection module for {@link RecentsImplementation}
  */
 @Module
-public class RecentsModule {
+public abstract class RecentsModule {
+
     /**
      * @return The {@link RecentsImplementation} from the config.
      */
     @Provides
-    public RecentsImplementation provideRecentsImpl(Context context) {
+    public static RecentsImplementation provideRecentsImpl(Context context,
+            ContextComponentHelper componentHelper) {
         final String clsName = context.getString(R.string.config_recentsComponent);
         if (clsName == null || clsName.length() == 0) {
             throw new RuntimeException("No recents component configured", null);
         }
-        Class<?> cls = null;
-        try {
-            cls = context.getClassLoader().loadClass(clsName);
-        } catch (Throwable t) {
-            throw new RuntimeException("Error loading recents component: " + clsName, t);
+        RecentsImplementation impl = componentHelper.resolveRecents(clsName);
+
+        if (impl == null) {
+            Class<?> cls = null;
+            try {
+                cls = context.getClassLoader().loadClass(clsName);
+            } catch (Throwable t) {
+                throw new RuntimeException("Error loading recents component: " + clsName, t);
+            }
+            try {
+                impl = (RecentsImplementation) cls.newInstance();
+            } catch (Throwable t) {
+                throw new RuntimeException("Error creating recents component: " + clsName, t);
+            }
         }
-        try {
-            RecentsImplementation impl = (RecentsImplementation) cls.newInstance();
-            return impl;
-        } catch (Throwable t) {
-            throw new RuntimeException("Error creating recents component: " + clsName, t);
-        }
+
+        return impl;
     }
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(OverviewProxyRecentsImpl.class)
+    public abstract RecentsImplementation bindOverviewProxyRecentsImpl(
+            OverviewProxyRecentsImpl impl);
 }

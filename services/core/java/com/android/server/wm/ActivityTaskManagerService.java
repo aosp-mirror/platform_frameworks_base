@@ -227,6 +227,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
+import android.view.WindowContainerTransaction;
 import android.view.WindowManager;
 
 import com.android.internal.R;
@@ -289,6 +290,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -3243,6 +3245,47 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // After reparenting (which only resizes the task to the stack bounds), resize the
                 // task to the actual bounds provided
                 task.resize(bounds, resizeMode, preserveWindow, !DEFER_RESUME);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void sanitizeAndApplyConfigChange(ConfigurationContainer container,
+            WindowContainerTransaction.Change change) {
+        if (!(container instanceof TaskRecord)) {
+            throw new RuntimeException("Invalid token in task transaction");
+        }
+        // The "client"-facing API should prevent bad changes; however, just in case, sanitize
+        // masks here.
+        int configMask = change.getConfigSetMask();
+        int windowMask = change.getWindowSetMask();
+        configMask &= ActivityInfo.CONFIG_WINDOW_CONFIGURATION
+                | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+        windowMask &= WindowConfiguration.WINDOW_CONFIG_BOUNDS;
+        Configuration c = new Configuration(container.getRequestedOverrideConfiguration());
+        c.setTo(change.getConfiguration(), configMask, windowMask);
+        container.onRequestedOverrideConfigurationChanged(c);
+    }
+
+    @Override
+    public void applyContainerTransaction(WindowContainerTransaction t) {
+        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "applyContainerTransaction()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            if (t == null) {
+                return;
+            }
+            synchronized (mGlobalLock) {
+                Iterator<Map.Entry<IBinder, WindowContainerTransaction.Change>> entries =
+                        t.getChanges().entrySet().iterator();
+                while (entries.hasNext()) {
+                    final Map.Entry<IBinder, WindowContainerTransaction.Change> entry =
+                            entries.next();
+                    final ConfigurationContainer cc = ConfigurationContainer.RemoteToken.fromBinder(
+                            entry.getKey()).getContainer();
+                    sanitizeAndApplyConfigChange(cc, entry.getValue());
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

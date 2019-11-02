@@ -54,6 +54,7 @@ import com.android.settingslib.graph.ThemedBatteryDrawable;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -139,7 +140,8 @@ public class BatteryMeterView extends LinearLayout implements
 
 
         addOnAttachStateChangeListener(
-                new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS));
+                new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS,
+                        Dependency.get(CommandQueue.class)));
 
         setupLayoutTransition();
 

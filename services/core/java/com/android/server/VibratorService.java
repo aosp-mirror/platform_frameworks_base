@@ -174,7 +174,8 @@ public class VibratorService extends IVibratorService.Stub
     static native long vibratorGetCapabilities();
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
-        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
+                int capability) {
             mProcStatesCache.put(uid, procState);
         }
 

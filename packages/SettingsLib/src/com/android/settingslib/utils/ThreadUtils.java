@@ -18,6 +18,7 @@ package com.android.settingslib.utils;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -64,11 +65,16 @@ public class ThreadUtils {
      * @Return A future of the task that can be monitored for updates or cancelled.
      */
     public static Future postOnBackgroundThread(Runnable runnable) {
-        if (sThreadExecutor == null) {
-            sThreadExecutor = Executors.newFixedThreadPool(
-                    Runtime.getRuntime().availableProcessors());
-        }
-        return sThreadExecutor.submit(runnable);
+        return getThreadExecutor().submit(runnable);
+    }
+
+    /**
+     * Posts callable in background using shared background thread pool.
+     *
+     * @Return A future of the task that can be monitored for updates or cancelled.
+     */
+    public static Future postOnBackgroundThread(Callable callable) {
+        return getThreadExecutor().submit(callable);
     }
 
     /**
@@ -78,4 +84,11 @@ public class ThreadUtils {
         getUiThreadHandler().post(runnable);
     }
 
+    private static synchronized ExecutorService getThreadExecutor() {
+        if (sThreadExecutor == null) {
+            sThreadExecutor = Executors.newFixedThreadPool(
+                    Runtime.getRuntime().availableProcessors());
+        }
+        return sThreadExecutor;
+    }
 }

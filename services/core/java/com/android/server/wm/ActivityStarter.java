@@ -107,7 +107,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -764,9 +763,7 @@ class ActivityStarter {
                     mRequest.waitResult.who = r.mActivityComponent;
                     mRequest.waitResult.totalTime = 0;
                 } else {
-                    final long startTimeMs = SystemClock.uptimeMillis();
-                    mSupervisor.waitActivityVisible(r.mActivityComponent, mRequest.waitResult,
-                            startTimeMs);
+                    mSupervisor.waitActivityVisible(r.mActivityComponent, mRequest.waitResult);
                     // Note: the timeout variable is not currently not ever set.
                     do {
                         try {

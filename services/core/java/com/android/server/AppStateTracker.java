@@ -632,7 +632,7 @@ public class AppStateTracker {
 
     private final class UidObserver extends IUidObserver.Stub {
         @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.onUidStateChanged(uid, procState);
         }
 

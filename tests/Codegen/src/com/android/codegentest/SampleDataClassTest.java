@@ -243,6 +243,26 @@ public class SampleDataClassTest {
         assertEquals(instance.toString(), unparceledInstance.toString());
     }
 
+    @Test
+    public void testNestedDataClasses_notMangledWhenParceled() {
+        assertEqualsAfterParcelling(
+                new SampleWithNestedDataClasses.NestedDataClass("1"),
+                SampleWithNestedDataClasses.NestedDataClass.CREATOR);
+
+        assertEqualsAfterParcelling(
+                new SampleWithNestedDataClasses.NestedDataClass2("2"),
+                SampleWithNestedDataClasses.NestedDataClass2.CREATOR);
+
+        assertEqualsAfterParcelling(
+                new SampleWithNestedDataClasses.NestedDataClass2.NestedDataClass3(3),
+                SampleWithNestedDataClasses.NestedDataClass2.NestedDataClass3.CREATOR);
+    }
+
+    private static <T extends Parcelable> void assertEqualsAfterParcelling(
+            T p, Parcelable.Creator<T> creator) {
+        assertEquals(p, parcelAndUnparcel(p, creator));
+    }
+
     private static <T extends Parcelable> T parcelAndUnparcel(
             T original, Parcelable.Creator<T> creator) {
         Parcel p = Parcel.obtain();

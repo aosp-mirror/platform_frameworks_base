@@ -29,7 +29,6 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
@@ -70,7 +69,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     private boolean mIsDark = false;
 
     @Inject
-    public StatusBarIconControllerImpl(Context context) {
+    public StatusBarIconControllerImpl(Context context, CommandQueue commandQueue) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
         Dependency.get(ConfigurationController.class).addCallback(this);
@@ -79,8 +78,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
         loadDimens();
 
-        SysUiServiceProvider.getComponent(context, CommandQueue.class)
-                .addCallback(this);
+        commandQueue.addCallback(this);
         Dependency.get(TunerService.class).addTunable(this, ICON_BLACKLIST);
     }
 

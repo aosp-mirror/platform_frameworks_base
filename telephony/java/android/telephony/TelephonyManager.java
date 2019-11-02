@@ -110,6 +110,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -197,11 +198,28 @@ public class TelephonyManager {
     /** @hide */
     static public final int OTASP_SIM_UNPROVISIONED = 5;
 
-    /** @hide */
+    /**
+     * Used in carrier Wi-Fi for IMSI + IMPI encryption, this indicates a public key that's
+     * available for use in ePDG links.
+     *
+     * @hide
+     */
+    @SystemApi
     static public final int KEY_TYPE_EPDG = 1;
 
-    /** @hide */
+    /**
+     * Used in carrier Wi-Fi for IMSI + IMPI encryption, this indicates a public key that's
+     * available for use in WLAN links.
+     *
+     * @hide
+     */
+    @SystemApi
     static public final int KEY_TYPE_WLAN = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"KEY_TYPE_"}, value = {KEY_TYPE_EPDG, KEY_TYPE_WLAN})
+    public @interface KeyType {}
 
     /**
      * No Single Radio Voice Call Continuity (SRVCC) handover is active.
@@ -308,7 +326,11 @@ public class TelephonyManager {
         mSubId = subId;
         Context appContext = context.getApplicationContext();
         if (appContext != null) {
-            mContext = appContext;
+            if (Objects.equals(context.getFeatureId(), appContext.getFeatureId())) {
+                mContext = appContext;
+            } else {
+                mContext = appContext.createFeatureContext(context.getFeatureId());
+            }
         } else {
             mContext = context;
         }
@@ -341,6 +363,16 @@ public class TelephonyManager {
             return mContext.getOpPackageName();
         }
         return ActivityThread.currentOpPackageName();
+    }
+
+    private String getFeatureId() {
+        // For legacy reasons the TelephonyManager has API for getting
+        // a static instance with no context set preventing us from
+        // getting the feature Id.
+        if (mContext != null) {
+            return mContext.getFeatureId();
+        }
+        return null;
     }
 
     private boolean isSystemProcess() {
@@ -2007,7 +2039,8 @@ public class TelephonyManager {
                 return null;
             }
 
-            Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName());
+            Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName(),
+                    mContext.getFeatureId());
             if (bundle == null || bundle.isEmpty()) {
                 Rlog.d(TAG, "getCellLocation returning null because CellLocation is unavailable");
                 return null;
@@ -2095,7 +2128,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getNeighboringCellInfo(mContext.getOpPackageName());
+            return telephony.getNeighboringCellInfo(mContext.getOpPackageName(),
+                    mContext.getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -3874,25 +3908,27 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns Carrier specific information that will be used to encrypt the IMSI and IMPI.
-     * This includes the public key and the key identifier. For multi-sim devices, if no subId
-     * has been specified, we will return the value for the dafault data sim.
-     * Return null if it is unavailable.
+     * Returns carrier specific information that will be used to encrypt the IMSI and IMPI,
+     * including the public key and the key identifier; or {@code null} if not available.
      * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * @param keyType whether the key is being used for wlan or epdg. Valid key types are
-     *        {@link TelephonyManager#KEY_TYPE_EPDG} or
-     *        {@link TelephonyManager#KEY_TYPE_WLAN}.
+     * For a multi-sim device, the dafault data sim is used if not specified.
+     * <p>
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
+     *
+     * @param keyType whether the key is being used for EPDG or WLAN. Valid values are
+     *        {@link #KEY_TYPE_EPDG} or {@link #KEY_TYPE_WLAN}.
      * @return ImsiEncryptionInfo Carrier specific information that will be used to encrypt the
      *         IMSI and IMPI. This includes the public key and the key identifier. This information
-     *         will be stored in the device keystore. The system will return a null when no key was
-     *         found, and the carrier does not require a key. The system will throw
-     *         IllegalArgumentException when an invalid key is sent or when key is required but
+     *         will be stored in the device keystore. {@code null} will be returned when no key is
+     *         found, and the carrier does not require a key.
+     * @throws IllegalArgumentException when an invalid key is found or when key is required but
      *         not found.
      * @hide
      */
-    public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int keyType) {
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    @Nullable
+    public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(@KeyType int keyType) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) {
@@ -3920,14 +3956,21 @@ public class TelephonyManager {
     }
 
     /**
-     * Resets the Carrier Keys in the database. This involves 2 steps:
+     * Resets the carrier keys used to encrypt the IMSI and IMPI.
+     * <p>
+     * This involves 2 steps:
      *  1. Delete the keys from the database.
      *  2. Send an intent to download new Certificates.
      * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * For a multi-sim device, the dafault data sim is used if not specified.
+     * <p>
+     * Requires Permission: MODIFY_PHONE_STATE.
+     *
+     * @see #getCarrierInfoForImsiEncryption
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
     public void resetCarrierKeysForImsiEncryption() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -3954,7 +3997,7 @@ public class TelephonyManager {
      * @return true if the digit at position keyType is 1, else false.
      * @hide
      */
-    private static boolean isKeyEnabled(int keyAvailability, int keyType) {
+    private static boolean isKeyEnabled(int keyAvailability, @KeyType int keyType) {
         int returnValue = (keyAvailability >> (keyType - 1)) & 1;
         return (returnValue == 1) ? true : false;
     }
@@ -3963,7 +4006,7 @@ public class TelephonyManager {
      * If Carrier requires Imsi to be encrypted.
      * @hide
      */
-    private boolean isImsiEncryptionRequired(int subId, int keyType) {
+    private boolean isImsiEncryptionRequired(int subId, @KeyType int keyType) {
         CarrierConfigManager configManager =
                 (CarrierConfigManager) mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
         if (configManager == null) {
@@ -5488,8 +5531,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getAllCellInfo(
-                    getOpPackageName());
+            return telephony.getAllCellInfo(getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -5581,7 +5623,7 @@ public class TelephonyManager {
                                             errorCode,
                                             createThrowableByClassName(exceptionName, message))));
                         }
-                    }, getOpPackageName());
+                    }, getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         }
     }
@@ -5623,7 +5665,7 @@ public class TelephonyManager {
                                             errorCode,
                                             createThrowableByClassName(exceptionName, message))));
                         }
-                    }, getOpPackageName(), workSource);
+                    }, getOpPackageName(), getFeatureId(), workSource);
         } catch (RemoteException ex) {
         }
     }
@@ -7447,7 +7489,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getCellNetworkScanResults(getSubId(), getOpPackageName());
+                return telephony.getCellNetworkScanResults(getSubId(), getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getAvailableNetworks RemoteException", ex);
@@ -7502,7 +7545,7 @@ public class TelephonyManager {
             }
         }
         return mTelephonyScanManager.requestNetworkScan(getSubId(), request, executor, callback,
-                getOpPackageName());
+                getOpPackageName(), getFeatureId());
     }
 
     /**
@@ -9498,16 +9541,28 @@ public class TelephonyManager {
         return returnValue;
     }
 
-    private int getSubIdForPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
+    /**
+     * Returns the subscription ID for the given phone account handle.
+     *
+     * @param phoneAccountHandle the phone account handle for outgoing calls
+     * @return subscription ID for the given phone account handle; or
+     *         {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}
+     *         if not available; or throw a SecurityException if the caller doesn't have the
+     *         permission.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public int getSubIdForPhoneAccountHandle(@NonNull PhoneAccountHandle phoneAccountHandle) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
-            ITelecomService service = getTelecomService();
+            ITelephony service = getITelephony();
             if (service != null) {
-                retval = getSubIdForPhoneAccount(service.getPhoneAccount(phoneAccountHandle));
+                retval = service.getSubIdForPhoneAccountHandle(
+                        phoneAccountHandle, mContext.getOpPackageName());
             }
-        } catch (RemoteException e) {
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getSubIdForPhoneAccountHandle RemoteException", ex);
+            ex.rethrowAsRuntimeException();
         }
-
         return retval;
     }
 
@@ -9621,7 +9676,8 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getServiceStateForSubscriber(subId, getOpPackageName());
+                return service.getServiceStateForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
@@ -10874,6 +10930,16 @@ public class TelephonyManager {
             return NETWORK_TYPE_BITMASK_UNKNOWN;
         }
     }
+
+    /**
+     * Broadcast intent action for Ota emergency number database installation complete.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public static final String ACTION_OTA_EMERGENCY_NUMBER_DB_INSTALLED =
+            "android.telephony.action.OTA_EMERGENCY_NUMBER_DB_INSTALLED";
 
     /**
      * Returns whether {@link TelephonyManager#ACTION_EMERGENCY_ASSISTANCE emergency assistance} is

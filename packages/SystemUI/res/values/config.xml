@@ -274,7 +274,6 @@
     <!-- SystemUI Services: The classes of the stuff to start. -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
         <item>com.android.systemui.util.NotificationChannels</item>
-        <item>com.android.systemui.statusbar.CommandQueue$CommandQueueStart</item>
         <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
         <item>com.android.systemui.recents.Recents</item>
         <item>com.android.systemui.volume.VolumeUI</item>
@@ -482,5 +481,8 @@
 
     <!-- Whether or not to add a "people" notifications section -->
     <bool name="config_usePeopleFiltering">false</bool>
+
+    <!-- Package name for controls plugin -->
+    <string name="config_controlsPluginPackageName" translatable="false">com.android.systemui.controls.panel</string>
 
 </resources>

@@ -82,6 +82,7 @@ import static com.android.server.wm.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
 import android.Manifest;
 import android.app.Activity;
@@ -561,8 +562,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         return candidateTaskId;
     }
 
-    void waitActivityVisible(ComponentName name, WaitResult result, long startTimeMs) {
-        final WaitInfo waitInfo = new WaitInfo(name, result, startTimeMs);
+    void waitActivityVisible(ComponentName name, WaitResult result) {
+        final WaitInfo waitInfo = new WaitInfo(name, result);
         mWaitingForActivityVisible.add(waitInfo);
     }
 
@@ -572,10 +573,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // down to the max limit while they are still waiting to finish.
         mFinishingActivities.remove(r);
 
-        stopWaitingForActivityVisible(r);
+        stopWaitingForActivityVisible(r, WaitResult.INVALID_DELAY);
     }
 
     void stopWaitingForActivityVisible(ActivityRecord r) {
+        stopWaitingForActivityVisible(r,
+                getActivityMetricsLogger().getLastDrawnDelayMs(r.getWindowingMode()));
+    }
+
+    void stopWaitingForActivityVisible(ActivityRecord r, long totalTime) {
         boolean changed = false;
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
             final WaitInfo w = mWaitingForActivityVisible.get(i);
@@ -584,7 +590,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 changed = true;
                 result.timeout = false;
                 result.who = w.getComponent();
-                result.totalTime = SystemClock.uptimeMillis() - w.getStartTime();
+                result.totalTime = totalTime;
                 mWaitingForActivityVisible.remove(w);
             }
         }
@@ -2127,7 +2133,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord s = mStoppingActivities.get(activityNdx);
 
-            final boolean animating = s.isSelfAnimating();
+            final boolean animating = s.isAnimating(TRANSITION);
 
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
                     + " animating=" + animating + " finishing=" + s.finishing);
@@ -2823,13 +2829,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     static class WaitInfo {
         private final ComponentName mTargetComponent;
         private final WaitResult mResult;
-        /** Time stamp when we started to wait for {@link WaitResult}. */
-        private final long mStartTimeMs;
 
-        WaitInfo(ComponentName targetComponent, WaitResult result, long startTimeMs) {
+        WaitInfo(ComponentName targetComponent, WaitResult result) {
             this.mTargetComponent = targetComponent;
             this.mResult = result;
-            this.mStartTimeMs = startTimeMs;
         }
 
         public boolean matches(ComponentName targetComponent) {
@@ -2838,10 +2841,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         public WaitResult getResult() {
             return mResult;
-        }
-
-        public long getStartTime() {
-            return mStartTimeMs;
         }
 
         public ComponentName getComponent() {

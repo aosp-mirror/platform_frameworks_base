@@ -912,7 +912,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
-        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
+                int capability) {
             mUidEventHandler.obtainMessage(UID_MSG_STATE_CHANGED,
                     uid, procState, procStateSeq).sendToTarget();
         }

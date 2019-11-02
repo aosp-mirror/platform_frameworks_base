@@ -750,6 +750,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     private void onFinished(Callback callback) {
+        if (mPendingFrameCallback != null) {
+            // No animations can finish while we're waiting on the blanking to finish
+            return;
+
+        }
         if (isAnimating(mScrimBehind)
             || isAnimating(mScrimInFront)
             || isAnimating(mScrimForBubble)) {

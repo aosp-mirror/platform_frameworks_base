@@ -151,6 +151,9 @@ class ProcessRecord implements WindowProcessListener {
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
     int verifiedAdj;            // The last adjustment that was verified as actually being set
+    int curCapability;          // Current capability flags of this process. For example,
+                                // PROCESS_CAPABILITY_FOREGROUND_LOCATION is one capability.
+    int setCapability;          // Last set capability flags.
     long lastCompactTime;       // The last time that this process was compacted
     int reqCompactAction;       // The most recent compaction action requested for this app.
     int lastCompactAction;      // The most recent compaction action performed for this app.
@@ -425,6 +428,8 @@ class ProcessRecord implements WindowProcessListener {
                 pw.print(" mRepProcState="); pw.print(mRepProcState);
                 pw.print(" pssProcState="); pw.print(pssProcState);
                 pw.print(" setProcState="); pw.print(setProcState);
+                pw.print(" curCapability="); pw.print(curCapability);
+                pw.print(" setCapability="); pw.print(setCapability);
                 pw.print(" lastStateTime=");
                 TimeUtils.formatDuration(lastStateTime, nowUptime, pw);
                 pw.println();
@@ -1095,6 +1100,10 @@ class ProcessRecord implements WindowProcessListener {
     boolean hasLocationForegroundServices() {
         return mHasForegroundServices
                 && (mFgServiceTypes & ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION) != 0;
+    }
+
+    boolean hasLocationCapability() {
+        return (setCapability & ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0;
     }
 
     int getForegroundServiceTypes() {

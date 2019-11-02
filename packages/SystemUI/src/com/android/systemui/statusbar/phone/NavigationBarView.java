@@ -76,6 +76,7 @@ import com.android.systemui.recents.RecentsOnboarding;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
@@ -300,7 +301,7 @@ public class NavigationBarView extends FrameLayout implements
         mConfiguration.updateFrom(context.getResources().getConfiguration());
 
         mScreenPinningNotify = new ScreenPinningNotify(mContext);
-        mBarTransitions = new NavigationBarTransitions(this);
+        mBarTransitions = new NavigationBarTransitions(this, Dependency.get(CommandQueue.class));
 
         mButtonDispatchers.put(R.id.back, backButton);
         mButtonDispatchers.put(R.id.home, new ButtonDispatcher(R.id.home));

@@ -30,6 +30,7 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 @SmallTest
@@ -56,10 +57,12 @@ public class DependencyTest extends SysuiTestCase {
     @Test
     public void testDump() {
         Dumpable d = mock(Dumpable.class);
+        String[] args = new String[0];
+        FileDescriptor fd = mock(FileDescriptor.class);
         mDependency.injectTestDependency(DUMPABLE, d);
         Dependency.get(DUMPABLE);
-        mDependency.dump(null, mock(PrintWriter.class), null);
-        verify(d).dump(eq(null), any(), eq(null));
+        mDependency.dump(fd, mock(PrintWriter.class), args);
+        verify(d).dump(eq(fd), any(), eq(args));
     }
 
     @Test

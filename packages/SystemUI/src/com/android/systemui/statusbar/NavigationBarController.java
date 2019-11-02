@@ -18,8 +18,6 @@ package com.android.systemui.statusbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.systemui.SysUiServiceProvider.getComponent;
-
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
@@ -66,14 +64,12 @@ public class NavigationBarController implements Callbacks {
     SparseArray<NavigationBarFragment> mNavigationBars = new SparseArray<>();
 
     @Inject
-    public NavigationBarController(Context context, @MainHandler Handler handler) {
+    public NavigationBarController(Context context, @MainHandler Handler handler,
+            CommandQueue commandQueue) {
         mContext = context;
         mHandler = handler;
         mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-        CommandQueue commandQueue = getComponent(mContext, CommandQueue.class);
-        if (commandQueue != null) {
-            commandQueue.addCallback(this);
-        }
+        commandQueue.addCallback(this);
     }
 
     @Override

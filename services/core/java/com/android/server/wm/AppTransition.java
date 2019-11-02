@@ -219,7 +219,7 @@ public class AppTransition implements Dump {
     private int mNextAppTransitionExit;
     private int mNextAppTransitionInPlace;
 
-    // Keyed by task id.
+    // Keyed by WindowContainer hashCode.
     private final SparseArray<AppTransitionAnimationSpec> mNextAppTransitionAnimationsSpecs
             = new SparseArray<>();
     private IAppTransitionAnimationSpecsFuture mNextAppTransitionAnimationsSpecsFuture;
@@ -372,8 +372,9 @@ public class AppTransition implements Dump {
         setAppTransitionState(APP_STATE_TIMEOUT);
     }
 
-    GraphicBuffer getAppTransitionThumbnailHeader(int taskId) {
-        AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(taskId);
+    GraphicBuffer getAppTransitionThumbnailHeader(WindowContainer container) {
+        AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(
+                container.hashCode());
         if (spec == null) {
             spec = mDefaultNextAppTransitionAnimationSpec;
         }
@@ -789,14 +790,15 @@ public class AppTransition implements Dump {
         }
     }
 
-    void getNextAppTransitionStartRect(int taskId, Rect rect) {
-        AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(taskId);
+    void getNextAppTransitionStartRect(WindowContainer container, Rect rect) {
+        AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(
+                container.hashCode());
         if (spec == null) {
             spec = mDefaultNextAppTransitionAnimationSpec;
         }
         if (spec == null || spec.rect == null) {
-            Slog.e(TAG, "Starting rect for task: " + taskId + " requested, but not available",
-                    new Throwable());
+            Slog.e(TAG, "Starting rect for container: " + container
+                            + " requested, but not available", new Throwable());
             rect.setEmpty();
         } else {
             rect.set(spec.rect);
@@ -1065,7 +1067,7 @@ public class AppTransition implements Dump {
      * when a thumbnail is specified with the pending animation override.
      */
     Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, @Nullable Rect contentInsets,
-            GraphicBuffer thumbnailHeader, final int taskId, int uiMode, int orientation) {
+            GraphicBuffer thumbnailHeader, WindowContainer container, int uiMode, int orientation) {
         Animation a;
         final int thumbWidthI = thumbnailHeader.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -1073,7 +1075,7 @@ public class AppTransition implements Dump {
         final int appWidth = appRect.width();
 
         float scaleW = appWidth / thumbWidth;
-        getNextAppTransitionStartRect(taskId, mTmpRect);
+        getNextAppTransitionStartRect(container, mTmpRect);
         final float fromX;
         float fromY;
         final float toX;
@@ -1226,7 +1228,7 @@ public class AppTransition implements Dump {
     Animation createAspectScaledThumbnailEnterExitAnimationLocked(int thumbTransitState,
             int uiMode, int orientation, int transit, Rect containingFrame, Rect contentInsets,
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean freeform,
-            int taskId) {
+            WindowContainer container) {
         Animation a;
         final int appWidth = containingFrame.width();
         final int appHeight = containingFrame.height();
@@ -1244,10 +1246,10 @@ public class AppTransition implements Dump {
                 final boolean scaleUp = thumbTransitState == THUMBNAIL_TRANSITION_ENTER_SCALE_UP;
                 if (freeform && scaleUp) {
                     a = createAspectScaledThumbnailEnterFreeformAnimationLocked(
-                            containingFrame, surfaceInsets, taskId);
+                            containingFrame, surfaceInsets, container);
                 } else if (freeform) {
                     a = createAspectScaledThumbnailExitFreeformAnimationLocked(
-                            containingFrame, surfaceInsets, taskId);
+                            containingFrame, surfaceInsets, container);
                 } else {
                     AnimationSet set = new AnimationSet(true);
 
@@ -1359,15 +1361,15 @@ public class AppTransition implements Dump {
     }
 
     private Animation createAspectScaledThumbnailEnterFreeformAnimationLocked(Rect frame,
-            @Nullable Rect surfaceInsets, int taskId) {
-        getNextAppTransitionStartRect(taskId, mTmpRect);
+            @Nullable Rect surfaceInsets, WindowContainer container) {
+        getNextAppTransitionStartRect(container, mTmpRect);
         return createAspectScaledThumbnailFreeformAnimationLocked(mTmpRect, frame, surfaceInsets,
                 true);
     }
 
     private Animation createAspectScaledThumbnailExitFreeformAnimationLocked(Rect frame,
-            @Nullable Rect surfaceInsets, int taskId) {
-        getNextAppTransitionStartRect(taskId, mTmpRect);
+            @Nullable Rect surfaceInsets, WindowContainer container) {
+        getNextAppTransitionStartRect(container, mTmpRect);
         return createAspectScaledThumbnailFreeformAnimationLocked(frame, mTmpRect, surfaceInsets,
                 false);
     }
@@ -1469,10 +1471,10 @@ public class AppTransition implements Dump {
      * leaving, and the activity that is entering.
      */
     Animation createThumbnailEnterExitAnimationLocked(int thumbTransitState, Rect containingFrame,
-            int transit, int taskId) {
+            int transit, WindowContainer container) {
         final int appWidth = containingFrame.width();
         final int appHeight = containingFrame.height();
-        final GraphicBuffer thumbnailHeader = getAppTransitionThumbnailHeader(taskId);
+        final GraphicBuffer thumbnailHeader = getAppTransitionThumbnailHeader(container);
         Animation a;
         getDefaultNextAppTransitionStartRect(mTmpRect);
         final int thumbWidthI = thumbnailHeader != null ? thumbnailHeader.getWidth() : appWidth;
@@ -1615,7 +1617,7 @@ public class AppTransition implements Dump {
     Animation loadAnimation(LayoutParams lp, int transit, boolean enter, int uiMode,
             int orientation, Rect frame, Rect displayFrame, Rect insets,
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean isVoiceInteraction,
-            boolean freeform, int taskId) {
+            boolean freeform, WindowContainer container) {
         Animation a;
         if (isKeyguardGoingAwayTransit(transit) && enter) {
             a = loadKeyguardExitAnimation(transit);
@@ -1679,7 +1681,7 @@ public class AppTransition implements Dump {
             mNextAppTransitionScaleUp =
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP);
             a = createThumbnailEnterExitAnimationLocked(getThumbnailTransitionState(enter),
-                    frame, transit, taskId);
+                    frame, transit, container);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s nextAppTransition=%s transit=%s isEntrance=%b "
                             + "Callers=%s",
@@ -1692,7 +1694,7 @@ public class AppTransition implements Dump {
                     (mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP);
             a = createAspectScaledThumbnailEnterExitAnimationLocked(
                     getThumbnailTransitionState(enter), uiMode, orientation, transit, frame,
-                    insets, surfaceInsets, stableInsets, freeform, taskId);
+                    insets, surfaceInsets, stableInsets, freeform, container);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: anim=%s nextAppTransition=%s transit=%s isEntrance=%b "
                             + "Callers=%s",
@@ -1895,7 +1897,11 @@ public class AppTransition implements Dump {
                 for (int i = 0; i < specs.length; i++) {
                     AppTransitionAnimationSpec spec = specs[i];
                     if (spec != null) {
-                        mNextAppTransitionAnimationsSpecs.put(spec.taskId, spec);
+                        final WindowContainer container = findTask(spec.taskId);
+                        if (container == null) {
+                            continue;
+                        }
+                        mNextAppTransitionAnimationsSpecs.put(container.hashCode(), spec);
                         if (i == 0) {
                             // In full screen mode, the transition code depends on the default spec
                             // to be set.
@@ -1910,6 +1916,19 @@ public class AppTransition implements Dump {
             mNextAppTransitionCallback = onAnimationStartedCallback;
             mAnimationFinishedCallback = onAnimationFinishedCallback;
         }
+    }
+
+    private Task findTask(int taskId) {
+        if (taskId < 0) {
+            return null;
+        }
+        ArrayList<Task> tasks = new ArrayList<>();
+        mDisplayContent.forAllTasks(task -> {
+            if (task.mTaskId == taskId) {
+                tasks.add(task);
+            }
+        });
+        return tasks.size() == 1 ? tasks.get(0) : null;
     }
 
     void overridePendingAppTransitionMultiThumbFuture(

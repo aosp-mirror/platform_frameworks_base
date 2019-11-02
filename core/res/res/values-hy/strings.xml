@@ -1274,8 +1274,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ցանցը չունի մուտք ինտերնետին"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Հպեք՝ ընտրանքները տեսնելու համար"</string>
-    <string name="mobile_no_internet" msgid="1445208572588803493">"Բջջային ցանցում ինտերնետ կապ չկա"</string>
-    <string name="other_networks_no_internet" msgid="1553338015597653827">"Ցանցում ինտերնետ կապ չկա"</string>
+    <string name="mobile_no_internet" msgid="1445208572588803493">"Բջջային ցանցը չի ապահովում ինտերնետ կապ"</string>
+    <string name="other_networks_no_internet" msgid="1553338015597653827">"Ցանցը միացված չէ ինտերնետին"</string>
     <string name="private_dns_broken_detailed" msgid="4293356177543535578">"Մասնավոր DNS սերվերն անհասանելի է"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Միացված է"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ցանցի կապը սահմանափակ է"</string>

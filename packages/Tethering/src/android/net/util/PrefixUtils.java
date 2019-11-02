@@ -42,16 +42,19 @@ public class PrefixUtils {
 
     public static final IpPrefix DEFAULT_WIFI_P2P_PREFIX = pfx("192.168.49.0/24");
 
+    /** Get non forwardable prefixes. */
     public static Set<IpPrefix> getNonForwardablePrefixes() {
         final HashSet<IpPrefix> prefixes = new HashSet<>();
         addNonForwardablePrefixes(prefixes);
         return prefixes;
     }
 
+    /** Add non forwardable prefixes. */
     public static void addNonForwardablePrefixes(Set<IpPrefix> prefixes) {
         Collections.addAll(prefixes, MIN_NON_FORWARDABLE_PREFIXES);
     }
 
+    /** Get local prefixes from |lp|. */
     public static Set<IpPrefix> localPrefixesFrom(LinkProperties lp) {
         final HashSet<IpPrefix> localPrefixes = new HashSet<>();
         if (lp == null) return localPrefixes;
@@ -66,10 +69,12 @@ public class PrefixUtils {
         return localPrefixes;
     }
 
+    /** Convert LinkAddress |addr| to IpPrefix. */
     public static IpPrefix asIpPrefix(LinkAddress addr) {
         return new IpPrefix(addr.getAddress(), addr.getPrefixLength());
     }
 
+    /** Convert InetAddress |ip| to IpPrefix. */
     public static IpPrefix ipAddressAsPrefix(InetAddress ip) {
         final int bitLength = (ip instanceof Inet4Address)
                 ? NetworkConstants.IPV4_ADDR_BITS

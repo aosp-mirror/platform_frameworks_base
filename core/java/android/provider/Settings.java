@@ -10654,6 +10654,7 @@ public final class Settings {
          * @hide
          * @see com.android.server.AppOpsService.Constants
          */
+        @TestApi
         public static final String APP_OPS_CONSTANTS = "app_ops_constants";
 
         /**

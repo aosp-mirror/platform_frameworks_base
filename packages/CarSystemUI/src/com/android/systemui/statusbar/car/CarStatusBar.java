@@ -80,6 +80,8 @@ import com.android.systemui.navigationbar.car.CarNavigationBarView;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.NavigationBarController;
@@ -134,16 +136,13 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 
 /**
  * A status bar tailored for the automotive use case.
  */
-@Singleton
 public class CarStatusBar extends StatusBar implements CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
     // used to calculate how fast to open or close the window
@@ -236,7 +235,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 }
             };
 
-    @Inject
     public CarStatusBar(
             Context context,
             FeatureFlags featureFlags,
@@ -301,6 +299,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
+            CommandQueue commandQueue,
+            PluginManager pluginManager,
 
             /* Car Settings injected components. */
             CarNavigationBarController carNavigationBarController) {
@@ -363,11 +363,14 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notifLog,
                 dozeParameters,
                 scrimController,
+                null /* keyguardLiftController */,
                 lockscreenWallpaperLazy,
                 biometricUnlockControllerLazy,
                 dozeServiceHost,
                 powerManager,
-                dozeScrimController);
+                dozeScrimController,
+                commandQueue,
+                pluginManager);
         mScrimController = scrimController;
         mCarNavigationBarController = carNavigationBarController;
     }

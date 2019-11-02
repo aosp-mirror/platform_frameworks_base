@@ -24,13 +24,18 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -335,7 +340,53 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testIsAnimating() {
+    public void testIsAnimating_TransitionFlag() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
+        final TestWindowContainer root = builder.setLayer(0).build();
+        final TestWindowContainer child1 = root.addChildWindow(
+                builder.setWaitForTransitionStart(true));
+
+        assertFalse(root.isAnimating(TRANSITION));
+        assertTrue(child1.isAnimating(TRANSITION));
+    }
+
+    @Test
+    public void testIsAnimating_ParentsFlag() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
+        final TestWindowContainer root = builder.setLayer(0).build();
+        final TestWindowContainer child1 = root.addChildWindow(builder);
+        final TestWindowContainer child2 = root.addChildWindow(builder.setIsAnimating(true));
+        final TestWindowContainer child21 = child2.addChildWindow(builder.setIsAnimating(false));
+
+        assertFalse(root.isAnimating());
+        assertFalse(child1.isAnimating());
+        assertFalse(child1.isAnimating(PARENTS));
+        assertTrue(child2.isAnimating());
+        assertTrue(child2.isAnimating(PARENTS));
+        assertFalse(child21.isAnimating());
+        assertTrue(child21.isAnimating(PARENTS));
+    }
+
+    @Test
+    public void testIsAnimating_ChildrenFlag() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
+        final TestWindowContainer root = builder.setLayer(0).build();
+        final TestWindowContainer child1 = root.addChildWindow(builder);
+        final TestWindowContainer child2 = root.addChildWindow(builder.setIsAnimating(true));
+        final TestWindowContainer child11 = child1.addChildWindow(builder.setIsAnimating(true));
+
+        assertFalse(root.isAnimating());
+        assertTrue(root.isAnimating(CHILDREN));
+        assertFalse(child1.isAnimating());
+        assertTrue(child1.isAnimating(CHILDREN));
+        assertTrue(child2.isAnimating());
+        assertTrue(child2.isAnimating(CHILDREN));
+        assertTrue(child11.isAnimating());
+        assertTrue(child11.isAnimating(CHILDREN));
+    }
+
+    @Test
+    public void testIsAnimating_combineFlags() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
@@ -345,19 +396,19 @@ public class WindowContainerTests extends WindowTestsBase {
         final TestWindowContainer child12 = child1.addChildWindow(builder.setIsAnimating(true));
         final TestWindowContainer child21 = child2.addChildWindow();
 
-        assertFalse(root.isAnimating());
-        assertTrue(child1.isAnimating());
-        assertTrue(child11.isAnimating());
-        assertTrue(child12.isAnimating());
-        assertFalse(child2.isAnimating());
-        assertFalse(child21.isAnimating());
+        assertFalse(root.isAnimating(TRANSITION | PARENTS));
+        assertTrue(child1.isAnimating(TRANSITION | PARENTS));
+        assertTrue(child11.isAnimating(TRANSITION | PARENTS));
+        assertTrue(child12.isAnimating(TRANSITION | PARENTS));
+        assertFalse(child2.isAnimating(TRANSITION | PARENTS));
+        assertFalse(child21.isAnimating(TRANSITION | PARENTS));
 
-        assertTrue(root.isSelfOrChildAnimating());
-        assertTrue(child1.isSelfOrChildAnimating());
-        assertFalse(child11.isSelfOrChildAnimating());
-        assertTrue(child12.isSelfOrChildAnimating());
-        assertFalse(child2.isSelfOrChildAnimating());
-        assertFalse(child21.isSelfOrChildAnimating());
+        assertTrue(root.isAnimating(TRANSITION | CHILDREN));
+        assertTrue(child1.isAnimating(TRANSITION | CHILDREN));
+        assertFalse(child11.isAnimating(TRANSITION | CHILDREN));
+        assertTrue(child12.isAnimating(TRANSITION | CHILDREN));
+        assertFalse(child2.isAnimating(TRANSITION | CHILDREN));
+        assertFalse(child21.isAnimating(TRANSITION | CHILDREN));
     }
 
     @Test
@@ -716,6 +767,7 @@ public class WindowContainerTests extends WindowTestsBase {
         private boolean mIsAnimating;
         private boolean mIsVisible;
         private boolean mFillsParent;
+        private boolean mWaitForTransitStart;
         private Integer mOrientation;
 
         private boolean mOnParentChangedCalled;
@@ -738,7 +790,7 @@ public class WindowContainerTests extends WindowTestsBase {
         };
 
         TestWindowContainer(WindowManagerService wm, int layer, boolean isAnimating,
-                boolean isVisible, Integer orientation) {
+                boolean isVisible, boolean waitTransitStart, Integer orientation) {
             super(wm);
 
             mLayer = layer;
@@ -746,6 +798,9 @@ public class WindowContainerTests extends WindowTestsBase {
             mIsVisible = isVisible;
             mFillsParent = true;
             mOrientation = orientation;
+            mWaitForTransitStart = waitTransitStart;
+            spyOn(mSurfaceAnimator);
+            doReturn(mIsAnimating).when(mSurfaceAnimator).isAnimating();
         }
 
         TestWindowContainer getParentWindow() {
@@ -783,11 +838,6 @@ public class WindowContainerTests extends WindowTestsBase {
         }
 
         @Override
-        boolean isSelfAnimating() {
-            return mIsAnimating;
-        }
-
-        @Override
         boolean isVisible() {
             return mIsVisible;
         }
@@ -810,6 +860,11 @@ public class WindowContainerTests extends WindowTestsBase {
         void setFillsParent(boolean fillsParent) {
             mFillsParent = fillsParent;
         }
+
+        @Override
+        boolean isWaitingForTransitionStart() {
+            return mWaitForTransitStart;
+        }
     }
 
     private static class TestWindowContainerBuilder {
@@ -817,6 +872,7 @@ public class WindowContainerTests extends WindowTestsBase {
         private int mLayer;
         private boolean mIsAnimating;
         private boolean mIsVisible;
+        private boolean mIsWaitTransitStart;
         private Integer mOrientation;
 
         TestWindowContainerBuilder(WindowManagerService wm) {
@@ -847,8 +903,14 @@ public class WindowContainerTests extends WindowTestsBase {
             return this;
         }
 
+        TestWindowContainerBuilder setWaitForTransitionStart(boolean waitTransitStart) {
+            mIsWaitTransitStart = waitTransitStart;
+            return this;
+        }
+
         TestWindowContainer build() {
-            return new TestWindowContainer(mWm, mLayer, mIsAnimating, mIsVisible, mOrientation);
+            return new TestWindowContainer(mWm, mLayer, mIsAnimating, mIsVisible,
+                    mIsWaitTransitStart, mOrientation);
         }
     }
 

@@ -40,13 +40,15 @@ import javax.inject.Singleton;
 @Singleton
 public class PipUI extends SystemUI implements CommandQueue.Callbacks {
 
+    private final CommandQueue mCommandQueue;
     private BasePipManager mPipManager;
 
     private boolean mSupportsPip;
 
     @Inject
-    public PipUI(Context context) {
+    public PipUI(Context context, CommandQueue commandQueue) {
         super(context);
+        mCommandQueue = commandQueue;
     }
 
     @Override
@@ -68,7 +70,7 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
                 : com.android.systemui.pip.phone.PipManager.getInstance();
         mPipManager.initialize(mContext);
 
-        getComponent(CommandQueue.class).addCallback(this);
+        mCommandQueue.addCallback(this);
     }
 
     @Override

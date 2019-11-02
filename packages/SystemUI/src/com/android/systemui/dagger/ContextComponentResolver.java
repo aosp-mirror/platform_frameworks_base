@@ -18,8 +18,10 @@ package com.android.systemui.dagger;
 
 import android.app.Activity;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 
 import com.android.systemui.SystemUI;
+import com.android.systemui.recents.RecentsImplementation;
 
 import java.util.Map;
 
@@ -35,15 +37,20 @@ public class ContextComponentResolver implements ContextComponentHelper {
     private final Map<Class<?>, Provider<Activity>> mActivityCreators;
     private final Map<Class<?>, Provider<Service>> mServiceCreators;
     private final Map<Class<?>, Provider<SystemUI>> mSystemUICreators;
+    private final Map<Class<?>, Provider<RecentsImplementation>> mRecentsCreators;
+    private final Map<Class<?>, Provider<BroadcastReceiver>> mBroadcastReceiverCreators;
 
     @Inject
-    ContextComponentResolver(
-            Map<Class<?>, Provider<Activity>> activityCreators,
+    ContextComponentResolver(Map<Class<?>, Provider<Activity>> activityCreators,
             Map<Class<?>, Provider<Service>> serviceCreators,
-            Map<Class<?>, Provider<SystemUI>> systemUICreators) {
+            Map<Class<?>, Provider<SystemUI>> systemUICreators,
+            Map<Class<?>, Provider<RecentsImplementation>> recentsCreators,
+            Map<Class<?>, Provider<BroadcastReceiver>> broadcastReceiverCreators) {
         mActivityCreators = activityCreators;
         mServiceCreators = serviceCreators;
         mSystemUICreators = systemUICreators;
+        mRecentsCreators = recentsCreators;
+        mBroadcastReceiverCreators = broadcastReceiverCreators;
     }
 
     /**
@@ -52,6 +59,22 @@ public class ContextComponentResolver implements ContextComponentHelper {
     @Override
     public Activity resolveActivity(String className) {
         return resolve(className, mActivityCreators);
+    }
+
+    /**
+     * Looks up the BroadcastReceiver class name to see if Dagger has an instance of it.
+     */
+    @Override
+    public BroadcastReceiver resolveBroadcastReceiver(String className) {
+        return resolve(className, mBroadcastReceiverCreators);
+    }
+
+    /**
+     * Looks up the RecentsImplementation class name to see if Dagger has an instance of it.
+     */
+    @Override
+    public RecentsImplementation resolveRecents(String className) {
+        return resolve(className, mRecentsCreators);
     }
 
     /**

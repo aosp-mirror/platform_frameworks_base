@@ -46,7 +46,11 @@ class ViewerConfigBuilder(
     private val statements: MutableMap<Int, LogCall> = mutableMapOf()
     private val groups: MutableSet<LogGroup> = mutableSetOf()
 
-    fun findLogCalls(unit: CompilationUnit, fileName: String): List<Pair<LogCall, ParsingContext>> {
+    fun findLogCalls(
+        unit: CompilationUnit,
+        path: String,
+        packagePath: String
+    ): List<Pair<LogCall, ParsingContext>> {
         val calls = mutableListOf<Pair<LogCall, ParsingContext>>()
         val visitor = object : ProtoLogCallVisitor {
             override fun processCall(
@@ -55,12 +59,12 @@ class ViewerConfigBuilder(
                 level: LogLevel,
                 group: LogGroup
             ) {
-                val logCall = LogCall(messageString, level, group, fileName)
-                val context = ParsingContext(fileName, call)
+                val logCall = LogCall(messageString, level, group, packagePath)
+                val context = ParsingContext(path, call)
                 calls.add(logCall to context)
             }
         }
-        processor.process(unit, visitor, fileName)
+        processor.process(unit, visitor, path)
 
         return calls
     }

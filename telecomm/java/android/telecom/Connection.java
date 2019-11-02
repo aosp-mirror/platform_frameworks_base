@@ -858,7 +858,7 @@ public abstract class Connection extends Conferenceable {
     }
 
     /** @hide */
-    public abstract static class Listener {
+    abstract static class Listener {
         public void onStateChanged(Connection c, int state) {}
         public void onAddressChanged(Connection c, Uri newAddress, int presentation) {}
         public void onCallerDisplayNameChanged(
@@ -2006,7 +2006,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @hide
      */
-    public final Connection addConnectionListener(Listener l) {
+    final Connection addConnectionListener(Listener l) {
         mListeners.add(l);
         return this;
     }
@@ -2019,7 +2019,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @hide
      */
-    public final Connection removeConnectionListener(Listener l) {
+    final Connection removeConnectionListener(Listener l) {
         if (l != null) {
             mListeners.remove(l);
         }
