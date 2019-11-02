@@ -164,7 +164,7 @@ class FileInfo(
                         }
                         if (endInclusive == -1) {
                             // Legacy generated code doesn't have end markers
-                            endInclusive = fileInfo.sourceLines.size - 2
+                            endInclusive = sourceNoPrefix.size - 2
                         }
                         IntRange(
                                 range.start + start - fileInfo.generatedWarningNumPrecedingEmptyLines,
