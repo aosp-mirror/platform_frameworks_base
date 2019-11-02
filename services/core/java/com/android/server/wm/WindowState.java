@@ -657,6 +657,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private KeyInterceptionInfo mKeyInterceptionInfo;
 
     /**
+     * This information is passed to SurfaceFlinger to decide which window should have a priority
+     * when deciding about the refresh rate of the display. All windows have the lowest priority by
+     * default. The variable is cached, so we do not send too many updates to SF.
+     */
+    int mFrameRateSelectionPriority = RefreshRatePolicy.LAYER_PRIORITY_UNSET;
+
+    /**
      * @return The insets state as requested by the client, i.e. the dispatched insets state
      *         for which the visibilities are overridden with what the client requested.
      */
@@ -5169,6 +5176,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+
+    /**
+     * Notifies SF about the priority of the window, if it changed. SF then uses this information
+     * to decide which window's desired rendering rate should have a priority when deciding about
+     * the refresh rate of the screen. Priority
+     * {@link RefreshRatePolicy#LAYER_PRIORITY_FOCUSED_WITH_MODE} is considered the highest.
+     */
+    @VisibleForTesting
+    void updateFrameRateSelectionPriorityIfNeeded() {
+        final int priority = getDisplayContent().getDisplayPolicy().getRefreshRatePolicy()
+                .calculatePriority(this);
+        if (mFrameRateSelectionPriority != priority) {
+            mFrameRateSelectionPriority = priority;
+            getPendingTransaction().setFrameRateSelectionPriority(mSurfaceControl,
+                    mFrameRateSelectionPriority);
+        }
+    }
+
     @Override
     void prepareSurfaces() {
         final Dimmer dimmer = getDimmer();
@@ -5177,6 +5202,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             applyDims(dimmer);
         }
         updateSurfacePosition();
+        // Send information to SufaceFlinger about the priority of the current window.
+        updateFrameRateSelectionPriorityIfNeeded();
 
         mWinAnimator.prepareSurfaceLocked(true);
         super.prepareSurfaces();
