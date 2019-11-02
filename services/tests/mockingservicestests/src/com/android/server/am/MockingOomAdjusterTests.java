@@ -61,6 +61,7 @@ import static com.android.server.am.ProcessList.UNKNOWN_ADJ;
 import static com.android.server.am.ProcessList.VISIBLE_APP_ADJ;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.answer;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -538,6 +539,21 @@ public class MockingOomAdjusterTests {
 
         assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, PERCEPTIBLE_LOW_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_NonCachedToCached() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        app.cached = false;
+        app.setCurRawAdj(SERVICE_ADJ);
+        doReturn(null).when(sService).getTopAppLocked();
+        sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
+        sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertTrue(ProcessList.CACHED_APP_MIN_ADJ <= app.setAdj);
+        assertTrue(ProcessList.CACHED_APP_MAX_ADJ >= app.setAdj);
     }
 
     @SuppressWarnings("GuardedBy")
