@@ -17,6 +17,7 @@
 package com.android.systemui;
 
 import com.android.systemui.dagger.DefaultActivityBinder;
+import com.android.systemui.dagger.DefaultBroadcastReceiverBinder;
 import com.android.systemui.dagger.DefaultServiceBinder;
 
 import dagger.Module;
@@ -26,6 +27,7 @@ import dagger.Module;
  */
 @Module(includes = {
         DefaultActivityBinder.class,
+        DefaultBroadcastReceiverBinder.class,
         DefaultServiceBinder.class,
         CarSystemUIBinder.class})
 public class CarComponentBinder {

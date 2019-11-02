@@ -79,8 +79,8 @@ import android.widget.Toast;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.NotificationChannels;
@@ -97,6 +97,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 
 /**
@@ -452,7 +454,8 @@ class DeleteImageInBackgroundTask extends AsyncTask<Uri, Void, Void> {
     }
 }
 
-class GlobalScreenshot {
+@Singleton
+public class GlobalScreenshot {
     static final String SCREENSHOT_URI_ID = "android:screenshot_uri_id";
     static final String EXTRA_ACTION_INTENT = "android:screenshot_action_intent";
     static final String EXTRA_CANCEL_NOTIFICATION = "android:screenshot_cancel_notification";
@@ -503,19 +506,17 @@ class GlobalScreenshot {
     /**
      * @param context everything needs a context :(
      */
-    public GlobalScreenshot(Context context) {
-        Resources r = context.getResources();
+    @Inject
+    public GlobalScreenshot(Context context, @MainResources Resources resources,
+            LayoutInflater layoutInflater) {
         mContext = context;
-        LayoutInflater layoutInflater = (LayoutInflater)
-                context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         // Inflate the screenshot layout
         mScreenshotLayout = layoutInflater.inflate(R.layout.global_screenshot, null);
-        mBackgroundView = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot_background);
-        mScreenshotView = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot);
-        mScreenshotFlash = (ImageView) mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
-        mScreenshotSelectorView = (ScreenshotSelectorView) mScreenshotLayout.findViewById(
-                R.id.global_screenshot_selector);
+        mBackgroundView = mScreenshotLayout.findViewById(R.id.global_screenshot_background);
+        mScreenshotView = mScreenshotLayout.findViewById(R.id.global_screenshot);
+        mScreenshotFlash = mScreenshotLayout.findViewById(R.id.global_screenshot_flash);
+        mScreenshotSelectorView = mScreenshotLayout.findViewById(R.id.global_screenshot_selector);
         mScreenshotLayout.setFocusable(true);
         mScreenshotSelectorView.setFocusable(true);
         mScreenshotSelectorView.setFocusableInTouchMode(true);
@@ -546,16 +547,16 @@ class GlobalScreenshot {
 
         // Get the various target sizes
         mNotificationIconSize =
-            r.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
+            resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_height);
 
         // Scale has to account for both sides of the bg
-        mBgPadding = (float) r.getDimensionPixelSize(R.dimen.global_screenshot_bg_padding);
+        mBgPadding = (float) resources.getDimensionPixelSize(R.dimen.global_screenshot_bg_padding);
         mBgPaddingScale = mBgPadding /  mDisplayMetrics.widthPixels;
 
         // determine the optimal preview size
         int panelWidth = 0;
         try {
-            panelWidth = r.getDimensionPixelSize(R.dimen.notification_panel_width);
+            panelWidth = resources.getDimensionPixelSize(R.dimen.notification_panel_width);
         } catch (Resources.NotFoundException e) {
         }
         if (panelWidth <= 0) {
@@ -563,7 +564,7 @@ class GlobalScreenshot {
             panelWidth = mDisplayMetrics.widthPixels;
         }
         mPreviewWidth = panelWidth;
-        mPreviewHeight = r.getDimensionPixelSize(R.dimen.notification_max_height);
+        mPreviewHeight = resources.getDimensionPixelSize(R.dimen.notification_max_height);
 
         // Setup the Camera shutter sound
         mCameraSound = new MediaActionSound();
@@ -917,6 +918,12 @@ class GlobalScreenshot {
      */
     public static class ActionProxyReceiver extends BroadcastReceiver {
         static final int CLOSE_WINDOWS_TIMEOUT_MILLIS = 3000;
+        private final StatusBar mStatusBar;
+
+        @Inject
+        public ActionProxyReceiver(StatusBar statusBar) {
+            mStatusBar = statusBar;
+        }
 
         @Override
         public void onReceive(Context context, final Intent intent) {
@@ -939,8 +946,8 @@ class GlobalScreenshot {
                         intent.getBooleanExtra(EXTRA_DISALLOW_ENTER_PIP, false));
                 context.startActivityAsUser(actionIntent, opts.toBundle(), UserHandle.CURRENT);
             };
-            StatusBar statusBar = SysUiServiceProvider.getComponent(context, StatusBar.class);
-            statusBar.executeRunnableDismissingKeyguard(startActivityRunnable, null,
+
+            mStatusBar.executeRunnableDismissingKeyguard(startActivityRunnable, null,
                     true /* dismissShade */, true /* afterKeyguardGone */, true /* deferred */);
         }
     }

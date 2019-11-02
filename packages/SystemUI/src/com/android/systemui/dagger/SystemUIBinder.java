@@ -48,6 +48,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NavigationBarController;
@@ -271,7 +272,8 @@ public abstract class SystemUIBinder {
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            PluginManager pluginManager) {
         return new StatusBar(
                 context,
                 featureFlags,
@@ -337,7 +339,8 @@ public abstract class SystemUIBinder {
                 dozeServiceHost,
                 powerManager,
                 dozeScrimController,
-                commandQueue);
+                commandQueue,
+                pluginManager);
     }
 
 }

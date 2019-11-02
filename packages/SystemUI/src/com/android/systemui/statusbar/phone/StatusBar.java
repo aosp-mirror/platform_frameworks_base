@@ -100,6 +100,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -168,7 +169,9 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.PluginDependencyProvider;
+import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -176,6 +179,7 @@ import com.android.systemui.qs.QSFragment;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.WindowManagerProxy;
@@ -396,6 +400,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final NotifLog mNotifLog;
     private final DozeParameters mDozeParameters;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
+    private final PluginManager mPluginManager;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -697,7 +702,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            PluginManager pluginManager) {
         super(context);
         mFeatureFlags = featureFlags;
         mLightBarController = lightBarController;
@@ -763,6 +769,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
         mCommandQueue = commandQueue;
+        mPluginManager = pluginManager;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
@@ -929,6 +936,50 @@ public class StatusBar extends SystemUI implements DemoMode,
         int disabledFlags2 = result.mDisabledFlags2;
         Dependency.get(InitController.class).addPostInitTask(
                 () -> setUpDisableFlags(disabledFlags1, disabledFlags2));
+
+        mPluginManager.addPluginListener(
+                new PluginListener<OverlayPlugin>() {
+                    private ArraySet<OverlayPlugin> mOverlays = new ArraySet<>();
+
+                    @Override
+                    public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
+                        mMainThreadHandler.post(
+                                () -> plugin.setup(getStatusBarWindow(), getNavigationBarView(),
+                                        new Callback(plugin), mDozeParameters));
+                    }
+
+                    @Override
+                    public void onPluginDisconnected(OverlayPlugin plugin) {
+                        mMainThreadHandler.post(() -> {
+                            mOverlays.remove(plugin);
+                            mStatusBarWindowController.setForcePluginOpen(mOverlays.size() != 0);
+                        });
+                    }
+
+                    class Callback implements OverlayPlugin.Callback {
+                        private final OverlayPlugin mPlugin;
+
+                        Callback(OverlayPlugin plugin) {
+                            mPlugin = plugin;
+                        }
+
+                        @Override
+                        public void onHoldStatusBarOpenChange() {
+                            if (mPlugin.holdStatusBarOpen()) {
+                                mOverlays.add(mPlugin);
+                            } else {
+                                mOverlays.remove(mPlugin);
+                            }
+                            mMainThreadHandler.post(() -> {
+                                mStatusBarWindowController
+                                        .setStateListener(b -> mOverlays.forEach(
+                                                o -> o.setCollapseDesired(b)));
+                                mStatusBarWindowController
+                                        .setForcePluginOpen(mOverlays.size() != 0);
+                            });
+                        }
+                    }
+                }, OverlayPlugin.class, true /* Allow multiple plugins */);
     }
 
     // ================================================================================

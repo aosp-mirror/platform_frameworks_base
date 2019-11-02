@@ -91,6 +91,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -230,6 +231,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
     @Mock private KeyguardLiftController mKeyguardLiftController;
     @Mock private CommandQueue mCommandQueue;
+    @Mock private PluginManager mPluginManager;
 
     @Before
     public void setup() throws Exception {
@@ -366,7 +368,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeServiceHost,
                 mPowerManager,
                 mDozeScrimController,
-                mCommandQueue);
+                mCommandQueue,
+                mPluginManager);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);
@@ -392,7 +395,6 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mStackScroller = mStackScroller;
         mStatusBar.mStatusBarWindowViewController = mStatusBarWindowViewController;
         mStatusBar.startKeyguard();
-        mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
         entryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,
                 mHeadsUpManager);
