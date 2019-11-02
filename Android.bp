@@ -34,6 +34,27 @@ filegroup {
     path: "core/java",
 }
 
+// These are subset of framework-core-sources that are needed by the
+// android.test.mock library. Ideally, the library should use public APIs only,
+// but unfortunately its API signature has some references to these private APIs.
+filegroup {
+    name: "framework-core-sources-for-test-mock",
+    srcs: [
+        "core/java/android/app/IApplicationThread.aidl",
+        "core/java/android/app/IServiceConnection.aidl",
+        "core/java/android/content/IContentProvider.java",
+        "core/java/android/content/pm/IPackageDataObserver.aidl",
+        "core/java/android/content/pm/InstantAppInfo.java",
+        "core/java/android/content/pm/KeySet.java",
+        "core/java/android/content/pm/PackageManager.java",
+        "core/java/android/content/pm/VerifierDeviceIdentity.java",
+        "core/java/android/content/res/Resources.java",
+        "core/java/android/os/storage/VolumeInfo.java",
+        "core/java/android/view/DisplayAdjustments.java",
+    ],
+    path: "core/java",
+}
+
 filegroup {
     name: "framework-drm-sources",
     srcs: [
