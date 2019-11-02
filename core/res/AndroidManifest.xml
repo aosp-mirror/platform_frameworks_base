@@ -4616,6 +4616,13 @@
     <permission android:name="android.permission.MONITOR_INPUT"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to manage ADB Root
+         @hide <p>Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.ADBROOT"
+                android:protectionLevel="signature|privileged" />
+
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"

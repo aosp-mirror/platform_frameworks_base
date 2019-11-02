@@ -671,6 +671,8 @@ java_defaults {
         ":dumpstate_aidl",
         ":incidentcompanion_aidl",
 
+        ":adbrootservice_aidl",
+
         "lowpan/java/android/net/lowpan/ILowpanEnergyScanCallback.aidl",
         "lowpan/java/android/net/lowpan/ILowpanNetScanCallback.aidl",
         "lowpan/java/android/net/lowpan/ILowpanInterfaceListener.aidl",
