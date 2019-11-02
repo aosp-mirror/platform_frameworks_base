@@ -106,21 +106,27 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testNetworkFailedRollback() throws Exception {
-        // Disconnect internet so we can test network health triggered rollbacks
-        getDevice().executeShellCommand("svc wifi disable");
-        getDevice().executeShellCommand("svc data disable");
+        try {
+            // Disconnect internet so we can test network health triggered rollbacks
+            getDevice().executeShellCommand("svc wifi disable");
+            getDevice().executeShellCommand("svc data disable");
 
-        runPhase("testNetworkFailedRollback_Phase1");
-        // Reboot device to activate staged package
-        getDevice().reboot();
+            runPhase("testNetworkFailedRollback_Phase1");
+            // Reboot device to activate staged package
+            getDevice().reboot();
 
-        // Verify rollback was enabled
-        runPhase("testNetworkFailedRollback_Phase2");
-        assertThrows(AssertionError.class, () -> runPhase("testNetworkFailedRollback_Phase3"));
+            // Verify rollback was enabled
+            runPhase("testNetworkFailedRollback_Phase2");
+            assertThrows(AssertionError.class, () -> runPhase("testNetworkFailedRollback_Phase3"));
 
-        getDevice().waitForDeviceAvailable();
-        // Verify rollback was executed after health check deadline
-        runPhase("testNetworkFailedRollback_Phase4");
+            getDevice().waitForDeviceAvailable();
+            // Verify rollback was executed after health check deadline
+            runPhase("testNetworkFailedRollback_Phase4");
+        } finally {
+            // Reconnect internet again so we won't break tests which assume internet available
+            getDevice().executeShellCommand("svc wifi enable");
+            getDevice().executeShellCommand("svc data enable");
+        }
     }
 
     /**
