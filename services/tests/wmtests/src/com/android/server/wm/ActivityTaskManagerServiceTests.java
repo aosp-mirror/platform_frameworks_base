@@ -16,11 +16,16 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
+import android.graphics.Rect;
+import android.view.WindowContainerTransaction;
 
 import androidx.test.filters.MediumTest;
 
@@ -57,6 +62,19 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         assertTrue("Duplicate activity finish request must also return 'true'",
                 mService.finishActivity(activity.appToken, 0 /* resultCode */,
                         null /* resultData */, Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
+    }
+
+    @Test
+    public void testTaskTransaction() {
+        removeGlobalMinSizeRestriction();
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        final TaskRecord task = stack.topTask();
+        WindowContainerTransaction t = new WindowContainerTransaction();
+        Rect newBounds = new Rect(10, 10, 100, 100);
+        t.setBounds(task.mRemoteToken, new Rect(10, 10, 100, 100));
+        mService.applyContainerTransaction(t);
+        assertEquals(newBounds, task.getBounds());
     }
 }
 

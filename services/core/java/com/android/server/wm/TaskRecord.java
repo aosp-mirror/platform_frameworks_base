@@ -77,7 +77,6 @@ import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
@@ -378,6 +377,7 @@ class TaskRecord extends ConfigurationContainer {
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         mAtmService = atmService;
         mTaskId = _taskId;
+        mRemoteToken = new RemoteToken(this);
         affinityIntent = _affinityIntent;
         affinity = _affinity;
         rootAffinity = _rootAffinity;
