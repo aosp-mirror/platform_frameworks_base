@@ -8029,6 +8029,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @TestApi
     public List<String> getCarrierPackageNamesForIntent(Intent intent) {
         return getCarrierPackageNamesForIntentAndPhone(intent, getPhoneId());
     }

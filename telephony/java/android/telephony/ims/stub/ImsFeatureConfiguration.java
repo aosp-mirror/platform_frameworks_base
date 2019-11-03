@@ -19,6 +19,7 @@ package android.telephony.ims.stub;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.ims.feature.ImsFeature;
@@ -35,6 +36,7 @@ import java.util.Set;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class ImsFeatureConfiguration implements Parcelable {
 
     public static final class FeatureSlotPair {

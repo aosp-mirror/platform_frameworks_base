@@ -19,6 +19,7 @@ package android.telephony.ims.feature;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.IInterface;
 import android.os.RemoteCallbackList;
@@ -43,6 +44,7 @@ import java.util.Map;
  * @hide
  */
 @SystemApi
+@TestApi
 public abstract class ImsFeature {
 
     private static final String LOG_TAG = "ImsFeature";
@@ -212,6 +214,7 @@ public abstract class ImsFeature {
     // Not Actually deprecated, but we need to remove it from the @SystemApi surface.
     @Deprecated
     @SystemApi // SystemApi only because it was leaked through type usage in a previous release.
+    @TestApi
     public static class Capabilities {
         /** @deprecated Use getters and accessors instead. */
         // Not actually deprecated, but we need to remove it from the @SystemApi surface eventually.

@@ -17,19 +17,19 @@
 package android.telephony.ims.stub;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Message;
 import android.os.RemoteException;
-import android.telephony.ims.ImsCallSessionListener;
-import android.telephony.ims.aidl.IImsCallSessionListener;
-
 import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsCallSession;
+import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
-import android.telephony.ims.ImsCallSession;
+import android.telephony.ims.ImsVideoCallProvider;
+import android.telephony.ims.aidl.IImsCallSessionListener;
+
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
-import android.telephony.ims.ImsVideoCallProvider;
-
 /**
  * Base implementation of IImsCallSession, which implements stub versions of the methods available.
  *
@@ -38,6 +38,7 @@ import android.telephony.ims.ImsVideoCallProvider;
  * @hide
  */
 @SystemApi
+@TestApi
 // DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
 // will break other implementations of ImsCallSession maintained by other ImsServices.
 public class ImsCallSessionImplBase implements AutoCloseable {
