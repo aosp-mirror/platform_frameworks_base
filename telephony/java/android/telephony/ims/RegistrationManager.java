@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Binder;
 import android.telephony.AccessNetworkConstants;
@@ -43,6 +44,7 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
+@TestApi
 public interface RegistrationManager {
 
     /**

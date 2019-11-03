@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.RemoteException;
@@ -54,6 +55,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
+@TestApi
 public class MmTelFeature extends ImsFeature {
 
     private static final String LOG_TAG = "MmTelFeature";
