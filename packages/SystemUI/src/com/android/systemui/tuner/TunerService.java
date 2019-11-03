@@ -115,4 +115,12 @@ public abstract class TunerService {
             return defaultValue;
         }
     }
+
+    public static int parseInteger(String value, int defaultValue) {
+        try {
+            return value != null ? Integer.parseInt(value) : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
 }
