@@ -135,6 +135,12 @@ MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(
     
 
 
+MutableBareField: android.net.wifi.WifiConfiguration#allowAutojoin:
+    
+MutableBareField: android.net.wifi.WifiConfiguration#carrierId:
+    
+
+
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
     
 

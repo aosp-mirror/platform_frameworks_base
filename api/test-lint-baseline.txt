@@ -1799,6 +1799,48 @@ MissingNullability: android.widget.TimePicker#getPmView():
     
 
 
+MutableBareField: android.content.AutofillOptions#appDisabledExpiration:
+    
+MutableBareField: android.content.AutofillOptions#augmentedAutofillEnabled:
+    
+MutableBareField: android.content.AutofillOptions#disabledActivities:
+    
+MutableBareField: android.content.AutofillOptions#whitelistedActivitiesForAugmentedAutofill:
+    
+MutableBareField: android.database.sqlite.SQLiteDebug.DbStats#cache:
+    
+MutableBareField: android.database.sqlite.SQLiteDebug.DbStats#dbName:
+    
+MutableBareField: android.database.sqlite.SQLiteDebug.DbStats#dbSize:
+    
+MutableBareField: android.database.sqlite.SQLiteDebug.DbStats#lookaside:
+    
+MutableBareField: android.database.sqlite.SQLiteDebug.DbStats#pageSize:
+    
+MutableBareField: android.database.sqlite.SQLiteDebug.PagerStats#dbStats:
+    
+MutableBareField: android.database.sqlite.SQLiteDebug.PagerStats#largestMemAlloc:
+    
+MutableBareField: android.database.sqlite.SQLiteDebug.PagerStats#memoryUsed:
+    
+MutableBareField: android.database.sqlite.SQLiteDebug.PagerStats#pageCacheOverflow:
+    
+MutableBareField: android.os.StrictMode.ViolationInfo#broadcastIntentAction:
+    
+MutableBareField: android.os.StrictMode.ViolationInfo#durationMillis:
+    
+MutableBareField: android.os.StrictMode.ViolationInfo#numAnimationsRunning:
+    
+MutableBareField: android.os.StrictMode.ViolationInfo#numInstances:
+    
+MutableBareField: android.os.StrictMode.ViolationInfo#tags:
+    
+MutableBareField: android.os.StrictMode.ViolationInfo#violationNumThisLoop:
+    
+MutableBareField: android.os.StrictMode.ViolationInfo#violationUptimeMillis:
+    
+
+
 NoByteOrShort: android.media.audiofx.AudioEffect#byteArrayToShort(byte[]):
     
 NoByteOrShort: android.media.audiofx.AudioEffect#setParameter(int, short) parameter #1:
@@ -2130,6 +2172,10 @@ StreamFiles: android.provider.MediaStore#scanFile(android.content.Context, java.
 StreamFiles: android.provider.MediaStore#scanFileFromShell(android.content.Context, java.io.File):
     
 StreamFiles: android.provider.MediaStore#scanVolume(android.content.Context, java.io.File):
+    
+
+
+UseParcelFileDescriptor: android.util.proto.ProtoOutputStream#ProtoOutputStream(java.io.FileDescriptor) parameter #0:
     
 
 
