@@ -66,6 +66,8 @@ public final class Tuner implements AutoCloseable  {
      */
     private native Frontend nativeOpenFrontendById(int id);
 
+    private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
+
 
     /**
      * Frontend Callback.
@@ -98,5 +100,16 @@ public final class Tuner implements AutoCloseable  {
             return null;
         }
         return nativeOpenFrontendById(id);
+    }
+
+    protected class Filter {
+        int mId;
+        private Filter(int id) {
+            mId = id;
+        }
+    }
+
+    private Filter openFilter(int type, int subType, int bufferSize) {
+        return nativeOpenFilter(type, subType, bufferSize);
     }
 }

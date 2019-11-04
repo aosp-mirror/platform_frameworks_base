@@ -25,19 +25,34 @@
 
 #pragma GCC diagnostic ignored "-Wunused-function"
 
+using ::android::hardware::Void;
 using ::android::hardware::hidl_vec;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
+using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
 using ::android::hardware::tv::tuner::V1_0::Result;
 
 struct fields_t {
     jfieldID context;
     jmethodID frontendInitID;
+    jmethodID filterInitID;
 };
 
 static fields_t gFields;
 
 namespace android {
+/////////////// FilterCallback ///////////////////////
+//TODO: implement filter callback
+Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& /* filterEvent */) {
+    ALOGD("FilterCallback::onFilterEvent");
+    return Void();
+}
+Return<void> FilterCallback::onFilterStatus(const DemuxFilterStatus /*status*/) {
+    ALOGD("FilterCallback::onFilterStatu");
+    return Void();
+}
 
+/////////////// Tuner ///////////////////////
 sp<ITuner> JTuner::mTuner;
 
 JTuner::JTuner(JNIEnv *env, jobject thiz)
@@ -116,6 +131,54 @@ jobject JTuner::openFrontendById(int id) {
             (jint) jId);
 }
 
+bool JTuner::openDemux() {
+    if (mTuner == nullptr) {
+        return false;
+    }
+    if (mDemux != nullptr) {
+        return true;
+    }
+    mTuner->openDemux([&](Result, uint32_t demuxId, const sp<IDemux>& demux) {
+        mDemux = demux;
+        mDemuxId = demuxId;
+        ALOGD("open demux, id = %d", demuxId);
+    });
+    if (mDemux == nullptr) {
+        return false;
+    }
+    return true;
+}
+
+jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
+    if (mDemux == NULL) {
+        if (!openDemux()) {
+            return NULL;
+        }
+    }
+
+    sp<IFilter> f;
+    mDemux->openFilter(type, bufferSize, new FilterCallback,
+            [&](Result, const sp<IFilter>& filter) {
+                f = filter;
+            });
+    if (f == NULL) {
+        ALOGD("Failed to open filter, type = %d", type.mainType);
+        return NULL;
+    }
+    int fId;
+    f->getId([&](Result, uint32_t filterId) {
+        fId = filterId;
+    });
+    mFilters[fId] = f;
+
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    return env->NewObject(
+            env->FindClass("android/media/tv/tuner/Tuner$Filter"),
+            gFields.filterInitID,
+            mObject,
+            (jint) fId);
+}
+
 }  // namespace android
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +212,10 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
 
     jclass frontendClazz = env->FindClass("android/media/tv/tuner/Tuner$Frontend");
     gFields.frontendInitID = env->GetMethodID(frontendClazz, "<init>", "(I)V");
+
+    jclass filterClazz = env->FindClass("android/media/tv/tuner/Tuner$Filter");
+    gFields.filterInitID =
+            env->GetMethodID(filterClazz, "<init>", "(Landroid/media/tv/tuner/Tuner;I)V");
 }
 
 static void android_media_tv_Tuner_native_setup(JNIEnv *env, jobject thiz) {
@@ -166,6 +233,19 @@ static jobject android_media_tv_Tuner_open_frontend_by_id(JNIEnv *env, jobject t
     return tuner->openFrontendById(id);
 }
 
+static jobject android_media_tv_Tuner_open_filter(
+        JNIEnv *env, jobject thiz, jint type, jint subType, jint bufferSize) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    DemuxFilterType filterType {
+        .mainType = static_cast<DemuxFilterMainType>(type),
+    };
+
+    // TODO: other sub types
+    filterType.subType.tsFilterType(static_cast<DemuxTsFilterType>(subType));
+
+    return tuner->openFilter(filterType, bufferSize);
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeInit", "()V", (void *)android_media_tv_Tuner_native_init },
     { "nativeSetup", "()V", (void *)android_media_tv_Tuner_native_setup },
@@ -173,6 +253,8 @@ static const JNINativeMethod gMethods[] = {
             (void *)android_media_tv_Tuner_get_frontend_ids },
     { "nativeOpenFrontendById", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
             (void *)android_media_tv_Tuner_open_frontend_by_id },
+    { "nativeOpenFilter", "(III)Landroid/media/tv/tuner/Tuner$Filter;",
+            (void *)android_media_tv_Tuner_open_filter },
 };
 
 static int register_android_media_tv_Tuner(JNIEnv *env) {
