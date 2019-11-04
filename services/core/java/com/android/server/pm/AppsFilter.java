@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageParser.Component;
 import static android.content.pm.PackageParser.IntentInfo;
+import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import android.Manifest;
@@ -32,6 +33,7 @@ import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.permission.IPermissionManager;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
@@ -152,13 +154,23 @@ public class AppsFilter {
 
         @Override
         public boolean isGloballyEnabled() {
-            return mFeatureEnabled;
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "isGloballyEnabled");
+            try {
+                return mFeatureEnabled;
+            } finally {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
         }
 
         @Override
         public boolean packageIsEnabled(PackageParser.Package pkg) {
-            return mInjector.getCompatibility().isChangeEnabled(
-                    PackageManager.FILTER_APPLICATION_QUERY, pkg.applicationInfo);
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "packageIsEnabled");
+            try {
+                return mInjector.getCompatibility().isChangeEnabled(
+                        PackageManager.FILTER_APPLICATION_QUERY, pkg.applicationInfo);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
         }
     }
 
@@ -292,42 +304,48 @@ public class AppsFilter {
      */
     public void addPackage(PackageParser.Package newPkg,
             Map<String, PackageParser.Package> existing) {
-        // let's re-evaluate the ability of already added packages to see this new package
-        if (newPkg.mForceQueryable
-                || (mSystemAppsQueryable && (newPkg.isSystem() || newPkg.isUpdatedSystemApp()))) {
-            mForceQueryable.add(newPkg.packageName);
-        } else {
-            for (String packageName : mQueriesViaIntent.keySet()) {
-                if (packageName == newPkg.packageName) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "filter.addPackage");
+        try {
+            // let's re-evaluate the ability of already added packages to see this new package
+            if (newPkg.mForceQueryable
+                    || (mSystemAppsQueryable && (newPkg.isSystem()
+                    || newPkg.isUpdatedSystemApp()))) {
+                mForceQueryable.add(newPkg.packageName);
+            } else {
+                for (String packageName : mQueriesViaIntent.keySet()) {
+                    if (packageName == newPkg.packageName) {
+                        continue;
+                    }
+                    final PackageParser.Package existingPackage = existing.get(packageName);
+                    if (canQuery(existingPackage, newPkg)) {
+                        mQueriesViaIntent.get(packageName).add(newPkg.packageName);
+                    }
+                }
+            }
+            // if the new package declares them, let's evaluate its ability to see existing packages
+            mQueriesViaIntent.put(newPkg.packageName, new HashSet<>());
+            for (PackageParser.Package existingPackage : existing.values()) {
+                if (existingPackage.packageName == newPkg.packageName) {
                     continue;
                 }
-                final PackageParser.Package existingPackage = existing.get(packageName);
-                if (canQuery(existingPackage, newPkg)) {
-                    mQueriesViaIntent.get(packageName).add(newPkg.packageName);
+                if (existingPackage.mForceQueryable
+                        || (mSystemAppsQueryable
+                        && (newPkg.isSystem() || newPkg.isUpdatedSystemApp()))) {
+                    continue;
+                }
+                if (canQuery(newPkg, existingPackage)) {
+                    mQueriesViaIntent.get(newPkg.packageName).add(existingPackage.packageName);
                 }
             }
-        }
-        // if the new package declares them, let's evaluate its ability to see existing packages
-        mQueriesViaIntent.put(newPkg.packageName, new HashSet<>());
-        for (PackageParser.Package existingPackage : existing.values()) {
-            if (existingPackage.packageName == newPkg.packageName) {
-                continue;
+            final HashSet<String> queriesPackages = new HashSet<>(
+                    newPkg.mQueriesPackages == null ? 0 : newPkg.mQueriesPackages.size());
+            if (newPkg.mQueriesPackages != null) {
+                queriesPackages.addAll(newPkg.mQueriesPackages);
             }
-            if (existingPackage.mForceQueryable
-                    || (mSystemAppsQueryable
-                    && (newPkg.isSystem() || newPkg.isUpdatedSystemApp()))) {
-                continue;
-            }
-            if (canQuery(newPkg, existingPackage)) {
-                mQueriesViaIntent.get(newPkg.packageName).add(existingPackage.packageName);
-            }
+            mQueriesViaPackage.put(newPkg.packageName, queriesPackages);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
-        final HashSet<String> queriesPackages = new HashSet<>(
-                newPkg.mQueriesPackages == null ? 0 : newPkg.mQueriesPackages.size());
-        if (newPkg.mQueriesPackages != null) {
-            queriesPackages.addAll(newPkg.mQueriesPackages);
-        }
-        mQueriesViaPackage.put(newPkg.packageName, queriesPackages);
     }
 
     /**
@@ -365,151 +383,166 @@ public class AppsFilter {
      */
     public boolean shouldFilterApplication(int callingUid, @Nullable SettingBase callingSetting,
             PackageSetting targetPkgSetting, int userId) {
-        final boolean featureEnabled = mFeatureConfig.isGloballyEnabled();
-        if (!featureEnabled) {
-            if (DEBUG_LOGGING) {
-                Slog.d(TAG, "filtering disabled; skipped");
-            }
-            return false;
-        }
-        if (callingUid < Process.FIRST_APPLICATION_UID) {
-            if (DEBUG_LOGGING) {
-                Slog.d(TAG, "filtering skipped; " + callingUid + " is system");
-            }
-            return false;
-        }
-        if (callingSetting == null) {
-            Slog.wtf(TAG, "No setting found for non system uid " + callingUid);
-            return true;
-        }
-        PackageSetting callingPkgSetting = null;
-        if (callingSetting instanceof PackageSetting) {
-            callingPkgSetting = (PackageSetting) callingSetting;
-            if (!shouldFilterApplicationInternal(callingPkgSetting, targetPkgSetting,
-                    userId)) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplication");
+        try {
+            final boolean featureEnabled = mFeatureConfig.isGloballyEnabled();
+            if (!featureEnabled) {
+                if (DEBUG_LOGGING) {
+                    Slog.d(TAG, "filtering disabled; skipped");
+                }
                 return false;
             }
-        } else if (callingSetting instanceof SharedUserSetting) {
-            final ArraySet<PackageSetting> packageSettings =
-                    ((SharedUserSetting) callingSetting).packages;
-            if (packageSettings != null && packageSettings.size() > 0) {
-                for (int i = 0, max = packageSettings.size(); i < max; i++) {
-                    final PackageSetting packageSetting = packageSettings.valueAt(i);
-                    if (!shouldFilterApplicationInternal(packageSetting, targetPkgSetting,
-                            userId)) {
-                        return false;
-                    }
-                    if (callingPkgSetting == null && packageSetting.pkg != null) {
-                        callingPkgSetting = packageSetting;
-                    }
+            if (callingUid < Process.FIRST_APPLICATION_UID) {
+                if (DEBUG_LOGGING) {
+                    Slog.d(TAG, "filtering skipped; " + callingUid + " is system");
                 }
-                if (callingPkgSetting == null) {
-                    Slog.wtf(TAG, callingSetting + " does not have any non-null packages!");
-                    return true;
-                }
-            } else {
-                Slog.wtf(TAG, callingSetting + " has no packages!");
+                return false;
+            }
+            if (callingSetting == null) {
+                Slog.wtf(TAG, "No setting found for non system uid " + callingUid);
                 return true;
             }
-        }
+            PackageSetting callingPkgSetting = null;
+            if (callingSetting instanceof PackageSetting) {
+                callingPkgSetting = (PackageSetting) callingSetting;
+                if (!shouldFilterApplicationInternal(callingPkgSetting, targetPkgSetting,
+                        userId)) {
+                    return false;
+                }
+            } else if (callingSetting instanceof SharedUserSetting) {
+                final ArraySet<PackageSetting> packageSettings =
+                        ((SharedUserSetting) callingSetting).packages;
+                if (packageSettings != null && packageSettings.size() > 0) {
+                    for (int i = 0, max = packageSettings.size(); i < max; i++) {
+                        final PackageSetting packageSetting = packageSettings.valueAt(i);
+                        if (!shouldFilterApplicationInternal(packageSetting, targetPkgSetting,
+                                userId)) {
+                            return false;
+                        }
+                        if (callingPkgSetting == null && packageSetting.pkg != null) {
+                            callingPkgSetting = packageSetting;
+                        }
+                    }
+                    if (callingPkgSetting == null) {
+                        Slog.wtf(TAG, callingSetting + " does not have any non-null packages!");
+                        return true;
+                    }
+                } else {
+                    Slog.wtf(TAG, callingSetting + " has no packages!");
+                    return true;
+                }
+            }
 
-        if (DEBUG_LOGGING) {
-            log(callingPkgSetting, targetPkgSetting,
-                    DEBUG_ALLOW_ALL ? "ALLOWED" : "BLOCKED");
+            if (DEBUG_LOGGING) {
+                log(callingPkgSetting, targetPkgSetting,
+                        DEBUG_ALLOW_ALL ? "ALLOWED" : "BLOCKED");
+            }
+            return !DEBUG_ALLOW_ALL;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
-        return !DEBUG_ALLOW_ALL;
     }
 
     private boolean shouldFilterApplicationInternal(
             PackageSetting callingPkgSetting, PackageSetting targetPkgSetting, int userId) {
-        final String callingName = callingPkgSetting.pkg.packageName;
-        final PackageParser.Package targetPkg = targetPkgSetting.pkg;
-
-        if (!mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting, "DISABLED");
-            }
-            return false;
-        }
-        // This package isn't technically installed and won't be written to settings, so we can
-        // treat it as filtered until it's available again.
-        if (targetPkg == null) {
-            if (DEBUG_LOGGING) {
-                Slog.wtf(TAG, "shouldFilterApplication: " + "targetPkg is null");
-            }
-            return true;
-        }
-        final String targetName = targetPkg.packageName;
-        if (callingPkgSetting.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.R) {
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting, "caller pre-R");
-            }
-            return false;
-        }
-        if (isImplicitlyQueryableSystemApp(targetPkgSetting)) {
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting, "implicitly queryable sys");
-            }
-            return false;
-        }
-        if (targetPkg.mForceQueryable) {
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting, "manifest forceQueryable");
-            }
-            return false;
-        }
-        if (mForceQueryable.contains(targetName)) {
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting, "whitelist forceQueryable");
-            }
-            return false;
-        }
-        if (mQueriesViaPackage.containsKey(callingName)
-                && mQueriesViaPackage.get(callingName).contains(
-                targetName)) {
-            // the calling package has explicitly declared the target package; allow
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting, "queries package");
-            }
-            return false;
-        } else if (mQueriesViaIntent.containsKey(callingName)
-                && mQueriesViaIntent.get(callingName).contains(targetName)) {
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting, "queries intent");
-            }
-            return false;
-        }
-        if (mImplicitlyQueryable.get(userId) != null
-                && mImplicitlyQueryable.get(userId).containsKey(callingName)
-                && mImplicitlyQueryable.get(userId).get(callingName).contains(targetName)) {
-            if (DEBUG_LOGGING) {
-                log(callingPkgSetting, targetPkgSetting, "implicitly queryable for user");
-            }
-            return false;
-        }
-        if (callingPkgSetting.pkg.instrumentation.size() > 0) {
-            for (int i = 0, max = callingPkgSetting.pkg.instrumentation.size(); i < max; i++) {
-                if (callingPkgSetting.pkg.instrumentation.get(i).info.targetPackage == targetName) {
-                    if (DEBUG_LOGGING) {
-                        log(callingPkgSetting, targetPkgSetting, "instrumentation");
-                    }
-                    return false;
-                }
-            }
-        }
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplicationInternal");
         try {
-            if (mPermissionManager.checkPermission(
-                    Manifest.permission.QUERY_ALL_PACKAGES, callingName, userId)
-                    == PackageManager.PERMISSION_GRANTED) {
+            final String callingName = callingPkgSetting.pkg.packageName;
+            final PackageParser.Package targetPkg = targetPkgSetting.pkg;
+
+            if (!mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
                 if (DEBUG_LOGGING) {
-                    log(callingPkgSetting, targetPkgSetting, "permission");
+                    log(callingPkgSetting, targetPkgSetting, "DISABLED");
                 }
                 return false;
             }
-        } catch (RemoteException e) {
+            // This package isn't technically installed and won't be written to settings, so we can
+            // treat it as filtered until it's available again.
+            if (targetPkg == null) {
+                if (DEBUG_LOGGING) {
+                    Slog.wtf(TAG, "shouldFilterApplication: " + "targetPkg is null");
+                }
+                return true;
+            }
+            final String targetName = targetPkg.packageName;
+            if (callingPkgSetting.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.R) {
+                if (DEBUG_LOGGING) {
+                    log(callingPkgSetting, targetPkgSetting, "caller pre-R");
+                }
+                return false;
+            }
+            if (isImplicitlyQueryableSystemApp(targetPkgSetting)) {
+                if (DEBUG_LOGGING) {
+                    log(callingPkgSetting, targetPkgSetting, "implicitly queryable sys");
+                }
+                return false;
+            }
+            if (targetPkg.mForceQueryable) {
+                if (DEBUG_LOGGING) {
+                    log(callingPkgSetting, targetPkgSetting, "manifest forceQueryable");
+                }
+                return false;
+            }
+            if (mForceQueryable.contains(targetName)) {
+                if (DEBUG_LOGGING) {
+                    log(callingPkgSetting, targetPkgSetting, "whitelist forceQueryable");
+                }
+                return false;
+            }
+            if (mQueriesViaPackage.containsKey(callingName)
+                    && mQueriesViaPackage.get(callingName).contains(
+                    targetName)) {
+                // the calling package has explicitly declared the target package; allow
+                if (DEBUG_LOGGING) {
+                    log(callingPkgSetting, targetPkgSetting, "queries package");
+                }
+                return false;
+            } else if (mQueriesViaIntent.containsKey(callingName)
+                    && mQueriesViaIntent.get(callingName).contains(targetName)) {
+                if (DEBUG_LOGGING) {
+                    log(callingPkgSetting, targetPkgSetting, "queries intent");
+                }
+                return false;
+            }
+            if (mImplicitlyQueryable.get(userId) != null
+                    && mImplicitlyQueryable.get(userId).containsKey(callingName)
+                    && mImplicitlyQueryable.get(userId).get(callingName).contains(targetName)) {
+                if (DEBUG_LOGGING) {
+                    log(callingPkgSetting, targetPkgSetting, "implicitly queryable for user");
+                }
+                return false;
+            }
+            final ArrayList<PackageParser.Instrumentation> inst =
+                    callingPkgSetting.pkg.instrumentation;
+            if (inst.size() > 0) {
+                for (int i = 0, max = inst.size(); i < max; i++) {
+                    if (inst.get(i).info.targetPackage == targetName) {
+                        if (DEBUG_LOGGING) {
+                            log(callingPkgSetting, targetPkgSetting, "instrumentation");
+                        }
+                        return false;
+                    }
+                }
+            }
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "filter.checkPermission");
+            try {
+                if (mPermissionManager.checkPermission(
+                        Manifest.permission.QUERY_ALL_PACKAGES, callingName, userId)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    if (DEBUG_LOGGING) {
+                        log(callingPkgSetting, targetPkgSetting, "permission");
+                    }
+                    return false;
+                }
+            } catch (RemoteException e) {
+                return true;
+            } finally {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
             return true;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
-        return true;
     }
 
     private static void log(PackageSetting callingPkgSetting, PackageSetting targetPkgSetting,
