@@ -19,17 +19,17 @@ package com.android.internal.telephony.cdma;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_IDP_STRING;
 
 import android.content.res.Resources;
-import android.os.Parcel;
 import android.os.SystemProperties;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.Rlog;
 import android.telephony.SmsCbLocation;
 import android.telephony.SmsCbMessage;
 import android.telephony.cdma.CdmaSmsCbProgramData;
-import android.telephony.Rlog;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
+import com.android.internal.telephony.Sms7BitEncodingTranslator;
 import com.android.internal.telephony.SmsAddress;
 import com.android.internal.telephony.SmsConstants;
 import com.android.internal.telephony.SmsHeader;
@@ -43,7 +43,6 @@ import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.uicc.IccUtils;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.HexDump;
-import com.android.internal.telephony.Sms7BitEncodingTranslator;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -878,6 +877,20 @@ public class SmsMessage extends SmsMessageBase {
                 SmsCbMessage.GEOGRAPHICAL_SCOPE_PLMN_WIDE, bData.messageId, location,
                 mEnvelope.serviceCategory, bData.getLanguage(), bData.userData.payloadStr,
                 bData.priority, null, bData.cmasWarningInfo, subId);
+    }
+
+    /**
+     * @return the bearer data byte array
+     */
+    public byte[] getEnvelopeBearerData() {
+        return mEnvelope.bearerData;
+    }
+
+    /**
+     * @return the 16-bit CDMA SCPT service category
+     */
+    public @CdmaSmsCbProgramData.Category int getEnvelopeServiceCategory() {
+        return mEnvelope.serviceCategory;
     }
 
     /**
