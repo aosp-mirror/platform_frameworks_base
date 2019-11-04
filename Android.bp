@@ -1637,6 +1637,7 @@ filegroup {
     name: "framework-wifistack-shared-srcs",
     srcs: [
         ":framework-annotations",
+	"core/java/android/os/HandlerExecutor.java",
         "core/java/android/util/KeyValueListParser.java",
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/Rational.java",
