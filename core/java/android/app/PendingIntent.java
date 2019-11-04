@@ -94,6 +94,12 @@ import java.lang.annotation.RetentionPolicy;
  * {@link #FLAG_CANCEL_CURRENT} or {@link #FLAG_UPDATE_CURRENT} to either
  * cancel or modify whatever current PendingIntent is associated with the
  * Intent you are supplying.
+ *
+ * <p>Also note that flags like {@link #FLAG_ONE_SHOT} or {@link #FLAG_IMMUTABLE} describe the
+ * PendingIntent instance and thus, are used to identify it. Any calls to retrieve or modify a
+ * PendingIntent created with these flags will also require these flags to be supplied in
+ * conjunction with others. E.g. To retrieve an existing PendingIntent created with
+ * FLAG_ONE_SHOT, <b>both</b> FLAG_ONE_SHOT and FLAG_NO_CREATE need to be supplied.
  */
 public final class PendingIntent implements Parcelable {
     private final IIntentSender mTarget;
