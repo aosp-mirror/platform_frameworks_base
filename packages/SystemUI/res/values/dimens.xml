@@ -768,7 +768,7 @@
     <dimen name="keyguard_indication_margin_bottom">40dp</dimen>
 
     <!-- The text size for battery level -->
-    <dimen name="battery_level_text_size">12sp</dimen>
+    <dimen name="battery_level_text_size">11sp</dimen>
 
     <!-- TrustDrawable: Minimum inner radius of the breathing animation -->
     <dimen name="trust_circle_inner_radius_visible_min">22dp</dimen>
@@ -823,7 +823,7 @@
     <dimen name="signal_cluster_margin_start">2.5dp</dimen>
 
     <!-- Padding between signal cluster and battery icon -->
-    <dimen name="signal_cluster_battery_padding">6dp</dimen>
+    <dimen name="signal_cluster_battery_padding">3dp</dimen>
 
     <!-- Padding for signal cluster and battery icon when there are not icons in signal cluster -->
     <dimen name="no_signal_cluster_battery_padding">3dp</dimen>
