@@ -5240,6 +5240,7 @@ package android.os {
   }
 
   public class BatteryStatsManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.os.connectivity.CellularBatteryStats getCellularBatteryStats();
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.os.connectivity.WifiBatteryStats getWifiBatteryStats();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteFullWifiLockAcquiredFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void noteFullWifiLockReleasedFromSource(@NonNull android.os.WorkSource);
@@ -5746,6 +5747,26 @@ package android.os {
 }
 
 package android.os.connectivity {
+
+  public final class CellularBatteryStats implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getEnergyConsumedMaMillis();
+    method public long getIdleTimeMillis();
+    method public long getKernelActiveTimeMillis();
+    method public long getLoggingDurationMillis();
+    method public long getMonitoredRailChargeConsumedMaMillis();
+    method public long getNumBytesRx();
+    method public long getNumBytesTx();
+    method public long getNumPacketsRx();
+    method public long getNumPacketsTx();
+    method public long getRxTimeMillis();
+    method public long getSleepTimeMillis();
+    method @NonNull public long[] getTimeInRatMicros();
+    method @NonNull public long[] getTimeInRxSignalStrengthLevelMicros();
+    method @NonNull public long[] getTxTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.connectivity.CellularBatteryStats> CREATOR;
+  }
 
   public final class WifiBatteryStats implements android.os.Parcelable {
     method public int describeContents();
