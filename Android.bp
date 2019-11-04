@@ -1445,8 +1445,6 @@ droidstubs {
     name: "hiddenapi-mappings",
     defaults: ["metalava-api-stubs-default"],
     srcs: [
-        ":non_openjdk_java_files",
-        ":openjdk_java_files",
         ":opt-telephony-common-srcs",
     ],
 
