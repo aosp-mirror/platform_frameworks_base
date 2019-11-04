@@ -54,7 +54,9 @@
                   android:minLines="1"
                   android:maxLines="1"
                   android:ellipsize="marquee" />
-        <!-- Extended activity info to distinguish between duplicate activity names -->
+        <!-- Extended activity info to distinguish between duplicate activity names
+            or provide record w/o permission warnings.
+        -->
         <TextView android:id="@android:id/text2"
                   android:textColor="?android:attr/textColorSecondary"
                   android:fontFamily="@android:string/config_bodyFontFamily"
@@ -64,7 +66,7 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:minLines="1"
-                  android:maxLines="1"
+                  android:maxLines="2"
                   android:ellipsize="marquee" />
     </LinearLayout>
 </LinearLayout>

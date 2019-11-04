@@ -3876,4 +3876,6 @@
 
   <java-symbol type="bool" name="config_showBuiltinWirelessChargingAnim" />
 
+  <java-symbol type="string" name="usb_device_resolve_prompt_warn" />
+
 </resources>

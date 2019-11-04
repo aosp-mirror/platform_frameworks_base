@@ -39,7 +39,7 @@ public class ResolverWrapperAdapter extends ResolverListAdapter {
             ResolverListCommunicator resolverListCommunicator) {
         super(context, payloadIntents, initialIntents, rList, filterLastUsed,
                 resolverListController,
-                useLayoutForBrowsables, resolverListCommunicator);
+                useLayoutForBrowsables, resolverListCommunicator, false);
     }
 
     public CountingIdlingResource getLabelIdlingResource() {
