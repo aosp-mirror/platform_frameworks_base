@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 
 import com.google.android.collect.Sets;
 
@@ -57,6 +58,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Mock private NotificationListenerService.RankingMap mRanking;
     @Mock private ExpandableNotificationRow mRow;
     @Mock private StatusBarStateController mStateController;
+    @Mock private RemoteInputUriController mRemoteInputUriController;
 
     // Dependency mocks:
     @Mock private NotificationEntryManager mEntryManager;
@@ -76,7 +78,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 mLockscreenUserManager, mSmartReplyController, mEntryManager,
                 () -> mock(ShadeController.class),
                 mStateController,
-                Handler.createAsync(Looper.myLooper()));
+                Handler.createAsync(Looper.myLooper()),
+                mRemoteInputUriController);
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
                 .setOpPkg(TEST_PACKAGE_NAME)
@@ -211,9 +214,11 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 NotificationEntryManager notificationEntryManager,
                 Lazy<ShadeController> shadeController,
                 StatusBarStateController statusBarStateController,
-                Handler mainHandler) {
+                Handler mainHandler,
+                RemoteInputUriController remoteInputUriController) {
             super(context, lockscreenUserManager, smartReplyController, notificationEntryManager,
-                    shadeController, statusBarStateController, mainHandler);
+                    shadeController, statusBarStateController, mainHandler,
+                    remoteInputUriController);
         }
 
         public void setUpWithPresenterForTest(Callback callback,

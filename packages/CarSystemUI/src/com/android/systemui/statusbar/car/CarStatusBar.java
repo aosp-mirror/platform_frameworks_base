@@ -128,6 +128,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
@@ -301,7 +302,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
             PluginManager pluginManager,
-
+            RemoteInputUriController remoteInputUriController,
             /* Car Settings injected components. */
             CarNavigationBarController carNavigationBarController) {
         super(
@@ -370,7 +371,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 powerManager,
                 dozeScrimController,
                 commandQueue,
-                pluginManager);
+                pluginManager,
+                remoteInputUriController);
         mScrimController = scrimController;
         mCarNavigationBarController = carNavigationBarController;
     }

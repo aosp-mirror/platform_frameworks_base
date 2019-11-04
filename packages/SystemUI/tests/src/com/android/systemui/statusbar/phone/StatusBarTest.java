@@ -131,6 +131,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
@@ -181,6 +182,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
+    @Mock private RemoteInputUriController mRemoteInputUriController;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
     @Mock private BatteryController mBatteryController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
@@ -369,7 +371,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mPowerManager,
                 mDozeScrimController,
                 mCommandQueue,
-                mPluginManager);
+                mPluginManager,
+                mRemoteInputUriController);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);
