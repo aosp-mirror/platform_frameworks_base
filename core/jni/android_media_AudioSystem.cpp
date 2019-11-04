@@ -27,6 +27,7 @@
 #include "core_jni_helpers.h"
 
 #include <audiomanager/AudioManager.h>
+#include <media/AudioDeviceTypeAddr.h>
 #include <media/AudioSystem.h>
 #include <media/AudioPolicy.h>
 #include <media/MicrophoneInfo.h>
@@ -2015,9 +2016,10 @@ static jint android_media_AudioSystem_setUidDeviceAffinities(JNIEnv *env, jobjec
         if (!env->IsInstanceOf(addrJobj, stringClass)) {
             return (jint) AUDIO_JAVA_BAD_VALUE;
         }
-        String8 address = String8(env->GetStringUTFChars((jstring) addrJobj, NULL));
+        const char* address = env->GetStringUTFChars((jstring) addrJobj, NULL);
         AudioDeviceTypeAddr dev = AudioDeviceTypeAddr(typesPtr[i], address);
         deviceVector.add(dev);
+        env->ReleaseStringUTFChars((jstring) addrJobj, address);
     }
     env->ReleaseIntArrayElements(deviceTypes, typesPtr, 0);
 

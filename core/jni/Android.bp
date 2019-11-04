@@ -279,6 +279,7 @@ cc_library_shared {
         "libmediametrics",
         "libmeminfo",
         "libaudioclient",
+        "libaudiofoundation",
         "libaudiopolicy",
         "libjpeg",
         "libusbhost",
