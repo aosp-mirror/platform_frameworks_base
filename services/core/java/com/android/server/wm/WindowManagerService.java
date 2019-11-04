@@ -80,7 +80,6 @@ import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_BOOT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -7640,7 +7639,11 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        handleDisplayFocusChange(touchedWindow);
+        final DisplayContent displayContent = touchedWindow.getDisplayContent();
+        if (!displayContent.isOnTop()) {
+            displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP, displayContent,
+                    true /* includingParents */);
+        }
         handleTaskFocusChange(touchedWindow.getTask());
     }
 
@@ -7660,29 +7663,6 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             mActivityTaskManager.setFocusedTask(task.mTaskId);
         } catch (RemoteException e) {
-        }
-    }
-
-    private void handleDisplayFocusChange(WindowState window) {
-        final DisplayContent displayContent = window.getDisplayContent();
-        if (displayContent == null) {
-            return;
-        }
-
-        final WindowContainer parent = displayContent.getParent();
-        if (parent != null && parent.getTopChild() != displayContent) {
-            parent.positionChildAt(WindowContainer.POSITION_TOP, displayContent,
-                    true /* includingParents */);
-            // For compatibility, only the topmost activity is allowed to be resumed for pre-Q
-            // app. Ensure the topmost activities are resumed whenever a display is moved to top.
-            // TODO(b/123761773): Investigate whether we can move this into
-            // RootActivityContainer#updateTopResumedActivityIfNeeded(). Currently, it is risky
-            // to do so because it seems possible to resume activities as part of a larger
-            // transaction and it's too early to resume based on current order when performing
-            // updateTopResumedActivityIfNeeded().
-            // TODO(display-merge): Remove cast
-            ((ActivityDisplay) displayContent).ensureActivitiesVisible(null /* starting */,
-                    0 /* configChanges */, !PRESERVE_WINDOWS, true /* notifyClients */);
         }
     }
 

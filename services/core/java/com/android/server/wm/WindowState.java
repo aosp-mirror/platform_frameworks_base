@@ -2625,7 +2625,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean canReceiveKeys = isVisibleOrAdding()
                 && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)
-                && (mActivityRecord == null || mActivityRecord.windowsAreFocusable())
+                && (mActivityRecord == null || mActivityRecord.windowsAreFocusable(fromUserTouch))
                 && !cantReceiveTouchInput();
         if (!canReceiveKeys) {
             return false;

@@ -2222,11 +2222,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return (info.flags & FLAG_ALWAYS_FOCUSABLE) != 0;
     }
 
+    boolean windowsAreFocusable() {
+        return windowsAreFocusable(false /* fromUserTouch */);
+    }
+
     // TODO: Does this really need to be different from isAlwaysFocusable()? For the activity side
     // focusable means resumeable. I guess with that in mind maybe we should rename the other
     // method to isResumeable() or something like that.
-    boolean windowsAreFocusable() {
-        if (mTargetSdk < Build.VERSION_CODES.Q) {
+    boolean windowsAreFocusable(boolean fromUserTouch) {
+        if (!fromUserTouch && mTargetSdk < Build.VERSION_CODES.Q) {
             final int pid = getPid();
             final ActivityRecord topFocusedAppOfMyProcess =
                     mWmService.mRoot.mTopFocusedAppByProcess.get(pid);
@@ -2240,7 +2244,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && getDisplay() != null;
     }
 
-    /** Move activity with its stack to front and make the stack focused. */
+    /**
+     * Move activity with its stack to front and make the stack focused.
+     * @param reason the reason to move to top
+     * @return {@code true} if the stack is focusable and has been moved to top or the activity
+     *         is not yet resumed while the stack is already on top, {@code false} otherwise.
+     */
     boolean moveFocusableActivityToTop(String reason) {
         if (!isFocusable()) {
             if (DEBUG_FOCUS) {
@@ -2261,7 +2270,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (DEBUG_FOCUS) {
                 Slog.d(TAG_FOCUS, "moveActivityStackToFront: already on top, activity=" + this);
             }
-            return false;
+            return !isState(RESUMED);
         }
 
         if (DEBUG_FOCUS) {
