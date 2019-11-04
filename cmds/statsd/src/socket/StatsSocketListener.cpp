@@ -39,8 +39,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-static const int kLogMsgHeaderSize = 28;
-
 StatsSocketListener::StatsSocketListener(std::shared_ptr<LogEventQueue> queue)
     : SocketListener(getLogSocket(), false /*start listen*/), mQueue(queue) {
 }
@@ -95,7 +93,7 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
         cred->uid = DEFAULT_OVERFLOWUID;
     }
 
-    char* ptr = ((char*)buffer) + sizeof(android_log_header_t);
+    uint8_t* ptr = ((uint8_t*)buffer) + sizeof(android_log_header_t);
     n -= sizeof(android_log_header_t);
 
     // When a log failed to write to statsd socket (e.g., due ot EBUSY), a special message would
@@ -124,18 +122,13 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
         }
     }
 
-    log_msg msg;
-
-    msg.entry.len = n;
-    msg.entry.hdr_size = kLogMsgHeaderSize;
-    msg.entry.sec = time(nullptr);
-    msg.entry.pid = cred->pid;
-    msg.entry.uid = cred->uid;
-
-    memcpy(msg.buf + kLogMsgHeaderSize, ptr, n + 1);
+    // move past the 4-byte StatsEventTag
+    uint8_t* msg = ptr + sizeof(uint32_t);
+    uint32_t len = n - sizeof(uint32_t);
+    uint32_t uid = cred->uid;
 
     int64_t oldestTimestamp;
-    if (!mQueue->push(std::make_unique<LogEvent>(msg), &oldestTimestamp)) {
+    if (!mQueue->push(std::make_unique<LogEvent>(msg, len, uid), &oldestTimestamp)) {
         StatsdStats::getInstance().noteEventQueueOverflow(oldestTimestamp);
     }
 

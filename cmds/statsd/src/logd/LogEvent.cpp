@@ -35,16 +35,21 @@ using android::util::ProtoOutputStream;
 using std::string;
 using std::vector;
 
-LogEvent::LogEvent(log_msg& msg) {
-    mContext =
-            create_android_log_parser(msg.msg() + sizeof(uint32_t), msg.len() - sizeof(uint32_t));
-    mLogdTimestampNs = msg.entry.sec * NS_PER_SEC + msg.entry.nsec;
-    mLogUid = msg.entry.uid;
+// Msg is expected to begin at the start of the serialized atom -- it should not
+// include the android_log_header_t or the StatsEventTag.
+LogEvent::LogEvent(uint8_t* msg, uint32_t len, uint32_t uid)
+    : mBuf(msg),
+      mRemainingLen(len),
+      mLogdTimestampNs(time(nullptr)),
+      mLogUid(uid)
+{
+#ifdef NEW_ENCODING_SCHEME
+    initNew();
+# else
+    mContext = create_android_log_parser((char*)msg, len);
     init(mContext);
-    if (mContext) {
-        // android_log_destroy will set mContext to NULL
-        android_log_destroy(&mContext);
-    }
+    if (mContext) android_log_destroy(&mContext); // set mContext to NULL
+#endif
 }
 
 LogEvent::LogEvent(const LogEvent& event) {
@@ -436,6 +441,186 @@ bool LogEvent::write(const AttributionNodeInternal& node) {
          return true;
     }
     return false;
+}
+
+void LogEvent::parseInt32(int32_t* pos, int32_t depth, bool* last) {
+    int32_t value = readNextValue<int32_t>();
+    addToValues(pos, depth, value, last);
+}
+
+void LogEvent::parseInt64(int32_t* pos, int32_t depth, bool* last) {
+    int64_t value = readNextValue<int64_t>();
+    addToValues(pos, depth, value, last);
+}
+
+void LogEvent::parseString(int32_t* pos, int32_t depth, bool* last) {
+    int32_t numBytes = readNextValue<int32_t>();
+    if ((uint32_t)numBytes > mRemainingLen) {
+        mValid = false;
+        return;
+    }
+
+    string value = string((char*)mBuf, numBytes);
+    mBuf += numBytes;
+    mRemainingLen -= numBytes;
+    addToValues(pos, depth, value, last);
+}
+
+void LogEvent::parseFloat(int32_t* pos, int32_t depth, bool* last) {
+    float value = readNextValue<float>();
+    addToValues(pos, depth, value, last);
+}
+
+void LogEvent::parseBool(int32_t* pos, int32_t depth, bool* last) {
+    // cast to int32_t because FieldValue does not support bools
+    int32_t value = (int32_t)readNextValue<uint8_t>();
+    addToValues(pos, depth, value, last);
+}
+
+void LogEvent::parseByteArray(int32_t* pos, int32_t depth, bool* last) {
+    int32_t numBytes = readNextValue<int32_t>();
+    if ((uint32_t)numBytes > mRemainingLen) {
+        mValid = false;
+        return;
+    }
+
+    vector<uint8_t> value(mBuf, mBuf + numBytes);
+    mBuf += numBytes;
+    mRemainingLen -= numBytes;
+    addToValues(pos, depth, value, last);
+}
+
+void LogEvent::parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last) {
+    int32_t numPairs = readNextValue<uint8_t>();
+
+    for (pos[1] = 1; pos[1] <= numPairs; pos[1]++) {
+        last[1] = (pos[1] == numPairs);
+
+        // parse key
+        pos[2] = 1;
+        parseInt32(pos, 2, last);
+
+        // parse value
+        last[2] = true;
+        uint8_t typeId = getTypeId(readNextValue<uint8_t>());
+        switch (typeId) {
+            case INT32_TYPE:
+                pos[2] = 2; // pos[2] determined by index of type in KeyValuePair in atoms.proto
+                parseInt32(pos, 2, last);
+                break;
+            case INT64_TYPE:
+                pos[2] = 3;
+                parseInt64(pos, 2, last);
+                break;
+            case STRING_TYPE:
+                pos[2] = 4;
+                parseString(pos, 2, last);
+                break;
+            case FLOAT_TYPE:
+                pos[2] = 5;
+                parseFloat(pos, 2, last);
+                break;
+            default:
+                mValid = false;
+        }
+    }
+
+    pos[1] = pos[2] = 1;
+    last[1] = last[2] = false;
+}
+
+void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last) {
+    int32_t numNodes = readNextValue<uint8_t>();
+    for (pos[1] = 1; pos[1] <= numNodes; pos[1]++) {
+        last[1] = (pos[1] == numNodes);
+
+        // parse uid
+        pos[2] = 1;
+        parseInt32(pos, 2, last);
+
+        // parse tag
+        pos[2] = 2;
+        last[2] = true;
+        parseString(pos, 2, last);
+    }
+
+    pos[1] = pos[2] = 1;
+    last[1] = last[2] = false;
+}
+
+
+// This parsing logic is tied to the encoding scheme used in StatsEvent.java and
+// stats_event.c
+void LogEvent::initNew() {
+    int32_t pos[] = {1, 1, 1};
+    bool last[] = {false, false, false};
+
+    // Beginning of buffer is OBJECT_TYPE | NUM_FIELDS | TIMESTAMP | ATOM_ID
+    uint8_t typeInfo = readNextValue<uint8_t>();
+    if (getTypeId(typeInfo) != OBJECT_TYPE) mValid = false;
+
+    uint8_t numElements = readNextValue<uint8_t>();
+    if (numElements < 2 || numElements > 127) mValid = false;
+
+    typeInfo = readNextValue<uint8_t>();
+    if (getTypeId(typeInfo) != INT64_TYPE) mValid = false;
+    mElapsedTimestampNs = readNextValue<int64_t>();
+    numElements--;
+
+    typeInfo = readNextValue<uint8_t>();
+    if (getTypeId(typeInfo) != INT32_TYPE) mValid = false;
+    mTagId = readNextValue<int32_t>();
+    numElements--;
+
+
+    for (pos[0] = 1; pos[0] <= numElements && mValid; pos[0]++) {
+        typeInfo = readNextValue<uint8_t>();
+        uint8_t typeId = getTypeId(typeInfo);
+
+        last[0] = (pos[0] == numElements);
+
+        // TODO(b/144373276): handle errors passed to the socket
+        // TODO(b/144373257): parse annotations
+        switch(typeId) {
+            case BOOL_TYPE:
+                parseBool(pos, 0, last);
+                break;
+            case INT32_TYPE:
+                parseInt32(pos, 0, last);
+                break;
+            case INT64_TYPE:
+                parseInt64(pos, 0, last);
+                break;
+            case FLOAT_TYPE:
+                parseFloat(pos, 0, last);
+                break;
+            case BYTE_ARRAY_TYPE:
+                parseByteArray(pos, 0, last);
+                break;
+            case STRING_TYPE:
+                parseString(pos, 0, last);
+                break;
+            case KEY_VALUE_PAIRS_TYPE:
+                parseKeyValuePairs(pos, 0, last);
+                break;
+            case ATTRIBUTION_CHAIN_TYPE:
+                parseAttributionChain(pos, 0, last);
+                break;
+            default:
+                mValid = false;
+        }
+    }
+
+    if (mRemainingLen != 0) mValid = false;
+    mBuf = nullptr;
+}
+
+uint8_t LogEvent::getTypeId(uint8_t typeInfo) {
+    return typeInfo & 0x0F; // type id in lower 4 bytes
+}
+
+uint8_t LogEvent::getNumAnnotations(uint8_t typeInfo) {
+    return (typeInfo >> 4) & 0x0F;
 }
 
 /**

@@ -24,6 +24,7 @@
 #include <log/log_read.h>
 #include <private/android_logger.h>
 #include <stats_event_list.h>
+#include "stats_event.h"
 #include <utils/Errors.h>
 
 #include <string>
@@ -69,9 +70,9 @@ struct InstallTrainInfo {
 class LogEvent {
 public:
     /**
-     * Read a LogEvent from a log_msg.
+     * Read a LogEvent from the socket
      */
-    explicit LogEvent(log_msg& msg);
+    explicit LogEvent(uint8_t* msg, uint32_t len, uint32_t uid);
 
     /**
      * Creates LogEvent from StatsLogEventWrapper.
@@ -206,6 +207,10 @@ public:
         return &mValues;
     }
 
+    bool isValid() {
+          return mValid;
+    }
+
     inline LogEvent makeCopy() {
         return LogEvent(*this);
     }
@@ -215,6 +220,69 @@ private:
      * Only use this if copy is absolutely needed.
      */
     LogEvent(const LogEvent&);
+
+
+    /**
+     * Parsing function for new encoding scheme.
+     */
+    void initNew();
+
+    void parseInt32(int32_t* pos, int32_t depth, bool* last);
+    void parseInt64(int32_t* pos, int32_t depth, bool* last);
+    void parseString(int32_t* pos, int32_t depth, bool* last);
+    void parseFloat(int32_t* pos, int32_t depth, bool* last);
+    void parseBool(int32_t* pos, int32_t depth, bool* last);
+    void parseByteArray(int32_t* pos, int32_t depth, bool* last);
+    void parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last);
+    void parseAttributionChain(int32_t* pos, int32_t depth, bool* last);
+
+    /**
+     * mBuf is a pointer to the current location in the buffer being parsed.
+     * Because the buffer lives  on the StatsSocketListener stack, this pointer
+     * is only valid during the LogEvent constructor. It will be set to null at
+     * the end of initNew.
+     */
+    uint8_t* mBuf;
+
+    uint32_t mRemainingLen; // number of valid bytes left in the buffer being parsed
+    bool mValid = true; // stores whether the event we received from the socket is valid
+
+    /**
+     * Side-effects:
+     *    If there is enough space in buffer to read value of type T
+     *        - move mBuf past the value that was just read
+     *        - decrement mRemainingLen by size of T
+     *    Else
+     *        - set mValid to false
+     */
+    template <class T>
+    T readNextValue() {
+        T value;
+        if (mRemainingLen < sizeof(T)) {
+            mValid = false;
+            value = 0; // all primitive types can successfully cast 0
+        } else {
+            value = *((T*)mBuf);
+            mBuf += sizeof(T);
+            mRemainingLen -= sizeof(T);
+        }
+        return value;
+    }
+
+    template <class T>
+    void addToValues(int32_t* pos, int32_t depth, T& value, bool* last) {
+        Field f = Field(mTagId, pos, depth);
+        // do not decorate last position at depth 0
+        for (int i = 1; i < depth; i++) {
+            if (last[i]) f.decorateLastPos(i);
+        }
+
+        Value v = Value(value);
+        mValues.push_back(FieldValue(f, v));
+    }
+
+    uint8_t getTypeId(uint8_t typeInfo);
+    uint8_t getNumAnnotations(uint8_t typeInfo);
 
     /**
      * Parses a log_msg into a LogEvent object.
