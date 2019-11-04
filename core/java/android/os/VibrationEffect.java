@@ -27,6 +27,8 @@ import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
 import android.util.MathUtils;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -77,6 +79,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int EFFECT_THUD = Effect.THUD;
 
@@ -85,6 +88,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int EFFECT_POP = Effect.POP;
 
@@ -126,6 +130,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(Uri, Context)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int[] RINGTONES = {
         Effect.RINGTONE_1,
@@ -493,6 +498,7 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(mAmplitude);
         }
 
+        @UnsupportedAppUsage
         public static final @android.annotation.NonNull Parcelable.Creator<OneShot> CREATOR =
             new Parcelable.Creator<OneShot>() {
                 @Override

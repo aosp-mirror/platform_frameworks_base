@@ -21,6 +21,8 @@ import android.annotation.StringRes;
 import android.annotation.TestApi;
 import android.graphics.Rect;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 /**
  * Represents a contextual mode of the user interface. Action modes can be used to provide
  * alternative interaction modes and replace parts of the normal UI until finished.
@@ -279,6 +281,7 @@ public abstract class ActionMode {
      * @return true if the UI used to show this action mode can take focus
      * @hide Internal use only
      */
+    @UnsupportedAppUsage
     @TestApi
     public boolean isUiFocusable() {
         return true;

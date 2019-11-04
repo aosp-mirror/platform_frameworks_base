@@ -2060,6 +2060,7 @@ public final class Settings {
      * This is the only type of reset available to non-system clients.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int RESET_MODE_PACKAGE_DEFAULTS = 1;
 
@@ -6137,6 +6138,7 @@ public final class Settings {
          * shortcut. Must be its flattened {@link ComponentName}.
          * @hide
          */
+        @UnsupportedAppUsage
         @TestApi
         public static final String ACCESSIBILITY_SHORTCUT_TARGET_SERVICE =
                 "accessibility_shortcut_target_service";
@@ -6294,6 +6296,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         @TestApi
         public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED =
                 "accessibility_display_magnification_enabled";
@@ -7930,6 +7933,7 @@ public final class Settings {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         @TestApi
         public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
 
@@ -8077,6 +8081,7 @@ public final class Settings {
          * The value is boolean (1 or 0).
          * @hide
          */
+        @UnsupportedAppUsage
         @TestApi
         public static final String NOTIFICATION_BADGING = "notification_badging";
 
@@ -10053,25 +10058,26 @@ public final class Settings {
         */
        public static final String MODE_RINGER = "mode_ringer";
 
-       /**
-        * Overlay display devices setting.
-        * The associated value is a specially formatted string that describes the
-        * size and density of simulated secondary display devices.
-        * <p>
-        * Format: {width}x{height}/{dpi};...
-        * </p><p>
-        * Example:
-        * <ul>
-        * <li><code>1280x720/213</code>: make one overlay that is 1280x720 at 213dpi.</li>
-        * <li><code>1920x1080/320;1280x720/213</code>: make two overlays, the first
-        * at 1080p and the second at 720p.</li>
-        * <li>If the value is empty, then no overlay display devices are created.</li>
-        * </ul></p>
-        *
-        * @hide
-        */
-       @TestApi
-       public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
+        /**
+         * Overlay display devices setting.
+         * The associated value is a specially formatted string that describes the
+         * size and density of simulated secondary display devices.
+         * <p>
+         * Format: {width}x{height}/{dpi};...
+         * </p><p>
+         * Example:
+         * <ul>
+         * <li><code>1280x720/213</code>: make one overlay that is 1280x720 at 213dpi.</li>
+         * <li><code>1920x1080/320;1280x720/213</code>: make two overlays, the first
+         * at 1080p and the second at 720p.</li>
+         * <li>If the value is empty, then no overlay display devices are created.</li>
+         * </ul></p>
+         *
+         * @hide
+         */
+        @UnsupportedAppUsage
+        @TestApi
+        public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
 
         /**
          * Threshold values for the duration and level of a discharge cycle,
@@ -10720,6 +10726,7 @@ public final class Settings {
          * @hide
          * @see com.android.server.power.batterysaver.BatterySaverPolicy
          */
+        @UnsupportedAppUsage
         @TestApi
         public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
 

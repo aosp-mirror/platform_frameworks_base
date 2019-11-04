@@ -798,6 +798,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link ActivityInfo#CONFIG_ASSETS_PATHS}.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public int assetsSeq;
 
