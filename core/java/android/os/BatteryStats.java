@@ -640,6 +640,10 @@ public abstract class BatteryStats implements Parcelable {
      */
     public static abstract class Uid {
 
+        @UnsupportedAppUsage
+        public Uid() {
+        }
+
         /**
          * Returns a mapping containing wakelock statistics.
          *
@@ -1002,6 +1006,11 @@ public abstract class BatteryStats implements Parcelable {
             }
 
             public static class ExcessivePower {
+
+                @UnsupportedAppUsage
+                public ExcessivePower() {
+                }
+
                 public static final int TYPE_WAKE = 1;
                 public static final int TYPE_CPU = 2;
 

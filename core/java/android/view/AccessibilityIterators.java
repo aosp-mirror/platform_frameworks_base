@@ -47,6 +47,10 @@ public final class AccessibilityIterators {
     public static abstract class AbstractTextSegmentIterator implements TextSegmentIterator {
 
         @UnsupportedAppUsage
+        public AbstractTextSegmentIterator() {
+        }
+
+        @UnsupportedAppUsage
         protected String mText;
 
         private final int[] mSegment = new int[2];

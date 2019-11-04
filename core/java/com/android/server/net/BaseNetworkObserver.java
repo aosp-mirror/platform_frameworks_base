@@ -28,6 +28,11 @@ import android.net.RouteInfo;
  * @hide
  */
 public class BaseNetworkObserver extends INetworkManagementEventObserver.Stub {
+
+    @UnsupportedAppUsage
+    public BaseNetworkObserver() {
+    }
+
     @Override
     public void interfaceStatusChanged(String iface, boolean up) {
         // default no-op
