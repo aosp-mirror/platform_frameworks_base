@@ -4179,4 +4179,10 @@
     <string-array name="config_integrityRuleProviderPackages" translatable="false">
         <!-- Add packages here -->
     </string-array>
+
+    <!-- When true, enables the whitelisted app to handle bug reports from power menu short press. -->
+    <bool name="config_bugReportHandlerEnabled">false</bool>
+
+    <!-- The package name for the default bug report handler app from power menu short press. This app must be whitelisted. -->
+    <string name="config_defaultBugReportHandlerApp" translatable="false"></string>
 </resources>

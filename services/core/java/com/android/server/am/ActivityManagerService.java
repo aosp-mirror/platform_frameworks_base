@@ -8401,6 +8401,31 @@ public class ActivityManagerService extends IActivityManager.Stub
         requestBugReportWithDescription(null, null, BugreportParams.BUGREPORT_MODE_REMOTE);
     }
 
+    /**
+     * Launches a bugreport-whitelisted app to handle a bugreport.
+     *
+     * <p>Allows a bug report handler app to take bugreports on the user's behalf. The handler can
+     * be predefined in the config, meant to be launched with the primary user. The user can
+     * override this with a different (or same) handler app on possibly a different user. This is
+     * useful for capturing bug reports from work profile, for instance.
+     *
+     * @return true if there is a bugreport-whitelisted app to handle a bugreport, or false
+     * otherwise.
+     */
+    @Override
+    public boolean launchBugReportHandlerApp() {
+        if (!BugReportHandlerUtil.isBugReportHandlerEnabled(mContext)) {
+            return false;
+        }
+
+        // Always log caller, even if it does not have permission to dump.
+        Slog.i(TAG, "launchBugReportHandlerApp requested by UID " + Binder.getCallingUid());
+        enforceCallingPermission(android.Manifest.permission.DUMP,
+                "launchBugReportHandlerApp");
+
+        return BugReportHandlerUtil.launchBugReportHandlerApp(mContext);
+    }
+
     public void registerProcessObserver(IProcessObserver observer) {
         enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "registerProcessObserver()");
