@@ -199,7 +199,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
         mDozeService.setDozeScreenBrightness(clampToUserSetting(mDefaultDozeBrightness));
         mDozeHost.setAodDimmingScrim(0f);
     }
-
+    //TODO: brightnessfloat change usages to float.
     private int clampToUserSetting(int brightness) {
         int userSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS, Integer.MAX_VALUE,

@@ -38,6 +38,7 @@ import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
@@ -179,7 +180,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
         private int mState = Display.STATE_UNKNOWN;
-        private int mBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+        private float mBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         private int mDefaultModeId;
         private int mActiveModeId;
         private boolean mActiveModeInvalid;
@@ -574,12 +575,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public Runnable requestDisplayStateLocked(final int state, final int brightness) {
+        public Runnable requestDisplayStateLocked(final int state, final float brightnessState) {
             // Assume that the brightness is off if the display is being turned off.
-            assert state != Display.STATE_OFF || brightness == PowerManager.BRIGHTNESS_OFF;
-
+            assert state != Display.STATE_OFF || BrightnessSynchronizer.floatEquals(
+                    brightnessState, PowerManager.BRIGHTNESS_OFF_FLOAT);
             final boolean stateChanged = (mState != state);
-            final boolean brightnessChanged = (mBrightness != brightness) && mBacklight != null;
+            final boolean brightnessChanged = (!BrightnessSynchronizer.floatEquals(
+                    mBrightnessState, brightnessState))
+                    && mBacklight != null;
             if (stateChanged || brightnessChanged) {
                 final long physicalDisplayId = mPhysicalDisplayId;
                 final IBinder token = getDisplayTokenLocked();
@@ -591,7 +594,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
 
                 if (brightnessChanged) {
-                    mBrightness = brightness;
+                    mBrightnessState = brightnessState;
                 }
 
                 // Defer actually setting the display state until after we have exited
@@ -630,10 +633,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             vrModeChange = true;
                         }
 
-
                         // Apply brightness changes given that we are in a non-suspended state.
                         if (brightnessChanged || vrModeChange) {
-                            setDisplayBrightness(brightness);
+                            setDisplayBrightness(brightnessState);
                         }
 
                         // Enter the final desired state, possibly suspended.
@@ -694,7 +696,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         }
                     }
 
-                    private void setDisplayBrightness(int brightness) {
+                    private void setDisplayBrightness(float brightness) {
                         if (DEBUG) {
                             Slog.d(TAG, "setDisplayBrightness("
                                     + "id=" + physicalDisplayId
@@ -704,17 +706,24 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayBrightness("
                                 + "id=" + physicalDisplayId + ", brightness=" + brightness + ")");
                         try {
-                            if (mHalBrightnessSupport) {
-                                mBacklight.setBrightnessFloat(
-                                        displayBrightnessToHalBrightness(brightness));
-                            } else {
-                                mBacklight.setBrightness(brightness);
+                            // TODO: make it float
+                            if (isHalBrightnessRangeSpecified()) {
+                                brightness = displayBrightnessToHalBrightness(
+                                        BrightnessSynchronizer.brightnessFloatToInt(getContext(),
+                                                brightness));
                             }
+                            mBacklight.setBrightness(brightness);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
-                                    "ScreenBrightness", brightness);
+                                    "ScreenBrightness",
+                                    BrightnessSynchronizer.brightnessFloatToInt(
+                                            getContext(), brightness));
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
+                    }
+
+                    private boolean isHalBrightnessRangeSpecified() {
+                        return !(mSystemBrightnessToNits == null || mNitsToHalBrightness == null);
                     }
 
                     /**
@@ -723,7 +732,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                      * a display device configuration file.
                      */
                     private float displayBrightnessToHalBrightness(int brightness) {
-                        if (mSystemBrightnessToNits == null || mNitsToHalBrightness == null) {
+                        if (!isHalBrightnessRangeSpecified()) {
                             return PowerManager.BRIGHTNESS_INVALID_FLOAT;
                         }
 
@@ -887,7 +896,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mActiveColorMode=" + mActiveColorMode);
             pw.println("mDefaultModeId=" + mDefaultModeId);
             pw.println("mState=" + Display.stateToString(mState));
-            pw.println("mBrightness=" + mBrightness);
+            pw.println("mBrightnessState=" + mBrightnessState);
             pw.println("mBacklight=" + mBacklight);
             pw.println("mAllmSupported=" + mAllmSupported);
             pw.println("mAllmRequested=" + mAllmRequested);

@@ -40,6 +40,7 @@ import android.view.SurfaceControl;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.internal.BrightnessSynchronizer;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
@@ -249,28 +250,21 @@ public class LightsService extends SystemService {
         }
 
         @Override
-        public void setBrightnessFloat(float brightness) {
-            if (!Float.isNaN(brightness)) {
-                setBrightness(brightness, 0, BRIGHTNESS_MODE_USER);
-            }
-        }
-
-        @Override
-        public void setBrightness(int brightness) {
+        public void setBrightness(float brightness) {
             setBrightness(brightness, BRIGHTNESS_MODE_USER);
         }
 
         @Override
-        public void setBrightness(int brightness, int brightnessMode) {
-            setBrightness(Float.NaN, brightness, brightnessMode);
-        }
-
-        private void setBrightness(float brightnessFloat, int brightness, int brightnessMode) {
+        public void setBrightness(float brightness, int brightnessMode) {
+            if (Float.isNaN(brightness)) {
+                Slog.w(TAG, "Brightness is not valid: " + brightness);
+                return;
+            }
             synchronized (this) {
                 // LOW_PERSISTENCE cannot be manually set
                 if (brightnessMode == BRIGHTNESS_MODE_LOW_PERSISTENCE) {
                     Slog.w(TAG, "setBrightness with LOW_PERSISTENCE unexpected #" + mHwLight.id
-                            + ": brightness=0x" + Integer.toHexString(brightness));
+                            + ": brightness=" + brightness);
                     return;
                 }
                 // Ideally, we'd like to set the brightness mode through the SF/HWC as well, but
@@ -278,6 +272,7 @@ public class LightsService extends SystemService {
                 // anything but USER or the device shouldBeInLowPersistenceMode().
                 if (brightnessMode == BRIGHTNESS_MODE_USER && !shouldBeInLowPersistenceMode()
                         && mSurfaceControlMaximumBrightness == 255) {
+                    // New system
                     // TODO: the last check should be mSurfaceControlMaximumBrightness != 0; the
                     // reason we enforce 255 right now is to stay consistent with the old path. In
                     // the future, the framework should be refactored so that brightness is a float
@@ -286,17 +281,12 @@ public class LightsService extends SystemService {
                     if (DEBUG) {
                         Slog.d(TAG, "Using new setBrightness path!");
                     }
-
-                    if (!Float.isNaN(brightnessFloat)) {
-                        SurfaceControl.setDisplayBrightness(mDisplayToken, brightnessFloat);
-                    } else if (brightness == 0) {
-                        SurfaceControl.setDisplayBrightness(mDisplayToken, -1.0f);
-                    } else {
-                        SurfaceControl.setDisplayBrightness(mDisplayToken,
-                                (float) (brightness - 1) / (mSurfaceControlMaximumBrightness - 1));
-                    }
+                    SurfaceControl.setDisplayBrightness(mDisplayToken, brightness);
                 } else {
-                    int color = brightness & 0x000000ff;
+                    // Old system
+                    int brightnessInt = BrightnessSynchronizer.brightnessFloatToInt(
+                            getContext(), brightness);
+                    int color = brightnessInt & 0x000000ff;
                     color = 0xff000000 | (color << 16) | (color << 8) | color;
                     setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
                 }
