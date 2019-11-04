@@ -43,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ମାଧ୍ୟମରେ ଉପଲବ୍ଧ"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"ସାଇନ୍ ଅପ୍ ପାଇଁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"ସଂଯୁକ୍ତ, ଇଣ୍ଟର୍‌ନେଟ୍‌ ନାହିଁ"</string>
-    <!-- no translation found for private_dns_broken (7356676011023412490) -->
-    <skip />
+    <string name="private_dns_broken" msgid="7356676011023412490">"ବ୍ୟକ୍ତିଗତ DNS ସର୍ଭର୍ ଆକ୍ସେସ୍ କରିହେବ ନାହିଁ"</string>
     <string name="wifi_limited_connection" msgid="7717855024753201527">"ସୀମିତ ସଂଯୋଗ"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"କୌଣସି ଇଣ୍ଟରନେଟ୍‌ ନାହିଁ"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"ସାଇନ୍-ଇନ୍ ଆବଶ୍ୟକ"</string>
@@ -62,6 +61,8 @@
     <string name="speed_label_medium" msgid="3175763313268941953">"ମଧ୍ୟମ"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"ଦ୍ରୁତ"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"ଅତି ଦ୍ରୁତ"</string>
+    <!-- no translation found for wifi_passpoint_expired (1711402866023391443) -->
+    <skip />
     <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ବିଛିନ୍ନ ହେଲା"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"ବିଚ୍ଛିନ୍ନ କରୁଛି…"</string>
@@ -467,4 +468,6 @@
     <string name="zen_mode_forever" msgid="2704305038191592967">"ଆପଣ ବନ୍ଦ ନକରିବା ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ଏହିକ୍ଷଣି"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"ଏହି ଡିଭାଇସ୍‍"</string>
+    <!-- no translation found for profile_connect_timeout_subtext (2401801610868184557) -->
+    <skip />
 </resources>

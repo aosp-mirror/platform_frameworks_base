@@ -61,6 +61,8 @@
     <string name="speed_label_medium" msgid="3175763313268941953">"मध्यम"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"तेज़"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"अत्‍यधिक तेज़"</string>
+    <!-- no translation found for wifi_passpoint_expired (1711402866023391443) -->
+    <skip />
     <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"डिसकनेक्ट किया गया"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"डिस्‍कनेक्‍ट हो रहा है..."</string>
@@ -466,4 +468,6 @@
     <string name="zen_mode_forever" msgid="2704305038191592967">"जब तक आप इसे बंद नहीं करते"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"अभी-अभी"</string>
     <string name="media_transfer_this_device_name" msgid="1636276898262571213">"यह डिवाइस"</string>
+    <!-- no translation found for profile_connect_timeout_subtext (2401801610868184557) -->
+    <skip />
 </resources>
