@@ -759,7 +759,7 @@
     <dimen name="keyguard_indication_margin_bottom">40dp</dimen>
 
     <!-- The text size for battery level -->
-    <dimen name="battery_level_text_size">12sp</dimen>
+    <dimen name="battery_level_text_size">11sp</dimen>
 
     <!-- TrustDrawable: Minimum inner radius of the breathing animation -->
     <dimen name="trust_circle_inner_radius_visible_min">22dp</dimen>
