@@ -7634,12 +7634,16 @@ public class TelephonyManager {
 
     /**
      * Check whether DUN APN is required for tethering.
+     * <p>
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
      *
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    public boolean getTetherApnRequired() {
-        return getTetherApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public boolean isTetherApnRequired() {
+        return isTetherApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -7649,11 +7653,11 @@ public class TelephonyManager {
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    public boolean getTetherApnRequired(int subId) {
+    public boolean isTetherApnRequired(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getTetherApnRequiredForSubscriber(subId);
+                return telephony.isTetherApnRequiredForSubscriber(subId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "hasMatchedTetherApnSetting RemoteException", ex);
         } catch (NullPointerException ex) {
