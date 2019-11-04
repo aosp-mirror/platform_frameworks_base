@@ -157,7 +157,6 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.dagger.SystemUIBinder;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.ExtensionFragmentListener;
@@ -637,7 +636,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Public constructor for StatusBar.
      *
      * StatusBar is considered optional, and therefore can not be marked as @Inject directly.
-     * Instead, an @Provide method is included in {@link SystemUIBinder}.
+     * Instead, an @Provide method is included.
      */
     public StatusBar(
             Context context,
