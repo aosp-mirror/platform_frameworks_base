@@ -19,7 +19,6 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
 public interface KeyguardMonitor extends CallbackController<Callback> {
 
     boolean isSecure();
-    boolean canSkipBouncer();
     boolean isShowing();
     boolean isOccluded();
     boolean isKeyguardFadingAway();
