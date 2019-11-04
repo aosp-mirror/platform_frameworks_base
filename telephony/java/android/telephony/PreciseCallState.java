@@ -41,7 +41,7 @@ import java.util.Objects;
  *   <li>Precise background call state.
  * </ul>
  *
- * @see android.telephony.TelephonyManager.CallState which contains generic call states.
+ * @see android.telephony.Annotation.CallState which contains generic call states.
  *
  * @hide
  */
