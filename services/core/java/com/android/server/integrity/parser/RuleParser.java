@@ -19,13 +19,14 @@ package com.android.server.integrity.parser;
 import com.android.server.integrity.model.Rule;
 
 import java.io.InputStream;
+import java.util.List;
 
 /** A helper class to parse rules into the {@link Rule} model. */
 public interface RuleParser {
 
     /** Parse rules from a string. */
-    Rule parse(String ruleText);
+    List<Rule> parse(String ruleText);
 
     /** Parse rules from an input stream. */
-    Rule parse(InputStream inputStream);
+    List<Rule> parse(InputStream inputStream);
 }

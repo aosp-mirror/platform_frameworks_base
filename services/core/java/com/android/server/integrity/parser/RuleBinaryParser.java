@@ -19,18 +19,19 @@ package com.android.server.integrity.parser;
 import com.android.server.integrity.model.Rule;
 
 import java.io.InputStream;
+import java.util.List;
 
 /** A helper class to parse rules into the {@link Rule} model from Binary representation. */
 public class RuleBinaryParser implements RuleParser {
 
     @Override
-    public Rule parse(String ruleText) {
+    public List<Rule> parse(String ruleText) {
         // TODO: Implement binary text parser.
         return null;
     }
 
     @Override
-    public Rule parse(InputStream inputStream) {
+    public List<Rule> parse(InputStream inputStream) {
         // TODO: Implement stream parser.
         return null;
     }
