@@ -79,7 +79,8 @@ import java.util.ArrayList;
 
 public class StatusBarNotificationPresenter implements NotificationPresenter,
         ConfigurationController.ConfigurationListener,
-        NotificationRowBinderImpl.BindRowCallback {
+        NotificationRowBinderImpl.BindRowCallback,
+        CommandQueue.Callbacks {
 
     private final LockscreenGestureLogger mLockscreenGestureLogger =
             Dependency.get(LockscreenGestureLogger.class);
@@ -184,17 +185,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
         NotificationListContainer notifListContainer = (NotificationListContainer) stackScroller;
         Dependency.get(InitController.class).addPostInitTask(() -> {
             NotificationEntryListener notificationEntryListener = new NotificationEntryListener() {
-                @Override
-                public void onNotificationAdded(NotificationEntry entry) {
-                    // Recalculate the position of the sliding windows and the titles.
-                    mShadeController.updateAreThereNotifications();
-                }
-
-                @Override
-                public void onPostEntryUpdated(NotificationEntry entry) {
-                    mShadeController.updateAreThereNotifications();
-                }
-
                 @Override
                 public void onEntryRemoved(
                         @Nullable NotificationEntry entry,
@@ -333,7 +323,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 }
             }
         }
-        mShadeController.updateAreThereNotifications();
     }
 
     public boolean hasActiveNotifications() {

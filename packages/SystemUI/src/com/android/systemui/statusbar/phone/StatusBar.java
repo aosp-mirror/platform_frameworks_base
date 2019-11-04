@@ -47,8 +47,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -117,7 +115,6 @@ import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.DateTimeView;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -399,6 +396,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final RemoteInputUriController mRemoteInputUriController;
     private final Optional<Divider> mDividerOptional;
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    private final LightsOutNotifController mLightsOutNotifController;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -704,6 +702,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
+            LightsOutNotifController lightsOutNotifController,
             SuperStatusBarViewFactory superStatusBarViewFactory) {
         super(context);
         mFeatureFlags = featureFlags;
@@ -774,7 +773,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDividerOptional = dividerOptional;
 
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
-
+        mLightsOutNotifController =  lightsOutNotifController;
         mBubbleExpandListener =
                 (isExpanding, key) -> {
                     mEntryManager.updateNotifications("onBubbleExpandChanged");
@@ -928,7 +927,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mConfigurationController.addCallback(this);
 
         // set the initial view visibility
-        Dependency.get(InitController.class).addPostInitTask(this::updateAreThereNotifications);
         int disabledFlags1 = result.mDisabledFlags1;
         int disabledFlags2 = result.mDisabledFlags2;
         Dependency.get(InitController.class).addPostInitTask(
@@ -1057,8 +1055,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                             mStatusBarStateController, mKeyguardBypassController,
                             mKeyguardStateController, mWakeUpCoordinator, mCommandQueue);
                     mHeadsUpAppearanceController.readFrom(oldController);
+
+                    mLightsOutNotifController.setLightsOutNotifView(
+                            mStatusBarView.findViewById(R.id.notification_lights_out));
                     mStatusBarWindowViewController.setStatusBarView(mStatusBarView);
-                    updateAreThereNotifications();
                     checkBarModes();
                 }).getFragmentManager()
                 .beginTransaction()
@@ -1543,38 +1543,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void requestFaceAuth() {
         if (!mKeyguardStateController.canDismissLockScreen()) {
             mKeyguardUpdateMonitor.requestFaceAuth();
-        }
-    }
-
-    public void updateAreThereNotifications() {
-        if (SPEW) {
-            final boolean clearable = hasActiveNotifications() &&
-                    mNotificationPanel.hasActiveClearableNotifications();
-            Log.d(TAG, "updateAreThereNotifications: N=" +
-                    mEntryManager.getNotificationData().getActiveNotifications().size() + " any=" +
-                    hasActiveNotifications() + " clearable=" + clearable);
-        }
-
-        if (mStatusBarView != null) {
-            final View nlo = mStatusBarView.findViewById(R.id.notification_lights_out);
-            final boolean showDot = hasActiveNotifications() && !areLightsOn();
-            if (showDot != (nlo.getAlpha() == 1.0f)) {
-                if (showDot) {
-                    nlo.setAlpha(0f);
-                    nlo.setVisibility(View.VISIBLE);
-                }
-                nlo.animate()
-                        .alpha(showDot ? 1 : 0)
-                        .setDuration(showDot ? 750 : 250)
-                        .setInterpolator(new AccelerateInterpolator(2.0f))
-                        .setListener(showDot ? null : new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator _a) {
-                                nlo.setVisibility(View.GONE);
-                            }
-                        })
-                        .start();
-            }
         }
     }
 
@@ -2306,14 +2274,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
         boolean barModeChanged = false;
-        final int diff = mAppearance ^ appearance;
         if (mAppearance != appearance) {
             mAppearance = appearance;
-
-            // update low profile
-            if ((diff & APPEARANCE_LOW_PROFILE_BARS) != 0) {
-                updateAreThereNotifications();
-            }
             barModeChanged = updateBarMode(barMode(mTransientShown, appearance));
         }
         mLightBarController.onStatusBarAppearanceChanged(appearanceRegions, barModeChanged,
@@ -2492,10 +2454,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     /** Returns whether the top activity is in immersive mode. */
     public boolean inImmersiveMode() {
         return mAppImmersive;
-    }
-
-    private boolean areLightsOn() {
-        return 0 == (mAppearance & APPEARANCE_LOW_PROFILE_BARS);
     }
 
     public static String viewInfo(View v) {
