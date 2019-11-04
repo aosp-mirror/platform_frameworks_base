@@ -17,8 +17,10 @@
 package com.android.systemui.screenshot;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_CORNER_FLOW;
 import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_ACTION_INTENT;
 import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_CANCEL_NOTIFICATION;
 import static com.android.systemui.screenshot.GlobalScreenshot.EXTRA_DISALLOW_ENTER_PIP;
@@ -29,6 +31,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.Notification;
 import android.app.Notification.BigPictureStyle;
@@ -59,12 +62,17 @@ import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -96,6 +104,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -109,6 +118,7 @@ class SaveImageInBackgroundData {
     Bitmap image;
     Uri imageUri;
     Runnable finisher;
+    Function<PendingIntent, Void> onEditReady;
     int iconSize;
     int previewWidth;
     int previewheight;
@@ -343,6 +353,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     R.drawable.ic_screenshot_edit,
                     r.getString(com.android.internal.R.string.screenshot_edit), editAction);
             mNotificationBuilder.addAction(editActionBuilder.build());
+            if (editAction != null && mParams.onEditReady != null) {
+                mParams.onEditReady.apply(editAction);
+            }
 
             // Create a delete action for the notification
             PendingIntent deleteAction = PendingIntent.getBroadcast(context, requestCode,
@@ -380,40 +393,46 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             GlobalScreenshot.notifyScreenshotError(mParams.context, mNotificationManager,
                     mParams.errorMsgResId);
         } else {
-            // Show the final notification to indicate screenshot saved
-            Context context = mParams.context;
-            Resources r = context.getResources();
+            if (mParams.onEditReady != null) {
+                // Cancel the "saving screenshot" notification
+                mNotificationManager.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
+            } else {
+                // Show the final notification to indicate screenshot saved
+                Context context = mParams.context;
+                Resources r = context.getResources();
 
-            // Create the intent to show the screenshot in gallery
-            Intent launchIntent = new Intent(Intent.ACTION_VIEW);
-            launchIntent.setDataAndType(mParams.imageUri, "image/png");
-            launchIntent.setFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                // Create the intent to show the screenshot in gallery
+                Intent launchIntent = new Intent(Intent.ACTION_VIEW);
+                launchIntent.setDataAndType(mParams.imageUri, "image/png");
+                launchIntent.setFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            final long now = System.currentTimeMillis();
+                final long now = System.currentTimeMillis();
 
-            // Update the text and the icon for the existing notification
-            mPublicNotificationBuilder
+                // Update the text and the icon for the existing notification
+                mPublicNotificationBuilder
+                        .setContentTitle(r.getString(R.string.screenshot_saved_title))
+                        .setContentText(r.getString(R.string.screenshot_saved_text))
+                        .setContentIntent(
+                                PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))
+                        .setWhen(now)
+                        .setAutoCancel(true)
+                        .setColor(context.getColor(
+                                com.android.internal.R.color.system_notification_accent_color));
+                mNotificationBuilder
                     .setContentTitle(r.getString(R.string.screenshot_saved_title))
                     .setContentText(r.getString(R.string.screenshot_saved_text))
                     .setContentIntent(PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))
                     .setWhen(now)
                     .setAutoCancel(true)
                     .setColor(context.getColor(
-                            com.android.internal.R.color.system_notification_accent_color));
-            mNotificationBuilder
-                .setContentTitle(r.getString(R.string.screenshot_saved_title))
-                .setContentText(r.getString(R.string.screenshot_saved_text))
-                .setContentIntent(PendingIntent.getActivity(mParams.context, 0, launchIntent, 0))
-                .setWhen(now)
-                .setAutoCancel(true)
-                .setColor(context.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setPublicVersion(mPublicNotificationBuilder.build())
-                .setFlag(Notification.FLAG_NO_CLEAR, false);
+                            com.android.internal.R.color.system_notification_accent_color))
+                    .setPublicVersion(mPublicNotificationBuilder.build())
+                    .setFlag(Notification.FLAG_NO_CLEAR, false);
 
-            mNotificationManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT,
-                    mNotificationBuilder.build());
+                mNotificationManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT,
+                        mNotificationBuilder.build());
+            }
         }
         mParams.finisher.run();
         mParams.clearContext();
@@ -473,8 +492,12 @@ public class GlobalScreenshot {
     private static final float SCREENSHOT_SCALE = 1f;
     private static final float SCREENSHOT_DROP_IN_MIN_SCALE = SCREENSHOT_SCALE * 0.725f;
     private static final float SCREENSHOT_DROP_OUT_MIN_SCALE = SCREENSHOT_SCALE * 0.45f;
+    private static final float SCREENSHOT_CORNER_MIN_SCALE = SCREENSHOT_SCALE * 0.2f;
     private static final float SCREENSHOT_FAST_DROP_OUT_MIN_SCALE = SCREENSHOT_SCALE * 0.6f;
     private static final float SCREENSHOT_DROP_OUT_MIN_SCALE_OFFSET = 0f;
+    private static final float SCREENSHOT_CORNER_MIN_SCALE_OFFSET = .1f;
+    private static final long SCREENSHOT_CORNER_TIMEOUT_MILLIS = 8000;
+    private static final int MESSAGE_CORNER_TIMEOUT = 2;
     private final int mPreviewWidth;
     private final int mPreviewHeight;
 
@@ -501,6 +524,19 @@ public class GlobalScreenshot {
     private AsyncTask<Void, Void, Void> mSaveInBgTask;
 
     private MediaActionSound mCameraSound;
+
+    private final Handler mScreenshotHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MESSAGE_CORNER_TIMEOUT:
+                    GlobalScreenshot.this.clearScreenshot();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
 
     /**
@@ -574,12 +610,14 @@ public class GlobalScreenshot {
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
      */
-    private void saveScreenshotInWorkerThread(Runnable finisher) {
+    private void saveScreenshotInWorkerThread(
+            Runnable finisher, @Nullable Function<PendingIntent, Void> onEditReady) {
         SaveImageInBackgroundData data = new SaveImageInBackgroundData();
         data.context = mContext;
         data.image = mScreenBitmap;
         data.iconSize = mNotificationIconSize;
         data.finisher = finisher;
+        data.onEditReady = onEditReady;
         data.previewWidth = mPreviewWidth;
         data.previewheight = mPreviewHeight;
         if (mSaveInBgTask != null) {
@@ -587,6 +625,10 @@ public class GlobalScreenshot {
         }
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data, mNotificationManager)
                 .execute();
+    }
+
+    private void saveScreenshotInWorkerThread(Runnable finisher) {
+        saveScreenshotInWorkerThread(finisher, null);
     }
 
     /**
@@ -683,6 +725,22 @@ public class GlobalScreenshot {
     }
 
     /**
+     * Clears current screenshot
+     */
+    private void clearScreenshot() {
+        if (mScreenshotLayout.isAttachedToWindow()) {
+            mWindowManager.removeView(mScreenshotLayout);
+        }
+
+        // Clear any references to the bitmap
+        mScreenBitmap = null;
+        mScreenshotView.setImageBitmap(null);
+        mBackgroundView.setVisibility(View.GONE);
+        mScreenshotView.setVisibility(View.GONE);
+        mScreenshotView.setLayerType(View.LAYER_TYPE_NONE, null);
+    }
+
+    /**
      * Starts the animation after taking the screenshot
      */
     private void startAnimation(final Runnable finisher, int w, int h, boolean statusBarVisible,
@@ -706,34 +764,55 @@ public class GlobalScreenshot {
             mScreenshotAnimation.removeAllListeners();
         }
 
+        boolean useCornerFlow =
+                DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI, SCREENSHOT_CORNER_FLOW, false);
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         ValueAnimator screenshotDropInAnim = createScreenshotDropInAnimation();
-        ValueAnimator screenshotFadeOutAnim = createScreenshotDropOutAnimation(w, h,
-                statusBarVisible, navBarVisible);
+        ValueAnimator screenshotFadeOutAnim = useCornerFlow
+                ? createScreenshotToCornerAnimation(w, h)
+                : createScreenshotDropOutAnimation(w, h, statusBarVisible, navBarVisible);
         mScreenshotAnimation = new AnimatorSet();
         mScreenshotAnimation.playSequentially(screenshotDropInAnim, screenshotFadeOutAnim);
         mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 // Save the screenshot once we have a bit of time now
-                saveScreenshotInWorkerThread(finisher);
-                mWindowManager.removeView(mScreenshotLayout);
-
-                // Clear any references to the bitmap
-                mScreenBitmap = null;
-                mScreenshotView.setImageBitmap(null);
+                if (!useCornerFlow) {
+                    saveScreenshotInWorkerThread(finisher);
+                    clearScreenshot();
+                } else {
+                    mScreenshotView.requestFocus();
+                    mScreenshotView.setOnClickListener((v) -> {
+                        // TODO: remove once we have a better UI to show that we aren't ready yet
+                        Toast notReadyToast = Toast.makeText(
+                                mContext, "Screenshot is not ready yet", Toast.LENGTH_SHORT);
+                        notReadyToast.show();
+                    });
+                    saveScreenshotInWorkerThread(finisher, intent -> {
+                        mScreenshotHandler.post(() -> mScreenshotView.setOnClickListener(v -> {
+                            try {
+                                intent.send();
+                                clearScreenshot();
+                            } catch (PendingIntent.CanceledException e) {
+                                Log.e(TAG, "Edit intent cancelled", e);
+                            }
+                            mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
+                        }));
+                        return null;
+                    });
+                    mScreenshotHandler.sendMessageDelayed(
+                            mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
+                            SCREENSHOT_CORNER_TIMEOUT_MILLIS);
+                }
             }
         });
-        mScreenshotLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                // Play the shutter sound to notify that we've taken a screenshot
-                mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+        mScreenshotHandler.post(() -> {
+            // Play the shutter sound to notify that we've taken a screenshot
+            mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
 
-                mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-                mScreenshotView.buildLayer();
-                mScreenshotAnimation.start();
-            }
+            mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            mScreenshotView.buildLayer();
+            mScreenshotAnimation.start();
         });
     }
     private ValueAnimator createScreenshotDropInAnimation() {
@@ -875,6 +954,47 @@ public class GlobalScreenshot {
                 }
             });
         }
+        return anim;
+    }
+
+    private ValueAnimator createScreenshotToCornerAnimation(int w, int h) {
+        ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+        anim.setStartDelay(SCREENSHOT_DROP_OUT_DELAY);
+
+        final float scaleDurationPct =
+                (float) SCREENSHOT_DROP_OUT_SCALE_DURATION / SCREENSHOT_DROP_OUT_DURATION;
+        final Interpolator scaleInterpolator = new Interpolator() {
+            @Override
+            public float getInterpolation(float x) {
+                if (x < scaleDurationPct) {
+                    // Decelerate, and scale the input accordingly
+                    return (float) (1f - Math.pow(1f - (x / scaleDurationPct), 2f));
+                }
+                return 1f;
+            }
+        };
+
+        // Determine the bounds of how to scale
+        float halfScreenWidth = (w - 2f * mBgPadding) / 2f;
+        float halfScreenHeight = (h - 2f * mBgPadding) / 2f;
+        final float offsetPct = SCREENSHOT_CORNER_MIN_SCALE_OFFSET;
+        final PointF finalPos = new PointF(
+                -halfScreenWidth + (SCREENSHOT_CORNER_MIN_SCALE + offsetPct) * halfScreenWidth,
+                halfScreenHeight - (SCREENSHOT_CORNER_MIN_SCALE + offsetPct) * halfScreenHeight);
+
+        // Animate the screenshot to the bottom left corner
+        anim.setDuration(SCREENSHOT_DROP_OUT_DURATION);
+        anim.addUpdateListener(animation -> {
+            float t = (Float) animation.getAnimatedValue();
+            float scaleT = (SCREENSHOT_DROP_IN_MIN_SCALE + mBgPaddingScale)
+                    - scaleInterpolator.getInterpolation(t)
+                    * (SCREENSHOT_DROP_IN_MIN_SCALE - SCREENSHOT_CORNER_MIN_SCALE);
+            mBackgroundView.setAlpha((1f - t) * BACKGROUND_ALPHA);
+            mScreenshotView.setScaleX(scaleT);
+            mScreenshotView.setScaleY(scaleT);
+            mScreenshotView.setTranslationX(t * finalPos.x);
+            mScreenshotView.setTranslationY(t * finalPos.y);
+        });
         return anim;
     }
 

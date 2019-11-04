@@ -337,6 +337,14 @@ public final class SystemUiDeviceConfigFlags {
             "brightline_falsing_zigzag_y_secondary_deviance";
 
 
+    // Flags related to screenshots
+
+    /**
+     * (boolean) Whether screenshot flow going to the corner (instead of shown in a notification)
+     * is enabled.
+     */
+    public static final String SCREENSHOT_CORNER_FLOW = "screenshot_corner_flow";
+
     private SystemUiDeviceConfigFlags() {
     }
 }
