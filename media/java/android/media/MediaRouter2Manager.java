@@ -25,18 +25,16 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -59,13 +57,11 @@ public class MediaRouter2Manager {
     private Client mClient;
     private final IMediaRouterService mMediaRouterService;
     final Handler mHandler;
-    final List<CallbackRecord> mCallbacks = new CopyOnWriteArrayList<>();
+    final List<CallbackRecord> mCallbackRecords = new CopyOnWriteArrayList<>();
 
-    @SuppressWarnings("WeakerAccess") /* synthetic access */
-    @NonNull
-    List<MediaRoute2ProviderInfo> mProviders = Collections.emptyList();
-    @NonNull
-    List<MediaRoute2Info> mRoutes = Collections.emptyList();
+    private final Object mRoutesLock = new Object();
+    @GuardedBy("mRoutesLock")
+    private final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
     @NonNull
     final ConcurrentMap<String, List<String>> mControlCategoryMap = new ConcurrentHashMap<>();
 
@@ -104,13 +100,13 @@ public class MediaRouter2Manager {
         Objects.requireNonNull(callback, "callback must not be null");
 
         CallbackRecord callbackRecord;
-        synchronized (mCallbacks) {
+        synchronized (mCallbackRecords) {
             if (findCallbackRecordIndexLocked(callback) >= 0) {
                 Log.w(TAG, "Ignoring to add the same callback twice.");
                 return;
             }
             callbackRecord = new CallbackRecord(executor, callback);
-            mCallbacks.add(callbackRecord);
+            mCallbackRecords.add(callbackRecord);
         }
 
         synchronized (sLock) {
@@ -136,32 +132,32 @@ public class MediaRouter2Manager {
     public void unregisterCallback(@NonNull Callback callback) {
         Objects.requireNonNull(callback, "callback must not be null");
 
-        synchronized (mCallbacks) {
+        synchronized (mCallbackRecords) {
             final int index = findCallbackRecordIndexLocked(callback);
             if (index < 0) {
                 Log.w(TAG, "Ignore removing unknown callback. " + callback);
                 return;
             }
-            mCallbacks.remove(index);
+            mCallbackRecords.remove(index);
             synchronized (sLock) {
-                if (mCallbacks.size() == 0 && mClient != null) {
+                if (mCallbackRecords.size() == 0 && mClient != null) {
                     try {
                         mMediaRouterService.unregisterManager(mClient);
                     } catch (RemoteException ex) {
                         Log.e(TAG, "Unable to unregister media router manager", ex);
                     }
-                    mClient.notifyProviderInfosUpdated(Collections.emptyList());
+                    //TODO: clear mRoutes?
                     mClient = null;
                 }
             }
         }
     }
 
-    @GuardedBy("mCallbacks")
+    @GuardedBy("mCallbackRecords")
     private int findCallbackRecordIndexLocked(Callback callback) {
-        final int count = mCallbacks.size();
+        final int count = mCallbackRecords.size();
         for (int i = 0; i < count; i++) {
-            if (mCallbacks.get(i).mCallback == callback) {
+            if (mCallbackRecords.get(i).mCallback == callback) {
                 return i;
             }
         }
@@ -184,11 +180,14 @@ public class MediaRouter2Manager {
             return Collections.emptyList();
         }
         List<MediaRoute2Info> routes = new ArrayList<>();
-        for (MediaRoute2Info route : mRoutes) {
-            if (route.supportsControlCategory(controlCategories)) {
-                routes.add(route);
+        synchronized (mRoutesLock) {
+            for (MediaRoute2Info route : mRoutes.values()) {
+                if (route.supportsControlCategory(controlCategories)) {
+                    routes.add(route);
+                }
             }
         }
+        //TODO: Should we cache this?
         return routes;
     }
 
@@ -282,136 +281,96 @@ public class MediaRouter2Manager {
         }
     }
 
-    int findProviderIndex(MediaRoute2ProviderInfo provider) {
-        final int count = mProviders.size();
-        for (int i = 0; i < count; i++) {
-            if (TextUtils.equals(mProviders.get(i).getUniqueId(), provider.getUniqueId())) {
-                return i;
+    void addRoutesOnHandler(List<MediaRoute2Info> routes) {
+        synchronized (mRoutesLock) {
+            for (MediaRoute2Info route : routes) {
+                mRoutes.put(route.getUniqueId(), route);
             }
         }
-        return -1;
+        if (routes.size() > 0) {
+            notifyRoutesAdded(routes);
+        }
     }
 
-    void updateProvider(@NonNull MediaRoute2ProviderInfo provider) {
-        if (provider == null || !provider.isValid()) {
-            Log.w(TAG, "Ignoring invalid provider : " + provider);
-            return;
-        }
-
-        final Collection<MediaRoute2Info> routes = provider.getRoutes();
-
-        final int index = findProviderIndex(provider);
-        if (index >= 0) {
-            final MediaRoute2ProviderInfo prevProvider = mProviders.get(index);
-            final Set<String> updatedRouteIds = new HashSet<>();
-            for (MediaRoute2Info routeInfo : routes) {
-                if (!routeInfo.isValid()) {
-                    Log.w(TAG, "Ignoring invalid route : " + routeInfo);
-                    continue;
-                }
-                final MediaRoute2Info prevRoute = prevProvider.getRoute(routeInfo.getId());
-                if (prevRoute == null) {
-                    notifyRouteAdded(routeInfo);
-                } else {
-                    if (!Objects.equals(prevRoute, routeInfo)) {
-                        notifyRouteChanged(routeInfo);
-                    }
-                    updatedRouteIds.add(routeInfo.getId());
-                }
-            }
-            final Collection<MediaRoute2Info> prevRoutes = prevProvider.getRoutes();
-
-            for (MediaRoute2Info prevRoute : prevRoutes) {
-                if (!updatedRouteIds.contains(prevRoute.getId())) {
-                    notifyRouteRemoved(prevRoute);
-                }
-            }
-        } else {
-            for (MediaRoute2Info routeInfo: routes) {
-                notifyRouteAdded(routeInfo);
+    void removeRoutesOnHandler(List<MediaRoute2Info> routes) {
+        synchronized (mRoutesLock) {
+            for (MediaRoute2Info route : routes) {
+                mRoutes.remove(route.getUniqueId());
             }
         }
+        if (routes.size() > 0) {
+            notifyRoutesRemoved(routes);
+        }
     }
 
-    void notifyRouteAdded(MediaRoute2Info routeInfo) {
-        for (CallbackRecord record : mCallbacks) {
+    void changeRoutesOnHandler(List<MediaRoute2Info> routes) {
+        synchronized (mRoutesLock) {
+            for (MediaRoute2Info route : routes) {
+                mRoutes.put(route.getUniqueId(), route);
+            }
+        }
+        if (routes.size() > 0) {
+            notifyRoutesChanged(routes);
+        }
+    }
+
+    private void notifyRoutesAdded(List<MediaRoute2Info> routes) {
+        for (CallbackRecord record: mCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mCallback.onRouteAdded(routeInfo));
+                    () -> record.mCallback.onRoutesAdded(routes));
         }
     }
 
-    void notifyRouteChanged(MediaRoute2Info routeInfo) {
-        for (CallbackRecord record : mCallbacks) {
+    private void notifyRoutesRemoved(List<MediaRoute2Info> routes) {
+        for (CallbackRecord record: mCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mCallback.onRouteChanged(routeInfo));
+                    () -> record.mCallback.onRoutesRemoved(routes));
         }
     }
 
-    void notifyRouteRemoved(MediaRoute2Info routeInfo) {
-        for (CallbackRecord record : mCallbacks) {
+    private void notifyRoutesChanged(List<MediaRoute2Info> routes) {
+        for (CallbackRecord record: mCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mCallback.onRouteRemoved(routeInfo));
+                    () -> record.mCallback.onRoutesChanged(routes));
         }
-    }
-
-    void notifyRouteListChanged() {
-        for (CallbackRecord record: mCallbacks) {
-            record.mExecutor.execute(
-                    () -> record.mCallback.onRoutesChanged(mRoutes));
-        }
-    }
-
-    void notifyProviderInfosUpdated(List<MediaRoute2ProviderInfo> providers) {
-        if (providers == null) {
-            Log.w(TAG, "Providers info is null.");
-            return;
-        }
-
-        ArrayList<MediaRoute2Info> routes = new ArrayList<>();
-
-        for (MediaRoute2ProviderInfo provider : providers) {
-            updateProvider(provider);
-            //TODO: Should we do this in updateProvider()?
-            routes.addAll(provider.getRoutes());
-        }
-        //TODO: Call notifyRouteRemoved for the routes of the removed providers.
-
-        //TODO: Filter invalid providers and invalid routes.
-        mProviders = providers;
-        mRoutes = routes;
-
-        //TODO: Call this when only the list is modified.
-        notifyRouteListChanged();
     }
 
     void notifyRouteSelected(String packageName, MediaRoute2Info route) {
-        for (CallbackRecord record : mCallbacks) {
+        for (CallbackRecord record : mCallbackRecords) {
             record.mExecutor.execute(() -> record.mCallback.onRouteSelected(packageName, route));
         }
     }
 
     void updateControlCategories(String packageName, List<String> categories) {
         mControlCategoryMap.put(packageName, categories);
+        for (CallbackRecord record : mCallbackRecords) {
+            record.mExecutor.execute(
+                    () -> record.mCallback.onControlCategoriesChanged(packageName));
+        }
     }
 
     /**
      * Interface for receiving events about media routing changes.
      */
     public static class Callback {
-        /**
-         * Called when a route is added.
-         */
-        public void onRouteAdded(@NonNull MediaRoute2Info routeInfo) {}
 
         /**
-         * Called when a route is changed.
+         * Called when routes are added.
+         * @param routes the list of routes that have been added. It's never empty.
          */
-        public void onRouteChanged(@NonNull MediaRoute2Info routeInfo) {}
+        public void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
-         * Called when a route is removed.
+         * Called when routes are removed.
+         * @param routes the list of routes that have been removed. It's never empty.
          */
-        public void onRouteRemoved(@NonNull MediaRoute2Info routeInfo) {}
+        public void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {}
+
+        /**
+         * Called when routes are changed.
+         * @param routes the list of routes that have been changed. It's never empty.
+         */
+        public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when a route is selected for an application.
@@ -422,13 +381,13 @@ public class MediaRouter2Manager {
          */
         public void onRouteSelected(@NonNull String packageName, @Nullable MediaRoute2Info route) {}
 
-        /**
-         * Called when the list of routes is changed.
-         * A client may refresh available routes for each application.
-         */
-        public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
 
-        //TODO: add onControlCategoriesChanged to notify available routes are changed
+        /**
+         * Called when the control categories of an app is changed.
+         *
+         * @param packageName the package name of the application
+         */
+        public void onControlCategoriesChanged(@NonNull String packageName) {}
     }
 
     final class CallbackRecord {
@@ -441,10 +400,12 @@ public class MediaRouter2Manager {
         }
 
         void notifyRoutes() {
-            mExecutor.execute(() -> mCallback.onRoutesChanged(mRoutes));
-            for (MediaRoute2Info routeInfo : mRoutes) {
-                mExecutor.execute(
-                        () -> mCallback.onRouteAdded(routeInfo));
+            List<MediaRoute2Info> routes;
+            synchronized (mRoutesLock) {
+                routes = new ArrayList<>(mRoutes.values());
+            }
+            if (routes.size() > 0) {
+                mExecutor.execute(() -> mCallback.onRoutesAdded(routes));
             }
         }
     }
@@ -463,9 +424,21 @@ public class MediaRouter2Manager {
         }
 
         @Override
-        public void notifyProviderInfosUpdated(List<MediaRoute2ProviderInfo> info) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifyProviderInfosUpdated,
-                    MediaRouter2Manager.this, info));
+        public void notifyRoutesAdded(List<MediaRoute2Info> routes) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::addRoutesOnHandler,
+                    MediaRouter2Manager.this, routes));
+        }
+
+        @Override
+        public void notifyRoutesRemoved(List<MediaRoute2Info> routes) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::removeRoutesOnHandler,
+                    MediaRouter2Manager.this, routes));
+        }
+
+        @Override
+        public void notifyRoutesChanged(List<MediaRoute2Info> routes) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::changeRoutesOnHandler,
+                    MediaRouter2Manager.this, routes));
         }
     }
 }
