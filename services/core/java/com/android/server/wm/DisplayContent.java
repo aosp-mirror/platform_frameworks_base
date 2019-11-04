@@ -2409,7 +2409,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     /** Returns true if a removal action is still being deferred. */
     @Override
     boolean checkCompleteDeferredRemoval() {
-        final boolean stillDeferringRemoval = super.checkCompleteDeferredRemoval();
+        boolean stillDeferringRemoval = false;
+
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final DisplayChildWindowContainer child = getChildAt(i);
+            stillDeferringRemoval |= child.checkCompleteDeferredRemoval();
+            if (getChildCount() == 0) {
+                // If this display is pending to be removed because it contains an activity with
+                // {@link ActivityRecord#mIsExiting} is true, this display may be removed when
+                // completing the removal of the last activity from
+                // {@link ActivityRecord#checkCompleteDeferredRemoval}.
+                return false;
+            }
+        }
 
         if (!stillDeferringRemoval && mDeferredRemoval) {
             removeImmediately();
