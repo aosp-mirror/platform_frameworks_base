@@ -22,6 +22,7 @@ import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -272,29 +273,28 @@ public class MediaRouterManagerTest {
 
     @Test
     public void testControlVolumeWithRouter() throws Exception {
-        MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
-
         Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CONTROL_CATEGORIES_ALL);
-        mRouter2.registerCallback(mExecutor, mockCallback);
 
         MediaRoute2Info volRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
         int originalVolume = volRoute.getVolume();
         int deltaVolume = (originalVolume == volRoute.getVolumeMax() ? -1 : 1);
-        int targetVolume = originalVolume + deltaVolume;
 
-        mRouter2.requestSetVolume(volRoute, targetVolume);
-        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
-                .onRouteChanged(argThat(route ->
-                        route.getId().equals(volRoute.getId())
-                                && route.getVolume() == targetVolume));
+        CountDownLatch latch1 = new CountDownLatch(1);
+        MediaRouter2.Callback callback1 =
+                createVolumeChangeCallback(ROUTE_ID_VARIABLE_VOLUME,
+                        originalVolume + deltaVolume, latch1);
+        mRouter2.registerCallback(mExecutor, callback1);
+        mRouter2.requestUpdateVolume(volRoute, deltaVolume);
+        assertTrue(latch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        mRouter2.unregisterCallback(callback1);
 
-        mRouter2.requestUpdateVolume(volRoute, -deltaVolume);
-        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
-                .onRouteChanged(argThat(route ->
-                        route.getId().equals(volRoute.getId())
-                                && route.getVolume() == originalVolume));
-
-        mRouter2.unregisterCallback(mockCallback);
+        CountDownLatch latch2 = new CountDownLatch(1);
+        MediaRouter2.Callback callback2 =
+                createVolumeChangeCallback(ROUTE_ID_VARIABLE_VOLUME, originalVolume, latch2);
+        mRouter2.registerCallback(mExecutor, callback2);
+        mRouter2.requestSetVolume(volRoute, originalVolume);
+        assertTrue(latch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        mRouter2.unregisterCallback(callback1);
     }
 
     @Test
@@ -312,13 +312,13 @@ public class MediaRouterManagerTest {
         int targetVolume = originalVolume + deltaVolume;
 
         mManager.requestSetVolume(volRoute, targetVolume);
-        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
+        verify(managerCallback, timeout(TIMEOUT_MS).atLeastOnce())
                 .onRouteChanged(argThat(route ->
                         route.getId().equals(volRoute.getId())
                                 && route.getVolume() == targetVolume));
 
         mManager.requestUpdateVolume(volRoute, -deltaVolume);
-        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
+        verify(managerCallback, timeout(TIMEOUT_MS).atLeastOnce())
                 .onRouteChanged(argThat(route ->
                         route.getId().equals(volRoute.getId())
                                 && route.getVolume() == originalVolume));
@@ -347,14 +347,14 @@ public class MediaRouterManagerTest {
         CountDownLatch latch = new CountDownLatch(1);
         MediaRouter2.Callback callback = new MediaRouter2.Callback() {
             @Override
-            public void onRoutesChanged(List<MediaRoute2Info> routes) {
-                if (routes.size() > 0) latch.countDown();
+            public void onRoutesAdded(List<MediaRoute2Info> added) {
+                if (added.size() > 0) latch.countDown();
             }
         };
         mRouter2.setControlCategories(controlCategories);
         mRouter2.registerCallback(mExecutor, callback);
         try {
-            latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
             return createRouteMap(mRouter2.getRoutes());
         } finally {
             mRouter2.unregisterCallback(callback);
@@ -370,19 +370,37 @@ public class MediaRouterManagerTest {
         MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
             @Override
             public void onRoutesChanged(List<MediaRoute2Info> routes) {
-                if (routes.size() > 0) latch.countDown();
+                if (routes.size() > 0) {
+                    latch.countDown();
+                }
             }
         };
         mManager.registerCallback(mExecutor, managerCallback);
         mRouter2.setControlCategories(controlCategories);
         mRouter2.registerCallback(mExecutor, routerCallback);
         try {
-            latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+            //TODO: currently this returns empty list occasionally.
+            //Maybe due to control category is not set yet
             return createRouteMap(mManager.getAvailableRoutes(mPackageName));
         } finally {
             mRouter2.unregisterCallback(routerCallback);
             mManager.unregisterCallback(managerCallback);
         }
+    }
+
+    MediaRouter2.Callback createVolumeChangeCallback(String routeId,
+            int targetVolume, CountDownLatch latch) {
+        MediaRouter2.Callback callback = new MediaRouter2.Callback() {
+            @Override
+            public void onRoutesChanged(List<MediaRoute2Info> changed) {
+                MediaRoute2Info volRoute = createRouteMap(changed).get(routeId);
+                if (volRoute != null && volRoute.getVolume() == targetVolume) {
+                    latch.countDown();
+                }
+            }
+        };
+        return callback;
     }
 
     // Helper for getting routes easily
