@@ -299,7 +299,7 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microphone"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"enregistrer des fichiers audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à enregistrer l\'audio?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"données d\'activité physique"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"accéder à vos activités physiques"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Autoriser « <xliff:g id="APP_NAME">%1$s</xliff:g> » à accéder à vos activités physiques?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Appareil photo"</string>
