@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NavigationBarController;
@@ -72,6 +73,8 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+
+import java.util.Optional;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -157,6 +160,7 @@ public class StatusBarModule {
             CommandQueue commandQueue,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
+            Optional<Divider> dividerOptional,
             SuperStatusBarViewFactory superStatusBarViewFactory) {
         return new StatusBar(
                 context,
@@ -225,6 +229,7 @@ public class StatusBarModule {
                 commandQueue,
                 pluginManager,
                 remoteInputUriController,
+                dividerOptional,
                 superStatusBarViewFactory);
     }
 }

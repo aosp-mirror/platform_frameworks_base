@@ -248,6 +248,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -397,6 +398,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final PluginManager mPluginManager;
     private final RemoteInputUriController mRemoteInputUriController;
+    private final Optional<Divider> mDividerOptional;
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
 
     // expanded notifications
@@ -634,6 +636,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * StatusBar is considered optional, and therefore can not be marked as @Inject directly.
      * Instead, an @Provide method is included.
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public StatusBar(
             Context context,
             FeatureFlags featureFlags,
@@ -701,6 +704,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             CommandQueue commandQueue,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
+            Optional<Divider> dividerOptional,
             SuperStatusBarViewFactory superStatusBarViewFactory) {
         super(context);
         mFeatureFlags = featureFlags;
@@ -768,6 +772,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mCommandQueue = commandQueue;
         mPluginManager = pluginManager;
         mRemoteInputUriController = remoteInputUriController;
+        mDividerOptional = dividerOptional;
+
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
 
         mBubbleExpandListener =
@@ -1479,8 +1485,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
             return mRecents.splitPrimaryTask(createMode, null, metricsDockAction);
         } else {
-            Divider divider = getComponent(Divider.class);
-            if (divider != null) {
+            if (mDividerOptional.isPresent()) {
+                Divider divider = mDividerOptional.get();
                 if (divider.isMinimized() && !divider.isHomeStackResizable()) {
                     // Undocking from the minimized state is not supported
                     return false;
@@ -3954,14 +3960,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void appTransitionCancelled(int displayId) {
         if (displayId == mDisplayId) {
-            getComponent(Divider.class).onAppTransitionFinished();
+            mDividerOptional.ifPresent(Divider::onAppTransitionFinished);
         }
     }
 
     @Override
     public void appTransitionFinished(int displayId) {
         if (displayId == mDisplayId) {
-            getComponent(Divider.class).onAppTransitionFinished();
+            mDividerOptional.ifPresent(Divider::onAppTransitionFinished);
         }
     }
 

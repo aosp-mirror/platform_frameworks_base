@@ -81,6 +81,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -136,6 +137,7 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -302,6 +304,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             CommandQueue commandQueue,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
+            Optional<Divider> dividerOptional,
             SuperStatusBarViewFactory superStatusBarViewFactory,
             /* Car Settings injected components. */
             CarNavigationBarController carNavigationBarController) {
@@ -372,6 +375,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 commandQueue,
                 pluginManager,
                 remoteInputUriController,
+                dividerOptional,
                 superStatusBarViewFactory);
         mScrimController = scrimController;
         mCarNavigationBarController = carNavigationBarController;

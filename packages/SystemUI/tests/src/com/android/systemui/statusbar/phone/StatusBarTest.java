@@ -92,6 +92,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -145,6 +146,7 @@ import org.mockito.MockitoAnnotations;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import dagger.Lazy;
 
@@ -233,6 +235,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private KeyguardLiftController mKeyguardLiftController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private PluginManager mPluginManager;
+    @Mock private Divider mDivider;
     @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
 
     @Before
@@ -372,6 +375,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mCommandQueue,
                 mPluginManager,
                 mRemoteInputUriController,
+                Optional.of(mDivider),
                 mSuperStatusBarViewFactory);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(

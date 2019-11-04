@@ -80,6 +80,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -102,6 +103,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private final Context mContext;
     private final PipUI mPipUI;
+    private final Optional<Divider> mDividerOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final NavigationBarController mNavBarController;
@@ -208,10 +210,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
             long token = Binder.clearCallingIdentity();
             try {
-                Divider divider = SysUiServiceProvider.getComponent(mContext, Divider.class);
-                if (divider != null) {
-                    divider.onDockedFirstAnimationFrame();
-                }
+                mDividerOptional.ifPresent(Divider::onDockedFirstAnimationFrame);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -241,11 +240,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
             long token = Binder.clearCallingIdentity();
             try {
-                Divider divider = SysUiServiceProvider.getComponent(mContext, Divider.class);
-                if (divider != null) {
-                    return divider.getView().getNonMinimizedSplitScreenSecondaryBounds();
-                }
-                return null;
+                return mDividerOptional.map(
+                        divider -> divider.getView().getNonMinimizedSplitScreenSecondaryBounds())
+                        .orElse(null);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -475,11 +472,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
             = this::cleanupAfterDeath;
 
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
     public OverviewProxyService(Context context, DeviceProvisionedController provisionController,
             NavigationBarController navBarController, NavigationModeController navModeController,
-            StatusBarWindowController statusBarWinController,
-            SysUiState sysUiState, PipUI pipUI) {
+            StatusBarWindowController statusBarWinController, SysUiState sysUiState, PipUI pipUI,
+            Optional<Divider> dividerOptional) {
         mContext = context;
         mPipUI = pipUI;
         mHandler = new Handler();
@@ -487,6 +485,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mStatusBarWinController = statusBarWinController;
         mDeviceProvisionedController = provisionController;
         mConnectionBackoffAttempts = 0;
+        mDividerOptional = dividerOptional;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
                 com.android.internal.R.string.config_recentsComponentName));
         mQuickStepIntent = new Intent(ACTION_QUICKSTEP)

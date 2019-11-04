@@ -59,7 +59,6 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks {
     public void start() {
         mWindowManager = new DividerWindowManager(mContext);
         update(mContext.getResources().getConfiguration());
-        putComponent(Divider.class, this);
         mDockDividerVisibilityListener = new DockDividerVisibilityListener();
         try {
             WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(
