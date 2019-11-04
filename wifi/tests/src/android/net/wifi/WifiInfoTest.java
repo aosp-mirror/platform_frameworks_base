@@ -38,7 +38,7 @@ public class WifiInfoTest {
     private static final String TEST_PACKAGE_NAME = "com.test.example";
     private static final String TEST_FQDN = "test.com";
     private static final String TEST_PROVIDER_NAME = "test";
-    private static final int TEST_WIFI_TECHNOLOGY = WifiInfo.WIFI_TECHNOLOGY_11AC;
+    private static final int TEST_WIFI_STANDARD = WifiInfo.WIFI_STANDARD_11AC;
 
     /**
      *  Verify parcel write/read with WifiInfo.
@@ -55,7 +55,7 @@ public class WifiInfoTest {
         writeWifiInfo.setFQDN(TEST_FQDN);
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
         writeWifiInfo.setNetworkSuggestionOrSpecifierPackageName(TEST_PACKAGE_NAME);
-        writeWifiInfo.setWifiTechnology(TEST_WIFI_TECHNOLOGY);
+        writeWifiInfo.setWifiStandard(TEST_WIFI_STANDARD);
 
         Parcel parcel = Parcel.obtain();
         writeWifiInfo.writeToParcel(parcel, 0);
@@ -74,6 +74,6 @@ public class WifiInfoTest {
         assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getNetworkSuggestionOrSpecifierPackageName());
         assertEquals(TEST_FQDN, readWifiInfo.getPasspointFqdn());
         assertEquals(TEST_PROVIDER_NAME, readWifiInfo.getPasspointProviderFriendlyName());
-        assertEquals(TEST_WIFI_TECHNOLOGY, readWifiInfo.getWifiTechnology());
+        assertEquals(TEST_WIFI_STANDARD, readWifiInfo.getWifiStandard());
     }
 }
