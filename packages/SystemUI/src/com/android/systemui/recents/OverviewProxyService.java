@@ -380,6 +380,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     taskId, mHandler, null);
         }
 
+        @Override
+        public void setSplitScreenMinimized(boolean minimized) {
+            Divider divider = mDividerOptional.get();
+            if (divider != null) {
+                divider.setMinimized(minimized);
+            }
+        }
+
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {

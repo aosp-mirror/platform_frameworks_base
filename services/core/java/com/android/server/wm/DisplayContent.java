@@ -16,9 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -32,6 +30,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -56,9 +55,6 @@ import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-import static android.view.WindowManager.DOCKED_BOTTOM;
-import static android.view.WindowManager.DOCKED_INVALID;
-import static android.view.WindowManager.DOCKED_TOP;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -84,9 +80,6 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
-import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
-import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
-import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
@@ -105,12 +98,15 @@ import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
 import static com.android.server.wm.DisplayContentProto.DOCKED_STACK_DIVIDER_CONTROLLER;
 import static com.android.server.wm.DisplayContentProto.DPI;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
+import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
 import static com.android.server.wm.DisplayContentProto.ID;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.OVERLAY_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
+import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.wm.DisplayContentProto.TASKS;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
@@ -2613,54 +2609,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     void adjustForImeIfNeeded() {
         final WindowState imeWin = mInputMethodWindow;
-        final boolean imeVisible = imeWin != null && imeWin.isVisibleLw() && imeWin.isDisplayedLw()
-                && !mDividerControllerLocked.isImeHideRequested();
-        final ActivityStack dockedStack = getRootSplitScreenPrimaryTask();
-        final boolean dockVisible = dockedStack != null;
-        final Task topDockedTask = dockVisible ? dockedStack.getTask((t) -> true): null;
-        final ActivityStack imeTargetStack = mWmService.getImeFocusStackLocked();
-        final int imeDockSide = (dockVisible && imeTargetStack != null) ?
-                imeTargetStack.getDockSide() : DOCKED_INVALID;
-        final boolean imeOnTop = (imeDockSide == DOCKED_TOP);
-        final boolean imeOnBottom = (imeDockSide == DOCKED_BOTTOM);
+        final boolean imeVisible = imeWin != null && imeWin.isVisibleLw()
+                && imeWin.isDisplayedLw();
         final int imeHeight = mDisplayFrames.getInputMethodWindowVisibleHeight();
-        final boolean imeHeightChanged = imeVisible &&
-                imeHeight != mDividerControllerLocked.getImeHeightAdjustedFor();
-
-        // This includes a case where the docked stack is unminimizing and IME is visible for the
-        // bottom side stack. The condition prevents adjusting the override task bounds for IME to
-        // the minimized docked stack bounds.
-        final boolean dockMinimized = mDividerControllerLocked.isMinimizedDock()
-                || (topDockedTask != null && imeOnBottom && !dockedStack.isAdjustedForIme()
-                && dockedStack.getBounds().height() < topDockedTask.getBounds().height());
-
-        // The divider could be adjusted for IME position, or be thinner than usual,
-        // or both. There are three possible cases:
-        // - If IME is visible, and focus is on top, divider is not moved for IME but thinner.
-        // - If IME is visible, and focus is on bottom, divider is moved for IME and thinner.
-        // - If IME is not visible, divider is not moved and is normal width.
-
-        if (imeVisible && dockVisible && (imeOnTop || imeOnBottom) && !dockMinimized) {
-            for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
-                final ActivityStack stack = mTaskContainers.getChildAt(i);
-                final boolean isDockedOnBottom = stack.getDockSide() == DOCKED_BOTTOM;
-                if (stack.isVisible() && (imeOnBottom || isDockedOnBottom)
-                        && stack.inSplitScreenWindowingMode()) {
-                    stack.setAdjustedForIme(imeWin, imeOnBottom && imeHeightChanged);
-                } else {
-                    stack.resetAdjustedForIme(false);
-                }
-            }
-            mDividerControllerLocked.setAdjustedForIme(
-                    imeOnBottom /*ime*/, true /*divider*/, true /*animate*/, imeWin, imeHeight);
-        } else {
-            for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
-                final ActivityStack stack = mTaskContainers.getChildAt(i);
-                stack.resetAdjustedForIme(!dockVisible);
-            }
-            mDividerControllerLocked.setAdjustedForIme(
-                    false /*ime*/, false /*divider*/, dockVisible /*animate*/, imeWin, imeHeight);
-        }
         mPinnedStackControllerLocked.setAdjustedForIme(imeVisible, imeHeight);
     }
 
@@ -3440,8 +3391,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInputMethodTarget = target;
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(false /* setLayoutNeeded */);
-        mInputMethodControlTarget = computeImeControlTarget();
-        mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
         updateImeParent();
     }
 
@@ -3452,7 +3401,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      *
      * @see #getImeControlTarget()
      */
-    void updateImeControlTarget(WindowState target) {
+    void updateImeControlTarget(InsetsControlTarget target) {
         mInputMethodControlTarget = target;
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
     }
@@ -3490,13 +3439,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Computes which control-target the IME should be attached to.
      */
     @VisibleForTesting
-    InsetsControlTarget computeImeControlTarget() {
+    InsetsControlTarget computeImeControlTarget(InsetsControlTarget appTarget) {
         if (!isImeAttachedToApp() && mRemoteInsetsControlTarget != null) {
             return mRemoteInsetsControlTarget;
         }
 
         // Otherwise, we just use the ime target
-        return mInputMethodTarget;
+        return appTarget;
     }
 
     void setLayoutNeeded() {
@@ -3880,7 +3829,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
-    /** @returns the orientation of the display when it's rotation is ROTATION_0. */
+    /** @return the orientation of the display when it's rotation is ROTATION_0. */
     int getNaturalOrientation() {
         return mBaseDisplayWidth < mBaseDisplayHeight
                 ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
@@ -4324,8 +4273,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     }
                 } else {
                     mRootSplitScreenPrimaryTask = stack;
-                    mDisplayContent.onSplitScreenModeActivated();
-                    mDividerControllerLocked.notifyDockedStackExistsChanged(true);
                 }
             }
         }
@@ -4337,11 +4284,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mRootPinnedTask = null;
             } else if (stack == mRootSplitScreenPrimaryTask) {
                 mRootSplitScreenPrimaryTask = null;
-                mDisplayContent.onSplitScreenModeDismissed();
-                // Re-set the split-screen create mode whenever the split-screen stack is removed.
-                mWmService.setDockedStackCreateStateLocked(
-                        SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
-                mDividerControllerLocked.notifyDockedStackExistsChanged(false);
             }
         }
 
@@ -5757,6 +5699,33 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return createStackUnchecked(windowingMode, activityType, stackId, onTop, info, intent);
     }
 
+    /** @return the tile to create the next stack in. */
+    private TaskTile updateLaunchTile(int windowingMode) {
+        if (!isSplitScreenWindowingMode(windowingMode)) {
+            // Only split-screen windowing modes interact with tiles.
+            return null;
+        }
+        for (int i = getStackCount() - 1; i >= 0; --i) {
+            final TaskTile t = getStackAt(i).asTile();
+            if (t == null || t.getRequestedOverrideWindowingMode() != windowingMode) {
+                continue;
+            }
+            // If not already set, pick a launch tile which is not the one we are launching
+            // into.
+            if (mLaunchTile == null) {
+                for (int j = 0, n = getStackCount(); j < n; ++j) {
+                    TaskTile tt = getStackAt(j).asTile();
+                    if (tt != t) {
+                        mLaunchTile = tt;
+                        break;
+                    }
+                }
+            }
+            return t;
+        }
+        return mLaunchTile;
+    }
+
     @VisibleForTesting
     ActivityStack createStackUnchecked(int windowingMode, int activityType,
             int stackId, boolean onTop, ActivityInfo info, Intent intent) {
@@ -5769,13 +5738,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             info.applicationInfo = new ApplicationInfo();
         }
 
+        TaskTile tile = updateLaunchTile(windowingMode);
+        if (tile != null) {
+            // Since this stack will be put into a tile, its windowingMode will be inherited.
+            windowingMode = WINDOWING_MODE_UNDEFINED;
+        }
         final ActivityStack stack = new ActivityStack(this, stackId,
                 mRootWindowContainer.mStackSupervisor, activityType, info, intent);
         addStack(stack, onTop ? POSITION_TOP : POSITION_BOTTOM);
         stack.setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
                 true /* creating */);
-
+        if (tile != null) {
+            tile.addChild(stack, 0 /* index */);
+        }
         return stack;
     }
 
@@ -5995,16 +5971,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void onSplitScreenModeDismissed() {
         mAtmService.deferWindowLayout();
         try {
-            // Adjust the windowing mode of any stack in secondary split-screen to fullscreen.
+            mLaunchTile = null;
             for (int i = getStackCount() - 1; i >= 0; --i) {
-                final ActivityStack otherStack = getStackAt(i);
-                if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
-                    continue;
+                final TaskTile t = getStackAt(i).asTile();
+                if (t != null) {
+                    t.removeAllChildren();
                 }
-                otherStack.setWindowingMode(WINDOWING_MODE_UNDEFINED, false /* animate */,
-                        false /* showRecents */, false /* enteringSplitScreenMode */,
-                        true /* deferEnsuringVisibility */, false /* creating */);
             }
+            mDividerControllerLocked.setMinimizedDockedStack(false /* minimized */,
+                    false /* animate */);
         } finally {
             final ActivityStack topFullscreenStack =
                     getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
@@ -6018,27 +5993,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 homeStack.moveToFront("onSplitScreenModeDismissed");
                 topFullscreenStack.moveToFront("onSplitScreenModeDismissed");
             }
-            mAtmService.continueWindowLayout();
-        }
-    }
-
-    void onSplitScreenModeActivated() {
-        mAtmService.deferWindowLayout();
-        try {
-            // Adjust the windowing mode of any affected by split-screen to split-screen secondary.
-            final ActivityStack splitScreenPrimaryStack = getRootSplitScreenPrimaryTask();
-            for (int i = getStackCount() - 1; i >= 0; --i) {
-                final ActivityStack otherStack = getStackAt(i);
-                if (otherStack == splitScreenPrimaryStack
-                        || !otherStack.affectedBySplitScreenResize()) {
-                    continue;
-                }
-                otherStack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
-                        false /* animate */, false /* showRecents */,
-                        true /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */,
-                        false /* creating */);
-            }
-        } finally {
             mAtmService.continueWindowLayout();
         }
     }

@@ -31,7 +31,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.Slog;
-import android.view.SurfaceControl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -78,30 +77,9 @@ public class TaskTile extends ActivityStack {
         // Virtual parent, so don't notify children.
     }
 
-    /**
-     * If there is a disconnection, this will clean up any vestigial surfaces left on the tile
-     * leash by moving known children to a new surfacecontrol and then removing the old one.
-     */
-    void cleanupSurfaces() {
-        if (mSurfaceControl == null) {
-            return;
-        }
-        SurfaceControl oldSurface = mSurfaceControl;
-        WindowContainer parentWin = getParent();
-        if (parentWin == null) {
-            return;
-        }
-        mSurfaceControl = parentWin.makeChildSurface(null).setName("TaskTile " + mTaskId + " - "
-                    + getRequestedOverrideWindowingMode()).setContainerLayer().build();
-        SurfaceControl.Transaction t = parentWin.getPendingTransaction();
-        t.show(mSurfaceControl);
-        for (int i = 0; i < mChildren.size(); ++i) {
-            if (mChildren.get(i).getSurfaceControl() == null) {
-                continue;
-            }
-            mChildren.get(i).reparentSurfaceControl(t, mSurfaceControl);
-        }
-        t.remove(oldSurface);
+    @Override
+    TaskTile asTile() {
+        return this;
     }
 
     @Override
@@ -213,6 +191,12 @@ public class TaskTile extends ActivityStack {
     void removeImmediately() {
         removeAllChildren();
         super.removeImmediately();
+    }
+
+    @Override
+    void taskOrganizerDied() {
+        super.taskOrganizerDied();
+        removeImmediately();
     }
 
     static TaskTile forToken(IBinder token) {

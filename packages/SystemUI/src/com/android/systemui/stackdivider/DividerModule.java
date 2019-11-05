@@ -17,8 +17,14 @@
 package com.android.systemui.stackdivider;
 
 import android.content.Context;
+import android.os.Handler;
 
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.wm.DisplayController;
+import com.android.systemui.wm.DisplayImeController;
+import com.android.systemui.wm.SystemWindows;
 
 import java.util.Optional;
 
@@ -35,7 +41,11 @@ import dagger.Provides;
 public class DividerModule {
     @Singleton
     @Provides
-    static Divider provideDivider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy) {
-        return new Divider(context, recentsOptionalLazy);
+    static Divider provideDivider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy,
+            DisplayController displayController, SystemWindows systemWindows,
+            DisplayImeController imeController, @Main Handler handler,
+            KeyguardStateController keyguardStateController) {
+        return new Divider(context, recentsOptionalLazy, displayController, systemWindows,
+                imeController, handler, keyguardStateController);
     }
 }
