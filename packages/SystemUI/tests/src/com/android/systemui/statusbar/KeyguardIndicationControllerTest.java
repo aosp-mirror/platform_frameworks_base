@@ -34,8 +34,11 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Looper;
+import android.os.UserManager;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -51,6 +54,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.wakelock.WakeLockFake;
@@ -84,6 +88,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock
+    private UserManager mUserManager;
     private KeyguardIndicationTextView mTextView;
 
     private KeyguardIndicationController mController;
@@ -97,9 +105,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mTextView = new KeyguardIndicationTextView(mContext);
 
         mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
+        mContext.addMockSystemService(UserManager.class, mUserManager);
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
 
+        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
 
         mWakeLock = new WakeLockFake();
@@ -112,6 +124,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
                 mLockPatternUtils, mWakeLock, mShadeController, mAccessibilityController,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor);
+        mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
     }
 
     @Test
@@ -167,6 +180,49 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void transientIndication_visibleWhenDozing_unlessSwipeUp_fromHelp() {
+        createController();
+        String message = "A message";
+
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricHelp(
+                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, message,
+                BiometricSourceType.FACE);
+        assertThat(mTextView.getText()).isEqualTo(message);
+        mController.setDozing(true);
+
+        assertThat(mTextView.getText()).isNotEqualTo(message);
+    }
+
+    @Test
+    public void transientIndication_visibleWhenDozing_unlessSwipeUp_fromError() {
+        createController();
+        String message = mContext.getString(R.string.keyguard_unlock);
+
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
+                "A message", BiometricSourceType.FACE);
+
+        assertThat(mTextView.getText()).isEqualTo(message);
+        mController.setDozing(true);
+
+        assertThat(mTextView.getText()).isNotEqualTo(message);
+    }
+
+    @Test
+    public void transientIndication_swipeUpToRetry() {
+        createController();
+        String message = mContext.getString(R.string.keyguard_retry);
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
+
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
+                "A message", BiometricSourceType.FACE);
+
+        verify(mStatusBarKeyguardViewManager).showBouncerMessage(eq(message), any());
+    }
+
+    @Test
     public void lockIcon_click() {
         createController();
 
@@ -190,6 +246,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void updateMonitor_listenerUpdatesIndication() {
         createController();
         String restingIndication = "Resting indication";
+        reset(mKeyguardUpdateMonitor);
 
         mController.setVisible(true);
         assertThat(mTextView.getText()).isEqualTo(
