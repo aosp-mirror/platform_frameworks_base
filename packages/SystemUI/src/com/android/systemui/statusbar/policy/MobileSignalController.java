@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionD
 
 import java.io.PrintWriter;
 import java.util.BitSet;
+import java.util.concurrent.Executor;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,7 +104,7 @@ public class MobileSignalController extends SignalController<
         mPhone = phone;
         mDefaults = defaults;
         mSubscriptionInfo = info;
-        mPhoneStateListener = new MobilePhoneStateListener(receiverLooper);
+        mPhoneStateListener = new MobilePhoneStateListener((new Handler(receiverLooper))::post);
         mNetworkNameSeparator = getStringIfExists(R.string.status_bar_network_name_separator);
         mNetworkNameDefault = getStringIfExists(
                 com.android.internal.R.string.lockscreen_carrier_default);
@@ -665,8 +666,8 @@ public class MobileSignalController extends SignalController<
     }
 
     class MobilePhoneStateListener extends PhoneStateListener {
-        public MobilePhoneStateListener(Looper looper) {
-            super(looper);
+        public MobilePhoneStateListener(Executor executor) {
+            super(executor);
         }
 
         @Override
