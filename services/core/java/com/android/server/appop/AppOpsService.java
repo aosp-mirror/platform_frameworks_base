@@ -47,8 +47,8 @@ import android.app.AppOpsManager;
 import android.app.AppOpsManager.HistoricalOps;
 import android.app.AppOpsManager.HistoricalOpsRequest;
 import android.app.AppOpsManager.Mode;
-import android.app.AppOpsManager.OpFeatureEntry;
 import android.app.AppOpsManager.OpEntry;
+import android.app.AppOpsManager.OpFeatureEntry;
 import android.app.AppOpsManager.OpFlags;
 import android.app.AppOpsManagerInternal;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
@@ -119,6 +119,12 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 
+import libcore.util.EmptyArray;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -137,12 +143,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import libcore.util.EmptyArray;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 public class AppOpsService extends IAppOpsService.Stub {
     static final String TAG = "AppOps";
@@ -2356,7 +2356,6 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void noteAsyncOp(String callingPackageName, int uid, String packageName, int opCode,
             String featureId, String message) {
         Preconditions.checkNotNull(message);
-        Preconditions.checkNotNull(packageName);
         verifyAndGetIsPrivileged(uid, packageName);
 
         verifyIncomingUid(uid);
