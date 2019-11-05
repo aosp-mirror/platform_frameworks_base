@@ -17,13 +17,11 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.NonNull;
-import android.app.ActivityManager;
 import android.content.Context;
 
 import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.settings.CurrentUserTracker;
 
 import java.util.ArrayList;
 
@@ -39,14 +37,11 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
 
     private final Context mContext;
-    private final CurrentUserTracker mUserTracker;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
-    private int mCurrentUser;
     private boolean mShowing;
     private boolean mSecure;
     private boolean mOccluded;
-    private boolean mCanSkipBouncer;
 
     private boolean mListening;
     private boolean mKeyguardFadingAway;
@@ -62,13 +57,6 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     public KeyguardMonitorImpl(Context context) {
         mContext = context;
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-        mUserTracker = new CurrentUserTracker(mContext) {
-            @Override
-            public void onUserSwitched(int newUserId) {
-                mCurrentUser = newUserId;
-                updateCanSkipBouncerState();
-            }
-        };
     }
 
     @Override
@@ -77,10 +65,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         mCallbacks.add(callback);
         if (mCallbacks.size() != 0 && !mListening) {
             mListening = true;
-            mCurrentUser = ActivityManager.getCurrentUser();
-            updateCanSkipBouncerState();
             mKeyguardUpdateMonitor.registerCallback(this);
-            mUserTracker.startTracking();
         }
     }
 
@@ -90,7 +75,6 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         if (mCallbacks.remove(callback) && mCallbacks.size() == 0 && mListening) {
             mListening = false;
             mKeyguardUpdateMonitor.removeCallback(this);
-            mUserTracker.stopTracking();
         }
     }
 
@@ -109,11 +93,6 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         return mOccluded;
     }
 
-    @Override
-    public boolean canSkipBouncer() {
-        return mCanSkipBouncer;
-    }
-
     public void notifyKeyguardState(boolean showing, boolean secure, boolean occluded) {
         if (mShowing == showing && mSecure == secure && mOccluded == occluded) return;
         mShowing = showing;
@@ -124,16 +103,11 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
 
     @Override
     public void onTrustChanged(int userId) {
-        updateCanSkipBouncerState();
         notifyKeyguardChanged();
     }
 
     public boolean isDeviceInteractive() {
         return mKeyguardUpdateMonitor.isDeviceInteractive();
-    }
-
-    private void updateCanSkipBouncerState() {
-        mCanSkipBouncer = mKeyguardUpdateMonitor.getUserCanSkipBouncer(mCurrentUser);
     }
 
     private void notifyKeyguardChanged() {
