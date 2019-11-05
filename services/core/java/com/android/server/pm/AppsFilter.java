@@ -211,7 +211,7 @@ public class AppsFilter {
             final Uri data = intent.getData();
             if ("content".equalsIgnoreCase(intent.getScheme())
                     && data != null
-                    && providerInfo.authority.equalsIgnoreCase(data.getAuthority())) {
+                    && Objects.equals(providerInfo.authority, data.getAuthority())) {
                 return true;
             }
         }
