@@ -276,18 +276,10 @@ static jobject android_view_InputChannel_nativeGetToken(JNIEnv* env, jobject obj
     NativeInputChannel* nativeInputChannel =
         android_view_InputChannel_getNativeInputChannel(env, obj);
     if (nativeInputChannel) {
-        return javaObjectForIBinder(env, nativeInputChannel->getInputChannel()->getToken());
+        return javaObjectForIBinder(env,
+                nativeInputChannel->getInputChannel()->getConnectionToken());
     }
     return 0;
-}
-
-static void android_view_InputChannel_nativeSetToken(JNIEnv* env, jobject obj, jobject tokenObj) {
-    NativeInputChannel* nativeInputChannel =
-        android_view_InputChannel_getNativeInputChannel(env, obj);
-    sp<IBinder> token = ibinderForJavaObject(env, tokenObj);
-    if (nativeInputChannel != nullptr) {
-        nativeInputChannel->getInputChannel()->setToken(token);
-    }
 }
 
 // ----------------------------------------------------------------------------
@@ -312,8 +304,6 @@ static const JNINativeMethod gInputChannelMethods[] = {
             (void*)android_view_InputChannel_nativeDup },
     { "nativeGetToken", "()Landroid/os/IBinder;",
             (void*)android_view_InputChannel_nativeGetToken },
-    { "nativeSetToken", "(Landroid/os/IBinder;)V",
-            (void*)android_view_InputChannel_nativeSetToken }
 };
 
 int register_android_view_InputChannel(JNIEnv* env) {
