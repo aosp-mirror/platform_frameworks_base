@@ -36,6 +36,9 @@ import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+
+import javax.inject.Inject;
 
 /**
  * Bouncer between work activities and the activity used to confirm credentials before unlocking
@@ -67,14 +70,21 @@ public class WorkLockActivity extends Activity {
      * @see KeyguardManager
      */
     private KeyguardManager mKgm;
+    private final BroadcastDispatcher mBroadcastDispatcher;
+
+    @Inject
+    public WorkLockActivity(BroadcastDispatcher broadcastDispatcher) {
+        super();
+        mBroadcastDispatcher = broadcastDispatcher;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        registerReceiverAsUser(mLockEventReceiver, UserHandle.ALL,
-                new IntentFilter(Intent.ACTION_DEVICE_LOCKED_CHANGED), /* permission */ null,
-                /* scheduler */ null);
+        mBroadcastDispatcher.registerReceiver(mLockEventReceiver,
+                new IntentFilter(Intent.ACTION_DEVICE_LOCKED_CHANGED), null /* handler */,
+                UserHandle.ALL);
 
         // Once the receiver is registered, check whether anything happened between now and the time
         // when this activity was launched. If it did and the user is unlocked now, just quit.

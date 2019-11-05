@@ -37,6 +37,7 @@ import android.util.Log;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -60,13 +61,15 @@ public class TileServices extends IQSService.Stub {
     private final Handler mHandler;
     private final Handler mMainHandler;
     private final QSTileHost mHost;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
 
-    public TileServices(QSTileHost host, Looper looper) {
+    public TileServices(QSTileHost host, Looper looper, BroadcastDispatcher broadcastDispatcher) {
         mHost = host;
         mContext = mHost.getContext();
-        mContext.registerReceiver(mRequestListeningReceiver,
+        mBroadcastDispatcher = broadcastDispatcher;
+        mBroadcastDispatcher.registerReceiver(mRequestListeningReceiver,
                 new IntentFilter(TileService.ACTION_REQUEST_LISTENING));
         mHandler = new Handler(looper);
         mMainHandler = new Handler(Looper.getMainLooper());
@@ -82,7 +85,8 @@ public class TileServices extends IQSService.Stub {
 
     public TileServiceManager getTileWrapper(CustomTile tile) {
         ComponentName component = tile.getComponent();
-        TileServiceManager service = onCreateTileService(component, tile.getQsTile());
+        TileServiceManager service = onCreateTileService(component, tile.getQsTile(),
+                mBroadcastDispatcher);
         synchronized (mServices) {
             mServices.put(tile, service);
             mTiles.put(component, tile);
@@ -93,8 +97,10 @@ public class TileServices extends IQSService.Stub {
         return service;
     }
 
-    protected TileServiceManager onCreateTileService(ComponentName component, Tile tile) {
-        return new TileServiceManager(this, mHandler, component, tile);
+    protected TileServiceManager onCreateTileService(ComponentName component, Tile tile,
+            BroadcastDispatcher broadcastDispatcher) {
+        return new TileServiceManager(this, mHandler, component, tile,
+                broadcastDispatcher);
     }
 
     public void freeService(CustomTile tile, TileServiceManager service) {
@@ -323,7 +329,7 @@ public class TileServices extends IQSService.Stub {
     public void destroy() {
         synchronized (mServices) {
             mServices.values().forEach(service -> service.handleDestroy());
-            mContext.unregisterReceiver(mRequestListeningReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mRequestListeningReceiver);
         }
     }
 

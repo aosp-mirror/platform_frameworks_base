@@ -64,6 +64,7 @@ import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
@@ -109,6 +110,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final SubscriptionDefaults mSubDefaults;
     private final DataSaverController mDataSaverController;
     private final CurrentUserTracker mUserTracker;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private final Object mLock = new Object();
     private Config mConfig;
 
@@ -170,7 +172,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
      */
     @Inject
     public NetworkControllerImpl(Context context, @BgLooper Looper bgLooper,
-            DeviceProvisionedController deviceProvisionedController) {
+            DeviceProvisionedController deviceProvisionedController,
+            BroadcastDispatcher broadcastDispatcher) {
         this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE),
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE),
@@ -179,7 +182,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 new AccessPointControllerImpl(context),
                 new DataUsageController(context),
                 new SubscriptionDefaults(),
-                deviceProvisionedController);
+                deviceProvisionedController,
+                broadcastDispatcher);
         mReceiverHandler.post(mRegisterListeners);
     }
 
@@ -191,12 +195,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
             AccessPointControllerImpl accessPointController,
             DataUsageController dataUsageController,
             SubscriptionDefaults defaultsHandler,
-            DeviceProvisionedController deviceProvisionedController) {
+            DeviceProvisionedController deviceProvisionedController,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mConfig = config;
         mReceiverHandler = new Handler(bgLooper);
         mCallbackHandler = callbackHandler;
         mDataSaverController = new DataSaverControllerImpl(context);
+        mBroadcastDispatcher = broadcastDispatcher;
 
         mSubscriptionManager = subManager;
         mSubDefaults = defaultsHandler;
@@ -229,7 +235,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true /* force callback */);
-        mUserTracker = new CurrentUserTracker(mContext) {
+        mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
             @Override
             public void onUserSwitched(int newUserId) {
                 NetworkControllerImpl.this.onUserSwitched(newUserId);
@@ -315,7 +321,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
-        mContext.registerReceiver(this, filter, null, mReceiverHandler);
+        mBroadcastDispatcher.registerReceiver(this, filter, mReceiverHandler);
         mListening = true;
 
         updateMobileControllers();

@@ -238,6 +238,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -401,6 +402,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final DozeParameters mDozeParameters;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final PluginManager mPluginManager;
+    private final RemoteInputUriController mRemoteInputUriController;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -703,7 +705,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
-            PluginManager pluginManager) {
+            PluginManager pluginManager,
+            RemoteInputUriController remoteInputUriController) {
         super(context);
         mFeatureFlags = featureFlags;
         mLightBarController = lightBarController;
@@ -770,7 +773,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
         mCommandQueue = commandQueue;
         mPluginManager = pluginManager;
-
+        mRemoteInputUriController = remoteInputUriController;
         mBubbleExpandListener =
                 (isExpanding, key) -> {
                     mEntryManager.updateNotifications("onBubbleExpandChanged");
@@ -847,8 +850,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mWallpaperSupported) {
             // Make sure we always have the most current wallpaper info.
             IntentFilter wallpaperChangedFilter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
-            mContext.registerReceiverAsUser(mWallpaperChangedReceiver, UserHandle.ALL,
-                    wallpaperChangedFilter, null /* broadcastPermission */, null /* scheduler */);
+            mBroadcastDispatcher.registerReceiver(mWallpaperChangedReceiver, wallpaperChangedFilter,
+                    null /* handler */, UserHandle.ALL);
             mWallpaperChangedReceiver.onReceive(mContext, null);
         } else if (DEBUG) {
             Log.v(TAG, "start(): no wallpaper service ");
@@ -912,7 +915,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         // end old BaseStatusBar.start().
 
         // Lastly, call to the icon policy to install/update all the icons.
-        mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController, mCommandQueue);
+        mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController, mCommandQueue,
+                mBroadcastDispatcher);
         mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
 
         mKeyguardStateController.addCallback(this);
@@ -1295,6 +1299,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 
         mEntryManager.setRowBinder(rowBinder);
+        mRemoteInputUriController.attach(mEntryManager);
+
         rowBinder.setNotificationClicker(new NotificationClicker(
                 this, mBubbleController, mNotificationActivityStarter));
 

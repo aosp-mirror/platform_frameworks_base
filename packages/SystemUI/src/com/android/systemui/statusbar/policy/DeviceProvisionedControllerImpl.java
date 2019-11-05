@@ -24,6 +24,7 @@ import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.settings.CurrentUserTracker;
 
@@ -49,8 +50,9 @@ public class DeviceProvisionedControllerImpl extends CurrentUserTracker implemen
     /**
      */
     @Inject
-    public DeviceProvisionedControllerImpl(Context context, @MainHandler Handler mainHandler) {
-        super(context);
+    public DeviceProvisionedControllerImpl(Context context, @MainHandler Handler mainHandler,
+            BroadcastDispatcher broadcastDispatcher) {
+        super(broadcastDispatcher);
         mContext = context;
         mContentResolver = context.getContentResolver();
         mDeviceProvisionedUri = Global.getUriFor(Global.DEVICE_PROVISIONED);

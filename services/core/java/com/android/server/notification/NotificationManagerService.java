@@ -415,6 +415,8 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     final ArrayMap<String, NotificationRecord> mNotificationsByKey = new ArrayMap<>();
     @GuardedBy("mNotificationLock")
+    final ArrayMap<String, InlineReplyUriRecord> mInlineReplyRecordsByKey = new ArrayMap<>();
+    @GuardedBy("mNotificationLock")
     final ArrayList<NotificationRecord> mEnqueuedNotifications = new ArrayList<>();
     @GuardedBy("mNotificationLock")
     final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
@@ -1167,42 +1169,53 @@ public class NotificationManagerService extends SystemService {
          * user associated with the NotificationRecord, and this grant will fail when trying
          * to grant URI permissions across users.
          */
-        public void grantInlineReplyUriPermission(String key, Uri uri, int callingUid) {
+        public void grantInlineReplyUriPermission(String key, Uri uri, UserHandle user,
+                String packageName, int callingUid) {
             synchronized (mNotificationLock) {
-                NotificationRecord r = mNotificationsByKey.get(key);
-                if (r != null) {
-                    IBinder owner = r.permissionOwner;
-                    if (owner == null) {
-                        r.permissionOwner = mUgmInternal.newUriPermissionOwner("NOTIF:" + key);
-                        owner = r.permissionOwner;
-                    }
-                    int uid = callingUid;
-                    int userId = r.sbn.getUserId();
-                    if (userId == UserHandle.USER_ALL) {
-                        userId = USER_SYSTEM;
-                    }
-                    if (UserHandle.getUserId(uid) != userId) {
-                        try {
-                            final String[] pkgs = mPackageManager.getPackagesForUid(callingUid);
-                            if (pkgs == null) {
-                                Log.e(TAG, "Cannot grant uri permission to unknown UID: "
-                                        + callingUid);
-                            }
-                            final String pkg = pkgs[0]; // Get the SystemUI package
-                            // Find the UID for SystemUI for the correct user
-                            uid =  mPackageManager.getPackageUid(pkg, 0, userId);
-                        } catch (RemoteException re) {
-                            Log.e(TAG, "Cannot talk to package manager", re);
+                InlineReplyUriRecord r = mInlineReplyRecordsByKey.get(key);
+                if (r == null) {
+                    InlineReplyUriRecord newRecord = new InlineReplyUriRecord(
+                            mUgmInternal.newUriPermissionOwner("INLINE_REPLY:" + key),
+                            user,
+                            packageName,
+                            key);
+                    r = newRecord;
+                    mInlineReplyRecordsByKey.put(key, r);
+                }
+                IBinder owner = r.getPermissionOwner();
+                int uid = callingUid;
+                int userId = r.getUserId();
+                if (UserHandle.getUserId(uid) != userId) {
+                    try {
+                        final String[] pkgs = mPackageManager.getPackagesForUid(callingUid);
+                        if (pkgs == null) {
+                            Log.e(TAG, "Cannot grant uri permission to unknown UID: "
+                                    + callingUid);
                         }
+                        final String pkg = pkgs[0]; // Get the SystemUI package
+                        // Find the UID for SystemUI for the correct user
+                        uid =  mPackageManager.getPackageUid(pkg, 0, userId);
+                    } catch (RemoteException re) {
+                        Log.e(TAG, "Cannot talk to package manager", re);
                     }
-                    grantUriPermission(owner, uri, uid, r.sbn.getPackageName(), userId);
-                } else {
-                    Log.w(TAG, "No record found for notification key:" + key);
+                }
+                r.addUri(uri);
+                grantUriPermission(owner, uri, uid, r.getPackageName(), userId);
+            }
+        }
 
-                    // TODO: figure out cancel story. I think it's: sysui needs to tell us
-                    // whenever noitifications held by a lifetimextender go away
-                    // IBinder owner = mUgmInternal.newUriPermissionOwner("InlineReply:" + key);
-                    // pass in userId and package as well as key (key for logging purposes)
+        @Override
+        /**
+         * Clears inline URI permission grants by destroying the permission owner for the specified
+         * notification.
+         */
+        public void clearInlineReplyUriPermissions(String key, int callingUid) {
+            synchronized (mNotificationLock) {
+                InlineReplyUriRecord uriRecord = mInlineReplyRecordsByKey.get(key);
+                if (uriRecord != null) {
+                    destroyPermissionOwner(uriRecord.getPermissionOwner(), uriRecord.getUserId(),
+                            "INLINE_REPLY: " + uriRecord.getKey());
+                    mInlineReplyRecordsByKey.remove(key);
                 }
             }
         }
@@ -7036,15 +7049,8 @@ public class NotificationManagerService extends SystemService {
 
         // If we have no Uris to grant, but an existing owner, go destroy it
         if (newUris == null && permissionOwner != null) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                if (DBG) Slog.d(TAG, key + ": destroying owner");
-                mUgmInternal.revokeUriPermissionFromOwner(permissionOwner, null, ~0,
-                        UserHandle.getUserId(oldRecord.getUid()));
-                permissionOwner = null;
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+            destroyPermissionOwner(permissionOwner, UserHandle.getUserId(oldRecord.getUid()), key);
+            permissionOwner = null;
         }
 
         // Grant access to new Uris
@@ -7065,7 +7071,9 @@ public class NotificationManagerService extends SystemService {
                 final Uri uri = oldUris.valueAt(i);
                 if (newUris == null || !newUris.contains(uri)) {
                     if (DBG) Slog.d(TAG, key + ": revoking " + uri);
-                    revokeUriPermission(permissionOwner, uri, oldRecord.getUid());
+                    int userId = ContentProvider.getUserIdFromUri(
+                            uri, UserHandle.getUserId(oldRecord.getUid()));
+                    revokeUriPermission(permissionOwner, uri, userId);
                 }
             }
         }
@@ -7092,7 +7100,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private void revokeUriPermission(IBinder owner, Uri uri, int sourceUid) {
+    private void revokeUriPermission(IBinder owner, Uri uri, int userId) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
         final long ident = Binder.clearCallingIdentity();
@@ -7101,7 +7109,17 @@ public class NotificationManagerService extends SystemService {
                     owner,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
+                    userId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void destroyPermissionOwner(IBinder owner, int userId, String logKey) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (DBG) Slog.d(TAG, logKey + ": destroying owner");
+            mUgmInternal.revokeUriPermissionFromOwner(owner, null, ~0, userId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

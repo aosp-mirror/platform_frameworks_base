@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -37,6 +38,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
@@ -44,6 +46,8 @@ import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -58,6 +62,7 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
@@ -109,6 +114,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private SubscriptionManager mSubscriptionManager;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
     private TestableLooper mTestableLooper;
     private TestableKeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
@@ -140,6 +147,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
         mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(context);
+    }
+
+    @Test
+    public void testReceiversRegistered() {
+        verify(mBroadcastDispatcher, atLeastOnce()).registerReceiver(
+                eq(mKeyguardUpdateMonitor.mBroadcastReceiver),
+                any(IntentFilter.class), any(Handler.class));
+        verify(mBroadcastDispatcher, atLeastOnce()).registerReceiver(
+                eq(mKeyguardUpdateMonitor.mBroadcastAllReceiver),
+                any(IntentFilter.class), any(Handler.class), eq(UserHandle.ALL));
     }
 
     @Test
@@ -518,10 +535,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         AtomicBoolean mSimStateChanged = new AtomicBoolean(false);
 
         protected TestableKeyguardUpdateMonitor(Context context) {
-            super(context, TestableLooper.get(KeyguardUpdateMonitorTest.this)
-                    .getLooper(), mDumpController);
-            context.unregisterReceiver(mBroadcastReceiver);
-            context.unregisterReceiver(mBroadcastAllReceiver);
+            super(context,
+                    TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
+                    mBroadcastDispatcher, mDumpController);
             mStrongAuthTracker = KeyguardUpdateMonitorTest.this.mStrongAuthTracker;
         }
 

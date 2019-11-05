@@ -27,6 +27,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
 import org.junit.Before;
@@ -44,7 +45,8 @@ public class LocationControllerImplTest extends SysuiTestCase {
     @Before
     public void setup() {
         mLocationController = spy(new LocationControllerImpl(mContext,
-                TestableLooper.get(this).getLooper()));
+                TestableLooper.get(this).getLooper(),
+                mock(BroadcastDispatcher.class)));
     }
 
     @Test

@@ -583,7 +583,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         } catch (IllegalArgumentException e) {
                             installer = "";
                         }
-                        sStatsd.informOnePackage(app, uid, pi.getLongVersionCode(), pi.versionName,
+                        sStatsd.informOnePackage(
+                                app,
+                                uid,
+                                pi.getLongVersionCode(),
+                                pi.versionName == null ? "" : pi.versionName,
                                 installer == null ? "" : installer);
                     }
                 } catch (Exception e) {

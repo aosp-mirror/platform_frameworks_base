@@ -52,6 +52,7 @@ import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -78,6 +79,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
     private final ActivityStarter mActivityStarter;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private boolean mListening;
     private boolean mShowingDetail;
@@ -85,12 +87,13 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     @Inject
     public DndTile(QSHost host, ZenModeController zenModeController,
-            ActivityStarter activityStarter) {
+            ActivityStarter activityStarter, BroadcastDispatcher broadcastDispatcher) {
         super(host);
         mController = zenModeController;
         mActivityStarter = activityStarter;
         mDetailAdapter = new DndDetailAdapter();
-        mContext.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
+        mBroadcastDispatcher = broadcastDispatcher;
+        broadcastDispatcher.registerReceiver(mReceiver, new IntentFilter(ACTION_SET_VISIBLE));
         mReceiverRegistered = true;
         mController.observe(getLifecycle(), mZenCallback);
     }
@@ -99,7 +102,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     protected void handleDestroy() {
         super.handleDestroy();
         if (mReceiverRegistered) {
-            mContext.unregisterReceiver(mReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mReceiver);
             mReceiverRegistered = false;
         }
     }

@@ -61,6 +61,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DualToneHandler;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
@@ -150,6 +151,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private boolean mPermissionsHubEnabled;
 
     private PrivacyItemController mPrivacyItemController;
+    private BroadcastDispatcher mBroadcastDispatcher;
 
     private final BroadcastReceiver mRingerReceiver = new BroadcastReceiver() {
         @Override
@@ -189,7 +191,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             NextAlarmController nextAlarmController, ZenModeController zenModeController,
             StatusBarIconController statusBarIconController,
             ActivityStarter activityStarter, PrivacyItemController privacyItemController,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue, BroadcastDispatcher broadcastDispatcher) {
         super(context, attrs);
         mAlarmController = nextAlarmController;
         mZenController = zenModeController;
@@ -198,6 +200,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mPrivacyItemController = privacyItemController;
         mDualToneHandler = new DualToneHandler(
                 new ContextThemeWrapper(context, R.style.QSHeaderTheme));
+        mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
     }
 
@@ -551,14 +554,14 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         if (listening) {
             mZenController.addCallback(this);
             mAlarmController.addCallback(this);
-            mContext.registerReceiver(mRingerReceiver,
+            mBroadcastDispatcher.registerReceiver(mRingerReceiver,
                     new IntentFilter(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
             mPrivacyItemController.addCallback(mPICCallback);
         } else {
             mZenController.removeCallback(this);
             mAlarmController.removeCallback(this);
             mPrivacyItemController.removeCallback(mPICCallback);
-            mContext.unregisterReceiver(mRingerReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mRingerReceiver);
             mPrivacyChipLogged = false;
         }
     }

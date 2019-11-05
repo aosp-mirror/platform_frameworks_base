@@ -37,6 +37,7 @@ import android.view.IPinnedStackController;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -200,7 +201,7 @@ public class PipManager implements BasePipManager {
     /**
      * Initializes {@link PipManager}.
      */
-    public void initialize(Context context) {
+    public void initialize(Context context, BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -214,7 +215,7 @@ public class PipManager implements BasePipManager {
 
         mPipBoundsHandler = new PipBoundsHandler(context);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
-        mMediaController = new PipMediaController(context, mActivityManager);
+        mMediaController = new PipMediaController(context, mActivityManager, broadcastDispatcher);
         mMenuController = new PipMenuActivityController(context, mActivityManager, mMediaController,
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager, mActivityTaskManager,

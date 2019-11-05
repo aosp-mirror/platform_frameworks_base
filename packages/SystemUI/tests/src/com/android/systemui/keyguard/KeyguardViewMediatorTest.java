@@ -37,6 +37,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -60,6 +61,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private @Mock StatusBarWindowController mStatusBarWindowController;
     private @Mock SystemUIFactory mSystemUIFactory;
+    private @Mock BroadcastDispatcher mBroadcastDispatcher;
 
     private FalsingManagerFake mFalsingManager;
 
@@ -81,7 +83,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         TestableLooper.get(this).runWithLooper(() -> {
             mViewMediator = new KeyguardViewMediator(
-                    mContext, mFalsingManager, mLockPatternUtils, mSystemUIFactory);
+                    mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
+                    mSystemUIFactory);
         });
     }
 

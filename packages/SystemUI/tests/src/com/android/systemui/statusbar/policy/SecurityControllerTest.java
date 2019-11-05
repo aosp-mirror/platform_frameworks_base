@@ -45,6 +45,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.SecurityController.SecurityControllerCallback;
 
 import org.junit.After;
@@ -99,7 +100,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         // TODO: Migrate this test to TestableLooper and use a handler attached
         // to that.
         mSecurityController = new SecurityControllerImpl(mContext,
-                new Handler(Looper.getMainLooper()), this);
+                new Handler(Looper.getMainLooper()), mock(BroadcastDispatcher.class), this);
     }
 
     @After

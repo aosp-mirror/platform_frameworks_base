@@ -34,6 +34,7 @@ import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.Dependency;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.power.EnhancedEstimates;
 
 import java.io.FileDescriptor;
@@ -58,6 +59,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private static final int UPDATE_GRANULARITY_MSEC = 1000 * 60;
 
     private final EnhancedEstimates mEstimates;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private final ArrayList<BatteryController.BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>();
     private final ArrayList<EstimateFetchCompletion> mFetchCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
@@ -76,17 +78,20 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     private boolean mFetchingEstimate = false;
 
     @Inject
-    public BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates) {
-        this(context, enhancedEstimates, context.getSystemService(PowerManager.class));
+    public BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
+            BroadcastDispatcher broadcastDispatcher) {
+        this(context, enhancedEstimates, context.getSystemService(PowerManager.class),
+                broadcastDispatcher);
     }
 
     @VisibleForTesting
     BatteryControllerImpl(Context context, EnhancedEstimates enhancedEstimates,
-            PowerManager powerManager) {
+            PowerManager powerManager, BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mHandler = new Handler();
         mPowerManager = powerManager;
         mEstimates = enhancedEstimates;
+        mBroadcastDispatcher = broadcastDispatcher;
 
         registerReceiver();
         updatePowerSave();
@@ -99,7 +104,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
         filter.addAction(ACTION_LEVEL_TEST);
-        mContext.registerReceiver(this, filter);
+        mBroadcastDispatcher.registerReceiver(this, filter);
     }
 
     @Override
@@ -306,7 +311,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     public void dispatchDemoCommand(String command, Bundle args) {
         if (!mDemoMode && command.equals(COMMAND_ENTER)) {
             mDemoMode = true;
-            mContext.unregisterReceiver(this);
+            mBroadcastDispatcher.unregisterReceiver(this);
         } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
             mDemoMode = false;
             registerReceiver();

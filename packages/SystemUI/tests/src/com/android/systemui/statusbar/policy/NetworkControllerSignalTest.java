@@ -61,7 +61,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mock(DeviceProvisionedController.class));
+                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd);
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, -1, 0);
@@ -123,7 +123,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mock(DeviceProvisionedController.class));
+                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd);
         setupNetworkController();
 
         // No Subscriptions.

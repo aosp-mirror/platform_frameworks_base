@@ -35,6 +35,7 @@ import android.provider.Settings;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.util.Utils;
 
@@ -57,6 +58,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
     private AppOpsManager mAppOpsManager;
     private StatusBarManager mStatusBarManager;
+    private BroadcastDispatcher mBroadcastDispatcher;
 
     private boolean mAreActiveLocationRequests;
 
@@ -65,14 +67,16 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private final H mHandler = new H();
 
     @Inject
-    public LocationControllerImpl(Context context, @BgLooper Looper bgLooper) {
+    public LocationControllerImpl(Context context, @BgLooper Looper bgLooper,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
+        mBroadcastDispatcher = broadcastDispatcher;
 
         // Register to listen for changes in location settings.
         IntentFilter filter = new IntentFilter();
         filter.addAction(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
         filter.addAction(LocationManager.MODE_CHANGED_ACTION);
-        context.registerReceiverAsUser(this, UserHandle.ALL, filter, null, new Handler(bgLooper));
+        mBroadcastDispatcher.registerReceiver(this, filter, new Handler(bgLooper), UserHandle.ALL);
 
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mStatusBarManager

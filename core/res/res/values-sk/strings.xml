@@ -310,7 +310,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k vašej fyzickej aktivite?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotenie a natáčanie videí"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snímať fotky a zaznamenávať video?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Chcete povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; fotiť a nahrávať video?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Zoznam hovorov"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"čítať a zapisovať do zoznamu hovorov"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k zoznamu hovorov?"</string>

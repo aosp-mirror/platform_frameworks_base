@@ -34,6 +34,7 @@ import android.util.ArraySet;
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.DemoMode;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -82,7 +83,7 @@ public class TunerServiceImpl extends TunerService {
      */
     @Inject
     public TunerServiceImpl(Context context, @MainHandler Handler mainHandler,
-            LeakDetector leakDetector) {
+            LeakDetector leakDetector, BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mContentResolver = mContext.getContentResolver();
         mLeakDetector = leakDetector;
@@ -95,7 +96,7 @@ public class TunerServiceImpl extends TunerService {
         }
 
         mCurrentUser = ActivityManager.getCurrentUser();
-        mUserTracker = new CurrentUserTracker(mContext) {
+        mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
             @Override
             public void onUserSwitched(int newUserId) {
                 mCurrentUser = newUserId;

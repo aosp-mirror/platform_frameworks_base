@@ -34,6 +34,7 @@ import androidx.slice.Clock;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.assist.AssistHandleBehaviorController.BehaviorController;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -161,6 +162,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     private final Lazy<SysUiState> mSysUiFlagContainer;
     private final Lazy<WakefulnessLifecycle> mWakefulnessLifecycle;
     private final Lazy<PackageManagerWrapper> mPackageManagerWrapper;
+    private final Lazy<BroadcastDispatcher> mBroadcastDispatcher;
 
     private boolean mOnLockscreen;
     private boolean mIsDozing;
@@ -193,7 +195,8 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
             Lazy<OverviewProxyService> overviewProxyService,
             Lazy<SysUiState> sysUiFlagContainer,
             Lazy<WakefulnessLifecycle> wakefulnessLifecycle,
-            Lazy<PackageManagerWrapper> packageManagerWrapper) {
+            Lazy<PackageManagerWrapper> packageManagerWrapper,
+            Lazy<BroadcastDispatcher> broadcastDispatcher) {
         mClock = clock;
         mHandler = handler;
         mPhenotypeHelper = phenotypeHelper;
@@ -207,6 +210,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         for (String action : DEFAULT_HOME_CHANGE_ACTIONS) {
             mDefaultHomeIntentFilter.addAction(action);
         }
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     @Override
@@ -215,7 +219,8 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
         mAssistHandleCallbacks = callbacks;
         mConsecutiveTaskSwitches = 0;
         mDefaultHome = getCurrentDefaultHome();
-        context.registerReceiver(mDefaultHomeBroadcastReceiver, mDefaultHomeIntentFilter);
+        mBroadcastDispatcher.get()
+                .registerReceiver(mDefaultHomeBroadcastReceiver, mDefaultHomeIntentFilter);
         mOnLockscreen = onLockscreen(mStatusBarStateController.get().getState());
         mIsDozing = mStatusBarStateController.get().isDozing();
         mStatusBarStateController.get().addCallback(mStatusBarStateListener);

@@ -16,7 +16,6 @@
 
 package android.net.wifi;
 
-import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -28,8 +27,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -99,45 +96,9 @@ public class WifiInfo implements Parcelable {
     private int mRssi;
 
     /**
-     * Wi-Fi unknown technology
+     * Wi-Fi standard for the connection
      */
-    public static final int WIFI_TECHNOLOGY_UNKNOWN = 0;
-
-    /**
-     * Wi-Fi 802.11a/b/g
-     */
-    public static final int WIFI_TECHNOLOGY_LEGACY = 1;
-
-    /**
-     * Wi-Fi 802.11n
-     */
-    public static final int WIFI_TECHNOLOGY_11N = 4;
-
-    /**
-     * Wi-Fi 802.11ac
-     */
-    public static final int WIFI_TECHNOLOGY_11AC = 5;
-
-    /**
-     * Wi-Fi 802.11ax
-     */
-    public static final int WIFI_TECHNOLOGY_11AX = 6;
-
-    /** @hide */
-    @IntDef(prefix = { "WIFI_TECHNOLOGY_" }, value = {
-            WIFI_TECHNOLOGY_UNKNOWN,
-            WIFI_TECHNOLOGY_LEGACY,
-            WIFI_TECHNOLOGY_11N,
-            WIFI_TECHNOLOGY_11AC,
-            WIFI_TECHNOLOGY_11AX
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface WifiTechnology{}
-
-    /**
-     * Wi-Fi technology for the connection
-     */
-    private @WifiTechnology int mWifiTechnology;
+    private @ScanResult.WifiStandard int mWifiStandard;
 
     /**
      * The unit in which links speeds are expressed.
@@ -330,7 +291,7 @@ public class WifiInfo implements Parcelable {
             txSuccessRate = source.txSuccessRate;
             rxSuccessRate = source.rxSuccessRate;
             score = source.score;
-            mWifiTechnology = source.mWifiTechnology;
+            mWifiStandard = source.mWifiStandard;
         }
     }
 
@@ -419,19 +380,19 @@ public class WifiInfo implements Parcelable {
     }
 
     /**
-     * Sets the Wi-Fi technology
+     * Sets the Wi-Fi standard
      * @hide
      */
-    public void setWifiTechnology(@WifiTechnology int wifiTechnology) {
-        mWifiTechnology = wifiTechnology;
+    public void setWifiStandard(@ScanResult.WifiStandard int wifiStandard) {
+        mWifiStandard = wifiStandard;
     }
 
     /**
-     * Get connection Wi-Fi technology
-     * @return the connection Wi-Fi technology
+     * Get connection Wi-Fi standard
+     * @return the connection Wi-Fi standard
      */
-    public @WifiTechnology int getWifiTechnology() {
-        return mWifiTechnology;
+    public @ScanResult.WifiStandard int getWifiStandard() {
+        return mWifiStandard;
     }
 
     /**
@@ -740,7 +701,7 @@ public class WifiInfo implements Parcelable {
                 .append(", MAC: ").append(mMacAddress == null ? none : mMacAddress)
                 .append(", Supplicant state: ")
                 .append(mSupplicantState == null ? none : mSupplicantState)
-                .append(", Wi-Fi technology: ").append(mWifiTechnology)
+                .append(", Wi-Fi standard: ").append(mWifiStandard)
                 .append(", RSSI: ").append(mRssi)
                 .append(", Link speed: ").append(mLinkSpeed).append(LINK_SPEED_UNITS)
                 .append(", Tx Link speed: ").append(mTxLinkSpeed).append(LINK_SPEED_UNITS)
@@ -796,7 +757,7 @@ public class WifiInfo implements Parcelable {
         dest.writeString(mNetworkSuggestionOrSpecifierPackageName);
         dest.writeString(mFqdn);
         dest.writeString(mProviderFriendlyName);
-        dest.writeInt(mWifiTechnology);
+        dest.writeInt(mWifiStandard);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -838,7 +799,7 @@ public class WifiInfo implements Parcelable {
                 info.mNetworkSuggestionOrSpecifierPackageName = in.readString();
                 info.mFqdn = in.readString();
                 info.mProviderFriendlyName = in.readString();
-                info.mWifiTechnology = in.readInt();
+                info.mWifiStandard = in.readInt();
                 return info;
             }
 

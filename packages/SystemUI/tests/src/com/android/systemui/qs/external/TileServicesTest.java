@@ -32,6 +32,7 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -45,7 +46,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
@@ -57,21 +60,37 @@ public class TileServicesTest extends SysuiTestCase {
 
     private TileServices mTileService;
     private ArrayList<TileServiceManager> mManagers;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private StatusBarIconController mStatusBarIconController;
+    @Mock
+    private QSFactoryImpl mQSFactory;
+    @Mock
+    private PluginManager mPluginManager;
+    @Mock
+    private  TunerService mTunerService;
+    @Mock
+    private AutoTileManager mAutoTileManager;
+    @Mock
+    private DumpController mDumpController;
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(BluetoothController.class);
         mManagers = new ArrayList<>();
         QSTileHost host = new QSTileHost(mContext,
-                mock(StatusBarIconController.class),
-                mock(QSFactoryImpl.class),
+                mStatusBarIconController,
+                mQSFactory,
                 new Handler(),
                 Looper.myLooper(),
-                mock(PluginManager.class),
-                mock(TunerService.class),
-                () -> mock(AutoTileManager.class),
-                mock(DumpController.class));
-        mTileService = new TestTileServices(host, Looper.getMainLooper());
+                mPluginManager,
+                mTunerService,
+                () -> mAutoTileManager,
+                mDumpController,
+                mBroadcastDispatcher);
+        mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher);
     }
 
     @After
@@ -138,12 +157,14 @@ public class TileServicesTest extends SysuiTestCase {
     }
 
     private class TestTileServices extends TileServices {
-        public TestTileServices(QSTileHost host, Looper looper) {
-            super(host, looper);
+        TestTileServices(QSTileHost host, Looper looper,
+                BroadcastDispatcher broadcastDispatcher) {
+            super(host, looper, broadcastDispatcher);
         }
 
         @Override
-        protected TileServiceManager onCreateTileService(ComponentName component, Tile qsTile) {
+        protected TileServiceManager onCreateTileService(ComponentName component, Tile qsTile,
+                BroadcastDispatcher broadcastDispatcher) {
             TileServiceManager manager = mock(TileServiceManager.class);
             mManagers.add(manager);
             when(manager.isLifecycleStarted()).thenReturn(true);

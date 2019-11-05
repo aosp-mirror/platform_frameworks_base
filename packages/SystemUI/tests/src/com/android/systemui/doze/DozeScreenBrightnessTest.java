@@ -45,6 +45,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.util.sensors.FakeSensorManager;
 
 import org.junit.Before;
@@ -66,6 +67,8 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     FakeSensorManager mSensorManager;
     @Mock
     DozeHost mDozeHost;
+    @Mock
+    BroadcastDispatcher mBroadcastDispatcher;
     DozeScreenBrightness mScreen;
 
     @Before
@@ -82,7 +85,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mSensorManager = new FakeSensorManager(mContext);
         mSensor = mSensorManager.getFakeLightSensor();
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
-                mSensor.getSensor(), mDozeHost, null /* handler */,
+                mSensor.getSensor(), mBroadcastDispatcher, mDozeHost, null /* handler */,
                 DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY,
                 true /* debuggable */);
     }
@@ -185,7 +188,7 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     @Test
     public void testNullSensor() throws Exception {
         mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
-                null /* sensor */, mDozeHost, null /* handler */,
+                null /* sensor */, mBroadcastDispatcher, mDozeHost, null /* handler */,
                 DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY,
                 true /* debuggable */);
 

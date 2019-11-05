@@ -16,11 +16,6 @@
 
 package android.media.tv.tuner;
 
-import android.annotation.IntDef;
-import android.hardware.tv.tuner.V1_0.Constants;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -32,32 +27,7 @@ public final class Tuner implements AutoCloseable  {
     private static final String TAG = "MediaTvTuner";
     private static final boolean DEBUG = false;
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({FRONTEND_TYPE_UNDEFINED, FRONTEND_TYPE_ANALOG, FRONTEND_TYPE_ATSC, FRONTEND_TYPE_ATSC3,
-            FRONTEND_TYPE_DVBC, FRONTEND_TYPE_DVBS, FRONTEND_TYPE_DVBT, FRONTEND_TYPE_ISDBS,
-            FRONTEND_TYPE_ISDBS3, FRONTEND_TYPE_ISDBT})
-    public @interface FrontendType {}
-
-    public static final int FRONTEND_TYPE_UNDEFINED = Constants.FrontendType.UNDEFINED;
-    public static final int FRONTEND_TYPE_ANALOG = Constants.FrontendType.ANALOG;
-    public static final int FRONTEND_TYPE_ATSC = Constants.FrontendType.ATSC;
-    public static final int FRONTEND_TYPE_ATSC3 = Constants.FrontendType.ATSC3;
-    public static final int FRONTEND_TYPE_DVBC = Constants.FrontendType.DVBC;
-    public static final int FRONTEND_TYPE_DVBS = Constants.FrontendType.DVBS;
-    public static final int FRONTEND_TYPE_DVBT = Constants.FrontendType.DVBT;
-    public static final int FRONTEND_TYPE_ISDBS = Constants.FrontendType.ISDBS;
-    public static final int FRONTEND_TYPE_ISDBS3 = Constants.FrontendType.ISDBS3;
-    public static final int FRONTEND_TYPE_ISDBT = Constants.FrontendType.ISDBT;
-
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({FRONTEND_EVENT_TYPE_LOCKED, FRONTEND_EVENT_TYPE_NO_SIGNAL,
-            FRONTEND_EVENT_TYPE_LOST_LOCK})
-    public @interface FrontendEventType {}
-
-    public static final int FRONTEND_EVENT_TYPE_LOCKED = Constants.FrontendEventType.LOCKED;
-    public static final int FRONTEND_EVENT_TYPE_NO_SIGNAL = Constants.FrontendEventType.NO_SIGNAL;
-    public static final int FRONTEND_EVENT_TYPE_LOST_LOCK = Constants.FrontendEventType.LOST_LOCK;
+    private static final int MSG_ON_FRONTEND_EVENT = 1;
 
     static {
         System.loadLibrary("media_tv_tuner");
@@ -96,6 +66,8 @@ public final class Tuner implements AutoCloseable  {
      */
     private native Frontend nativeOpenFrontendById(int id);
 
+    private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
+
 
     /**
      * Frontend Callback.
@@ -128,5 +100,16 @@ public final class Tuner implements AutoCloseable  {
             return null;
         }
         return nativeOpenFrontendById(id);
+    }
+
+    protected class Filter {
+        int mId;
+        private Filter(int id) {
+            mId = id;
+        }
+    }
+
+    private Filter openFilter(int type, int subType, int bufferSize) {
+        return nativeOpenFilter(type, subType, bufferSize);
     }
 }

@@ -34,6 +34,7 @@ import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.PluginListener;
@@ -80,6 +81,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final TunerService mTunerService;
     private final PluginManager mPluginManager;
     private final DumpController mDumpController;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     private AutoTileManager mAutoTiles;
@@ -99,14 +101,16 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             PluginManager pluginManager,
             TunerService tunerService,
             Provider<AutoTileManager> autoTiles,
-            DumpController dumpController) {
+            DumpController dumpController,
+            BroadcastDispatcher broadcastDispatcher) {
         mIconController = iconController;
         mContext = context;
         mTunerService = tunerService;
         mPluginManager = pluginManager;
         mDumpController = dumpController;
+        mBroadcastDispatcher = broadcastDispatcher;
 
-        mServices = new TileServices(this, bgLooper);
+        mServices = new TileServices(this, bgLooper, mBroadcastDispatcher);
 
         defaultFactory.setHost(this);
         mQsFactories.add(defaultFactory);
@@ -334,7 +338,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 Intent intent = new Intent().setComponent(component);
                 TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
                         mContext, mServices, new Tile(), intent,
-                        new UserHandle(ActivityManager.getCurrentUser()));
+                        new UserHandle(ActivityManager.getCurrentUser()),
+                        mBroadcastDispatcher);
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
                 TileLifecycleManager.setTileAdded(mContext, component, false);

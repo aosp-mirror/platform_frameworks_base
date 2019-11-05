@@ -495,6 +495,7 @@ LogSection::LogSection(int id, const char* logID, ...) : WorkerThreadSection(id)
         name += " ";
         name += arg;
     }
+    va_end(args);
 
     switch (mLogID) {
         case LOG_ID_EVENTS:

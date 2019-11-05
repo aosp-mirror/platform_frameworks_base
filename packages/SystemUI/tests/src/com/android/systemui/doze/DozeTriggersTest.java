@@ -39,6 +39,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
@@ -66,6 +67,8 @@ public class DozeTriggersTest extends SysuiTestCase {
     private DozeHost mHost;
     @Mock
     private AlarmManager mAlarmManager;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
     private DozeTriggers mTriggers;
     private FakeSensorManager mSensors;
     private Sensor mTapSensor;
@@ -87,7 +90,7 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, config, parameters,
                 asyncSensorManager, Handler.createAsync(Looper.myLooper()), wakeLock, true,
-                mDockManagerFake, mProximitySensor, mock(DozeLog.class));
+                mDockManagerFake, mProximitySensor, mock(DozeLog.class), mBroadcastDispatcher);
         waitForSensorManager();
     }
 

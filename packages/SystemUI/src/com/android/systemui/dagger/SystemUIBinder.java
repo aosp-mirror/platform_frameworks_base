@@ -30,6 +30,7 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.LatencyTester;
 import com.android.systemui.ScreenDecorations;
 import com.android.systemui.SizeCompatModeActivityController;
+import com.android.systemui.SliceBroadcastRelayHandler;
 import com.android.systemui.SystemUI;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.appops.AppOpsController;
@@ -95,9 +96,11 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.tv.TvStatusBar;
+import com.android.systemui.theme.ThemeOverlayController;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeUI;
@@ -184,11 +187,23 @@ public abstract class SystemUIBinder {
     public abstract SystemUI bindsSizeCompatModeActivityController(
             SizeCompatModeActivityController sysui);
 
+    /** Inject into SliceBroadcastRelayHandler. */
+    @Binds
+    @IntoMap
+    @ClassKey(SliceBroadcastRelayHandler.class)
+    public abstract SystemUI bindSliceBroadcastRelayHandler(SliceBroadcastRelayHandler sysui);
+
     /** Inject into StatusBar. */
     @Binds
     @IntoMap
     @ClassKey(StatusBar.class)
     public abstract SystemUI bindsStatusBar(StatusBar sysui);
+
+    /** Inject into ThemeOverlayController. */
+    @Binds
+    @IntoMap
+    @ClassKey(ThemeOverlayController.class)
+    public abstract SystemUI bindThemeOverlayController(ThemeOverlayController sysui);
 
     /** Inject into TvStatusBar. */
     @Binds
@@ -273,7 +288,8 @@ public abstract class SystemUIBinder {
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
-            PluginManager pluginManager) {
+            PluginManager pluginManager,
+            RemoteInputUriController remoteInputUriController) {
         return new StatusBar(
                 context,
                 featureFlags,
@@ -340,7 +356,8 @@ public abstract class SystemUIBinder {
                 powerManager,
                 dozeScrimController,
                 commandQueue,
-                pluginManager);
+                pluginManager,
+                remoteInputUriController);
     }
 
 }

@@ -5478,9 +5478,30 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
 
         mService.mNotificationDelegate.grantInlineReplyUriPermission(
-                nr.getKey(), uri, nr.sbn.getUid());
+                nr.getKey(), uri, nr.sbn.getUser(), nr.sbn.getPackageName(), nr.sbn.getUid());
 
         // Grant permission called for the UID of SystemUI under the target user ID
+        verify(mUgm, times(1)).grantUriPermissionFromOwner(any(),
+                eq(nr.sbn.getUid()), eq(nr.sbn.getPackageName()), eq(uri), anyInt(), anyInt(),
+                eq(nr.sbn.getUserId()));
+    }
+
+    @Test
+    public void testGrantInlineReplyUriPermission_noRecordExists() throws Exception {
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        waitForIdle();
+
+        // No notifications exist for the given record
+        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifsBefore.length);
+
+        Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
+        int uid = 0; // sysui on primary user
+
+        mService.mNotificationDelegate.grantInlineReplyUriPermission(
+                nr.getKey(), uri, nr.sbn.getUser(), nr.sbn.getPackageName(), nr.sbn.getUid());
+
+        // Grant permission still called if no NotificationRecord exists for the given key
         verify(mUgm, times(1)).grantUriPermissionFromOwner(any(),
                 eq(nr.sbn.getUid()), eq(nr.sbn.getPackageName()), eq(uri), anyInt(), anyInt(),
                 eq(nr.sbn.getUserId()));
@@ -5504,7 +5525,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
 
         mService.mNotificationDelegate.grantInlineReplyUriPermission(
-                nr.getKey(), uri, nr.sbn.getUid());
+                nr.getKey(), uri, nr.sbn.getUser(), nr.sbn.getPackageName(), nr.sbn.getUid());
 
         // Target user for the grant is USER_ALL instead of USER_SYSTEM
         verify(mUgm, times(1)).grantUriPermissionFromOwner(any(),
@@ -5531,7 +5552,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
 
         int uid = 0; // sysui on primary user
-        int otherUserUid = (otherUserId * 100000) + 1; // SystemUI as a different user
+        int otherUserUid = (otherUserId * 100000) + 1; // sysui as a different user
         String sysuiPackage = "sysui";
         final String[] sysuiPackages = new String[] { sysuiPackage };
         when(mPackageManager.getPackagesForUid(uid)).thenReturn(sysuiPackages);
@@ -5541,7 +5562,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManager.getPackageUid(sysuiPackage, 0, otherUserId))
                 .thenReturn(otherUserUid);
 
-        mService.mNotificationDelegate.grantInlineReplyUriPermission(nr.getKey(), uri, uid);
+        mService.mNotificationDelegate.grantInlineReplyUriPermission(
+                nr.getKey(), uri, nr.sbn.getUser(), nr.sbn.getPackageName(), uid);
 
         // Target user for the grant is USER_ALL instead of USER_SYSTEM
         verify(mUgm, times(1)).grantUriPermissionFromOwner(any(),
@@ -5550,22 +5572,64 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGrantInlineReplyUriPermission_noRecordExists() throws Exception {
-        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
-        waitForIdle();
+    public void testClearInlineReplyUriPermission_uriRecordExists() throws Exception {
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        reset(mPackageManager);
 
-        // No notifications exist for the given record
-        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
-        assertEquals(0, notifsBefore.length);
+        Uri uri1 = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
+        Uri uri2 = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 2);
 
-        Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
-        int uid = 0; // sysui on primary user
+        // create an inline record with two uris in it
+        mService.mNotificationDelegate.grantInlineReplyUriPermission(
+                nr.getKey(), uri1, nr.sbn.getUser(), nr.sbn.getPackageName(), nr.sbn.getUid());
+        mService.mNotificationDelegate.grantInlineReplyUriPermission(
+                nr.getKey(), uri2, nr.sbn.getUser(), nr.sbn.getPackageName(), nr.sbn.getUid());
 
-        mService.mNotificationDelegate.grantInlineReplyUriPermission(nr.getKey(), uri, uid);
+        InlineReplyUriRecord record = mService.mInlineReplyRecordsByKey.get(nr.getKey());
+        assertNotNull(record); // record exists
+        assertEquals(record.getUris().size(), 2); // record has two uris in it
 
-        // Grant permission not called if no record exists for the given key
-        verify(mUgm, times(0)).grantUriPermissionFromOwner(any(), anyInt(), any(),
-                eq(uri), anyInt(), anyInt(), anyInt());
+        mService.mNotificationDelegate.clearInlineReplyUriPermissions(nr.getKey(), nr.sbn.getUid());
+
+        // permissionOwner destroyed
+        verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(
+                eq(record.getPermissionOwner()), eq(null), eq(~0), eq(nr.getUserId()));
+    }
+
+
+    @Test
+    public void testClearInlineReplyUriPermission_noUriRecordExists() throws Exception {
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        reset(mPackageManager);
+
+        mService.mNotificationDelegate.clearInlineReplyUriPermissions(nr.getKey(), nr.sbn.getUid());
+
+        // no permissionOwner destroyed
+        verify(mUgmInternal, times(0)).revokeUriPermissionFromOwner(
+                any(), eq(null), eq(~0), eq(nr.getUserId()));
+    }
+
+    @Test
+    public void testClearInlineReplyUriPermission_userAll() throws Exception {
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
+                UserHandle.USER_ALL);
+        reset(mPackageManager);
+
+        Uri uri1 = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
+        Uri uri2 = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 2);
+
+        // create an inline record a uri in it
+        mService.mNotificationDelegate.grantInlineReplyUriPermission(
+                nr.getKey(), uri1, nr.sbn.getUser(), nr.sbn.getPackageName(), nr.sbn.getUid());
+
+        InlineReplyUriRecord record = mService.mInlineReplyRecordsByKey.get(nr.getKey());
+        assertNotNull(record); // record exists
+
+        mService.mNotificationDelegate.clearInlineReplyUriPermissions(nr.getKey(), nr.sbn.getUid());
+
+        // permissionOwner destroyed for USER_SYSTEM, not USER_ALL
+        verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(
+                eq(record.getPermissionOwner()), eq(null), eq(~0), eq(USER_SYSTEM));
     }
 
     @Test

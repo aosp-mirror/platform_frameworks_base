@@ -35,6 +35,7 @@ import android.view.LayoutInflater;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.BgHandler;
 import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.dagger.qualifiers.MainHandler;
@@ -226,8 +227,8 @@ public class DependencyProvider {
     @Singleton
     @Provides
     public DeviceProvisionedController provideDeviceProvisionedController(Context context,
-            @MainHandler Handler mainHandler) {
-        return new DeviceProvisionedControllerImpl(context, mainHandler);
+            @MainHandler Handler mainHandler, BroadcastDispatcher broadcastDispatcher) {
+        return new DeviceProvisionedControllerImpl(context, mainHandler, broadcastDispatcher);
     }
 
     /** */

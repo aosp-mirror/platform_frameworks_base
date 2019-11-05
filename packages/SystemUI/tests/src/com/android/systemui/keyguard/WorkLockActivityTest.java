@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WorkLockActivity;
 
 import org.junit.Before;
@@ -55,12 +56,13 @@ public class WorkLockActivityTest extends SysuiTestCase {
     private @Mock DevicePolicyManager mDevicePolicyManager;
     private @Mock KeyguardManager mKeyguardManager;
     private @Mock Context mContext;
+    private @Mock BroadcastDispatcher mBroadcastDispatcher;
 
     private WorkLockActivity mActivity;
 
     private static class WorkLockActivityTestable extends WorkLockActivity {
-        WorkLockActivityTestable(Context baseContext) {
-            super();
+        WorkLockActivityTestable(Context baseContext, BroadcastDispatcher broadcastDispatcher) {
+            super(broadcastDispatcher);
             attachBaseContext(baseContext);
         }
     }
@@ -77,7 +79,7 @@ public class WorkLockActivityTest extends SysuiTestCase {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        mActivity = new WorkLockActivityTestable(mContext);
+        mActivity = new WorkLockActivityTestable(mContext, mBroadcastDispatcher);
     }
 
     @Test

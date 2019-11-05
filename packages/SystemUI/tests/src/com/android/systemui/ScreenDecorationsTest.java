@@ -50,6 +50,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R.dimen;
 import com.android.systemui.ScreenDecorations.TunablePaddingTagListener;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -79,9 +80,13 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private WindowManager mWindowManager;
     private FragmentService mFragmentService;
     private FragmentHostManager mFragmentHostManager;
-    private TunerService mTunerService;
     private StatusBarWindowView mView;
     private TunablePaddingService mTunablePaddingService;
+    private Handler mMainHandler;
+    @Mock
+    private TunerService mTunerService;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private Lazy<StatusBar> mStatusBarLazy;
 
     @Before
@@ -89,10 +94,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
-        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
-                new Handler(mTestableLooper.getLooper()));
+        mMainHandler = new Handler(mTestableLooper.getLooper());
         mTunablePaddingService = mDependency.injectMockDependency(TunablePaddingService.class);
-        mTunerService = mDependency.injectMockDependency(TunerService.class);
         mFragmentService = mDependency.injectMockDependency(FragmentService.class);
 
         mWindowManager = mock(WindowManager.class);
@@ -108,7 +111,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mFragmentService.getFragmentHostManager(any())).thenReturn(mFragmentHostManager);
 
 
-        mScreenDecorations = new ScreenDecorations(mContext, mStatusBarLazy) {
+        mScreenDecorations = new ScreenDecorations(mContext, mStatusBarLazy, mMainHandler,
+                mBroadcastDispatcher, mTunerService) {
             @Override
             public void start() {
                 super.start();

@@ -46,6 +46,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
@@ -90,6 +91,7 @@ public class NotificationLockscreenUserManagerImpl implements
     private final UserManager mUserManager;
     private final IStatusBarService mBarService;
     private final List<UserChangedListener> mListeners = new ArrayList<>();
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private boolean mShowLockscreenNotifications;
     private boolean mAllowLockscreenRemoteInput;
@@ -180,7 +182,8 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     @Inject
-    public NotificationLockscreenUserManagerImpl(Context context) {
+    public NotificationLockscreenUserManagerImpl(Context context,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
@@ -191,6 +194,7 @@ public class NotificationLockscreenUserManagerImpl implements
         Dependency.get(StatusBarStateController.class).addCallback(this);
         mLockPatternUtils = new LockPatternUtils(context);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
@@ -244,15 +248,15 @@ public class NotificationLockscreenUserManagerImpl implements
                     UserHandle.USER_ALL);
         }
 
-        mContext.registerReceiverAsUser(mAllUsersReceiver, UserHandle.ALL,
+        mBroadcastDispatcher.registerReceiver(mAllUsersReceiver,
                 new IntentFilter(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                null, null);
+                null /* handler */, UserHandle.ALL);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        mContext.registerReceiver(mBaseBroadcastReceiver, filter);
+        mBroadcastDispatcher.registerReceiver(mBaseBroadcastReceiver, filter);
 
         IntentFilter internalFilter = new IntentFilter();
         internalFilter.addAction(NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION);

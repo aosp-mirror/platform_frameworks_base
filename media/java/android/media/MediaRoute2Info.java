@@ -314,7 +314,7 @@ public final class MediaRoute2Info implements Parcelable {
         List<String> mSupportedCategories;
         int mVolume;
         int mVolumeMax;
-        int mVolumeHandling;
+        int mVolumeHandling = PLAYBACK_VOLUME_FIXED;
         Bundle mExtras;
 
         public Builder(@NonNull String id, @NonNull String name) {

@@ -48,6 +48,7 @@ import android.view.DisplayInfo;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -227,7 +228,7 @@ public class PipManager implements BasePipManager {
     /**
      * Initializes {@link PipManager}.
      */
-    public void initialize(Context context) {
+    public void initialize(Context context, BroadcastDispatcher broadcastDispatcher) {
         if (mInitialized) {
             return;
         }
@@ -238,8 +239,8 @@ public class PipManager implements BasePipManager {
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
-        mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, intentFilter,
-                null, null);
+        broadcastDispatcher.registerReceiver(mBroadcastReceiver, intentFilter,
+                null /* handler */, UserHandle.ALL);
 
         if (sSettingsPackageAndClassNamePairList == null) {
             String[] settings = mContext.getResources().getStringArray(
@@ -286,7 +287,7 @@ public class PipManager implements BasePipManager {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
 
-        mPipNotification = new PipNotification(context);
+        mPipNotification = new PipNotification(context, broadcastDispatcher);
     }
 
     private void loadConfigurationsAndApply(Configuration newConfig) {

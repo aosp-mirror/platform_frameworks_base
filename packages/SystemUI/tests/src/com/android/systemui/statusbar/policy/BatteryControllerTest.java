@@ -27,6 +27,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.power.EnhancedEstimates;
 
 import org.junit.Assert;
@@ -44,13 +45,15 @@ public class BatteryControllerTest extends SysuiTestCase {
 
     @Mock
     private PowerManager mPowerManager;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
     private BatteryControllerImpl mBatteryController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mBatteryController = new BatteryControllerImpl(getContext(), mock(EnhancedEstimates.class),
-                mPowerManager);
+                mPowerManager, mBroadcastDispatcher);
     }
 
     @Test

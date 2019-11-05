@@ -95,7 +95,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
         // we want to separate them into a different section.
         super(context, payloadIntents, null, rList, filterLastUsed,
                 resolverListController, useLayoutForBrowsables,
-                chooserListCommunicator);
+                chooserListCommunicator, false);
 
         createPlaceHolders();
         mMaxShortcutTargetsPerApp =

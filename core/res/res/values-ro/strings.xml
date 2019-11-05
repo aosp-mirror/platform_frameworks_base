@@ -301,13 +301,13 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze fotografiile, conținutul media și fișierele de pe dispozitiv?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze sunet"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Pemiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să înregistreze conținut audio?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Pemiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să înregistreze audio?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Activitate fizică"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"accesați activitatea fizică"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Permiteți aplicației &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze activitatea fizică?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze videoclipuri"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să facă fotografii și să înregistreze videoclipuri?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să fotografieze și să înregistreze video?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Jurnale de apeluri"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"să citească și să scrie jurnalul de apeluri telefonice"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze jurnalele de apeluri?"</string>

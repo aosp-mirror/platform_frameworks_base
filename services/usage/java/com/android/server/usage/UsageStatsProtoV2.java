@@ -448,10 +448,10 @@ final class UsageStatsProtoV2 {
                         final long packagesToken = proto.start(
                                 IntervalStatsObfuscatedProto.PACKAGES);
                         UsageStats usageStats = parseUsageStats(proto, stats.beginTime);
+                        proto.end(packagesToken);
                         if (usageStats.mPackageToken != PackagesTokenData.UNASSIGNED_TOKEN) {
                             stats.packageStatsObfuscated.put(usageStats.mPackageToken, usageStats);
                         }
-                        proto.end(packagesToken);
                     } catch (IOException e) {
                         Slog.e(TAG, "Unable to read some usage stats from proto.", e);
                     }
@@ -483,6 +483,13 @@ final class UsageStatsProtoV2 {
                     // endTime not assigned, assume default value of 0 plus beginTime
                     if (stats.endTime == 0) {
                         stats.endTime = stats.beginTime;
+                    }
+                    // update the begin and end time stamps for all usage stats
+                    final int usageStatsSize = stats.packageStatsObfuscated.size();
+                    for (int i = 0; i < usageStatsSize; i++) {
+                        final UsageStats usageStats = stats.packageStatsObfuscated.valueAt(i);
+                        usageStats.mBeginTimeStamp = stats.beginTime;
+                        usageStats.mEndTimeStamp = stats.endTime;
                     }
                     return;
             }

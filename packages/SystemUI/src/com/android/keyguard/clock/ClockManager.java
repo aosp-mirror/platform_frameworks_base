@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Observer;
 
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManager.DockEventListener;
@@ -125,9 +126,9 @@ public final class ClockManager {
     @Inject
     public ClockManager(Context context, InjectionInflationController injectionInflater,
             PluginManager pluginManager, SysuiColorExtractor colorExtractor,
-            @Nullable DockManager dockManager) {
+            @Nullable DockManager dockManager, BroadcastDispatcher broadcastDispatcher) {
         this(context, injectionInflater, pluginManager, colorExtractor,
-                context.getContentResolver(), new CurrentUserObservable(context),
+                context.getContentResolver(), new CurrentUserObservable(broadcastDispatcher),
                 new SettingsWrapper(context.getContentResolver()), dockManager);
     }
 

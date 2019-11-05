@@ -50,6 +50,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -125,12 +126,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     public QSPanel(Context context, AttributeSet attrs, DumpController dumpController) {
-        this(context, attrs, dumpController, null);
+        this(context, attrs, dumpController, null, Dependency.get(BroadcastDispatcher.class));
     }
 
     @Inject
     public QSPanel(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            DumpController dumpController, PluginManager pluginManager) {
+            DumpController dumpController, PluginManager pluginManager,
+            BroadcastDispatcher broadcastDispatcher) {
         super(context, attrs);
         mContext = context;
 
@@ -177,7 +179,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         updateResources();
 
         mBrightnessController = new BrightnessController(getContext(),
-                findViewById(R.id.brightness_slider));
+                findViewById(R.id.brightness_slider), broadcastDispatcher);
         mDumpController = dumpController;
         mPluginManager = pluginManager;
         if (mPluginManager != null && Settings.System.getInt(

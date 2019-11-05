@@ -102,6 +102,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.MainLooper;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -1502,6 +1503,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     @Inject
     protected KeyguardUpdateMonitor(Context context, @MainLooper Looper mainLooper,
+            BroadcastDispatcher broadcastDispatcher,
             DumpController dumpController) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
@@ -1645,12 +1647,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        context.registerReceiver(mBroadcastReceiver, filter, null, mHandler);
+        broadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mHandler);
 
         final IntentFilter bootCompleteFilter = new IntentFilter();
         bootCompleteFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         bootCompleteFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-        context.registerReceiver(mBroadcastReceiver, bootCompleteFilter, null, mHandler);
+        broadcastDispatcher.registerReceiver(mBroadcastReceiver, bootCompleteFilter, mHandler);
 
         final IntentFilter allUserFilter = new IntentFilter();
         allUserFilter.addAction(Intent.ACTION_USER_INFO_CHANGED);
@@ -1661,8 +1663,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         allUserFilter.addAction(ACTION_USER_UNLOCKED);
         allUserFilter.addAction(ACTION_USER_STOPPED);
         allUserFilter.addAction(ACTION_USER_REMOVED);
-        context.registerReceiverAsUser(mBroadcastAllReceiver, UserHandle.ALL, allUserFilter,
-                null, mHandler);
+        broadcastDispatcher.registerReceiver(mBroadcastAllReceiver, allUserFilter, mHandler,
+                UserHandle.ALL);
 
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
         try {

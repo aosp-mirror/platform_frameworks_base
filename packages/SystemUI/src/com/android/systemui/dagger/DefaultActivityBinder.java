@@ -19,7 +19,11 @@ package com.android.systemui.dagger;
 import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
+import com.android.systemui.keyguard.WorkLockActivity;
+import com.android.systemui.settings.BrightnessDialog;
 import com.android.systemui.tuner.TunerActivity;
+import com.android.systemui.usb.UsbDebuggingActivity;
+import com.android.systemui.usb.UsbDebuggingSecondaryUserActivity;
 
 import dagger.Binds;
 import dagger.Module;
@@ -42,4 +46,29 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(ForegroundServicesDialog.class)
     public abstract Activity bindForegroundServicesDialog(ForegroundServicesDialog activity);
+
+    /** Inject into WorkLockActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(WorkLockActivity.class)
+    public abstract Activity bindWorkLockActivity(WorkLockActivity activity);
+
+    /** Inject into BrightnessDialog. */
+    @Binds
+    @IntoMap
+    @ClassKey(BrightnessDialog.class)
+    public abstract Activity bindBrightnessDialog(BrightnessDialog activity);
+
+    /** Inject into UsbDebuggingActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbDebuggingActivity.class)
+    public abstract Activity bindUsbDebuggingActivity(UsbDebuggingActivity activity);
+
+    /** Inject into UsbDebuggingSecondaryUserActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbDebuggingSecondaryUserActivity.class)
+    public abstract Activity bindUsbDebuggingSecondaryUserActivity(
+            UsbDebuggingSecondaryUserActivity activity);
 }

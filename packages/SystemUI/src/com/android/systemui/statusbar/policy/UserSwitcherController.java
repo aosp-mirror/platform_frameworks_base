@@ -59,6 +59,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -96,6 +97,7 @@ public class UserSwitcherController implements Dumpable {
     private final KeyguardStateController mKeyguardStateController;
     protected final Handler mHandler;
     private final ActivityStarter mActivityStarter;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private ArrayList<UserRecord> mUsers = new ArrayList<>();
     private Dialog mExitGuestDialog;
@@ -111,10 +113,12 @@ public class UserSwitcherController implements Dumpable {
 
     @Inject
     public UserSwitcherController(Context context, KeyguardStateController keyguardStateController,
-            @MainHandler Handler handler, ActivityStarter activityStarter) {
+            @MainHandler Handler handler, ActivityStarter activityStarter,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
+        mBroadcastDispatcher = broadcastDispatcher;
         if (!UserManager.isGuestUserEphemeral()) {
-            mGuestResumeSessionReceiver.register(context);
+            mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
         }
         mKeyguardStateController = keyguardStateController;
         mHandler = handler;
@@ -127,8 +131,8 @@ public class UserSwitcherController implements Dumpable {
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_STOPPED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter,
-                null /* permission */, null /* scheduler */);
+        mBroadcastDispatcher.registerReceiver(
+                mReceiver, filter, null /* handler */, UserHandle.SYSTEM);
 
         mSecondaryUserServiceIntent = new Intent(context, SystemUISecondaryUserService.class);
 

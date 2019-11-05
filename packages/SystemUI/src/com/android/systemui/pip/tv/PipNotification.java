@@ -34,6 +34,7 @@ import android.util.Log;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.util.NotificationChannels;
 
 /**
@@ -143,7 +144,7 @@ public class PipNotification {
         }
     };
 
-    public PipNotification(Context context) {
+    public PipNotification(Context context, BroadcastDispatcher broadcastDispatcher) {
         mNotificationManager = (NotificationManager) context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
 
@@ -161,7 +162,7 @@ public class PipNotification {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_MENU);
         intentFilter.addAction(ACTION_CLOSE);
-        context.registerReceiver(mEventReceiver, intentFilter);
+        broadcastDispatcher.registerReceiver(mEventReceiver, intentFilter);
 
         onConfigurationChanged(context);
     }

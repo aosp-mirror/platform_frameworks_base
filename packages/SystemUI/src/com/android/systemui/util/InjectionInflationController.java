@@ -37,7 +37,6 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
-import com.android.systemui.statusbar.policy.Clock;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -179,11 +178,6 @@ public class InjectionInflationController {
          * Creates the QSCustomizer.
          */
         QSCustomizer createQSCustomizer();
-
-        /**
-         * Creates a Clock.
-         */
-        Clock createClock();
     }
 
     /**

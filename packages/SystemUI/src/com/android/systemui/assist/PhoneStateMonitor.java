@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
@@ -67,7 +68,7 @@ final class PhoneStateMonitor {
     private boolean mLauncherShowing;
     @Nullable private ComponentName mDefaultHome;
 
-    PhoneStateMonitor(Context context) {
+    PhoneStateMonitor(Context context, BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
@@ -77,7 +78,7 @@ final class PhoneStateMonitor {
         for (String action : DEFAULT_HOME_CHANGE_ACTIONS) {
             intentFilter.addAction(action);
         }
-        mContext.registerReceiver(new BroadcastReceiver() {
+        broadcastDispatcher.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 mDefaultHome = getCurrentDefaultHome();

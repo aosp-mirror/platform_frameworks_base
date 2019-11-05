@@ -16,11 +16,15 @@
 
 package android.net.wifi;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -223,11 +227,86 @@ public class ScanResult implements Parcelable {
     */
     public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4;
 
-   /**
-    * AP Channel bandwidth; one of {@link #CHANNEL_WIDTH_20MHZ}, {@link #CHANNEL_WIDTH_40MHZ},
-    * {@link #CHANNEL_WIDTH_80MHZ}, {@link #CHANNEL_WIDTH_160MHZ}
-    * or {@link #CHANNEL_WIDTH_80MHZ_PLUS_MHZ}.
-    */
+    /**
+     * Wi-Fi unknown standard
+     */
+    public static final int WIFI_STANDARD_UNKNOWN = 0;
+
+    /**
+     * Wi-Fi 802.11a/b/g
+     */
+    public static final int WIFI_STANDARD_LEGACY = 1;
+
+    /**
+     * Wi-Fi 802.11n
+     */
+    public static final int WIFI_STANDARD_11N = 4;
+
+    /**
+     * Wi-Fi 802.11ac
+     */
+    public static final int WIFI_STANDARD_11AC = 5;
+
+    /**
+     * Wi-Fi 802.11ax
+     */
+    public static final int WIFI_STANDARD_11AX = 6;
+
+    /** @hide */
+    @IntDef(prefix = { "WIFI_STANDARD_" }, value = {
+            WIFI_STANDARD_UNKNOWN,
+            WIFI_STANDARD_LEGACY,
+            WIFI_STANDARD_11N,
+            WIFI_STANDARD_11AC,
+            WIFI_STANDARD_11AX
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WifiStandard{}
+
+    /**
+     * AP wifi standard.
+     */
+    private @WifiStandard int mWifiStandard;
+
+    /**
+     * return the AP wifi standard.
+     */
+    public @WifiStandard int getWifiStandard() {
+        return mWifiStandard;
+    }
+
+    /**
+     * sets the AP wifi standard.
+     * @hide
+     */
+    public void setWifiStandard(@WifiStandard int standard) {
+        mWifiStandard = standard;
+    }
+
+    /**
+     * Convert Wi-Fi standard to string
+     */
+    private static @Nullable String wifiStandardToString(@WifiStandard int standard) {
+        switch(standard) {
+            case WIFI_STANDARD_LEGACY:
+                return "legacy";
+            case WIFI_STANDARD_11N:
+                return "11n";
+            case WIFI_STANDARD_11AC:
+                return "11ac";
+            case WIFI_STANDARD_11AX:
+                return "11ax";
+            case WIFI_STANDARD_UNKNOWN:
+                return "unknown";
+        }
+        return null;
+    }
+
+    /**
+     * AP Channel bandwidth; one of {@link #CHANNEL_WIDTH_20MHZ}, {@link #CHANNEL_WIDTH_40MHZ},
+     * {@link #CHANNEL_WIDTH_80MHZ}, {@link #CHANNEL_WIDTH_160MHZ}
+     * or {@link #CHANNEL_WIDTH_80MHZ_PLUS_MHZ}.
+     */
     public int channelWidth;
 
     /**
@@ -549,6 +628,7 @@ public class ScanResult implements Parcelable {
         this.carrierApEapType = UNSPECIFIED;
         this.carrierName = null;
         this.radioChainInfos = null;
+        this.mWifiStandard = WIFI_STANDARD_UNKNOWN;
     }
 
     /** {@hide} */
@@ -571,6 +651,7 @@ public class ScanResult implements Parcelable {
         this.carrierApEapType = UNSPECIFIED;
         this.carrierName = null;
         this.radioChainInfos = null;
+        this.mWifiStandard = WIFI_STANDARD_UNKNOWN;
     }
 
     /** {@hide} */
@@ -600,6 +681,7 @@ public class ScanResult implements Parcelable {
         this.carrierApEapType = UNSPECIFIED;
         this.carrierName = null;
         this.radioChainInfos = null;
+        this.mWifiStandard = WIFI_STANDARD_UNKNOWN;
     }
 
     /** {@hide} */
@@ -641,6 +723,7 @@ public class ScanResult implements Parcelable {
             carrierApEapType = source.carrierApEapType;
             carrierName = source.carrierName;
             radioChainInfos = source.radioChainInfos;
+            this.mWifiStandard = source.mWifiStandard;
         }
     }
 
@@ -679,6 +762,7 @@ public class ScanResult implements Parcelable {
         sb.append(", ChannelBandwidth: ").append(channelWidth);
         sb.append(", centerFreq0: ").append(centerFreq0);
         sb.append(", centerFreq1: ").append(centerFreq1);
+        sb.append(", standard: ").append(wifiStandardToString(mWifiStandard));
         sb.append(", 80211mcResponder: ");
         sb.append(((flags & FLAG_80211mc_RESPONDER) != 0) ? "is supported" : "is not supported");
         sb.append(", Carrier AP: ").append(isCarrierAp ? "yes" : "no");
@@ -714,6 +798,7 @@ public class ScanResult implements Parcelable {
         dest.writeInt(channelWidth);
         dest.writeInt(centerFreq0);
         dest.writeInt(centerFreq1);
+        dest.writeInt(mWifiStandard);
         dest.writeLong(seen);
         dest.writeInt(untrusted ? 1 : 0);
         dest.writeInt(numUsage);
@@ -796,6 +881,7 @@ public class ScanResult implements Parcelable {
                                                                fixed with flags below */
                 );
 
+                sr.mWifiStandard = in.readInt();
                 sr.seen = in.readLong();
                 sr.untrusted = in.readInt() != 0;
                 sr.numUsage = in.readInt();

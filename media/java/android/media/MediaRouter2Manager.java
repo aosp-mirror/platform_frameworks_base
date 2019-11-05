@@ -67,7 +67,7 @@ public class MediaRouter2Manager {
     @NonNull
     List<MediaRoute2Info> mRoutes = Collections.emptyList();
     @NonNull
-    ConcurrentMap<String, List<String>> mControlCategoryMap = new ConcurrentHashMap<>();
+    final ConcurrentMap<String, List<String>> mControlCategoryMap = new ConcurrentHashMap<>();
 
     /**
      * Gets an instance of media router manager that controls media route of other applications.
@@ -427,6 +427,8 @@ public class MediaRouter2Manager {
          * A client may refresh available routes for each application.
          */
         public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
+
+        //TODO: add onControlCategoriesChanged to notify available routes are changed
     }
 
     final class CallbackRecord {

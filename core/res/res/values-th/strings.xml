@@ -1234,7 +1234,7 @@
     <string name="volume_unknown" msgid="1400219669770445902">"ระดับเสียง"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"ระดับบลูทูธ"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"ระดับเสียงเรียกเข้า"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"ปริมาณการโทร"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"ระดับเสียงการโทร"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"ระดับเสียงของสื่อ"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"ระดับเสียงของการแจ้งเตือน"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"เสียงเรียกเข้าเริ่มต้น"</string>

@@ -303,6 +303,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     info.damageAccumulator = &mDamageAccumulator;
     info.layerUpdateQueue = &mLayerUpdateQueue;
+    info.damageGenerationId = mDamageId++;
     info.out.canDrawThisFrame = true;
 
     mAnimationContext->startFrame(info.mode);
@@ -702,7 +703,7 @@ bool CanvasContext::surfaceRequiresRedraw() {
     surface->query(NATIVE_WINDOW_WIDTH, &width);
     surface->query(NATIVE_WINDOW_HEIGHT, &height);
 
-    return width == mLastFrameWidth && height == mLastFrameHeight;
+    return width != mLastFrameWidth || height != mLastFrameHeight;
 }
 
 void CanvasContext::setRenderAheadDepth(int renderAhead) {

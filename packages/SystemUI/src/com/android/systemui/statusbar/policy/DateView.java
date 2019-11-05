@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import java.util.Date;
 import java.util.Locale;
@@ -41,6 +42,7 @@ public class DateView extends TextView {
     private DateFormat mDateFormat;
     private String mLastText;
     private String mDatePattern;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -75,6 +77,7 @@ public class DateView extends TextView {
         if (mDatePattern == null) {
             mDatePattern = getContext().getString(R.string.system_ui_date_pattern);
         }
+        mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
     }
 
     @Override
@@ -86,7 +89,7 @@ public class DateView extends TextView {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-        getContext().registerReceiver(mIntentReceiver, filter, null,
+        mBroadcastDispatcher.registerReceiver(mIntentReceiver, filter,
                 Dependency.get(Dependency.TIME_TICK_HANDLER));
 
         updateClock();
@@ -97,7 +100,7 @@ public class DateView extends TextView {
         super.onDetachedFromWindow();
 
         mDateFormat = null; // reload the locale next time
-        getContext().unregisterReceiver(mIntentReceiver);
+        mBroadcastDispatcher.unregisterReceiver(mIntentReceiver);
     }
 
     protected void updateClock() {

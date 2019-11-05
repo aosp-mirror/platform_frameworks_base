@@ -42,6 +42,8 @@ public class ScanResultTest {
     public static final int TEST_LEVEL = -56;
     public static final int TEST_FREQUENCY = 2412;
     public static final long TEST_TSF = 04660l;
+    public static final @ScanResult.WifiStandard int TEST_WIFI_STANDARD =
+            ScanResult.WIFI_STANDARD_11AC;
 
     /**
      * Setup before tests.
@@ -149,12 +151,14 @@ public class ScanResultTest {
     @Test
     public void verifyScanResultToStringWithoutRadioChainInfo() throws Exception {
         ScanResult scanResult = createScanResult();
-        assertEquals("SSID: \"test_ssid\", BSSID: 04:ac:fe:45:34:10, capabilities: CCMP, " +
-                "level: -56, frequency: 2412, timestamp: 2480, distance: 0(cm), distanceSd: 0(cm), " +
-                "passpoint: no, ChannelBandwidth: 0, centerFreq0: 0, centerFreq1: 0, " +
-                "80211mcResponder: is not supported, Carrier AP: no, " +
-                "Carrier AP EAP Type: 0, Carrier name: null, " +
-                "Radio Chain Infos: null", scanResult.toString());
+        assertEquals("SSID: \"test_ssid\", BSSID: 04:ac:fe:45:34:10, capabilities: CCMP, "
+                + "level: -56, frequency: 2412, timestamp: 2480, "
+                + "distance: 0(cm), distanceSd: 0(cm), "
+                + "passpoint: no, ChannelBandwidth: 0, centerFreq0: 0, centerFreq1: 0, "
+                + "standard: 11ac, "
+                + "80211mcResponder: is not supported, Carrier AP: no, "
+                + "Carrier AP EAP Type: 0, Carrier name: null, "
+                + "Radio Chain Infos: null", scanResult.toString());
     }
 
     /**
@@ -170,13 +174,15 @@ public class ScanResultTest {
         scanResult.radioChainInfos[1] = new ScanResult.RadioChainInfo();
         scanResult.radioChainInfos[1].id = 1;
         scanResult.radioChainInfos[1].level = -54;
-        assertEquals("SSID: \"test_ssid\", BSSID: 04:ac:fe:45:34:10, capabilities: CCMP, " +
-                "level: -56, frequency: 2412, timestamp: 2480, distance: 0(cm), distanceSd: 0(cm), " +
-                "passpoint: no, ChannelBandwidth: 0, centerFreq0: 0, centerFreq1: 0, " +
-                "80211mcResponder: is not supported, Carrier AP: no, " +
-                "Carrier AP EAP Type: 0, Carrier name: null, " +
-                "Radio Chain Infos: [RadioChainInfo: id=0, level=-45, " +
-                "RadioChainInfo: id=1, level=-54]", scanResult.toString());
+        assertEquals("SSID: \"test_ssid\", BSSID: 04:ac:fe:45:34:10, capabilities: CCMP, "
+                + "level: -56, frequency: 2412, timestamp: 2480, distance: 0(cm), "
+                + "distanceSd: 0(cm), "
+                + "passpoint: no, ChannelBandwidth: 0, centerFreq0: 0, centerFreq1: 0, "
+                + "standard: 11ac, "
+                + "80211mcResponder: is not supported, Carrier AP: no, "
+                + "Carrier AP EAP Type: 0, Carrier name: null, "
+                + "Radio Chain Infos: [RadioChainInfo: id=0, level=-45, "
+                + "RadioChainInfo: id=1, level=-54]", scanResult.toString());
     }
 
     /**
@@ -197,6 +203,7 @@ public class ScanResultTest {
         result.level = TEST_LEVEL;
         result.frequency = TEST_FREQUENCY;
         result.timestamp = TEST_TSF;
+        result.setWifiStandard(TEST_WIFI_STANDARD);
         return result;
     }
 
@@ -207,6 +214,7 @@ public class ScanResultTest {
         assertEquals(expected.level, actual.level);
         assertEquals(expected.frequency, actual.frequency);
         assertEquals(expected.timestamp, actual.timestamp);
+        assertEquals(expected.getWifiStandard(), actual.getWifiStandard());
         assertArrayEquals(expected.radioChainInfos, actual.radioChainInfos);
         assertArrayEquals(expected.informationElements, actual.informationElements);
     }

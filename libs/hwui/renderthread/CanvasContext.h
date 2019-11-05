@@ -245,6 +245,7 @@ private:
     // Need at least 4 because we do quad buffer. Add a 5th for good measure.
     RingBuffer<SwapHistory, 5> mSwapHistory;
     int64_t mFrameNumber = -1;
+    int64_t mDamageId = 0;
 
     // last vsync for a dropped frame due to stuffed queue
     nsecs_t mLastDropVsync = 0;

@@ -67,6 +67,8 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.Preconditions;
 import com.android.systemui.RegionInterceptingFrameLayout.RegionInterceptableView;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
@@ -103,6 +105,9 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private final Lazy<StatusBar> mStatusBarLazy;
 
     private DisplayManager mDisplayManager;
+    private final BroadcastDispatcher mBroadcastDispatcher;
+    private final Handler mMainHandler;
+    private final TunerService mTunerService;
     private DisplayManager.DisplayListener mDisplayListener;
 
     @VisibleForTesting
@@ -140,9 +145,16 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     }
 
     @Inject
-    public ScreenDecorations(Context context, Lazy<StatusBar> statusBarLazy) {
+    public ScreenDecorations(Context context,
+            Lazy<StatusBar> statusBarLazy,
+            @MainHandler Handler handler,
+            BroadcastDispatcher broadcastDispatcher,
+            TunerService tunerService) {
         super(context);
         mStatusBarLazy = statusBarLazy;
+        mMainHandler = handler;
+        mBroadcastDispatcher = broadcastDispatcher;
+        mTunerService = tunerService;
     }
 
     @Override
@@ -239,8 +251,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
         mDensity = metrics.density;
 
-        Dependency.get(Dependency.MAIN_HANDLER).post(
-                () -> Dependency.get(TunerService.class).addTunable(this, SIZE));
+        mMainHandler.post(() -> mTunerService.addTunable(this, SIZE));
 
         // Watch color inversion and invert the overlay as needed.
         mColorInversionSetting = new SecureSetting(mContext, mHandler,
@@ -255,7 +266,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiver(mIntentReceiver, filter, null /* permission */, mHandler);
+        mBroadcastDispatcher.registerReceiver(mIntentReceiver, filter, mHandler);
 
         mOverlay.addOnLayoutChangeListener(new OnLayoutChangeListener() {
             @Override

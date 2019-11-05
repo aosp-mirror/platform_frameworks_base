@@ -108,7 +108,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 mConfig, Looper.getMainLooper(), mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
                 mock(DataUsageController.class), mMockSubDefaults,
-                mock(DeviceProvisionedController.class));
+                mock(DeviceProvisionedController.class), mMockBd);
         setupNetworkController();
 
         setupDefaultSignal();

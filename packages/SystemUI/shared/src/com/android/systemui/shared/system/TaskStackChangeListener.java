@@ -89,6 +89,14 @@ public abstract class TaskStackChangeListener {
         onTaskMovedToFront(taskInfo.taskId);
     }
 
+    /**
+     * Called when a task’s description is changed due to an activity calling
+     * ActivityManagerService.setTaskDescription
+     *
+     * @param taskInfo info about the task which changed, with {@link TaskInfo#taskDescription}
+     */
+    public void onTaskDescriptionChanged(RunningTaskInfo taskInfo) { }
+
     public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) { }
     public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) { }
 

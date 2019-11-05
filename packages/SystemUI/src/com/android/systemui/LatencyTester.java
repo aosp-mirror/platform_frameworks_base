@@ -29,6 +29,7 @@ import android.os.SystemClock;
 
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 
 import javax.inject.Inject;
@@ -49,13 +50,16 @@ public class LatencyTester extends SystemUI {
             "com.android.systemui.latency.ACTION_TURN_ON_SCREEN";
     private final BiometricUnlockController mBiometricUnlockController;
     private final PowerManager mPowerManager;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     @Inject
     public LatencyTester(Context context, BiometricUnlockController biometricUnlockController,
-            PowerManager powerManager) {
+            PowerManager powerManager, BroadcastDispatcher broadcastDispatcher) {
         super(context);
+
         mBiometricUnlockController = biometricUnlockController;
         mPowerManager = powerManager;
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     @Override
@@ -67,7 +71,7 @@ public class LatencyTester extends SystemUI {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_FINGERPRINT_WAKE);
         filter.addAction(ACTION_TURN_ON_SCREEN);
-        mContext.registerReceiver(new BroadcastReceiver() {
+        mBroadcastDispatcher.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();

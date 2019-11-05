@@ -145,7 +145,7 @@ public class GestureDetector {
         boolean onSingleTapConfirmed(MotionEvent e);
  
         /**
-         * Notified when a double-tap occurs.
+         * Notified when a double-tap occurs. Triggered on the down event of second tap.
          *
          * @param e The down motion event of the first tap of the double-tap.
          * @return true if the event is consumed, else false
@@ -378,7 +378,9 @@ public class GestureDetector {
      *
      * @param context the application's context
      * @param listener the listener invoked for all the callbacks, this must
-     * not be null.
+     * not be null. If the listener implements the {@link OnDoubleTapListener} or
+     * {@link OnContextClickListener} then it will also be set as the listener for
+     * these callbacks (for example when using the {@link SimpleOnGestureListener}).
      *
      * @throws NullPointerException if {@code listener} is null.
      */
@@ -393,7 +395,9 @@ public class GestureDetector {
      *
      * @param context the application's context
      * @param listener the listener invoked for all the callbacks, this must
-     * not be null.
+     * not be null. If the listener implements the {@link OnDoubleTapListener} or
+     * {@link OnContextClickListener} then it will also be set as the listener for
+     * these callbacks (for example when using the {@link SimpleOnGestureListener}).
      * @param handler the handler to use for running deferred listener events.
      *
      * @throws NullPointerException if {@code listener} is null.

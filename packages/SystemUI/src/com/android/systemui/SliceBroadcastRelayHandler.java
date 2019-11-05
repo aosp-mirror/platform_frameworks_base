@@ -28,19 +28,27 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.SliceBroadcastRelay;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Allows settings to register certain broadcasts to launch the settings app for pinned slices.
  * @see SliceBroadcastRelay
  */
+@Singleton
 public class SliceBroadcastRelayHandler extends SystemUI {
     private static final String TAG = "SliceBroadcastRelay";
     private static final boolean DEBUG = false;
 
     private final ArrayMap<Uri, BroadcastRelay> mRelays = new ArrayMap<>();
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
-    public SliceBroadcastRelayHandler(Context context) {
+    @Inject
+    public SliceBroadcastRelayHandler(Context context, BroadcastDispatcher broadcastDispatcher) {
         super(context);
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     @Override
@@ -48,9 +56,10 @@ public class SliceBroadcastRelayHandler extends SystemUI {
         if (DEBUG) Log.d(TAG, "Start");
         IntentFilter filter = new IntentFilter(SliceBroadcastRelay.ACTION_REGISTER);
         filter.addAction(SliceBroadcastRelay.ACTION_UNREGISTER);
-        mContext.registerReceiver(mReceiver, filter);
+        mBroadcastDispatcher.registerReceiver(mReceiver, filter);
     }
 
+    // This does not use BroadcastDispatcher as the filter may have schemas or mime types.
     @VisibleForTesting
     void handleIntent(Intent intent) {
         if (SliceBroadcastRelay.ACTION_REGISTER.equals(intent.getAction())) {

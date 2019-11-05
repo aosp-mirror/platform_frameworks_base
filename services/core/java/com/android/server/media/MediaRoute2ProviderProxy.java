@@ -119,6 +119,11 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         }
     }
 
+    @NonNull
+    public String getUniqueId() {
+        return mUniqueId;
+    }
+
     @Nullable
     public MediaRoute2ProviderInfo getProviderInfo() {
         return mProviderInfo;
@@ -294,7 +299,7 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
     }
 
     public interface Callback {
-        void onProviderStateChanged(MediaRoute2ProviderProxy provider);
+        void onProviderStateChanged(@NonNull MediaRoute2ProviderProxy provider);
     }
 
     private final class Connection implements DeathRecipient {

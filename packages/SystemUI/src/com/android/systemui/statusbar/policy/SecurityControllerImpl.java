@@ -48,6 +48,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.BgHandler;
 import com.android.systemui.settings.CurrentUserTracker;
 
@@ -100,13 +101,14 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     /**
      */
     @Inject
-    public SecurityControllerImpl(Context context, @BgHandler Handler bgHandler) {
-        this(context, bgHandler, null);
+    public SecurityControllerImpl(Context context, @BgHandler Handler bgHandler,
+            BroadcastDispatcher broadcastDispatcher) {
+        this(context, bgHandler, broadcastDispatcher, null);
     }
 
     public SecurityControllerImpl(Context context, Handler bgHandler,
-            SecurityControllerCallback callback) {
-        super(context);
+            BroadcastDispatcher broadcastDispatcher, SecurityControllerCallback callback) {
+        super(broadcastDispatcher);
         mContext = context;
         mBgHandler = bgHandler;
         mDevicePolicyManager = (DevicePolicyManager)
@@ -124,8 +126,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         IntentFilter filter = new IntentFilter();
         filter.addAction(KeyChain.ACTION_TRUST_STORE_CHANGED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null,
-                bgHandler);
+        broadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, bgHandler, UserHandle.ALL);
 
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);

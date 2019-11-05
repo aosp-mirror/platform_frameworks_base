@@ -75,6 +75,7 @@ package android {
     field public static final String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
     field public static final String GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS = "android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS";
     field public static final String GRANT_RUNTIME_PERMISSIONS = "android.permission.GRANT_RUNTIME_PERMISSIONS";
+    field public static final String GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS = "android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS";
     field public static final String HARDWARE_TEST = "android.permission.HARDWARE_TEST";
     field public static final String HDMI_CEC = "android.permission.HDMI_CEC";
     field public static final String HIDE_NON_SYSTEM_OVERLAY_WINDOWS = "android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS";
@@ -9496,14 +9497,17 @@ package android.telephony.ims {
   }
 
   public class ImsUtListener {
+    method public void onLineIdentificationSupplementaryServiceResponse(int, @NonNull android.telephony.ims.ImsSsInfo);
     method public void onSupplementaryServiceIndication(android.telephony.ims.ImsSsData);
     method public void onUtConfigurationCallBarringQueried(int, android.telephony.ims.ImsSsInfo[]);
     method public void onUtConfigurationCallForwardQueried(int, android.telephony.ims.ImsCallForwardInfo[]);
     method public void onUtConfigurationCallWaitingQueried(int, android.telephony.ims.ImsSsInfo[]);
-    method public void onUtConfigurationQueried(int, android.os.Bundle);
+    method @Deprecated public void onUtConfigurationQueried(int, android.os.Bundle);
     method public void onUtConfigurationQueryFailed(int, android.telephony.ims.ImsReasonInfo);
     method public void onUtConfigurationUpdateFailed(int, android.telephony.ims.ImsReasonInfo);
     method public void onUtConfigurationUpdated(int);
+    field @Deprecated public static final String BUNDLE_KEY_CLIR = "queryClir";
+    field @Deprecated public static final String BUNDLE_KEY_SSINFO = "imsSsInfo";
   }
 
   public abstract class ImsVideoCallProvider {
