@@ -134,6 +134,10 @@ class Bubble {
         return mAppName;
     }
 
+    public Drawable getUserBadgedAppIcon() {
+        return mUserBadgedAppIcon;
+    }
+
     boolean isInflated() {
         return mInflated;
     }
@@ -165,7 +169,6 @@ class Bubble {
         mIconView = (BubbleView) inflater.inflate(
                 R.layout.bubble_view, stackView, false /* attachToRoot */);
         mIconView.setBubble(this);
-        mIconView.setAppIcon(mUserBadgedAppIcon);
 
         mExpandedView = (BubbleExpandedView) inflater.inflate(
                 R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
