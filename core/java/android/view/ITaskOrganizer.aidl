@@ -26,8 +26,7 @@ import android.app.ActivityManager;
  * {@hide}
  */
 oneway interface ITaskOrganizer {
-    void taskAppeared(in IWindowContainer container,
-        in ActivityManager.RunningTaskInfo taskInfo);
+    void taskAppeared(in ActivityManager.RunningTaskInfo taskInfo);
     void taskVanished(in IWindowContainer container);
 
     /**
@@ -35,4 +34,19 @@ oneway interface ITaskOrganizer {
      * ActivityTaskManagerService#applyTaskOrganizerTransaction
      */
     void transactionReady(int id, in SurfaceControl.Transaction t);
+
+    /**
+     * Will fire when core attributes of a Task's info change. Relevant properties include the
+     * {@link WindowConfiguration.ActivityType} and whether it is resizable.
+     *
+     * This is used, for example, during split-screen. The flow for starting is: Something sends an
+     * Intent with windowingmode. Then WM finds a matching root task and launches the new task into
+     * it. This causes the root task's info to change because now it has a task when it didn't
+     * before. The default Divider implementation interprets this as a request to enter
+     * split-screen mode and will move all other Tasks into the secondary root task. When WM
+     * applies this change, it triggers an info change in the secondary root task because it now
+     * has children. The Divider impl looks at the info and can see that the secondary root task
+     * has adopted an ActivityType of HOME and proceeds to show the minimized dock UX.
+     */
+    void onTaskInfoChanged(in ActivityManager.RunningTaskInfo info);
 }

@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -27,17 +24,14 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
@@ -46,7 +40,6 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.IDisplayWindowListener;
-import android.view.WindowContainerTransaction;
 
 import androidx.test.filters.MediumTest;
 
@@ -123,47 +116,6 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
         // Check enter no transactions with enter pip requests are made.
         verify(lifecycleManager, times(0)).scheduleTransaction(any());
-    }
-
-    @Test
-    public void testTaskTransaction() {
-        removeGlobalMinSizeRestriction();
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
-                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
-        final Task task = stack.getTopMostTask();
-        WindowContainerTransaction t = new WindowContainerTransaction();
-        Rect newBounds = new Rect(10, 10, 100, 100);
-        t.setBounds(task.mRemoteToken, new Rect(10, 10, 100, 100));
-        mService.applyContainerTransaction(t);
-        assertEquals(newBounds, task.getBounds());
-    }
-
-    @Test
-    public void testStackTransaction() {
-        removeGlobalMinSizeRestriction();
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
-                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
-        ActivityManager.StackInfo info =
-                mService.getStackInfo(WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
-        WindowContainerTransaction t = new WindowContainerTransaction();
-        assertEquals(stack.mRemoteToken, info.stackToken);
-        Rect newBounds = new Rect(10, 10, 100, 100);
-        t.setBounds(info.stackToken, new Rect(10, 10, 100, 100));
-        mService.applyContainerTransaction(t);
-        assertEquals(newBounds, stack.getBounds());
-    }
-
-    @Test
-    public void testContainerChanges() {
-        removeGlobalMinSizeRestriction();
-        final ActivityStack stack = new StackBuilder(mRootWindowContainer)
-                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
-        final Task task = stack.getTopMostTask();
-        WindowContainerTransaction t = new WindowContainerTransaction();
-        assertTrue(task.isFocusable());
-        t.setFocusable(stack.mRemoteToken, false);
-        mService.applyContainerTransaction(t);
-        assertFalse(task.isFocusable());
     }
 
     @Test

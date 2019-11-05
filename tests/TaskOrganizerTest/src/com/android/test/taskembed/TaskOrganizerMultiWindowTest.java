@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.view.ITaskOrganizer;
 import android.view.IWindowContainer;
 import android.view.SurfaceControl;
@@ -47,12 +48,15 @@ public class TaskOrganizerMultiWindowTest extends Activity {
 
     class Organizer extends ITaskOrganizer.Stub {
         @Override
-        public void taskAppeared(IWindowContainer wc, ActivityManager.RunningTaskInfo ti) {
-            mView.reparentTask(wc);
+        public void taskAppeared(ActivityManager.RunningTaskInfo ti) {
+            mView.reparentTask(ti.token);
         }
         public void taskVanished(IWindowContainer wc) {
         }
         public void transactionReady(int id, SurfaceControl.Transaction t) {
+        }
+        @Override
+        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         }
     }
 
