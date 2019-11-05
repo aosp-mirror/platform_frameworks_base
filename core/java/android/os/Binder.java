@@ -37,7 +37,9 @@ import libcore.io.IoUtils;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Modifier;
 
@@ -905,11 +907,60 @@ public class Binder implements IBinder {
             @Nullable FileDescriptor err,
             @NonNull String[] args, @Nullable ShellCallback callback,
             @NonNull ResultReceiver resultReceiver) throws RemoteException {
-        FileOutputStream fout = new FileOutputStream(err != null ? err : out);
-        PrintWriter pw = new FastPrintWriter(fout);
+
+        // First, convert in, out and err to @NonNull, by redirecting any that's null to /dev/null.
+        try {
+            if (in == null) {
+                in = new FileInputStream("/dev/null").getFD();
+            }
+            if (out == null) {
+                out = new FileOutputStream("/dev/null").getFD();
+            }
+            if (err == null) {
+                err = out;
+            }
+        } catch (IOException e) {
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(err != null ? err : out));
+            pw.println("Failed to open /dev/null: " + e.getMessage());
+            pw.flush();
+            resultReceiver.send(-1, null);
+            return;
+        }
+        // Also make args @NonNull.
+        if (args == null) {
+            args = new String[0];
+        }
+
+        int result = -1;
+        try {
+            result = handleShellCommand(in, out, err, args);
+        } finally {
+            resultReceiver.send(result, null);
+        }
+    }
+
+    /**
+     * System services can implement this method to implement ADB shell commands.
+     *
+     * TODO More Javadoc.
+     * TODO Add a generic way to define subcommands and their permissions.
+     *
+     * @param in standard input.
+     * @param out standard output.
+     * @param err standard error.
+     * @param args arguments passed to the command. Can be empty. The first argument is typically
+     *             a subcommand, such as {@code run} for {@code adb shell cmd jobscheduler run}.
+     *
+     * @hide
+     */
+    // @SystemApi TODO Make it a system API.
+    protected int handleShellCommand(@NonNull FileDescriptor in, @NonNull FileDescriptor out,
+            @NonNull FileDescriptor err, @NonNull String[] args) {
+        FileOutputStream ferr = new FileOutputStream(err);
+        PrintWriter pw = new FastPrintWriter(ferr);
         pw.println("No shell command implementation.");
         pw.flush();
-        resultReceiver.send(0, null);
+        return 0;
     }
 
     /**

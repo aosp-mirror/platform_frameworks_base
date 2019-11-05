@@ -59,9 +59,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
@@ -2690,11 +2688,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
-                String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
-                (new JobSchedulerShellCommand(JobSchedulerService.this)).exec(
-                        this, in, out, err, args, callback, resultReceiver);
+        protected int handleShellCommand(@NonNull FileDescriptor in, @NonNull FileDescriptor out,
+                @NonNull FileDescriptor err, @NonNull String[] args) {
+            return (new JobSchedulerShellCommand(JobSchedulerService.this)).exec(
+                    this, in, out, err, args);
         }
+
 
         /**
          * <b>For internal system user only!</b>

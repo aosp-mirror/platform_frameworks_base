@@ -20,13 +20,13 @@ import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.os.BasicShellCommandHandler;
 import android.os.Binder;
-import android.os.ShellCommand;
 import android.os.UserHandle;
 
 import java.io.PrintWriter;
 
-public final class JobSchedulerShellCommand extends ShellCommand {
+public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
     public static final int CMD_ERR_NO_PACKAGE = -1000;
     public static final int CMD_ERR_NO_JOB = -1001;
     public static final int CMD_ERR_CONSTRAINTS = -1002;
