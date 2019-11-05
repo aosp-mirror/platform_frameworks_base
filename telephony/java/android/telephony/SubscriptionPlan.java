@@ -44,6 +44,14 @@ import java.util.Objects;
  * as explaining how much mobile data they have remaining, and what will happen
  * when they run out.
  *
+ * If specifying network types, the developer must supply at least one plan
+ * that applies to all network types (default), and all additional plans
+ * may not include a particular network type more than once.
+ * This is enforced by {@link SubscriptionManager} when setting the plans.
+ *
+ * Plan selection will prefer plans that have specific network types defined
+ * over plans that apply to all network types.
+ *
  * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
  * @see SubscriptionManager#getSubscriptionPlans(int)
  */
@@ -213,7 +221,7 @@ public final class SubscriptionPlan implements Parcelable {
 
     /**
      * Return an array containing all {@link NetworkType}s this SubscriptionPlan applies to.
-     * A null array means this SubscriptionPlan applies to all network types.
+     * A null value means this SubscriptionPlan applies to all network types.
      */
     public @Nullable @NetworkType int[] getNetworkTypes() {
         return networkTypes;
@@ -372,20 +380,13 @@ public final class SubscriptionPlan implements Parcelable {
 
         /**
          * Set the network types this SubscriptionPlan applies to.
-         * The developer must supply at least one plan that applies to all network types (default),
-         * and all additional plans may not include a particular network type more than once.
-         * Plan selection will prefer plans that have specific network types defined
-         * over plans that apply to all network types.
          *
          * @param networkTypes a set of all {@link NetworkType}s that apply to this plan.
-         *            A null value or empty array means the plan applies to all network types.
+         *            A null value means the plan applies to all network types,
+         *            and an empty array means the plan applies to no network types.
          */
         public @NonNull Builder setNetworkTypes(@Nullable @NetworkType int[] networkTypes) {
-            if (networkTypes == null || networkTypes.length == 0) {
-                plan.networkTypes = null;
-            } else {
-                plan.networkTypes = networkTypes;
-            }
+            plan.networkTypes = networkTypes;
             return this;
         }
     }
