@@ -1232,7 +1232,7 @@ public class CameraDeviceImpl extends CameraDevice
 
     private boolean checkPrivilegedAppList() {
         String packageName = ActivityThread.currentOpPackageName();
-        String packageList = SystemProperties.get("persist.vendor.camera.privapp.list");
+        String packageList = SystemProperties.get("vendor.camera.aux.packagelist");
 
         if (packageList.length() > 0) {
             TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');

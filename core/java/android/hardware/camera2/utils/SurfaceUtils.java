@@ -222,7 +222,7 @@ public class SurfaceUtils {
 
     private static boolean isPrivilegedApp() {
         String packageName = ActivityThread.currentOpPackageName();
-        String packageList = SystemProperties.get("persist.camera.privapp.list");
+        String packageList = SystemProperties.get("vendor.camera.aux.packagelist");
 
         if (packageList.length() > 0) {
             TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
