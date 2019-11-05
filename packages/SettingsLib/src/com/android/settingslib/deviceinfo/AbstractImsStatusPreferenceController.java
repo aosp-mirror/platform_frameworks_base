@@ -44,7 +44,7 @@ public abstract class AbstractImsStatusPreferenceController
     private static final String[] CONNECTIVITY_INTENTS = {
             BluetoothAdapter.ACTION_STATE_CHANGED,
             ConnectivityManager.CONNECTIVITY_ACTION,
-            WifiManager.LINK_CONFIGURATION_CHANGED_ACTION,
+            WifiManager.ACTION_LINK_CONFIGURATION_CHANGED,
             WifiManager.NETWORK_STATE_CHANGED_ACTION,
     };
 

@@ -902,7 +902,7 @@ public class WifiTrackerTest {
         tracker.mReceiver.onReceive(
                 mContext, new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION));
         tracker.mReceiver.onReceive(
-                mContext, new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION));
+                mContext, new Intent(WifiManager.ACTION_LINK_CONFIGURATION_CHANGED));
 
 
         verify(mockWifiListener, never()).onAccessPointsChanged();
@@ -920,7 +920,7 @@ public class WifiTrackerTest {
         tracker.mReceiver.onReceive(
                 mContext, new Intent(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION));
         tracker.mReceiver.onReceive(
-                mContext, new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION));
+                mContext, new Intent(WifiManager.ACTION_LINK_CONFIGURATION_CHANGED));
 
         verify(mockWifiListener, never()).onAccessPointsChanged();
 

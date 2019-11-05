@@ -44,7 +44,7 @@ public abstract class AbstractWifiMacAddressPreferenceController
 
     private static final String[] CONNECTIVITY_INTENTS = {
             ConnectivityManager.CONNECTIVITY_ACTION,
-            WifiManager.LINK_CONFIGURATION_CHANGED_ACTION,
+            WifiManager.ACTION_LINK_CONFIGURATION_CHANGED,
             WifiManager.NETWORK_STATE_CHANGED_ACTION,
     };
 
