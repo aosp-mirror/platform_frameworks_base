@@ -32,6 +32,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.UserManager;
+import android.view.Surface;
 
 import org.junit.After;
 import org.junit.Before;
@@ -93,6 +94,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         private boolean mIsTranslucent = false;
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         private int mSystemUiVisibility = 0;
+        private int mRotation = Surface.ROTATION_0;
 
         TaskSnapshotBuilder setScale(float scale) {
             mScale = scale;
@@ -124,6 +126,11 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             return this;
         }
 
+        TaskSnapshotBuilder setRotation(int rotation) {
+            mRotation = rotation;
+            return this;
+        }
+
         TaskSnapshot build() {
             final GraphicBuffer buffer = GraphicBuffer.create(100, 100, PixelFormat.RGBA_8888,
                     USAGE_HW_TEXTURE | USAGE_SW_READ_RARELY | USAGE_SW_READ_RARELY);
@@ -131,7 +138,8 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             c.drawColor(Color.RED);
             buffer.unlockCanvasAndPost(c);
             return new TaskSnapshot(MOCK_SNAPSHOT_ID, new ComponentName("", ""), buffer,
-                    ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT, TEST_INSETS,
+                    ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
+                    mRotation, TEST_INSETS,
                     mReducedResolution, mScale, mIsRealSnapshot,
                     mWindowingMode, mSystemUiVisibility, mIsTranslucent);
         }

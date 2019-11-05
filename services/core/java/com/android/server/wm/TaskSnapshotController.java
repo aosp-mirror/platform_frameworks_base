@@ -343,6 +343,7 @@ class TaskSnapshotController {
         builder.setPixelFormat(pixelFormat);
         builder.setIsTranslucent(isTranslucent);
         builder.setOrientation(activity.getTask().getConfiguration().orientation);
+        builder.setRotation(activity.getTask().getDisplayContent().getRotation());
         builder.setWindowingMode(task.getWindowingMode());
         builder.setSystemUiVisibility(getSystemUiVisibility(task));
         return true;
@@ -492,7 +493,8 @@ class TaskSnapshotController {
         return new TaskSnapshot(
                 System.currentTimeMillis() /* id */,
                 topChild.mActivityComponent, hwBitmap.createGraphicBufferHandle(),
-                hwBitmap.getColorSpace(), topChild.getTask().getConfiguration().orientation,
+                hwBitmap.getColorSpace(), mainWindow.getConfiguration().orientation,
+                mainWindow.getWindowConfiguration().getRotation(),
                 getInsets(mainWindow), ActivityManager.isLowRamDeviceStatic() /* reduced */,
                 mFullSnapshotScale, false /* isRealSnapshot */, task.getWindowingMode(),
                 getSystemUiVisibility(task), false);

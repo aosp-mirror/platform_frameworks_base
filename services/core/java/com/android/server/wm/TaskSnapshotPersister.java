@@ -338,6 +338,7 @@ class TaskSnapshotPersister {
         boolean writeProto() {
             final TaskSnapshotProto proto = new TaskSnapshotProto();
             proto.orientation = mSnapshot.getOrientation();
+            proto.rotation = mSnapshot.getRotation();
             proto.insetLeft = mSnapshot.getContentInsets().left;
             proto.insetTop = mSnapshot.getContentInsets().top;
             proto.insetRight = mSnapshot.getContentInsets().right;

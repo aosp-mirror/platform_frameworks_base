@@ -102,8 +102,8 @@ class TaskSnapshotLoader {
             // For legacy snapshots, restore the scale based on the reduced resolution state
             final float legacyScale = reducedResolution ? mPersister.getReducedScale() : 1f;
             final float scale = Float.compare(proto.scale, 0f) != 0 ? proto.scale : legacyScale;
-            return new TaskSnapshot(proto.id, topActivityComponent, buffer,
-                    hwBitmap.getColorSpace(), proto.orientation,
+            return new TaskSnapshot(proto.id, topActivityComponent, buffer, hwBitmap.getColorSpace(),
+                    proto.orientation, proto.rotation,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
                     reducedResolution, scale, proto.isRealSnapshot, proto.windowingMode,
                     proto.systemUiVisibility, proto.isTranslucent);
