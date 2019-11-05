@@ -30,6 +30,7 @@ public class StatusBarDependenciesModule {
      * Provides our instance of CommandQueue which is considered optional.
      */
     @Provides
+    @Singleton
     public CommandQueue provideCommandQueue(Context context) {
         return new CommandQueue(context);
     }
