@@ -75,7 +75,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.media.AudioAttributes;
@@ -109,7 +108,6 @@ import android.view.Display;
 import android.view.IWindowManager;
 import android.view.InsetsState.InternalInsetType;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
 import android.view.ThreadedRenderer;
@@ -201,6 +199,7 @@ import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
@@ -242,7 +241,6 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
@@ -363,8 +361,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Nullable
     private final KeyguardLiftController mKeyguardLiftController;
 
-    private int mNaturalBarHeight = -1;
-
     private final Point mCurrentDisplaySize = new Point();
 
     protected StatusBarWindowViewController mStatusBarWindowViewController;
@@ -383,7 +379,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final FeatureFlags mFeatureFlags;
     private final StatusBarIconController mIconController;
     private final DozeLog mDozeLog;
-    private final InjectionInflationController mInjectionInflater;
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -402,6 +397,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final PluginManager mPluginManager;
     private final RemoteInputUriController mRemoteInputUriController;
+    private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -646,7 +642,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarIconController statusBarIconController,
             DozeLog dozeLog,
-            InjectionInflationController injectionInflationController,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
@@ -705,7 +700,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
             PluginManager pluginManager,
-            RemoteInputUriController remoteInputUriController) {
+            RemoteInputUriController remoteInputUriController,
+            SuperStatusBarViewFactory superStatusBarViewFactory) {
         super(context);
         mFeatureFlags = featureFlags;
         mLightBarController = lightBarController;
@@ -713,7 +709,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mIconController = statusBarIconController;
         mDozeLog = dozeLog;
-        mInjectionInflater = injectionInflationController;
         mPulseExpansionHandler = pulseExpansionHandler;
         mWakeUpCoordinator = notificationWakeUpCoordinator;
         mKeyguardBypassController = keyguardBypassController;
@@ -773,6 +768,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mCommandQueue = commandQueue;
         mPluginManager = pluginManager;
         mRemoteInputUriController = remoteInputUriController;
+        mSuperStatusBarViewFactory = superStatusBarViewFactory;
+
         mBubbleExpandListener =
                 (isExpanding, key) -> {
                     mEntryManager.updateNotifications("onBubbleExpandChanged");
@@ -1367,10 +1364,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private void inflateShelf() {
-        mNotificationShelf =
-                (NotificationShelf) mInjectionInflater.injectable(
-                        LayoutInflater.from(mContext)).inflate(
-                                R.layout.status_bar_notification_shelf, mStackScroller, false);
+        mNotificationShelf = mSuperStatusBarViewFactory.getNotificationShelf(mStackScroller);
         mNotificationShelf.setOnClickListener(mGoToLockedShadeListener);
     }
 
@@ -1428,10 +1422,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected void inflateStatusBarWindow(Context context) {
-        mStatusBarWindow = (StatusBarWindowView) mInjectionInflater.injectable(
-                LayoutInflater.from(context)).inflate(R.layout.super_status_bar, null);
+        mStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
         mStatusBarWindowViewController = mStatusBarWindowViewControllerBuilder
-                .setStatusBarWindowView(mStatusBarWindow)
                 .setShadeController(this)
                 .build();
     }
@@ -1469,12 +1461,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public int getStatusBarHeight() {
-        if (mNaturalBarHeight < 0) {
-            final Resources res = mContext.getResources();
-            mNaturalBarHeight =
-                    res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        }
-        return mNaturalBarHeight;
+        return mStatusBarWindowController.getStatusBarHeight();
     }
 
     protected boolean toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
@@ -2648,7 +2635,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void createAndAddWindows(@Nullable RegisterStatusBarResult result) {
         makeStatusBarView(result);
-        mStatusBarWindowController.add(mStatusBarWindow, getStatusBarHeight());
+        mStatusBarWindowController.attach();
     }
 
     // called by makeStatusbar and also by PhoneStatusBarView
@@ -2926,7 +2913,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mQSPanel.updateResources();
         }
 
-        loadDimens();
+        mStatusBarWindowController.refreshStatusBarHeight();
 
         if (mStatusBarView != null) {
             mStatusBarView.updateResources();
@@ -2937,19 +2924,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.updateResources();
         }
-    }
-
-    protected void loadDimens() {
-        final Resources res = mContext.getResources();
-
-        int oldBarHeight = mNaturalBarHeight;
-        mNaturalBarHeight = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
-        if (mStatusBarWindowController != null && mNaturalBarHeight != oldBarHeight) {
-            mStatusBarWindowController.setBarHeight(mNaturalBarHeight);
-        }
-
-        if (DEBUG) Log.v(TAG, "defineSlots");
     }
 
     // Visibility reporting

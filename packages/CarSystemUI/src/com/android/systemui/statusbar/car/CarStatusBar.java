@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
@@ -131,7 +132,6 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -244,7 +244,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarIconController statusBarIconController,
             DozeLog dozeLog,
-            InjectionInflationController injectionInflationController,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
@@ -303,6 +302,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             CommandQueue commandQueue,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
+            SuperStatusBarViewFactory superStatusBarViewFactory,
             /* Car Settings injected components. */
             CarNavigationBarController carNavigationBarController) {
         super(
@@ -313,7 +313,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 keyguardUpdateMonitor,
                 statusBarIconController,
                 dozeLog,
-                injectionInflationController,
                 pulseExpansionHandler,
                 notificationWakeUpCoordinator,
                 keyguardBypassController,
@@ -372,7 +371,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 dozeScrimController,
                 commandQueue,
                 pluginManager,
-                remoteInputUriController);
+                remoteInputUriController,
+                superStatusBarViewFactory);
         mScrimController = scrimController;
         mCarNavigationBarController = carNavigationBarController;
     }

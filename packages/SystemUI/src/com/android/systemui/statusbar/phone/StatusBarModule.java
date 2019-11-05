@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarDependenciesModule;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
@@ -71,7 +72,6 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.util.InjectionInflationController;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -98,7 +98,6 @@ public class StatusBarModule {
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarIconController statusBarIconController,
             DozeLog dozeLog,
-            InjectionInflationController injectionInflationController,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
@@ -157,7 +156,8 @@ public class StatusBarModule {
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
             PluginManager pluginManager,
-            RemoteInputUriController remoteInputUriController) {
+            RemoteInputUriController remoteInputUriController,
+            SuperStatusBarViewFactory superStatusBarViewFactory) {
         return new StatusBar(
                 context,
                 featureFlags,
@@ -166,7 +166,6 @@ public class StatusBarModule {
                 keyguardUpdateMonitor,
                 statusBarIconController,
                 dozeLog,
-                injectionInflationController,
                 pulseExpansionHandler,
                 notificationWakeUpCoordinator,
                 keyguardBypassController,
@@ -225,6 +224,7 @@ public class StatusBarModule {
                 dozeScrimController,
                 commandQueue,
                 pluginManager,
-                remoteInputUriController);
+                remoteInputUriController,
+                superStatusBarViewFactory);
     }
 }

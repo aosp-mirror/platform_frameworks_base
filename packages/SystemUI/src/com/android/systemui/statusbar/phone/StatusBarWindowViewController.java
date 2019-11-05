@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -492,7 +493,8 @@ public class StatusBarWindowViewController {
         private final DozeLog mDozeLog;
         private final DozeParameters mDozeParameters;
         private final CommandQueue mCommandQueue;
-        private StatusBarWindowView mView;
+        private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+        private final StatusBarWindowView mView;
 
         @Inject
         public Builder(
@@ -510,7 +512,8 @@ public class StatusBarWindowViewController {
                 StatusBarStateController statusBarStateController,
                 DozeLog dozeLog,
                 DozeParameters dozeParameters,
-                CommandQueue commandQueue) {
+                CommandQueue commandQueue,
+                SuperStatusBarViewFactory superStatusBarViewFactory) {
             mInjectionInflationController = injectionInflationController;
             mCoordinator = coordinator;
             mPulseExpansionHandler = pulseExpansionHandler;
@@ -526,14 +529,9 @@ public class StatusBarWindowViewController {
             mDozeLog = dozeLog;
             mDozeParameters = dozeParameters;
             mCommandQueue = commandQueue;
-        }
+            mSuperStatusBarViewFactory = superStatusBarViewFactory;
 
-        /**
-         * Provide {@link StatusBarWindowView} to attach this controller to.
-         */
-        public Builder setStatusBarWindowView(StatusBarWindowView view) {
-            mView = view;
-            return this;
+            mView = mSuperStatusBarViewFactory.getStatusBarWindowView();
         }
 
         /**
