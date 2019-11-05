@@ -56,8 +56,6 @@ import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 
-import static com.android.server.EventLogTags.WM_TASK_CREATED;
-import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.am.TaskRecordProto.ACTIVITIES;
 import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
 import static com.android.server.am.TaskRecordProto.FULLSCREEN;
@@ -128,7 +126,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.DisplayMetrics;
-import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -421,8 +418,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             ActivityStack stack) {
         super(atmService.mWindowManager);
 
-        EventLog.writeEvent(WM_TASK_CREATED, _taskId,
-                stack != null ? stack.mStackId : INVALID_STACK_ID);
+        EventLogTags.writeWmTaskCreated(_taskId, stack != null ? stack.mStackId : INVALID_STACK_ID);
         mAtmService = atmService;
         mTaskId = _taskId;
         mUserId = _userId;
@@ -1301,7 +1297,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         } else if (!mReuseTask) {
             // Remove entire task if it doesn't have any activity left and it isn't marked for reuse
             mStack.removeChild(this, reason);
-            EventLog.writeEvent(WM_TASK_REMOVED, mTaskId,
+            EventLogTags.writeWmTaskRemoved(mTaskId,
                     "removeChild: last r=" + r + " in t=" + this);
             removeIfPossible();
         }
@@ -2306,7 +2302,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     @Override
     void removeImmediately() {
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
-        EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeTask");
+        EventLogTags.writeWmTaskRemoved(mTaskId, "removeTask");
         super.removeImmediately();
     }
 
@@ -2314,7 +2310,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     void reparent(ActivityStack stack, int position, boolean moveParents, String reason) {
         if (DEBUG_STACK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
                 + " from stack=" + getTaskStack());
-        EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "reParentTask");
+        EventLogTags.writeWmTaskRemoved(mTaskId, "reParentTask");
 
         final ActivityStack prevStack = getTaskStack();
         final boolean wasTopFocusedStack =

@@ -83,6 +83,8 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PRE
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.SCREEN_COMPAT_PACKAGES;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.MODE;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE;
+import static com.android.server.am.EventLogTags.writeBootProgressEnableScreen;
+import static com.android.server.am.EventLogTags.writeConfigurationChanged;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
@@ -215,7 +217,6 @@ import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -258,7 +259,6 @@ import com.android.server.am.ActivityManagerServiceDumpActivitiesProto;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.BaseErrorDialog;
-import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentController;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
@@ -5195,8 +5195,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.i(TAG_CONFIGURATION,
                 "Updating global configuration to: " + values);
-
-        EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
+        writeConfigurationChanged(changes);
         StatsLog.write(StatsLog.RESOURCE_CONFIGURATION_CHANGED,
                 values.colorMode,
                 values.densityDpi,
@@ -5359,8 +5358,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     void enableScreenAfterBoot(boolean booted) {
-        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_ENABLE_SCREEN,
-                SystemClock.uptimeMillis());
+        writeBootProgressEnableScreen(SystemClock.uptimeMillis());
         mWindowManager.enableScreenAfterBoot();
 
         synchronized (mGlobalLock) {
@@ -5491,7 +5489,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         applyUpdateLockStateLocked(r);
         applyUpdateVrModeLocked(r);
 
-        EventLogTags.writeAmSetResumedActivity(
+        EventLogTags.writeWmSetResumedActivity(
                 r == null ? -1 : r.mUserId,
                 r == null ? "NULL" : r.shortComponentName,
                 reason);
@@ -6419,8 +6417,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void enableScreenAfterBoot(boolean booted) {
             synchronized (mGlobalLock) {
-                EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_ENABLE_SCREEN,
-                        SystemClock.uptimeMillis());
+                writeBootProgressEnableScreen(SystemClock.uptimeMillis());
                 mWindowManager.enableScreenAfterBoot();
                 updateEventDispatchingLocked(booted);
             }

@@ -2786,8 +2786,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         int total = user + system + iowait + irq + softIrq + idle;
                         if (total == 0) total = 1;
 
-                        EventLog.writeEvent(EventLogTags.CPU,
-                                ((user+system+iowait+irq+softIrq) * 100) / total,
+                        EventLogTags.writeCpu(
+                                ((user + system + iowait + irq + softIrq) * 100) / total,
                                 (user * 100) / total,
                                 (system * 100) / total,
                                 (iowait * 100) / total,
@@ -3656,7 +3656,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final ArrayList<ProcessMemInfo> memInfos
                     = doReport ? new ArrayList<ProcessMemInfo>(mProcessList.getLruSizeLocked())
                     : null;
-            EventLog.writeEvent(EventLogTags.AM_LOW_MEMORY, mProcessList.getLruSizeLocked());
+            EventLogTags.writeAmLowMemory(mProcessList.getLruSizeLocked());
             long now = SystemClock.uptimeMillis();
             for (int i = mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
                 ProcessRecord rec = mProcessList.mLruProcesses.get(i);
@@ -3737,8 +3737,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mAllowLowerMemLevel = false;
                 doLowMem = false;
             }
-            EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.userId, app.pid, app.processName,
-                    app.setAdj, app.setProcState);
+            EventLogTags.writeAmProcDied(app.userId, app.pid, app.processName, app.setAdj,
+                    app.setProcState);
             if (DEBUG_CLEANUP) Slog.v(TAG_CLEANUP,
                 "Dying app: " + app + ", pid: " + pid + ", thread: " + thread.asBinder());
             handleAppDiedLocked(app, false, true);
@@ -3761,7 +3761,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Execute the callback if there is any.
             doAppDiedCallbackLocked(app);
 
-            EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.userId, app.pid, app.processName);
+            EventLogTags.writeAmProcDied(app.userId, app.pid, app.processName, app.setAdj,
+                    app.setProcState);
         } else if (DEBUG_PROCESSES) {
             Slog.d(TAG_PROCESSES, "Received spurious death notification for thread "
                     + thread.asBinder());
@@ -4755,8 +4756,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (gone) {
             Slog.w(TAG, "Process " + app + " failed to attach");
-            EventLog.writeEvent(EventLogTags.AM_PROCESS_START_TIMEOUT, app.userId,
-                    pid, app.uid, app.processName);
+            EventLogTags.writeAmProcessStartTimeout(app.userId, pid, app.uid, app.processName);
             mProcessList.removeProcessNameLocked(app.processName, app.uid);
             mAtmInternal.clearHeavyWeightProcessIfEquals(app.getWindowProcessController());
             mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
@@ -4847,7 +4847,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (app == null) {
             Slog.w(TAG, "No pending application record for pid " + pid
                     + " (IApplicationThread " + thread + "); dropping process");
-            EventLog.writeEvent(EventLogTags.AM_DROP_PROCESS, pid);
+            EventLogTags.writeAmDropProcess(pid);
             if (pid > 0 && pid != MY_PID) {
                 killProcessQuiet(pid);
                 //TODO: killProcessGroup(app.info.uid, pid);
@@ -4885,7 +4885,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return false;
         }
 
-        EventLog.writeEvent(EventLogTags.AM_PROC_BOUND, app.userId, app.pid, app.processName);
+        EventLogTags.writeAmProcBound(app.userId, app.pid, app.processName);
 
         app.curAdj = app.setAdj = app.verifiedAdj = ProcessList.INVALID_ADJ;
         mOomAdjuster.setAttachingSchedGroupLocked(app);
@@ -7163,7 +7163,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + cpi.applicationInfo.packageName + "/"
                             + cpi.applicationInfo.uid + " for provider "
                             + name + ": launching app became null");
-                    EventLog.writeEvent(EventLogTags.AM_PROVIDER_LOST_PROCESS,
+                    EventLogTags.writeAmProviderLostProcess(
                             UserHandle.getUserId(cpi.applicationInfo.uid),
                             cpi.applicationInfo.packageName,
                             cpi.applicationInfo.uid, name);
@@ -9156,7 +9156,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         t.traceEnd(); // KillProcesses
 
         Slog.i(TAG, "System now ready");
-        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY, SystemClock.uptimeMillis());
+
+        EventLogTags.writeBootProgressAmsReady(SystemClock.uptimeMillis());
 
         t.traceBegin("updateTopComponentForFactoryTest");
         mAtmInternal.updateTopComponentForFactoryTest();
@@ -9410,7 +9411,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     void handleApplicationCrashInner(String eventType, ProcessRecord r, String processName,
             ApplicationErrorReport.CrashInfo crashInfo) {
-        EventLog.writeEvent(EventLogTags.AM_CRASH, Binder.getCallingPid(),
+
+        EventLogTags.writeAmCrash(Binder.getCallingPid(),
                 UserHandle.getUserId(Binder.getCallingUid()), processName,
                 r == null ? -1 : r.info.flags,
                 crashInfo.exceptionClassName,
@@ -9613,7 +9615,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final String processName = app == null ? "system_server"
                 : (r == null ? "unknown" : r.processName);
 
-        EventLog.writeEvent(EventLogTags.AM_WTF, UserHandle.getUserId(callingUid), callingPid,
+        EventLogTags.writeAmWtf(UserHandle.getUserId(callingUid), callingPid,
                 processName, r == null ? -1 : r.info.flags, tag, crashInfo.exceptionMessage);
 
         StatsLog.write(StatsLog.WTF_OCCURRED, callingUid, tag, processName,
