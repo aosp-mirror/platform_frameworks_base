@@ -127,6 +127,13 @@ class ReceiverRestrictedContext extends ContextWrapper {
     }
 
     @Override
+    public Intent registerReceiverForAllUsers(BroadcastReceiver receiver, IntentFilter filter,
+            String broadcastPermission, Handler scheduler) {
+        return registerReceiverAsUser(
+                receiver, UserHandle.ALL, filter, broadcastPermission, scheduler);
+    }
+
+    @Override
     public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
             IntentFilter filter, String broadcastPermission, Handler scheduler) {
         if (receiver == null) {
@@ -1517,6 +1524,13 @@ class ContextImpl extends Context {
             String broadcastPermission, Handler scheduler, int flags) {
         return registerReceiverInternal(receiver, getUserId(),
                 filter, broadcastPermission, scheduler, getOuterContext(), flags);
+    }
+
+    @Override
+    public Intent registerReceiverForAllUsers(BroadcastReceiver receiver,
+            IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        return registerReceiverAsUser(receiver, UserHandle.ALL,
+                filter, broadcastPermission, scheduler);
     }
 
     @Override

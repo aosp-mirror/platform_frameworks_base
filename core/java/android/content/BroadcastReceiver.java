@@ -16,6 +16,8 @@
 
 package android.content;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -25,6 +27,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
@@ -621,6 +624,20 @@ public abstract class BroadcastReceiver {
     @UnsupportedAppUsage
     public final PendingResult getPendingResult() {
         return mPendingResult;
+    }
+
+    /**
+     * Returns the user that the broadcast was sent to.
+     *
+     * <p>It can be used in a receiver registered by
+     * {@link Context#registerReceiverForAllUsers Context.registerReceiverForAllUsers()}
+     * to determine on which user the broadcast was sent.
+     *
+     * @hide
+     */
+    @SystemApi
+    public final @NonNull UserHandle getSendingUser() {
+        return UserHandle.of(getSendingUserId());
     }
 
     /** @hide */
