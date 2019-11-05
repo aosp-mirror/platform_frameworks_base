@@ -19,6 +19,8 @@ package com.android.server.integrity.parser;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.server.integrity.model.AtomicFormula;
+import com.android.server.integrity.model.Formula;
 import com.android.server.integrity.model.Rule;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -38,8 +40,15 @@ public final class RuleXmlParser implements RuleParser {
 
     public static final String TAG = "RuleXmlParser";
 
+    // TODO: Use XML attributes
     private static final String RULE_LIST_TAG = "RuleList";
     private static final String RULE_TAG = "Rule";
+    private static final String OPEN_FORMULA_TAG = "OpenFormula";
+    private static final String ATOMIC_FORMULA_TAG = "AtomicFormula";
+    private static final String EFFECT_TAG = "Effect";
+    private static final String KEY_TAG = "Key";
+    private static final String OPERATOR_TAG = "Operator";
+    private static final String VALUE_TAG = "Value";
 
     @Override
     public List<Rule> parse(String ruleText) {
@@ -65,7 +74,8 @@ public final class RuleXmlParser implements RuleParser {
         return null;
     }
 
-    private List<Rule> parseRules(XmlPullParser parser) throws IOException, XmlPullParserException {
+    private static List<Rule> parseRules(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
         List<Rule> rules = new ArrayList<>();
 
         // Skipping the first event type, which is always {@link XmlPullParser.START_DOCUMENT}
@@ -98,8 +108,109 @@ public final class RuleXmlParser implements RuleParser {
         return rules;
     }
 
-    private Rule parseRule(XmlPullParser parser) {
-        // TODO: Implement rule parser.
+    private static Rule parseRule(XmlPullParser parser) {
+        try {
+            Formula formula = null;
+            @Rule.Effect int effect = 0;
+
+            boolean isValid = true;
+            int eventType;
+            while ((eventType = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                String nodeName = parser.getName();
+
+                if (eventType == XmlPullParser.END_TAG && parser.getName().equals(RULE_TAG)) {
+                    break;
+                }
+
+                if (eventType == XmlPullParser.START_TAG) {
+                    switch (nodeName) {
+                        case OPEN_FORMULA_TAG:
+                            formula = parseOpenFormula(parser);
+                            break;
+                        case ATOMIC_FORMULA_TAG:
+                            formula = parseAtomicFormula(parser);
+                            break;
+                        case EFFECT_TAG:
+                            effect = Integer.parseInt(extractValue(parser));
+                            break;
+                        default:
+                            isValid = false;
+                    }
+                } else {
+                    isValid = false;
+                }
+            }
+
+            return isValid ? new Rule(formula, effect) : null;
+        } catch (Exception e) {
+            // In case of any exceptions arising from constructing the rule, it will be skipped.
+            // Rules are assumed to be validated on the server.
+            return null;
+        }
+    }
+
+    private static Formula parseOpenFormula(XmlPullParser parser) {
+        // TODO: Implement open formula parser.
         return null;
+    }
+
+    private static Formula parseAtomicFormula(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        @AtomicFormula.Key int key = 0;
+        @AtomicFormula.Operator int operator = 0;
+        String value = null;
+
+        boolean isValid = true;
+        int eventType;
+        while ((eventType = parser.next()) != XmlPullParser.END_DOCUMENT) {
+            String nodeName = parser.getName();
+
+            if (eventType == XmlPullParser.END_TAG && parser.getName().equals(ATOMIC_FORMULA_TAG)) {
+                break;
+            }
+
+            if (eventType == XmlPullParser.START_TAG) {
+                switch (nodeName) {
+                    case KEY_TAG:
+                        key = Integer.parseInt(extractValue(parser));
+                        break;
+                    case OPERATOR_TAG:
+                        operator = Integer.parseInt(extractValue(parser));
+                        break;
+                    case VALUE_TAG:
+                        value = extractValue(parser);
+                        break;
+                    default:
+                        isValid = false;
+                }
+            }
+        }
+        return isValid ? constructAtomicFormulaBasedOnKey(key, operator, value) : null;
+    }
+
+    private static Formula constructAtomicFormulaBasedOnKey(@AtomicFormula.Key int key,
+            @AtomicFormula.Operator int operator, String value) {
+        switch (key) {
+            case AtomicFormula.PACKAGE_NAME:
+            case AtomicFormula.INSTALLER_NAME:
+            case AtomicFormula.APP_CERTIFICATE:
+            case AtomicFormula.INSTALLER_CERTIFICATE:
+                return new AtomicFormula.StringAtomicFormula(key, value);
+            case AtomicFormula.PRE_INSTALLED:
+                return new AtomicFormula.BooleanAtomicFormula(key, Boolean.parseBoolean(value));
+            case AtomicFormula.VERSION_CODE:
+                return new AtomicFormula.IntAtomicFormula(key, operator, Integer.parseInt(value));
+            default:
+                return null;
+        }
+    }
+
+    private static String extractValue(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        String value = null;
+        if (parser.next() == XmlPullParser.TEXT) {
+            value = parser.getText();
+        }
+        return parser.next() == XmlPullParser.END_TAG ? value : null;
     }
 }
