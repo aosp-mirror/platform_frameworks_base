@@ -3050,7 +3050,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void handleAsyncChannelHalfConnect(Message msg) {
-        AsyncChannel ac = (AsyncChannel) msg.obj;
+        ensureRunningOnConnectivityServiceThread();
+        final AsyncChannel ac = (AsyncChannel) msg.obj;
         if (mNetworkFactoryInfos.containsKey(msg.replyTo)) {
             if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
                 if (VDBG) log("NetworkFactory connected");
@@ -3116,6 +3117,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // ConnectivityService, free its interfaces and clean up.
     // Must be called on the Handler thread.
     private void disconnectAndDestroyNetwork(NetworkAgentInfo nai) {
+        ensureRunningOnConnectivityServiceThread();
         if (DBG) {
             log(nai.name() + " got DISCONNECTED, was satisfying " + nai.numNetworkRequests());
         }
@@ -3253,6 +3255,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void handleRegisterNetworkRequest(NetworkRequestInfo nri) {
+        ensureRunningOnConnectivityServiceThread();
         mNetworkRequests.put(nri.request, nri);
         mNetworkRequestInfoLogs.log("REGISTER " + nri);
         if (nri.request.isListen()) {
@@ -3286,6 +3289,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // - UnneededFor.LINGER: foreground NetworkRequests. If a network is unneeded for this reason,
     //   then it should be lingered.
     private boolean unneeded(NetworkAgentInfo nai, UnneededFor reason) {
+        ensureRunningOnConnectivityServiceThread();
         final int numRequests;
         switch (reason) {
             case TEARDOWN:
@@ -3344,6 +3348,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void handleTimedOutNetworkRequest(final NetworkRequestInfo nri) {
+        ensureRunningOnConnectivityServiceThread();
         if (mNetworkRequests.get(nri.request) == null) {
             return;
         }
@@ -3374,6 +3379,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void handleRemoveNetworkRequest(final NetworkRequestInfo nri) {
+        ensureRunningOnConnectivityServiceThread();
+
         nri.unlinkDeathRecipient();
         mNetworkRequests.remove(nri.request);
 
@@ -5506,7 +5513,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private final HashSet<Integer> mBlockedAppUids = new HashSet<>();
 
     // Note: if mDefaultRequest is changed, NetworkMonitor needs to be updated.
+    @NonNull
     private final NetworkRequest mDefaultRequest;
+    // The NetworkAgentInfo currently satisfying the default request, if any.
+    @Nullable
+    private volatile NetworkAgentInfo mDefaultNetworkNai = null;
 
     // Request used to optionally keep mobile data active even when higher
     // priority networks like Wi-Fi are active.
@@ -5525,17 +5536,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void clearNetworkForRequest(int requestId) {
         synchronized (mNetworkForRequestId) {
             mNetworkForRequestId.remove(requestId);
+            if (mDefaultRequest.requestId == requestId) mDefaultNetworkNai = null;
         }
     }
 
     private void setNetworkForRequest(int requestId, NetworkAgentInfo nai) {
         synchronized (mNetworkForRequestId) {
             mNetworkForRequestId.put(requestId, nai);
+            if (mDefaultRequest.requestId == requestId) mDefaultNetworkNai = nai;
         }
     }
 
     private NetworkAgentInfo getDefaultNetwork() {
-        return getNetworkForRequest(mDefaultRequest.requestId);
+        return mDefaultNetworkNai;
     }
 
     @Nullable
@@ -6325,6 +6338,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     //               validated) of becoming the highest scoring network.
     private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork,
             ReapUnvalidatedNetworks reapUnvalidatedNetworks, long now) {
+        ensureRunningOnConnectivityServiceThread();
         if (!newNetwork.everConnected) return;
         boolean keep = newNetwork.isVPN();
         boolean isNewDefault = false;
