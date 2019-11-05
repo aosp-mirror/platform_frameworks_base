@@ -649,7 +649,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private boolean hasAnySim() {
-        int simCount = mPhone.getSimCount();
+        int simCount = mPhone.getActiveModemCount();
         for (int i = 0; i < simCount; i++) {
             int state = mPhone.getSimState(i);
             if (state != TelephonyManager.SIM_STATE_ABSENT
