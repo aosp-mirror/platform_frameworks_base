@@ -4949,6 +4949,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mBootMsgDialog.getWindow().setDimAmount(1);
                     WindowManager.LayoutParams lp = mBootMsgDialog.getWindow().getAttributes();
                     lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+                    lp.setFitWindowInsetsTypes(0 /* types */);
                     mBootMsgDialog.getWindow().setAttributes(lp);
                     mBootMsgDialog.setCancelable(false);
                     mBootMsgDialog.show();

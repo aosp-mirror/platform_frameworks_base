@@ -78,6 +78,8 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
         resources.addOverride(R.dimen.navigation_bar_height, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_height_landscape, NAV_BAR_HEIGHT);
         resources.addOverride(R.dimen.navigation_bar_width, NAV_BAR_HEIGHT);
+        resources.addOverride(R.dimen.navigation_bar_frame_height_landscape, NAV_BAR_HEIGHT);
+        resources.addOverride(R.dimen.navigation_bar_frame_height, NAV_BAR_HEIGHT);
         doReturn(resources.getResources()).when(mDisplayPolicy).getCurrentUserResources();
         doReturn(true).when(mDisplayPolicy).hasNavigationBar();
         doReturn(true).when(mDisplayPolicy).hasStatusBar();

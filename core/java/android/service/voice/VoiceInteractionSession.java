@@ -1137,6 +1137,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
         mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
                 mCallbacks, this, mDispatcherState,
                 WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.BOTTOM, true);
+        mWindow.getWindow().setFitWindowInsetsTypes(0 /* types */);
         mWindow.getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED |
                         WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |

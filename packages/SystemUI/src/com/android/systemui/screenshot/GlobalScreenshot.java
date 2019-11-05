@@ -258,6 +258,7 @@ public class GlobalScreenshot {
                 PixelFormat.TRANSLUCENT);
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
         mWindowLayoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        mWindowLayoutParams.setFitWindowInsetsTypes(0 /* types */);
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mNotificationManager =
                 (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);

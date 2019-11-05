@@ -23,6 +23,7 @@ import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -40,12 +41,14 @@ import android.util.AttributeSet;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
@@ -321,6 +324,16 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        if (isAttachedToWindow()
+                && ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL) {
+            // Our window doesn't cover entire display, so we use the display frame to re-calculate
+            // the insets.
+            final InsetsState state = getWindowInsetsController().getState();
+            insets = state.calculateInsets(state.getDisplayFrame(), insets.isRound(),
+                    insets.shouldAlwaysConsumeSystemBars(), insets.getDisplayCutout(),
+                    null /* legacyContentInsets */, null /* legacyStableInsets */,
+                    SOFT_INPUT_ADJUST_NOTHING, null /* typeSideMap */);
+        }
         if (mStableInsets.left != insets.getStableInsetLeft()
                 || mStableInsets.top != insets.getStableInsetTop()
                 || mStableInsets.right != insets.getStableInsetRight()

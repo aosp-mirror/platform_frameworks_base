@@ -71,6 +71,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -154,6 +155,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
         final TaskDescription taskDescription = new TaskDescription();
         taskDescription.setBackgroundColor(WHITE);
+        final WindowState topFullscreenWindow;
         final int sysUiVis;
         final int windowFlags;
         final int windowPrivateFlags;
@@ -173,7 +175,7 @@ class TaskSnapshotSurface implements StartingSurface {
                         + task);
                 return null;
             }
-            final WindowState topFullscreenWindow = topFullscreenActivity.getTopFullscreenWindow();
+            topFullscreenWindow = topFullscreenActivity.getTopFullscreenWindow();
             if (mainWindow == null || topFullscreenWindow == null) {
                 Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for activity="
                         + activity);
@@ -220,7 +222,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final TaskSnapshotSurface snapshotSurface = new TaskSnapshotSurface(service, window,
                 surfaceControl, snapshot, layoutParams.getTitle(), taskDescription, sysUiVis,
                 windowFlags, windowPrivateFlags, taskBounds,
-                currentOrientation);
+                currentOrientation, topFullscreenWindow.getClientInsetsState());
         window.setOuter(snapshotSurface);
         try {
             session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
@@ -238,7 +240,7 @@ class TaskSnapshotSurface implements StartingSurface {
     TaskSnapshotSurface(WindowManagerService service, Window window, SurfaceControl surfaceControl,
             TaskSnapshot snapshot, CharSequence title, TaskDescription taskDescription,
             int sysUiVis, int windowFlags, int windowPrivateFlags, Rect taskBounds,
-            int currentOrientation) {
+            int currentOrientation, InsetsState insetsState) {
         mService = service;
         mSurface = service.mSurfaceFactory.get();
         mHandler = new Handler(mService.mH.getLooper());
@@ -251,7 +253,7 @@ class TaskSnapshotSurface implements StartingSurface {
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
         mTaskBounds = taskBounds;
         mSystemBarBackgroundPainter = new SystemBarBackgroundPainter(windowFlags,
-                windowPrivateFlags, sysUiVis, taskDescription, 1f);
+                windowPrivateFlags, sysUiVis, taskDescription, 1f, insetsState);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
         mTransaction = mService.mTransactionFactory.get();
@@ -502,9 +504,10 @@ class TaskSnapshotSurface implements StartingSurface {
         private final int mWindowPrivateFlags;
         private final int mSysUiVis;
         private final float mScale;
+        private final InsetsState mInsetsState;
 
         SystemBarBackgroundPainter(int windowFlags, int windowPrivateFlags, int sysUiVis,
-                TaskDescription taskDescription, float scale) {
+                TaskDescription taskDescription, float scale, InsetsState insetsState) {
             mWindowFlags = windowFlags;
             mWindowPrivateFlags = windowPrivateFlags;
             mSysUiVis = sysUiVis;
@@ -524,6 +527,7 @@ class TaskSnapshotSurface implements StartingSurface {
                             && context.getResources().getBoolean(R.bool.config_navBarNeedsScrim));
             mStatusBarPaint.setColor(mStatusBarColor);
             mNavigationBarPaint.setColor(mNavigationBarColor);
+            mInsetsState = insetsState;
         }
 
         void setInsets(Rect contentInsets, Rect stableInsets) {
@@ -534,8 +538,11 @@ class TaskSnapshotSurface implements StartingSurface {
         int getStatusBarColorViewHeight() {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
-            if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                    mSysUiVis, mStatusBarColor, mWindowFlags, forceBarBackground)) {
+            if (ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
+                    ? STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                            mSysUiVis, mStatusBarColor, mWindowFlags, forceBarBackground)
+                    : STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                            mInsetsState, mStatusBarColor, mWindowFlags, forceBarBackground)) {
                 return (int) (getColorViewTopInset(mStableInsets.top, mContentInsets.top) * mScale);
             } else {
                 return 0;
@@ -545,8 +552,11 @@ class TaskSnapshotSurface implements StartingSurface {
         private boolean isNavigationBarColorViewVisible() {
             final boolean forceBarBackground =
                     (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
-            return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                    mSysUiVis, mNavigationBarColor, mWindowFlags, forceBarBackground);
+            return ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL
+                    ? NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                            mSysUiVis, mNavigationBarColor, mWindowFlags, forceBarBackground)
+                    : NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
+                            mInsetsState, mNavigationBarColor, mWindowFlags, forceBarBackground);
         }
 
         void drawDecors(Canvas c, @Nullable Rect alreadyDrawnFrame) {

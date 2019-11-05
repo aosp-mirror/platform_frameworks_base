@@ -120,6 +120,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
         window.getAttributes().height = ViewGroup.LayoutParams.MATCH_PARENT;
         window.getAttributes().layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
+        window.setFitWindowInsetsTypes(0 /* types */);
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.addFlags(
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN

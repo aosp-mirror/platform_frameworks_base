@@ -85,6 +85,7 @@ public class DefaultUiController implements AssistManager.UiController {
                 PixelFormat.TRANSLUCENT);
         mLayoutParams.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
         mLayoutParams.gravity = Gravity.BOTTOM;
+        mLayoutParams.setFitWindowInsetsTypes(0 /* types */);
         mLayoutParams.setTitle("Assist");
 
         mInvocationLightsView = (InvocationLightsView)

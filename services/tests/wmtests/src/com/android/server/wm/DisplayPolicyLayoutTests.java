@@ -36,6 +36,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -45,6 +46,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 
@@ -55,6 +57,10 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.InsetsState;
+import android.view.ViewRootImpl;
+import android.view.WindowInsets.Side;
+import android.view.WindowInsets.Type;
 import android.view.WindowManager;
 
 import androidx.test.filters.FlakyTest;
@@ -97,8 +103,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final WindowManager.LayoutParams attrs = mWindow.mAttrs;
         attrs.width = MATCH_PARENT;
         attrs.height = MATCH_PARENT;
-        attrs.flags =
-                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         attrs.format = PixelFormat.TRANSLUCENT;
     }
 
@@ -134,8 +138,186 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     @Test
+    public void layoutWindowLw_fitStatusBars() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.setFitWindowInsetsTypes(Type.statusBars());
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_fitNavigationBars() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.setFitWindowInsetsTypes(Type.navigationBars());
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getParentFrame(), 0, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
     public void layoutWindowLw_appDrawsBars() {
-        mWindow.mAttrs.flags |= FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.flags = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.setFitWindowInsetsTypes(Type.systemBars());
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, 0);
+        assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_forceAppDrawBars() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.privateFlags = PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
+        mWindow.mAttrs.setFitWindowInsetsTypes(Type.systemBars());
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, 0);
+        assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_onlyDrawBottomBar() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.flags = FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.privateFlags = PRIVATE_FLAG_ONLY_DRAW_BOTTOM_BAR_BACKGROUND;
+        mWindow.mAttrs.setFitWindowInsetsTypes(Type.systemBars());
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_fitAllSides() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.setFitWindowInsetsSides(Side.all());
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_fitTopOnly() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.setFitWindowInsetsSides(Side.TOP);
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_fitMax() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final InsetsState state =
+                mDisplayContent.getInsetsStateController().getInsetsForDispatch(mWindow);
+        state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
+        state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
+        mWindow.mAttrs.setFitIgnoreVisibility(true);
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_fitNonMax() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode == ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        final InsetsState state =
+                mDisplayContent.getInsetsStateController().getInsetsForDispatch(mWindow);
+        state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
+        state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
+        mWindow.mAttrs.setFitIgnoreVisibility(false);
+        addWindow(mWindow);
+
+        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
+
+        assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, 0);
+        assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
+        assertInsetByTopBottom(mWindow.getVisibleFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
+    }
+
+    // TODO(b/118118435): remove after migration
+    @Test
+    public void layoutWindowLw_appDrawsBarsLegacy() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -148,9 +330,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
     }
 
+    // TODO(b/118118435): remove after migration
     @Test
     public void layoutWindowLw_appWontDrawBars() {
-        mWindow.mAttrs.flags &= ~FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -163,10 +348,13 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, NAV_BAR_HEIGHT);
     }
 
+    // TODO(b/118118435): remove after migration
     @Test
     public void layoutWindowLw_appWontDrawBars_forceStatusAndNav() throws Exception {
-        mWindow.mAttrs.flags &= ~FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-        mWindow.mAttrs.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
+        mWindow.mAttrs.flags = FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR;
+        mWindow.mAttrs.privateFlags = PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -179,11 +367,14 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, 0);
     }
 
+    // TODO(b/118118435): remove after migration (keyguard dialog is not special with the new logic)
     @Test
     public void layoutWindowLw_keyguardDialog_hideNav() {
         mWindow.mAttrs.type = TYPE_KEYGUARD_DIALOG;
-        mWindow.mAttrs.flags |= FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.systemUiVisibility = SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        mWindow.mAttrs.setFitWindowInsetsTypes(0 /* types */);
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* uiMode */);
@@ -200,6 +391,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void layoutWindowLw_withDisplayCutout() {
         addDisplayCutout();
 
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -216,6 +409,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void layoutWindowLw_withDisplayCutout_never() {
         addDisplayCutout();
 
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
         addWindow(mWindow);
 
@@ -233,7 +428,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void layoutWindowLw_withDisplayCutout_layoutFullscreen() {
         addDisplayCutout();
 
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        mWindow.mAttrs.setFitWindowInsetsTypes(
+                mWindow.mAttrs.getFitWindowInsetsTypes() & ~Type.statusBars());
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -243,14 +442,18 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetByTopBottom(mWindow.getStableFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
         assertInsetByTopBottom(mWindow.getDecorFrame(), 0, 0);
-        assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
+        assertInsetByTopBottom(mWindow.getDisplayFrameLw(), 0, 0);
     }
 
     @Test
     public void layoutWindowLw_withDisplayCutout_fullscreen() {
         addDisplayCutout();
 
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_FULLSCREEN;
+        mDisplayContent.getInsetsStateController().getInsetsForDispatch(mWindow)
+                .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -267,7 +470,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void layoutWindowLw_withDisplayCutout_fullscreenInCutout() {
         addDisplayCutout();
 
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_FULLSCREEN;
+        mDisplayContent.getInsetsStateController().getInsetsForDispatch(mWindow)
+                .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindow(mWindow);
 
@@ -286,6 +493,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void layoutWindowLw_withDisplayCutout_landscape() {
         addDisplayCutout();
         setRotation(ROTATION_90);
+
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -303,6 +513,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void layoutWindowLw_withDisplayCutout_seascape() {
         addDisplayCutout();
         setRotation(ROTATION_270);
+
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -321,7 +534,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         addDisplayCutout();
         setRotation(ROTATION_90);
 
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        mWindow.mAttrs.setFitWindowInsetsTypes(
+                mWindow.mAttrs.getFitWindowInsetsTypes() & ~Type.statusBars());
         addWindow(mWindow);
 
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -339,6 +556,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         addDisplayCutout();
 
         mWindow.mAttrs.flags = FLAG_LAYOUT_IN_SCREEN;
+        mWindow.mAttrs.setFitWindowInsetsTypes(Type.systemBars() & ~Type.statusBars());
         mWindow.mAttrs.type = TYPE_APPLICATION_OVERLAY;
         mWindow.mAttrs.width = DISPLAY_WIDTH;
         mWindow.mAttrs.height = DISPLAY_HEIGHT;
@@ -356,7 +574,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         addDisplayCutout();
         setRotation(ROTATION_90);
 
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        mWindow.mAttrs.setFitWindowInsetsTypes(
+                mWindow.mAttrs.getFitWindowInsetsTypes() & ~Type.statusBars());
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindow(mWindow);
 
@@ -372,6 +594,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_withForwardInset_SoftInputAdjustResize() {
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
         addWindow(mWindow);
 
@@ -392,6 +616,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_withForwardInset_SoftInputAdjustNothing() {
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_NOTHING;
         addWindow(mWindow);
 
@@ -408,9 +634,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         assertInsetBy(mWindow.getDisplayFrameLw(), 0, 0, 0, 0);
     }
 
+    // TODO(b/118118435): remove after removing PolicyControl
     @FlakyTest(bugId = 129711077)
     @Test
     public void layoutWindowLw_withImmersive_SoftInputAdjustResize() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
         synchronized (mWm.mGlobalLock) {
             mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
             mWindow.mAttrs.flags = 0;
@@ -433,9 +662,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         }
     }
 
+    // TODO(b/118118435): remove after removing PolicyControl
     @FlakyTest(bugId = 129711077)
     @Test
     public void layoutWindowLw_withImmersive_SoftInputAdjustNothing() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
         synchronized (mWm.mGlobalLock) {
             mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_NOTHING;
             mWindow.mAttrs.flags = 0;
@@ -457,9 +689,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         }
     }
 
+    // TODO(b/118118435): remove after removing PolicyControl
     @FlakyTest(bugId = 129711077)
     @Test
     public void layoutWindowLw_withForceImmersive_fullscreen() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
         synchronized (mWm.mGlobalLock) {
             mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
             mWindow.mAttrs.flags = 0;
@@ -481,9 +716,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         }
     }
 
+    // TODO(b/118118435): remove after removing PolicyControl
     @FlakyTest(bugId = 129711077)
     @Test
     public void layoutWindowLw_withForceImmersive_nonFullscreen() {
+        assumeTrue(ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL);
+
         synchronized (mWm.mGlobalLock) {
             mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_RESIZE;
             mWindow.mAttrs.flags = 0;
@@ -509,6 +747,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutHint_appWindow() {
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+
         // Initialize DisplayFrames
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
@@ -530,6 +771,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutHint_appWindowInTask() {
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+
         // Initialize DisplayFrames
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
@@ -553,6 +797,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutHint_appWindowInTask_outsideContentFrame() {
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+
         // Initialize DisplayFrames
         mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
@@ -581,7 +828,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void forceShowSystemBars_clearsSystemUIFlags() {
         mDisplayPolicy.mLastSystemUiFlags |= SYSTEM_UI_FLAG_FULLSCREEN;
         mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        mWindow.mAttrs.flags |= FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+        mWindow.mAttrs.flags =
+                FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mSystemUiVisibility = SYSTEM_UI_FLAG_FULLSCREEN;
         mDisplayPolicy.setForceShowSystemBars(true);
         addWindow(mWindow);
@@ -600,7 +848,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void testScreenDecorWindows() {
         final WindowState decorWindow = createWindow(null, TYPE_APPLICATION_OVERLAY, "decorWindow");
-        decorWindow.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        mWindow.mAttrs.flags = FLAG_NOT_FOCUSABLE | FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR
+                | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         decorWindow.mAttrs.privateFlags |= PRIVATE_FLAG_IS_SCREEN_DECOR;
         addWindow(decorWindow);
         addWindow(mWindow);

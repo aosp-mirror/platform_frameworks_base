@@ -203,4 +203,9 @@ public interface WindowInsetsController {
      * @see Behavior
      */
     void setSystemBarsBehavior(@Behavior int behavior);
+
+    /**
+     * @hide
+     */
+    InsetsState getState();
 }

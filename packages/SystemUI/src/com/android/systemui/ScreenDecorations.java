@@ -495,6 +495,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             lp.gravity = Gravity.TOP | Gravity.LEFT;
         }
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        lp.setFitWindowInsetsTypes(0 /* types */);
         if (isLandscape(mRotation)) {
             lp.width = WRAP_CONTENT;
             lp.height = MATCH_PARENT;
