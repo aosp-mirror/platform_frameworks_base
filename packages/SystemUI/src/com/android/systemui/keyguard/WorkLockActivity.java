@@ -117,9 +117,14 @@ public class WorkLockActivity extends Activity {
         }
     }
 
+    @VisibleForTesting
+    protected void unregisterBroadcastReceiver() {
+        mBroadcastDispatcher.unregisterReceiver(mLockEventReceiver);
+    }
+
     @Override
     public void onDestroy() {
-        unregisterReceiver(mLockEventReceiver);
+        unregisterBroadcastReceiver();
         super.onDestroy();
     }
 
