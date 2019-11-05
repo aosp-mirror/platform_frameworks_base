@@ -56,7 +56,9 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     public void addListener(IActivityManager am, TaskStackChangeListener listener) {
-        mTaskStackListeners.add(listener);
+        synchronized (mTaskStackListeners) {
+            mTaskStackListeners.add(listener);
+        }
         if (!mRegistered) {
             // Register mTaskStackListener to IActivityManager only once if needed.
             try {
@@ -69,8 +71,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     public void removeListener(TaskStackChangeListener listener) {
-        mTaskStackListeners.remove(listener);
-        if (mTaskStackListeners.isEmpty() && mRegistered) {
+        boolean isEmpty;
+        synchronized (mTaskStackListeners) {
+            mTaskStackListeners.remove(listener);
+            isEmpty = mTaskStackListeners.isEmpty();
+        }
+        if (isEmpty && mRegistered) {
             // Unregister mTaskStackListener once we have no more listeners
             try {
                 ActivityTaskManager.getService().unregisterTaskStackListener(this);
@@ -83,14 +89,17 @@ public class TaskStackChangeListeners extends TaskStackListener {
 
     @Override
     public void onTaskStackChanged() throws RemoteException {
-        // Call the task changed callback for the non-ui thread listeners first
+        // Call the task changed callback for the non-ui thread listeners first. Copy to a set of
+        // temp listeners so that we don't lock on mTaskStackListeners while calling all the
+        // callbacks. This call is always on the same binder thread, so we can just synchronize
+        // on the copying of the listener list.
         synchronized (mTaskStackListeners) {
-            mTmpListeners.clear();
             mTmpListeners.addAll(mTaskStackListeners);
         }
         for (int i = mTmpListeners.size() - 1; i >= 0; i--) {
             mTmpListeners.get(i).onTaskStackChangedBackground();
         }
+        mTmpListeners.clear();
 
         mHandler.removeMessages(H.ON_TASK_STACK_CHANGED);
         mHandler.sendEmptyMessage(H.ON_TASK_STACK_CHANGED);
