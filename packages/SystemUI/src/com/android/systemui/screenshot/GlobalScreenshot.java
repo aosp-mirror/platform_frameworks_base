@@ -93,6 +93,7 @@ import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -100,6 +101,7 @@ import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
 
 /**
  * POD used in the AsyncTask which saves an image in the background.
@@ -921,8 +923,9 @@ public class GlobalScreenshot {
         private final StatusBar mStatusBar;
 
         @Inject
-        public ActionProxyReceiver(StatusBar statusBar) {
-            mStatusBar = statusBar;
+        public ActionProxyReceiver(Optional<Lazy<StatusBar>> statusBarLazy) {
+            Lazy<StatusBar> statusBar = statusBarLazy.orElse(null);
+            mStatusBar = statusBar != null ? statusBar.get() : null;
         }
 
         @Override
@@ -947,8 +950,13 @@ public class GlobalScreenshot {
                 context.startActivityAsUser(actionIntent, opts.toBundle(), UserHandle.CURRENT);
             };
 
-            mStatusBar.executeRunnableDismissingKeyguard(startActivityRunnable, null,
-                    true /* dismissShade */, true /* afterKeyguardGone */, true /* deferred */);
+            if (mStatusBar != null) {
+                mStatusBar.executeRunnableDismissingKeyguard(startActivityRunnable, null,
+                        true /* dismissShade */, true /* afterKeyguardGone */,
+                        true /* deferred */);
+            } else {
+                startActivityRunnable.run();
+            }
         }
     }
 
