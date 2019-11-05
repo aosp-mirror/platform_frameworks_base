@@ -2406,4 +2406,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: Q
     SETTINGS_AWARE_DISPLAY = 1750;
+
+    // OPEN: Settings > System > Input & Gesture > tap gesture
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_GESTURE_TAP = 1751;
 }
