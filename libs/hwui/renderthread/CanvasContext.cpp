@@ -479,7 +479,8 @@ void CanvasContext::draw() {
         if (didDraw) {
             swap.damage = windowDirty;
         } else {
-            swap.damage = SkRect::MakeWH(INT_MAX, INT_MAX);
+            float max = static_cast<float>(INT_MAX);
+            swap.damage = SkRect::MakeWH(max, max);
         }
         swap.swapCompletedTime = systemTime(SYSTEM_TIME_MONOTONIC);
         swap.vsyncTime = mRenderThread.timeLord().latestVsync();
