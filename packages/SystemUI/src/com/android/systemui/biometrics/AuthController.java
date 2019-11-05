@@ -23,7 +23,10 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.Authenticator;
@@ -84,6 +87,28 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             mHandler.post(mTaskStackChangedRunnable);
         }
     }
+
+    @VisibleForTesting
+    final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mCurrentDialog != null
+                    && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                Log.w(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received");
+                mCurrentDialog.dismissWithoutCallback(true /* animate */);
+                mCurrentDialog = null;
+
+                try {
+                    if (mReceiver != null) {
+                        mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+                        mReceiver = null;
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Remote exception", e);
+                }
+            }
+        }
+    };
 
     private final Runnable mTaskStackChangedRunnable = () -> {
         if (mCurrentDialog != null) {
@@ -204,6 +229,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         super(context);
         mCommandQueue = commandQueue;
         mInjector = injector;
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+
+        context.registerReceiver(mBroadcastReceiver, filter);
     }
 
     @Override

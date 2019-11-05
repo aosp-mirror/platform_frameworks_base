@@ -35,6 +35,7 @@ import android.app.ActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.Authenticator;
@@ -401,6 +402,19 @@ public class AuthControllerTest extends SysuiTestCase {
         showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED);
         mAuthController.onDeviceCredentialPressed();
+    }
+
+    @Test
+    public void testActionCloseSystemDialogs_dismissesDialogIfShowing() throws Exception {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        mAuthController.mBroadcastReceiver.onReceive(mContext, intent);
+        waitForIdleSync();
+
+        assertNull(mAuthController.mCurrentDialog);
+        assertNull(mAuthController.mReceiver);
+        verify(mDialog1).dismissWithoutCallback(true /* animate */);
+        verify(mReceiver).onDialogDismissed(eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL));
     }
 
     // Helpers
