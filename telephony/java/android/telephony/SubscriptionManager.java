@@ -2101,13 +2101,13 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static boolean isValidSlotIndex(int slotIndex) {
-        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getSupportedModemCount();
+        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getActiveModemCount();
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public static boolean isValidPhoneId(int phoneId) {
-        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getSupportedModemCount();
+        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getActiveModemCount();
     }
 
     /** @hide */
