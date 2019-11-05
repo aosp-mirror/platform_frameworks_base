@@ -36,8 +36,8 @@ import android.net.netlink.NetlinkSocket;
 import android.net.util.IpUtils;
 import android.net.util.SharedLog;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.INetworkManagementService;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -60,7 +60,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A class to encapsulate the business logic of programming the tethering
@@ -74,7 +73,7 @@ public class OffloadController {
     private static final String ANYIP = "0.0.0.0";
     private static final ForwardedStats EMPTY_STATS = new ForwardedStats();
 
-    private static enum UpdateType { IF_NEEDED, FORCE };
+    private enum UpdateType { IF_NEEDED, FORCE };
 
     private final Handler mHandler;
     private final OffloadHardwareInterface mHwInterface;
@@ -128,6 +127,7 @@ public class OffloadController {
         }
     }
 
+    /** Start hardware offload. */
     public boolean start() {
         if (started()) return true;
 
@@ -235,6 +235,7 @@ public class OffloadController {
         return isStarted;
     }
 
+    /** Stop hardware offload. */
     public void stop() {
         // Completely stops tethering offload. After this method is called, it is no longer safe to
         // call any HAL method, no callbacks from the hardware will be delivered, and any in-flight
@@ -258,7 +259,9 @@ public class OffloadController {
             // getTetherStats() is the only function in OffloadController that can be called from
             // a different thread. Do not attempt to update stats by querying the offload HAL
             // synchronously from a different thread than our Handler thread. http://b/64771555.
-            Runnable updateStats = () -> { updateStatsForCurrentUpstream(); };
+            Runnable updateStats = () -> {
+                updateStatsForCurrentUpstream();
+            };
             if (Looper.myLooper() == mHandler.getLooper()) {
                 updateStats.run();
             } else {
@@ -358,6 +361,7 @@ public class OffloadController {
         }
     }
 
+    /** Set current tethering upstream LinkProperties. */
     public void setUpstreamLinkProperties(LinkProperties lp) {
         if (!started() || Objects.equals(mUpstreamLinkProperties, lp)) return;
 
@@ -376,6 +380,7 @@ public class OffloadController {
         pushUpstreamParameters(prevUpstream);
     }
 
+    /** Set local prefixes. */
     public void setLocalPrefixes(Set<IpPrefix> localPrefixes) {
         mExemptPrefixes = localPrefixes;
 
@@ -383,6 +388,7 @@ public class OffloadController {
         computeAndPushLocalPrefixes(UpdateType.IF_NEEDED);
     }
 
+    /** Update current downstream LinkProperties. */
     public void notifyDownstreamLinkProperties(LinkProperties lp) {
         final String ifname = lp.getInterfaceName();
         final LinkProperties oldLp = mDownstreams.put(ifname, new LinkProperties(lp));
@@ -421,6 +427,7 @@ public class OffloadController {
         }
     }
 
+    /** Remove downstream interface from offload hardware. */
     public void removeDownstreamInterface(String ifname) {
         final LinkProperties lp = mDownstreams.remove(ifname);
         if (lp == null) return;
@@ -481,7 +488,7 @@ public class OffloadController {
                 iface, v4addr, v4gateway, (v6gateways.isEmpty() ? null : v6gateways));
 
         if (!success) {
-           return success;
+            return success;
         }
 
         // Update stats after we've told the hardware to change routing so we don't miss packets.
@@ -545,6 +552,7 @@ public class OffloadController {
         return false;
     }
 
+    /** Dump information. */
     public void dump(IndentingPrintWriter pw) {
         if (isOffloadDisabled()) {
             pw.println("Offload disabled");
@@ -630,7 +638,7 @@ public class OffloadController {
             if (ip instanceof Inet4Address) {
                 return (Inet4Address) ip;
             }
-        } catch (IllegalArgumentException iae) {}
+        } catch (IllegalArgumentException iae) { }
         return null;
     }
 

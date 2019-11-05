@@ -23,9 +23,9 @@ import android.hardware.tetheroffload.control.V1_0.ITetheringOffloadCallback;
 import android.hardware.tetheroffload.control.V1_0.NatTimeoutUpdate;
 import android.hardware.tetheroffload.control.V1_0.NetworkProtocol;
 import android.hardware.tetheroffload.control.V1_0.OffloadCallbackEvent;
+import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.net.util.SharedLog;
 import android.system.OsConstants;
 
 import java.util.ArrayList;
@@ -55,18 +55,34 @@ public class OffloadHardwareInterface {
     private TetheringOffloadCallback mTetheringOffloadCallback;
     private ControlCallback mControlCallback;
 
+    /** The callback to notify status of offload management process. */
     public static class ControlCallback {
+        /** Offload started. */
         public void onStarted() {}
+        /**
+         * Offload stopped because an error has occurred in lower layer.
+         */
         public void onStoppedError() {}
+        /**
+         * Offload stopped because the device has moved to a bearer on which hardware offload is
+         * not supported. Subsequent calls to setUpstreamParameters and add/removeDownstream will
+         * likely fail and cannot be presumed to be saved inside of the hardware management process.
+         * Upon receiving #onSupportAvailable(), the caller should reprogram the hardware to begin
+         * offload again.
+         */
         public void onStoppedUnsupported() {}
+        /** Indicate that offload is able to proivde support for this time. */
         public void onSupportAvailable() {}
+        /** Offload stopped because of usage limit reached. */
         public void onStoppedLimitReached() {}
 
+        /** Indicate to update NAT timeout. */
         public void onNatTimeoutUpdate(int proto,
                                        String srcAddr, int srcPort,
                                        String dstAddr, int dstPort) {}
     }
 
+    /** The object which records Tx/Rx forwarded bytes. */
     public static class ForwardedStats {
         public long rxBytes;
         public long txBytes;
@@ -76,11 +92,13 @@ public class OffloadHardwareInterface {
             txBytes = 0;
         }
 
+        /** Add Tx/Rx bytes. */
         public void add(ForwardedStats other) {
             rxBytes += other.rxBytes;
             txBytes += other.txBytes;
         }
 
+        /** Returns the string representation of this object. */
         public String toString() {
             return String.format("rx:%s tx:%s", rxBytes, txBytes);
         }
@@ -91,14 +109,17 @@ public class OffloadHardwareInterface {
         mLog = log.forSubComponent(TAG);
     }
 
+    /** Get default value indicating whether offload is supported. */
     public int getDefaultTetherOffloadDisabled() {
         return DEFAULT_TETHER_OFFLOAD_DISABLED;
     }
 
+    /** Configure offload management process. */
     public boolean initOffloadConfig() {
         return configOffload();
     }
 
+    /** Initialize the tethering offload HAL. */
     public boolean initOffloadControl(ControlCallback controlCb) {
         mControlCallback = controlCb;
 
@@ -125,8 +146,8 @@ public class OffloadHardwareInterface {
             mOffloadControl.initOffload(
                     mTetheringOffloadCallback,
                     (boolean success, String errMsg) -> {
-                        results.success = success;
-                        results.errMsg = errMsg;
+                        results.mSuccess = success;
+                        results.mErrMsg = errMsg;
                     });
         } catch (RemoteException e) {
             record(logmsg, e);
@@ -134,9 +155,10 @@ public class OffloadHardwareInterface {
         }
 
         record(logmsg, results);
-        return results.success;
+        return results.mSuccess;
     }
 
+    /** Stop IOffloadControl. */
     public void stopOffloadControl() {
         if (mOffloadControl != null) {
             try {
@@ -154,6 +176,7 @@ public class OffloadHardwareInterface {
         mLog.log("stopOffloadControl()");
     }
 
+    /** Get Tx/Rx usage from last query. */
     public ForwardedStats getForwardedStats(String upstream) {
         final String logmsg = String.format("getForwardedStats(%s)",  upstream);
 
@@ -174,6 +197,7 @@ public class OffloadHardwareInterface {
         return stats;
     }
 
+    /** Set local prefixes to offload management process. */
     public boolean setLocalPrefixes(ArrayList<String> localPrefixes) {
         final String logmsg = String.format("setLocalPrefixes([%s])",
                 String.join(",", localPrefixes));
@@ -182,8 +206,8 @@ public class OffloadHardwareInterface {
         try {
             mOffloadControl.setLocalPrefixes(localPrefixes,
                     (boolean success, String errMsg) -> {
-                        results.success = success;
-                        results.errMsg = errMsg;
+                        results.mSuccess = success;
+                        results.mErrMsg = errMsg;
                     });
         } catch (RemoteException e) {
             record(logmsg, e);
@@ -191,9 +215,10 @@ public class OffloadHardwareInterface {
         }
 
         record(logmsg, results);
-        return results.success;
+        return results.mSuccess;
     }
 
+    /** Set data limit value to offload management process. */
     public boolean setDataLimit(String iface, long limit) {
 
         final String logmsg = String.format("setDataLimit(%s, %d)", iface, limit);
@@ -203,8 +228,8 @@ public class OffloadHardwareInterface {
             mOffloadControl.setDataLimit(
                     iface, limit,
                     (boolean success, String errMsg) -> {
-                        results.success = success;
-                        results.errMsg = errMsg;
+                        results.mSuccess = success;
+                        results.mErrMsg = errMsg;
                     });
         } catch (RemoteException e) {
             record(logmsg, e);
@@ -212,9 +237,10 @@ public class OffloadHardwareInterface {
         }
 
         record(logmsg, results);
-        return results.success;
+        return results.mSuccess;
     }
 
+    /** Set upstream parameters to offload management process. */
     public boolean setUpstreamParameters(
             String iface, String v4addr, String v4gateway, ArrayList<String> v6gws) {
         iface = (iface != null) ? iface : NO_INTERFACE_NAME;
@@ -230,8 +256,8 @@ public class OffloadHardwareInterface {
             mOffloadControl.setUpstreamParameters(
                     iface, v4addr, v4gateway, v6gws,
                     (boolean success, String errMsg) -> {
-                        results.success = success;
-                        results.errMsg = errMsg;
+                        results.mSuccess = success;
+                        results.mErrMsg = errMsg;
                     });
         } catch (RemoteException e) {
             record(logmsg, e);
@@ -239,9 +265,10 @@ public class OffloadHardwareInterface {
         }
 
         record(logmsg, results);
-        return results.success;
+        return results.mSuccess;
     }
 
+    /** Add downstream prefix to offload management process. */
     public boolean addDownstreamPrefix(String ifname, String prefix) {
         final String logmsg = String.format("addDownstreamPrefix(%s, %s)", ifname, prefix);
 
@@ -249,8 +276,8 @@ public class OffloadHardwareInterface {
         try {
             mOffloadControl.addDownstream(ifname, prefix,
                     (boolean success, String errMsg) -> {
-                        results.success = success;
-                        results.errMsg = errMsg;
+                        results.mSuccess = success;
+                        results.mErrMsg = errMsg;
                     });
         } catch (RemoteException e) {
             record(logmsg, e);
@@ -258,9 +285,10 @@ public class OffloadHardwareInterface {
         }
 
         record(logmsg, results);
-        return results.success;
+        return results.mSuccess;
     }
 
+    /** Remove downstream prefix from offload management process. */
     public boolean removeDownstreamPrefix(String ifname, String prefix) {
         final String logmsg = String.format("removeDownstreamPrefix(%s, %s)", ifname, prefix);
 
@@ -268,8 +296,8 @@ public class OffloadHardwareInterface {
         try {
             mOffloadControl.removeDownstream(ifname, prefix,
                     (boolean success, String errMsg) -> {
-                        results.success = success;
-                        results.errMsg = errMsg;
+                        results.mSuccess = success;
+                        results.mErrMsg = errMsg;
                     });
         } catch (RemoteException e) {
             record(logmsg, e);
@@ -277,7 +305,7 @@ public class OffloadHardwareInterface {
         }
 
         record(logmsg, results);
-        return results.success;
+        return results.mSuccess;
     }
 
     private void record(String msg, Throwable t) {
@@ -286,7 +314,7 @@ public class OffloadHardwareInterface {
 
     private void record(String msg, CbResults results) {
         final String logmsg = msg + YIELDS + results;
-        if (!results.success) {
+        if (!results.mSuccess) {
             mLog.e(logmsg);
         } else {
             mLog.log(logmsg);
@@ -298,7 +326,7 @@ public class OffloadHardwareInterface {
         public final ControlCallback controlCb;
         public final SharedLog log;
 
-        public TetheringOffloadCallback(Handler h, ControlCallback cb, SharedLog sharedLog) {
+        TetheringOffloadCallback(Handler h, ControlCallback cb, SharedLog sharedLog) {
             handler = h;
             controlCb = cb;
             log = sharedLog;
@@ -332,7 +360,7 @@ public class OffloadHardwareInterface {
         @Override
         public void updateTimeout(NatTimeoutUpdate params) {
             handler.post(() -> {
-                    controlCb.onNatTimeoutUpdate(
+                controlCb.onNatTimeoutUpdate(
                         networkProtocolToOsConstant(params.proto),
                         params.src.addr, uint16(params.src.port),
                         params.dst.addr, uint16(params.dst.port));
@@ -352,15 +380,15 @@ public class OffloadHardwareInterface {
     }
 
     private static class CbResults {
-        boolean success;
-        String errMsg;
+        boolean mSuccess;
+        String mErrMsg;
 
         @Override
         public String toString() {
-            if (success) {
+            if (mSuccess) {
                 return "ok";
             } else {
-                return "fail: " + errMsg;
+                return "fail: " + mErrMsg;
             }
         }
     }

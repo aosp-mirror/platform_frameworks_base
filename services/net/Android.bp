@@ -29,6 +29,7 @@ filegroup {
         "java/android/net/ConnectivityModuleConnector.java",
         "java/android/net/NetworkStackClient.java",
         "java/android/net/ip/InterfaceController.java",
+        "java/android/net/netlink/*.java",
         "java/android/net/util/InterfaceParams.java",
         "java/android/net/util/NetdService.java",
         "java/android/net/util/NetworkConstants.java",
