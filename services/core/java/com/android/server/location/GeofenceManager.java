@@ -161,8 +161,8 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
         }
 
         GeofenceState state = new GeofenceState(geofence,
-                request.getExpireAt(), allowedResolutionLevel, uid, packageName, featureId,
-                listenerIdentifier, intent);
+                request.getExpirationRealtimeMs(SystemClock.elapsedRealtime()),
+                allowedResolutionLevel, uid, packageName, featureId, listenerIdentifier, intent);
         synchronized (mLock) {
             // first make sure it doesn't already exist
             for (int i = mFences.size() - 1; i >= 0; i--) {

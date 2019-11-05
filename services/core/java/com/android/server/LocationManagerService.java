@@ -2081,23 +2081,13 @@ public class LocationManagerService extends ILocationManager.Stub {
         private boolean mIsForegroundUid;
         private Location mLastFixBroadcast;
         private Throwable mStackTrace;  // for debugging only
+        private long mExpirationRealtimeMs;
 
         /**
          * Note: must be constructed with lock held.
          */
         private UpdateRecord(String provider, LocationRequest request, Receiver receiver) {
-            // translate expireIn value into expireAt
-            long elapsedRealtime = SystemClock.elapsedRealtime();
-            long expireAt;
-            // Check for > Long.MAX_VALUE overflow (elapsedRealtime > 0):
-            if (request.getExpireIn() > Long.MAX_VALUE - elapsedRealtime) {
-                expireAt = Long.MAX_VALUE;
-            } else {
-                expireAt = Math.max(request.getExpireIn() + elapsedRealtime, 0);
-            }
-            request.setExpireAt(Math.min(request.getExpireAt(), expireAt));
-            request.setExpireIn(Long.MAX_VALUE);
-
+            mExpirationRealtimeMs = request.getExpirationRealtimeMs(SystemClock.elapsedRealtime());
             mProvider = provider;
             mRealRequest = request;
             mRequest = request;
@@ -2969,7 +2959,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         // Check whether the expiry date has passed
-        return record.mRealRequest.getExpireAt() >= now;
+        return record.mExpirationRealtimeMs >= now;
     }
 
     @GuardedBy("mLock")
@@ -3100,7 +3090,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             // track expired records
-            if (r.mRealRequest.getNumUpdates() <= 0 || r.mRealRequest.getExpireAt() < now) {
+            if (r.mRealRequest.getNumUpdates() <= 0 || r.mExpirationRealtimeMs < now) {
                 // notify the client it can remove this listener
                 r.mReceiver.callRemovedLocked();
                 if (deadUpdateRecords == null) {
