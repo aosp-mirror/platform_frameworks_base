@@ -54,6 +54,7 @@ import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.Annotation.NetworkType;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.util.DisplayMetrics;
@@ -894,6 +895,11 @@ public class SubscriptionManager {
      * which has changed.
      */
     public static final String EXTRA_SUBSCRIPTION_INDEX = "android.telephony.extra.SUBSCRIPTION_INDEX";
+
+    /**
+     * Integer extra to specify SIM slot index.
+     */
+    public static final String EXTRA_SLOT_INDEX = "android.telephony.extra.SLOT_INDEX";
 
     private final Context mContext;
     private volatile INetworkPolicyManager mNetworkPolicy;
@@ -2095,13 +2101,13 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static boolean isValidSlotIndex(int slotIndex) {
-        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getMaxPhoneCount();
+        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getSupportedModemCount();
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public static boolean isValidPhoneId(int phoneId) {
-        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getMaxPhoneCount();
+        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getSupportedModemCount();
     }
 
     /** @hide */
@@ -2122,6 +2128,7 @@ public class SubscriptionManager {
         if (VDBG) logd("putPhoneIdAndSubIdExtra: phoneId=" + phoneId + " subId=" + subId);
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
         intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
+        intent.putExtra(EXTRA_SLOT_INDEX, phoneId);
         intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
     }
 

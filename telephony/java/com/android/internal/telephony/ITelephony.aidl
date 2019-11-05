@@ -864,6 +864,11 @@ interface ITelephony {
     String getImsService(int slotId, boolean isCarrierImsService);
 
     /**
+     * Get the MmTelFeature state attached to this subscription id.
+     */
+    void getImsMmTelFeatureState(int subId, IIntegerConsumer callback);
+
+    /**
      * Set the network selection mode to automatic.
      *
      * @param subId the id of the subscription to update.
@@ -1302,6 +1307,12 @@ interface ITelephony {
      * Returns the subscription ID associated with the specified PhoneAccount.
      */
     int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
+
+    /**
+     * Returns the subscription ID associated with the specified PhoneAccountHandle.
+     */
+    int getSubIdForPhoneAccountHandle(in PhoneAccountHandle phoneAccountHandle,
+            String callingPackage);
 
     /**
      * Returns the PhoneAccountHandle associated with a subscription ID.
@@ -1774,21 +1785,6 @@ interface ITelephony {
      boolean isInEmergencySmsMode();
 
     /**
-     * Get a list of SMS apps on a user.
-     */
-    String[] getSmsApps(int userId);
-
-    /**
-     * Get the default SMS app on a given user.
-     */
-    String getDefaultSmsApp(int userId);
-
-    /**
-     * Set the default SMS app to a given package on a given user.
-     */
-    void setDefaultSmsApp(int userId, String packageName);
-
-    /**
      * Return the modem radio power state for slot index.
      *
      */
@@ -1804,6 +1800,16 @@ interface ITelephony {
       * Removes an existing IMS registration status callback for the subscription specified.
       */
     void unregisterImsRegistrationCallback(int subId, IImsRegistrationCallback c);
+
+    /**
+     * Get the IMS service registration state for the MmTelFeature associated with this sub id.
+     */
+    void getImsMmTelRegistrationState(int subId, IIntegerConsumer consumer);
+
+    /**
+     * Get the transport type for the IMS service registration state.
+     */
+    void getImsMmTelRegistrationTransportType(int subId, IIntegerConsumer consumer);
 
     /**
      * Adds an IMS MmTel capabilities callback for the subscription specified.
@@ -1824,6 +1830,12 @@ interface ITelephony {
      * return true if the IMS MmTel capability for the given registration tech is available.
      */
     boolean isAvailable(int subId, int capability, int regTech);
+
+    /**
+     * Return whether or not the MmTel capability is supported for the requested transport type.
+     */
+    void isMmTelCapabilitySupported(int subId, IIntegerConsumer callback, int capability,
+            int transportType);
 
     /**
      * Returns true if the user's setting for 4G LTE is enabled, for the subscription specified.

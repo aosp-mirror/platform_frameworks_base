@@ -37,7 +37,7 @@ java_defaults {
         "libvndksupport",
         "libziparchive",
         "libz",
-        "netd_aidl_interface-V2-cpp",
+        "netd_aidl_interface-cpp",
     ],
 }
 

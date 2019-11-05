@@ -43,8 +43,8 @@ interface ITelephonyRegistry {
     void listenForSubscriber(in int subId, String pkg, IPhoneStateListener callback, int events,
             boolean notifyNow);
     @UnsupportedAppUsage
-    void notifyCallState(int state, String incomingNumber);
-    void notifyCallStateForPhoneId(in int phoneId, in int subId, int state, String incomingNumber);
+    void notifyCallStateForAllSubs(int state, String incomingNumber);
+    void notifyCallState(in int phoneId, in int subId, int state, String incomingNumber);
     void notifyServiceStateForPhoneId(in int phoneId, in int subId, in ServiceState state);
     void notifySignalStrengthForPhoneId(in int phoneId, in int subId,
             in SignalStrength signalStrength);

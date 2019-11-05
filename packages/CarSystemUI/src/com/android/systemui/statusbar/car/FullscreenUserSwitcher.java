@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.car;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.car.Car;
 import android.car.trust.CarTrustAgentEnrollmentManager;
 import android.car.userlib.CarUserManagerHelper;
 import android.content.BroadcastReceiver;
@@ -50,7 +51,7 @@ public class FullscreenUserSwitcher {
     private final CarStatusBar mStatusBar;
     private final Context mContext;
     private final UserManager mUserManager;
-    private final CarTrustAgentEnrollmentManager mEnrollmentManager;
+    private CarTrustAgentEnrollmentManager mEnrollmentManager;
     private CarTrustAgentUnlockDialogHelper mUnlockDialogHelper;
     private UserGridRecyclerView.UserRecord mSelectedUser;
     private CarUserManagerHelper mCarUserManagerHelper;
@@ -64,13 +65,11 @@ public class FullscreenUserSwitcher {
             mContext.unregisterReceiver(mUserUnlockReceiver);
         }
     };
+    private final Car mCar;
 
-
-    public FullscreenUserSwitcher(CarStatusBar statusBar, ViewStub containerStub,
-            CarTrustAgentEnrollmentManager enrollmentManager, Context context) {
+    public FullscreenUserSwitcher(CarStatusBar statusBar, ViewStub containerStub, Context context) {
         mStatusBar = statusBar;
         mParent = containerStub.inflate();
-        mEnrollmentManager = enrollmentManager;
         mContext = context;
 
         View container = mParent.findViewById(R.id.container);
@@ -85,6 +84,15 @@ public class FullscreenUserSwitcher {
         mCarUserManagerHelper = new CarUserManagerHelper(context);
         mUnlockDialogHelper = new CarTrustAgentUnlockDialogHelper(mContext);
         mUserManager = mContext.getSystemService(UserManager.class);
+
+        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
+                (car, ready) -> {
+                    if (!ready) {
+                        return;
+                    }
+                    mEnrollmentManager = (CarTrustAgentEnrollmentManager) car
+                            .getCarManager(Car.CAR_TRUST_AGENT_ENROLLMENT_SERVICE);
+                });
 
         mShortAnimDuration = container.getResources()
                 .getInteger(android.R.integer.config_shortAnimTime);
@@ -201,6 +209,9 @@ public class FullscreenUserSwitcher {
     }
 
     private boolean hasTrustedDevice(int uid) {
+        if (mEnrollmentManager == null) { // car service not ready, so it cannot be available.
+            return false;
+        }
         return !mEnrollmentManager.getEnrolledDeviceInfoForUser(uid).isEmpty();
     }
 

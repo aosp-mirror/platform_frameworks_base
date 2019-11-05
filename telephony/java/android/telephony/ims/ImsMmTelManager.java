@@ -25,30 +25,26 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
-import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
-import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * A manager for the MmTel (Multimedia Telephony) feature of an IMS network, given an associated
@@ -62,9 +58,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
-public class ImsMmTelManager {
-
-    private static final String TAG = "ImsMmTelManager";
+public class ImsMmTelManager implements RegistrationManager {
 
     /**
      * @hide
@@ -97,94 +91,18 @@ public class ImsMmTelManager {
      * Callback class for receiving IMS network Registration callback events.
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback) (RegistrationCallback)
      * @see #unregisterImsRegistrationCallback(RegistrationCallback)
+     * @deprecated Use {@link RegistrationManager.RegistrationCallback} instead.
      */
-    public static class RegistrationCallback {
-
-        private static class RegistrationBinder extends IImsRegistrationCallback.Stub {
-
-            // Translate ImsRegistrationImplBase API to new AccessNetworkConstant because WLAN
-            // and WWAN are more accurate constants.
-            private static final Map<Integer, Integer> IMS_REG_TO_ACCESS_TYPE_MAP =
-                    new HashMap<Integer, Integer>() {{
-                        // Map NONE to -1 to make sure that we handle the REGISTRATION_TECH_NONE
-                        // case, since it is defined.
-                        put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE, -1);
-                        put(ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
-                                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-                        put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
-                                AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
-                    }};
-
-            private final RegistrationCallback mLocalCallback;
-            private Executor mExecutor;
-
-            RegistrationBinder(RegistrationCallback localCallback) {
-                mLocalCallback = localCallback;
-            }
-
-            @Override
-            public void onRegistered(int imsRadioTech) {
-                if (mLocalCallback == null) return;
-
-                Binder.withCleanCallingIdentity(() -> mExecutor.execute(() ->
-                        mLocalCallback.onRegistered(getAccessType(imsRadioTech))));
-            }
-
-            @Override
-            public void onRegistering(int imsRadioTech) {
-                if (mLocalCallback == null) return;
-
-                Binder.withCleanCallingIdentity(() -> mExecutor.execute(() ->
-                        mLocalCallback.onRegistering(getAccessType(imsRadioTech))));
-            }
-
-            @Override
-            public void onDeregistered(ImsReasonInfo info) {
-                if (mLocalCallback == null) return;
-
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> mLocalCallback.onUnregistered(info)));
-            }
-
-            @Override
-            public void onTechnologyChangeFailed(int imsRadioTech, ImsReasonInfo info) {
-                if (mLocalCallback == null) return;
-
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> mLocalCallback.onTechnologyChangeFailed(
-                                getAccessType(imsRadioTech), info)));
-            }
-
-            @Override
-            public void onSubscriberAssociatedUriChanged(Uri[] uris) {
-                if (mLocalCallback == null) return;
-
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() ->
-                                mLocalCallback.onSubscriberAssociatedUriChanged(uris)));
-            }
-
-            private void setExecutor(Executor executor) {
-                mExecutor = executor;
-            }
-
-            private static int getAccessType(int regType) {
-                if (!IMS_REG_TO_ACCESS_TYPE_MAP.containsKey(regType)) {
-                    Log.w("ImsMmTelManager", "RegistrationBinder - invalid regType returned: "
-                            + regType);
-                    return -1;
-                }
-                return IMS_REG_TO_ACCESS_TYPE_MAP.get(regType);
-            }
-        }
-
-        private final RegistrationBinder mBinder = new RegistrationBinder(this);
+    // Do not add to this class, add to RegistrationManager.RegistrationCallback instead.
+    @Deprecated
+    public static class RegistrationCallback extends RegistrationManager.RegistrationCallback {
 
         /**
          * Notifies the framework when the IMS Provider is registered to the IMS network.
          *
          * @param imsTransportType the radio access technology.
          */
+        @Override
         public void onRegistered(@AccessNetworkConstants.TransportType int imsTransportType) {
         }
 
@@ -193,6 +111,7 @@ public class ImsMmTelManager {
          *
          * @param imsTransportType the radio access technology.
          */
+        @Override
         public void onRegistering(@AccessNetworkConstants.TransportType int imsTransportType) {
         }
 
@@ -201,6 +120,7 @@ public class ImsMmTelManager {
          *
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
+        @Override
         public void onUnregistered(@Nullable ImsReasonInfo info) {
         }
 
@@ -210,32 +130,10 @@ public class ImsMmTelManager {
          * @param imsTransportType The transport type that has failed to handover registration to.
          * @param info A {@link ImsReasonInfo} that identifies the reason for failure.
          */
+        @Override
         public void onTechnologyChangeFailed(
                 @AccessNetworkConstants.TransportType int imsTransportType,
                 @Nullable ImsReasonInfo info) {
-        }
-
-        /**
-         * Returns a list of subscriber {@link Uri}s associated with this IMS subscription when
-         * it changes. Per RFC3455, an associated URI is a URI that the service provider has
-         * allocated to a user for their own usage. A user's phone number is typically one of the
-         * associated URIs.
-         * @param uris new array of subscriber {@link Uri}s that are associated with this IMS
-         *         subscription.
-         * @hide
-         */
-        public void onSubscriberAssociatedUriChanged(@Nullable Uri[] uris) {
-        }
-
-        /**@hide*/
-        public final IImsRegistrationCallback getBinder() {
-            return mBinder;
-        }
-
-        /**@hide*/
-        //Only exposed as public for compatibility with deprecated ImsManager APIs.
-        public void setExecutor(Executor executor) {
-            mBinder.setExecutor(executor);
         }
     }
 
@@ -311,7 +209,7 @@ public class ImsMmTelManager {
         }
     }
 
-    private int mSubId;
+    private final int mSubId;
 
     /**
      * Create an instance of {@link ImsMmTelManager} for the subscription id specified.
@@ -356,7 +254,10 @@ public class ImsMmTelManager {
      * the {@link ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
+     * @deprecated Use {@link #registerImsRegistrationCallback(
+     * RegistrationManager.RegistrationCallback, Executor)} instead.
      */
+    @Deprecated
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void registerImsRegistrationCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull RegistrationCallback c) throws ImsException {
@@ -366,10 +267,6 @@ public class ImsMmTelManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
-        if (!isImsAvailableOnDevice()) {
-            throw new ImsException("IMS not available on device.",
-                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
-        }
         c.setExecutor(executor);
         try {
             getITelephony().registerImsRegistrationCallback(mSubId, c.getBinder());
@@ -378,8 +275,30 @@ public class ImsMmTelManager {
                 // Rethrow as runtime error to keep API compatible.
                 throw new IllegalArgumentException(e.getMessage());
             } else {
-                throw new RuntimeException(e.getMessage());
+                throw new ImsException(e.getMessage(), e.errorCode);
             }
+        } catch (RemoteException | IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**{@inheritDoc}*/
+    @Override
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void registerImsRegistrationCallback(
+            @NonNull RegistrationManager.RegistrationCallback c,
+            @NonNull @CallbackExecutor Executor executor) throws ImsException {
+        if (c == null) {
+            throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        c.setExecutor(executor);
+        try {
+            getITelephony().registerImsRegistrationCallback(mSubId, c.getBinder());
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException | IllegalStateException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
@@ -395,7 +314,10 @@ public class ImsMmTelManager {
      * @param c The {@link RegistrationCallback} to be removed.
      * @see SubscriptionManager.OnSubscriptionsChangedListener
      * @see #registerImsRegistrationCallback(Executor, RegistrationCallback)
+     * @deprecated Use {@link #unregisterImsRegistrationCallback(
+     * RegistrationManager.RegistrationCallback)}.
      */
+    @Deprecated
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public void unregisterImsRegistrationCallback(@NonNull RegistrationCallback c) {
         if (c == null) {
@@ -403,6 +325,69 @@ public class ImsMmTelManager {
         }
         try {
             getITelephony().unregisterImsRegistrationCallback(mSubId, c.getBinder());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**{@inheritDoc}*/
+    @Override
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void unregisterImsRegistrationCallback(
+            @NonNull RegistrationManager.RegistrationCallback c) {
+        if (c == null) {
+            throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
+        }
+        try {
+            getITelephony().unregisterImsRegistrationCallback(mSubId, c.getBinder());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**{@inheritDoc}*/
+    @Override
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void getRegistrationState(@NonNull @ImsRegistrationState Consumer<Integer> stateCallback,
+            @NonNull @CallbackExecutor Executor executor) {
+        if (stateCallback == null) {
+            throw new IllegalArgumentException("Must include a non-null callback.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        try {
+            getITelephony().getImsMmTelRegistrationState(mSubId, new IIntegerConsumer.Stub() {
+                @Override
+                public void accept(int result) {
+                    executor.execute(() -> stateCallback.accept(result));
+                }
+            });
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**{@inheritDoc}*/
+    @Override
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void getRegistrationTransportType(
+            @NonNull @AccessNetworkConstants.TransportType Consumer<Integer> transportTypeCallback,
+            @NonNull @CallbackExecutor Executor executor) {
+        if (transportTypeCallback == null) {
+            throw new IllegalArgumentException("Must include a non-null callback.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        try {
+            getITelephony().getImsMmTelRegistrationTransportType(mSubId,
+                    new IIntegerConsumer.Stub() {
+                        @Override
+                        public void accept(int result) {
+                            executor.execute(() -> transportTypeCallback.accept(result));
+                        }
+                    });
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -416,7 +401,7 @@ public class ImsMmTelManager {
      *
      * Use {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to
      * subscription changed events and call
-     * {@link #unregisterImsRegistrationCallback(RegistrationCallback)} to clean up.
+     * {@link #unregisterMmTelCapabilityCallback(CapabilityCallback)} to clean up.
      *
      * When the callback is registered, it will initiate the callback c to be called with the
      * current capabilities.
@@ -441,10 +426,6 @@ public class ImsMmTelManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
-        if (!isImsAvailableOnDevice()) {
-            throw new ImsException("IMS not available on device.",
-                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
-        }
         c.setExecutor(executor);
         try {
             getITelephony().registerMmTelCapabilityCallback(mSubId, c.getBinder());
@@ -453,7 +434,7 @@ public class ImsMmTelManager {
                 // Rethrow as runtime error to keep API compatible.
                 throw new IllegalArgumentException(e.getMessage());
             } else {
-                throw new RuntimeException(e.getMessage());
+                throw new ImsException(e.getMessage(), e.errorCode);
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -614,6 +595,46 @@ public class ImsMmTelManager {
             return getITelephony().isAvailable(mSubId, capability, imsRegTech);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Query whether or not the requested MmTel capability is supported by the carrier on the
+     * specified network transport.
+     * <p>
+     * This is a configuration option and does not change. The only time this may change is if a
+     * new IMS configuration is loaded when there is a
+     * {@link CarrierConfigManager#ACTION_CARRIER_CONFIG_CHANGED} broadcast for this subscription.
+     * @param capability The capability that is being queried for support on the carrier network.
+     * @param transportType The transport type of the capability to check support for.
+     * @param callback A consumer containing a Boolean result specifying whether or not the
+     *                 capability is supported on this carrier network for the transport specified.
+     * @param executor The executor that the callback will be called with.
+     * @throws ImsException if the subscription is no longer valid or the IMS service is not
+     * available.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void isSupported(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+            @AccessNetworkConstants.TransportType int transportType,
+            @NonNull Consumer<Boolean> callback,
+            @NonNull @CallbackExecutor Executor executor) throws ImsException {
+        if (callback == null) {
+            throw new IllegalArgumentException("Must include a non-null Consumer.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        try {
+            getITelephony().isMmTelCapabilitySupported(mSubId, new IIntegerConsumer.Stub() {
+                @Override
+                public void accept(int result) {
+                    executor.execute(() -> callback.accept(result == 1));
+                }
+            }, capability, transportType);
+        } catch (ServiceSpecificException sse) {
+            throw new ImsException(sse.getMessage(), sse.errorCode);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -940,7 +961,7 @@ public class ImsMmTelManager {
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    boolean isTtyOverVolteEnabled() {
+    public boolean isTtyOverVolteEnabled() {
         try {
             return getITelephony().isTtyOverVolteEnabled(mSubId);
         } catch (ServiceSpecificException e) {
@@ -955,20 +976,39 @@ public class ImsMmTelManager {
         }
     }
 
-    private static boolean isImsAvailableOnDevice() {
-        IPackageManager pm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
-        if (pm == null) {
-            // For some reason package manger is not available.. This will fail internally anyways,
-            // so do not throw error and allow.
-            return true;
+    /**
+     * Get the status of the MmTel Feature registered on this subscription.
+     * @param callback A callback containing an Integer describing the current state of the
+     *                 MmTel feature, Which will be one of the following:
+     *                 {@link ImsFeature#STATE_UNAVAILABLE},
+     *                {@link ImsFeature#STATE_INITIALIZING},
+     *                {@link ImsFeature#STATE_READY}. Will be called using the executor
+     *                 specified when the service state has been retrieved from the IMS service.
+     * @param executor The executor that will be used to call the callback.
+     * @throws ImsException if the IMS service associated with this subscription is not available or
+     * the IMS service is not available.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void getFeatureState(@NonNull @ImsFeature.ImsState Consumer<Integer> callback,
+            @NonNull @CallbackExecutor Executor executor) throws ImsException {
+        if (callback == null) {
+            throw new IllegalArgumentException("Must include a non-null Consumer.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
         }
         try {
-            return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS, 0);
+            getITelephony().getImsMmTelFeatureState(mSubId, new IIntegerConsumer.Stub() {
+                @Override
+                public void accept(int result) {
+                    executor.execute(() -> callback.accept(result));
+                }
+            });
+        } catch (ServiceSpecificException sse) {
+            throw new ImsException(sse.getMessage(), sse.errorCode);
         } catch (RemoteException e) {
-            // For some reason package manger is not available.. This will fail internally anyways,
-            // so do not throw error and allow.
+            e.rethrowAsRuntimeException();
         }
-        return true;
     }
 
     private static ITelephony getITelephony() {

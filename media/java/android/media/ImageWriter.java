@@ -192,13 +192,15 @@ public class ImageWriter implements AutoCloseable {
 
         mMaxImages = maxImages;
 
-        if (format == ImageFormat.UNKNOWN) {
-            format = SurfaceUtils.getSurfaceFormat(surface);
-        }
         // Note that the underlying BufferQueue is working in synchronous mode
         // to avoid dropping any buffers.
         mNativeContext = nativeInit(new WeakReference<>(this), surface, maxImages, format);
 
+        // nativeInit internally overrides UNKNOWN format. So does surface format query after
+        // nativeInit and before getEstimatedNativeAllocBytes().
+        if (format == ImageFormat.UNKNOWN) {
+            format = SurfaceUtils.getSurfaceFormat(surface);
+        }
         // Estimate the native buffer allocation size and register it so it gets accounted for
         // during GC. Note that this doesn't include the buffers required by the buffer queue
         // itself and the buffers requested by the producer.

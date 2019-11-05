@@ -1448,6 +1448,15 @@ public class CarrierConfigManager {
             "stk_disable_launch_browser_bool";
 
     /**
+      * Boolean indicating if the helper text for STK GET INKEY/INPUT commands with the digit only
+      * mode is displayed on the input screen.
+      * The helper text is dispayed regardless of the input mode, if {@code false}.
+      * @hide
+      */
+    public static final String KEY_HIDE_DIGITS_HELPER_TEXT_ON_STK_INPUT_SCREEN_BOOL =
+            "hide_digits_helper_text_on_stk_input_screen_bool";
+
+    /**
      * Boolean indicating if show data RAT icon on status bar even when data is disabled
      * @hide
      */
@@ -1827,6 +1836,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL =
             "support_direct_fdn_dialing_bool";
+
+    /**
+     * Int indicating the max number length for FDN
+     * @hide
+     */
+    public static final String KEY_FDN_NUMBER_LENGTH_LIMIT_INT =
+            "fdn_number_length_limit_int";
 
     /**
      * Report IMEI as device id even if it's a CDMA/LTE phone.
@@ -2865,6 +2881,16 @@ public class CarrierConfigManager {
             "always_show_primary_signal_bar_in_opportunistic_network_boolean";
 
     /**
+     * Upon data switching between subscriptions within a carrier group, if switch depends on
+     * validation result, this value defines customized value of how long we wait for validation
+     * success before we fail and revoke the switch.
+     * Time out is in milliseconds.
+     * @hide
+     */
+    public static final String KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG =
+            "data_switch_validation_timeout_long";
+
+    /**
      * GPS configs. See android.hardware.gnss@1.0 IGnssConfiguration.
      * @hide
      */
@@ -3209,6 +3235,14 @@ public class CarrierConfigManager {
     public static final String KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY =
             "disconnect_cause_play_busytone_int_array";
 
+    /**
+     * Flag specifying whether to prevent sending CLIR activation("*31#") and deactivation("#31#")
+     * code only without dialing number.
+     * When {@code true}, these are prevented, {@code false} otherwise.
+     */
+    public static final String KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL =
+            "prevent_clir_activation_and_deactivation_code_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -3411,6 +3445,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
+        sDefaults.putInt(KEY_FDN_NUMBER_LENGTH_LIMIT_INT, 20);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_DATA_ROAMING_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_SKIP_CF_FAIL_TO_DISABLE_DIALOG_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL, true);
@@ -3519,6 +3554,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_METERED_NETWORK_FOR_CERT_DOWNLOAD_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_DIGITS_HELPER_TEXT_ON_STK_INPUT_SCREEN_BOOL, true);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putInt(KEY_EMERGENCY_NOTIFICATION_DELAY_INT, -1);
@@ -3639,6 +3675,8 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, null);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
+        sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
     }
 
     /**
