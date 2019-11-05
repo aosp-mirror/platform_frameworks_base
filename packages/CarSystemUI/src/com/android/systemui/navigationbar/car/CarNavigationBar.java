@@ -53,13 +53,13 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final CarNavigationBarController mCarNavigationBarController;
     private final WindowManager mWindowManager;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final CommandQueue mCommandQueue;
     private final Lazy<FacetButtonTaskStackListener> mFacetButtonTaskStackListener;
     private final Handler mMainHandler;
     private final Lazy<KeyguardStateController> mKeyguardStateController;
     private final Lazy<NavigationBarController> mNavigationBarController;
 
     private IStatusBarService mBarService;
-    private CommandQueue mCommandQueue;
     private ActivityManagerWrapper mActivityManagerWrapper;
 
     // If the nav bar should be hidden when the soft keyboard is visible.
@@ -83,6 +83,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             CarNavigationBarController carNavigationBarController,
             WindowManager windowManager,
             DeviceProvisionedController deviceProvisionedController,
+            CommandQueue commandQueue,
             Lazy<FacetButtonTaskStackListener> facetButtonTaskStackListener,
             @MainHandler Handler mainHandler,
             Lazy<KeyguardStateController> keyguardStateController,
@@ -91,6 +92,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mCarNavigationBarController = carNavigationBarController;
         mWindowManager = windowManager;
         mDeviceProvisionedController = deviceProvisionedController;
+        mCommandQueue = commandQueue;
         mFacetButtonTaskStackListener = facetButtonTaskStackListener;
         mMainHandler = mainHandler;
         mKeyguardStateController = keyguardStateController;
@@ -109,7 +111,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
         // Connect into the status bar manager service
-        mCommandQueue = getComponent(CommandQueue.class);
         mCommandQueue.addCallback(this);
 
         RegisterStatusBarResult result = null;
