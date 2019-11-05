@@ -30,7 +30,6 @@ import android.content.Context;
 import android.graphics.Insets;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -39,8 +38,6 @@ import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Callback;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
-import android.view.WindowInsetsController;
-import android.view.WindowInsetsController.OnControllableInsetsChangedListener;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 
@@ -49,7 +46,7 @@ import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class WindowInsetsActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
 
     private View mRoot;
 
@@ -58,7 +55,7 @@ public class WindowInsetsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.window_inset_activity);
+        setContentView(R.layout.chat_activity);
 
         setSupportActionBar(findViewById(R.id.toolbar));
 
@@ -71,7 +68,7 @@ public class WindowInsetsActivity extends AppCompatActivity {
 
         mRoot.setOnTouchListener(new View.OnTouchListener() {
             private final ViewConfiguration mViewConfiguration =
-                    ViewConfiguration.get(WindowInsetsActivity.this);
+                    ViewConfiguration.get(ChatActivity.this);
             WindowInsetsAnimationController mAnimationController;
             WindowInsetsAnimationControlListener mCurrentRequest;
             boolean mRequestedController = false;
