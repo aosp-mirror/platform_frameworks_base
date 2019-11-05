@@ -3061,7 +3061,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // A network factory has connected.  Send it all current NetworkRequests.
                 for (NetworkRequestInfo nri : mNetworkRequests.values()) {
                     if (nri.request.isListen()) continue;
-                    NetworkAgentInfo nai = getNetworkForRequest(nri.request.requestId);
+                    NetworkAgentInfo nai = getNetworkForRequest(nri);
                     final int score;
                     final int serial;
                     if (nai != null) {
@@ -3164,9 +3164,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Remove all previously satisfied requests.
         for (int i = 0; i < nai.numNetworkRequests(); i++) {
             NetworkRequest request = nai.requestAt(i);
-            NetworkAgentInfo currentNetwork = getNetworkForRequest(request.requestId);
+            final NetworkRequestInfo nri = mNetworkRequests.get(request);
+            final NetworkAgentInfo currentNetwork = getNetworkForRequest(nri);
             if (currentNetwork != null && currentNetwork.network.netId == nai.network.netId) {
-                clearNetworkForRequest(request.requestId);
+                setNetworkForRequest(nri, null);
                 sendUpdatedScoreToFactories(request, null);
             }
         }
@@ -3267,7 +3268,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         rematchAllNetworksAndRequests(null, 0);
-        if (nri.request.isRequest() && getNetworkForRequest(nri.request.requestId) == null) {
+        if (nri.request.isRequest() && getNetworkForRequest(nri) == null) {
             sendUpdatedScoreToFactories(nri.request, null);
         }
     }
@@ -3323,8 +3324,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     // 2. Unvalidated WiFi will not be reaped when validated cellular
                     //    is currently satisfying the request.  This is desirable when
                     //    WiFi ends up validating and out scoring cellular.
-                    getNetworkForRequest(nri.request.requestId).getCurrentScore() <
-                            nai.getCurrentScoreAsValidated())) {
+                    getNetworkForRequest(nri).getCurrentScore()
+                            < nai.getCurrentScoreAsValidated())) {
                 return false;
             }
         }
@@ -3352,7 +3353,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (mNetworkRequests.get(nri.request) == null) {
             return;
         }
-        if (getNetworkForRequest(nri.request.requestId) != null) {
+        if (getNetworkForRequest(nri) != null) {
             return;
         }
         if (VDBG || (DBG && nri.request.isRequest())) {
@@ -3400,7 +3401,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mNetworkRequestInfoLogs.log("RELEASE " + nri);
         if (nri.request.isRequest()) {
             boolean wasKept = false;
-            NetworkAgentInfo nai = getNetworkForRequest(nri.request.requestId);
+            final NetworkAgentInfo nai = getNetworkForRequest(nri);
             if (nai != null) {
                 boolean wasBackgroundNetwork = nai.isBackgroundNetwork();
                 nai.removeRequest(nri.request.requestId);
@@ -3417,7 +3418,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 } else {
                     wasKept = true;
                 }
-                clearNetworkForRequest(nri.request.requestId);
+                setNetworkForRequest(nri, null);
                 if (!wasBackgroundNetwork && nai.isBackgroundNetwork()) {
                     // Went from foreground to background.
                     updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
@@ -5100,6 +5101,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private class NetworkRequestInfo implements IBinder.DeathRecipient {
         final NetworkRequest request;
+        // The network currently satisfying this request, or null if none. Must only be touched
+        // on the handler thread. This only makes sense for network requests and not for listens,
+        // as defined by NetworkRequest#isRequest(). For listens, this is always null.
+        @Nullable
+        NetworkAgentInfo mSatisfier;
         final PendingIntent mPendingIntent;
         boolean mPendingIntentSent;
         private final IBinder mBinder;
@@ -5527,23 +5533,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // priority networks like ethernet are active.
     private final NetworkRequest mDefaultWifiRequest;
 
-    private NetworkAgentInfo getNetworkForRequest(int requestId) {
+    @Nullable
+    private NetworkAgentInfo getNetworkForRequest(@NonNull final NetworkRequestInfo requestInfo) {
+        ensureRunningOnConnectivityServiceThread();
         synchronized (mNetworkForRequestId) {
-            return mNetworkForRequestId.get(requestId);
+            return requestInfo.mSatisfier;
         }
     }
 
-    private void clearNetworkForRequest(int requestId) {
+    private void setNetworkForRequest(@NonNull final NetworkRequestInfo requestInfo,
+            @Nullable NetworkAgentInfo nai) {
+        ensureRunningOnConnectivityServiceThread();
         synchronized (mNetworkForRequestId) {
-            mNetworkForRequestId.remove(requestId);
-            if (mDefaultRequest.requestId == requestId) mDefaultNetworkNai = null;
-        }
-    }
-
-    private void setNetworkForRequest(int requestId, NetworkAgentInfo nai) {
-        synchronized (mNetworkForRequestId) {
-            mNetworkForRequestId.put(requestId, nai);
-            if (mDefaultRequest.requestId == requestId) mDefaultNetworkNai = nai;
+            requestInfo.mSatisfier = nai;
+            if (isDefaultRequest(requestInfo)) mDefaultNetworkNai = nai;
         }
     }
 
@@ -6362,7 +6365,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // requests or not, and doesn't affect the network's score.
             if (nri.request.isListen()) continue;
 
-            final NetworkAgentInfo currentNetwork = getNetworkForRequest(nri.request.requestId);
+            final NetworkAgentInfo currentNetwork = getNetworkForRequest(nri);
             final boolean satisfies = newNetwork.satisfies(nri.request);
             if (newNetwork == currentNetwork && satisfies) {
                 if (VDBG) {
@@ -6396,7 +6399,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         if (VDBG || DDBG) log("   accepting network in place of null");
                     }
                     newNetwork.unlingerRequest(nri.request);
-                    setNetworkForRequest(nri.request.requestId, newNetwork);
+                    setNetworkForRequest(nri, newNetwork);
                     if (!newNetwork.addRequest(nri.request)) {
                         Slog.wtf(TAG, "BUG: " + newNetwork.name() + " already has " + nri.request);
                     }
@@ -6430,7 +6433,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 newNetwork.removeRequest(nri.request.requestId);
                 if (currentNetwork == newNetwork) {
-                    clearNetworkForRequest(nri.request.requestId);
+                    setNetworkForRequest(nri, null);
                     sendUpdatedScoreToFactories(nri.request, null);
                 } else {
                     Slog.wtf(TAG, "BUG: Removing request " + nri.request.requestId + " from " +
