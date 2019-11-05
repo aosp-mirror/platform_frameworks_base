@@ -328,6 +328,9 @@ public abstract class WebSettings {
      * <p>
      * The built-in mechanisms are the only currently supported zoom
      * mechanisms, so it is recommended that this setting is always enabled.
+     * However, on-screen zoom controls are deprecated in Android (see
+     * {@link android.widget.ZoomButtonsController}) so it's recommended to
+     * disable {@link #setDisplayZoomControls}.
      *
      * @param enabled whether the WebView should use its built-in zoom mechanisms
      */
@@ -347,7 +350,9 @@ public abstract class WebSettings {
     /**
      * Sets whether the WebView should display on-screen zoom controls when
      * using the built-in zoom mechanisms. See {@link #setBuiltInZoomControls}.
-     * The default is {@code true}.
+     * The default is {@code true}. However, on-screen zoom controls are deprecated
+     * in Android (see {@link android.widget.ZoomButtonsController}) so it's
+     * recommended to set this to {@code false}.
      *
      * @param enabled whether the WebView should display on-screen zoom controls
      */
