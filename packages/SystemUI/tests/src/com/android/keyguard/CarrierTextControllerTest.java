@@ -120,6 +120,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         mCarrierTextCallbackInfo = new CarrierTextController.CarrierTextCallbackInfo("",
                 new CharSequence[]{}, false, new int[]{});
         when(mTelephonyManager.getSupportedModemCount()).thenReturn(3);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(3);
 
         mCarrierTextController = new TestCarrierTextController(mContext, SEPARATOR, true, true,
                 mKeyguardUpdateMonitor);
@@ -173,6 +174,15 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         // There's only one subscription in the list
         assertEquals(1, captor.getValue().listOfCarriers.length);
         assertEquals(TEST_CARRIER, captor.getValue().listOfCarriers[0]);
+
+        // Now it becomes single SIM active mode.
+        reset(mCarrierTextCallback);
+        when(mTelephonyManager.getActiveModemCount()).thenReturn(1);
+        // Update carrier text. It should ignore error state of subId 3 in inactive slotId.
+        mCarrierTextController.updateCarrierText();
+        mTestableLooper.processAllMessages();
+        verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
+        assertEquals("TEST_CARRIER", captor.getValue().carrierText);
     }
 
     @Test

@@ -171,12 +171,15 @@ public class CarrierTextController {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mSeparator = separator;
         mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
-        mSimSlotsNumber = ((TelephonyManager) context.getSystemService(
-                Context.TELEPHONY_SERVICE)).getSupportedModemCount();
+        mSimSlotsNumber = getTelephonyManager().getSupportedModemCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
         updateDisplayOpportunisticSubscriptionCarrierText(SystemProperties.getBoolean(
                 TelephonyProperties.DISPLAY_OPPORTUNISTIC_SUBSCRIPTION_CARRIER_TEXT_PROPERTY_NAME,
                 false));
+    }
+
+    private TelephonyManager getTelephonyManager() {
+        return (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
     }
 
     /**
@@ -194,7 +197,7 @@ public class CarrierTextController {
         CharSequence carrierTextForSimIOError = getCarrierTextForSimState(
                 IccCardConstants.State.CARD_IO_ERROR, carrier);
         // mSimErrorState has the state of each sim indexed by slotID.
-        for (int index = 0; index < mSimErrorState.length; index++) {
+        for (int index = 0; index < getTelephonyManager().getActiveModemCount(); index++) {
             if (!mSimErrorState[index]) {
                 continue;
             }
@@ -227,8 +230,7 @@ public class CarrierTextController {
      * @param callback Callback to provide text updates
      */
     public void setListening(CarrierTextCallback callback) {
-        TelephonyManager telephonyManager = ((TelephonyManager) mContext
-                .getSystemService(Context.TELEPHONY_SERVICE));
+        TelephonyManager telephonyManager = getTelephonyManager();
         if (callback != null) {
             mCarrierTextCallback = callback;
             if (ConnectivityManager.from(mContext).isNetworkSupported(
