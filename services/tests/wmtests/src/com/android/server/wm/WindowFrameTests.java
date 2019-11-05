@@ -96,6 +96,10 @@ public class WindowFrameTests extends WindowTestsBase {
         assertRect(w.getFrameLw(), left, top, right, bottom);
     }
 
+    private void assertRelFrame(WindowState w, int left, int top, int right, int bottom) {
+        assertRect(w.getRelativeFrameLw(), left, top, right, bottom);
+    }
+
     private void assertContentFrame(WindowState w, Rect expectedRect) {
         assertRect(w.getContentFrameLw(), expectedRect.left, expectedRect.top, expectedRect.right,
                 expectedRect.bottom);
@@ -153,6 +157,7 @@ public class WindowFrameTests extends WindowTestsBase {
         w.getWindowFrames().setFrames(pf, df, cf, vf, dcf, sf);
         w.computeFrameLw();
         assertFrame(w, 0, 0, 1000, 1000);
+        assertRelFrame(w, 0, 0, 1000, 1000);
         assertContentInset(w, 0, topContentInset, 0, bottomContentInset);
         assertVisibleInset(w, 0, topVisibleInset, 0, bottomVisibleInset);
         assertStableInset(w, leftStableInset, 0, rightStableInset, 0);
@@ -167,6 +172,7 @@ public class WindowFrameTests extends WindowTestsBase {
         w.mRequestedHeight = 100;
         w.computeFrameLw();
         assertFrame(w, 100, 100, 200, 200);
+        assertRelFrame(w, 100, 100, 200, 200);
         assertContentInset(w, 0, 0, 0, 0);
         // In this case the frames are shrunk to the window frame.
         assertContentFrame(w, w.getFrameLw());
@@ -189,6 +195,7 @@ public class WindowFrameTests extends WindowTestsBase {
         w.getWindowFrames().setFrames(pf, pf, pf, pf, pf, pf);
         w.computeFrameLw();
         assertFrame(w, 0, 0, 1000, 1000);
+        assertRelFrame(w, 0, 0, 1000, 1000);
 
         // It can select various widths and heights within the bounds.
         // Strangely the window attribute width is ignored for normal windows
@@ -242,15 +249,18 @@ public class WindowFrameTests extends WindowTestsBase {
         w.mAttrs.gravity = Gravity.RIGHT | Gravity.TOP;
         w.computeFrameLw();
         assertFrame(w, 700, 0, 1000, 300);
+        assertRelFrame(w, 700, 0, 1000, 300);
         w.mAttrs.gravity = Gravity.RIGHT | Gravity.BOTTOM;
         w.computeFrameLw();
         assertFrame(w, 700, 700, 1000, 1000);
+        assertRelFrame(w, 700, 700, 1000, 1000);
         // Window specified  x and y are interpreted as offsets in the opposite
         // direction of gravity
         w.mAttrs.x = 100;
         w.mAttrs.y = 100;
         w.computeFrameLw();
         assertFrame(w, 600, 600, 900, 900);
+        assertRelFrame(w, 600, 600, 900, 900);
     }
 
     @Test
@@ -279,6 +289,8 @@ public class WindowFrameTests extends WindowTestsBase {
         // For non fullscreen tasks the containing frame is based off the
         // task bounds not the parent frame.
         assertEquals(resolvedTaskBounds, w.getFrameLw());
+        assertEquals(0, w.getRelativeFrameLw().left);
+        assertEquals(0, w.getRelativeFrameLw().top);
         assertContentFrame(w, resolvedTaskBounds);
         assertContentInset(w, 0, 0, 0, 0);
 
@@ -290,6 +302,8 @@ public class WindowFrameTests extends WindowTestsBase {
         windowFrames.setFrames(pf, pf, cf, cf, pf, cf);
         w.computeFrameLw();
         assertEquals(resolvedTaskBounds, w.getFrameLw());
+        assertEquals(0, w.getRelativeFrameLw().left);
+        assertEquals(0, w.getRelativeFrameLw().top);
         int contentInsetRight = resolvedTaskBounds.right - cfRight;
         int contentInsetBottom = resolvedTaskBounds.bottom - cfBottom;
         assertContentInset(w, 0, 0, contentInsetRight, contentInsetBottom);
@@ -309,6 +323,8 @@ public class WindowFrameTests extends WindowTestsBase {
         windowFrames.setFrames(pf, pf, cf, cf, pf, cf);
         w.computeFrameLw();
         assertEquals(resolvedTaskBounds, w.getFrameLw());
+        assertEquals(0, w.getRelativeFrameLw().left);
+        assertEquals(0, w.getRelativeFrameLw().top);
         contentInsetRight = insetRight - cfRight;
         contentInsetBottom = insetBottom - cfBottom;
         assertContentInset(w, 0, 0, contentInsetRight, contentInsetBottom);

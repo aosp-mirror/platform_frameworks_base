@@ -212,7 +212,6 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
-import com.android.server.wm.utils.InsetUtils;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
@@ -1129,6 +1128,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
 
+        // Calculate relative frame
+        mWindowFrames.mRelFrame.set(mWindowFrames.mFrame);
+        WindowContainer parent = getParent();
+        int parentLeft = 0;
+        int parentTop = 0;
+        if (mIsChildWindow) {
+            parentLeft = ((WindowState) parent).mWindowFrames.mFrame.left;
+            parentTop = ((WindowState) parent).mWindowFrames.mFrame.top;
+        } else if (parent != null) {
+            final Rect parentBounds = parent.getDisplayedBounds();
+            parentLeft = parentBounds.left;
+            parentTop = parentBounds.top;
+        }
+        mWindowFrames.mRelFrame.offsetTo(mWindowFrames.mFrame.left - parentLeft,
+                mWindowFrames.mFrame.top - parentTop);
+
         if (DEBUG_LAYOUT || DEBUG) {
             Slog.v(TAG, "Resolving (mRequestedWidth="
                             + mRequestedWidth + ", mRequestedheight="
@@ -1152,6 +1167,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public Rect getFrameLw() {
         return mWindowFrames.mFrame;
+    }
+
+    /** Accessor for testing */
+    Rect getRelativeFrameLw() {
+        return mWindowFrames.mRelFrame;
     }
 
     @Override
@@ -1289,6 +1309,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // We update mLastFrame always rather than in the conditional with the last inset
         // variables, because mFrameSizeChanged only tracks the width and height changing.
         mWindowFrames.mLastFrame.set(mWindowFrames.mFrame);
+        mWindowFrames.mLastRelFrame.set(mWindowFrames.mRelFrame);
 
         if (didFrameInsetsChange
                 || winAnimator.mSurfaceResized
@@ -1859,8 +1880,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean hasMoved() {
         return mHasSurface && (mWindowFrames.hasContentChanged() || mMovedByResize)
                 && !mAnimatingExit
-                && (mWindowFrames.mFrame.top != mWindowFrames.mLastFrame.top
-                    || mWindowFrames.mFrame.left != mWindowFrames.mLastFrame.left)
+                && (mWindowFrames.mRelFrame.top != mWindowFrames.mLastRelFrame.top
+                    || mWindowFrames.mRelFrame.left != mWindowFrames.mLastRelFrame.left)
                 && (!mIsChildWindow || !getParentWindow().hasMoved());
     }
 

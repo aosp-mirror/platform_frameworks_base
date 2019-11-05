@@ -45,6 +45,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -161,12 +162,12 @@ public class TaskRecordTests extends ActivityTestsBase {
         assertTrue(task.returnsToHomeStack());
     }
 
-    /** Ensures that empty bounds are not propagated to the configuration. */
+    /** Ensures that empty bounds cause appBounds to inherit from parent. */
     @Test
     public void testAppBounds_EmptyBounds() {
         final Rect emptyBounds = new Rect();
         testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, emptyBounds,
-                null /*ExpectedBounds*/);
+                mParentBounds);
     }
 
     /** Ensures that bounds on freeform stacks are not clipped. */
@@ -413,6 +414,24 @@ public class TaskRecordTests extends ActivityTestsBase {
         assertEquals(longSide * DENSITY_DEFAULT / parentConfig.densityDpi,
                 inOutConfig.screenWidthDp);
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, inOutConfig.orientation);
+    }
+
+    @Test
+    public void testComputeNestedConfigResourceOverrides() {
+        final Task task = new TaskBuilder(mSupervisor).build();
+        assertTrue(task.getResolvedOverrideBounds().isEmpty());
+        int origScreenH = task.getConfiguration().screenHeightDp;
+        Configuration stackConfig = new Configuration();
+        stackConfig.setTo(task.getStack().getRequestedOverrideConfiguration());
+        stackConfig.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        // Set bounds on stack (not task) and verify that the task resource configuration changes
+        // despite it's override bounds being empty.
+        Rect bounds = new Rect(task.getStack().getBounds());
+        bounds.bottom = (int) (bounds.bottom * 0.6f);
+        stackConfig.windowConfiguration.setBounds(bounds);
+        task.getStack().onRequestedOverrideConfigurationChanged(stackConfig);
+        assertNotEquals(origScreenH, task.getConfiguration().screenHeightDp);
     }
 
     /** Ensures that the alias intent won't have target component resolved. */
