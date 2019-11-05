@@ -57,6 +57,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -2688,10 +2689,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        protected int handleShellCommand(@NonNull FileDescriptor in, @NonNull FileDescriptor out,
-                @NonNull FileDescriptor err, @NonNull String[] args) {
+        protected int handleShellCommand(@NonNull ParcelFileDescriptor in,
+                @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+                @NonNull String[] args) {
             return (new JobSchedulerShellCommand(JobSchedulerService.this)).exec(
-                    this, in, out, err, args);
+                    this, in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(),
+                    args);
         }
 
 
