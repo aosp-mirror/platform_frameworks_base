@@ -1301,8 +1301,8 @@ public class ActivityOptions {
 
     /**
      * Set's whether the activity launched with this option should be a task overlay. That is the
-     * activity will always be the top activity of the task.  If {@param canResume} is true, then
-     * the task will also not be moved to the front of the stack.
+     * activity will always be the top activity of the task.
+     * @param canResume {@code false} if the task will also not be moved to the front of the stack.
      * @hide
      */
     @TestApi
