@@ -34,6 +34,7 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import lineageos.providers.LineageSettings;
@@ -52,6 +53,7 @@ public class AdbOverNetworkTile extends QSTileImpl<BooleanState> {
     private boolean mListening;
     private final KeyguardMonitor mKeyguardMonitor;
     private final KeyguardMonitorCallback mKeyguardCallback = new KeyguardMonitorCallback();
+    private final UnlockMethodCache mUnlockMethodCache;
 
     private final ConnectivityManager mConnectivityManager;
 
@@ -65,6 +67,7 @@ public class AdbOverNetworkTile extends QSTileImpl<BooleanState> {
         super(host);
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
+        mUnlockMethodCache = UnlockMethodCache.getInstance(mHost.getContext());
     }
 
     @Override
@@ -74,7 +77,7 @@ public class AdbOverNetworkTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick() {
-        if (mKeyguardMonitor.isSecure() && !mKeyguardMonitor.canSkipBouncer()) {
+        if (mKeyguardMonitor.isSecure() && !mUnlockMethodCache.canSkipBouncer()) {
             Dependency.get(ActivityStarter.class)
                     .postQSRunnableDismissingKeyguard(this::toggleAction);
         } else {
