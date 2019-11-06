@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -52,6 +53,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -59,12 +62,13 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     private ForegroundServiceController mFsc;
     private ForegroundServiceNotificationListener mListener;
     private NotificationEntryListener mEntryListener;
-    private NotificationEntryManager mEntryManager;
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private AppOpsController mAppOpsController;
 
     @Before
     public void setUp() throws Exception {
-        mEntryManager = mock(NotificationEntryManager.class);
-        mFsc = new ForegroundServiceController(mEntryManager);
+        MockitoAnnotations.initMocks(this);
+        mFsc = new ForegroundServiceController(mEntryManager, mAppOpsController);
         mListener = new ForegroundServiceNotificationListener(
                 mContext, mFsc, mEntryManager);
         ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =

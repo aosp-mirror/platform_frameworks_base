@@ -51,7 +51,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.AppOpsManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -136,7 +135,6 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
-import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
@@ -144,7 +142,6 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
@@ -152,7 +149,6 @@ import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
-import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
@@ -213,7 +209,6 @@ import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -236,7 +231,6 @@ import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
@@ -253,10 +247,10 @@ import dagger.Subcomponent;
 
 public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, KeyguardStateController.Callback,
-        OnHeadsUpChangedListener, CommandQueue.Callbacks, ZenModeController.Callback,
+        OnHeadsUpChangedListener, CommandQueue.Callbacks,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener, ShadeController,
-        ActivityLaunchAnimator.Callback, AppOpsController.Callback {
+        ActivityLaunchAnimator.Callback {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
@@ -375,7 +369,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final FeatureFlags mFeatureFlags;
     private final StatusBarIconController mIconController;
-    private final DozeLog mDozeLog;
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -389,7 +382,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ConfigurationController mConfigurationController;
     private final StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
-    private final NotifLog mNotifLog;
     private final DozeParameters mDozeParameters;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final PluginManager mPluginManager;
@@ -424,10 +416,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationListController mNotificationListController;
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private final NotificationViewHierarchyManager mViewHierarchyManager;
-    private final ForegroundServiceController mForegroundServiceController;
-    private final AppOpsController mAppOpsController;
     private final KeyguardViewMediator mKeyguardViewMediator;
-    private final ZenModeController mZenController;
     private final NotificationAlertingManager mNotificationAlertingManager;
 
     // for disabling the status bar
@@ -614,19 +603,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private ActivityIntentHelper mActivityIntentHelper;
 
-    @Override
-    public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
-        Dependency.get(MAIN_HANDLER).post(() -> {
-            mForegroundServiceController.onAppOpChanged(code, uid, packageName, active);
-        });
-    }
-
-    protected static final int[] APP_OPS = new int[] {AppOpsManager.OP_CAMERA,
-            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-            AppOpsManager.OP_RECORD_AUDIO,
-            AppOpsManager.OP_COARSE_LOCATION,
-            AppOpsManager.OP_FINE_LOCATION};
-
     /**
      * Public constructor for StatusBar.
      *
@@ -641,7 +617,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarIconController statusBarIconController,
-            DozeLog dozeLog,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
@@ -659,10 +634,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationEntryManager notificationEntryManager,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
-            ForegroundServiceController foregroundServiceController,
-            AppOpsController appOpsController,
             KeyguardViewMediator keyguardViewMediator,
-            ZenModeController zenModeController,
             NotificationAlertingManager notificationAlertingManager,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
@@ -689,7 +661,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
-            NotifLog notifLog,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             @Nullable KeyguardLiftController keyguardLiftController,
@@ -710,7 +681,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAutoHideController = autoHideController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mIconController = statusBarIconController;
-        mDozeLog = dozeLog;
         mPulseExpansionHandler = pulseExpansionHandler;
         mWakeUpCoordinator = notificationWakeUpCoordinator;
         mKeyguardBypassController = keyguardBypassController;
@@ -728,10 +698,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mEntryManager = notificationEntryManager;
         mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
         mViewHierarchyManager = notificationViewHierarchyManager;
-        mForegroundServiceController = foregroundServiceController;
-        mAppOpsController = appOpsController;
         mKeyguardViewMediator = keyguardViewMediator;
-        mZenController = zenModeController;
         mNotificationAlertingManager = notificationAlertingManager;
         mDisplayMetrics = displayMetrics;
         mMetricsLogger = metricsLogger;
@@ -758,7 +725,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mConfigurationController = configurationController;
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarWindowViewControllerBuilder = statusBarWindowViewControllerBuilder;
-        mNotifLog = notifLog;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
@@ -995,7 +961,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
 
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
-        mZenController.addCallback(this);
         NotificationListContainer notifListContainer = (NotificationListContainer) mStackScroller;
         mNotificationLogger.setUpWithContainer(notifListContainer);
 
@@ -1255,8 +1220,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mContext,
                         mAllowNotificationLongPress,
                         mKeyguardBypassController,
-                        mStatusBarStateController,
-                        mNotifLog);
+                        mStatusBarStateController);
 
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
@@ -1267,10 +1231,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 new NotificationListController(
                         mEntryManager,
                         (NotificationListContainer) mStackScroller,
-                        mForegroundServiceController,
                         mDeviceProvisionedController);
 
-        mAppOpsController.addCallback(APP_OPS, this);
         mNotificationShelf.setOnActivatedListener(mPresenter);
         mRemoteInputManager.getController().addCallback(mStatusBarWindowController);
 
@@ -1523,10 +1485,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void clickTile(ComponentName tile) {
         mQSPanel.clickTile(tile);
-    }
-
-    public boolean areNotificationsHidden() {
-        return mZenController.areNotificationsHiddenInShade();
     }
 
     /**
@@ -2479,10 +2437,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         pw.print("  mStatusBarMode=");
         pw.println(BarTransitions.modeToString(mStatusBarMode));
         pw.print("  mDozing="); pw.println(mDozing);
-        pw.print("  mZenMode=");
-        pw.println(Settings.Global.zenModeToString(Settings.Global.getInt(
-                mContext.getContentResolver(), Settings.Global.ZEN_MODE,
-                Settings.Global.ZEN_MODE_OFF)));
         pw.print("  mWallpaperSupported= "); pw.println(mWallpaperSupported);
 
         if (mStatusBarView != null) {
@@ -2518,8 +2472,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 ", no: " + UiModeManager.MODE_NIGHT_NO + ")");
         final boolean lightWpTheme = mContext.getThemeResId() == R.style.Theme_SystemUI_Light;
         pw.println("    light wallpaper theme: " + lightWpTheme);
-
-        mDozeLog.dump(pw);
 
         if (mKeyguardIndicationController != null) {
             mKeyguardIndicationController.dump(fd, pw, args);

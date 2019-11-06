@@ -74,18 +74,15 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency;
-import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -200,13 +197,10 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private AssistManager mAssistManager;
     @Mock private NotificationGutsManager mNotificationGutsManager;
     @Mock private NotificationMediaManager mNotificationMediaManager;
-    @Mock private ForegroundServiceController mForegroundServiceController;
-    @Mock private AppOpsController mAppOpsController;
     @Mock private NavigationBarController mNavigationBarController;
     @Mock private BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private ColorExtractor.GradientColors mGradientColors;
-    @Mock private DozeLog mDozeLog;
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
     @Mock private NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     @Mock private KeyguardBypassController mKeyguardBypassController;
@@ -312,7 +306,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mAutoHideController,
                 mKeyguardUpdateMonitor,
                 mStatusBarIconController,
-                mDozeLog,
                 mPulseExpansionHandler,
                 mNotificationWakeUpCoordinator,
                 mKeyguardBypassController,
@@ -334,10 +327,7 @@ public class StatusBarTest extends SysuiTestCase {
                 entryManager,
                 mNotificationInterruptionStateProvider,
                 mNotificationViewHierarchyManager,
-                mForegroundServiceController,
-                mAppOpsController,
                 mKeyguardViewMediator,
-                mZenModeController,
                 mNotificationAlertingManager,
                 new DisplayMetrics(),
                 mMetricsLogger,
@@ -364,7 +354,6 @@ public class StatusBarTest extends SysuiTestCase {
                 configurationController,
                 mStatusBarWindowController,
                 mStatusBarWindowViewControllerBuilder,
-                mNotifLog,
                 mDozeParameters,
                 mScrimController,
                 mKeyguardLiftController,

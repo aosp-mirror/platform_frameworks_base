@@ -142,6 +142,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
+import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Assert;
 
@@ -344,6 +345,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean mForceNoOverlappingRendering;
     private final ArrayList<Pair<ExpandableNotificationRow, Boolean>> mTmpList = new ArrayList<>();
     private FalsingManager mFalsingManager;
+    private final ZenModeController mZenController;
     private boolean mAnimationRunning;
     private ViewTreeObserver.OnPreDrawListener mRunningAnimationUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -520,7 +522,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGutsManager notificationGutsManager,
             NotificationSectionsFeatureManager sectionsFeatureManager,
-            PeopleHubSectionFooterViewAdapter peopleHubViewAdapter) {
+            PeopleHubSectionFooterViewAdapter peopleHubViewAdapter,
+            ZenModeController zenController) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -535,6 +538,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mHeadsUpManager.setAnimationStateHandler(this::setHeadsUpGoingAwayAnimationsAllowed);
         mKeyguardBypassController = keyguardBypassController;
         mFalsingManager = falsingManager;
+        mZenController = zenController;
 
         int[] buckets = sectionsFeatureManager.getNotificationBuckets();
         mSectionsManager =
@@ -4882,7 +4886,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         int oldTextRes = mEmptyShadeView.getTextResource();
-        int newTextRes = mStatusBar.areNotificationsHidden()
+        int newTextRes = mZenController.areNotificationsHiddenInShade()
                 ? R.string.dnd_suppressing_shade_text : R.string.empty_shade_text;
         if (oldTextRes != newTextRes) {
             mEmptyShadeView.setText(newTextRes);

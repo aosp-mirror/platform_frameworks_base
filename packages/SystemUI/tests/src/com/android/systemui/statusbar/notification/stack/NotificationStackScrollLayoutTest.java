@@ -82,6 +82,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarTest.TestableNotificationEntryManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.DeviceConfigProxyFake;
 
 import org.junit.After;
@@ -123,6 +124,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private KeyguardBypassController mKeyguardBypassController;
+    @Mock private ZenModeController mZenModeController;
     private TestableNotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
 
@@ -173,7 +175,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(NotificationLockscreenUserManager.class),
                 mock(NotificationGutsManager.class),
                 new NotificationSectionsFeatureManager(new DeviceConfigProxyFake(), mContext),
-                mock(PeopleHubSectionFooterViewAdapter.class));
+                mock(PeopleHubSectionFooterViewAdapter.class),
+                mZenModeController);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);
@@ -211,7 +214,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Test
     public void updateEmptyView_dndSuppressing() {
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        when(mBar.areNotificationsHidden()).thenReturn(true);
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
 
         mStackScroller.updateEmptyShadeView(true);
 
@@ -222,7 +225,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void updateEmptyView_dndNotSuppressing() {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        when(mBar.areNotificationsHidden()).thenReturn(false);
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
 
         mStackScroller.updateEmptyShadeView(true);
 
@@ -233,11 +236,11 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void updateEmptyView_noNotificationsToDndSuppressing() {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
-        when(mBar.areNotificationsHidden()).thenReturn(false);
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(false);
         mStackScroller.updateEmptyShadeView(true);
         verify(mEmptyShadeView).setText(R.string.empty_shade_text);
 
-        when(mBar.areNotificationsHidden()).thenReturn(true);
+        when(mZenModeController.areNotificationsHiddenInShade()).thenReturn(true);
         mStackScroller.updateEmptyShadeView(true);
         verify(mEmptyShadeView).setText(R.string.dnd_suppressing_shade_text);
     }
