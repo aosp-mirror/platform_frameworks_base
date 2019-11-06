@@ -5079,118 +5079,58 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean canPOorDOCallResetPassword(ActiveAdmin admin, @UserIdInt int userId) {
-        // Only if the admins targets a pre-O SDK
-        return getTargetSdk(admin.info.getPackageName(), userId) < Build.VERSION_CODES.O;
+    private boolean setPasswordPrivileged(@NonNull String password, int flags, int callingUid) {
+        // Only allow setting password on an unsecured user
+        if (isLockScreenSecureUnchecked(UserHandle.getUserId(callingUid))) {
+            throw new SecurityException("Cannot change current password");
+        }
+        return resetPasswordInternal(password, 0, null, flags, callingUid);
     }
 
-    /* PO or DO could do an untrusted reset in certain conditions. */
-    private boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId) {
-        synchronized (getLockObject()) {
-            // An active DO or PO might be able to fo an untrusted credential reset
-            for (final ActiveAdmin admin : getUserData(userId).mAdminList) {
-                if (!isActiveAdminWithPolicyForUserLocked(admin,
-                          DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, userId)) {
-                    continue;
-                }
-                if (canPOorDOCallResetPassword(admin, userId)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
     @Override
-    public boolean resetPassword(String passwordOrNull, int flags) throws RemoteException {
+    public boolean resetPassword(@Nullable String password, int flags) throws RemoteException {
         if (!mLockPatternUtils.hasSecureLockScreen()) {
             Slog.w(LOG_TAG, "Cannot reset password when the device has no lock screen");
             return false;
         }
-
+        if (password == null) password = "";
         final int callingUid = mInjector.binderGetCallingUid();
         final int userHandle = mInjector.userHandleGetCallingUserId();
 
-        String password = passwordOrNull != null ? passwordOrNull : "";
-
-        // Password resetting to empty/null is not allowed for managed profiles.
-        if (TextUtils.isEmpty(password)) {
-            enforceNotManagedProfile(userHandle, "clear the active password");
+        // As of R, only privlleged caller holding RESET_PASSWORD can call resetPassword() to
+        // set password to an unsecured user.
+        if (mContext.checkCallingPermission(permission.RESET_PASSWORD)
+                == PackageManager.PERMISSION_GRANTED) {
+            return setPasswordPrivileged(password, flags, callingUid);
         }
 
         synchronized (getLockObject()) {
-            // If caller has PO (or DO) it can change the password, so see if that's the case first.
+            // If caller has PO (or DO) throw or fail silently depending on its target SDK level.
             ActiveAdmin admin = getActiveAdminWithPolicyForUidLocked(
                     null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, callingUid);
-            final boolean preN;
             if (admin != null) {
-                if (!canPOorDOCallResetPassword(admin, userHandle)) {
-                    throw new SecurityException("resetPassword() is deprecated for DPC targeting O"
-                            + " or later");
-                }
-                preN = getTargetSdk(admin.info.getPackageName(),
-                        userHandle) <= android.os.Build.VERSION_CODES.M;
-            } else {
-                // Otherwise, make sure the caller has any active admin with the right policy or
-                // the required permission.
-                admin = getActiveAdminOrCheckPermissionForCallerLocked(
-                        null,
-                        DeviceAdminInfo.USES_POLICY_RESET_PASSWORD,
-                        android.Manifest.permission.RESET_PASSWORD);
-                // Cannot be preN if admin is null because an exception would have been
-                // thrown before getting here
-                preN = admin == null ? false : getTargetSdk(admin.info.getPackageName(),
-                        userHandle) <= android.os.Build.VERSION_CODES.M;
-
-                // As of N, password resetting to empty/null is not allowed anymore.
-                // TODO Should we allow DO/PO to set an empty password?
-                if (TextUtils.isEmpty(password)) {
-                    if (!preN) {
-                        throw new SecurityException("Cannot call with null password");
-                    } else {
-                        Slog.e(LOG_TAG, "Cannot call with null password");
-                        return false;
-                    }
-                }
-                // As of N, password cannot be changed by the admin if it is already set.
-                if (isLockScreenSecureUnchecked(userHandle)) {
-                    if (!preN) {
-                        throw new SecurityException("Cannot change current password");
-                    } else {
-                        Slog.e(LOG_TAG, "Cannot change current password");
-                        return false;
-                    }
-                }
-            }
-            // Do not allow to reset password when current user has a managed profile
-            if (!isManagedProfile(userHandle)) {
-                for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
-                    if (userInfo.isManagedProfile()) {
-                        if (!preN) {
-                            throw new IllegalStateException(
-                                    "Cannot reset password on user has managed profile");
-                        } else {
-                            Slog.e(LOG_TAG, "Cannot reset password on user has managed profile");
-                            return false;
-                        }
-                    }
-                }
-            }
-            // Do not allow to reset password when user is locked
-            if (!mUserManager.isUserUnlocked(userHandle)) {
-                if (!preN) {
-                    throw new IllegalStateException("Cannot reset password when user is locked");
-                } else {
-                    Slog.e(LOG_TAG, "Cannot reset password when user is locked");
+                if (getTargetSdk(admin.info.getPackageName(), userHandle) < Build.VERSION_CODES.O) {
+                    Slog.e(LOG_TAG, "DPC can no longer call resetPassword()");
                     return false;
                 }
+                throw new SecurityException("Device admin can no longer call resetPassword()");
             }
-        }
 
-        return resetPasswordInternal(password, 0, null, flags, callingUid, userHandle);
+            // Legacy device admin cannot call resetPassword either
+            admin = getActiveAdminForCallerLocked(
+                    null, DeviceAdminInfo.USES_POLICY_RESET_PASSWORD, false);
+            if (getTargetSdk(admin.info.getPackageName(),
+                    userHandle) <= android.os.Build.VERSION_CODES.M) {
+                Slog.e(LOG_TAG, "Device admin can no longer call resetPassword()");
+                return false;
+            }
+            throw new SecurityException("Device admin can no longer call resetPassword()");
+        }
     }
 
     private boolean resetPasswordInternal(String password, long tokenHandle, byte[] token,
-            int flags, int callingUid, int userHandle) {
+            int flags, int callingUid) {
+        final int userHandle = UserHandle.getUserId(callingUid);
         synchronized (getLockObject()) {
             final PasswordMetrics minMetrics = getPasswordMinimumMetrics(userHandle);
             final List<PasswordValidationError> validationErrors;
@@ -5228,21 +5168,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Don't do this with the lock held, because it is going to call
         // back in to the service.
         final long ident = mInjector.binderClearCallingIdentity();
-        final boolean result;
         final LockscreenCredential newCredential =
                 LockscreenCredential.createPasswordOrNone(password);
         try {
-            if (token == null) {
-                // This is the legacy reset password for DPM. Here we want to be able to override
-                // the old device password without necessarily knowing it.
-                mLockPatternUtils.setLockCredential(
-                        newCredential,
-                        LockscreenCredential.createNone(),
-                        userHandle, /*allowUntrustedChange */true);
-                result = true;
+            if (tokenHandle == 0 || token == null) {
+                if (!mLockPatternUtils.setLockCredential(newCredential,
+                        LockscreenCredential.createNone(), userHandle)) {
+                    return false;
+                }
             } else {
-                result = mLockPatternUtils.setLockCredentialWithToken(newCredential, tokenHandle,
-                        token, userHandle);
+                if (!mLockPatternUtils.setLockCredentialWithToken(newCredential, tokenHandle,
+                        token, userHandle)) {
+                    return false;
+                }
             }
             boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
             if (requireEntry) {
@@ -5259,7 +5197,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
-        return result;
+        return true;
     }
 
     private boolean isLockScreenSecureUnchecked(int userId) {
@@ -11575,11 +11513,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         @Override
-        public boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId) {
-            return DevicePolicyManagerService.this.canUserHaveUntrustedCredentialReset(userId);
-        }
-
-        @Override
         public CharSequence getPrintingDisabledReasonForUser(@UserIdInt int userId) {
             synchronized (getLockObject()) {
                 if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_PRINTING,
@@ -13792,7 +13725,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (policy.mPasswordTokenHandle != 0) {
                 final String password = passwordOrNull != null ? passwordOrNull : "";
                 return resetPasswordInternal(password, policy.mPasswordTokenHandle, token,
-                        flags, mInjector.binderGetCallingUid(), userHandle);
+                        flags, mInjector.binderGetCallingUid());
             } else {
                 Slog.w(LOG_TAG, "No saved token handle");
             }

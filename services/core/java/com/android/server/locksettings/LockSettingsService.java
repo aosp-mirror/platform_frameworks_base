@@ -378,7 +378,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (DEBUG) Slog.v(TAG, "Tie managed profile to parent now!");
         try (LockscreenCredential unifiedProfilePassword = generateRandomProfilePassword()) {
             setLockCredentialInternal(unifiedProfilePassword, managedUserPassword, managedUserId,
-                    false, /* isLockTiedToParent= */ true);
+                    /* isLockTiedToParent= */ true);
             tieProfileLockToParent(managedUserId, unifiedProfilePassword);
         }
     }
@@ -1437,17 +1437,12 @@ public class LockSettingsService extends ILockSettings.Stub {
                         setLockCredentialInternal(LockscreenCredential.createNone(),
                                 profilePasswordMap.get(managedUserId),
                                 managedUserId,
-                                false, /* isLockTiedToParent= */ true);
+                                /* isLockTiedToParent= */ true);
+                        mStorage.removeChildProfileLock(managedUserId);
+                        removeKeystoreProfileKey(managedUserId);
                     } else {
-                        Slog.wtf(TAG, "clear tied profile challenges, but no password supplied.");
-                        // Attempt an untrusted reset by supplying an empty credential.
-                        setLockCredentialInternal(LockscreenCredential.createNone(),
-                                LockscreenCredential.createNone(),
-                                managedUserId,
-                                true, /* isLockTiedToParent= */ true);
+                        Slog.wtf(TAG, "Attempt to clear tied challenge, but no password supplied.");
                     }
-                    mStorage.removeChildProfileLock(managedUserId);
-                    removeKeystoreProfileKey(managedUserId);
                 }
             }
         }
@@ -1531,7 +1526,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     // should call setLockCredentialInternal.
     @Override
     public boolean setLockCredential(LockscreenCredential credential,
-            LockscreenCredential savedCredential, int userId, boolean allowUntrustedChange) {
+            LockscreenCredential savedCredential, int userId) {
 
         if (!mLockPatternUtils.hasSecureLockScreen()) {
             throw new UnsupportedOperationException(
@@ -1540,7 +1535,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         checkWritePermission(userId);
         synchronized (mSeparateChallengeLock) {
             if (!setLockCredentialInternal(credential, savedCredential,
-                    userId, allowUntrustedChange, /* isLockTiedToParent= */ false)) {
+                    userId, /* isLockTiedToParent= */ false)) {
                 return false;
             }
             setSeparateProfileChallengeEnabledLocked(userId, true, /* unused */ null);
@@ -1562,14 +1557,13 @@ public class LockSettingsService extends ILockSettings.Stub {
      *     credentials are being tied to its parent's credentials.
      */
     private boolean setLockCredentialInternal(LockscreenCredential credential,
-            LockscreenCredential savedCredential, int userId,
-            boolean allowUntrustedChange, boolean isLockTiedToParent) {
+            LockscreenCredential savedCredential, int userId, boolean isLockTiedToParent) {
         Preconditions.checkNotNull(credential);
         Preconditions.checkNotNull(savedCredential);
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
                 return spBasedSetLockCredentialInternalLocked(credential, savedCredential, userId,
-                        allowUntrustedChange, isLockTiedToParent);
+                        isLockTiedToParent);
             }
         }
 
@@ -1617,7 +1611,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (shouldMigrateToSyntheticPasswordLocked(userId)) {
                 initializeSyntheticPasswordLocked(currentHandle.hash, savedCredential, userId);
                 return spBasedSetLockCredentialInternalLocked(credential, savedCredential, userId,
-                        allowUntrustedChange, isLockTiedToParent);
+                        isLockTiedToParent);
             }
         }
         if (DEBUG) Slog.d(TAG, "setLockCredentialInternal: user=" + userId);
@@ -2039,7 +2033,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
             if (shouldReEnroll) {
                 setLockCredentialInternal(credential, credential,
-                        userId, false, /* isLockTiedToParent= */ false);
+                        userId, /* isLockTiedToParent= */ false);
             } else {
                 // Now that we've cleared of all required GK migration, let's do the final
                 // migration to synthetic password.
@@ -2174,7 +2168,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         mSpManager.removeUser(userId);
         mStorage.removeUser(userId);
         mStrongAuth.removeUser(userId);
-        tryRemoveUserFromSpCacheLater(userId);
 
         final KeyStore ks = KeyStore.getInstance();
         ks.onUserRemoved(userId);
@@ -2432,25 +2425,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    /**
-     * A user's synthetic password does not change so it must be cached in certain circumstances to
-     * enable untrusted credential reset.
-     *
-     * Untrusted credential reset will be removed in a future version (b/68036371) at which point
-     * this cache is no longer needed as the SP will always be known when changing the user's
-     * credential.
-     */
-    @GuardedBy("mSpManager")
-    private SparseArray<AuthenticationToken> mSpCache = new SparseArray<>();
-
     private void onAuthTokenKnownForUser(@UserIdInt int userId, AuthenticationToken auth) {
-        // Preemptively cache the SP and then try to remove it in a handler.
-        Slog.i(TAG, "Caching SP for user " + userId);
-        synchronized (mSpManager) {
-            mSpCache.put(userId, auth);
-        }
-        tryRemoveUserFromSpCacheLater(userId);
-
         if (mInjector.isGsiRunning()) {
             Slog.w(TAG, "AuthSecret disabled in GSI");
             return;
@@ -2469,42 +2444,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.w(TAG, "Failed to pass primary user secret to AuthSecret HAL", e);
             }
         }
-    }
-
-    private void tryRemoveUserFromSpCacheLater(@UserIdInt int userId) {
-        mHandler.post(() -> {
-            if (!shouldCacheSpForUser(userId)) {
-                // The transition from 'should not cache' to 'should cache' can only happen if
-                // certain admin apps are installed after provisioning e.g. via adb. This is not
-                // a common case and we do not seamlessly support; it may result in the SP not
-                // being cached when it is needed. The cache can be re-populated by verifying
-                // the credential again.
-                Slog.i(TAG, "Removing SP from cache for user " + userId);
-                synchronized (mSpManager) {
-                    mSpCache.remove(userId);
-                }
-            }
-        });
-    }
-
-    /** Do not hold any of the locks from this service when calling. */
-    private boolean shouldCacheSpForUser(@UserIdInt int userId) {
-        // Before the user setup has completed, an admin could be installed that requires the SP to
-        // be cached (see below).
-        if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.USER_SETUP_COMPLETE, 0, userId) == 0) {
-            return true;
-        }
-
-        // If the user has an admin which can perform an untrusted credential reset, the SP needs to
-        // be cached. If there isn't a DevicePolicyManager then there can't be an admin in the first
-        // place so caching is not necessary.
-        final DevicePolicyManagerInternal dpmi = LocalServices.getService(
-                DevicePolicyManagerInternal.class);
-        if (dpmi == null) {
-            return false;
-        }
-        return dpmi.canUserHaveUntrustedCredentialReset(userId);
     }
 
     /**
@@ -2540,8 +2479,8 @@ public class LockSettingsService extends ILockSettings.Stub {
      *     This could also happen during an untrusted reset to clear password.
      *
      * 3. credentialhash == null and credential != null
-     *     This is the untrusted credential reset, OR the user sets a new lockscreen password
-     *     FOR THE FIRST TIME on a SP-enabled device. New credential and new SID will be created
+     *     The user sets a new lockscreen password FOR THE FIRST TIME on a SP-enabled device.
+     *     New credential and new SID will be created
      */
     @GuardedBy("mSpManager")
     @VisibleForTesting
@@ -2866,8 +2805,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     @GuardedBy("mSpManager")
     private boolean spBasedSetLockCredentialInternalLocked(LockscreenCredential credential,
-            LockscreenCredential savedCredential, int userId,
-            boolean allowUntrustedChange, boolean isLockTiedToParent) {
+            LockscreenCredential savedCredential, int userId, boolean isLockTiedToParent) {
         if (DEBUG) Slog.d(TAG, "spBasedSetLockCredentialInternalLocked: user=" + userId);
         if (savedCredential.isNone() && isManagedProfileWithUnifiedLock(userId)) {
             // get credential from keystore when managed profile has unified lock
@@ -2888,50 +2826,24 @@ public class LockSettingsService extends ILockSettings.Stub {
         VerifyCredentialResponse response = authResult.gkResponse;
         AuthenticationToken auth = authResult.authToken;
 
-        // If existing credential is provided, the existing credential must match.
-        if (!savedCredential.isNone() && auth == null) {
-            Slog.w(TAG, "Failed to enroll: incorrect credential");
-            return false;
-        }
-        boolean untrustedReset = false;
-        if (auth != null) {
-            onAuthTokenKnownForUser(userId, auth);
-        } else if (response == null) {
-            throw new IllegalStateException("Password change failed.");
-        } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR) {
-            // We are performing an untrusted credential change, by DevicePolicyManager or other
-            // internal callers that don't provide the existing credential
-            Slog.w(TAG, "Untrusted credential change invoked");
-            // Try to get a cached auth token, so we can keep SP unchanged.
-            auth = mSpCache.get(userId);
-            if (!allowUntrustedChange) {
-                throw new IllegalStateException("Untrusted credential change was invoked but it was"
-                        + " not allowed. This is likely a bug. Auth token is null: "
-                        + Boolean.toString(auth == null));
+
+        if (auth == null) {
+            if (response == null
+                    || response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR) {
+                Slog.w(TAG, "Failed to enroll: incorrect credential.");
+                return false;
             }
-            untrustedReset = true;
-        } else /* responseCode == VerifyCredentialResponse.RESPONSE_RETRY */ {
-            Slog.w(TAG, "Rate limit exceeded, so password was not changed.");
-            return false;
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+                Slog.w(TAG, "Failed to enroll: rate limit exceeded.");
+                return false;
+            }
+            // Should not be reachable, but just in case.
+            throw new IllegalStateException("password change failed");
         }
 
-        if (auth != null) {
-            if (untrustedReset) {
-                // Force change the current SID to mantain existing behaviour that an untrusted
-                // reset leads to a change of SID. If the untrusted reset is for clearing the
-                // current password, the nuking of the SID will be done in
-                // setLockCredentialWithAuthTokenLocked next
-                mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
-            }
-            setLockCredentialWithAuthTokenLocked(credential, auth, userId);
-            mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
-        } else {
-            throw new IllegalStateException(
-                    "Untrusted credential reset not possible without cached SP");
-            // Could call initializeSyntheticPasswordLocked(null, credential, credentialType,
-            // requestedQuality, userId) instead if we still allow untrusted reset that changes
-            // synthetic password. That would invalidate existing escrow tokens though.
-        }
+        onAuthTokenKnownForUser(userId, auth);
+        setLockCredentialWithAuthTokenLocked(credential, auth, userId);
+        mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
         sendCredentialsOnChangeIfRequired(credential, userId, isLockTiedToParent);
         return true;
     }
@@ -3086,11 +2998,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                     + "verification.");
             return false;
         }
+        onAuthTokenKnownForUser(userId, result.authToken);
         long oldHandle = getSyntheticPasswordHandleLocked(userId);
         setLockCredentialWithAuthTokenLocked(credential, result.authToken, userId);
         mSpManager.destroyPasswordBasedSyntheticPassword(oldHandle, userId);
-
-        onAuthTokenKnownForUser(userId, result.authToken);
         return true;
     }
 
@@ -3209,8 +3120,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private class DeviceProvisionedObserver extends ContentObserver {
         private final Uri mDeviceProvisionedUri = Settings.Global.getUriFor(
                 Settings.Global.DEVICE_PROVISIONED);
-        private final Uri mUserSetupCompleteUri = Settings.Secure.getUriFor(
-                Settings.Secure.USER_SETUP_COMPLETE);
 
         private boolean mRegistered;
 
@@ -3228,8 +3137,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                     reportDeviceSetupComplete();
                     clearFrpCredentialIfOwnerNotSecure();
                 }
-            } else if (mUserSetupCompleteUri.equals(uri)) {
-                tryRemoveUserFromSpCacheLater(userId);
             }
         }
 
@@ -3281,8 +3188,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (register) {
                 mContext.getContentResolver().registerContentObserver(mDeviceProvisionedUri,
                         false, this);
-                mContext.getContentResolver().registerContentObserver(mUserSetupCompleteUri,
-                        false, this, UserHandle.USER_ALL);
             } else {
                 mContext.getContentResolver().unregisterContentObserver(this);
             }
