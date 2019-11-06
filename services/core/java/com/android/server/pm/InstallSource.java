@@ -18,8 +18,6 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 
-import com.android.internal.util.IndentingPrintWriter;
-
 import java.util.Objects;
 
 /**
@@ -31,11 +29,20 @@ final class InstallSource {
      * An instance of InstallSource representing an absence of knowledge of the source of
      * a package. Used in preference to null.
      */
-    static final InstallSource EMPTY = new InstallSource(null, null, false);
+    static final InstallSource EMPTY = new InstallSource(null, null, null, false);
 
     /** The package that requested the installation, if known. */
     @Nullable
     final String initiatingPackageName;
+
+    /**
+     * The package on behalf of which the initiating package requested the installation, if any.
+     * For example if a downloaded APK is installed via the Package Installer this could be the
+     * app that performed the download. This value is provided by the initiating package and not
+     * verified by the framework.
+     */
+    @Nullable
+    final String originatingPackageName;
 
     /**
      * Package name of the app that installed this package (the installer of record). Note that
@@ -48,47 +55,49 @@ final class InstallSource {
     final boolean isOrphaned;
 
     static InstallSource create(@Nullable String initiatingPackageName,
-            @Nullable String installerPackageName) {
-        return create(initiatingPackageName, installerPackageName, false);
-    }
+            @Nullable String originatingPackageName, @Nullable String installerPackageName,
+            boolean isOrphaned) {
 
-    static InstallSource create(@Nullable String initiatingPackageName,
-            @Nullable String installerPackageName, boolean isOrphaned) {
-        if (initiatingPackageName == null && installerPackageName == null && !isOrphaned) {
+        if (initiatingPackageName == null && originatingPackageName == null
+                && installerPackageName == null && !isOrphaned) {
             return EMPTY;
         }
         return new InstallSource(
                 initiatingPackageName == null ? null : initiatingPackageName.intern(),
+                originatingPackageName == null ? null : originatingPackageName.intern(),
                 installerPackageName == null ? null : installerPackageName.intern(),
                 isOrphaned);
     }
 
     private InstallSource(@Nullable String initiatingPackageName,
-            @Nullable String installerPackageName, boolean isOrphaned) {
+            @Nullable String originatingPackageName, @Nullable String installerPackageName,
+            boolean isOrphaned) {
         this.initiatingPackageName = initiatingPackageName;
-        this.isOrphaned = isOrphaned;
+        this.originatingPackageName = originatingPackageName;
         this.installerPackageName = installerPackageName;
-    }
-
-    void dump(IndentingPrintWriter pw) {
-        pw.printPair("installerPackageName", installerPackageName);
-        pw.printPair("installInitiatingPackageName", initiatingPackageName);
+        this.isOrphaned = isOrphaned;
     }
 
     /**
      * Return an InstallSource the same as this one except with the specified installerPackageName.
      */
     InstallSource setInstallerPackage(String installerPackageName) {
-        return Objects.equals(installerPackageName, this.installerPackageName) ? this
-                : create(initiatingPackageName, installerPackageName, isOrphaned);
+        if (Objects.equals(installerPackageName, this.installerPackageName)) {
+            return this;
+        }
+        return create(initiatingPackageName, originatingPackageName, installerPackageName,
+                isOrphaned);
     }
 
     /**
      * Return an InstallSource the same as this one except with the specified value for isOrphaned.
      */
     InstallSource setIsOrphaned(boolean isOrphaned) {
-        return isOrphaned == this.isOrphaned ? this
-                : create(initiatingPackageName, installerPackageName, isOrphaned);
+        if (isOrphaned == this.isOrphaned) {
+            return this;
+        }
+        return create(initiatingPackageName, originatingPackageName, installerPackageName,
+                isOrphaned);
     }
 
     /**
@@ -102,11 +111,16 @@ final class InstallSource {
 
         boolean modified = false;
         String initiatingPackageName = this.initiatingPackageName;
+        String originatingPackageName = this.originatingPackageName;
         String installerPackageName = this.installerPackageName;
         boolean isOrphaned = this.isOrphaned;
 
         if (packageName.equals(initiatingPackageName)) {
             initiatingPackageName = null;
+            modified = true;
+        }
+        if (packageName.equals(originatingPackageName)) {
+            originatingPackageName = null;
             modified = true;
         }
         if (packageName.equals(installerPackageName)) {
@@ -115,8 +129,10 @@ final class InstallSource {
             modified = true;
         }
 
-        return modified
-                ? create(initiatingPackageName, installerPackageName, isOrphaned)
-                : this;
+        if (!modified) {
+            return this;
+        }
+        return create(initiatingPackageName, originatingPackageName, installerPackageName,
+                isOrphaned);
     }
 }

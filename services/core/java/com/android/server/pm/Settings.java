@@ -2848,6 +2848,9 @@ public final class Settings {
         if (installSource.initiatingPackageName != null) {
             serializer.attribute(null, "installInitiator", installSource.initiatingPackageName);
         }
+        if (installSource.originatingPackageName != null) {
+            serializer.attribute(null, "installOriginator", installSource.originatingPackageName);
+        }
         if (pkg.volumeUuid != null) {
             serializer.attribute(null, "volumeUuid", pkg.volumeUuid);
         }
@@ -3605,6 +3608,7 @@ public final class Settings {
         String systemStr = null;
         String installerPackageName = null;
         String isOrphaned = null;
+        String installOriginatingPackageName = null;
         String installInitiatingPackageName = null;
         String volumeUuid = null;
         String categoryHintString = null;
@@ -3653,6 +3657,7 @@ public final class Settings {
             installerPackageName = parser.getAttributeValue(null, "installer");
             isOrphaned = parser.getAttributeValue(null, "isOrphaned");
             installInitiatingPackageName = parser.getAttributeValue(null, "installInitiator");
+            installOriginatingPackageName = parser.getAttributeValue(null, "installOriginator");
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
             categoryHintString = parser.getAttributeValue(null, "categoryHint");
             if (categoryHintString != null) {
@@ -3808,7 +3813,8 @@ public final class Settings {
         if (packageSetting != null) {
             packageSetting.uidError = "true".equals(uidError);
             packageSetting.installSource = InstallSource.create(
-                    installInitiatingPackageName, installerPackageName, "true".equals(isOrphaned));
+                    installInitiatingPackageName, installOriginatingPackageName,
+                    installerPackageName, "true".equals(isOrphaned));
             packageSetting.volumeUuid = volumeUuid;
             packageSetting.categoryHint = categoryHint;
             packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;
