@@ -71,7 +71,7 @@ public class NotificationAlertingManager {
             }
 
             @Override
-            public void onPostEntryUpdated(NotificationEntry entry) {
+            public void onPreEntryUpdated(NotificationEntry entry) {
                 updateAlertState(entry);
             }
 
@@ -114,8 +114,8 @@ public class NotificationAlertingManager {
 
     private void updateAlertState(NotificationEntry entry) {
         boolean alertAgain = alertAgain(entry, entry.getSbn().getNotification());
-        boolean shouldAlert;
-        shouldAlert = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
+        // includes check for whether this notification should be filtered:
+        boolean shouldAlert = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
         final boolean wasAlerting = mHeadsUpManager.isAlerting(entry.getKey());
         if (wasAlerting) {
             if (shouldAlert) {

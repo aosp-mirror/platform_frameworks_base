@@ -69,19 +69,12 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPreEntryUpdated(NotificationEntry entry) {
-                final boolean mAmbientStateHasChanged =
+                final boolean ambientStateHasChanged =
                         entry.isAmbient() != entry.getRow().isLowPriority();
-                if (mAmbientStateHasChanged) {
+                if (ambientStateHasChanged) {
+                    // note: entries are removed in onReorderingFinished
                     mLowPriorityReorderingViews.add(entry);
                 }
-            }
-
-            @Override
-            public void onPostEntryUpdated(NotificationEntry entry) {
-                // This line is technically not required as we'll get called as the hierarchy
-                // manager will call onReorderingFinished() immediately before this.
-                // TODO: Find a way to make this relationship more explicit
-                mLowPriorityReorderingViews.remove(entry);
             }
         });
     }

@@ -604,10 +604,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
-            public void onPostEntryUpdated(NotificationEntry entry) {
-                if (!entry.getSbn().isClearable()) {
-                    // The user may have performed a dismiss action on the notification, since it's
-                    // not clearable we should snap it back.
+            public void onPreEntryUpdated(NotificationEntry entry) {
+                if (entry.rowExists() && !entry.getSbn().isClearable()) {
+                    // If the row already exists, the user may have performed a dismiss action on
+                    // the notification. Since it's not clearable we should snap it back.
                     snapViewIfNeeded(entry);
                 }
             }
