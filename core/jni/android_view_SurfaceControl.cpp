@@ -545,6 +545,14 @@ static void nativeSetLayerStack(JNIEnv* env, jclass clazz, jlong transactionObj,
     transaction->setLayerStack(ctrl, layerStack);
 }
 
+static void nativeSetShadowRadius(JNIEnv* env, jclass clazz, jlong transactionObj,
+         jlong nativeObject, jfloat shadowRadius) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    const auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    transaction->setShadowRadius(ctrl, shadowRadius);
+}
+
 static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
     const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
     jlongArray array = env->NewLongArray(displayIds.size());
@@ -1308,6 +1316,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetCornerRadius },
     {"nativeSetLayerStack", "(JJI)V",
             (void*)nativeSetLayerStack },
+    {"nativeSetShadowRadius", "(JJF)V",
+            (void*)nativeSetShadowRadius },
     {"nativeGetPhysicalDisplayIds", "()[J",
             (void*)nativeGetPhysicalDisplayIds },
     {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
