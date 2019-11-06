@@ -445,8 +445,31 @@ public class AppsFilter {
 
     private boolean shouldFilterApplicationInternal(
             PackageSetting callingPkgSetting, PackageSetting targetPkgSetting, int userId) {
+        return shouldFilterApplicationInternal(callingPkgSetting, targetPkgSetting, userId,
+                true /*expandSharedUser*/);
+    }
+
+    /**
+     * @param expandSharedUser true if all members of the shared user a target may belong to should
+     *                         be considered
+     */
+    private boolean shouldFilterApplicationInternal(
+            PackageSetting callingPkgSetting, PackageSetting targetPkgSetting, int userId,
+            boolean expandSharedUser) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplicationInternal");
         try {
+            // special case shared user targets
+            if (expandSharedUser && targetPkgSetting.sharedUser != null) {
+                for (PackageSetting sharedMemberSetting : targetPkgSetting.sharedUser.packages) {
+                    if (!shouldFilterApplicationInternal(
+                            callingPkgSetting, sharedMemberSetting, userId,
+                            false /*expandSharedUser*/)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             final String callingName = callingPkgSetting.pkg.packageName;
             final PackageParser.Package targetPkg = targetPkgSetting.pkg;
 
@@ -468,6 +491,12 @@ public class AppsFilter {
             if (callingPkgSetting.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.R) {
                 if (DEBUG_LOGGING) {
                     log(callingPkgSetting, targetPkgSetting, "caller pre-R");
+                }
+                return false;
+            }
+            if (callingPkgSetting.appId == targetPkgSetting.appId) {
+                if (DEBUG_LOGGING) {
+                    log(callingPkgSetting, targetPkgSetting, "same app id");
                 }
                 return false;
             }
