@@ -235,7 +235,7 @@ message AppWindowTokenProto {
     optional WindowContainerThumbnailProto thumbnail = 6;
     optional bool fills_parent = 7;
     optional bool app_stopped = 8;
-    optional bool hidden_requested = 9;
+    optional bool visible_requested = 9;
     optional bool client_hidden = 10;
     optional bool defer_hiding_client = 11;
     optional bool reported_drawn = 12;

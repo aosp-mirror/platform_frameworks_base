@@ -60,9 +60,7 @@ import static com.android.server.EventLogTags.WM_TASK_CREATED;
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.am.TaskRecordProto.ACTIVITIES;
 import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
-import static com.android.server.am.TaskRecordProto.BOUNDS;
 import static com.android.server.am.TaskRecordProto.FULLSCREEN;
-import static com.android.server.am.TaskRecordProto.ID;
 import static com.android.server.am.TaskRecordProto.LAST_NON_FULLSCREEN_BOUNDS;
 import static com.android.server.am.TaskRecordProto.MIN_HEIGHT;
 import static com.android.server.am.TaskRecordProto.MIN_WIDTH;
@@ -89,10 +87,8 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.TaskProto.APP_WINDOW_TOKENS;
-import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
-import static com.android.server.wm.TaskProto.ID;
 import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
 import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
 import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
@@ -2209,7 +2205,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
         for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
             final ActivityRecord r = getChildAt(activityNdx);
-            if (r.visible) {
+            if (r.mVisibleRequested) {
                 r.showStartingWindow(null /* prev */, false /* newTask */, taskSwitch);
             }
         }
@@ -2531,7 +2527,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final ActivityRecord token = mChildren.get(i);
             // skip hidden (or about to hide) apps
-            if (token.mIsExiting || token.isClientHidden() || token.hiddenRequested) {
+            if (token.mIsExiting || token.isClientHidden() || !token.mVisibleRequested) {
                 continue;
             }
             final WindowState win = token.findMainWindow();
@@ -2751,7 +2747,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final ActivityRecord token = mChildren.get(i);
             // skip hidden (or about to hide) apps
-            if (!token.mIsExiting && !token.isClientHidden() && !token.hiddenRequested) {
+            if (!token.mIsExiting && !token.isClientHidden() && token.mVisibleRequested) {
                 return token;
             }
         }
