@@ -793,7 +793,6 @@ Lcom/android/internal/R$id;->media_actions:I
 Lcom/android/internal/R$id;->message:I
 Lcom/android/internal/R$id;->minute:I
 Lcom/android/internal/R$id;->month:I
-Lcom/android/internal/R$id;->name:I
 Lcom/android/internal/R$id;->notification_header:I
 Lcom/android/internal/R$id;->ok:I
 Lcom/android/internal/R$id;->overlay:I
