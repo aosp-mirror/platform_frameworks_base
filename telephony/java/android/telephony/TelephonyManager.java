@@ -9449,18 +9449,37 @@ public class TelephonyManager {
     }
 
     /**
-     * Resets Telephony and IMS settings back to factory defaults.
+     * Resets telephony manager settings back to factory defaults.
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.CONNECTIVITY_INTERNAL)
     public void factoryReset(int subId) {
         try {
             Log.d(TAG, "factoryReset: subId=" + subId);
             ITelephony telephony = getITelephony();
-            if (telephony != null)
+            if (telephony != null) {
                 telephony.factoryReset(subId);
+            }
+        } catch (RemoteException e) {
+        }
+    }
+
+
+    /**
+     * Resets Telephony and IMS settings back to factory defaults only for the subscription
+     * associated with this instance.
+     * @see #createForSubscriptionId(int)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONNECTIVITY_INTERNAL)
+    public void resetSettings() {
+        try {
+            Log.d(TAG, "resetSettings: subId=" + getSubId());
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.factoryReset(getSubId());
+            }
         } catch (RemoteException e) {
         }
     }

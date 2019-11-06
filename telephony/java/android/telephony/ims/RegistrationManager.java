@@ -90,7 +90,7 @@ public interface RegistrationManager {
 
     /**
      * Callback class for receiving IMS network Registration callback events.
-     * @see #registerImsRegistrationCallback(RegistrationCallback, Executor)
+     * @see #registerImsRegistrationCallback(Executor, RegistrationCallback)
      * @see #unregisterImsRegistrationCallback(RegistrationCallback)
      */
     class RegistrationCallback {
@@ -229,8 +229,8 @@ public interface RegistrationManager {
      * When the callback is registered, it will initiate the callback c to be called with the
      * current registration state.
      *
-     * @param c The {@link RegistrationCallback} to be added.
      * @param executor The executor the callback events should be run on.
+     * @param c The {@link RegistrationCallback} to be added.
      * @see #unregisterImsRegistrationCallback(RegistrationCallback)
      * @throws ImsException if the subscription associated with this callback is valid, but
      * the {@link ImsService} associated with the subscription is not available. This can happen if
@@ -238,8 +238,8 @@ public interface RegistrationManager {
      * reason.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    void registerImsRegistrationCallback(@NonNull RegistrationCallback c,
-            @NonNull @CallbackExecutor Executor executor) throws ImsException;
+    void registerImsRegistrationCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull RegistrationCallback c) throws ImsException;
 
     /**
      * Removes an existing {@link RegistrationCallback}.
@@ -250,36 +250,36 @@ public interface RegistrationManager {
      *
      * @param c The {@link RegistrationCallback} to be removed.
      * @see SubscriptionManager.OnSubscriptionsChangedListener
-     * @see #registerImsRegistrationCallback(RegistrationCallback, Executor)
+     * @see #registerImsRegistrationCallback(Executor, RegistrationCallback)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     void unregisterImsRegistrationCallback(@NonNull RegistrationCallback c);
 
     /**
      * Gets the registration state of the IMS service.
-     * @param stateCallback A callback called on the supplied {@link Executor} that will contain the
-     *                      registration state of the IMS service, which will be one of the
-     *                      following: {@link #REGISTRATION_STATE_NOT_REGISTERED},
-     *                      {@link #REGISTRATION_STATE_REGISTERING}, or
-     *                      {@link #REGISTRATION_STATE_REGISTERED}.
      * @param executor The {@link Executor} that will be used to call the IMS registration state
      *                 callback.
+     * @param stateCallback A callback called on the supplied {@link Executor} that will contain the
+ *                      registration state of the IMS service, which will be one of the
+ *                      following: {@link #REGISTRATION_STATE_NOT_REGISTERED},
+ *                      {@link #REGISTRATION_STATE_REGISTERING}, or
+ *                      {@link #REGISTRATION_STATE_REGISTERED}.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    void getRegistrationState(@NonNull @ImsRegistrationState Consumer<Integer> stateCallback,
-            @NonNull @CallbackExecutor Executor executor);
+    void getRegistrationState(@NonNull @CallbackExecutor Executor executor,
+            @NonNull @ImsRegistrationState Consumer<Integer> stateCallback);
 
     /**
      * Gets the Transport Type associated with the current IMS registration.
-     * @param transportTypeCallback The transport type associated with the current IMS registration,
-     *                              which will be one of following:
-     *                              {@link AccessNetworkConstants#TRANSPORT_TYPE_WWAN},
-     *                              {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, or
-     *                              {@link AccessNetworkConstants#TRANSPORT_TYPE_INVALID}.
      * @param executor The {@link Executor} that will be used to call the transportTypeCallback.
+     * @param transportTypeCallback The transport type associated with the current IMS registration,
+ *                              which will be one of following:
+ *                              {@link AccessNetworkConstants#TRANSPORT_TYPE_WWAN},
+ *                              {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, or
+ *                              {@link AccessNetworkConstants#TRANSPORT_TYPE_INVALID}.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     void getRegistrationTransportType(
-            @NonNull @AccessNetworkConstants.TransportType Consumer<Integer> transportTypeCallback,
-            @NonNull @CallbackExecutor Executor executor);
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull @AccessNetworkConstants.TransportType Consumer<Integer> transportTypeCallback);
 }
