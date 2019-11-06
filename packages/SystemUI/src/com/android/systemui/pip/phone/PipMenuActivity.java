@@ -102,6 +102,7 @@ public class PipMenuActivity extends Activity {
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
     private int mMenuState;
+    private boolean mResize = true;
     private boolean mAllowMenuTimeout = true;
     private boolean mAllowTouches = true;
 
@@ -323,7 +324,7 @@ public class PipMenuActivity extends Activity {
             if (mMenuContainerAnimator != null) {
                 mMenuContainerAnimator.cancel();
             }
-            notifyMenuStateChange(menuState);
+            notifyMenuStateChange(menuState, resizeMenuOnShow);
             mMenuContainerAnimator = new AnimatorSet();
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
                     mMenuContainer.getAlpha(), 1f);
@@ -370,7 +371,7 @@ public class PipMenuActivity extends Activity {
         if (mMenuState != MENU_STATE_NONE) {
             cancelDelayedFinish();
             if (notifyMenuVisibility) {
-                notifyMenuStateChange(MENU_STATE_NONE);
+                notifyMenuStateChange(MENU_STATE_NONE, mResize);
             }
             mMenuContainerAnimator = new AnimatorSet();
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
@@ -528,11 +529,13 @@ public class PipMenuActivity extends Activity {
         mBackgroundDrawable.setAlpha(alpha);
     }
 
-    private void notifyMenuStateChange(int menuState) {
+    private void notifyMenuStateChange(int menuState, boolean resize) {
         mMenuState = menuState;
+        mResize = resize;
         Message m = Message.obtain();
         m.what = PipMenuActivityController.MESSAGE_MENU_STATE_CHANGED;
         m.arg1 = menuState;
+        m.arg2 = resize ?  1 : 0;
         sendMessage(m, "Could not notify controller of PIP menu visibility");
     }
 
@@ -571,6 +574,7 @@ public class PipMenuActivity extends Activity {
         Message m = Message.obtain();
         m.what = PipMenuActivityController.MESSAGE_UPDATE_ACTIVITY_CALLBACK;
         m.replyTo = callback;
+        m.arg1 = mResize ?  1 : 0;
         sendMessage(m, "Could not notify controller of activity finished");
     }
 
