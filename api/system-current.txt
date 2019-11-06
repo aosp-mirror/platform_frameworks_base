@@ -8246,7 +8246,7 @@ package android.telephony {
   }
 
   public final class ModemActivityInfo implements android.os.Parcelable {
-    ctor public ModemActivityInfo(long, int, int, @NonNull int[], int);
+    ctor public ModemActivityInfo(long, int, int, @Nullable int[], int);
     method public int describeContents();
     method public int getIdleTimeMillis();
     method public int getReceiveTimeMillis();
