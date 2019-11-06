@@ -379,15 +379,20 @@ class MethodBuilder {
   // https://source.android.com/devices/tech/dalvik/instruction-formats for documentation of
   // formats.
 
+  inline uint8_t ToBits(::dex::Opcode opcode) {
+    static_assert(sizeof(uint8_t) == sizeof(::dex::Opcode));
+    return static_cast<uint8_t>(opcode);
+  }
+
   inline void Encode10x(::dex::Opcode opcode) {
     // 00|op
     static_assert(sizeof(uint8_t) == sizeof(::dex::Opcode));
-    buffer_.push_back(static_cast<uint8_t>(opcode));
+    buffer_.push_back(ToBits(opcode));
   }
 
   inline void Encode11x(::dex::Opcode opcode, uint8_t a) {
     // aa|op
-    buffer_.push_back((a << 8) | opcode);
+    buffer_.push_back((a << 8) | ToBits(opcode));
   }
 
   inline void Encode11n(::dex::Opcode opcode, uint8_t a, int8_t b) {
@@ -398,12 +403,12 @@ class MethodBuilder {
     CHECK_LE(-8, b);
     CHECK_LT(b, 8);
 
-    buffer_.push_back(((b & 0xf) << 12) | (a << 8) | opcode);
+    buffer_.push_back(((b & 0xf) << 12) | (a << 8) | ToBits(opcode));
   }
 
   inline void Encode21c(::dex::Opcode opcode, uint8_t a, uint16_t b) {
     // aa|op|bbbb
-    buffer_.push_back((a << 8) | opcode);
+    buffer_.push_back((a << 8) | ToBits(opcode));
     buffer_.push_back(b);
   }
 
@@ -411,12 +416,12 @@ class MethodBuilder {
     // b|a|op|bbbb
     CHECK(IsShortRegister(a));
     CHECK(IsShortRegister(b));
-    buffer_.push_back((b << 12) | (a << 8) | opcode);
+    buffer_.push_back((b << 12) | (a << 8) | ToBits(opcode));
     buffer_.push_back(c);
   }
 
   inline void Encode32x(::dex::Opcode opcode, uint16_t a, uint16_t b) {
-    buffer_.push_back(opcode);
+    buffer_.push_back(ToBits(opcode));
     buffer_.push_back(a);
     buffer_.push_back(b);
   }
@@ -431,14 +436,14 @@ class MethodBuilder {
     CHECK(IsShortRegister(e));
     CHECK(IsShortRegister(f));
     CHECK(IsShortRegister(g));
-    buffer_.push_back((a << 12) | (g << 8) | opcode);
+    buffer_.push_back((a << 12) | (g << 8) | ToBits(opcode));
     buffer_.push_back(b);
     buffer_.push_back((f << 12) | (e << 8) | (d << 4) | c);
   }
 
   inline void Encode3rc(::dex::Opcode opcode, size_t a, uint16_t b, uint16_t c) {
     CHECK_LE(a, 255);
-    buffer_.push_back((a << 8) | opcode);
+    buffer_.push_back((a << 8) | ToBits(opcode));
     buffer_.push_back(b);
     buffer_.push_back(c);
   }
