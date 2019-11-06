@@ -49,10 +49,12 @@ public final class StatsEvent {
     // See android_util_StatsLog.cpp.
     private static final int MAX_PAYLOAD_SIZE = LOGGER_ENTRY_MAX_PAYLOAD - 4;
 
+    private final int mAtomId;
     private final Buffer mBuffer;
     private final int mNumBytes;
 
-    private StatsEvent(@NonNull final Buffer buffer, final int numBytes) {
+    private StatsEvent(final int atomId, @NonNull final Buffer buffer, final int numBytes) {
+        mAtomId = atomId;
         mBuffer = buffer;
         mNumBytes = numBytes;
     }
@@ -63,6 +65,10 @@ public final class StatsEvent {
     @NonNull
     public StatsEvent.Builder newBuilder() {
         return new StatsEvent.Builder(Buffer.obtain());
+    }
+
+    int getAtomId() {
+        return mAtomId;
     }
 
     @NonNull
@@ -116,9 +122,10 @@ public final class StatsEvent {
         private static final byte TYPE_LIST = 0x03;
         private static final byte TYPE_FLOAT = 0x04;
         private static final byte TYPE_BOOLEAN = 0x05;
-        private static final byte TYPE_OBJECT = 0x06;
-        private static final byte TYPE_BYTE_ARRAY = 0x07;
-        private static final byte TYPE_ATTRIBUTION_CHAIN = 0x08;
+        private static final byte TYPE_BYTE_ARRAY = 0x06;
+        private static final byte TYPE_OBJECT = 0x07;
+        private static final byte TYPE_KEY_VALUE_PAIRS = 0x08;
+        private static final byte TYPE_ATTRIBUTION_CHAIN = 0x09;
         private static final byte TYPE_ERRORS = 0x0F;
 
         // Error flags.
@@ -126,17 +133,19 @@ public final class StatsEvent {
         private static final int ERROR_NO_ATOM_ID = 0x2;
         private static final int ERROR_OVERFLOW = 0x4;
         private static final int ERROR_ATTRIBUTION_CHAIN_TOO_LONG = 0x8;
-        private static final int ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD = 0x10;
-        private static final int ERROR_INVALID_ANNOTATION_ID = 0x20;
-        private static final int ERROR_ANNOTATION_ID_TOO_LARGE = 0x40;
-        private static final int ERROR_TOO_MANY_ANNOTATIONS = 0x80;
-        private static final int ERROR_TOO_MANY_FIELDS = 0x100;
-        private static final int ERROR_ATTRIBUTION_UIDS_TAGS_SIZES_NOT_EQUAL = 0x200;
+        private static final int ERROR_TOO_MANY_KEY_VALUE_PAIRS = 0x10;
+        private static final int ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD = 0x20;
+        private static final int ERROR_INVALID_ANNOTATION_ID = 0x40;
+        private static final int ERROR_ANNOTATION_ID_TOO_LARGE = 0x80;
+        private static final int ERROR_TOO_MANY_ANNOTATIONS = 0x100;
+        private static final int ERROR_TOO_MANY_FIELDS = 0x200;
+        private static final int ERROR_ATTRIBUTION_UIDS_TAGS_SIZES_NOT_EQUAL = 0x400;
 
         // Size limits.
         private static final int MAX_ANNOTATION_COUNT = 15;
         private static final int MAX_ATTRIBUTION_NODES = 127;
         private static final int MAX_NUM_ELEMENTS = 127;
+        private static final int MAX_KEY_VALUE_PAIRS = 127;
 
         // Fixed positions.
         private static final int POS_NUM_ELEMENTS = 1;
@@ -309,6 +318,72 @@ public final class StatsEvent {
         }
 
         /**
+         * Write KeyValuePairsAtom entries to this StatsEvent.
+         *
+         * @param intMap Integer key-value pairs.
+         * @param longMap Long key-value pairs.
+         * @param stringMap String key-value pairs.
+         * @param floatMap Float key-value pairs.
+         **/
+        @NonNull
+        public Builder writeKeyValuePairs(
+                @NonNull final SparseIntArray intMap,
+                @NonNull final SparseLongArray longMap,
+                @NonNull final SparseArray<String> stringMap,
+                @NonNull final SparseArray<Float> floatMap) {
+            final int intMapSize = intMap.size();
+            final int longMapSize = longMap.size();
+            final int stringMapSize = stringMap.size();
+            final int floatMapSize = floatMap.size();
+            final int totalCount = intMapSize + longMapSize + stringMapSize + floatMapSize;
+
+            if (totalCount > MAX_KEY_VALUE_PAIRS) {
+                mErrorMask |= ERROR_TOO_MANY_KEY_VALUE_PAIRS;
+            } else {
+                writeTypeId(TYPE_KEY_VALUE_PAIRS);
+                mPos += mBuffer.putByte(mPos, (byte) totalCount);
+
+                for (int i = 0; i < intMapSize; i++) {
+                    final int key = intMap.keyAt(i);
+                    final int value = intMap.valueAt(i);
+                    mPos += mBuffer.putInt(mPos, key);
+                    writeTypeId(TYPE_INT);
+                    mPos += mBuffer.putInt(mPos, value);
+                }
+
+                for (int i = 0; i < longMapSize; i++) {
+                    final int key = longMap.keyAt(i);
+                    final long value = longMap.valueAt(i);
+                    mPos += mBuffer.putInt(mPos, key);
+                    writeTypeId(TYPE_LONG);
+                    mPos += mBuffer.putLong(mPos, value);
+                }
+
+                for (int i = 0; i < stringMapSize; i++) {
+                    final int key = stringMap.keyAt(i);
+                    final String value = stringMap.valueAt(i);
+                    mPos += mBuffer.putInt(mPos, key);
+                    writeTypeId(TYPE_STRING);
+                    final byte[] valueBytes = stringToBytes(value);
+                    mPos += mBuffer.putInt(mPos, valueBytes.length);
+                    mPos += mBuffer.putByteArray(mPos, valueBytes);
+                }
+
+                for (int i = 0; i < floatMapSize; i++) {
+                    final int key = floatMap.keyAt(i);
+                    final float value = floatMap.valueAt(i);
+                    mPos += mBuffer.putInt(mPos, key);
+                    writeTypeId(TYPE_FLOAT);
+                    mPos += mBuffer.putFloat(mPos, value);
+                }
+
+                mNumElements++;
+            }
+
+            return this;
+        }
+
+        /**
          * Write a boolean annotation for the last field written.
          **/
         @NonNull
@@ -379,7 +454,7 @@ public final class StatsEvent {
                 size = mPos;
             }
 
-            return new StatsEvent(mBuffer, size);
+            return new StatsEvent(mAtomId, mBuffer, size);
         }
 
         private void writeTypeId(final byte typeId) {
