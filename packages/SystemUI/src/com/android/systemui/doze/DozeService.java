@@ -55,10 +55,6 @@ public class DozeService extends DreamService
 
         setWindowless(true);
 
-        if (DozeFactory.getHost(this) == null) {
-            finish();
-            return;
-        }
         mPluginManager.addPluginListener(this, DozeServicePlugin.class, false /* allowMultiple */);
         mDozeMachine = mDozeFactory.assembleMachine(this);
     }
