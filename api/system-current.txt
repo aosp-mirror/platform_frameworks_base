@@ -5219,6 +5219,17 @@ package android.os {
     method @NonNull public static java.io.File getVendorDirectory();
   }
 
+  public class HidlMemory implements java.io.Closeable {
+    ctor public HidlMemory(@NonNull String, @IntRange(from=0) long, @Nullable android.os.NativeHandle);
+    method public void close() throws java.io.IOException;
+    method @NonNull public android.os.HidlMemory dup() throws java.io.IOException;
+    method protected void finalize();
+    method @Nullable public android.os.NativeHandle getHandle();
+    method @NonNull public String getName();
+    method public long getSize();
+    method @NonNull public android.os.NativeHandle releaseHandle();
+  }
+
   public class HidlSupport {
     method public static boolean deepEquals(Object, Object);
     method public static int deepHashCode(Object);
@@ -5249,6 +5260,7 @@ package android.os {
     method public final void copyToInt8Array(long, byte[], int);
     method public final boolean getBool(long);
     method public final double getDouble(long);
+    method public final long getFieldHandle(long);
     method public final float getFloat(long);
     method public final short getInt16(long);
     method public final int getInt32(long);
@@ -5263,6 +5275,7 @@ package android.os {
     method public final void putDoubleArray(long, double[]);
     method public final void putFloat(long, float);
     method public final void putFloatArray(long, float[]);
+    method public final void putHidlMemory(long, @NonNull android.os.HidlMemory);
     method public final void putInt16(long, short);
     method public final void putInt16Array(long, short[]);
     method public final void putInt32(long, int);
@@ -5291,9 +5304,11 @@ package android.os {
     method public final double readDouble();
     method public final java.util.ArrayList<java.lang.Double> readDoubleVector();
     method public final android.os.HwBlob readEmbeddedBuffer(long, long, long, boolean);
+    method @NonNull @Nullable public final android.os.HidlMemory readEmbeddedHidlMemory(long, long, long);
     method @Nullable public final android.os.NativeHandle readEmbeddedNativeHandle(long, long);
     method public final float readFloat();
     method public final java.util.ArrayList<java.lang.Float> readFloatVector();
+    method @NonNull public final android.os.HidlMemory readHidlMemory();
     method public final short readInt16();
     method public final java.util.ArrayList<java.lang.Short> readInt16Vector();
     method public final int readInt32();
@@ -5318,6 +5333,7 @@ package android.os {
     method public final void writeDoubleVector(java.util.ArrayList<java.lang.Double>);
     method public final void writeFloat(float);
     method public final void writeFloatVector(java.util.ArrayList<java.lang.Float>);
+    method public final void writeHidlMemory(@NonNull android.os.HidlMemory);
     method public final void writeInt16(short);
     method public final void writeInt16Vector(java.util.ArrayList<java.lang.Short>);
     method public final void writeInt32(int);
