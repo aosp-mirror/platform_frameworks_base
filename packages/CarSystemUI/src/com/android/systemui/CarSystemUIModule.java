@@ -35,12 +35,14 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.car.CarStatusBar;
+import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.volume.CarVolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 
@@ -122,4 +124,8 @@ abstract class CarSystemUIModule {
     @Binds
     abstract VolumeDialogComponent bindVolumeDialogComponent(
             CarVolumeDialogComponent carVolumeDialogComponent);
+
+    @Binds
+    abstract StatusBarKeyguardViewManager bindStatusBarKeyguardViewManager(
+            CarStatusBarKeyguardViewManager keyguardViewManager);
 }
