@@ -1640,6 +1640,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 allowTaskSnapshot, activityCreated, fromRecents, snapshot);
 
         if (type == STARTING_WINDOW_TYPE_SNAPSHOT) {
+            if (isActivityTypeHome()) {
+                // The snapshot of home is only used once because it won't be updated while screen
+                // is on (see {@link TaskSnapshotController#screenTurningOff}).
+                mWmService.mTaskSnapshotController.removeSnapshotCache(task.mTaskId);
+                // TODO(b/9684093): Use more general condition to specify the case.
+                if (mDisplayContent.mAppTransition
+                        .getAppTransition() != WindowManager.TRANSIT_KEYGUARD_GOING_AWAY) {
+                    // Only use snapshot of home as starting window when unlocking.
+                    return false;
+                }
+            }
             return createSnapshot(snapshot);
         }
 

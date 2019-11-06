@@ -4572,6 +4572,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    @Override
+    public void invalidateHomeTaskSnapshot(IBinder token) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null || !r.isActivityTypeHome()) {
+                return;
+            }
+            mWindowManager.mTaskSnapshotController.removeSnapshotCache(r.getTask().mTaskId);
+        }
+    }
+
     /** Return the user id of the last resumed activity. */
     @Override
     public @UserIdInt

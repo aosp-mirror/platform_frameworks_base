@@ -109,7 +109,7 @@ class TaskSnapshotCache {
         removeRunningEntry(taskId);
     }
 
-    private void removeRunningEntry(int taskId) {
+    void removeRunningEntry(int taskId) {
         final CacheEntry entry = mRunningCache.get(taskId);
         if (entry != null) {
             mAppTaskMap.remove(entry.topApp);

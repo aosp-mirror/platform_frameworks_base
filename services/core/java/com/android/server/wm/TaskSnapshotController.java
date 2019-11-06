@@ -171,22 +171,30 @@ class TaskSnapshotController {
     }
 
     void snapshotTasks(ArraySet<Task> tasks) {
+        snapshotTasks(mTmpTasks, false /* allowSnapshotHome */);
+    }
+
+    private void snapshotTasks(ArraySet<Task> tasks, boolean allowSnapshotHome) {
         for (int i = tasks.size() - 1; i >= 0; i--) {
             final Task task = tasks.valueAt(i);
-            final int mode = getSnapshotMode(task);
             final TaskSnapshot snapshot;
-            switch (mode) {
-                case SNAPSHOT_MODE_NONE:
-                    continue;
-                case SNAPSHOT_MODE_APP_THEME:
-                    snapshot = drawAppThemeSnapshot(task);
-                    break;
-                case SNAPSHOT_MODE_REAL:
-                    snapshot = snapshotTask(task);
-                    break;
-                default:
-                    snapshot = null;
-                    break;
+            final boolean snapshotHome = allowSnapshotHome && task.isActivityTypeHome();
+            if (snapshotHome) {
+                snapshot = snapshotTask(task);
+            } else {
+                switch (getSnapshotMode(task)) {
+                    case SNAPSHOT_MODE_NONE:
+                        continue;
+                    case SNAPSHOT_MODE_APP_THEME:
+                        snapshot = drawAppThemeSnapshot(task);
+                        break;
+                    case SNAPSHOT_MODE_REAL:
+                        snapshot = snapshotTask(task);
+                        break;
+                    default:
+                        snapshot = null;
+                        break;
+                }
             }
             if (snapshot != null) {
                 final GraphicBuffer buffer = snapshot.getSnapshot();
@@ -196,8 +204,11 @@ class TaskSnapshotController {
                             + buffer.getHeight());
                 } else {
                     mCache.putSnapshot(task, snapshot);
-                    mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
-                    task.onSnapshotChanged(snapshot);
+                    // Don't persist or notify the change for the temporal snapshot.
+                    if (!snapshotHome) {
+                        mPersister.persistSnapshot(task.mTaskId, task.mUserId, snapshot);
+                        task.onSnapshotChanged(snapshot);
+                    }
                 }
             }
         }
@@ -450,6 +461,10 @@ class TaskSnapshotController {
         mPersister.onTaskRemovedFromRecents(taskId, userId);
     }
 
+    void removeSnapshotCache(int taskId) {
+        mCache.removeRunningEntry(taskId);
+    }
+
     /**
      * See {@link TaskSnapshotPersister#removeObsoleteFiles}
      */
@@ -485,7 +500,9 @@ class TaskSnapshotController {
                             mTmpTasks.add(task);
                         }
                     });
-                    snapshotTasks(mTmpTasks);
+                    // Allow taking snapshot of home when turning screen off to reduce the delay of
+                    // unlocking/waking to home.
+                    snapshotTasks(mTmpTasks, true /* allowSnapshotHome */);
                 }
             } finally {
                 listener.onScreenOff();

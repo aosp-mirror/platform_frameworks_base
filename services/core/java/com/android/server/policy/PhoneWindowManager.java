@@ -157,6 +157,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
@@ -4603,6 +4604,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void screenTurningOn(final ScreenOnListener screenOnListener) {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Screen turning on...");
 
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn", 0 /* cookie */);
         updateScreenOffSleepToken(false);
         mDefaultDisplayPolicy.screenTurnedOn(screenOnListener);
 
@@ -4665,6 +4667,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mDefaultDisplayPolicy.finishScreenTurningOn()) {
             return; // Spurious or not ready yet.
         }
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn", 0 /* cookie */);
 
         final boolean enableScreen;
         final boolean awake = mDefaultDisplayPolicy.isAwake();
