@@ -25,6 +25,7 @@ import com.android.systemui.DumpController;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
@@ -77,6 +78,9 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract Divider optionalDivider();
+
+    @BindsOptionalOf
+    abstract Recents optionalRecents();
 
     @BindsOptionalOf
     abstract StatusBar optionalStatusBar();

@@ -28,19 +28,14 @@ import com.android.systemui.statusbar.CommandQueue;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * A proxy to a Recents implementation.
  */
-@Singleton
 public class Recents extends SystemUI implements CommandQueue.Callbacks {
 
     private final RecentsImplementation mImpl;
     private final CommandQueue mCommandQueue;
 
-    @Inject
     public Recents(Context context, RecentsImplementation impl, CommandQueue commandQueue) {
         super(context);
         mImpl = impl;
@@ -50,7 +45,6 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
     @Override
     public void start() {
         mCommandQueue.addCallback(this);
-        putComponent(Recents.class, this);
         mImpl.onStart(mContext, this);
     }
 

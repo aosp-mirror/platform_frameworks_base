@@ -27,7 +27,10 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsImplementation;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
@@ -85,5 +88,12 @@ abstract class SystemUIDefaultModule {
     @Provides
     static Divider provideDivider(Context context) {
         return new Divider(context);
+    }
+
+    @Provides
+    @Singleton
+    static Recents provideRecents(Context context, RecentsImplementation recentsImplementation,
+            CommandQueue commandQueue) {
+        return new Recents(context, recentsImplementation, commandQueue);
     }
 }
