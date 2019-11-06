@@ -77,6 +77,7 @@ import android.os.SELinux;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.os.storage.StorageManager;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
@@ -2747,12 +2748,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             return false;   // callingPackage was faked.
         }
 
+        // TODO(b/144048540): DPM needs to take into account the userId, not just the package.
         final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
         if (dpm.isDeviceOwnerApp(callingPackage) || dpm.isProfileOwnerApp(callingPackage)) {
             return true;
         }
-        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        return !um.hasUserRestriction(UserManager.DISALLOW_SET_WALLPAPER);
+        final int callingUserId = UserHandle.getCallingUserId();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+            return !umi.hasUserRestriction(UserManager.DISALLOW_SET_WALLPAPER, callingUserId);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     @Override
