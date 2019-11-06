@@ -298,7 +298,10 @@ public abstract class AuthBiometricView extends LinearLayout {
                     .getDimension(R.dimen.biometric_dialog_icon_padding);
             mIconView.setY(getHeight() - mIconView.getHeight() - iconPadding);
 
-            final int newHeight = mIconView.getHeight() + 2 * (int) iconPadding;
+            // Subtract the vertical padding from the new height since it's only used to create
+            // extra space between the other elements, and not part of the actual icon.
+            final int newHeight = mIconView.getHeight() + 2 * (int) iconPadding
+                    - mIconView.getPaddingTop() - mIconView.getPaddingBottom();
             mPanelController.updateForContentDimensions(mMediumWidth, newHeight,
                     0 /* animateDurationMs */);
 
