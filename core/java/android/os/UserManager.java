@@ -2486,6 +2486,8 @@ public class UserManager {
 
     /**
      * Return the number of users currently created on the device.
+     * <p>This API is not for use by third-party apps. It requires the {@code MANAGE_USERS}
+     * permission.</p>
      */
     public int getUserCount() {
         List<UserInfo> users = getUsers();
