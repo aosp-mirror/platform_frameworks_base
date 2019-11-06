@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Buscando a túa cara"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Autenticouse a cara"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmada"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Toca Confirmar para completar o proceso"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca o sensor de impresión dixital"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona de impresión dixital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Buscándote…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacións menos urxentes abaixo"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Toca de novo para abrir"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Pasa o dedo cara arriba para desbloquear"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Pasa o dedo cara arriba para abrir"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Este dispositivo está xestionado pola túa organización"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Este dispositivo está xestionado por <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Pasa o dedo desde a icona para acceder ao teléfono"</string>
@@ -893,10 +894,10 @@
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"Non terás acceso aos datos nin a Internet a través de <xliff:g id="CARRIER">%s</xliff:g>. Internet só estará dispoñible mediante a wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"o teu operador"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Dado que unha aplicación se superpón sobre unha solicitude de permiso, a configuración non pode verificar a túa resposta."</string>
-    <string name="slice_permission_title" msgid="7465009437851044444">"Queres permitir que a aplicación <xliff:g id="APP_0">%1$s</xliff:g> mostre partes de <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"Queres permitir que <xliff:g id="APP_0">%1$s</xliff:g> mostre fragmentos de aplicación de <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Pode ler información da aplicación <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_text_2" msgid="3146758297471143723">"- Pode levar a cabo accións dentro da aplicación <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="slice_permission_checkbox" msgid="7986504458640562900">"Permitir que a aplicación <xliff:g id="APP">%1$s</xliff:g> mostre partes de calquera aplicación"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"Permitir que <xliff:g id="APP">%1$s</xliff:g> mostre fragmentos de calquera aplicación"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Permitir"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Denegar"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Tocar para programar a función Aforro de batería"</string>

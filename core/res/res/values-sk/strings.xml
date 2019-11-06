@@ -97,6 +97,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Správy hlasovej schránky"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Volanie cez Wi‑Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Stav SIM karty"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Stav SIM karty: vysoká priorita"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Používateľ, s ktorým komunikujete, požiadal o režim FULL textového telefónu"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Používateľ, s ktorým komunikujete, požiadal o režim HCO textového telefónu"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Používateľ, s ktorým komunikujete, požiadal o režim VCO textového telefónu"</string>
@@ -556,11 +557,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona odtlačku prsta"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"správa hardvéru na overenie tváre"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"spravovať hardvér odomknutia tvárou"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Umožňuje aplikácii vyvolať metódy, ktoré pridávajú a odstraňujú šablóny tvárí."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"používanie hardvéru na overenie tváre"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Umožňuje aplikácii používať na overenie totožnosti hardvér na overenie tváre"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Overenie tváre"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"používať hardvér Odomknutia tvárou"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Umožňuje aplikácii používať na overenie totožnosti hardvér Odomknutia tvárou"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Odomknutie tvárou"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Znova zaregistrujte svoju tvár"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Znova zaregistrujte svoju tvár, aby sa zlepšilo rozpoznávanie"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Nepodarilo sa nasnímať presné údaje o tvári. Skúste to znova."</string>
@@ -573,7 +574,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Posuňte telefón doľava."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Posuňte telefón doprava."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Pozrite sa priamejšie na zariadenie."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nie je vidieť vašu tvár. Pozrite sa na telefón."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Umiestnite svoju tvár priamo pred telefón."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Priveľa pohybu. Nehýbte telefónom."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Znova zaregistrujte svoju tvár."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Tvár už nie je možné rozpoznať. Skúste to znova."</string>
@@ -582,19 +583,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Otočte hlavu o niečo menej."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Otočte hlavu o niečo menej."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Odstráňte všetko, čo vám zakrýva tvár."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Vyčistite senzor v hornom okraji obrazovky."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Vyčistite hornú časť obrazovky vrátane čierneho panela"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Tvár sa nedá overiť. Hardvér nie je k dispozícii."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Vyskúšajte znova overenie tváre."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Skúste znova použiť odomknutie tvárou."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nové údaje o tvári sa nedajú uložiť. Najprv odstráňte jeden zo starých záznamov."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Operácia týkajúca sa tváre bola zrušená"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Overenie tváre bolo zrušené používateľom"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Operácia týkajúca sa tváre bola zrušená"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Odomknutie tvárou zrušil používateľ."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Príliš veľa pokusov. Skúste to znova neskôr."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Príliš veľa pokusov. Overenie tváre bolo deaktivované."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Príliš veľa pokusov. Odomknutie tvárou bolo zakázané."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nedá sa overiť tvár. Skúste to znova."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Overenie tváre ste nenastavili"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Toto zariadenie nepodporuje overenie tváre"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Nenastavili ste odomknutie tvárou."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Toto zariadenie nepodporuje odomknutie tvárou."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Tvár <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

@@ -97,6 +97,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Голосовые сообщения"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Звонки по Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Статус SIM-карты"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Важные уведомления SIM-карты"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"На устройстве абонента выбран режим телетайпа \"ВСЕ\""</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"На устройстве абонента выбран режим телетайпа HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"На устройстве абонента выбран режим телетайпа VCO"</string>
@@ -556,11 +557,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Значок отпечатка пальца"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"Управлять оборудованием для распознавания лиц"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"Управление аппаратным обеспечением для функции \"Фейсконтроль\""</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Приложение сможет добавлять и удалять шаблоны лиц."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"Использовать оборудование для распознавания лиц"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Приложение сможет использовать распознающее оборудование для аутентификации."</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Распознавание лица"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"Использование аппаратного обеспечения для функции \"Фейсконтроль\""</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Приложение сможет использовать для аутентификации аппаратное обеспечение Фейсконтроля."</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Фейсконтроль"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Зарегистрируйте лицо ещё раз"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Чтобы улучшить распознавание лица, зарегистрируйте его ещё раз"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Не удалось собрать данные. Повторите попытку."</string>
@@ -573,7 +574,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Переместите телефон влево."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Переместите телефон вправо."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Смотрите прямо на устройство."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Вашего лица не видно. Смотрите на телефон."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Держите телефон прямо перед лицом."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Не перемещайте устройство. Держите его неподвижно."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Повторите попытку."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Не удалось распознать лицо. Повторите попытку."</string>
@@ -582,19 +583,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Держите голову ровнее."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Держите голову ровнее."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Ваше лицо плохо видно."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Очистите сканер в верхней части экрана."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Протрите верхнюю часть экрана (в том числе черную панель)."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Не удалось распознать лицо. Сканер недоступен."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Лицо не распознано. Попробуйте ещё раз."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Попробуйте воспользоваться функцией ещё раз."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Недостаточно места. Удалите старые данные для распознавания."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Распознавание отменено."</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Распознавание лица отменено пользователем."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Распознавание отменено"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Фейсконтроль: операция отменена пользователем."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Слишком много попыток. Повторите позже."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Слишком много попыток. Распознавание лица отключено."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Слишком много попыток. Функция \"Фейсконтроль\" отключена."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Не удалось распознать лицо. Повторите попытку."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Вы не настроили распознавание лица."</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Это устройство не поддерживает распознавание лица."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Вы не настроили фейсконтроль."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Это устройство не поддерживает функцию \"Фейсконтроль\"."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Лицо <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

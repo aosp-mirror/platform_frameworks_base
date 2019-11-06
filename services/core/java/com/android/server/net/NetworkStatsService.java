@@ -131,7 +131,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FileRotator;
@@ -266,10 +265,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Set of all ifaces currently used by traffic that does not explicitly specify a Network. */
     @GuardedBy("mStatsLock")
     private Network[] mDefaultNetworks = new Network[0];
-
-    /** Set containing info about active VPNs and their underlying networks. */
-    @GuardedBy("mStatsLock")
-    private VpnInfo[] mVpnInfos = new VpnInfo[0];
 
     private final DropBoxNonMonotonicObserver mNonMonotonicObserver =
             new DropBoxNonMonotonicObserver();
@@ -864,7 +859,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @Override
     public void forceUpdateIfaces(
             Network[] defaultNetworks,
-            VpnInfo[] vpnArray,
             NetworkState[] networkStates,
             String activeIface) {
         checkNetworkStackPermission(mContext);
@@ -872,7 +866,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         final long token = Binder.clearCallingIdentity();
         try {
-            updateIfaces(defaultNetworks, vpnArray, networkStates, activeIface);
+            updateIfaces(defaultNetworks, networkStates, activeIface);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1138,13 +1132,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private void updateIfaces(
             Network[] defaultNetworks,
-            VpnInfo[] vpnArray,
             NetworkState[] networkStates,
             String activeIface) {
         synchronized (mStatsLock) {
             mWakeLock.acquire();
             try {
-                mVpnInfos = vpnArray;
                 mActiveIface = activeIface;
                 updateIfacesLocked(defaultNetworks, networkStates);
             } finally {
@@ -1154,10 +1146,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     /**
-     * Inspect all current {@link NetworkState} to derive mapping from {@code
-     * iface} to {@link NetworkStatsHistory}. When multiple {@link NetworkInfo}
-     * are active on a single {@code iface}, they are combined under a single
-     * {@link NetworkIdentitySet}.
+     * Inspect all current {@link NetworkState} to derive mapping from {@code iface} to {@link
+     * NetworkStatsHistory}. When multiple {@link NetworkInfo} are active on a single {@code iface},
+     * they are combined under a single {@link NetworkIdentitySet}.
      */
     @GuardedBy("mStatsLock")
     private void updateIfacesLocked(Network[] defaultNetworks, NetworkState[] states) {
@@ -1282,27 +1273,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // For xt/dev, we pass a null VPN array because usage is aggregated by UID, so VPN traffic
         // can't be reattributed to responsible apps.
         Trace.traceBegin(TRACE_TAG_NETWORK, "recordDev");
-        mDevRecorder.recordSnapshotLocked(
-                devSnapshot, mActiveIfaces, null /* vpnArray */, currentTime);
+        mDevRecorder.recordSnapshotLocked(devSnapshot, mActiveIfaces, currentTime);
         Trace.traceEnd(TRACE_TAG_NETWORK);
         Trace.traceBegin(TRACE_TAG_NETWORK, "recordXt");
-        mXtRecorder.recordSnapshotLocked(
-                xtSnapshot, mActiveIfaces, null /* vpnArray */, currentTime);
+        mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, currentTime);
         Trace.traceEnd(TRACE_TAG_NETWORK);
 
         // For per-UID stats, pass the VPN info so VPN traffic is reattributed to responsible apps.
-        VpnInfo[] vpnArray = mVpnInfos;
         Trace.traceBegin(TRACE_TAG_NETWORK, "recordUid");
-        mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
+        mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
         Trace.traceEnd(TRACE_TAG_NETWORK);
         Trace.traceBegin(TRACE_TAG_NETWORK, "recordUidTag");
-        mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
+        mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
         Trace.traceEnd(TRACE_TAG_NETWORK);
 
         // We need to make copies of member fields that are sent to the observer to avoid
         // a race condition between the service handler thread and the observer's
         mStatsObservers.updateStats(xtSnapshot, uidSnapshot, new ArrayMap<>(mActiveIfaces),
-                new ArrayMap<>(mActiveUidIfaces), vpnArray, currentTime);
+                new ArrayMap<>(mActiveUidIfaces), currentTime);
     }
 
     /**
@@ -1675,8 +1663,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     private NetworkStats getNetworkStatsUidDetail(String[] ifaces)
             throws RemoteException {
-
-        // TODO: remove 464xlat adjustments from NetworkStatsFactory and apply all at once here.
         final NetworkStats uidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL,
                 ifaces);
 

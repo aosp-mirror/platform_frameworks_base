@@ -41,6 +41,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
@@ -106,12 +107,31 @@ public class DozeTriggers implements DozeMachine.Part {
         mDockManager = dockManager;
     }
 
-    private void onNotification() {
-        if (DozeMachine.DEBUG) Log.d(TAG, "requestNotificationPulse");
+    private void onNotification(Runnable onPulseSuppressedListener) {
+        if (DozeMachine.DEBUG) {
+            Log.d(TAG, "requestNotificationPulse");
+        }
+        if (!sWakeDisplaySensorState) {
+            Log.d(TAG, "Wake display false. Pulse denied.");
+            runIfNotNull(onPulseSuppressedListener);
+            DozeLog.tracePulseDropped(mContext, "wakeDisplaySensor");
+            return;
+        }
         mNotificationPulseTime = SystemClock.elapsedRealtime();
-        if (!mConfig.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) return;
-        requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */);
+        if (!mConfig.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
+            runIfNotNull(onPulseSuppressedListener);
+            DozeLog.tracePulseDropped(mContext, "pulseOnNotificationsDisabled");
+            return;
+        }
+        requestPulse(DozeLog.PULSE_REASON_NOTIFICATION, false /* performedProxCheck */,
+                onPulseSuppressedListener);
         DozeLog.traceNotificationPulse(mContext);
+    }
+
+    private static void runIfNotNull(Runnable runnable) {
+        if (runnable != null) {
+            runnable.run();
+        }
     }
 
     private void proximityCheckThenCall(IntConsumer callback,
@@ -137,8 +157,7 @@ public class DozeTriggers implements DozeMachine.Part {
     }
 
     @VisibleForTesting
-    void onSensor(int pulseReason, boolean sensorPerformedProxCheck,
-            float screenX, float screenY, float[] rawValues) {
+    void onSensor(int pulseReason, float screenX, float screenY, float[] rawValues) {
         boolean isDoubleTap = pulseReason == DozeLog.REASON_SENSOR_DOUBLE_TAP;
         boolean isTap = pulseReason == DozeLog.REASON_SENSOR_TAP;
         boolean isPickup = pulseReason == DozeLog.REASON_SENSOR_PICKUP;
@@ -150,10 +169,12 @@ public class DozeTriggers implements DozeMachine.Part {
         if (isWakeDisplay) {
             onWakeScreen(wakeEvent, mMachine.isExecutingTransition() ? null : mMachine.getState());
         } else if (isLongPress) {
-            requestPulse(pulseReason, sensorPerformedProxCheck);
+            requestPulse(pulseReason, true /* alreadyPerformedProxCheck */,
+                    null /* onPulseSupressedListener */);
         } else if (isWakeLockScreen) {
             if (wakeEvent) {
-                requestPulse(pulseReason, sensorPerformedProxCheck);
+                requestPulse(pulseReason, true /* alreadyPerformedProxCheck */,
+                        null /* onPulseSupressedListener */);
             }
         } else {
             proximityCheckThenCall((result) -> {
@@ -171,8 +192,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 } else {
                     mDozeHost.extendPulse(pulseReason);
                 }
-            }, sensorPerformedProxCheck
-                    || (mDockManager != null && mDockManager.isDocked()), pulseReason);
+            }, true /* alreadyPerformedProxCheck */, pulseReason);
         }
 
         if (isPickup) {
@@ -193,7 +213,7 @@ public class DozeTriggers implements DozeMachine.Part {
             // Let's prepare the display to wake-up by drawing black.
             // This will cover the hardware wake-up sequence, where the display
             // becomes black for a few frames.
-            mDozeHost.setAodDimmingScrim(255f);
+            mDozeHost.setAodDimmingScrim(1f);
         }
         mMachine.wakeUp();
     }
@@ -216,15 +236,21 @@ public class DozeTriggers implements DozeMachine.Part {
         if (state == DozeMachine.State.DOZE_PULSING
                 || state == DozeMachine.State.DOZE_PULSING_BRIGHT) {
             boolean ignoreTouch = near;
-            if (DEBUG) Log.i(TAG, "Prox changed, ignore touch = " + ignoreTouch);
+            if (DEBUG) {
+                Log.i(TAG, "Prox changed, ignore touch = " + ignoreTouch);
+            }
             mDozeHost.onIgnoreTouchWhilePulsing(ignoreTouch);
         }
 
         if (far && (paused || pausing)) {
-            if (DEBUG) Log.i(TAG, "Prox FAR, unpausing AOD");
+            if (DEBUG) {
+                Log.i(TAG, "Prox FAR, unpausing AOD");
+            }
             mMachine.requestState(DozeMachine.State.DOZE_AOD);
         } else if (near && aod) {
-            if (DEBUG) Log.i(TAG, "Prox NEAR, pausing AOD");
+            if (DEBUG) {
+                Log.i(TAG, "Prox NEAR, pausing AOD");
+            }
             mMachine.requestState(DozeMachine.State.DOZE_AOD_PAUSING);
         }
     }
@@ -252,7 +278,7 @@ public class DozeTriggers implements DozeMachine.Part {
                             .setType(MetricsEvent.TYPE_OPEN)
                             .setSubtype(DozeLog.REASON_SENSOR_WAKE_UP));
                 }
-            }, false /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
+            }, true /* alreadyPerformedProxCheck */, DozeLog.REASON_SENSOR_WAKE_UP);
         } else {
             boolean paused = (state == DozeMachine.State.DOZE_AOD_PAUSED);
             boolean pausing = (state == DozeMachine.State.DOZE_AOD_PAUSING);
@@ -282,6 +308,7 @@ public class DozeTriggers implements DozeMachine.Part {
             case DOZE_AOD:
                 mDozeSensors.setProxListening(newState != DozeMachine.State.DOZE);
                 mDozeSensors.setListening(true);
+                mDozeSensors.setPaused(false);
                 if (newState == DozeMachine.State.DOZE_AOD && !sWakeDisplaySensorState) {
                     onWakeScreen(false, newState);
                 }
@@ -289,15 +316,19 @@ public class DozeTriggers implements DozeMachine.Part {
             case DOZE_AOD_PAUSED:
             case DOZE_AOD_PAUSING:
                 mDozeSensors.setProxListening(true);
-                mDozeSensors.setListening(false);
+                mDozeSensors.setPaused(true);
                 break;
             case DOZE_PULSING:
             case DOZE_PULSING_BRIGHT:
                 mDozeSensors.setTouchscreenSensorsListening(false);
                 mDozeSensors.setProxListening(true);
+                mDozeSensors.setPaused(false);
                 break;
             case DOZE_PULSE_DONE:
                 mDozeSensors.requestTemporaryDisable();
+                // A pulse will temporarily disable sensors that require a touch screen.
+                // Let's make sure that they are re-enabled when the pulse is over.
+                mDozeSensors.updateListening();
                 break;
             case FINISH:
                 mBroadcastReceiver.unregister(mContext);
@@ -321,7 +352,8 @@ public class DozeTriggers implements DozeMachine.Part {
         }
     }
 
-    private void requestPulse(final int reason, boolean performedProxCheck) {
+    private void requestPulse(final int reason, boolean performedProxCheck,
+            Runnable onPulseSuppressedListener) {
         Assert.isMainThread();
         mDozeHost.extendPulse(reason);
 
@@ -338,6 +370,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 DozeLog.tracePulseDropped(mContext, mPulsePending, mMachine.getState(),
                         mDozeHost.isPulsingBlocked());
             }
+            runIfNotNull(onPulseSuppressedListener);
             return;
         }
 
@@ -345,7 +378,9 @@ public class DozeTriggers implements DozeMachine.Part {
         proximityCheckThenCall((result) -> {
             if (result == ProximityCheck.RESULT_NEAR) {
                 // in pocket, abort pulse
+                DozeLog.tracePulseDropped(mContext, "inPocket");
                 mPulsePending = false;
+                runIfNotNull(onPulseSuppressedListener);
             } else {
                 // not in pocket, continue pulsing
                 continuePulseRequest(reason);
@@ -382,6 +417,9 @@ public class DozeTriggers implements DozeMachine.Part {
         mDozeSensors.dump(pw);
     }
 
+    /**
+     * @see DozeSensors.ProxSensor
+     */
     private abstract class ProximityCheck implements SensorEventListener, Runnable {
         private static final int TIMEOUT_DELAY_MS = 500;
 
@@ -393,12 +431,18 @@ public class DozeTriggers implements DozeMachine.Part {
         private boolean mRegistered;
         private boolean mFinished;
         private float mMaxRange;
+        private boolean mUsingBrightnessSensor;
 
         protected abstract void onProximityResult(int result);
 
         public void check() {
             Preconditions.checkState(!mFinished && !mRegistered);
-            final Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+            Sensor sensor = DozeSensors.findSensorWithType(mSensorManager,
+                    mContext.getString(R.string.doze_brightness_sensor_type));
+            mUsingBrightnessSensor = sensor != null;
+            if (sensor == null) {
+                sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+            }
             if (sensor == null) {
                 if (DozeMachine.DEBUG) Log.d(TAG, "ProxCheck: No sensor found");
                 finishWithResult(RESULT_UNKNOWN);
@@ -414,6 +458,9 @@ public class DozeTriggers implements DozeMachine.Part {
             mRegistered = true;
         }
 
+        /**
+         * @see DozeSensors.ProxSensor#onSensorChanged(SensorEvent)
+         */
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (event.values.length == 0) {
@@ -423,7 +470,14 @@ public class DozeTriggers implements DozeMachine.Part {
                 if (DozeMachine.DEBUG) {
                     Log.d(TAG, "ProxCheck: Event: value=" + event.values[0] + " max=" + mMaxRange);
                 }
-                final boolean isNear = event.values[0] < mMaxRange;
+                final boolean isNear;
+                if (mUsingBrightnessSensor) {
+                    // The custom brightness sensor is gated by the proximity sensor and will
+                    // return 0 whenever prox is covered.
+                    isNear = event.values[0] == 0;
+                } else {
+                    isNear = event.values[0] < mMaxRange;
+                }
                 finishWithResult(isNear ? RESULT_NEAR : RESULT_FAR);
             }
         }
@@ -463,7 +517,8 @@ public class DozeTriggers implements DozeMachine.Part {
         public void onReceive(Context context, Intent intent) {
             if (PULSE_ACTION.equals(intent.getAction())) {
                 if (DozeMachine.DEBUG) Log.d(TAG, "Received pulse intent");
-                requestPulse(DozeLog.PULSE_REASON_INTENT, false /* performedProxCheck */);
+                requestPulse(DozeLog.PULSE_REASON_INTENT, false, /* performedProxCheck */
+                        null /* onPulseSupressedListener */);
             }
             if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
                 mMachine.requestState(DozeMachine.State.FINISH);
@@ -513,8 +568,8 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private DozeHost.Callback mHostCallback = new DozeHost.Callback() {
         @Override
-        public void onNotificationAlerted() {
-            onNotification();
+        public void onNotificationAlerted(Runnable onPulseSuppressedListener) {
+            onNotification(onPulseSuppressedListener);
         }
 
         @Override

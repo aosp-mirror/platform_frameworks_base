@@ -96,6 +96,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Poruke govorne pošte"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Pozivanje putem WiFi-ja"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Status SIM-a"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Status visokog prioriteta SIM-a"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Ravnopravni uređaj zatražio načina rada TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Ravnopravni uređaj zatražio načina rada TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Ravnopravni uređaj zatražio načina rada TTY VCO"</string>
@@ -486,9 +487,9 @@
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"uspostavljanje i prekidanje WiFi veze"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Omogućava aplikaciji uspostavljanje i prekidanje veze sa WiFi pristupnim tačkama, kao i promjenu konfiguracije uređaja za WiFi mreže."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"dozvoljava prijem paketa kroz WiFi Multicast"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Omogućava aplikaciji prijem paketa poslanih svim uređajima na WiFi mreži pomoću multicast tehnologije, a ne samo na vaš tablet. Troši više energije nego rad van multicast načina rada."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Omogućava aplikaciji prijem paketa poslanih svim uređajima na WiFi mreži pomoću multicast tehnologije, a ne samo na vaš TV. Troši više energije nego rad van multicast načina rada."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Omogućava aplikaciji prijem paketa poslanih svim uređajima na WiFi mreži pomoću multicast tehnologije, a ne samo na vaš telefon. Troši više energije nego rad van multicast načina rada."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Omogućava aplikaciji prijem paketa poslanih svim uređajima na WiFi mreži pomoću višesmjernih adresa, a ne samo na vaš tablet. Troši više energije nego rad van multicast načina rada."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Omogućava aplikaciji prijem paketa poslanih svim uređajima na WiFi mreži pomoću višesmjernih adresa, a ne samo na vaš TV. Troši više energije nego rad van multicast načina rada."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Omogućava aplikaciji prijem paketa poslanih svim uređajima na WiFi mreži pomoću višesmjernih adresa, a ne samo na vaš telefon. Troši više energije nego rad van multicast načina rada."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"pristup Bluetooth postavkama"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Dozvoljava aplikaciji konfiguriranje lokalnog Bluetooth tableta te otkrivanje udaljenih uređaja i sparivanje s njima."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Dozvoljava aplikaciji konfiguriranje lokalnog Bluetooth TV-a te otkrivanje i povezivanje s udaljenim uređajima."</string>
@@ -553,11 +554,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona za otisak prsta"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"upravljanje hardverom za autentifikaciju licem"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"upravljanje hardverom za otključavanje licem"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Omogućava aplikaciji korištenje metoda za dodavanje i brisanje šablona lica za upotrebu."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"upotreba hardvera za autentifikaciju licem"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Omogućava aplikaciji da za autentifikaciju koristi hardver za autentifikaciju licem"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Autentifikacija licem"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"korištenje hardvera za otključavanje licem"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Omogućava aplikaciji da za autentifikaciju koristi hardver za otključavanje licem"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Otključavanje licem"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Ponovo registrirajte lice"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Ponovo registrirajte lice da poboljšate prepoznavanje"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Lice nije snimljeno precizno. Pokušajte ponovo."</string>
@@ -570,7 +571,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Pomjerite telefon ulijevo."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Pomjerite telefon udesno."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Gledajte direktno u uređaj."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Ne vidi se lice. Gledajte u telefon."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Postavite lice direktno ispred telefona"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Previše pokreta. Držite telefon mirno."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Ponovo registrirajte lice."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Nije više moguće prepoznati lice. Pokušajte opet."</string>
@@ -579,19 +580,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Malo manje zakrenite glavu."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Malo manje zakrenite glavu."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Uklonite prepreke koje blokiraju vaše lice."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Očistite senzor na gornjem rubu ekrana."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Očistite vrh ekrana, uključujući crnu traku"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nije moguće potvrditi lice. Hardver nije dostupan."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Pokušajte ponovo s autentifikacijom lica."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Pokušajte ponovo s otključavanjem licem."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nije moguće sačuvati nove podatke o licu. Prvo izbrišite stare."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Prepoznavanje lica je otkazano"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Korisnik je otkazao provjeru lica"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Prepoznavanje lica je otkazano."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Korisnik je otkazao otključavanje licem."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Previše pokušaja. Pokušajte ponovo kasnije."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Previše pokušaja. Autentifikacija licem je onemogućena."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Previše pokušaja. Otključavanje licem je onemogućeno."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nije moguće potvrditi lice. Pokušajte ponovo."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Niste postavili autentifikaciju pomoću lica"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Autentifikacija pomoću lica nije podržana na ovom uređaju"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Niste postavili otključavanje licem."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Otključavanje licem nije podržano na ovom uređaju."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Lice <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

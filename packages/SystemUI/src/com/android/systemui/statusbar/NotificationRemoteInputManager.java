@@ -52,6 +52,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -121,6 +122,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected final Context mContext;
     private final UserManager mUserManager;
     private final KeyguardManager mKeyguardManager;
+    private final StatusBarStateController mStatusBarStateController;
 
     protected RemoteInputController mRemoteInputController;
     protected NotificationLifetimeExtender.NotificationSafeToRemoveCallback
@@ -259,6 +261,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             SmartReplyController smartReplyController,
             NotificationEntryManager notificationEntryManager,
             Lazy<ShadeController> shadeController,
+            StatusBarStateController statusBarStateController,
             @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
         mContext = context;
         mLockscreenUserManager = lockscreenUserManager;
@@ -271,6 +274,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         addLifetimeExtenders();
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
+        mStatusBarStateController = statusBarStateController;
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
@@ -380,7 +384,10 @@ public class NotificationRemoteInputManager implements Dumpable {
 
         if (!mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
             final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
-            if (mLockscreenUserManager.isLockscreenPublicMode(userId)) {
+            if (mLockscreenUserManager.isLockscreenPublicMode(userId)
+                    || mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
+                // Even if we don't have security we should go through this flow, otherwise we won't
+                // go to the shade
                 mCallback.onLockedRemoteInput(row, view);
                 return true;
             }
@@ -391,6 +398,11 @@ public class NotificationRemoteInputManager implements Dumpable {
             }
         }
 
+        if (riv != null && !riv.isAttachedToWindow()) {
+            // the remoteInput isn't attached to the window anymore :/ Let's focus on the expanded
+            // one instead if it's available
+            riv = null;
+        }
         if (riv == null) {
             riv = findRemoteInputView(row.getPrivateLayout().getExpandedChild());
             if (riv == null) {
@@ -405,6 +417,10 @@ public class NotificationRemoteInputManager implements Dumpable {
             return true;
         }
 
+        if (!riv.isAttachedToWindow()) {
+            // if we still didn't find a view that is attached, let's abort.
+            return false;
+        }
         int width = view.getWidth();
         if (view instanceof TextView) {
             // Center the reveal on the text which might be off-center from the TextView

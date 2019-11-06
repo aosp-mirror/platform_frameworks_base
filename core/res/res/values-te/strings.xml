@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"వాయిస్ మెయిల్ సందేశాలు"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi కాలింగ్"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM స్థితి"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"అధిక ప్రాధాన్యత గల SIM స్థితి"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"అవతలి వారు FULL TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"అవతలి వారు HCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"అవతలి వారు VCO TTY మోడ్‌ని అభ్యర్థించారు"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"వేలిముద్ర చిహ్నం"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"ముఖ ప్రమాణీకరణ హార్డ్‌వేర్‌ను నిర్వహించండి"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"ముఖంతో అన్‌లాక్ చేయగల హార్డ్‌వేర్ నిర్వహణ"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"వినియోగం కోసం ముఖ టెంప్లేట్‌లను జోడించే మరియు తొలగించే పద్ధతులను అమలు చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ముఖ ప్రమాణీకరణ హార్డ్‌వేర్‌ను వాడండి"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ప్రమాణీకరణ కోసం ముఖ ప్రామాణీకరణ హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ముఖ ప్రామాణీకరణ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ముఖంతో అన్‌లాక్ చేయగల హార్డ్‌వేర్ వినియోగం"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"ప్రమాణీకరణ కోసం ముఖంతో అన్‌లాక్ చేయగల హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"ముఖంతో అన్‌లాక్"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"మీ ముఖాన్ని తిరిగి నమోదు చేయండి"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"గుర్తింపును మెరుగుపరచడానికి, దయచేసి మీ ముఖంను తిరిగి నమోదు చేసుకోండి"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ముఖం డేటా సరిగ్గా రాలేదు. మళ్లీ ప్రయత్నించండి."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ఫోన్‌ను ఎడమవైపునకు జరపండి."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ఫోన్‌ను కుడివైపునకు జరపండి."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"దయచేసి మీ పరికరం వైపు మరింత నేరుగా చూడండి."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"మీ ముఖం కనిపించడం లేదు. ఫోన్ వైపు చూడండి."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"మీ ముఖాన్ని ఫోన్‌కు ఎదురుగా ఉంచండి."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ఇక ముఖం గుర్తించలేదు. మళ్లీ ప్రయత్నించండి."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"మీ తలను ఇంకాస్త తక్కువ తిప్పండి."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"మీ తలను ఎడమ/కుడి వైపుగా ఇంకాస్త తిప్పండి."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేస్తుంది."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"స్క్రీన్ ఎగువన ఉన్న సెన్సార్‌ను శుభ్రం చేస్తుంది."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"నల్లని పట్టీతో సహా మీ స్క్రీన్ పైభాగం అంతటినీ శుభ్రంగా తుడవండి"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ముఖం ధృవీకరించలేరు. హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"ముఖ ప్రామాణీకరణను మళ్ళీ ప్రయత్నించండి."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"ముఖంతో అన్‌లాక్‌ను మళ్లీ ప్రయత్నించండి."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"కొత్త ముఖం డేటాను నిల్వ చేయడం కాదు. మొదట పాతది తొలిగించండి."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"ముఖ కార్యకలాపం రద్దయింది"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"వినియోగదారు ద్వారా ముఖ ప్రామాణీకరణ రద్దు చేయబడింది"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ముఖ కార్యకలాపం రద్దయింది."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ముఖంతో అన్‌లాక్‌ను వినియోగదారు రద్దు చేశారు."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"చాలా ఎక్కువ ప్రయత్నాలు చేసారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"అనేకసార్లు ప్రయత్నించారు. ముఖ ప్రమాణీకరణ నిలిపివేయబడింది."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"అనేకసార్లు ప్రయత్నించారు. ముఖంతో అన్‌లాక్ నిలిపివేయబడింది."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"ముఖం ధృవీకరించలేకపోయింది. మళ్లీ ప్రయత్నించండి."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"మీరు ముఖ ప్రామాణీకరణను సెటప్ చేయలేదు"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"ఈ పరికరంలో ముఖ ప్రమాణీకరణకు మద్దతు లేదు"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"మీరు ముఖంతో అన్‌లాక్‌ను సెటప్ చేయలేదు."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"ఈ పరికరంలో ముఖంతో అన్‌లాక్‌ను ఉపయోగించడానికి మద్దతు లేదు."</string>
     <string name="face_name_template" msgid="7004562145809595384">"ముఖ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1664,7 +1665,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"షార్ట్‌కట్ ఆన్‌లో ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కితే యాక్సెస్ సామర్థ్య ఫీచర్ ప్రారంభం అవుతుంది.\n\n ప్రస్తుత యాక్సెస్ సామర్థ్య ఫీచర్:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n సెట్టింగ్‌లు &gt; యాక్సెస్ సామర్థ్యంలో మీరు ఫీచర్‌ను మార్చవచ్చు."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"సత్వరమార్గాన్ని ఆఫ్ చేయి"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"సత్వరమార్గాన్ని ఉపయోగించు"</string>
-    <string name="color_inversion_feature_name" msgid="4231186527799958644">"వర్ణ విలోమం"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"రంగుల మార్పిడి"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"రంగు సవరణ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>

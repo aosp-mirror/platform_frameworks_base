@@ -67,6 +67,8 @@ enum NsRcode {
     // NS_R_BADSIG  = 16,
     NS_R_BADKEY = 17;
     NS_R_BADTIME = 18;
+    NS_R_INTERNAL_ERROR = 254;
+    NS_R_TIMEOUT = 255;
 }
 
 // Currently defined type values for resources and queries.
@@ -143,11 +145,11 @@ enum IpVersion {
     IV_IPV6 = 2;
 }
 
-enum TransportType {
-    TT_UNKNOWN = 0;
-    TT_UDP = 1;
-    TT_TCP = 2;
-    TT_DOT = 3;
+enum Protocol {
+    PROTO_UNKNOWN = 0;
+    PROTO_UDP = 1;
+    PROTO_TCP = 2;
+    PROTO_DOT = 3;
 }
 
 enum PrivateDnsModes {
@@ -157,21 +159,22 @@ enum PrivateDnsModes {
     PDM_STRICT = 3;
 }
 
-enum Transport {
+enum NetworkType {
+    NT_UNKNOWN = 0;
     // Indicates this network uses a Cellular transport.
-    TRANSPORT_DEFAULT = 0;  // TRANSPORT_CELLULAR
+    NT_CELLULAR = 1;
     // Indicates this network uses a Wi-Fi transport.
-    TRANSPORT_WIFI = 1;
+    NT_WIFI = 2;
     // Indicates this network uses a Bluetooth transport.
-    TRANSPORT_BLUETOOTH = 2;
+    NT_BLUETOOTH = 3;
     // Indicates this network uses an Ethernet transport.
-    TRANSPORT_ETHERNET = 3;
+    NT_ETHERNET = 4;
     // Indicates this network uses a VPN transport.
-    TRANSPORT_VPN = 4;
+    NT_VPN = 5;
     // Indicates this network uses a Wi-Fi Aware transport.
-    TRANSPORT_WIFI_AWARE = 5;
+    NT_WIFI_AWARE = 6;
     // Indicates this network uses a LoWPAN transport.
-    TRANSPORT_LOWPAN = 6;
+    NT_LOWPAN = 7;
 }
 
 enum CacheStatus{
@@ -195,13 +198,13 @@ message DnsQueryEvent {
 
     optional android.stats.dnsresolver.IpVersion ip_version = 4;
 
-    optional android.stats.dnsresolver.TransportType transport = 5;
+    optional android.stats.dnsresolver.Protocol protocol = 5;
 
     // Number of DNS query retry times
     optional int32 retry_times = 6;
 
     // Ordinal number of name server.
-    optional int32 dns_server_count = 7;
+    optional int32 dns_server_index = 7;
 
     // Used only by TCP and DOT. True for new connections.
     optional bool connected = 8;

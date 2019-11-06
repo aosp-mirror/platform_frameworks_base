@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mailboxnachrichten"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"WLAN-Telefonie"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Status der SIM-Karte"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Benachrichtigungen mit hoher Priorität von der SIM-Karte"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer hat TTY-Modus \"Vollständig\" angefordert."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer hat TTY-Modus \"HCO\" angefordert."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer hat TTY-Modus \"VC\" angefordert."</string>
@@ -428,7 +429,7 @@
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Diese App kann jederzeit Audio über das Mikrofon aufnehmen."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"Befehle an die SIM senden"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Ermöglicht der App das Senden von Befehlen an die SIM-Karte. Dies ist äußerst risikoreich."</string>
-    <string name="permlab_activityRecognition" msgid="3634590230567608356">"körperlichen Aktivitäten erkennen"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"Körperliche Aktivitäten erkennen"</string>
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Diese App kann deine körperliche Aktivität erkennen."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Bilder und Videos aufnehmen"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Diese App kann mit der Kamera jederzeit Bilder und Videos aufnehmen."</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Fingerabdruck-Symbol"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"Gesichtserkennungshardware verwalten"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"Face Unlock-Hardware verwalten"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Ermöglicht der App,  Gesichtsvorlagen hinzuzufügen oder zu entfernen."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"Gesichtserkennungshardware verwenden"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Ermöglicht der App, für die Authentifizierung Gesichtserkennungshardware zu verwenden"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Gesichtserkennung"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"Face Unlock-Hardware verwenden"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Ermöglicht der App, zu Authentifizierungszwecken Face Unlock-Hardware zu verwenden"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Gesicht neu scannen lassen"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Für bessere Erkennung Gesicht neu scannen lassen"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Gesichtsdaten nicht gut erfasst. Erneut versuchen."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Beweg das Smartphone nach links."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Beweg das Smartphone nach rechts."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Bitte sieh direkt auf dein Gerät."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Gesicht wurde nicht gefunden. Blicke aufs Telefon."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Halte dein Gesicht direkt vor dein Smartphone."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Bitte registriere dein Gesicht noch einmal."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Gesicht wird nicht mehr erkannt. Erneut versuchen."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Neig den Kopf etwas weniger stark."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Neig den Kopf etwas weniger stark."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Entferne alles, was dein Gesicht verdeckt."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Reinige den Sensor am oberen Rand des Bildschirms."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Reinige den oberen Teil deines Bildschirms, einschließlich der schwarzen Leiste"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Gesichtserkennung noch einmal versuchen."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Face Unlock noch einmal versuchen."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Kein Speicherplatz frei. Bitte erst ein Gesicht löschen."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Gesichtserkennung abgebrochen"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Gesichtserkennung vom Nutzer abgebrochen"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Gesichtserkennung abgebrochen."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Face Unlock vom Nutzer abgebrochen."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Zu viele Versuche. Die Gesichtserkennung wurde deaktiviert."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Zu viele Versuche. Face Unlock wurde deaktiviert."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Gesichtsprüfung nicht möglich. Noch mal versuchen."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Die Gesichtserkennung ist nicht eingerichtet"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Gesichtserkennung wird auf diesem Gerät nicht unterstützt"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Face Unlock ist nicht eingerichtet."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Face Unlock wird auf diesem Gerät nicht unterstützt."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Gesicht <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

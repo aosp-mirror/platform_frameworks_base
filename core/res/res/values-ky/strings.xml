@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Үн почтасынын билдирүүлөрү"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi аркылуу чалуу"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM-картанын абалы"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"SIM картадагы өтө маанилүү билдирмелер"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Peer TTY режимин FULL кылууну суранды"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Peer TTY режимин HCO кылууну суранды"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Peer TTY режимин VCO кылууну суранды"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Манжа изинин сүрөтчөсү"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"жүздүн аныктыгын текшерүүчү аппараттык камсыздоону башкаруу"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"жүзүнөн таануу функциясынын аппараттык камсыздоосун башкаруу"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Колдонмого пайдалануу үчүн жүздүн үлгүлөрүн кошуу жана жок кылуу мүмкүндүгүн берет."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"жүздүн аныктыгын текшерүүчү аппараттык камсыздоону колдонуу"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Колдонмого аныктыгын текшерүү үчүн жүздүн аныктыгын текшерүүчү аппараттык камсыздоону пайдалануу мүмкүндүгүн берет"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Жүздүн аныктыгын текшерүү"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"аппараттык камсыздоо үчүн жүзүнөн таанууну колдонуу"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Колдонмо аныктыкты текшерүүдө Жүзүнөн таануу функциясынын аппараттык камсыздоосун колдонот"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Жүзүнөн таануу"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Жүзүңүздү кайра таанытыңыз."</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Мыкты таануу үчүн, жүзүңүздү кайра таанытыңыз"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Жүзүңүз жакшы тартылган жок. Кайра аракет кылыңыз."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Телефонду солго жылдырыңыз."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Телефонду оңго жылдырыңыз."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Түзмөгүңүзгө түз караңыз."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Жүзүңүз көрүнбөй жатат. Телефонду караңыз."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Телефонду жүзүңүздүн маңдайында кармаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Кыймылдап жибердиңиз. Телефонду түз кармаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Жүзүңүздү кайра таанытыңыз."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Жүз таанылган жок. Кайра аракет кылыңыз."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Башыңызды бир аз гана эңкейтиңиз."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Жүзүңүздү жашырып турган нерселерди алып салыңыз."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Экрандын жогору жагындагы сенсорду тазалаңыз."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Экраныңыздын жогору жагын, анын ичинде тилкени да тазалаңыз"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Жүз ырасталбай жатат. Аппараттык камсыздоо жеткиликсиз."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Жүздүн аныктыгын кайра текшерип көрүңүз"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Жүзүнөн таануу функциясын кайра текшерип көрүңүз."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Жаңы жүздү сактоо мүмкүн эмес. Адегенде эскисин өчүрүңүз."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Жүздүн аныктыгын текшерүү жокко чыгарылды"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Жүздүн аныктыгын текшерүү колдонуучу аркылуу жокко чыгарылды"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Жүздүн аныктыгын текшерүү жокко чыгарылды."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Жүзүнөн таануу функциясын колдонуучу өчүрүп салды."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Өтө көп жолу аракет жасадыңыз. Кийинчерээк кайра аракет кылыңыз."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Өтө көп аракеттер аткарылды. Жүздүн аныктыгын текшерүү өчүк."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Өтө көп жолу аракет кылдыңыз. Жүзүнөн таануу функциясы өчүрүлдү."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Жүз ырасталбай жатат. Кайра аракет кылыңыз."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Жүздүн аныктыгын текшерүүнү жөндөй элексиз"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Жүздүн аныктыгын текшерүү бул түзмөктө колдоого алынбайт"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Жүзүнөн таануу функциясын жөндөй элексиз."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Жүзүнөн таануу функциясы бул түзмөктө иштебейт."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Жүз <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1898,7 +1899,7 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бардык тилдер"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бардык аймактар"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Издөө"</string>
-    <string name="app_suspended_title" msgid="2075071241147969611">"Колдонмо жеткиликтсиз"</string>
+    <string name="app_suspended_title" msgid="2075071241147969611">"Колдонмо жеткиликсиз"</string>
     <string name="app_suspended_default_message" msgid="123166680425711887">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> колдонмосу учурда жеткиликсиз. Анын жеткиликтүүлүгү <xliff:g id="APP_NAME_1">%2$s</xliff:g> тарабынан башкарылат."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"Кеңири маалымат"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Жумуш профили күйгүзүлсүнбү?"</string>

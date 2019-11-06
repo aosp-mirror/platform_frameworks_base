@@ -53,6 +53,12 @@ public class PointerLocationView extends View implements InputDeviceListener,
     // to plot alongside the default one.  Useful for testing and comparison purposes.
     private static final String ALT_STRATEGY_PROPERY_KEY = "debug.velocitytracker.alt";
 
+    /**
+     * If set to a positive value between 1-255, shows an overlay with the approved (red) and
+     * rejected (blue) exclusions.
+     */
+    private static final String GESTURE_EXCLUSION_PROP = "debug.pointerlocation.showexclusion";
+
     public static class PointerState {
         // Trace of previous points.
         private float[] mTraceX = new float[32];
@@ -138,8 +144,10 @@ public class PointerLocationView extends View implements InputDeviceListener,
     private final PointerCoords mTempCoords = new PointerCoords();
 
     private final Region mSystemGestureExclusion = new Region();
+    private final Region mSystemGestureExclusionRejected = new Region();
     private final Path mSystemGestureExclusionPath = new Path();
     private final Paint mSystemGestureExclusionPaint;
+    private final Paint mSystemGestureExclusionRejectedPaint;
 
     private final VelocityTracker mVelocity;
     private final VelocityTracker mAltVelocity;
@@ -189,6 +197,10 @@ public class PointerLocationView extends View implements InputDeviceListener,
         mSystemGestureExclusionPaint = new Paint();
         mSystemGestureExclusionPaint.setARGB(25, 255, 0, 0);
         mSystemGestureExclusionPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        mSystemGestureExclusionRejectedPaint = new Paint();
+        mSystemGestureExclusionRejectedPaint.setARGB(25, 0, 0, 255);
+        mSystemGestureExclusionRejectedPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         PointerState ps = new PointerState();
         mPointers.add(ps);
@@ -261,6 +273,12 @@ public class PointerLocationView extends View implements InputDeviceListener,
             mSystemGestureExclusionPath.reset();
             mSystemGestureExclusion.getBoundaryPath(mSystemGestureExclusionPath);
             canvas.drawPath(mSystemGestureExclusionPath, mSystemGestureExclusionPaint);
+        }
+
+        if (!mSystemGestureExclusionRejected.isEmpty()) {
+            mSystemGestureExclusionPath.reset();
+            mSystemGestureExclusionRejected.getBoundaryPath(mSystemGestureExclusionPath);
+            canvas.drawPath(mSystemGestureExclusionPath, mSystemGestureExclusionRejectedPaint);
         }
 
         // Labels
@@ -754,6 +772,9 @@ public class PointerLocationView extends View implements InputDeviceListener,
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+            final int alpha = systemGestureExclusionOpacity();
+            mSystemGestureExclusionPaint.setAlpha(alpha);
+            mSystemGestureExclusionRejectedPaint.setAlpha(alpha);
         } else {
             mSystemGestureExclusion.setEmpty();
         }
@@ -805,7 +826,12 @@ public class PointerLocationView extends View implements InputDeviceListener,
     }
 
     private static boolean shouldShowSystemGestureExclusion() {
-        return SystemProperties.getBoolean("debug.pointerlocation.showexclusion", false);
+        return systemGestureExclusionOpacity() > 0;
+    }
+
+    private static int systemGestureExclusionOpacity() {
+        int x = SystemProperties.getInt(GESTURE_EXCLUSION_PROP, 0);
+        return x >= 0 && x <= 255 ? x : 0;
     }
 
     // HACK
@@ -928,12 +954,19 @@ public class PointerLocationView extends View implements InputDeviceListener,
     private ISystemGestureExclusionListener mSystemGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
         @Override
-        public void onSystemGestureExclusionChanged(int displayId, Region systemGestureExclusion) {
+        public void onSystemGestureExclusionChanged(int displayId, Region systemGestureExclusion,
+                Region systemGestureExclusionUnrestricted) {
             Region exclusion = Region.obtain(systemGestureExclusion);
+            Region rejected = Region.obtain();
+            if (systemGestureExclusionUnrestricted != null) {
+                rejected.set(systemGestureExclusionUnrestricted);
+                rejected.op(exclusion, Region.Op.DIFFERENCE);
+            }
             Handler handler = getHandler();
             if (handler != null) {
                 handler.post(() -> {
                     mSystemGestureExclusion.set(exclusion);
+                    mSystemGestureExclusionRejected.set(rejected);
                     exclusion.recycle();
                     invalidate();
                 });

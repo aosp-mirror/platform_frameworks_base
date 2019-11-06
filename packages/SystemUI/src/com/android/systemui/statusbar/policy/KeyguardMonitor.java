@@ -19,7 +19,6 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
 public interface KeyguardMonitor extends CallbackController<Callback> {
 
     boolean isSecure();
-    boolean canSkipBouncer();
     boolean isShowing();
     boolean isOccluded();
     boolean isKeyguardFadingAway();
@@ -28,6 +27,19 @@ public interface KeyguardMonitor extends CallbackController<Callback> {
     long getKeyguardFadingAwayDuration();
     long getKeyguardFadingAwayDelay();
     long calculateGoingToFullShadeDelay();
+
+    /**
+     * @return a shortened fading away duration similar to
+     * {{@link #getKeyguardFadingAwayDuration()}} which may only span half of the duration, unless
+     * we're bypassing
+     */
+    default long getShortenedFadingAwayDuration() {
+        if (isBypassFadingAnimation()) {
+            return getKeyguardFadingAwayDuration();
+        } else {
+            return getKeyguardFadingAwayDuration() / 2;
+        }
+    }
 
     default boolean isDeviceInteractive() {
         return false;
@@ -39,7 +51,21 @@ public interface KeyguardMonitor extends CallbackController<Callback> {
     default void notifyKeyguardGoingAway(boolean b) {
     }
 
-    default void notifyKeyguardFadingAway(long delay, long fadeoutDuration) {
+    /**
+     * @return {@code true} if the current fading away animation is the fast bypass fading.
+     */
+    default boolean isBypassFadingAnimation() {
+        return false;
+    }
+
+    /**
+     * Notifies that the Keyguard is fading away with the specified timings.
+     * @param delay the precalculated animation delay in milliseconds
+     * @param fadeoutDuration the duration of the exit animation, in milliseconds
+     * @param isBypassFading is this a fading away animation while bypassing
+     */
+    default void notifyKeyguardFadingAway(long delay, long fadeoutDuration,
+            boolean isBypassFading) {
     }
 
     default void notifyKeyguardDoneFading() {
@@ -49,6 +75,7 @@ public interface KeyguardMonitor extends CallbackController<Callback> {
     }
 
     interface Callback {
-        void onKeyguardShowingChanged();
+        default void onKeyguardShowingChanged() {}
+        default void onKeyguardFadingAwayChanged() {}
     }
 }

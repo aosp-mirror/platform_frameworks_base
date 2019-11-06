@@ -151,4 +151,7 @@
       <item quantity="one">SIM දැන් අබල කර ඇත. දිගටම කරගෙන යාමට PUK කේතය ඇතුළු කරන්න. SIM ස්ථිරවම භාවිත කළ නොහැකි බවට පත් වීමට පෙර ඔබ සතුව උත්සාහයන් <xliff:g id="_NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත. විස්තර සඳහා වාහක සම්බන්ධ කර ගන්න.</item>
       <item quantity="other">SIM දැන් අබල කර ඇත. දිගටම කරගෙන යාමට PUK කේතය ඇතුළු කරන්න. SIM ස්ථිරවම භාවිත කළ නොහැකි බවට පත් වීමට පෙර ඔබ සතුව උත්සාහයන් <xliff:g id="_NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත. විස්තර සඳහා වාහක සම්බන්ධ කර ගන්න.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"පෙරනිමි"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"බුබුළ"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"ප්‍රතිසමය"</string>
 </resources>

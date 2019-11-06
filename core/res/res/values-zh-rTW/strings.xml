@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"語音留言"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM 卡狀態"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"高優先順序 SIM 卡狀態"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"通訊對象要求使用 TTY 的 FULL 模式"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"通訊對象要求使用 TTY 的 HCO 模式"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"通訊對象要求使用 TTY 的 VCO 模式"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指紋圖示"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"管理臉孔驗證硬體"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"管理人臉解鎖硬體"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"允許應用程式呼叫方法來新增及移除可用的臉孔範本。"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"使用臉孔驗證硬體"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"允許應用程式使用臉孔驗證硬體進行驗證"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"臉孔驗證"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"使用人臉解鎖硬體"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"允許應用程式使用人臉解鎖硬體進行驗證"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"人臉解鎖"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"請重新註冊你的臉孔"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"為提升辨識精準度，請重新註冊你的臉孔"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"無法擷取精準臉孔資料，請再試一次。"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"請將手機向左移動。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"請將手機向右移動。"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"請儘可能直視裝置正面。"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"無法偵測你的臉孔，請直視手機。"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"將你的臉孔正對手機。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"鏡頭過度晃動，請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"請重新註冊你的臉孔。"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"已無法辨識臉孔，請再試一次。"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"請將你的頭部稍微向上或向下傾斜。"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"請將你的頭部稍微向左或向右旋轉。"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"請移除任何會遮住臉孔的物體。"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"請清除螢幕頂端感應器的髒汙。"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"請清理螢幕頂端，包括黑色橫列"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"相關硬體無法使用，因此無法驗證臉孔。"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"請重新驗證臉孔。"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"請重新進行人臉解鎖。"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"無法儲存新的臉孔資料，請先刪除舊的資料。"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"臉孔處理作業已取消"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"使用者已取消臉孔驗證作業"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"臉孔處理作業已取消。"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"使用者已取消人臉解鎖作業。"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"嘗試次數過多，請稍後再試。"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"嘗試次數過多，因此系統已停用臉孔驗證。"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"嘗試次數過多，因此系統已停用人臉解鎖功能。"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"無法驗證臉孔，請再試一次。"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"你尚未設定臉孔驗證"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"這個裝置不支援臉孔驗證"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"你尚未設定人臉解鎖功能。"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"這個裝置不支援人臉解鎖功能。"</string>
     <string name="face_name_template" msgid="7004562145809595384">"臉孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -624,7 +625,7 @@
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改網路使用量計算方式"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"允許應用程式修改應用程式網路使用量的計算方式 (不建議一般應用程式使用)。"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"存取通知"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"允許應用程式擷取、檢查及清除通知 (包括由其他應用程式發佈的通知)。"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"允許應用程式擷取、檢查及清除通知 (包括由其他應用程式發布的通知)。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"繫結至通知接聽器服務"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"允許應用程式繫結至通知接聽器服務的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"繫結至條件提供者服務"</string>
@@ -1566,13 +1567,13 @@
     <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"「<xliff:g id="APP">%s</xliff:g>」的數據用量比平常多"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"安全性憑證"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"憑證有效。"</string>
-    <string name="issued_to" msgid="454239480274921032">"發佈至："</string>
+    <string name="issued_to" msgid="454239480274921032">"發布至："</string>
     <string name="common_name" msgid="2233209299434172646">"常用名稱："</string>
     <string name="org_name" msgid="6973561190762085236">"機構："</string>
     <string name="org_unit" msgid="7265981890422070383">"機構單位："</string>
-    <string name="issued_by" msgid="2647584988057481566">"發佈者："</string>
+    <string name="issued_by" msgid="2647584988057481566">"發布者："</string>
     <string name="validity_period" msgid="8818886137545983110">"有效期間："</string>
-    <string name="issued_on" msgid="5895017404361397232">"發佈日期："</string>
+    <string name="issued_on" msgid="5895017404361397232">"發布日期："</string>
     <string name="expires_on" msgid="3676242949915959821">"到期日："</string>
     <string name="serial_number" msgid="758814067660862493">"序號："</string>
     <string name="fingerprints" msgid="4516019619850763049">"指紋"</string>

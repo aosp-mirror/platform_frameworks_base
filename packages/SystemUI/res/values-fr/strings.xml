@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Recherche de votre visage…"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Visage authentifié"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmé"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Appuyez sur \"Confirmer\" pour terminer"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Appuyez sur le lecteur d\'empreinte digitale"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icône d\'empreinte digitale"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Recherche de votre visage…"</string>
@@ -375,7 +376,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Jusqu\'à l\'aube"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"À partir de <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Jusqu\'à <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Thème foncé"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"Thème sombre"</string>
     <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"Thème foncé\nÉconomiseur de batterie"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"La technologie NFC est désactivée"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifications moins urgentes ci-dessous"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Appuyer à nouveau pour ouvrir"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Faire glisser pour déverrouiller"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Balayer vers le haut pour ouvrir"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Cet appareil est géré par votre entreprise"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Cet appareil est géré par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Balayer pour téléphoner"</string>

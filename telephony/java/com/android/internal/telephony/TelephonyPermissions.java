@@ -600,25 +600,20 @@ public final class TelephonyPermissions {
         }
     }
 
-    /**
-     * Returns whether the provided uid has carrier privileges for any active subscription ID.
-     */
-    private static boolean checkCarrierPrivilegeForAnySubId(Context context,
-            Supplier<ITelephony> telephonySupplier, int uid) {
+    /** Returns whether the provided uid has carrier privileges for any active subscription ID. */
+    private static boolean checkCarrierPrivilegeForAnySubId(
+            Context context, Supplier<ITelephony> telephonySupplier, int uid) {
         SubscriptionManager sm = (SubscriptionManager) context.getSystemService(
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE);
-        int[] activeSubIds = sm.getActiveSubscriptionIdList();
-        if (activeSubIds != null) {
-            for (int activeSubId : activeSubIds) {
-                if (getCarrierPrivilegeStatus(telephonySupplier, activeSubId, uid)
-                        == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                    return true;
-                }
+        int[] activeSubIds = sm.getActiveSubscriptionIdList(/* visibleOnly */ false);
+        for (int activeSubId : activeSubIds) {
+            if (getCarrierPrivilegeStatus(telephonySupplier, activeSubId, uid)
+                    == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                return true;
             }
         }
         return false;
     }
-
 
     private static int getCarrierPrivilegeStatus(
             Supplier<ITelephony> telephonySupplier, int subId, int uid) {

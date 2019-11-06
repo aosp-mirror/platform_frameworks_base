@@ -55,11 +55,11 @@
     <string name="label_view" msgid="6304565553218192990">"Xem"</string>
     <string name="always_use_device" msgid="4015357883336738417">"Luôn mở <xliff:g id="APPLICATION">%1$s</xliff:g> khi kết nối <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Luôn mở <xliff:g id="APPLICATION">%1$s</xliff:g> khi kết nối <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"Cho phép gỡ lỗi USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Cho phép gỡ lỗi qua USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Tệp tham chiếu khóa RSA của máy tính là:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Luôn cho phép từ máy tính này"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"Cho phép"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Tính năng gỡ lỗi USB không được phép"</string>
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Không cho phép chế độ gỡ lỗi qua USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Người dùng hiện đã đăng nhập vào thiết bị này không thể bật tính năng gỡ lỗi USB. Để sử dụng tính năng này, hãy chuyển sang người dùng chính."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"Đã tắt cổng USB"</string>
     <string name="usb_contaminant_message" msgid="7379089091591609111">"Để bảo vệ thiết bị của bạn khỏi chất lỏng hay mảnh vỡ, cổng USB sẽ tắt và không phát hiện được bất kỳ phụ kiện nào.\n\nBạn sẽ nhận được thông báo khi có thể sử dụng lại cổng USB."</string>
@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Đang tìm khuôn mặt của bạn"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Đã xác thực khuôn mặt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Ðã xác nhận"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Nhấn vào Xác nhận để hoàn tất"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Chạm vào cảm biến vân tay"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Biểu tượng vân tay"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Đang tìm kiếm bạn…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Thông báo ít khẩn cấp hơn bên dưới"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Nhấn lại để mở"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Vuốt lên để mở khóa"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Vuốt lên để mở"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Thiết bị này do tổ chức của bạn quản lý"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Thiết bị này được <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> quản lý"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Vuốt từ biểu tượng để mở điện thoại"</string>
@@ -740,7 +741,7 @@
     <string name="battery" msgid="7498329822413202973">"Pin"</string>
     <string name="clock" msgid="7416090374234785905">"Đồng hồ"</string>
     <string name="headset" msgid="4534219457597457353">"Tai nghe"</string>
-    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Mở cài đặt"</string>
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Mở phần cài đặt"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Đã kết nối tai nghe"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Đã kết nối tai nghe"</string>
     <string name="data_saver" msgid="5037565123367048522">"Trình tiết kiệm dữ liệu"</string>
@@ -816,7 +817,7 @@
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Ứng dụng không hỗ trợ chia đôi màn hình."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"Ứng dụng có thể không hoạt động trên màn hình phụ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"Ứng dụng không hỗ trợ khởi chạy trên màn hình phụ."</string>
-    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Mở cài đặt."</string>
+    <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Mở phần cài đặt."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Mở cài đặt nhanh."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Đóng cài đặt nhanh."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Đã đặt báo thức."</string>

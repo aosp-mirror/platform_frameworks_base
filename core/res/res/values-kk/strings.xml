@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Дауыстық пошта хабарлары"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi қоңыраулары"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM күйі"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"SIM картасы туралы маңызды хабарландырулар"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Пир TTY режимі ТОЛЫҚ сұрады"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Пир TTY режимінің HCO сұрады"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Пир TTY режимінің VCO сұрады"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Саусақ ізі белгішесі"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"бетті тану жабдығын басқару"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"Face Unlock жабдығын басқару"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Қолданбаға пайдаланатын бет үлгілерін енгізу және жою әдістерін шақыруға мүмкіндік береді."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"бетті тану жабдығын пайдалану"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Қолданбаға бетті тану жабдығын қолдануға рұқсат етеді"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Бетті тану"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"Face Unlock жабдығын пайдалану"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Аутентификациялау үшін қолданбаға Face Unlock жабдығын пайдалануға рұқсат береді."</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Бетті қайта тіркеу"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Құрылғы жүзіңізді жақсырақ тануы үшін, бетіңізді қайта тіркеңіз."</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Бет деректері дұрыс алынбады. Әрекетті қайталаңыз."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Телефонды солға жылжытыңыз."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Телефонды оңға жылжытыңыз."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Құрылғының камерасына тура қараңыз."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Бетіңіз көрінбейді. Телефонға қараңыз."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Бетіңізді телефонға тура қаратыңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Қозғалыс тым көп. Телефонды қозғалтпаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Қайта тіркеліңіз."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Енді бет анықтау мүмкін емес. Әрекетті қайталаңыз."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Басыңызды түзурек ұстаңыз."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Басыңызды кішкене бұрыңыз."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Бетіңізді жауып тұрған нәрсені алып тастаңыз."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Экранның жоғарғы жиегіндегі датчикті тазалаңыз."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Экранның жоғарғы жағын, сонымен қатар қара жолақты өшіріңіз."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Құрылғы бетіңізді танымады. Қайталап көріңіз."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Face Unlock функциясын қайта қолданып көріңіз."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Жаңа бетті сақтау мүмкін емес. Алдымен ескісін жойыңыз."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Бетті танудан бас тартылды."</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Пайдаланушы бетті тану әрекетінен бас тартты."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Бетті танудан бас тартылды."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Пайдаланушы Face Unlock функциясынан бас тартты."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Тым көп әрекет жасалды. Кейінірек қайталаңыз."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Тым көп әрекет жасалды. Бетті тану функциясы өшірілді."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Тым көп әрекет жасалды. Face Unlock функциясы өшірілді."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Бетті тану мүмкін емес. Әрекетті қайталаңыз."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Бетті тану функциясы реттелмеген."</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Бетті тану функциясын бұл құрылғы қолдамайды."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Face Unlock реттелмеді."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Бұл құрылғыда Face Unlock функциясы істемейді."</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> беті"</string>
   <string-array name="face_error_vendor">
   </string-array>

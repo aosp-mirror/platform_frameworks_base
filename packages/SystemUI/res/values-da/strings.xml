@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Søger efter dit ansigt"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Ansigtet er godkendt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Bekræftet"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Tryk på Bekræft for at udføre"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Sæt fingeren på fingeraftrykslæseren"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikon for fingeraftryk"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Forsøger at finde dig…"</string>
@@ -254,8 +255,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Lommelygten er tændt."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Lommelygten er slukket."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Lommelygten er tændt."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Invertering af farver er slået fra."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Invertering af farver er slået til."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Ombytning af farver er slået fra."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Ombytning af farver er slået til."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobilhotspot er slået fra."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilhotspot er slået til."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Casting af din skærm er stoppet."</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre presserende notifikationer nedenfor"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Tryk igen for at åbne"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Stryg opad for at låse op"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Stryg opad for at åbne"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Denne enhed administreres af din organisation"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Denne enhed administreres af <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Stryg fra telefonikonet"</string>

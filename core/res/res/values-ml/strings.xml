@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"വോയ്‌സ്‌മെയിൽ സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"വൈഫൈ കോളിംഗ്"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"സിം നില"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"ഉയർന്ന മുൻഗണനയുള്ള സിം നില"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഫുൾ\'"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"വിരലടയാള ഐക്കൺ"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"മുഖം തിരിച്ചറിയൽ ഹാർഡ്‌വെയർ മാനേജ് ചെയ്യുക"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ മാനേജ് ചെയ്യുക"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ഉപയോഗിക്കാനായി, മുഖത്തിന്റെ ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"മുഖം തിരിച്ചറിയൽ ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"പരിശോധിച്ചുറപ്പിക്കലിനായി മുഖം തിരിച്ചറിയൽ ഹാർഡ്‌വെയർ  ഉപയോഗിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"മുഖം പരിശോധിച്ചുറപ്പിക്കൽ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"പരിശോധിച്ചുറപ്പിക്കാൻ മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ അനുവദിക്കുന്നു"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക്"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യൂ"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"തിരിച്ചറിയൽ മെച്ചപ്പെടുത്താൻ, നിങ്ങളുടെ മുഖം ദയവായി വീണ്ടും എൻറോൾ ചെയ്യൂ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"കൃത്യ മുഖ ഡാറ്റ എടുക്കാനായില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ഫോൺ ഇടത്തോട്ട് നീക്കുക."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ഫോൺ വലത്തോട്ട് നീക്കുക."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"നിങ്ങളുടെ ഉപകരണത്തിന് നേരെ കൂടുതൽ നന്നായി നോക്കുക."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"നിങ്ങളുടെ മുഖം കാണാനാവുന്നില്ല. ഫോണിലേക്ക് നോക്കൂ."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"നിങ്ങളുടെ മുഖം ക്യാമറയ്‌ക്ക് നേരെയാക്കുക."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ഇനി മുഖം തിരിച്ചറിയാനാവില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"നിങ്ങളുടെ തല ഇത്ര തിരിക്കേണ്ട."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"നിങ്ങളുടെ തല ഇത്ര തിരിക്കേണ്ട."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"നിങ്ങളുടെ മുഖം മറയ്‌ക്കുന്നത് എല്ലാം നീക്കം ചെയ്യൂ."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"സ്‌ക്രീനിന്റെ മുകളിലെ സെൻസർ വൃത്തിയാക്കുക."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"കറുപ്പ് ബാർ ഉൾപ്പെടെ നിങ്ങളുടെ സ്ക്രീനിന്റെ മുകൾഭാഗം വൃത്തിയാക്കുക"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"മുഖം പരിശോധിച്ചുറപ്പിക്കാൻ വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് വീണ്ടും പരീക്ഷിക്കൂ"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"പുതിയ മുഖ ഡാറ്റ സംഭരിക്കാനാകില്ല. ആദ്യം പഴയത് ഇല്ലാതാക്കുക."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"മുഖം തിരിച്ചറിയൽ പ്രവർത്തനം റദ്ദാക്കി"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"മുഖം പരിശോധിച്ചുറപ്പിക്കൽ ഉപയോക്താവ് റദ്ദാക്കി"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"മുഖത്തിന്റെ പ്രവർത്തനം റദ്ദാക്കി."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ഉപയോക്താവ് മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് റദ്ദാക്കി"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"വളരെയധികം ശ്രമങ്ങൾ. മുഖം തിരിച്ചറിയൽ പ്രവർത്തനരഹിതമാക്കി."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"വളരെയധികം ശ്രമങ്ങൾ. മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"നിങ്ങൾ മുഖം പരിശോധിച്ചുറപ്പിക്കൽ സജ്ജീകരിച്ചില്ല"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"ഈ ഉപകരണം മുഖം പരിശോധിച്ചുറപ്പിക്കൽ പിന്തുണയ്ക്കുന്നില്ല"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് സജ്ജീകരിച്ചില്ല."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"മുഖം തിരിച്ചറിഞ്ഞുള്ള അൺലോക്ക് ഈ ഉപകരണം പിന്തുണയ്ക്കുന്നില്ല."</string>
     <string name="face_name_template" msgid="7004562145809595384">"മുഖം <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

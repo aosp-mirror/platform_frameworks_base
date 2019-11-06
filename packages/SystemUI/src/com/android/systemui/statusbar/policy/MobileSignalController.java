@@ -29,6 +29,7 @@ import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -96,9 +97,10 @@ public class MobileSignalController extends SignalController<
         mDefaults = defaults;
         mSubscriptionInfo = info;
         mPhoneStateListener = new MobilePhoneStateListener(receiverLooper);
-        mNetworkNameSeparator = getStringIfExists(R.string.status_bar_network_name_separator);
+        mNetworkNameSeparator = getStringIfExists(R.string.status_bar_network_name_separator)
+                .toString();
         mNetworkNameDefault = getStringIfExists(
-                com.android.internal.R.string.lockscreen_carrier_default);
+                com.android.internal.R.string.lockscreen_carrier_default).toString();
 
         mapIconSets();
 
@@ -123,10 +125,6 @@ public class MobileSignalController extends SignalController<
         updateInflateSignalStrength();
         mapIconSets();
         updateTelephony();
-    }
-
-    public int getDataContentDescription() {
-        return getIcons().mDataContentDescription;
     }
 
     public void setAirplaneMode(boolean airplaneMode) {
@@ -163,7 +161,8 @@ public class MobileSignalController extends SignalController<
                         | PhoneStateListener.LISTEN_CALL_STATE
                         | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
                         | PhoneStateListener.LISTEN_DATA_ACTIVITY
-                        | PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE);
+                        | PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE
+                        | PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
         mContext.getContentResolver().registerContentObserver(Global.getUriFor(Global.MOBILE_DATA),
                 true, mObserver);
         mContext.getContentResolver().registerContentObserver(Global.getUriFor(
@@ -215,10 +214,14 @@ public class MobileSignalController extends SignalController<
 
         MobileIconGroup hGroup = TelephonyIcons.THREE_G;
         MobileIconGroup hPlusGroup = TelephonyIcons.THREE_G;
-        if (mConfig.hspaDataDistinguishable) {
+        if (mConfig.show4gFor3g) {
+            hGroup = TelephonyIcons.FOUR_G;
+            hPlusGroup = TelephonyIcons.FOUR_G;
+        } else if (mConfig.hspaDataDistinguishable) {
             hGroup = TelephonyIcons.H;
             hPlusGroup = TelephonyIcons.H_PLUS;
         }
+
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSDPA, hGroup);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSUPA, hGroup);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSPA, hGroup);
@@ -291,8 +294,14 @@ public class MobileSignalController extends SignalController<
     public void notifyListeners(SignalCallback callback) {
         MobileIconGroup icons = getIcons();
 
-        String contentDescription = getStringIfExists(getContentDescription());
-        String dataContentDescription = getStringIfExists(icons.mDataContentDescription);
+        String contentDescription = getStringIfExists(getContentDescription()).toString();
+        CharSequence dataContentDescriptionHtml = getStringIfExists(icons.mDataContentDescription);
+
+        //TODO: Hacky
+        // The data content description can sometimes be shown in a text view and might come to us
+        // as HTML. Strip any styling here so that listeners don't have to care
+        CharSequence dataContentDescription = Html.fromHtml(
+                dataContentDescriptionHtml.toString(), 0).toString();
         if (mCurrentState.inetCondition == 0) {
             dataContentDescription = mContext.getString(R.string.data_connection_no_internet);
         }
@@ -307,7 +316,7 @@ public class MobileSignalController extends SignalController<
 
         int qsTypeIcon = 0;
         IconState qsIcon = null;
-        String description = null;
+        CharSequence description = null;
         // Only send data sim callbacks to QS.
         if (mCurrentState.dataSim) {
             qsTypeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.mQsDataType : 0;
@@ -324,8 +333,9 @@ public class MobileSignalController extends SignalController<
         showDataIcon &= mCurrentState.isDefault || dataDisabled;
         int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.mDataType : 0;
         callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
-                activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
-                mSubscriptionInfo.getSubscriptionId(), mCurrentState.roaming);
+                activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
+                description, icons.mIsWide, mSubscriptionInfo.getSubscriptionId(),
+                mCurrentState.roaming);
     }
 
     @Override
@@ -376,9 +386,9 @@ public class MobileSignalController extends SignalController<
     }
 
     private void updateDataSim() {
-        int defaultDataSub = mDefaults.getDefaultDataSubId();
-        if (SubscriptionManager.isValidSubscriptionId(defaultDataSub)) {
-            mCurrentState.dataSim = defaultDataSub == mSubscriptionInfo.getSubscriptionId();
+        int activeDataSubId = mDefaults.getActiveDataSubId();
+        if (SubscriptionManager.isValidSubscriptionId(activeDataSubId)) {
+            mCurrentState.dataSim = activeDataSubId == mSubscriptionInfo.getSubscriptionId();
         } else {
             // There doesn't seem to be a data sim selected, however if
             // there isn't a MobileSignalController with dataSim set, then
@@ -634,6 +644,13 @@ public class MobileSignalController extends SignalController<
             }
             mCurrentState.carrierNetworkChangeMode = active;
 
+            updateTelephony();
+        }
+
+        @Override
+        public void onActiveDataSubscriptionIdChanged(int subId) {
+            if (DEBUG) Log.d(mTag, "onActiveDataSubscriptionIdChanged: subId=" + subId);
+            updateDataSim();
             updateTelephony();
         }
     };

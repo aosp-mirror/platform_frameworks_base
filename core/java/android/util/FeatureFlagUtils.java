@@ -57,6 +57,7 @@ public class FeatureFlagUtils {
         //DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put(PIXEL_WALLPAPER_CATEGORY_SWITCH, "false");
         DEFAULT_FLAGS.put("settings_wifi_details_datausage_header", "false");
+        DEFAULT_FLAGS.put("settings_skip_direction_mutable", "true");
     }
 
     /**

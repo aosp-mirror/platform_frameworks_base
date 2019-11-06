@@ -241,9 +241,9 @@ public final class ClockManager {
     }
 
     private void reload() {
-        mPreviewClocks.reload();
+        mPreviewClocks.reloadCurrentClock();
         mListeners.forEach((listener, clocks) -> {
-            clocks.reload();
+            clocks.reloadCurrentClock();
             ClockPlugin clock = clocks.getCurrentClock();
             if (clock instanceof DefaultClockController) {
                 listener.onClockChanged(null);
@@ -288,20 +288,13 @@ public final class ClockManager {
         @Override
         public void onPluginConnected(ClockPlugin plugin, Context pluginContext) {
             addClockPlugin(plugin);
-            reload();
-            if (plugin == mCurrentClock) {
-                ClockManager.this.reload();
-            }
+            reloadIfNeeded(plugin);
         }
 
         @Override
         public void onPluginDisconnected(ClockPlugin plugin) {
-            boolean isCurrentClock = plugin == mCurrentClock;
             removeClockPlugin(plugin);
-            reload();
-            if (isCurrentClock) {
-                ClockManager.this.reload();
-            }
+            reloadIfNeeded(plugin);
         }
 
         /**
@@ -348,10 +341,19 @@ public final class ClockManager {
             }
         }
 
+        private void reloadIfNeeded(ClockPlugin plugin) {
+            final boolean wasCurrentClock = plugin == mCurrentClock;
+            reloadCurrentClock();
+            final boolean isCurrentClock = plugin == mCurrentClock;
+            if (wasCurrentClock || isCurrentClock) {
+                ClockManager.this.reload();
+            }
+        }
+
         /**
          * Update the current clock.
          */
-        void reload() {
+        void reloadCurrentClock() {
             mCurrentClock = getClockPlugin();
         }
 

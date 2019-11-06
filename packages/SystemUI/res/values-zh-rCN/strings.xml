@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"正在查找您的面孔"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"面孔身份验证成功"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"已确认"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"点按“确认”即可完成"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"请触摸指纹传感器"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指纹图标"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"正在查找您的面孔…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"不太紧急的通知会显示在下方"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次点按即可打开"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑动即可解锁"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"向上滑动即可打开"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"此设备由您所属单位管理"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"此设备是由<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>托管"</string>
     <string name="phone_hint" msgid="4872890986869209950">"滑动图标即可拨打电话"</string>

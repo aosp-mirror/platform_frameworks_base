@@ -151,4 +151,7 @@
       <item quantity="other">SIM is nou gedeaktiveer. Voer PUK-kode in om voort te gaan. Jy het <xliff:g id="_NUMBER_1">%d</xliff:g> pogings oor voordat die SIM permanent onbruikbaar word. Kontak die diensverskaffer vir besonderhede.</item>
       <item quantity="one">SIM is nou gedeaktiveer. Voer PUK-kode in om voort te gaan. Jy het <xliff:g id="_NUMBER_0">%d</xliff:g> poging oor voordat die SIM permanent onbruikbaar word. Kontak die diensverskaffer vir besonderhede.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Verstek"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Borrel"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analoog"</string>
 </resources>

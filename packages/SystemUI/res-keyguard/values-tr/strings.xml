@@ -151,4 +151,7 @@
       <item quantity="other">SIM artık devre dışı. Devam etmek için PUK kodunu girin. SIM kalıcı olarak kullanım dışı kalmadan önce <xliff:g id="_NUMBER_1">%d</xliff:g> deneme hakkınız kaldı. Ayrıntılı bilgi için operatörünüzle iletişim kurun.</item>
       <item quantity="one">SIM artık devre dışı. Devam etmek için PUK kodunu girin. SIM kalıcı olarak kullanım dışı kalmadan önce <xliff:g id="_NUMBER_0">%d</xliff:g> deneme hakkınız kaldı. Ayrıntılı bilgi için operatörünüzle iletişim kurun.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Varsayılan"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Baloncuk"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analog"</string>
 </resources>

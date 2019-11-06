@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Tiek meklēta jūsu seja"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Seja autentificēta"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Apstiprināts"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Lai pabeigtu, pieskarieties Apstiprināt"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Pieskarieties pirksta nospieduma sensoram"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Pirksta nospieduma ikona"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Notiek jūsu sejas meklēšana…"</string>
@@ -401,7 +402,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mazāk steidzami paziņojumi tiek rādīti tālāk"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Pieskarieties vēlreiz, lai atvērtu"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Velciet uz augšu, lai atbloķētu"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Velciet augšup, lai atvērtu"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Šo ierīci pārvalda jūsu organizācija"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Šo ierīci pārvalda <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Lai lietotu tālruni, velciet no ikonas"</string>

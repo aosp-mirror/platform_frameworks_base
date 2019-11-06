@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Buscando tu rostro"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Se autenticó el rostro"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmado"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Presiona Confirmar para completarla"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor de huellas digitales"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ícono de huella digital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Autenticando tu rostro…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificaciones menos urgentes abajo"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Presionar de nuevo para abrir"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Desliza el dedo hacia arriba para desbloquear el teléfono"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Desliza el dedo hacia arriba para abrir"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Tu organización administra este dispositivo"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> administra este dispositivo"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Desliza el dedo para desbloquear el teléfono."</string>
@@ -552,7 +553,7 @@
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ocultar"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Llamada"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sistema"</string>
-    <string name="stream_ring" msgid="8213049469184048338">"Hacer sonar"</string>
+    <string name="stream_ring" msgid="8213049469184048338">"Timbre"</string>
     <string name="stream_music" msgid="9086982948697544342">"Multimedia"</string>
     <string name="stream_alarm" msgid="5209444229227197703">"Alarma"</string>
     <string name="stream_notification" msgid="2563720670905665031">"Notificación"</string>
@@ -560,7 +561,7 @@
     <string name="stream_dtmf" msgid="2447177903892477915">"Multifrecuencia de tono doble"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Accesibilidad"</string>
     <string name="ring_toggle_title" msgid="3281244519428819576">"Llamadas"</string>
-    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Hacer sonar"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Timbre"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibrar"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Silenciar"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Teléfono en vibración"</string>

@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"আপনার ফেস খোঁজা হচ্ছে"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ফেস যাচাই করা হয়েছে"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"কনফার্ম করা হয়েছে"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"সম্পূর্ণ করতে \'কনফার্ম করুন\' বোতামে ট্যাপ করুন"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"আঙ্গুলের ছাপের সেন্সর স্পর্শ করুন"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"আঙ্গুলের ছাপের আইকন"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"আপনার জন্য খোঁজা হচ্ছে…"</string>
@@ -231,9 +232,9 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"বিমান মোড চালু হয়েছে।"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"সম্পূর্ণ নীরব"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"শুধুমাত্র অ্যালার্ম"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="5555155552520665891">"বিরক্ত করবেন না।"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"\'বিরক্ত করবেন না\' বন্ধ আছে।"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="6808220653747701059">"\'বিরক্ত করবেন না\' চালু করা হয়েছে।"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="5555155552520665891">"বিরক্ত করবে না।"</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="2757071272328547807">"\'বিরক্ত করবে না\' বন্ধ আছে।"</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="6808220653747701059">"\'বিরক্ত করবে না\' চালু করা হয়েছে।"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ব্লুটুথ"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ব্লুটুথ বন্ধ আছে।"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ব্লুটুথ চালু আছে।"</string>
@@ -298,7 +299,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"স্ক্রিন সেভার"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ইথারনেট"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"আরও বিকল্পের জন্য আইকনগুলি টাচ করে ধরে থাকুন"</string>
-    <string name="quick_settings_dnd_label" msgid="7112342227663678739">"বিরক্ত করবেন না"</string>
+    <string name="quick_settings_dnd_label" msgid="7112342227663678739">"বিরক্ত করবে না"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"শুধুমাত্র অগ্রাধিকার"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"শুধুমাত্র অ্যালার্মগুলি"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"একদম নিরব"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"নিচে অপেক্ষাকৃত কম জরুরী বিজ্ঞপ্তিগুলি"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"খোলার জন্য আবার আলতো চাপুন"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"আনলক করতে উপরের দিকে সোয়াইপ করুন"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"খোলার জন্য উপরে সোয়াইপ করুন"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"আপনার সংস্থা এই ডিভাইসটি পরিচালনা করছে"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"এই ডিভাইসটি <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> এর দ্বারা পরিচালিত"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ফোনের জন্য আইকন থেকে সোয়াইপ করুন"</string>
@@ -459,7 +460,7 @@
     <string name="manage_notifications_text" msgid="2386728145475108753">"পরিচালনা করুন"</string>
     <string name="notification_section_header_gentle" msgid="4372438504154095677">"নীরব বিজ্ঞপ্তি"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"সব নীরব বিজ্ঞপ্তি মুছুন"</string>
-    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'বিরক্ত করবেন না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
+    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'বিরক্ত করবে না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"এখন শুরু করুন"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"কোনো বিজ্ঞপ্তি নেই"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"প্রোফাইল পর্যবেক্ষণ করা হতে পারে"</string>
@@ -734,9 +735,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"ক্যালেন্ডার"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"ভলিউম নিয়ন্ত্রণ সহ দেখান"</string>
-    <string name="volume_and_do_not_disturb" msgid="1750270820297253561">"বিরক্ত করবেন না"</string>
+    <string name="volume_and_do_not_disturb" msgid="1750270820297253561">"বিরক্ত করবে না"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"ভলিউম বোতামের শর্টকাট"</string>
-    <string name="volume_up_silent" msgid="7545869833038212815">"ভলিউম বাড়িয়ে \'বিরক্ত করবেন না\' মোড থেকে বেরিয়ে আসুন"</string>
+    <string name="volume_up_silent" msgid="7545869833038212815">"ভলিউম বাড়িয়ে \'বিরক্ত করবে না\' মোড থেকে বেরিয়ে আসুন"</string>
     <string name="battery" msgid="7498329822413202973">"ব্যাটারি"</string>
     <string name="clock" msgid="7416090374234785905">"ঘড়ি"</string>
     <string name="headset" msgid="4534219457597457353">"হেডসেট"</string>
@@ -880,10 +881,10 @@
     <string name="mobile_carrier_text_format" msgid="3241721038678469804">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"ওয়াই ফাই বন্ধ আছে"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ব্লুটুথ বন্ধ আছে"</string>
-    <string name="dnd_is_off" msgid="6167780215212497572">"বিরক্ত করবেন না বিকল্পটি বন্ধ আছে"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"বিরক্ত করবেন না বিকল্পটি একটি স্বয়ংক্রিয় নিয়ম <xliff:g id="ID_1">%s</xliff:g> এর দ্বারা চালু করা হয়েছে।"</string>
-    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"বিরক্ত করবেন না বিকল্পটি একটি অ্যাপ <xliff:g id="ID_1">%s</xliff:g> এর দ্বারা চালু করা হয়েছে।"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"বিরক্ত করবেন না বিকল্পটি একটি স্বয়ংক্রিয় নিয়ম বা অ্যাপের দ্বারা চালু করা হয়েছে।"</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"বিরক্ত করবে না বিকল্পটি বন্ধ আছে"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"বিরক্ত করবে না বিকল্পটি একটি স্বয়ংক্রিয় নিয়ম <xliff:g id="ID_1">%s</xliff:g> এর দ্বারা চালু করা হয়েছে।"</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"বিরক্ত করবে না বিকল্পটি একটি অ্যাপ <xliff:g id="ID_1">%s</xliff:g> এর দ্বারা চালু করা হয়েছে।"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"বিরক্ত করবে না বিকল্পটি একটি স্বয়ংক্রিয় নিয়ম বা অ্যাপের দ্বারা চালু করা হয়েছে।"</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> পর্যন্ত"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"রাখুন"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"বদলে দিন"</string>

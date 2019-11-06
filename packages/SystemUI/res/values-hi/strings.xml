@@ -46,8 +46,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटूथ टीदर किया गया"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट का तरीका सेट करें"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"सामान्य कीबोर्ड"</string>
-    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> को <xliff:g id="USB_DEVICE">%2$s</xliff:g> के एक्सेस की अनुमति दें?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> को <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> के एक्सेस की अनुमति दें?"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> को <xliff:g id="USB_DEVICE">%2$s</xliff:g> के ऐक्सेस की अनुमति दें?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> को <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> के ऐक्सेस की अनुमति दें?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> के लिए <xliff:g id="APPLICATION">%1$s</xliff:g> खोलें?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> के लिए <xliff:g id="APPLICATION">%1$s</xliff:g> खोलें?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इस USB सहायक डिवाइस के साथ कोई भी इंस्टॉल ऐप्स  काम नहीं करता. इस सहायक डिवाइस के बारे में यहां ज़्यादा जानें: <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"आपके चेहरे की पुष्टि की जा रही है"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"चेहरे की पुष्टि हो गई"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"पुष्टि हो गई"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"\'पुष्टि करें\' पर टैप करके पूरा करें"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"फ़िंगरप्रिंट सेंसर को छुएं"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"फ़िंगरप्रिंट आइकॉन"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"आपको पहचान रहा है…"</string>
@@ -204,7 +205,7 @@
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"पूरी सूचनाएं देखें"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"सूचना साफ़ करें"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS सक्षम."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS प्राप्त करना."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS पाना."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"टेलीटाइपराइटर सक्षम."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"रिंगर कंपन (वाइब्रेशन)."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"रिंगर मौन."</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"कम अत्यावश्यक सूचनाएं नीचे दी गई हैं"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"खोलने के लिए फिर से टैप करें"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करने के लिए ऊपर स्वाइप करें"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"खोलने के लिए ऊपर स्वाइप करें"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"इस डिवाइस का प्रबंधन आपका संगठन करता है"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"इस डिवाइस के प्रबंधक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> हैं"</string>
     <string name="phone_hint" msgid="4872890986869209950">"फ़ोन के लिए आइकॉन से स्वाइप करें"</string>
@@ -451,8 +452,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"बैटरी सेवर चालू है"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"निष्‍पादन और पृष्ठभूमि डेटा को कम करता है"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"बैटरी सेवर बंद करें"</string>
-    <string name="media_projection_dialog_text" msgid="8585357687598538511">"रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपकी स्क्रीन पर दिखाई जा रही या आपके डिवाइस पर चलाई जा रही संवेदनशील जानकारी एक्सेस कर सकता है. इस जानकारी में ऑडियो, पासवर्ड, भुगतान की जानकारी, फ़ोटो और मैसेज शामिल हैं."</string>
-    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"रिकॉर्ड या कास्ट करते समय, यह सेवा देने वाला ऐप्लिकेशन आपकी स्क्रीन पर दिखाई जा रही या आपके डिवाइस पर चलाई जा रही संवेदनशील जानकारी एक्सेस कर सकता है. इस जानकारी में ऑडियो, पासवर्ड, भुगतान की जानकारी, फ़ोटो और मैसेज शामिल हैं."</string>
+    <string name="media_projection_dialog_text" msgid="8585357687598538511">"रिकॉर्ड या कास्ट करते समय, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपकी स्क्रीन पर दिखाई जा रही या आपके डिवाइस पर चलाई जा रही संवेदनशील जानकारी ऐक्सेस कर सकता है. इस जानकारी में ऑडियो, पासवर्ड, भुगतान की जानकारी, फ़ोटो और मैसेज शामिल हैं."</string>
+    <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"रिकॉर्ड या कास्ट करते समय, यह सेवा देने वाला ऐप्लिकेशन आपकी स्क्रीन पर दिखाई जा रही या आपके डिवाइस पर चलाई जा रही संवेदनशील जानकारी ऐक्सेस कर सकता है. इस जानकारी में ऑडियो, पासवर्ड, भुगतान की जानकारी, फ़ोटो और मैसेज शामिल हैं."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"कास्ट करने/रिकॉर्ड करने के दौरान संवेदनशील जानकारी का सबके सामने आ जाना"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी को हटाएं"</string>

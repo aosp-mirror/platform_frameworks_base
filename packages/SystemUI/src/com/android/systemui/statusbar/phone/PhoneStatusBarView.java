@@ -82,6 +82,7 @@ public class PhoneStatusBarView extends PanelBar {
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
      */
     private int mCutoutSideNudge = 0;
+    private boolean mHeadsUpVisible;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -277,7 +278,7 @@ public class PhoneStatusBarView extends PanelBar {
         super.panelExpansionChanged(frac, expanded);
         updateScrimFraction();
         if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
-            mBar.getNavigationBarView().onPanelExpandedChange();
+            mBar.getNavigationBarView().onStatusBarPanelStateChanged();
         }
     }
 
@@ -378,5 +379,15 @@ public class PhoneStatusBarView extends PanelBar {
             return new Pair<>(0, size.x - bounds.left);
         }
         return null;
+    }
+
+    public void setHeadsUpVisible(boolean headsUpVisible) {
+        mHeadsUpVisible = headsUpVisible;
+        updateVisibility();
+    }
+
+    @Override
+    protected boolean shouldPanelBeVisible() {
+        return mHeadsUpVisible || super.shouldPanelBeVisible();
     }
 }

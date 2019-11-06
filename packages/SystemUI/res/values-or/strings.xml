@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ଆପଣଙ୍କର ମୁହଁକୁ ପ୍ରମାଣ କରୁଛି"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ମୁହଁ ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ସୁନିଶ୍ଚିତ କରାଯାଇଛି"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ ସୁନିଶ୍ଚିତ କରନ୍ତୁରେ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ଟିପଚିହ୍ନ ସେନସର୍‌କୁ ଛୁଅଁନ୍ତୁ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଇକନ୍"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ଆପଣଙ୍କୁ ଚିହ୍ନଟ କରୁଛି…"</string>
@@ -249,9 +250,9 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"ପ୍ୟାନେଲ୍ ବନ୍ଦ କରନ୍ତୁ।"</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"ଅଧିକ ସମୟ।"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"କମ୍ ସମୟ।"</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ଫ୍ଲାଶ୍‌ଲାଇଟ୍ ଅଫ୍ ଅଛି।"</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ଫ୍ଲାସ୍‍ଲାଇଟ୍ ବନ୍ଦ ଅଛି।"</string>
     <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"ଟର୍ଚ୍ଚ ଲାଇଟ୍‍ ଅନୁପଲବ୍ଧ।"</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ଫ୍ଲାଶ୍‌ଲାଇଟ୍ ଅନ୍ ଅଛି।"</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ଫ୍ଲାସ୍‍ଲାଇଟ୍ ଚାଲୁଅଛି।"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ଟର୍ଚ୍ଚ ଲାଇଟ୍ ବନ୍ଦ ଅଛି।"</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ଟର୍ଚ୍ଚ ଲାଇଟ୍ ଅନ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"ରଙ୍ଗ ବିପରୀତିକରଣକୁ ବନ୍ଦ କରିଦିଆଗଲା।"</string>
@@ -361,7 +362,7 @@
       <item quantity="one">%d ଡିଭାଇସ୍</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ବିଜ୍ଞପ୍ତି"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ଫ୍ଲାଶ୍‍ଲାଇଟ"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ଫ୍ଲାସ୍‍ଲାଇଟ୍"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"ମୋବାଇଲ୍‌ ଡାଟା"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ଡାଟାର ବ୍ୟବହାର"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ଅବଶିଷ୍ଟ ଡାଟା"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ନିମ୍ନରେ କମ୍‍ ଜରୁରୀ ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ଖୋଲିବା ପାଇଁ ପୁଣି ଟାପ୍‍ କରନ୍ତୁ"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"ଅନଲକ୍‌ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରନ୍ତୁ"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"ଖୋଲିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ଏହି ଡିଭାଇସ୍‌ ଆପଣଙ୍କ ସଂସ୍ଥା ଦ୍ୱାରା ପରିଚାଳିତ।"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ଏହି ଡିଭାଇସ୍‌ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ଦ୍ୱାରା ପରିଚାଳିତ ହେଉଛି"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ଫୋନ୍‍ ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>

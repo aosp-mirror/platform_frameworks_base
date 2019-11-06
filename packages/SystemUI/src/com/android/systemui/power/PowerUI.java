@@ -64,6 +64,8 @@ public class PowerUI extends SystemUI {
     private static final int CHARGE_CYCLE_PERCENT_RESET = 45;
     private static final long SIX_HOURS_MILLIS = Duration.ofHours(6).toMillis();
     public static final int NO_ESTIMATE_AVAILABLE = -1;
+    private static final String BOOT_COUNT_KEY = "boot_count";
+    private static final String PREFS = "powerui_prefs";
 
     private final Handler mHandler = new Handler();
     @VisibleForTesting
@@ -118,7 +120,7 @@ public class PowerUI extends SystemUI {
 
         // Check to see if we need to let the user know that the phone previously shut down due
         // to the temperature being too high.
-        showThermalShutdownDialog();
+        showWarnOnThermalShutdown();
 
         // Register an observer to configure mEnableSkinTemperatureWarning and perform the
         // registration of skin thermal event listener upon Settings change.
@@ -542,10 +544,23 @@ public class PowerUI extends SystemUI {
         }
     }
 
-    private void showThermalShutdownDialog() {
-        if (mPowerManager.getLastShutdownReason()
-                == PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN) {
-            mWarnings.showThermalShutdownWarning();
+    private void showWarnOnThermalShutdown() {
+        int bootCount = -1;
+        int lastReboot = mContext.getSharedPreferences(PREFS, 0).getInt(BOOT_COUNT_KEY, -1);
+        try {
+            bootCount = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.BOOT_COUNT);
+        } catch (Settings.SettingNotFoundException e) {
+            Slog.e(TAG, "Failed to read system boot count from Settings.Global.BOOT_COUNT");
+        }
+        // Only show the thermal shutdown warning when there is a thermal reboot.
+        if (bootCount > lastReboot) {
+            mContext.getSharedPreferences(PREFS, 0).edit().putInt(BOOT_COUNT_KEY,
+                    bootCount).apply();
+            if (mPowerManager.getLastShutdownReason()
+                    == PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN) {
+                mWarnings.showThermalShutdownWarning();
+            }
         }
     }
 

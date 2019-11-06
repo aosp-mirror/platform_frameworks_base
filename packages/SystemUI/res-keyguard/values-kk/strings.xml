@@ -151,4 +151,7 @@
       <item quantity="other">SIM картасы өшірілді. Жалғастыру үшін PUK кодын енгізіңіз. <xliff:g id="_NUMBER_1">%d</xliff:g> мүмкіндік қалды, одан кейін SIM картасы біржола құлыпталады. Толығырақ мәліметті оператордан алыңыз.</item>
       <item quantity="one">SIM картасы өшірілді. Жалғастыру үшін PUK кодын енгізіңіз. <xliff:g id="_NUMBER_0">%d</xliff:g> мүмкіндік қалды, одан кейін SIM картасы біржола құлыпталады. Толығырақ мәліметті оператордан алыңыз.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Әдепкі"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Көпіршік"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Аналогтық"</string>
 </resources>

@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ボイスメール メッセージ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM のステータス"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"高優先度: SIM のステータス"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ピアから、TTY モードを FULL にするようリクエストされました"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ピアから、TTYモードをHCOにするようリクエストされました"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ピアから、TTYモードをVCOにするようリクエストされました"</string>
@@ -297,9 +298,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"運動データ"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"運動データにアクセス"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"運動データへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"身体活動"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"身体活動にアクセス"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"身体活動へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真と動画の撮影"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"写真と動画の撮影を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
@@ -428,8 +429,8 @@
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"このアプリは、いつでもマイクを使用して録音できます。"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIMへのコマンド送信"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIMにコマンドを送信することをアプリに許可します｡この許可は非常に危険です。"</string>
-    <string name="permlab_activityRecognition" msgid="3634590230567608356">"運動の認識"</string>
-    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"このアプリで運動が認識されるようにします。"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"身体活動の認識"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"このアプリで身体活動が認識されるようにします。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"バイブレーションの制御"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指紋アイコン"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"顔認証ハードウェアの管理"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"顔認証ハードウェアの管理"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"使用する顔テンプレートの追加や削除を行うメソッドの呼び出しをアプリに許可します。"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"顔認証ハードウェアの使用"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"顔認証ハードウェアを認証に使用することをアプリに許可します"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"顔認証"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"顔認証ハードウェアの使用"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"顔認証ハードウェアを認証に使用することをアプリに許可します"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"顔認証"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"顔の再登録"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"認識を改善するには、顔を再登録してください"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"顔を認識できませんでした。もう一度お試しください。"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"スマートフォンを左に動かしてください。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"スマートフォンを右に動かしてください。"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"もっとまっすぐデバイスに顔を向けてください。"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"顔を確認できません。スマートフォンを見てください。"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"顔をスマートフォンの真正面に向けてください。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"あまり動かさないでください。安定させてください。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"顔を登録し直してください。"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"顔を認識できなくなりました。もう一度お試しください。"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"顔の向きを少し戻してください。"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"顔の向きを少し戻してください。"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"顔を隠しているものをすべて外してください"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"画面の上端にあるセンサーの汚れを落としてください。"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"黒いバーを含め、画面の上部をきれいにしてください"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"顔を確認できません。ハードウェアを利用できません。"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"顔認証をもう一度お試しください。"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"顔認証をもう一度お試しください。"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"新しい顔データを保存できません。古いデータを削除してください。"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"顔の操作をキャンセルしました"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"顔の認証がユーザーによりキャンセルされました"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"顔の操作をキャンセルしました。"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"顔認証はユーザーによりキャンセルされました。"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"試行回数の上限です。後でもう一度お試しください。"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"入力回数が上限を超えました。顔認証が無効になりました。"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"試行回数が上限を超えたため、顔認証を無効にしました。"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"顔を確認できません。もう一度お試しください。"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"顔認証を設定していません"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"顔認証はこのデバイスではご利用いただけません"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"顔認証を設定していません。"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"このデバイスでは、顔認証はご利用いただけません。"</string>
     <string name="face_name_template" msgid="7004562145809595384">"顔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -817,7 +818,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"もう一度お試しください"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"もう一度お試しください"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"すべての機能とデータを利用するにはロック解除"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"フェイスアンロックの最大試行回数を超えました"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"顔認証の最大試行回数を超えました"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIMカードが挿入されていません"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"タブレット内にSIMカードがありません。"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"テレビにSIMカードが挿入されていません。"</string>
@@ -887,7 +888,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"ロック解除エリアを拡大します。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"スライドロックを解除します。"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"パターンロックを解除します。"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"フェイスアンロックを行います。"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"顔認証を行います。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PINロックを解除します。"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"SIM PIN のロックを解除します。"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"SIM PUK のロックを解除します。"</string>
@@ -1354,7 +1355,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"アナログのオーディオ アクセサリを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"タップして USB デバッグを無効にしてください"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"USB デバッグを無効にするにはここをタップしてください"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USBデバッグを無効にする場合に選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>

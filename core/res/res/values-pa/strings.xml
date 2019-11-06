@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ਵੌਇਸਮੇਲ ਸੁਨੇਹੇ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"ਸਿਮ ਅਵਸਥਾ"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"ਉੱਚ ਤਰਜੀਹੀ ਸਿਮ ਸਥਿਤੀ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ਪੀਅਰ ਨੇ TTY Mode FULL ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ਪੀਅਰ ਨੇ TTY Mode HCO ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ਪੀਅਰ ਨੇ TTY Mode VCO ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਪ੍ਰਤੀਕ"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਹਾਰਡਵੇਅਰ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"ਚਿਹਰਾ ਅਣਲਾਕ ਹਾਰਡਵੇਅਰ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ਐਪ ਨੂੰ ਵਰਤਣ ਲਈ ਚਿਹਰਾ ਟੈਮਪਲੇਟ ਸ਼ਾਮਲ ਕਰਨ ਜਾਂ ਮਿਟਾਉਣ ਦੀਆਂ ਵਿਧੀਆਂ ਦੀ ਬੇਨਤੀ ਕਰਨ ਦਿੰਦੀ ਹੈ।"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦੀ ਹੈ"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ਚਿਹਰਾ ਅਣਲਾਕ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚਿਹਰਾ ਅਣਲਾਕ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"ਚਿਹਰਾ ਅਣਲਾਕ"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ਆਪਣਾ ਚਿਹਰਾ ਮੁੜ-ਦਰਜ ਕਰੋ"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ਪਛਾਣ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੇ ਚਿਹਰੇ ਨੂੰ ਮੁੜ-ਦਰਜ ਕਰੋ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ਸਟੀਕ ਚਿਹਰਾ ਡਾਟਾ ਕੈਪਚਰ ਨਹੀਂ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ਫ਼ੋਨ ਨੂੰ ਖੱਬੇ ਪਾਸੇ ਲਿਜਾਓ।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ਫ਼ੋਨ ਨੂੰ ਸੱਜੇ ਪਾਸੇ ਲਿਜਾਓ।"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ਕਿਰਪਾ ਕਰਕੇ ਸਿੱਧਾ ਆਪਣੇ ਡੀਵਾਈਸ ਵੱਲ ਦੇਖੋ।"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"ਤੁਹਾਡਾ ਚਿਹਰਾ ਨਹੀਂ ਦਿਸ ਰਿਹਾ। ਫ਼ੋਨ ਵੱਲ ਦੇਖੋ।"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"ਆਪਣਾ ਚਿਹਰਾ ਫ਼ੋਨ ਦੇ ਬਿਲਕੁਲ ਸਾਹਮਣੇ ਰੱਖੋ।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਹਿਲਜੁਲ। ਫ਼ੋਨ ਨੂੰ ਸਥਿਰ ਰੱਖੋ।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਚਿਹਰਾ ਦੁਬਾਰਾ ਦਰਜ ਕਰੋ।"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ਹੁਣ ਚਿਹਰਾ ਪਛਾਣਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ਆਪਣਾ ਸਿਰ ਥੋੜਾ ਜਿਹਾ ਝੁਕਾਓ।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ਆਪਣਾ ਸਿਰ ਥੋੜਾ ਜਿਹਾ ਝੁਕਾਓ।"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"ਤੁਹਾਡਾ ਚਿਹਰਾ ਲੁਕਾਉਣ ਵਾਲੀ ਕੋਈ ਵੀ ਚੀਜ਼ ਹਟਾਓ।"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"ਸਕ੍ਰੀਨ ਦੇ ਸਿਖਰਲੇ ਕਿਨਾਰੇ ਦਾ ਸੈਂਸਰ ਸਾਫ਼ ਕਰੋ।"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"ਕਾਲੀ ਪੱਟੀ ਸਮੇਤ, ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਸਿਖਰ ਨੂੰ ਸਾਫ਼ ਕਰੋ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਹੋ ਸਕੀ। ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ।"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਦੁਬਾਰਾ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"ਚਿਹਰਾ ਅਣਲਾਕ ਦੁਬਾਰਾ ਵਰਤ ਕੇ ਦੇਖੋ।"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"ਨਵਾਂ ਚਿਹਰਾ ਡਾਟਾ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ। ਪਹਿਲਾਂ ਪੁਰਾਣਾ ਹਟਾਓ।"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"ਚਿਹਰਾ ਪਛਾਣਨ ਦੀ ਪ੍ਰਕਿਰਿਆ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"ਵਰਤੋਂਕਾਰ ਵੱਲੋਂ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਨੂੰ ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ਚਿਹਰਾ ਪਛਾਣਨ ਦੀ ਪ੍ਰਕਿਰਿਆ ਰੱਦ ਕੀਤੀ ਗਈ।"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ਵਰਤੋਂਕਾਰ ਨੇ ਚਿਹਰਾ ਅਣਲਾਕ ਰੱਦ ਕੀਤਾ।"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ਹੱਦੋਂ ਵੱਧ ਕੋਸ਼ਿਸ਼ਾਂ। ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"ਬਹੁਤ ਸਾਰੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ। ਚਿਹਰਾ ਅਣਲਾਕ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"ਚਿਹਰੇ ਦੀ ਪੁਸ਼ਟੀ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"ਤੁਸੀਂ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਹੈ"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਦੀ ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"ਤੁਸੀਂ ਚਿਹਰਾ ਅਣਲਾਕ ਸੈੱਟਅੱਪ ਨਹੀਂ ਕੀਤਾ ਹੈ।"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਚਿਹਰਾ ਅਣਲਾਕ ਦੀ ਸੁਵਿਧਾ ਨਹੀਂ ਹੈ।"</string>
     <string name="face_name_template" msgid="7004562145809595384">"ਚਿਹਰਾ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1343,7 +1344,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"ਕੋਈ ਅਨੁਮਤੀਆਂ ਲੁੜੀਂਦੀਆਂ ਨਹੀਂ"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ਇਸ ਨਾਲ ਤੁਹਾਨੂੰ ਖਰਚਾ ਪੈ ਸਕਦਾ ਹੈ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ਠੀਕ"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"USB ਰਾਹੀਂ ਇਸ ਡੀਵਾਈਸ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"ਇਹ ਡੀਵਾਈਸ USB ਰਾਹੀਂ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"ਕਨੈਕਟ ਕੀਤਾ ਡੀਵਾਈਸ USB ਰਾਹੀਂ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ਫ਼ਾਈਲ ਟ੍ਰਾਂਸਫ਼ਰ ਚਾਲੂ ਹੈ"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB ਰਾਹੀਂ PTP ਚਾਲੂ ਹੈ"</string>

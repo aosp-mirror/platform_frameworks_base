@@ -22,6 +22,7 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -48,10 +49,13 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
+import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -60,7 +64,10 @@ import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.util.AsyncSensorManager;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeDialogComponent;
@@ -127,10 +134,12 @@ public class SystemUIFactory {
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils,  ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry,
-            KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
+            KeyguardBouncer.BouncerExpansionCallback expansionCallback,
+            KeyguardBypassController bypassController) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
                 dismissCallbackRegistry, FalsingManagerFactory.getInstance(context),
-                expansionCallback, KeyguardUpdateMonitor.getInstance(context),
+                expansionCallback, UnlockMethodCache.getInstance(context),
+                KeyguardUpdateMonitor.getInstance(context), bypassController,
                 new Handler(Looper.getMainLooper()));
     }
 
@@ -138,14 +147,18 @@ public class SystemUIFactory {
             LockscreenWallpaper lockscreenWallpaper,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
-            AlarmManager alarmManager) {
+            AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
         return new ScrimController(scrimBehind, scrimInFront, scrimStateListener,
-                scrimVisibleListener, dozeParameters, alarmManager);
+                scrimVisibleListener, dozeParameters, alarmManager, keyguardMonitor);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
-            StatusBar statusBar, StatusBarStateController statusBarStateController) {
+            StatusBar statusBar,
+            NotificationWakeUpCoordinator wakeUpCoordinator,
+            KeyguardBypassController keyguardBypassController,
+            StatusBarStateController statusBarStateController) {
         return new NotificationIconAreaController(context, statusBar, statusBarStateController,
+                wakeUpCoordinator, keyguardBypassController,
                 Dependency.get(NotificationMediaManager.class));
     }
 
@@ -203,6 +216,18 @@ public class SystemUIFactory {
     @Nullable
     public String provideLeakReportEmail() {
         return null;
+    }
+
+    @Singleton
+    @Provides
+    @Nullable
+    public KeyguardLiftController provideKeyguardLiftController(Context context,
+            StatusBarStateController statusBarStateController,
+            AsyncSensorManager asyncSensorManager) {
+        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            return null;
+        }
+        return new KeyguardLiftController(context, statusBarStateController, asyncSensorManager);
     }
 
     @Singleton

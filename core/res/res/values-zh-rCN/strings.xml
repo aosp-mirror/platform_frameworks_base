@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"语音邮件"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"WLAN 通话"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM 卡状态"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"高优先顺序 SIM 卡状态"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"对方请求使用“TTY 完整”模式"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"对方请求使用“TTY HCO”模式"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"对方请求使用“TTY VCO”模式"</string>
@@ -297,9 +298,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麦克风"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"录制音频"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;录音吗？"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"健身运动"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"访问您的健身运动"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的健身运动吗？"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"身体活动"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"获取您的身体活动数据"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;获取您的身体活动数据吗？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相机"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"拍摄照片和录制视频"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;拍摄照片和录制视频吗？"</string>
@@ -428,8 +429,8 @@
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"此应用可随时使用麦克风进行录音。"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"向 SIM 卡发送命令"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"允许应用向SIM卡发送命令（此权限具有很高的危险性）。"</string>
-    <string name="permlab_activityRecognition" msgid="3634590230567608356">"识别健身运动"</string>
-    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"此应用可以识别您的健身运动。"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"识别身体活动"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"此应用可以识别您的身体活动。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍摄照片和视频"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"此应用可随时使用相机拍摄照片和录制视频。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制振动"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指纹图标"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"管理人脸身份验证硬件"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"管理人脸解锁硬件"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"允许该应用调用方法来添加和删除可用的人脸模板。"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"使用人脸身份验证硬件"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"允许该应用使用人脸身份验证硬件进行身份验证"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"面孔身份验证"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"使用人脸解锁硬件"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"允许该应用使用人脸解锁硬件进行身份验证"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"人脸解锁"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"重新注册您的面孔"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"要提升识别精确度，请重新注册您的面孔"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"无法捕获准确的人脸数据，请重试。"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"请将手机向左移动。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"请将手机向右移动。"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"请直视您的设备。"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"看不到您的脸部，请直视手机。"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"请将你的面部正对手机。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"请重新注册您的面孔。"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"已无法识别人脸，请重试。"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"请将您的头稍微上下倾斜。"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"请将您的头稍微左右旋转。"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"请移除所有遮挡您面部的物体。"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"请将屏幕顶部边缘的传感器擦拭干净。"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"请将屏幕顶部（包括黑色条栏）清理干净"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"无法验证人脸。硬件无法使用。"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"请重新尝试面孔身份验证。"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"请重新尝试人脸解锁。"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"无法存储新的人脸数据。请先删除旧的人脸数据。"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"人脸处理操作已取消"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"用户已取消人脸身份验证"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"面孔处理操作已取消。"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"用户已取消人脸解锁。"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"尝试次数过多，请稍后重试。"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"尝试次数过多，人脸身份验证已停用。"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"尝试次数过多，人脸解锁已停用。"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"无法验证人脸，请重试。"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"您尚未设置人脸身份验证"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"此设备不支持人脸身份验证"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"您尚未设置人脸解锁。"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"此设备不支持人脸解锁。"</string>
     <string name="face_name_template" msgid="7004562145809595384">"面孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

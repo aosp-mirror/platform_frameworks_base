@@ -16,60 +16,104 @@
 
 package com.android.server.wm;
 
+import static android.hardware.display.DisplayManager.DeviceConfig.KEY_HIGH_REFRESH_RATE_BLACKLIST;
+
 import android.annotation.NonNull;
-import android.os.SystemProperties;
+import android.annotation.Nullable;
+import android.content.res.Resources;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
+
+import java.io.PrintWriter;
+import java.util.concurrent.Executor;
 
 /**
  * A Blacklist for packages that should force the display out of high refresh rate.
  */
 class HighRefreshRateBlacklist {
 
-    private static final String SYSPROP_KEY = "ro.window_manager.high_refresh_rate_blacklist";
-    private static final String SYSPROP_KEY_LENGTH_SUFFIX = "_length";
-    private static final String SYSPROP_KEY_ENTRY_SUFFIX = "_entry";
-    private static final int MAX_ENTRIES = 50;
+    private final ArraySet<String> mBlacklistedPackages = new ArraySet<>();
+    @NonNull
+    private final String[] mDefaultBlacklist;
+    private final Object mLock = new Object();
 
-    private ArraySet<String> mBlacklistedPackages = new ArraySet<>();
-
-    static HighRefreshRateBlacklist create() {
-        return new HighRefreshRateBlacklist(new SystemPropertyGetter() {
+    static HighRefreshRateBlacklist create(@NonNull Resources r) {
+        return new HighRefreshRateBlacklist(r, new DeviceConfigInterface() {
             @Override
-            public int getInt(String key, int def) {
-                return SystemProperties.getInt(key, def);
+            public @Nullable String getProperty(@NonNull String namespace, @NonNull String name) {
+                return DeviceConfig.getProperty(namespace, name);
             }
-
-            @Override
-            public String get(String key) {
-                return SystemProperties.get(key);
+            public void addOnPropertyChangedListener(@NonNull String namespace,
+                    @NonNull Executor executor,
+                    @NonNull DeviceConfig.OnPropertyChangedListener listener) {
+                DeviceConfig.addOnPropertyChangedListener(namespace, executor, listener);
             }
         });
     }
 
     @VisibleForTesting
-    HighRefreshRateBlacklist(SystemPropertyGetter propertyGetter) {
+    HighRefreshRateBlacklist(Resources r, DeviceConfigInterface deviceConfig) {
+        mDefaultBlacklist = r.getStringArray(R.array.config_highRefreshRateBlacklist);
+        deviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                BackgroundThread.getExecutor(), new OnPropertyChangedListener());
+        final String property = deviceConfig.getProperty(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                KEY_HIGH_REFRESH_RATE_BLACKLIST);
+        updateBlacklist(property);
+    }
 
-        // Read and populate the blacklist
-        final int length = Math.min(
-                propertyGetter.getInt(SYSPROP_KEY + SYSPROP_KEY_LENGTH_SUFFIX, 0),
-                MAX_ENTRIES);
-        for (int i = 1; i <= length; i++) {
-            final String packageName = propertyGetter.get(
-                    SYSPROP_KEY + SYSPROP_KEY_ENTRY_SUFFIX + i);
-            if (!packageName.isEmpty()) {
-                mBlacklistedPackages.add(packageName);
+    private void updateBlacklist(@Nullable String property) {
+        synchronized (mLock) {
+            mBlacklistedPackages.clear();
+            if (property != null) {
+                String[] packages = property.split(",");
+                for (String pkg : packages) {
+                    String pkgName = pkg.trim();
+                    if (!pkgName.isEmpty()) {
+                        mBlacklistedPackages.add(pkgName);
+                    }
+                }
+            } else {
+                // If there's no config, or the config has been deleted, fallback to the device's
+                // default blacklist
+                for (String pkg : mDefaultBlacklist) {
+                    mBlacklistedPackages.add(pkg);
+                }
             }
         }
     }
 
     boolean isBlacklisted(String packageName) {
-        return mBlacklistedPackages.contains(packageName);
+        synchronized (mLock) {
+            return mBlacklistedPackages.contains(packageName);
+        }
+    }
+    void dump(PrintWriter pw) {
+        pw.println("High Refresh Rate Blacklist");
+        pw.println("  Packages:");
+        synchronized (mLock) {
+            for (String pkg : mBlacklistedPackages) {
+                pw.println("    " + pkg);
+            }
+        }
     }
 
-    interface SystemPropertyGetter {
-        int getInt(String key, int def);
-        @NonNull String get(String key);
+    interface DeviceConfigInterface {
+        @Nullable String getProperty(@NonNull String namespace, @NonNull String name);
+        void addOnPropertyChangedListener(@NonNull String namespace, @NonNull Executor executor,
+                @NonNull DeviceConfig.OnPropertyChangedListener listener);
+    }
+
+    private class OnPropertyChangedListener implements DeviceConfig.OnPropertyChangedListener {
+        public void onPropertyChanged(@NonNull String namespace, @NonNull String name,
+                @Nullable String value) {
+            if (KEY_HIGH_REFRESH_RATE_BLACKLIST.equals(name)) {
+                updateBlacklist(value);
+            }
+        }
     }
 }
+

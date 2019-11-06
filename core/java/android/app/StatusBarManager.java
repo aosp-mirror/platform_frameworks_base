@@ -434,6 +434,9 @@ public class StatusBarManager {
         private boolean mNotificationPeeking;
         private boolean mRecents;
         private boolean mSearch;
+        private boolean mSystemIcons;
+        private boolean mClock;
+        private boolean mNotificationIcons;
 
         /** @hide */
         public DisableInfo(int flags1, int flags2) {
@@ -442,6 +445,9 @@ public class StatusBarManager {
             mNotificationPeeking = (flags1 & DISABLE_NOTIFICATION_ALERTS) != 0;
             mRecents = (flags1 & DISABLE_RECENT) != 0;
             mSearch = (flags1 & DISABLE_SEARCH) != 0;
+            mSystemIcons = (flags1 & DISABLE_SYSTEM_INFO) != 0;
+            mClock = (flags1 & DISABLE_CLOCK) != 0;
+            mNotificationIcons = (flags1 & DISABLE_NOTIFICATION_ICONS) != 0;
         }
 
         /** @hide */
@@ -528,6 +534,48 @@ public class StatusBarManager {
         }
 
         /**
+         * @return {@code true} if system icons are disabled
+         *
+         * @hide
+         */
+        public boolean areSystemIconsDisabled() {
+            return mSystemIcons;
+        }
+
+        /** * @hide */
+        public void setSystemIconsDisabled(boolean disabled) {
+            mSystemIcons = disabled;
+        }
+
+        /**
+         * @return {@code true} if the clock icon is disabled
+         *
+         * @hide
+         */
+        public boolean isClockDisabled() {
+            return mClock;
+        }
+
+        /** * @hide */
+        public void setClockDisabled(boolean disabled) {
+            mClock = disabled;
+        }
+
+        /**
+         * @return {@code true} if notification icons are disabled
+         *
+         * @hide
+         */
+        public boolean areNotificationIconsDisabled() {
+            return mNotificationIcons;
+        }
+
+        /** * @hide */
+        public void setNotificationIconsDisabled(boolean disabled) {
+            mNotificationIcons = disabled;
+        }
+
+        /**
          * @return {@code true} if no components are disabled (default state)
          *
          * @hide
@@ -536,7 +584,7 @@ public class StatusBarManager {
         @TestApi
         public boolean areAllComponentsEnabled() {
             return !mStatusBarExpansion && !mNavigateHome && !mNotificationPeeking && !mRecents
-                    && !mSearch;
+                    && !mSearch && !mSystemIcons && !mClock && !mNotificationIcons;
         }
 
         /** @hide */
@@ -546,6 +594,9 @@ public class StatusBarManager {
             mNotificationPeeking = false;
             mRecents = false;
             mSearch = false;
+            mSystemIcons = false;
+            mClock = false;
+            mNotificationIcons = false;
         }
 
         /**
@@ -555,7 +606,7 @@ public class StatusBarManager {
          */
         public boolean areAllComponentsDisabled() {
             return mStatusBarExpansion && mNavigateHome && mNotificationPeeking
-                    && mRecents && mSearch;
+                    && mRecents && mSearch && mSystemIcons && mClock && mNotificationIcons;
         }
 
         /** @hide */
@@ -565,6 +616,9 @@ public class StatusBarManager {
             mNotificationPeeking = true;
             mRecents = true;
             mSearch = true;
+            mSystemIcons = true;
+            mClock = true;
+            mNotificationIcons = true;
         }
 
         @Override
@@ -577,6 +631,9 @@ public class StatusBarManager {
                     .append(mNotificationPeeking ? "disabled" : "enabled");
             sb.append(" mRecents=").append(mRecents ? "disabled" : "enabled");
             sb.append(" mSearch=").append(mSearch ? "disabled" : "enabled");
+            sb.append(" mSystemIcons=").append(mSystemIcons ? "disabled" : "enabled");
+            sb.append(" mClock=").append(mClock ? "disabled" : "enabled");
+            sb.append(" mNotificationIcons=").append(mNotificationIcons ? "disabled" : "enabled");
 
             return sb.toString();
 
@@ -597,6 +654,9 @@ public class StatusBarManager {
             if (mNotificationPeeking) disable1 |= DISABLE_NOTIFICATION_ALERTS;
             if (mRecents) disable1 |= DISABLE_RECENT;
             if (mSearch) disable1 |= DISABLE_SEARCH;
+            if (mSystemIcons) disable1 |= DISABLE_SYSTEM_INFO;
+            if (mClock) disable1 |= DISABLE_CLOCK;
+            if (mNotificationIcons) disable1 |= DISABLE_NOTIFICATION_ICONS;
 
             return new Pair<Integer, Integer>(disable1, disable2);
         }

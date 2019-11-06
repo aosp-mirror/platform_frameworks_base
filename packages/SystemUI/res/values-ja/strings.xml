@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"顔を認証中です"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"顔を認証しました"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"確認しました"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"完了するには [確認] をタップしてください"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"指紋認証センサーをタップしてください"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指紋アイコン"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"顔を認証しています…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"緊急度の低い通知を下に表示"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"開くにはもう一度タップしてください"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"ロック解除するには上にスワイプしてください"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"開くには上にスワイプします"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"このデバイスは組織によって管理されています"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> が管理しています"</string>
     <string name="phone_hint" msgid="4872890986869209950">"右にスワイプして通話"</string>

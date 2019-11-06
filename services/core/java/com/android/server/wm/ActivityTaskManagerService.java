@@ -1451,22 +1451,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .execute();
     }
 
+    /**
+     * Start the recents activity to perform the recents animation.
+     *
+     * @param intent The intent to start the recents activity.
+     * @param recentsAnimationRunner Pass {@code null} to only preload the activity.
+     */
     @Override
-    public void startRecentsActivity(Intent intent, IAssistDataReceiver assistDataReceiver,
-            IRecentsAnimationRunner recentsAnimationRunner) {
+    public void startRecentsActivity(Intent intent, @Deprecated IAssistDataReceiver unused,
+            @Nullable IRecentsAnimationRunner recentsAnimationRunner) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "startRecentsActivity()");
         final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
                 final int recentsUid = mRecentTasks.getRecentsComponentUid();
+                final WindowProcessController caller = getProcessController(callingPid, callingUid);
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
-                        getActivityStartController(), mWindowManager, callingPid);
-                anim.startRecentsActivity(intent, recentsAnimationRunner, recentsComponent,
-                        recentsUid, assistDataReceiver);
+                        getActivityStartController(), mWindowManager, intent, recentsComponent,
+                        recentsUid, caller);
+                if (recentsAnimationRunner == null) {
+                    anim.preloadRecentsActivity();
+                } else {
+                    anim.startRecentsActivity(recentsAnimationRunner);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4640,7 +4652,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void registerRemoteAnimations(IBinder token, RemoteAnimationDefinition definition) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimations");
-        definition.setCallingPid(Binder.getCallingPid());
+        definition.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
@@ -4660,7 +4672,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             RemoteAnimationAdapter adapter) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimationForNextActivityStart");
-        adapter.setCallingPid(Binder.getCallingPid());
+        adapter.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
@@ -4677,7 +4689,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             RemoteAnimationDefinition definition) {
         mAmInternal.enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
                 "registerRemoteAnimations");
-        definition.setCallingPid(Binder.getCallingPid());
+        definition.setCallingPidUid(Binder.getCallingPid(), Binder.getCallingUid());
         synchronized (mGlobalLock) {
             final ActivityDisplay display = mRootActivityContainer.getActivityDisplay(displayId);
             if (display == null) {
@@ -4988,6 +5000,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      *  - the cmd arg isn't the flattened component name of an existing activity:
      *    dump all activity whose component contains the cmd as a substring
      *  - A hex number of the ActivityRecord object instance.
+     * <p>
+     * The caller should not hold lock when calling this method because it will wait for the
+     * activities to complete the dump.
      *
      *  @param dumpVisibleStacksOnly dump activity with {@param name} only if in a visible stack
      *  @param dumpFocusedStackOnly dump activity with {@param name} only if in the focused stack
@@ -5040,29 +5055,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private void dumpActivity(String prefix, FileDescriptor fd, PrintWriter pw,
             final ActivityRecord r, String[] args, boolean dumpAll) {
         String innerPrefix = prefix + "  ";
+        IApplicationThread appThread = null;
         synchronized (mGlobalLock) {
             pw.print(prefix); pw.print("ACTIVITY "); pw.print(r.shortComponentName);
             pw.print(" "); pw.print(Integer.toHexString(System.identityHashCode(r)));
             pw.print(" pid=");
-            if (r.hasProcess()) pw.println(r.app.getPid());
-            else pw.println("(not running)");
+            if (r.hasProcess()) {
+                pw.println(r.app.getPid());
+                appThread = r.app.getThread();
+            } else {
+                pw.println("(not running)");
+            }
             if (dumpAll) {
                 r.dump(pw, innerPrefix);
             }
         }
-        if (r.attachedToProcess()) {
+        if (appThread != null) {
             // flush anything that is already in the PrintWriter since the thread is going
             // to write to the file descriptor directly
             pw.flush();
-            try {
-                TransferPipe tp = new TransferPipe();
-                try {
-                    r.app.getThread().dumpActivity(tp.getWriteFd(),
-                            r.appToken, innerPrefix, args);
-                    tp.go(fd);
-                } finally {
-                    tp.kill();
-                }
+            try (TransferPipe tp = new TransferPipe()) {
+                appThread.dumpActivity(tp.getWriteFd(), r.appToken, innerPrefix, args);
+                tp.go(fd);
             } catch (IOException e) {
                 pw.println(innerPrefix + "Failure while dumping the activity: " + e);
             } catch (RemoteException e) {
@@ -6100,11 +6114,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp) {
+        public void notifyAppTransitionStarting(SparseIntArray reasons,
+                long timestamp) {
             synchronized (mGlobalLock) {
                 mStackSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
                         reasons, timestamp);
             }
+        }
+
+        @Override
+        public void notifySingleTaskDisplayDrawn(int displayId) {
+            mTaskChangeNotificationController.notifySingleTaskDisplayDrawn(displayId);
         }
 
         @Override
@@ -7165,10 +7185,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
                 String[] args, int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
                 boolean dumpFocusedStackOnly) {
-            synchronized (mGlobalLock) {
-                return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti,
-                        dumpAll, dumpVisibleStacksOnly, dumpFocusedStackOnly);
-            }
+            return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti, dumpAll,
+                    dumpVisibleStacksOnly, dumpFocusedStackOnly);
         }
 
         @Override

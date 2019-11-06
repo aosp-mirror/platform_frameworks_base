@@ -118,7 +118,6 @@ public class DefaultUiController implements AssistManager.UiController {
 
     @Override // AssistManager.UiController
     public void hide() {
-        Dependency.get(AssistManager.class).hideAssist();
         detach();
         if (mInvocationAnimator.isRunning()) {
             mInvocationAnimator.cancel();

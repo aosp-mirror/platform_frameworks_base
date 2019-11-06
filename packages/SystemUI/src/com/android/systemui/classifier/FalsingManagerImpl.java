@@ -67,8 +67,8 @@ public class FalsingManagerImpl implements FalsingManager {
             Sensor.TYPE_LIGHT,
             Sensor.TYPE_ROTATION_VECTOR,
     };
-    private static final String FALSING_REMAIN_LOCKED = "falsing_failure_after_attempts";
-    private static final String FALSING_SUCCESS = "falsing_success_after_attempts";
+    public static final String FALSING_REMAIN_LOCKED = "falsing_failure_after_attempts";
+    public static final String FALSING_SUCCESS = "falsing_success_after_attempts";
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Context mContext;

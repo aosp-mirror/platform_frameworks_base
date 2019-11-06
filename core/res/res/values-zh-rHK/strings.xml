@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"留言訊息"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 通話"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM 卡狀態"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"重要 SIM 卡狀態"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"對方曾要求 TTY 完整模式"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"對方曾要求 TTY 模式 (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"對方曾要求 TTY 模式 (VCO)"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"指紋圖示"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"管理臉孔驗證硬件"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"管理臉孔解鎖硬件"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"允許應用程式調用方法，以加入和刪除可用的臉孔範本。"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"使用臉孔驗證硬件"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"允許應用程式使用臉孔驗證硬件來驗證"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"臉孔驗證"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"使用臉孔解鎖硬件"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"允許應用程式使用臉孔解鎖硬件來驗證"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"臉孔解鎖"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"重新註冊臉孔"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"如要提高識別能力，請重新註冊您的臉孔"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"無法擷取準確的臉容資料。請再試一次。"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"請將手機向左移。"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"請將手機向右移。"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"請以更直視的角度看著裝置。"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"看不到您的臉。請看著手機。"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"將手機對準您的臉孔正面。"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"裝置不夠穩定。請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"請重新註冊臉孔。"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"無法再識別臉孔。請再試一次。"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"減少頭部上下轉動幅度。"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"減少頭部左右轉動幅度。"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"移除遮住您臉孔的任何東西。"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"請清潔螢幕頂部邊緣的感應器。"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"請清理螢幕頂部，包括黑色列"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"無法驗證臉孔，硬件無法使用。"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"請再次嘗試驗證臉孔。"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"請再次嘗試「臉孔解鎖」。"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"無法儲存新的臉容資料，請先刪除舊資料。"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"臉孔操作已取消"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"使用者已取消臉孔驗證"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"臉孔操作已取消。"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"使用者已取消「臉孔解鎖」。"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"嘗試次數過多，請稍後再試。"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"嘗試次數過多，臉孔驗證已停用。"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"嘗試次數過多，「臉孔解鎖」已停用。"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"無法驗證臉孔。請再試一次。"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"您尚未設定臉孔驗證"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"此裝置不支援臉孔驗證"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"您尚未設定「臉孔解鎖」。"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"此裝置不支援「臉孔解鎖」。"</string>
     <string name="face_name_template" msgid="7004562145809595384">"臉孔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -817,7 +818,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"再試一次"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"再試一次"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"解鎖即可使用所有功能和資料"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超過臉容解鎖嘗試次數上限"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超過臉孔解鎖嘗試次數上限"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"找不到 SIM 卡"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板電腦中沒有 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"電視沒有 SIM 卡。"</string>
@@ -887,7 +888,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"展開解鎖區域。"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"滑動解鎖。"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"圖案解鎖。"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"臉容解鎖。"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"臉孔解鎖。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN 解鎖。"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"SIM 卡 PIN 碼解鎖。"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"SIM 卡 PUK 解鎖。"</string>

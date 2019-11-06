@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Лицето ви се търси"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Лицето е удостоверено"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Потвърдено"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Докоснете „Потвърждаване“ за завършване"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Докоснете сензора за отпечатъци"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Икона за отпечатък"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Търсим ви…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Ппоказване на по-малко спешните известия по-долу"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Докоснете отново, за да отворите"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Плъзнете нагоре, за да отключите"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Прекарайте пръст нагоре, за да отключите"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Това устройство се управлява от организацията ви"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Това устройство се управлява от <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Плъзнете с пръст от иконата, за да използвате телефона"</string>

@@ -50,14 +50,15 @@ interface IFaceService {
             int callingUid, int callingPid, int callingUserId, boolean fromClient);
 
     // Start face enrollment
-    void enroll(IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,
+    void enroll(int userId, IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,
             String opPackageName, in int [] disabledFeatures);
 
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);
 
     // Any errors resulting from this call will be returned to the listener
-    void remove(IBinder token, int faceId, int userId, IFaceServiceReceiver receiver);
+    void remove(IBinder token, int faceId, int userId, IFaceServiceReceiver receiver,
+            String opPackageName);
 
     // Rename the face specified by faceId to the given name
     void rename(int faceId, String name);
@@ -98,10 +99,10 @@ interface IFaceService {
     // Enumerate all faces
     void enumerate(IBinder token, int userId, IFaceServiceReceiver receiver);
 
-    void setFeature(int feature, boolean enabled, in byte [] token,
-            IFaceServiceReceiver receiver);
+    void setFeature(int userId, int feature, boolean enabled, in byte [] token,
+            IFaceServiceReceiver receiver, String opPackageName);
 
-    void getFeature(int feature, IFaceServiceReceiver receiver);
+    void getFeature(int userId, int feature, IFaceServiceReceiver receiver, String opPackageName);
 
     void userActivity();
 }

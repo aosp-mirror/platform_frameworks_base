@@ -303,7 +303,7 @@ public class SmartReplyView extends ViewGroup {
         };
 
         OnClickListener onClickListener = view ->
-            smartReplyView.mKeyguardDismissUtil.executeWhenUnlocked(action);
+            smartReplyView.mKeyguardDismissUtil.executeWhenUnlocked(action, !entry.isRowPinned());
         if (useDelayedOnClickListener) {
             onClickListener = new DelayedOnClickListener(onClickListener,
                     smartReplyView.mConstants.getOnClickInitDelay());

@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"તમારો ચહેરો શોધી રહ્યાં છીએ"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ચહેરાનું પ્રમાણીકરણ થયું"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"પુષ્ટિ કરી"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"પરીક્ષણ પૂર્ણ કરવા કન્ફર્મ કરોને ટૅપ કરો"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ફિંગરપ્રિન્ટના સેન્સરને સ્પર્શ કરો"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ફિંગરપ્રિન્ટનું આઇકન"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"તમારા માટે શોધી રહ્યાં છે..."</string>
@@ -313,7 +314,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"શ્રવણ યંત્રો"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ચાલુ કરી રહ્યાં છીએ…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"તેજ"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"આપમેળે ફેરવો"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"ઑટો રોટેટ"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"સ્ક્રીનને આપમેળે ફેરવો"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> મોડ"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"પરિભ્રમણ લૉક થયું"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"નીચે ઓછી તાકીદની સૂચનાઓ"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ખોલવા માટે ફરીથી ટૅપ કરો"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"અનલૉક કરવા માટે ઉપર સ્વાઇપ કરો"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"ખોલવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"આ ઉપકરણ તમારી સંસ્થા દ્વારા સંચાલિત છે"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"આ ઉપકરણ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> દ્વારા સંચાલિત થાય છે"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ફોન માટે આયકનમાંથી સ્વાઇપ કરો"</string>

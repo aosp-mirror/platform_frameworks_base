@@ -97,6 +97,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Sporočila v odzivniku"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Klicanje prek Wi-Fi-ja"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Stanje kartice SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Stanje kartice SIM z visoko stopnjo prednosti"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Enakovredna naprava je zahtevala način TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Enakovredna naprava je zahtevala način TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Enakovredna naprava je zahtevala način TTY VCO"</string>
@@ -556,11 +557,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona prstnih odtisov"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"upravljanje strojne opreme za preverjanje pristnosti obraza"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"upravljanje strojne opreme za odklepanje z obrazom"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Aplikaciji omogoča sprožanje načinov za dodajanje in brisanje predlog z obrazi za uporabo."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"uporaba strojne opreme za preverjanje pristnosti obraza"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Aplikaciji omogoča uporabo strojne opreme za preverjanje pristnosti obraza"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Preverjanje pristnosti z obrazom"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"uporaba strojne opreme za odklepanje z obrazom"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Aplikaciji omogoča uporabo strojne opreme za odklepanje z obrazom za preverj. pristnosti"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Odklepanje z obrazom"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Znova prijavite obraz"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Za izboljšanje prepoznavanja znova prijavite svoj obraz"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Točnih podatkov o obrazu ni bilo mogoče zajeti. Poskusite znova."</string>
@@ -573,7 +574,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Telefon premaknite v levo."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Telefon premaknite v desno."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Glejte bolj naravnost v napravo."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Obraz ni viden. Poglejte v telefon."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Obraz nastavite naravnost pred telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Preveč se premikate. Držite telefon pri miru."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Znova prijavite svoj obraz."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Obraza ni več mogoče prepoznati. Poskusite znova."</string>
@@ -582,19 +583,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Malce manj nagnite glavo."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Glejte malce bolj naravnost."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Umaknite vse, kar vam morda zakriva obraz."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Očistite tipalo na zgornjem robu zaslona."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Očistite vrhnji del zaslona, vključno s črno vrstico"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Obraza ni mogoče preveriti. Str. opr. ni na voljo."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Znova izvedite preverjanje pristnosti z obrazom."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Znova izvedite odklepanje z obrazom."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Novega obraza ni mogoče shraniti. Najprej izbrišite starega."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Dejanje z obrazom je bilo preklicano"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Preverjanje pristnosti obraza preklical uporabnik"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Dejanje z obrazom je bilo preklicano."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Odklepanje z obrazom je preklical uporabnik."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Preveč poskusov. Poskusite znova pozneje."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Preveč poskusov. Preverjanje pristnosti obraza onemogočeno."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Preveč poskusov. Odklepanje z obrazom je onemogočeno."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Obraza ni mogoče preveriti. Poskusite znova."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Preverjanje pristnosti obraza ni nastavljeno"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Ta naprava ne podpira preverjanja pristnosti obraza"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Odklepanja z obrazom niste nastavili."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Ta naprava ne podpira odklepanja z obrazom."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Obraz <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

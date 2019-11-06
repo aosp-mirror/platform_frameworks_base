@@ -18,13 +18,19 @@ package com.android.server.display.color;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.res.Resources;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.Time;
 import android.os.Handler;
@@ -33,6 +39,7 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.System;
 import android.test.mock.MockContentResolver;
+import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -73,6 +80,8 @@ public class ColorDisplayServiceTest {
     private ColorDisplayService mCds;
     private ColorDisplayService.BinderService mBinderService;
 
+    private Resources mResourcesSpy;
+
     @BeforeClass
     public static void setDtm() {
         final DisplayTransformManager dtm = Mockito.mock(DisplayTransformManager.class);
@@ -83,6 +92,9 @@ public class ColorDisplayServiceTest {
     public void setUp() {
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         doReturn(mContext).when(mContext).getApplicationContext();
+
+        mResourcesSpy = Mockito.spy(mContext.getResources());
+        when(mContext.getResources()).thenReturn(mResourcesSpy);
 
         mUserId = ActivityManager.getCurrentUser();
 
@@ -112,6 +124,8 @@ public class ColorDisplayServiceTest {
 
         mUserId = UserHandle.USER_NULL;
         mContext = null;
+
+        FakeSettingsProvider.clearSettingsProvider();
 
         LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
     }
@@ -924,11 +938,8 @@ public class ColorDisplayServiceTest {
 
         startService();
         assertUserColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
-        if (isColorModeValid(ColorDisplayManager.COLOR_MODE_SATURATED)) {
-            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_SATURATED);
-        } else if (isColorModeValid(ColorDisplayManager.COLOR_MODE_AUTOMATIC)) {
-            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_AUTOMATIC);
-        }
+        assertActiveColorMode(mContext.getResources().getInteger(
+                R.integer.config_accessibilityColorMode));
     }
 
     @Test
@@ -942,11 +953,8 @@ public class ColorDisplayServiceTest {
 
         startService();
         assertUserColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
-        if (isColorModeValid(ColorDisplayManager.COLOR_MODE_SATURATED)) {
-            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_SATURATED);
-        } else if (isColorModeValid(ColorDisplayManager.COLOR_MODE_AUTOMATIC)) {
-            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_AUTOMATIC);
-        }
+        assertActiveColorMode(mContext.getResources().getInteger(
+                R.integer.config_accessibilityColorMode));
     }
 
     @Test
@@ -961,11 +969,8 @@ public class ColorDisplayServiceTest {
 
         startService();
         assertUserColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
-        if (isColorModeValid(ColorDisplayManager.COLOR_MODE_SATURATED)) {
-            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_SATURATED);
-        } else if (isColorModeValid(ColorDisplayManager.COLOR_MODE_AUTOMATIC)) {
-            assertActiveColorMode(ColorDisplayManager.COLOR_MODE_AUTOMATIC);
-        }
+        assertActiveColorMode(mContext.getResources().getInteger(
+                R.integer.config_accessibilityColorMode));
     }
 
     @Test
@@ -1020,11 +1025,15 @@ public class ColorDisplayServiceTest {
 
     @Test
     public void displayWhiteBalance_enabledAfterLinearColorModeSelected() {
+        if (!isColorModeValid(ColorDisplayManager.COLOR_MODE_SATURATED)) {
+            return;
+        }
         setDisplayWhiteBalanceEnabled(true);
-        setNightDisplayActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
+        mBinderService.setColorMode(ColorDisplayManager.COLOR_MODE_SATURATED);
         startService();
-        mBinderService.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+        assertDwbActive(false);
 
+        mBinderService.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         mCds.updateDisplayWhiteBalanceStatus();
         assertDwbActive(true);
     }
@@ -1032,10 +1041,8 @@ public class ColorDisplayServiceTest {
     @Test
     public void displayWhiteBalance_disabledWhileAccessibilityColorCorrectionEnabled() {
         setDisplayWhiteBalanceEnabled(true);
-        startService();
         setAccessibilityColorCorrection(true);
-
-        mCds.updateDisplayWhiteBalanceStatus();
+        startService();
         assertDwbActive(false);
 
         setAccessibilityColorCorrection(false);
@@ -1046,15 +1053,87 @@ public class ColorDisplayServiceTest {
     @Test
     public void displayWhiteBalance_disabledWhileAccessibilityColorInversionEnabled() {
         setDisplayWhiteBalanceEnabled(true);
-        startService();
         setAccessibilityColorInversion(true);
-
-        mCds.updateDisplayWhiteBalanceStatus();
+        startService();
         assertDwbActive(false);
 
         setAccessibilityColorInversion(false);
         mCds.updateDisplayWhiteBalanceStatus();
         assertDwbActive(true);
+    }
+
+    @Test
+    public void compositionColorSpaces_noResources() {
+        final DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
+        reset(dtm);
+
+        when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
+            .thenReturn(new int[] {});
+        when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorSpaces))
+            .thenReturn(new int[] {});
+        setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+        startService();
+        verify(dtm).setColorMode(eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(),
+                eq(Display.COLOR_MODE_INVALID));
+    }
+
+    @Test
+    public void compositionColorSpaces_invalidResources() {
+        final DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
+        reset(dtm);
+
+        when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
+            .thenReturn(new int[] {
+               ColorDisplayManager.COLOR_MODE_NATURAL,
+               // Missing second color mode
+            });
+        when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorSpaces))
+            .thenReturn(new int[] {
+               Display.COLOR_MODE_SRGB,
+               Display.COLOR_MODE_DISPLAY_P3
+            });
+        setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+        startService();
+        verify(dtm).setColorMode(eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(),
+                eq(Display.COLOR_MODE_INVALID));
+    }
+
+    @Test
+    public void compositionColorSpaces_validResources_validColorMode() {
+        final DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
+        reset(dtm);
+
+        when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
+            .thenReturn(new int[] {
+               ColorDisplayManager.COLOR_MODE_NATURAL
+            });
+        when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorSpaces))
+            .thenReturn(new int[] {
+               Display.COLOR_MODE_SRGB,
+            });
+        setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
+        startService();
+        verify(dtm).setColorMode(eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(),
+                eq(Display.COLOR_MODE_SRGB));
+    }
+
+    @Test
+    public void compositionColorSpaces_validResources_invalidColorMode() {
+        final DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
+        reset(dtm);
+
+        when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorModes))
+            .thenReturn(new int[] {
+               ColorDisplayManager.COLOR_MODE_NATURAL
+            });
+        when(mResourcesSpy.getIntArray(R.array.config_displayCompositionColorSpaces))
+            .thenReturn(new int[] {
+               Display.COLOR_MODE_SRGB,
+            });
+        setColorMode(ColorDisplayManager.COLOR_MODE_BOOSTED);
+        startService();
+        verify(dtm).setColorMode(eq(ColorDisplayManager.COLOR_MODE_BOOSTED), any(),
+                eq(Display.COLOR_MODE_INVALID));
     }
 
     /**
@@ -1159,7 +1238,7 @@ public class ColorDisplayServiceTest {
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mCds.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
-            mCds.onStartUser(mUserId);
+            mCds.onUserChanged(mUserId);
         });
     }
 

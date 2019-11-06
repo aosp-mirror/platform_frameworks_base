@@ -34,6 +34,7 @@ import static android.os.Process.THREAD_GROUP_BG_NONINTERACTIVE;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
 import static android.os.Process.THREAD_GROUP_RESTRICTED;
 import static android.os.Process.THREAD_GROUP_TOP_APP;
+import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.setProcessGroup;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
@@ -1803,7 +1804,6 @@ public final class OomAdjuster {
                                 if (app.renderThreadTid != 0) {
                                     setThreadScheduler(app.renderThreadTid,
                                             SCHED_OTHER, 0);
-                                    setThreadPriority(app.renderThreadTid, -4);
                                 }
                             } catch (IllegalArgumentException e) {
                                 Slog.w(TAG,
@@ -1815,9 +1815,10 @@ public final class OomAdjuster {
                         } else {
                             // Reset priority for top app UI and render threads
                             setThreadPriority(app.pid, 0);
-                            if (app.renderThreadTid != 0) {
-                                setThreadPriority(app.renderThreadTid, 0);
-                            }
+                        }
+
+                        if (app.renderThreadTid != 0) {
+                            setThreadPriority(app.renderThreadTid, THREAD_PRIORITY_DISPLAY);
                         }
                     }
                 } catch (Exception e) {

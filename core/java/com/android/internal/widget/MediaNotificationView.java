@@ -26,6 +26,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 
+import java.util.ArrayList;
+
 /**
  * A TextView that can float around an image on the end.
  *
@@ -42,6 +44,7 @@ public class MediaNotificationView extends FrameLayout {
     private View mMainColumn;
     private View mMediaContent;
     private int mImagePushIn;
+    private ArrayList<VisibilityChangeListener> mListeners;
 
     public MediaNotificationView(Context context) {
         this(context, null);
@@ -167,5 +170,51 @@ public class MediaNotificationView extends FrameLayout {
         mHeader = findViewById(com.android.internal.R.id.notification_header);
         mMainColumn = findViewById(com.android.internal.R.id.notification_main_column);
         mMediaContent = findViewById(com.android.internal.R.id.notification_media_content);
+    }
+
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+        if (mListeners != null) {
+            for (int i = 0; i < mListeners.size(); i++) {
+                mListeners.get(i).onAggregatedVisibilityChanged(isVisible);
+            }
+        }
+    }
+
+    /**
+     * Add a listener to receive updates on the visibility of this view
+     *
+     * @param listener The listener to add.
+     */
+    public void addVisibilityListener(VisibilityChangeListener listener) {
+        if (mListeners == null) {
+            mListeners = new ArrayList<>();
+        }
+        if (!mListeners.contains(listener)) {
+            mListeners.add(listener);
+        }
+    }
+
+    /**
+     * Remove the specified listener
+     *
+     * @param listener The listener to remove.
+     */
+    public void removeVisibilityListener(VisibilityChangeListener listener) {
+        if (mListeners != null) {
+            mListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Interface for receiving updates when the view's visibility changes
+     */
+    public interface VisibilityChangeListener {
+        /**
+         * Method called when the visibility of this view has changed
+         * @param isVisible true if the view is now visible
+         */
+        void onAggregatedVisibilityChanged(boolean isVisible);
     }
 }

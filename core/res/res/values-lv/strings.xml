@@ -96,6 +96,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Balss pasta ziņojumi"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi zvani"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM kartes statuss"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Augstas prioritātes SIM kartes statuss"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Vienādranga ierīce pieprasīja teksta tālruņa režīmu FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Vienādranga ierīce pieprasīja teksta tālruņa režīmu HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Vienādranga ierīce pieprasīja teksta tālruņa režīmu VCO"</string>
@@ -553,11 +554,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Pirksta nospieduma ikona"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"pārvaldīt sejas autentifikācijas aparatūru"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"pārvaldīt aparatūru, kas paredzēta autorizācijai pēc sejas"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Atļauj lietotnei izsaukt metodes izmantojamo sejas veidņu pievienošanai un dzēšanai."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"izmantot sejas autentifikācijas aparatūru"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Atļauj lietotnei izmantot sejas autentifikācijas aparatūru autentificēšanai"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Sejas autentificēšana"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"lietot aparatūru, kas paredzēta autorizācijai pēc sejas"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Atļauj lietotnei izmantot autentificēšanai aparatūru, ar ko veic autorizāciju pēc sejas"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Autorizācija pēc sejas"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Atkārtoti reģistrējiet seju"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Lai uzlabotu atpazīšanu, lūdzu, atkārtoti reģistrējiet savu seju"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Neizdevās tvert sejas datus. Mēģiniet vēlreiz."</string>
@@ -570,7 +571,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Pārvietojiet tālruni pa kreisi."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Pārvietojiet tālruni pa labi."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Lūdzu, tiešāk skatieties uz savu ierīci."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Jūsu seja nav redzama. Paskatieties uz tālruni."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Novietojiet savu seju tieši pretī tālrunim."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Pārāk daudz kustību. Nekustīgi turiet tālruni."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Lūdzu, atkārtoti reģistrējiet savu seju."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Seju vairs nevar atpazīt. Mēģiniet vēlreiz."</string>
@@ -579,19 +580,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Pagrieziet galvu nedaudz mazāk."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Pagrieziet galvu nedaudz mazāk."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Noņemiet visu, kas aizsedz jūsu seju."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Notīriet sensoru ekrāna augšējā malā."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Notīriet ekrāna augšdaļu, tostarp melno joslu."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nevar verificēt seju. Aparatūra nav pieejama."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Vēlreiz veiciet sejas autentificēšanu."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Vēlreiz mēģiniet veikt autorizāciju pēc sejas."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nevar saglabāt jaunās sejas datus. Dzēsiet kādu no vecajām."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Darbība ar sejas datiem atcelta"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Lietotājs atcēla sejas autentificēšanu"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Darbība ar sejas datiem atcelta."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Lietotājs atcēla autorizāciju pēc sejas."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Pārāk daudz mēģinājumu. Vēlāk mēģiniet vēlreiz."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Pārāk daudz mēģinājumu. Sejas autentificēšana ir atspējota."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Pārāk daudz mēģinājumu. Autorizācija pēc sejas ir atspējota."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nevar verificēt seju. Mēģiniet vēlreiz."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Sejas autentifikācija nav iestatīta"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Sejas autentificēšana šajā ierīcē netiek atbalstīta"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Autorizācija pēc sejas nav iestatīta."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Autorizācija pēc sejas šajā ierīcē netiek atbalstīta"</string>
     <string name="face_name_template" msgid="7004562145809595384">"Seja <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

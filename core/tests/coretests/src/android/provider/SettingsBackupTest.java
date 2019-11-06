@@ -93,6 +93,7 @@ public class SettingsBackupTest {
                     Settings.System.VOLUME_VOICE, // deprecated since API 2?
                     Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                     Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
+                    Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.PEAK_REFRESH_RATE // depends on hardware capabilities
                     );
 
@@ -264,6 +265,7 @@ public class SettingsBackupTest {
                     Settings.Global.EUICC_PROVISIONED,
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
                     Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
+                    Settings.Global.EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
                     Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
                     Settings.Global.FORCED_APP_STANDBY_ENABLED,
@@ -714,13 +716,13 @@ public class SettingsBackupTest {
                  Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
                  Settings.Secure.FLASHLIGHT_AVAILABLE,
                  Settings.Secure.FLASHLIGHT_ENABLED,
+                 Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED,
                  Settings.Secure.CROSS_PROFILE_CALENDAR_ENABLED,
                  Settings.Secure.LOCATION_ACCESS_CHECK_INTERVAL_MILLIS,
                  Settings.Secure.LOCATION_ACCESS_CHECK_DELAY_MILLIS,
                  Settings.Secure.BIOMETRIC_DEBUG_ENABLED,
                  Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
-                 Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED,
-                 Settings.Secure.FACE_UNLOCK_EDUCATION_INFO_DISPLAYED);
+                 Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

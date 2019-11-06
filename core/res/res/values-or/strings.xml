@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ଭଏସମେଲ୍‍ ମେସେଜ୍‍"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ୱାଇ-ଫାଇ କଲିଙ୍ଗ"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM ଷ୍ଟାଟସ୍"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"ଉଚ୍ଚ ପ୍ରାଥମିକତା SIM ସ୍ଥିତି"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ପୀଆର୍‌ ଅନୁରୋଧ କରିଥିବା TTY ମୋଡ୍‍ FULL ଅଟେ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ପୀଅର୍‌ ଅନୁରୋଧ କରିଥିବା TTY ମୋଡ୍‍ HCO ଅଟେ"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ପୀଅର୍‌ ଅନୁରୋଧ କରିଥିବା TTY ମୋଡ୍‍ VCO ଅଟେ"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଇକନ୍"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ହାର୍ଡୱେର୍‌ର ପରିଚାଳନା କରନ୍ତୁ"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"ଫେସ୍ ଅନ୍‌ଲକ୍ ହାର୍ଡୱେର୍ ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ବ୍ୟବହାର ପାଇଁ ଆପ୍‍କୁ ଫେସିଆଲ୍‍ ଟେମ୍ପଲେଟ୍‍ ଯୋଡିବା ଓ ଡିଲିଟ୍‍ ର ପଦ୍ଧତି ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ହାର୍ଡୱେର୍‌ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ହାର୍ଡୱେର୍‌ର ପ୍ରମାଣ ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ମୁହଁ ପ୍ରାମାଣିକତା"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ଫେସ୍ ଅନ୍‌ଲକ୍ ହାର୍ଡୱେର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"ପ୍ରାମାଣିକତା ପାଇଁ ଫେସ୍ ଅନ୍‌ଲକ୍ ହାର୍ଡୱେର୍‌ର ବ୍ୟବହାର ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"ଫେସ୍ ଅନ୍‌ଲକ୍"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ଚିହ୍ନଟକରଣକୁ ଉନ୍ନତ କରିବା ପାଇଁ, ଦୟାକରି ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ।"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ମୁହଁର ଡାଟା କ୍ୟାପଚର୍ ହେଲାନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ବାମ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ଡାହାଣ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ଦୟାକରି ଆପଣଙ୍କ ଡିଭାଇସ୍‌କୁ ସିଧାସଳଖ ଦେଖନ୍ତୁ।"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"ଆପଣଙ୍କର ମୁହଁ ଦେଖି ପାରୁନାହିଁ। ଫୋନ୍‌କୁ ଦେଖନ୍ତୁ।"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"ଆପଣଙ୍କ ମୁହଁକୁ ଫୋନ୍ ସାମ୍ନାରେ ସିଧାସଳଖ ରଖନ୍ତୁ।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ଅତ୍ୟଧିକ ଅସ୍ଥିର। ଫୋନ୍‍କୁ ସ୍ଥିର ଭାବେ ଧରନ୍ତୁ।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ଦୟାକରି ଆପଣଙ୍କର ମୁହଁ ପୁଣି-ଏନ୍‍ରୋଲ୍ କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ଆଉ ମୁହଁ ଚିହ୍ନଟ କରିହେଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ଆପଣଙ୍କର ମୁଣ୍ଡକୁ ଟିକିଏ ବୁଲାନ୍ତୁ।"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"ଆପଣଙ୍କର ମୁହଁ ଲୁଚାଉଥିବା ଜିନିଷକୁ କାଢ଼ି ଦିଅନ୍ତୁ।"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"ସ୍କ୍ରିନ୍‍ର ଉପର ପ୍ରାନ୍ତରେ ଥିବା ସେନ୍ସର୍‍କୁ ଖାଲି କରନ୍ତୁ।"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"କଳା ବାର୍ ସମେତ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‌ର ଶୀର୍ଷକୁ ସଫା କରନ୍ତୁ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ହାର୍ଡୱେୟାର୍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"ପୁଣି ମୁହଁ ପ୍ରାମାଣିକତା କରନ୍ତୁ।"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"ଫେସ୍ ଅନ୍‌ଲକ୍ ପୁଣି ବ୍ୟବହାର କରି ଦେଖନ୍ତୁ"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"ନୂଆ ମୁହଁ ଡାଟା ଷ୍ଟୋର୍ ହେବ ନାହିଁ। ପ୍ରଥମେ ପୁରୁଣାକୁ ଡିଲିଟ୍ କରନ୍ତୁ।"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"ମୁହଁ ପ୍ରମାଣିକିକରଣ ପ୍ରକ୍ରିୟା ବାତିଲ୍ ହୋଇଛି"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"ଉପଯୋଗକର୍ତ୍ତା ମୁହଁ ପ୍ରମାଣିକିକରଣ ବାତିଲ୍‌ କରିଛନ୍ତି"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ଫେସ୍‍ର ଅପରେଶନ୍‍ କ୍ୟାନ୍ସଲ୍‍ ହୋ‍ଇଗଲା"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ଦ୍ୱାରା ଫେସ୍ ଅନଲକ୍ ବାତିଲ୍ କରାଯାଇଛି।"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ବାରମ୍ବାର ଚେଷ୍ଟା। ପରେ ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"ଅତ୍ୟଧିକ ପ୍ରଚେଷ୍ଟା. ମୁହଁ ପ୍ରମାଣିକିକରଣ ଅକ୍ଷମ ହୋଇଛି।"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"ଅତ୍ୟଧିକ ପ୍ରଚେଷ୍ଟା. ଫେସ୍ ଅନ୍‌ଲକ୍ ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"ଆପଣ ମୁହଁ ପ୍ରମାଣିକିକରଣ ସେଟ୍ ଅପ୍ କରିନାହାଁନ୍ତି"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"ଏହି ଡିଭାଇସ୍‌ରେ ମୁହଁ ପ୍ରମାଣିକିକରଣ ସମର୍ଥିତ ନୁହେଁ"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"ଆପଣ ଫେସ୍ ଅନ୍‌ଲକ୍ ସେଟ୍ ଅପ୍ କରିନାହାଁନ୍ତି"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"ଏହି ଡିଭାଇସ୍‌ରେ ଫେସ୍ ଅନ୍‌ଲକ୍ ସମର୍ଥିତ ନୁହେଁ।"</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g>ଙ୍କ ଫେସ୍‍"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1342,7 +1343,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"କୌଣସି ଅନୁମତିର ଆବଶ୍ୟକତା ନାହିଁ"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ଶୁଳ୍କ ଲାଗୁ ହୋଇପାରେ"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ଠିକ୍‍ ଅଛି"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"USB ମାଧ୍ୟମରେ ଏହି ଡିଭାଇସ୍‌କୁ ଚାର୍ଜ କରନ୍ତୁ"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"USB ମାଧ୍ୟମରେ ଏହି ଡିଭାଇସ୍‌ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB ମାଧ୍ୟମରେ ଯୋଡ଼ାଯାଇଥିବା ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ଫାଇଲ୍ ଟ୍ରାନ୍ସଫର୍ ଚାଲୁ କରାଗଲା"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB ମାଧ୍ୟମରେ PTPକୁ ଚାଲୁ କରାଗଲା"</string>
@@ -1658,7 +1659,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ଆପଣଙ୍କ ଅନଲକ୍‍ ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। ଆଉ <xliff:g id="NUMBER_1">%2$d</xliff:g>ଟି ଭୁଲ ପ୍ରୟାସ ପରେ ଏକ ଇମେଲ୍‍ ଆକାଉଣ୍ଟ ବ୍ୟବହାର କରି ନିଜ ଫୋନ୍‌କୁ ଅନଲକ୍‌ କରିବା ପାଇଁ କୁହାଯିବ।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ବାହାର କରନ୍ତୁ"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିସ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିଶ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"ଆକ୍ସେସବିଲିଟି ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"ସର୍ଟକଟ୍‌ ଅନ୍‌ ଥିବା ବେଳେ, ଉଭୟ ଭଲ୍ୟୁମ୍‍ ବଟନ୍‍ 3 ସେକେଣ୍ଡ ପାଇଁ ଦବାଇବା ଦ୍ୱାରା ଆକ୍ସେସବିଲିଟି ବୈଶିଷ୍ଟ ଆରମ୍ଭ ହେବ।\n\n ସମ୍ପ୍ରତି ଆକ୍ସେସବିଲିଟି ବୈଶିଷ୍ଟ୍ୟ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ସେଟିଙ୍ଗ ଓ ଆକ୍ସେସବିଲିଟିରେ ଆପଣ ବୈଶିଷ୍ଟ୍ୟ ବଦଳାଇ ପାରିବେ।"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"ଶର୍ଟକଟ୍‍ ବନ୍ଦ କରନ୍ତୁ"</string>

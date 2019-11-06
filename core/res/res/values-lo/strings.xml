@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ຂໍ້ຄວາມສຽງ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ການ​ໂທ Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"ສະຖານະ SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"ສະຖານະ SIM ຄວາມສຳຄັນສູງ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ໂໝດ TTY ທີ່​ເພື່ອນ​ຂໍ​ນັ້ນ​ເຕັມ​ແລ້ວ"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ໂໝດ TTY ທີ່​ເພື່ອນ​ຂໍ HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ໂໝດ TTY ທີ່​ເພື່ອນ​ຂໍ VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ໄອຄອນລາຍນິ້ວມື"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"ຈັດການຮາດແວການກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າ"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"ຈັດການຮາດແວປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ອະນຸຍາດໃຫ້ແອັບເປີດວິທີການຕ່າງໆເພື່ອເພີ່ມ ແລະ ລຶບແມ່ແບບໃບໜ້າສຳລັບການນຳໃຊ້."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ໃຊ້ຮາດແວການກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ຮາດແວການກວດສອບຄວາມຖືກຕ້ອງດ້ວຍໃບໜ້າສຳລັບການກວດສອບຄວາມຖືກຕ້ອງ"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ການພິສູດຢືນຢັນດ້ວຍໃບໜ້າ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ໃຊ້ຮາດແວການປົດລັອກໃບໜ້າ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"ອະນຸຍາດໃຫ້ແອັບໃຊ້ຮາດແວການປົດລັອກດ້ວຍໜ້າເພື່ອພິສູດຢືນຢັນ"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"ປົດລັອກດ້ວຍໜ້າ"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ລົງທະບຽນໃບໜ້າຂອງທ່ານຄືນໃໝ່"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ເພື່ອປັບປຸງການຈຳແນກ, ກະລຸນາລົງທະບຽນໃບໜ້າຂອງທ່ານຄືນໃໝ່."</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ບໍ່ສາມາດບັນທຶກຂໍ້ມູນໃບໜ້າທີ່ຖືກຕ້ອງໄດ້. ກະລຸນາລອງໃໝ່."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ຍ້າຍໂທລະສັບໄປທາງຊ້າຍ."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ຍ້າຍໂທລະສັບໄປທາງຂວາ."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"ກະລຸນາເບິ່ງອຸປະກອນຂອງທ່ານໃຫ້ຊື່ໆ."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"ບໍ່ສາມາດເບິ່ງເຫັນໜ້າຂອງທ່ານໄດ້. ກະລຸນາເບິ່ງໂທລະສັບ."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"ຫັນໜ້າຂອງທ່ານໄປໃສ່ໜ້າໂທລະສັບໂດຍກົງ."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ເຄື່ອນໄຫວຫຼາຍເກີນໄປ. ກະລຸນາຖືໂທລະສັບໄວ້ຊື່ໆ."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ກະລຸນາລົງທະບຽນອຸປະກອນຂອງທ່ານອີກເທື່ອໜຶ່ງ."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ບໍ່ສາມາດຈຳແນກໃບໜ້າໄດ້ອີກຕໍ່ໄປ. ກະລຸນາລອງໃໝ່."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ອຽງຫົວຂອງທ່ານໜ້ອຍໜຶ່ງ."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ອຽງຫົວຂອງທ່ານໜ້ອຍໜຶ່ງ."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"ນຳສິ່ງທີ່ກີດຂວາງໃບໜ້າທ່ານອອກ."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"ທຳຄວາມສະອາດເຊັນເຊີຢູ່ເທິງສຸດຂອງຂອບຈໍ."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"ທຳຄວາມສະອາດສ່ວນເທິງສຸດຂອງໜ້າຈໍທ່ານ, ຮວມທັງແຖບດຳນຳ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ບໍ່ມີຮາດແວໃຫ້ໃຊ້."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"ລອງໃຊ້ການພິສູດຢືນຢັນໃບໜ້າອີກເທື່ອໜຶ່ງ"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"ລອງປົດລັອກດ້ວຍໜ້າອີກເທື່ອໜຶ່ງ."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"ບໍ່ສາມາດບັນທຶກຂໍ້ມູນໃບໜ້າໃໝ່ໄດ້. ກະລຸນາລຶບຂໍ້ມູນເກົ່າອອກກ່ອນ."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"ຍົກເລີກການດຳເນີນການກັບໃບໜ້າແລ້ວ"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"ຜູ້ໃຊ້ຍົກເລີກການພິສູດຢືນຢັນໃບໜ້າແລ້ວ"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ຍົກເລີກການດຳເນີນການກັບໃບໜ້າແລ້ວ."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ຜູ້ໃຊ້ຍົກເລີກການປົດລັອກດ້ວຍໜ້າແລ້ວ."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ມີຄວາມພະຍາຍາມຫຼາຍຄັ້ງເກີນໄປ. ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ປິດການພິສູດຢືນຢັນດ້ວຍໃບໜ້າແລ້ວ."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ປິດນຳໃຊ້ການປົດລັອກດ້ວຍໜ້າແລ້ວ."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ກະລຸນາລອງໃໝ່."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"ທ່ານຍັງບໍ່ໄດ້ຕັ້ງຄ່າການພິສູດຢືນຢັນດ້ວຍໃບໜ້າເທື່ອ"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"ບໍ່ຮອງຮັບການພິສູດຢືນຢັນໃບໜ້າຢູ່ອຸປະກອນນີ້"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"ທ່ານຍັງບໍ່ໄດ້ຕັ້ງການປົດລັອກດ້ວຍໜ້າເທື່ອ."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"ບໍ່ຮອງຮັບການປົດລັອກດ້ວຍໜ້າຢູ່ອຸປະກອນນີ້."</string>
     <string name="face_name_template" msgid="7004562145809595384">"ໃບໜ້າ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

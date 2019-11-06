@@ -54,6 +54,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getPackageImportance(String);
     method public long getTotalRam();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
+    method public static boolean isHighEndGfx();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
@@ -3255,10 +3256,13 @@ package android.view {
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method @android.view.ViewDebug.ExportedProperty(mapping={@android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_AUTO, to="auto"), @android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_YES, to="yes"), @android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_NO, to="no"), @android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS, to="yesExcludeDescendants"), @android.view.ViewDebug.IntToString(from=android.view.View.IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS, to="noExcludeDescendants")}) public int getImportantForContentCapture();
     method public android.view.View getTooltipView();
     method public boolean isAutofilled();
     method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    method public final boolean isImportantForContentCapture();
+    method public void onProvideContentCaptureStructure(@NonNull android.view.ViewStructure, int);
     method protected void resetResolvedDrawables();
     method public void resetResolvedLayoutDirection();
     method public void resetResolvedPadding();
@@ -3269,7 +3273,13 @@ package android.view {
     method public boolean restoreFocusNotInCluster();
     method public void setAutofilled(boolean);
     method public final void setFocusedInCluster();
+    method public void setImportantForContentCapture(int);
     method public void setIsRootNamespace(boolean);
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_AUTO = 0; // 0x0
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_NO = 2; // 0x2
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS = 8; // 0x8
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_YES = 1; // 0x1
+    field public static final int IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS = 4; // 0x4
   }
 
   public class ViewConfiguration {

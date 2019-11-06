@@ -464,7 +464,9 @@ public abstract class WebSettings {
      * Note that the feature will continue to be supported on older versions of
      * Android as before.
      *
-     * This function does not have any effect.
+     * @deprecated In Android O and afterwards, this function does not have
+     * any effect, the form data will be saved to platform's autofill service
+     * if applicable.
      */
     @Deprecated
     public abstract  void setSaveFormData(boolean save);

@@ -104,9 +104,17 @@ public class BiometricManager {
      */
     @RequiresPermission(USE_BIOMETRIC)
     public @BiometricError int canAuthenticate() {
+        return canAuthenticate(mContext.getUserId());
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public @BiometricError int canAuthenticate(int userId) {
         if (mService != null) {
             try {
-                return mService.canAuthenticate(mContext.getOpPackageName());
+                return mService.canAuthenticate(mContext.getOpPackageName(), userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -117,6 +125,25 @@ public class BiometricManager {
                 Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
                 return BIOMETRIC_ERROR_HW_UNAVAILABLE;
             }
+        }
+    }
+
+    /**
+     * @hide
+     * @param userId
+     * @return
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public boolean hasEnrolledBiometrics(int userId) {
+        if (mService != null) {
+            try {
+                return mService.hasEnrolledBiometrics(userId);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Remote exception in hasEnrolledBiometrics(): " + e);
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 

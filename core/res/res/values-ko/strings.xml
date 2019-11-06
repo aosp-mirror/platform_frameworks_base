@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"음성사서함 메시지"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi 통화"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM 상태"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"우선순위가 높은 SIM 상태"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"피어가 TTY 모드 FULL을 요청했습니다."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"피어가 TTY 모드 HCO를 요청했습니다."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"피어가 TTY 모드 VCO를 요청했습니다."</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"지문 아이콘"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"얼굴 인증 하드웨어 관리"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"얼굴인식 잠금해제 하드웨어 관리"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"사용할 얼굴 템플릿의 추가 및 삭제 메서드를 앱에서 호출하도록 허용합니다."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"얼굴 인증 하드웨어 사용"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"앱에서 얼굴 인증 하드웨어를 인증에 사용하도록 허용합니다."</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"얼굴 인증"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"얼굴인식 잠금해제 하드웨어 사용"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"앱에서 얼굴인식 잠금해제 하드웨어를 인증에 사용하도록 허용합니다."</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"얼굴인식 잠금해제"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"얼굴 재등록 필요"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"인식률을 개선하려면 얼굴을 다시 등록하세요."</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"정확한 얼굴 데이터를 캡처하지 못했습니다. 다시 시도하세요."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"휴대전화를 왼쪽으로 이동하세요."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"휴대전화를 오른쪽으로 이동하세요."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"기기에서 더 똑바로 바라보세요."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"얼굴이 보이지 않습니다. 휴대전화를 바라보세요."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"휴대전화가 얼굴 정면을 향하도록 두세요."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"너무 많이 움직였습니다. 휴대전화를 흔들리지 않게 잡으세요."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"얼굴을 다시 등록해 주세요."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"더 이상 얼굴을 인식할 수 없습니다. 다시 시도하세요."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"고개를 조금 덜 돌려 보세요."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"고개를 조금 덜 돌려 보세요."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"얼굴이 가려지지 않도록 해 주세요."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"화면 상단 가장자리의 센서를 깨끗하게 닦아 주세요."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"검은색 바를 포함한 화면 상단을 청소하세요."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"얼굴을 확인할 수 없습니다. 하드웨어를 사용할 수 없습니다."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"얼굴 인증을 다시 시도해 보세요."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"얼굴인식 잠금해제를 다시 시도해 주세요."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"새 얼굴 데이터를 저장할 수 없습니다. 먼저 기존 얼굴 데이터를 삭제하세요."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"얼굴 인식 작업이 취소되었습니다."</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"사용자가 얼굴 인증을 취소했습니다."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"얼굴 인식 작업이 취소되었습니다."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"사용자가 얼굴인식 잠금해제를 취소했습니다."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"시도 횟수가 너무 많습니다. 얼굴 인증이 사용 중지되었습니다."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"시도 횟수가 너무 많습니다. 얼굴인식 잠금해제가 사용 중지되었습니다."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"얼굴을 확인할 수 없습니다. 다시 시도하세요."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"얼굴 인증을 설정하지 않았습니다."</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"이 기기에서는 얼굴 인증이 지원되지 않습니다."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"얼굴인식 잠금해제를 설정하지 않았습니다."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"이 기기에서는 얼굴인식 잠금해제가 지원되지 않습니다."</string>
     <string name="face_name_template" msgid="7004562145809595384">"얼굴 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

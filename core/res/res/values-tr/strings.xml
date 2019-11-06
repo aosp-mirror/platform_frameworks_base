@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Sesli mesajlar"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Kablosuz çağrı"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM durumu"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Yüksek öncelikli SIM durumu"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Karşı taraf TTY Modunu TAM yaptı"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Karşı taraf TTY Modunu HCO yaptı"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Karşı taraf TTY Modunu VCO yaptı"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Parmak izi simgesi"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"yüz kimlik doğrulaması donanımını yönetme"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"yüz tanıma kilidi donanımı yönet"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Uygulamanın, kullanılacak yüz şablonlarını ekleme ve silme yöntemlerini başlatmasına izin verir."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"yüz kimlik doğrulaması donanımını kullanma"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Uygulamanın yüz kimlik doğrulaması donanımı kullanmasına izin verir"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Yüzle Kimlik Doğrulama"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"yüz tanıma kilidi donanımını kullan"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Uygulamanın yüz tanıma kilidi donanımı kullanmasına izin verir"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Yüz tanıma kilidi"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Yüzünüzü yeniden kaydedin"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Daha iyi tanınmasını sağlamak için lütfen yüzünüzü yeniden kaydedin"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Doğru yüz verileri yakalanamadı. Tekrar deneyin."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Telefonu sola hareket ettirin."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Telefonu sağa hareket ettirin."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Lütfen cihazınıza daha doğrudan bakın."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Yüzünüz görülmüyor. Telefona bakın."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Yüzünüz telefonun tam karşısına gelmelidir."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Çok fazla hareket ediyorsunuz. Telefonu sabit tutun."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Lütfen yüzünüzü yeniden kaydedin."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Yüz artık tanınamıyor. Tekrar deneyin."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Başınızı biraz daha az çevirin."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Başınızı biraz daha az çevirin."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Yüzünüzün görünmesini engelleyen şeyleri kaldırın."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Ekranın üst kenarındaki sensörü temizleyin."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Siyah çubuk da dahil olmak üzere ekranınızın üst kısmını temizleyin"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Yüz doğrulanamıyor. Donanım kullanılamıyor."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Yüzle kimlik doğrulamayı tekrar deneyin."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Yüz tanıma kilidini yeniden deneyin."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Yeni yüz verisi depolanamıyor. Önce eski bir tanesini silin."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Yüz işlemi iptal edildi"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Yüz kimlik doğrulama işlemini kullanıcı iptal etti"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Yüz işlemi iptal edildi."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Yüz tanıma kilidi kullanıcı tarafından iptal edildi."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Çok fazla deneme yapıldı. Daha sonra tekrar deneyin."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Çok fazla deneme yapıldı. Yüz kimlik doğrulaması devre dışı."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Çok fazla deneme yapıldı. Yüz tanıma kilidi devredışı."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Yüz doğrulanamıyor. Tekrar deneyin."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Yüz kimlik doğrulaması ayarlamadınız"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Bu cihazda yüz kimlik doğrulaması desteklenmiyor"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Yüz tanıma kilidi ayarlamadınız."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Bu cihazda yüz tanıma kilidi desteklenmiyor"</string>
     <string name="face_name_template" msgid="7004562145809595384">"Yüz <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

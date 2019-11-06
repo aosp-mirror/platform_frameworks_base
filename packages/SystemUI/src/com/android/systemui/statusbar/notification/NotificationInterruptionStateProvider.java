@@ -23,7 +23,6 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -32,13 +31,13 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -50,6 +49,7 @@ public class NotificationInterruptionStateProvider {
 
     private static final String TAG = "InterruptionStateProvider";
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_HEADS_UP = true;
     private static final boolean ENABLE_HEADS_UP = true;
     private static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
@@ -186,18 +186,19 @@ public class NotificationInterruptionStateProvider {
      * @return true if the entry should heads up, false otherwise
      */
     public boolean shouldHeadsUp(NotificationEntry entry) {
-        StatusBarNotification sbn = entry.notification;
-
-        if (getShadeController().isDozing()) {
-            if (DEBUG) {
-                Log.d(TAG, "No heads up: device is dozing: " + sbn.getKey());
-            }
-            return false;
+        if (mStatusBarStateController.isDozing()) {
+            return shouldHeadsUpWhenDozing(entry);
+        } else {
+            return shouldHeadsUpWhenAwake(entry);
         }
+    }
+
+    private boolean shouldHeadsUpWhenAwake(NotificationEntry entry) {
+        StatusBarNotification sbn = entry.notification;
 
         boolean inShade = mStatusBarStateController.getState() == SHADE;
         if (entry.isBubble() && inShade) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: in unlocked shade where notification is shown as a "
                         + "bubble: " + sbn.getKey());
             }
@@ -205,7 +206,7 @@ public class NotificationInterruptionStateProvider {
         }
 
         if (!canAlertCommon(entry)) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: notification shouldn't alert: " + sbn.getKey());
             }
             return false;
@@ -216,7 +217,7 @@ public class NotificationInterruptionStateProvider {
         }
 
         if (entry.importance < NotificationManager.IMPORTANCE_HIGH) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: unimportant notification: " + sbn.getKey());
             }
             return false;
@@ -231,13 +232,16 @@ public class NotificationInterruptionStateProvider {
         boolean inUse = mPowerManager.isScreenOn() && !isDreaming;
 
         if (!inUse) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: not in use: " + sbn.getKey());
             }
             return false;
         }
 
         if (!mHeadsUpSuppressor.canHeadsUp(entry, sbn)) {
+            if (DEBUG_HEADS_UP) {
+                Log.d(TAG, "No heads up: aborted by suppressor: " + sbn.getKey());
+            }
             return false;
         }
 
@@ -251,61 +255,44 @@ public class NotificationInterruptionStateProvider {
      * @param entry the entry to check
      * @return true if the entry should ambient pulse, false otherwise
      */
-    public boolean shouldPulse(NotificationEntry entry) {
+    private boolean shouldHeadsUpWhenDozing(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
 
         if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: disabled by setting: " + sbn.getKey());
             }
             return false;
         }
 
-        if (!getShadeController().isDozing()) {
-            if (DEBUG) {
-                Log.d(TAG, "No pulsing: not dozing: " + sbn.getKey());
-            }
-            return false;
-        }
-
         if (!canAlertCommon(entry)) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: notification shouldn't alert: " + sbn.getKey());
             }
             return false;
         }
 
         if (entry.shouldSuppressAmbient()) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: ambient effect suppressed: " + sbn.getKey());
             }
             return false;
         }
 
         if (entry.importance < NotificationManager.IMPORTANCE_DEFAULT) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: not important enough: " + sbn.getKey());
             }
             return false;
         }
-
-        Bundle extras = sbn.getNotification().extras;
-        CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
-        CharSequence text = extras.getCharSequence(Notification.EXTRA_TEXT);
-        if (TextUtils.isEmpty(title) && TextUtils.isEmpty(text)) {
-            if (DEBUG) {
-                Log.d(TAG, "No pulsing: title and text are empty: " + sbn.getKey());
-            }
-            return false;
-        }
-
-        return true;
+         return true;
     }
 
     /**
-     * Common checks between heads up alerting and ambient pulse alerting.  See
+     * Common checks between regular heads up and when pulsing.  See
      * {@link #shouldHeadsUp(NotificationEntry)} and
-     * {@link #shouldPulse(NotificationEntry)}.  Notifications that fail any of these checks
+     * {@link #shouldHeadsUpWhenDozing(NotificationEntry)}.  Notifications that fail any of these
+     * checks
      * should not alert at all.
      *
      * @param entry the entry to check
@@ -315,7 +302,7 @@ public class NotificationInterruptionStateProvider {
         StatusBarNotification sbn = entry.notification;
 
         if (mNotificationFilter.shouldFilterOut(entry)) {
-            if (DEBUG) {
+            if (DEBUG || DEBUG_HEADS_UP) {
                 Log.d(TAG, "No alerting: filtered notification: " + sbn.getKey());
             }
             return false;
@@ -323,7 +310,7 @@ public class NotificationInterruptionStateProvider {
 
         // Don't alert notifications that are suppressed due to group alert behavior
         if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
-            if (DEBUG) {
+            if (DEBUG || DEBUG_HEADS_UP) {
                 Log.d(TAG, "No alerting: suppressed due to group alert behavior");
             }
             return false;
@@ -345,28 +332,28 @@ public class NotificationInterruptionStateProvider {
         StatusBarNotification sbn = entry.notification;
 
         if (!mUseHeadsUp || mPresenter.isDeviceInVrMode()) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: no huns or vr mode");
             }
             return false;
         }
 
         if (entry.shouldSuppressPeek()) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: suppressed by DND: " + sbn.getKey());
             }
             return false;
         }
 
         if (isSnoozedPackage(sbn)) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: snoozed package: " + sbn.getKey());
             }
             return false;
         }
 
         if (entry.hasJustLaunchedFullScreenIntent()) {
-            if (DEBUG) {
+            if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No heads up: recent fullscreen: " + sbn.getKey());
             }
             return false;
@@ -387,6 +374,19 @@ public class NotificationInterruptionStateProvider {
 
     protected NotificationPresenter getPresenter() {
         return mPresenter;
+    }
+
+    /**
+     * When an entry was added, should we launch its fullscreen intent? Examples are Alarms or
+     * incoming calls.
+     *
+     * @param entry the entry that was added
+     * @return {@code true} if we should launch the full screen intent
+     */
+    public boolean shouldLaunchFullScreenIntentWhenAdded(NotificationEntry entry) {
+        return entry.notification.getNotification().fullScreenIntent != null
+            && (!shouldHeadsUp(entry)
+                || mStatusBarStateController.getState() == StatusBarState.KEYGUARD);
     }
 
     /** A component which can suppress heads-up notifications due to the overall state of the UI. */

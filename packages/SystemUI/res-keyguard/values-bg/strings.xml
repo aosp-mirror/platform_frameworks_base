@@ -151,4 +151,7 @@
       <item quantity="other">SIM картата вече е деактивирана. Въведете PUK кода, за да продължите. Остават ви <xliff:g id="_NUMBER_1">%d</xliff:g> опита, преди SIM картата да стане неизползваема завинаги. Свържете се с оператора за подробности.</item>
       <item quantity="one">SIM картата вече е деактивирана. Въведете PUK кода, за да продължите. Остава ви <xliff:g id="_NUMBER_0">%d</xliff:g> опит, преди SIM картата да стане неизползваема завинаги. Свържете се с оператора за подробности.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Стандартен"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Балонен"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Аналогов"</string>
 </resources>

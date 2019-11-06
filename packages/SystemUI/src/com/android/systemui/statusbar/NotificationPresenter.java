@@ -63,11 +63,6 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
     int getMaxNotificationsWhileLocked(boolean recompute);
 
     /**
-     * True if the presenter is currently locked.
-     */
-    boolean isPresenterLocked();
-
-    /**
      * Called when the row states are updated by {@link NotificationViewHierarchyManager}.
      */
     void onUpdateRowStates();

@@ -151,4 +151,7 @@
       <item quantity="other">SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. <xliff:g id="_NUMBER_1">%d</xliff:g>번 더 실패하면 SIM을 완전히 사용할 수 없게 됩니다. 자세한 내용은 이동통신사에 문의하세요.</item>
       <item quantity="one">SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. <xliff:g id="_NUMBER_0">%d</xliff:g>번 더 실패하면 SIM을 완전히 사용할 수 없게 됩니다. 자세한 내용은 이동통신사에 문의하세요.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"기본"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"버블"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"아날로그"</string>
 </resources>

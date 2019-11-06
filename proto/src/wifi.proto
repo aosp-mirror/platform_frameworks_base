@@ -551,6 +551,30 @@ message WifiLog {
 
   // Histogram of the EAP method type of all installed Passpoint profiles for R2
   repeated PasspointProfileTypeCount installed_passpoint_profile_type_for_r2 = 148;
+
+  // Histogram of Tx link speed at 2G
+  repeated Int32Count tx_link_speed_count_2g = 149;
+
+  // Histogram of Tx link speed at 5G low band
+  repeated Int32Count tx_link_speed_count_5g_low = 150;
+
+  // Histogram of Tx link speed at 5G middle band
+  repeated Int32Count tx_link_speed_count_5g_mid = 151;
+
+  // Histogram of Tx link speed at 5G high band
+  repeated Int32Count tx_link_speed_count_5g_high = 152;
+
+  // Histogram of Rx link speed at 2G
+  repeated Int32Count rx_link_speed_count_2g = 153;
+
+  // Histogram of Rx link speed at 5G low band
+  repeated Int32Count rx_link_speed_count_5g_low = 154;
+
+  // Histogram of Rx link speed at 5G middle band
+  repeated Int32Count rx_link_speed_count_5g_mid = 155;
+
+  // Histogram of Rx link speed at 5G high band
+  repeated Int32Count rx_link_speed_count_5g_high = 156;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -826,6 +850,7 @@ message LinkSpeedCount {
   // Sum of squares of rssi values (dBm^2)
   optional int64 rssi_sum_of_squares_dbm_sq = 4;
 }
+
 
 // Number of occurrences of Soft AP session durations
 message SoftApDurationBucket {

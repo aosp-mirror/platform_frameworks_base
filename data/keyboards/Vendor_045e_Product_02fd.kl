@@ -53,5 +53,10 @@ key 158   BUTTON_SELECT
 # Hamburger - 3 parallel lines
 key 315   BUTTON_START
 
-# Xbox key
+# There are at least two versions of firmware out for this controller.
+# They send different linux keys for the "Xbox" button.
+# Xbox key (original firmware)
 key 172   BUTTON_MODE
+
+# Xbox key (newer firmware)
+key 316   BUTTON_MODE

@@ -151,4 +151,7 @@
       <item quantity="one">Naka-disable na ang SIM. Ilagay ang PUK code upang magpatuloy. Mayroon kang <xliff:g id="_NUMBER_1">%d</xliff:g> natitirang pagsubok bago tuluyang hindi magamit ang SIM. Makipag-ugnayan sa carrier para sa mga detalye.</item>
       <item quantity="other">Naka-disable na ang SIM. Ilagay ang PUK code upang magpatuloy. Mayroon kang <xliff:g id="_NUMBER_1">%d</xliff:g> na natitirang pagsubok bago tuluyang hindi magamit ang SIM. Makipag-ugnayan sa carrier para sa mga detalye.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Default"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bubble"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analog"</string>
 </resources>

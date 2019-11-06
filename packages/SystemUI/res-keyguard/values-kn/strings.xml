@@ -151,4 +151,7 @@
       <item quantity="one">ಸಿಮ್ ಅನ್ನು ಈಗ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಸಲು PUK ಕೋಡ್ ನಮೂದಿಸಿ. ಸಿಮ್ ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಪ್ರಯೋಜಕವಾಗುವ ಮುನ್ನ ನಿಮ್ಮಲ್ಲಿ <xliff:g id="_NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ. ವಿವರಗಳಿಗಾಗಿ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಿ.</item>
       <item quantity="other">ಸಿಮ್ ಅನ್ನು ಈಗ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ. ಮುಂದುವರಿಸಲು PUK ಕೋಡ್ ನಮೂದಿಸಿ. ಸಿಮ್ ಶಾಶ್ವತವಾಗಿ ನಿಷ್ಪ್ರಯೋಜಕವಾಗುವ ಮುನ್ನ ನಿಮ್ಮಲ್ಲಿ <xliff:g id="_NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ. ವಿವರಗಳಿಗಾಗಿ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಿ.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"ಡೀಫಾಲ್ಟ್"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"ಬಬಲ್"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"ಅನಲಾಗ್"</string>
 </resources>

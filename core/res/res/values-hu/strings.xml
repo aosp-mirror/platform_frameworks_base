@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Hangpostaüzenetek"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-hívás"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM-kártya állapota"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Elsődleges SIM-kártya állapota"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Partner által kért TTY-mód: FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Partner által kért TTY-mód: HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Partner által kért TTY-mód: VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ujjlenyomat ikon"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"arcfelismerő hardver kezelése"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"arcalapú feloldásra szolgáló hardver kezelése"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Engedélyezi, hogy az alkalmazás arcsablon-hozzáadási és -törlési metódusokat hívjon."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"arcfelismerő hardver használata"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Engedélyezi, hogy az alkalmazás hitelesítésre használja az arcfelismerő hardvert"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Arcfelismerés"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"arcalapú feloldásra szolgáló hardver használata"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Engedélyezi, hogy az alkalmazás hitelesítésre használja az arcalapú feloldás hardverét"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Arcalapú feloldás"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Rögzítsen újra képet az arcáról"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"A felismerés javítása érdekében rögzítsen újra az arcáról készített képet"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Sikertelen az arc pontos rögzítése. Próbálja újra."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mozgassa a telefont balra."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mozgassa a telefont jobbra."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Szemből nézzen az eszközre."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nem látszik az arca. Nézzen a telefonra."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"A telefont közvetlenül az arca elé tegye."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Túl sok a mozgás. Tartsa stabilan a telefont."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Rögzítsen újra képet az arcáról."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Már nem lehet felismerni az arcát. Próbálja újra."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Kicsit kevésbé fordítsa el a fejét."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Kicsit kevésbé fordítsa el a fejét."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Távolítson el mindent, ami takarja az arcát."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Tisztítsa meg a képernyő tetején lévő érzékelőt."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Tisztítsa meg a képernyő tetejét, a fekete sávot is beleértve."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Sikertelen arcellenőrzés. A hardver nem érhető el."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Próbálja újra az arcfelismerést."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Próbálja újra az arcalapú feloldást."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nem tárolhatók újabb arcadatok. Törölje valamelyik arcot."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Az arccal kapcsolatos művelet megszakítva"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Az arc hitelesítését megszakította a felhasználó"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Az arccal kapcsolatos művelet törölve."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Az arcalapú feloldást megszakította a felhasználó."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Túl sok próbálkozás. Próbálja újra később."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Túl sokszor próbálkozott. Arcfelismerés letiltva."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Túl sok próbálkozás. Az arcalapú feloldás letiltva."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nem sikerült ellenőrizni az arcát. Próbálja újra."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Nem állította be az arcfelismerést"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Az eszköz nem támogatja az arcfelismerést"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Nem állította be az arcalapú feloldást."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Az eszköz nem támogatja az arcalapú feloldást"</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> arc"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1353,7 +1354,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Folyamatban van a csatlakoztatott eszköz töltése. Koppintson a további lehetőségekhez."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analóg audiotartozék észlelve"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"A csatlakoztatott eszköz nem kompatibilis ezzel a telefonnal. További információért koppintson ide."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hibakereső csatlakoztatva"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-hibakereső csatlakoztatva"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Koppintson az USB-hibakeresés kikapcsolásához"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Válassza ezt az USB hibakeresés kikapcsolásához."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Tesztelési alapkörnyezet mód engedélyezve"</string>

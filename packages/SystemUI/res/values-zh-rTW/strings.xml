@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"正在尋找你的臉孔"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"臉孔驗證成功"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"確認完畢"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"輕觸 [確認] 完成驗證設定"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"請輕觸指紋感應器"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指紋圖示"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"正在尋找你的臉孔…"</string>
@@ -263,8 +264,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"工作模式已開啟。"</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="5605534876107300711">"工作模式已關閉。"</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"工作模式已開啟。"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"Data Saver 已關閉。"</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"Data Saver 已開啟。"</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"數據節省模式已關閉。"</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"數據節省模式已開啟。"</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"已關閉感應器隱私設定。"</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"已開啟感應器隱私設定。"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"螢幕亮度"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"較不緊急的通知會顯示在下方"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"再次輕觸即可開啟"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑動即可解鎖"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"向上滑動即可開啟"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"這個裝置是由貴機構所管理"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"這個裝置是由 <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> 所管理"</string>
     <string name="phone_hint" msgid="4872890986869209950">"滑動手機圖示即可啟用"</string>
@@ -744,8 +745,8 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"已與耳機連線"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"已與耳機連線"</string>
     <string name="data_saver" msgid="5037565123367048522">"數據節省模式"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Data Saver 已開啟"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Data Saver 已關閉"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"數據節省模式已開啟"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"數據節省模式已關閉"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"開啟"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"關閉"</string>
     <string name="nav_bar" msgid="1993221402773877607">"導覽列"</string>

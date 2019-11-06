@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensajes del buzón de voz"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Llamada con Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Estado de SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Notificaciones de prioridad alta sobre el estado de la SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"El dispositivo del mismo nivel solicitó el modo TTY FULL."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"El dispositivo del mismo nivel solicitó el modo TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"El dispositivo del mismo nivel solicitó el modo TTY VCO."</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ícono de huella digital"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"administrar el hardware de autenticación facial"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"administrar el hardware de Desbloqueo facial"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permite que la app emplee métodos para agregar y borrar plantillas de rostros para su uso."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"usar el hardware de autenticación facial"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permite que la app use el hardware de autenticación facial para reconocerte"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Autenticación facial"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"usar el hardware de Desbloqueo facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Permite que la app use el hardware de Desbloqueo facial con fines de autenticación"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Desbloqueo facial"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Vuelve a registrar tu rostro"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Para mejorar el reconocimiento, vuelve a registrar tu rostro"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Datos faciales imprecisos. Vuelve a intentarlo."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mueve el teléfono hacia la izquierda."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mueve el teléfono hacia la derecha."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Mira directamente al dispositivo."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"No se ve tu cara. Mira el teléfono."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Ubica el rostro directamente frente al teléfono."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Te estás moviendo demasiado. No muevas el teléfono"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Vuelve a registrar tu cara."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ya no se reconoce la cara. Vuelve a intentarlo."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Gira la cabeza un poco menos."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Gira la cabeza un poco menos."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Quítate cualquier objeto que te cubra el rostro."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Limpiar sensor del borde superior de la pantalla."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Limpia la parte superior de la pantalla, incluida la barra negra"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"No se verificó el rostro. Hardware no disponible."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Vuelve a realizar la autenticación de rostro."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Vuelve a probar el Desbloqueo facial."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"No hay espacio para datos faciales nuevos. Borra uno viejo."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Se canceló el reconocimiento facial"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"El usuario canceló la autenticación facial"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Se canceló el reconocimiento facial."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"El usuario canceló el Desbloqueo facial."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Demasiados intentos. Inténtalo de nuevo más tarde."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Demasiados intentos. Se inhabilitó la autenticación facial."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Demasiados intentos. Se inhabilitó el Desbloqueo facial."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"No se pudo verificar la cara. Vuelve a intentarlo."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"No configuraste la autenticación facial"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"No se admite la autenticación facial en este dispositivo"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"No configuraste el Desbloqueo facial."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"No se admite el Desbloqueo facial en este dispositivo."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Rostro <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

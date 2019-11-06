@@ -136,6 +136,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_DEX_BOOT = "dex_boot";
 
     /**
+     * Namespace for display manager related features. The names to access the properties in this
+     * namespace should be defined in {@link android.hardware.display.DisplayManager}.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_DISPLAY_MANAGER = "display_manager";
+
+    /**
      * Namespace for all Game Driver features.
      *
      * @hide
@@ -336,6 +344,20 @@ public final class DeviceConfig {
         @TestApi
         String KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE =
                 "system_gestures_excluded_by_pre_q_sticky_immersive";
+
+        /**
+         * The minimum duration between gesture exclusion logging for a given window in
+         * milliseconds.
+         *
+         * Events that happen in-between will be silently dropped.
+         *
+         * A non-positive value disables logging.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_WINDOW_MANAGER
+         * @hide
+         */
+        String KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS =
+                "system_gesture_exclusion_log_debounce_millis";
     }
 
     private static final Object sLock = new Object();

@@ -151,4 +151,7 @@
       <item quantity="one">সিম অক্ষম করা হয়েছে। চালিয়ে যেতে PUK কোড লিখুন। আপনি আর <xliff:g id="_NUMBER_1">%d</xliff:g> বার চেষ্টা করতে পারবেন, তারপরে এই সিমটি আর একেবারেই ব্যবহার করা যাবে না। বিশদে জানতে পরিষেবা প্রদানকারীর সাথে যোগাযোগ করুন।</item>
       <item quantity="other">সিম অক্ষম করা হয়েছে। চালিয়ে যেতে PUK কোড লিখুন। আপনি আর <xliff:g id="_NUMBER_1">%d</xliff:g> বার চেষ্টা করতে পারবেন, তারপরে এই সিমটি আর একেবারেই ব্যবহার করা যাবে না। বিশদে জানতে পরিষেবা প্রদানকারীর সাথে যোগাযোগ করুন।</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"ডিফল্ট"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"বাবল"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"অ্যানালগ"</string>
 </resources>

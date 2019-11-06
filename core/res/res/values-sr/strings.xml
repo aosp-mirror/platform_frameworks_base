@@ -96,6 +96,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Поруке говорне поште"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Позивање преко Wi-Fi мреже"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Статус SIM-а"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Обавештења SIM картице са статусом „висок приоритет“"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Корисник захтева ПОТПУН режим TTY"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Корисник захтева ПРЕНОС ЗВУКА за режим TTY"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Корисник захтева ПРЕНОС ГЛАСА за режим TTY"</string>
@@ -553,11 +554,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Икона отиска прста"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"управљање хардв. за потврду идентитета помоћу лица"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"управљање хардв. за откључавање лицем"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Дозвољава да апликација активира методе за додавање и брисање шаблона лица ради коришћења."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"коришћење хардв. за потврду идентитета помоћу лица"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Дозвољава да апликација користи хардвер за потврду идентитета помоћу лица"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Потврда идентитета лицем"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"коришћење хардвера за откључавање лицем"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Дозвољава да апликација користи хардвер за откључавање лицем ради потврде идентитета"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Откључавање лицем"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Поново региструјте лице"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Да бисте побољшали препознавање, поново региструјте лице"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Снимање лица није успело. Пробајте поново."</string>
@@ -570,7 +571,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Померите телефон улево."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Померите телефон удесно."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Гледајте право у уређај."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Не види се лице. Гледајте у телефон."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Поставите лице директно испред телефона"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Много се померате. Држите телефон мирно."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Поново региструјте лице."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Више не може да се препозна лице. Пробајте поново."</string>
@@ -579,19 +580,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Мало мање померите главу."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Мало мање померите главу."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Уклоните све што вам заклања лице."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Очистите сензор на горњој ивици екрана."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Очистите горњи део екрана, укључујући црну траку"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Провера лица није успела. Хардвер није доступан."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Пробајте поново потврду идентитета помоћу лица."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Пробајте поново откључавање лицем."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Нови подаци о лицу нису сачувани. Прво избришете претходне."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Обрада лица је отказана"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Корисник је отказао потврду идентитета лицем"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Обрада лица је отказана."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Корисник је отказао откључавање лицем"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Превише покушаја. Пробајте поново касније."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Превише покушаја. Потврда идентитета лицем је онемогућена."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Превише покушаја. Откључавање лицем је онемогућено."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Провера лица није успела. Пробајте поново."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Нисте подесили потврду идентитета лицем"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Препознавање лица није подржано на овом уређају"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Нисте подесили откључавање лицем"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Откључавање лицем није подржано на овом уређају"</string>
     <string name="face_name_template" msgid="7004562145809595384">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

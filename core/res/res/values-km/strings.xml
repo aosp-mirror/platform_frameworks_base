@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"សារ​ជា​សំឡេង"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ការហៅ​ទូរសព្ទ​តាម Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"ស្ថានភាព​ស៊ីម"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"ស្ថានភាពស៊ីម​ដែលមាន​អាទិភាព​ខ្ពស់"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"ម៉ាស៊ីនកូនបានស្នើ TTY Mode VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"រូបតំណាងស្នាមម្រាមដៃ"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"គ្រប់គ្រង​ផ្នែករឹង​ផ្ទៀងផ្ទាត់​ផ្ទៃ​មុខ"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"គ្រប់គ្រង​ហាតវែរ​ដោះសោតាមទម្រង់មុខ"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"អនុញ្ញាតឱ្យកម្មវិធីប្រើវិធីសាស្ត្រដើម្បី​បញ្ចូល និងលុបទម្រង់​គំរូ​ផ្ទៃមុខសម្រាប់ប្រើប្រាស់។"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ប្រើ​ផ្នែករឹង​ផ្ទៀងផ្ទាត់​ផ្ទៃ​មុខ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ផ្នែករឹង​ផ្ទៀងផ្ទាត់​ផ្ទៃមុខ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ការផ្ទៀងផ្ទាត់មុខ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ប្រើ​ហាតវែរ​ដោះសោ​តាមទម្រង់មុខ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ហាតវែរ​ដោះសោតាមទម្រង់មុខ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"ការដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ដើម្បី​ធ្វើឱ្យ​ការសម្គាល់មុខ​ប្រសើរជាងមុន សូមស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"មិនអាច​ថត​ទិន្នន័យទម្រង់មុខ​បាន​ត្រឹមត្រូវទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ផ្លាស់ទី​ទូរសព្ទទៅខាងឆ្វេង។"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ផ្លាស់ទីទូរសព្ទទៅខាងស្ដាំ។"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"សូមមើល​ឱ្យចំ​ឧបករណ៍​របស់អ្នក​ជាងមុន។"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"មើលមិនឃើញ​មុខ​របស់អ្នកទេ។ សូមសម្លឹងមើល​ទូរសព្ទ។"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"បែរមុខ​របស់អ្នក​ឱ្យចំ​ពីមុខ​ទូរសព្ទ​ផ្ទាល់។"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"មាន​ចលនា​ខ្លាំងពេក។ សូមកាន់​ទូរសព្ទ​ឱ្យនឹង។"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"សូម​​ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត។"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"មិន​អាច​សម្គាល់មុខ​បាន​ទៀតទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ងាកក្បាល​របស់អ្នកតិចជាងមុន​បន្តិច។"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ងាកក្បាល​របស់អ្នក​បន្តិចទៀត។"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"យកអ្វី​ដែលបាំង​មុខ​របស់អ្នកចេញ។"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"សម្អាត​ឧបករណ៍ចាប់សញ្ញា​នៅគែម​ខាងលើ​នៃអេក្រង់។"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"សម្អាតផ្នែកខាង​លើនៃ​អេក្រង់​របស់​អ្នក រួមទាំង​របារខ្មៅ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"មិនអាច​ផ្ទៀងផ្ទាត់​មុខបានទេ។ មិនមាន​ហាតវែរទេ។"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"សាកល្បង​ផ្ទៀងផ្ទាត់​មុខម្ដងទៀត។"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"សាកល្បង​ដោះសោតាមទម្រង់មុខ​ម្ដងទៀត។"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"មិនអាច​ផ្ទុកទិន្នន័យទម្រង់​មុខថ្មី​បានទេ។ សូមលុបទិន្នន័យទម្រង់​មុខចាស់ជាមុនសិន។"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"បាន​បោះបង់​ប្រតិបត្តិការចាប់​ទម្រង់មុខ"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"ការផ្ទៀងផ្ទាត់មុខ​ត្រូវបានបោះបង់​ដោយអ្នកប្រើប្រាស់"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"បាន​បោះបង់​ប្រតិបត្តិការចាប់​ផ្ទៃមុខ។"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"អ្នកប្រើប្រាស់​បានបោះបង់​ការដោះសោ​តាមទម្រង់មុខ។"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"ព្យាយាមចូលច្រើនពេក។ បានបិទ​ការផ្ទៀងផ្ទាត់មុខ។"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"ការដោះសោ​តាមទម្រង់មុខត្រូវបាន​បិទ ដោយ​សារ​ព្យាយាម​ច្រើនដង​ពេក។"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"មិន​អាច​ផ្ទៀងផ្ទាត់​មុខ​បាន​ទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"អ្នក​មិនទាន់​រៀបចំ​ការផ្ទៀងផ្ទាត់​មុខនៅឡើយទេ"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"មិន​អាច​ប្រើ​ការផ្ទៀងផ្ទាត់​មុខ​នៅលើ​ឧបករណ៍​នេះ​បានទេ"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"អ្នក​មិនទាន់​រៀបចំ​ការដោះសោតាមទម្រង់មុខ​នៅឡើយទេ។"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"មិនអាចប្រើ​ការដោះសោតាមទម្រង់មុខ​នៅលើ​ឧបករណ៍​នេះ​បានទេ។"</string>
     <string name="face_name_template" msgid="7004562145809595384">"ផ្ទៃមុខទី <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

@@ -26,7 +26,6 @@ import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -38,7 +37,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 public final class StatusBarTouchableRegionManager implements
         OnComputeInternalInsetsListener, ConfigurationListener {
 
-    private final AssistManager mAssistManager = Dependency.get(AssistManager.class);
     private final BubbleController mBubbleController = Dependency.get(BubbleController.class);
     private final Context mContext;
     private final HeadsUpManagerPhone mHeadsUpManager;
@@ -48,6 +46,7 @@ public final class StatusBarTouchableRegionManager implements
     private int mStatusBarHeight;
     private final View mStatusBarWindowView;
     private boolean mForceCollapsedUntilLayout = false;
+    private final StatusBarWindowController mStatusBarWindowController;
 
     public StatusBarTouchableRegionManager(@NonNull Context context,
                                            HeadsUpManagerPhone headsUpManager,
@@ -57,10 +56,15 @@ public final class StatusBarTouchableRegionManager implements
         mHeadsUpManager = headsUpManager;
         mStatusBar = statusBar;
         mStatusBarWindowView = statusBarWindowView;
+        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
 
         initResources();
 
         mBubbleController.setBubbleStateChangeListener((hasBubbles) -> {
+            updateTouchableRegion();
+        });
+
+        mStatusBarWindowController.setForcePluginOpenListener((forceOpen) -> {
             updateTouchableRegion();
         });
         Dependency.get(ConfigurationController.class).addCallback(this);
@@ -77,7 +81,8 @@ public final class StatusBarTouchableRegionManager implements
                 mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpManager.isHeadsUpGoingAway()
                         || mBubbleController.hasBubbles()
                         || mForceCollapsedUntilLayout
-                        || hasCutoutInset;
+                        || hasCutoutInset
+                        || mStatusBarWindowController.getForcePluginOpen();
         if (shouldObserve == mShouldAdjustInsets) {
             return;
         }

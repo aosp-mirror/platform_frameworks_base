@@ -50,7 +50,7 @@ import java.util.List;
  * override {@link #getView(int, View, ViewGroup)}
  * and inflate a view resource.
  * For a code example, see
- * the <a href="https://developer.android.com/samples/CustomChoiceList/index.html">
+ * the <a href="https://github.com/googlesamples/android-CustomChoiceList/#readme">
  * CustomChoiceList</a> sample.
  * </p>
  * <p>

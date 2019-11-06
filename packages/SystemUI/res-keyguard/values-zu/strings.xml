@@ -151,4 +151,7 @@
       <item quantity="one">I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-<xliff:g id="_NUMBER_1">%d</xliff:g> esele ngaphambi kokuthi i-SIM ingasebenziseki unaphakade. Xhumana nenkampani yenethiwekhi ngemininingwane.</item>
       <item quantity="other">I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-<xliff:g id="_NUMBER_1">%d</xliff:g> esele ngaphambi kokuthi i-SIM ingasebenziseki unaphakade. Xhumana nenkampani yenethiwekhi ngemininingwane.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Okuzenzekelayo"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Ibhamuza"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"I-Analog"</string>
 </resources>

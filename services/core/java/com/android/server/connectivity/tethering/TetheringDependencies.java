@@ -21,7 +21,6 @@ import android.net.NetworkRequest;
 import android.net.ip.IpServer;
 import android.net.util.SharedLog;
 import android.os.Handler;
-import android.telephony.SubscriptionManager;
 
 import com.android.internal.util.StateMachine;
 import com.android.server.connectivity.MockableSystemProperties;
@@ -88,9 +87,10 @@ public class TetheringDependencies {
     }
 
     /**
-     * Get default data subscription id to build TetheringConfiguration.
+     * Generate a new TetheringConfiguration according to input sub Id.
      */
-    public int getDefaultDataSubscriptionId() {
-        return SubscriptionManager.getDefaultDataSubscriptionId();
+    public TetheringConfiguration generateTetheringConfiguration(Context ctx, SharedLog log,
+            int subId) {
+        return new TetheringConfiguration(ctx, log, subId);
     }
 }

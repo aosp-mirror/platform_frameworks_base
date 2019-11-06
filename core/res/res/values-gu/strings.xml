@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"વૉઇસમેઇલ સંદેશા"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"વાઇ-ફાઇ કૉલિંગ"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"સિમનું સ્ટેટસ"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"સિમ કાર્ડનું ઉચ્ચ પ્રાધાન્યતાનું સ્ટેટસ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"પીઅરે TTY મોડ પૂર્ણની વિનંતી કરી"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"પીઅરે TTY મોડ HCO ની વિનંતી કરી"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"પીઅરે TTY મોડ VCO ની વિનંતી કરી"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ફિંગરપ્રિન્ટ આયકન"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"ચહેરા પ્રમાણીકરણના હાર્ડવેરને મેનેજ કરો"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"ફેસ અનલૉકના હાર્ડવેરને મેનેજ કરો"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"ઍપને ઉપયોગ માટે ચહેરાના નમૂના ઉમેરવા અને ડિલીટ કરવાની પદ્ધતિને રદ કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ચહેરા પ્રમાણીકરણના હાર્ડવેરનો ઉપયોગ કરો"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ઍપને પ્રમાણીકરણ માટે ચહેરા પ્રમાણીકરણના હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"ચહેરાનું પ્રમાણીકરણ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"ફેસ અનલૉક હાર્ડવેરનો ઉપયોગ કરો"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"ઍપને પ્રમાણીકરણ માટે ફેસ અનલૉકના હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"ફેસ અનલૉક"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ઓળખવાની પ્રક્રિયાને બહેતર બનાવવા માટે કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"ચહેરાનો સચોટ ડેટા કૅપ્ચર ન થયો. ફરી પ્રયાસ કરો."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ફોનને ડાબી બાજુ ખસેડો."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ફોનને જમણી બાજુ ખસેડો."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"કૃપા કરીને તમારા ડિવાઇસ તરફ સીધું જુઓ."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"તમારો ચહેરો દેખાતો નથી. ફોનની સામે જુઓ."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"તમારો ચહેરો તમારા ફોનની બિલકુલ સામે રાખો."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"ડિવાઇસ અસ્થિર છે. ફોનને સ્થિર રાખો."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"ચહેરો ઓળખી શકાતો નથી. ફરી પ્રયાસ કરો."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"તમારું માથું થોડું ફેરવો."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"તમારું માથું થોડું ઓછું ફેરવો."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"તમારા ચહેરાને છુપાવતી કંઈપણ વસ્તુ દૂર કરો."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"સ્ક્રીનની ટોચની ધાર પરના સેન્સરને સાફ કરો."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"કાળી પટ્ટી સહિત, તમારી સ્ક્રીનની ટોચ સાફ કરો"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"ચહેરો ચકાસી શકાતો નથી. હાર્ડવેર ઉપલબ્ધ નથી."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"ચહેરા પ્રમાણીકરણનો ફરીથી પ્રયાસ કરી જુઓ."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"ફેસ અનલૉકને ફરી અજમાવો."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"ચહેરાનો નવો ડેટા સ્ટોર કરી શકતાં નથી. પહેલા જૂનો ડિલીટ કરો."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"ચહેરા સંબંધિત પ્રક્રિયા રદ કરવામાં આવી છે"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"વપરાશકર્તાએ ચહેરાનું પ્રમાણીકરણ રદ કર્યુ"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ચહેરા સંબંધિત કાર્યવાહી રદ કરવામાં આવી છે."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"વપરાશકર્તાએ ફેસ અનલૉક રદ કર્યું."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ઘણા બધા પ્રયત્નો. થોડા સમય પછી ફરી પ્રયાસ કરો."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"ઘણા બધા પ્રયાસો. ચહેરાનું પ્રમાણીકરણ બંધ કરવામાં આવ્યું છે."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"ઘણા બધા પ્રયાસો. ફેસ અનલૉક બંધ કર્યું."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"ચહેરો ચકાસી શકાતો નથી. ફરી પ્રયાસ કરો."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"તમે ચહેરાના પ્રમાણીકરણનું સેટઅપ કર્યું નથી"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"આ ડિવાઇસ પર ચહેરાનું પ્રમાણીકરણ કરવાની સુવિધા નથી"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"તમે ફેસ અનલૉકનું સેટઅપ કર્યું નથી."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"આ ડિવાઇસ પર ફેસ અનલૉક કરવાની સુવિધા નથી."</string>
     <string name="face_name_template" msgid="7004562145809595384">"ચહેરાનું <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1343,7 +1344,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"કોઈ પરવાનગીઓ જરૂરી નથી"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"આનાથી તમારા પૈસા ખર્ચ થઈ શકે છે"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ઓકે"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"આ ઉપકરણને USB મારફતે ચાર્જ કરી રહ્યાં છીએ"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"આ ડિવાઇસને USB મારફતે ચાર્જ કરી રહ્યાં છીએ"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"કનેક્ટેડ ઉપકરણને USB મારફતે ચાર્જ કરી રહ્યાં છીએ"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ફાઇલ ટ્રાન્સફર ચાલુ છે"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB મારફતે PTP ચાલુ કર્યું"</string>

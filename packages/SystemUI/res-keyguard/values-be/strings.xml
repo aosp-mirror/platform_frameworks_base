@@ -167,4 +167,7 @@
       <item quantity="many">SIM-карта заблакіравана. Каб працягнуць, увядзіце PUK-код. У вас ёсць яшчэ <xliff:g id="_NUMBER_1">%d</xliff:g> спроб, пасля чаго SIM-карта будзе заблакіравана назаўсёды. Звярніцеся да аператара, каб даведацца больш.</item>
       <item quantity="other">SIM-карта заблакіравана. Каб працягнуць, увядзіце PUK-код. У вас ёсць яшчэ <xliff:g id="_NUMBER_1">%d</xliff:g> спробы, пасля чаго SIM-карта будзе заблакіравана назаўсёды. Звярніцеся да аператара, каб даведацца больш.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Стандартны"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Бурбалкі"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Са стрэлкамі"</string>
 </resources>

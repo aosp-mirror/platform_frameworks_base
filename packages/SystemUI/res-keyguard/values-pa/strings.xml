@@ -151,4 +151,7 @@
       <item quantity="one">ਸਿਮ ਹੁਣ ਬੰਦ ਹੋ ਗਿਆ ਹੈ। ਜਾਰੀ ਰੱਖਣ ਲਈ PUK ਕੋਡ ਦਾਖਲ ਕਰੋ। ਸਿਮ ਦੇ ਪੱਕੇ ਤੌਰ \'ਤੇ ਬੇਕਾਰ ਹੋ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="_NUMBER_1">%d</xliff:g> ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਕੈਰੀਅਰ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।</item>
       <item quantity="other">ਸਿਮ ਹੁਣ ਬੰਦ ਹੋ ਗਿਆ ਹੈ। ਜਾਰੀ ਰੱਖਣ ਲਈ PUK ਕੋਡ ਦਾਖਲ ਕਰੋ। ਸਿਮ ਦੇ ਪੱਕੇ ਤੌਰ \'ਤੇ ਬੇਕਾਰ ਹੋ ਜਾਣ ਤੋਂ ਪਹਿਲਾਂ ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="_NUMBER_1">%d</xliff:g> ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ। ਵੇਰਵਿਆਂ ਲਈ ਕੈਰੀਅਰ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"ਪੂਰਵ-ਨਿਰਧਾਰਤ"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"ਬੁਲਬੁਲਾ"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"ਐਨਾਲੌਗ"</string>
 </resources>

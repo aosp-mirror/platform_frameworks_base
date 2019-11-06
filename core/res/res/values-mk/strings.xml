@@ -71,10 +71,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Одбивање несакани вознемирувачки повици"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Испорака на повикувачки број"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Не вознемирувај"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Стандардно, повикувачот со овој ID е ограничен. Следен повик: ограничен"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Стандардно, повикувачот со овој ID е ограничен. Следен повик: не е ограничен"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: ограничен"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: не е ограничен"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Стандардно, ID на повикувач е скриен. Следен повик: скриен"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Стандардно, ID на повикувач е скриен. Следен повик: не е скриен"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Стандардно, ID на повикувач не е скриен. Следен повик: скриен"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, ID на повикувач не е скриен. Следен повик: не е скриен"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услугата не е предвидена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не може да го промените поставувањето за ID на повикувач."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Нема услуга за мобилен интернет"</string>
@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Пораки од говорна пошта"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Повикување преку Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Статус на SIM-картичка"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Статус на SIM-известувања со висок приоритет"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Рамноправен уред го побара режимот на TTY „FULL“"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Рамноправен уред го побара режимот на TTY „HCO“"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Рамноправен уред го побара режимот на TTY „VCO“"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Икона за отпечатоци"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"управува со хардвер за проверка на лице"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"управува со хардвер за „Отклучување со лик“"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Дозволува апликац. да повика начини за додавање и бришење шаблони на лице за користење."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"користи хардвер за проверка на лице"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Дозволува апликацијата да користи хардвер за лице за проверка"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Проверка на лик"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"користи хардвер за „Отклучување со лик“"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Дозволува апликацијата да користи хардвер за „Отклучување со лик“ за проверка"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Отклучување со лик"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Повторно регистрирајте го ликот"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"За да се подобри препознавањето, повторно регистрирајте го ликот"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Не се сними прецизна слика. Обидете се повторно."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Поместете го телефонот налево."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Поместете го телефонот надесно."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Погледнете подиректно во уредот."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Не ви се гледа ликот. Гледајте во телефонот."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Наместете го лицето директно пред телефонот."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Премногу движење. Држете го телефонот стабилно."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Повторно регистрирајте го лицето."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ликот не се препознава. Обидете се повторно."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Не вртете ја главата толку многу."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Не вртете ја главата толку многу."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Отстранете ги работите што ви го покриваат лицето."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Исчистете го сензорот на горниот врв од екранот."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Исчистете го врвот на екранот, вклучувајќи ја црната лента"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Ликот не може да се потврди. Хардвер - недостапен."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Пробајте ја проверката на лице повторно."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Пробајте „Отклучување со лик“ повторно."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Не се зачуваа податоците за нов лик. Избришете го стариот."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Операцијата со лик се откажа"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Проверката на ликот е откажана од корисникот"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Операцијата со лице се откажа."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"„Отклучувањето со лик“ е откажано од корисникот."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Премногу обиди. Обидете се повторно подоцна."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Премногу обиди. Проверката на лик е оневозможена."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Премногу обиди. „Отклучувањето со лик“ е оневозможено."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Ликот не може да се потврди. Обидете се повторно."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Не сте поставиле проверка на лик"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Проверката на лик не е поддржана на уредов"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Не сте поставиле „Отклучување со лик“."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"„Отклучувањето со лик“ не е поддржано на уредов."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

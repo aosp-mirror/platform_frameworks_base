@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"အသံမေးလ် မက်ဆေ့ဂျ်များ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi ခေါ်ဆိုမှု"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"ဆင်းမ်ကဒ် အခြေအနေ"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"အထူးဦးစားပေး ဆင်းမ်ကတ်အခြေအနေ"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"အခြားစက်မှ TTY မုဒ် FULL ပြုရန် တောင်းဆို၏"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"အခြားစက်မှ TTY မုဒ် HCO ပြုရန် တောင်းဆို၏"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY မုဒ် VCO ပြုရန် အခြားစက်မှ တောင်းဆို၏"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"လက်ဗွေ အိုင်ကွန်"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကို စီမံပါ"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း စက်ပစ္စည်းကို စီမံခြင်း"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"အသုံးပြုရန်အတွက် မျက်နှာပုံစံထည့်ရန် (သို့) ဖျက်ရန်နည်းလမ်းကို အက်ပ်အား သုံးခွင့်ပြုသည်။"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကို သုံးပါ"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"အထောက်အထားစိစစ်ရန်အတွက် ဤအက်ပ်အား မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကိုသုံးခွင့်ပြုသည်"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"မျက်နှာ စိစစ်ခြင်း"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း စက်ပစ္စည်းကို သုံးပါ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"အထောက်အထားစိစစ်ရန်အတွက် ဤအက်ပ်အား မျက်နှာမှတ်သော့ဖွင့်ခြင်း စက်ပစ္စည်းကိုသုံးခွင့်ပြုသည်"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"ပိုမှတ်မိစေရန် သင့်မျက်နှာကို စာရင်းပြန်သွင်းပါ"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"မျက်နှာဒေတာ အမှန် မရိုက်ယူနိုင်ပါ၊ ထပ်စမ်းကြည့်ပါ။"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ဖုန်းကို ဘယ်ဘက်သို့ရွှေ့ပါ။"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ဖုန်းကို ညာဘက်သို့ ရွှေ့ပါ။"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"သင့်စက်ပစ္စည်းကို တည့်တည့်ကြည့်ပါ။"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"သင့်မျက်နှာကို မမြင်ရပါ။ ဖုန်းကိုကြည့်ပါ။"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"မျက်နှာကို ဖုန်းရှေ့တွင် တည့်အောင်ထားပါ။"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"လှုပ်လွန်းသည်။ ဖုန်းကို ငြိမ်ငြိမ်ကိုင်ပါ။"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"သင့်မျက်နှာကို ပြန်စာရင်းသွင်းပါ။"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"မျက်နှာ မမှတ်သားနိုင်တော့ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"ခေါင်းကို သိပ်မလှည့်ပါနှင့်။"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"သင့်မျက်နှာကို ကွယ်နေသည့်အရာအားလုံး ဖယ်ပါ။"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"မျက်နှာပြင်ထိပ်ရှိ အာရုံခံဆင်ဆာကို သန့်ရှင်းပါ။"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"အနက်ရောင်ဘားအပါအဝင် ဖန်သားပြင်ထိပ်ကို သန့်ရှင်းရေး လုပ်ပါ"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"မျက်နှာဖြင့် ထပ်မံ၍ အထောက်အထား စိစစ်ကြည့်ပါ။"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"မျက်နှာဒေတာအသစ် သိမ်း၍မရပါ။ အဟောင်းကို အရင်ဖျက်ပါ။"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"မျက်နှာဆိုင်ရာ ဆောင်ရွက်မှုကို ပယ်ဖျက်လိုက်ပါပြီ"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"အသုံးပြုသူက မျက်နှာအထောက်အထားစိစစ်မှု မလုပ်တော့ပါ"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"မျက်နှာ ဆောင်ရွက်ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"မှတ်နှာမှတ် သော့ဖွင့်ခြင်းကို အသုံးပြုသူက မလုပ်တော့ပါ။"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ နောက်မှထပ်စမ်းပါ။"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"စမ်းသပ်ကြိမ် များနေပြီ။ မျက်နှာစိစစ်ခြင်း ပိတ်လိုက်သည်။"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"စမ်းသပ်ကြိမ် များနေပြီ။ မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ပိတ်လိုက်ပါပြီ။"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"မျက်နှာ အထောက်အထားစိစစ်ခြင်းကို ထည့်သွင်းမထားပါ"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"ဤစက်ပစ္စည်းတွင် မျက်နှာအထောက်အထား စိစစ်ခြင်းကို သုံး၍မရပါ"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို ထည့်သွင်းမထားပါ"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"ဤစက်ပစ္စည်းတွင် မျက်နှာမှတ် သော့ဖွင့်ခြင်းကို သုံး၍မရပါ။"</string>
     <string name="face_name_template" msgid="7004562145809595384">"မျက်နှာ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1343,7 +1344,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"ခွင့်ပြုချက်မလိုအပ်ပါ"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"သင့်အတွက် ပိုက်ဆံကုန်ကျနိုင်ပါသည်"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"ဤစက်ပစ္စည်းကို USB မှတစ်ဆင့် အားသွင်းနေသည်"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"ဤစက်ကို USB ဖြင့် အားသွင်းနေသည်"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB မှတစ်ဆင့် ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB ဖြင့် ဖိုင်လွှဲပြောင်းခြင်းကို ဖွင့်ထားသည်"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB မှတစ်ဆင့် PTP ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>

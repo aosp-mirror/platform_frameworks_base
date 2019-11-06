@@ -38,7 +38,7 @@
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet me shpejtësi"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Po karikohet ngadalë"</string>
-    <string name="keyguard_low_battery" msgid="9218432555787624490">"Lidh ngarkuesin."</string>
+    <string name="keyguard_low_battery" msgid="9218432555787624490">"Lidh karikuesin."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Shtyp \"Meny\" për të shkyçur."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Rrjeti është i kyçur"</string>
     <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Nuk ka kartë SIM"</string>
@@ -151,4 +151,7 @@
       <item quantity="other">Karta SIM tani është çaktivizuar. Fut kodin PUK për të vazhduar. Të kanë mbetur edhe <xliff:g id="_NUMBER_1">%d</xliff:g> përpjekje përpara se karta SIM të bëhet përgjithmonë e papërdorshme. Kontakto me operatorin për detaje.</item>
       <item quantity="one">Karta SIM tani është çaktivizuar. Fut kodin PUK për të vazhduar. Të ka mbetur edhe <xliff:g id="_NUMBER_0">%d</xliff:g> përpjekje përpara se karta SIM të bëhet përgjithmonë e papërdorshme. Kontakto me operatorin për detaje.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"E parazgjedhur"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Flluskë"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analoge"</string>
 </resources>

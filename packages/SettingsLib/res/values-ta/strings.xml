@@ -159,7 +159,7 @@
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ஒலித்திறன்"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"உருவாக்கப்படும் பேச்சின் டோன் பாதிக்கப்படும்"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"மொழி"</string>
-    <string name="tts_lang_use_system" msgid="2679252467416513208">"அமைப்பின் மொழியில்"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"அமைப்பின் மொழியைப் பயன்படுத்தவும்"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"மொழி தேர்ந்தெடுக்கப்படவில்லை"</string>
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"பேசப்படும் உரைக்கு மொழி சார்ந்த குரலை அமைக்கிறது"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"எடுத்துக்காட்டைக் கவனிக்கவும்"</string>

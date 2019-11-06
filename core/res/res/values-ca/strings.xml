@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Missatges de veu"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Trucades per Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Estat de la SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Estat de la SIM d\'alta prioritat"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"L\'altre dispositiu ha sol·licitat el mode TTY COMPLET."</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"L\'altre dispositiu ha sol·licitat el mode TTY HCO."</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"L\'altre dispositiu ha sol·licitat el mode TTY VCO."</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona d\'empremta digital"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"gestiona el maquinari d\'autenticació facial"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"gestiona el maquinari de desbloqueig facial"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permet que l\'aplicació afegeixi i suprimeixi plantilles de cares que es puguin fer servir."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"utilitza el maquinari d\'autenticació facial"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permet que l\'aplicació faci servir maquinari d\'autenticació facial"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Autenticació facial"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"utilitza el maquinari de desbloqueig facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Permet que l\'aplicació faci servir el maquinari de desbloqueig facial per a l\'autenticació"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Desbloqueig facial"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Torna a registrar la cara"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Per millorar el reconeixement, torna a registrar la cara"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"No es reconeix la teva cara. Torna-ho a provar."</string>
@@ -567,34 +568,34 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mou el telèfon cap a l\'esquerra."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mou el telèfon cap a la dreta."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Mira més directament cap al dispositiu."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"No se\'t veu la cara. Mira el telèfon."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Posa la cara directament davant del telèfon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Massa moviment. Subjecta bé el telèfon."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Torna a registrar la teva cara."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Ja no es reconeix la teva cara. Torna-ho a provar."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"És massa semblant; canvia de postura."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Inclina el cap una mica menys."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Inclina el cap una mica menys."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"No inclinis tant el cap."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"No giris tant el cap."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"No inclinis tant el cap."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"No giris tant el cap."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Suprimeix qualsevol cosa que amagui la teva cara."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Neteja el sensor de l\'extrem superior."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Neteja la part superior de la pantalla, inclosa la barra negra"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"No es pot verificar la cara. Maquinari no disponible."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Torna a provar l\'autenticació facial."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Torna a provar el desbloqueig facial."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"No es poden desar dades facials noves. Suprimeix-ne d\'antigues."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"S\'ha cancel·lat el reconeixement facial"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"L\'usuari ha cancel·lat l\'autenticació facial"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"S\'ha cancel·lat el reconeixement facial."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"L\'usuari ha cancel·lat el desbloqueig facial."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Massa intents. Torna-ho a provar més tard."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Massa intents. S\'ha desactivat l\'autenticació facial."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Massa intents. S\'ha desactivat el desbloqueig facial."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"No es pot verificar la cara. Torna-ho a provar."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"No has configurat l\'autenticació facial"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"L\'autenticació facial no és compatible amb el dispositiu."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"No has configurat el desbloqueig facial"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"El desbloqueig facial no és compatible amb el dispositiu."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="4024817159806482191">"Icona facial"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"llegir la configuració de sincronització"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Persones estigui sincronitzada amb un compte."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Contactes estigui sincronitzada amb un compte."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar o desactivar la sincronització"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Permet que una aplicació modifiqui la configuració de sincronització d\'un compte. Per exemple, aquesta acció es pot fer servir per activar la sincronització de l\'aplicació Persones amb un compte."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"llegir les estadístiques de sincronització"</string>
@@ -845,9 +846,9 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, se\'t demanarà que desbloquegis la tauleta amb l\'inici de sessió de Google.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%3$d</xliff:g> segons."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Has dibuixat el patró de desbloqueig incorrectament <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. Tens <xliff:g id="NUMBER_1">%2$d</xliff:g> intents més abans no hagis de desbloquejar el televisor amb les dades d\'inici de sessió de Google.\n\n Torna a provar-ho d\'aquí a <xliff:g id="NUMBER_2">%3$d</xliff:g> segons."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, se\'t demanarà que desbloquegis el telèfon amb l\'inici de sessió de Google.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%3$d</xliff:g> segons."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades incorrectament. D\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> intents incorrectes més, la tauleta es restablirà a la configuració predeterminada de fàbrica i es perdran totes les dades dels usuaris."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, la tauleta es restablirà a la configuració predeterminada de fàbrica i es perdran totes les dades dels usuaris."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Has provat de desbloquejar el televisor incorrectament <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. Tens <xliff:g id="NUMBER_1">%2$d</xliff:g> intents més abans no es restableixin els valors de fàbrica de l\'aparell i es perdin totes les dades d\'usuari."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades incorrectament. D\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> intents incorrectes més, la tauleta es restablirà a la configuració predeterminada de fàbrica i es perdran totes les dades dels usuaris."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, la tauleta es restablirà a la configuració predeterminada de fàbrica i es perdran totes les dades dels usuaris."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER">%d</xliff:g> vegades incorrectament. Ara la tauleta es restablirà a la configuració predeterminada de fàbrica."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Has provat de desbloquejar el televisor incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. Ara es restabliran els valors de fàbrica de l\'aparell."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades incorrectament. Ara el telèfon es restablirà a la configuració predeterminada de fàbrica."</string>
@@ -1482,7 +1483,7 @@
     <string name="back_button_label" msgid="2300470004503343439">"Enrere"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Següent"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Omet"</string>
-    <string name="no_matches" msgid="8129421908915840737">"Cap coincidència"</string>
+    <string name="no_matches" msgid="8129421908915840737">"No s\'ha trobat cap coincidència"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Troba-ho a la pàgina"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g></item>
@@ -1647,9 +1648,9 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Has escrit malament el PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Has escrit malament la contrasenya <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Has dibuixat el patró de desbloqueig de manera incorrecta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. D\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> intents incorrectes més, la tauleta es restablirà a la configuració predeterminada de fàbrica i es perdran totes les dades dels usuaris."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, la tauleta es restablirà a la configuració predeterminada de fàbrica i es perdran totes les dades dels usuaris."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Has provat de desbloquejar el televisor incorrectament <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades. Tens <xliff:g id="NUMBER_1">%2$d</xliff:g> intents més abans no es restableixin els valors de fàbrica de l\'aparell i es perdin totes les dades d\'usuari."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. D\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> intents incorrectes més, el telèfon es restablirà a la configuració predeterminada de fàbrica i es perdran totes les dades dels usuaris."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, el telèfon es restablirà a la configuració predeterminada de fàbrica i es perdran totes les dades dels usuaris."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Has provat de desbloquejar la tauleta <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. Ara la tauleta es restablirà a la configuració predeterminada de fàbrica."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Has provat de desbloquejar el televisor incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. Ara es restabliran els valors de fàbrica de l\'aparell."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Has provat de desbloquejar el telèfon <xliff:g id="NUMBER">%d</xliff:g> vegades de manera incorrecta. Ara el telèfon es restablirà a la configuració predeterminada de fàbrica."</string>

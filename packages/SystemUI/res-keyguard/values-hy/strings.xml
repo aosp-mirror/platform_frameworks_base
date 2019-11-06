@@ -151,4 +151,7 @@
       <item quantity="one">SIM քարտն անջատված է: Շարունակելու համար մուտքագրեք PUK կոդը: Մնացել է <xliff:g id="_NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել: Մանրամասների համար դիմեք օպերատորին:</item>
       <item quantity="other">SIM քարտն անջատված է: Շարունակելու համար մուտքագրեք PUK կոդը: Մնացել է <xliff:g id="_NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել: Մանրամասների համար դիմեք օպերատորին:</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Կանխադրված"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Պղպջակ"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Անալոգային"</string>
 </resources>

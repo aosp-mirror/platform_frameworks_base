@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"پیام‌های پست صوتی"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏تماس ازطریق Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"وضعیت سیم‌کارت"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"وضعیت سیم با اولویت بالا"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏دستگاه مرتبط درخواست TTY حالت FULL کرد"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏دستگاه مرتبط درخواست TTY حالت HCO کرد"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏دستگاه مرتبط درخواست TTY حالت VCO کرد"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"نماد اثر انگشت"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"مدیریت سخت‌افزار احراز هویت با چهره"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"مدیریت سخت‌افزار «بازگشایی با چهره»"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای چهره جهت استفاده فرابخواند."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"استفاده از سخت‌افزار احراز هویت با چهره"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"به برنامه امکان می‌دهد از سخت‌افزار احراز هویت با چهره برای احراز هویت استفاده کند"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"احراز هویت با چهره"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"استفاده از سخت‌افزار «بازگشایی با چهره»"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"به برنامه امکان می‌دهد از سخت‌افزار «بازگشایی با چهره» برای احراز هویت استفاده کند"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"بازگشایی با چهره"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"ثبت مجدد چهره"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"برای بهبود تشخیص، لطفاً چهره‌تان را دوباره ثبت کنید"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"داده‌های دقیق چهره ضبط نشد. دوباره امتحان کنید."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"تلفن را به‌سمت چپ حرکت دهید."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"تلفن را به سمت راست حرکت دهید."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"لطفاً مستقیم به دستگاه نگه کنید."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"چهره‌تان دیده نمی‌شود. به تلفن نگاه کنید."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"صورتتان را مستقیماً روبروی تلفن قرار دهید."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"حرکت خیلی زیاد است. تلفن را ثابت نگه‌دارید."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"لطفاً چهره‌تان را مجدداً ثبت کنید."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"دیگر چهره را تشخیص نمی‌دهد. دوباره امتحان کنید."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"سرتان را کمی پایین آورید."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"سرتان را کمی پایین آورید."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"هرچیزی را که حائل چهره‌تان است بردارید."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"حسگر واقع در لبه بالای صفحه را تمیز کنید."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"بالای صفحه و همچنین نوار مشکی را تمیز کنید."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"چهره تأیید نشد. سخت‌افزار در دسترس نیست."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"احراز هویت با چهره با دوباره امتحان کنید."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"«بازگشایی با چهره» را دوباره امتحان کنید."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"داده‌ چهره جدید ذخیره نشد. اول داده‌ چهره قدیمی را حذف کنید."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"عملیات شناسایی چهره لغو شد"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"احراز هویت چهره توسط کاربر لغو شد"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"عملیات شناسایی چهره لغو شد."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"کاربر «بازگشایی با چهره» را لغو کرد."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"تعداد زیادی تلاش ناموفق. بعداً دوباره امتحان کنید."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"تعداد تلاش‌ها بیش‌ازحد مجاز است. احرازهویت چهره غیرفعال شد."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"تعداد تلاش‌ها بیش‌ازحد مجاز است. «بازگشایی با چهره» غیرفعال است."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"چهره تأیید نشد. دوباره امتحان کنید."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"احراز هویت چهره راه‌اندازی نشده است"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"احراز هویت چهره در این دستگاه پشتیبانی نمی‌شود."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"«بازگشایی با چهره» را راه‌اندازی نکرده‌اید."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"«بازگشایی با چهره» در این دستگاه پشتیبانی نمی‌شود."</string>
     <string name="face_name_template" msgid="7004562145809595384">"چهره <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

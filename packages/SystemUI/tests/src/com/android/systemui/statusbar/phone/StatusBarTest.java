@@ -157,7 +157,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private NotificationPresenter mNotificationPresenter;
+    @Mock private StatusBarNotificationPresenter mNotificationPresenter;
     @Mock
     private NotificationEntryListener mEntryListener;
     @Mock
@@ -222,6 +222,7 @@ public class StatusBarTest extends SysuiTestCase {
         mNotificationLogger = new NotificationLogger(mNotificationListener,
                 Dependency.get(UiOffloadThread.class), mEntryManager, mStatusBarStateController,
                 mExpansionStateLogger);
+        mNotificationLogger.setVisibilityReporter(mock(Runnable.class));
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
         DozeLog.traceDozing(mContext, false /* dozing */);
 
@@ -253,7 +254,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
-                mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
+                mKeyguardIndicationController, mStackScroller,
                 mPowerManager, mNotificationPanelView, mBarService, mNotificationListener,
                 mNotificationLogger, mVisualStabilityManager, mViewHierarchyManager,
                 mEntryManager, mScrimController, mBiometricUnlockController,
@@ -269,19 +270,13 @@ public class StatusBarTest extends SysuiTestCase {
         SystemUIFactory.getInstance().getRootComponent()
                 .getStatusBarInjector()
                 .createStatusBar(mStatusBar);
+        mStatusBar.setHeadsUpManager(mHeadsUpManager);
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
         mEntryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,
                 mHeadsUpManager, mNotificationData);
         mEntryManager.addNotificationEntryListener(mEntryListener);
         mNotificationLogger.setUpWithContainer(mStackScroller);
-
-        TestableLooper.get(this).setMessageHandler(m -> {
-            if (m.getCallback() == mStatusBar.mNotificationLogger.getVisibilityReporter()) {
-                return false;
-            }
-            return true;
-        });
     }
 
     @Test
@@ -644,10 +639,10 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     public void testPulseWhileDozing_notifyAuthInterrupt() {
         HashSet<Integer> reasonsWantingAuth = new HashSet<>(
-                Collections.singletonList(DozeLog.PULSE_REASON_NOTIFICATION));
+                Collections.singletonList(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN));
         HashSet<Integer> reasonsSkippingAuth = new HashSet<>(
                 Arrays.asList(DozeLog.PULSE_REASON_INTENT,
-                        DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN,
+                        DozeLog.PULSE_REASON_NOTIFICATION,
                         DozeLog.PULSE_REASON_SENSOR_SIGMOTION,
                         DozeLog.REASON_SENSOR_PICKUP,
                         DozeLog.REASON_SENSOR_DOUBLE_TAP,
@@ -666,6 +661,7 @@ public class StatusBarTest extends SysuiTestCase {
             return null;
         }).when(mDozeScrimController).pulse(any(), anyInt());
 
+        mStatusBar.mDozeServiceHost.mWakeLockScreenPerformsAuth = true;
         for (int i = 0; i < DozeLog.REASONS; i++) {
             reset(mKeyguardUpdateMonitor);
             mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class), i);
@@ -765,7 +761,7 @@ public class StatusBarTest extends SysuiTestCase {
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
-                NotificationStackScrollLayout stack, HeadsUpManagerPhone hum,
+                NotificationStackScrollLayout stack,
                 PowerManager pm, NotificationPanelView panelView,
                 IStatusBarService barService, NotificationListener notificationListener,
                 NotificationLogger notificationLogger,
@@ -784,7 +780,7 @@ public class StatusBarTest extends SysuiTestCase {
                 NotificationShelf notificationShelf,
                 NotificationLockscreenUserManager notificationLockscreenUserManager,
                 CommandQueue commandQueue,
-                NotificationPresenter notificationPresenter,
+                StatusBarNotificationPresenter notificationPresenter,
                 BubbleController bubbleController,
                 NavigationBarController navBarController,
                 AutoHideController autoHideController,
@@ -794,7 +790,6 @@ public class StatusBarTest extends SysuiTestCase {
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
             mStackScroller = stack;
-            mHeadsUpManager = hum;
             mPowerManager = pm;
             mNotificationPanel = panelView;
             mBarService = barService;
@@ -824,6 +819,7 @@ public class StatusBarTest extends SysuiTestCase {
             mAutoHideController = autoHideController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mStatusBarWindow = statusBarWindow;
+            mDozeServiceHost.mWakeLockScreenPerformsAuth = false;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
@@ -840,6 +836,10 @@ public class StatusBarTest extends SysuiTestCase {
 
         public void setBarStateForTest(int state) {
             mState = state;
+        }
+
+        void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
+            mHeadsUpManager = headsUpManager;
         }
 
         public void setUserSetupForTest(boolean userSetup) {

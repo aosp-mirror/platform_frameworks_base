@@ -103,6 +103,7 @@ public class Watchdog extends Thread {
     public static final List<String> HAL_INTERFACES_OF_INTEREST = Arrays.asList(
             "android.hardware.audio@2.0::IDevicesFactory",
             "android.hardware.audio@4.0::IDevicesFactory",
+            "android.hardware.biometrics.face@1.0::IBiometricsFace",
             "android.hardware.bluetooth@1.0::IBluetoothHci",
             "android.hardware.camera.provider@2.4::ICameraProvider",
             "android.hardware.graphics.allocator@2.0::IAllocator",
@@ -111,9 +112,9 @@ public class Watchdog extends Thread {
             "android.hardware.media.c2@1.0::IComponentStore",
             "android.hardware.media.omx@1.0::IOmx",
             "android.hardware.media.omx@1.0::IOmxStore",
+            "android.hardware.power.stats@1.0::IPowerStats",
             "android.hardware.sensors@1.0::ISensors",
-            "android.hardware.vr@1.0::IVr",
-            "android.hardware.biometrics.face@1.0::IBiometricsFace"
+            "android.hardware.vr@1.0::IVr"
     );
 
     static Watchdog sWatchdog;

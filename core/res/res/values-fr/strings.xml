@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Messages vocaux"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Appels Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"État de la carte SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Notifications prioritaires de la carte SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Mode TTY demandé par l\'interlocuteur : COMPLET"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Mode TTY demandé par l\'interlocuteur : HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Mode TTY demandé par l\'interlocuteur : VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icône d\'empreinte digitale"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"gérer le matériel d\'authentification faciale"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"gérer les composants de Face Unlock"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Autorise l\'appli à invoquer des méthodes pour ajouter et supprimer des modèles de visages."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"utiliser le matériel d\'authentification faciale"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Autorise l\'appli à utiliser le matériel d\'authentification faciale pour l\'authentification"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Authentification faciale"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"utiliser les composants de Face Unlock"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Autorise l\'application à utiliser les composants de Face Unlock pour l\'authentification"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Enregistrer à nouveau votre visage"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Pour améliorer la reconnaissance, veuillez enregistrer à nouveau votre visage"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Capture du visage impossible. Réessayez."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Déplacez le téléphone vers la gauche."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Déplacez le téléphone vers la droite."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Veuillez regarder plus directement l\'appareil."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Visage non détecté. Regardez le téléphone."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Placez votre visage en face du téléphone."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Trop de mouvement. Ne bougez pas le téléphone."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Veuillez enregistrer à nouveau votre visage."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Impossible de reconnaître le visage. Réessayez."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Tournez un peu moins la tête."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Tournez un peu moins la tête."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Retirez tout ce qui cache votre visage."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Nettoyez le capteur en haut de l\'écran."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Nettoyez la partie supérieure de l\'écran, y compris la barre noire"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Imposs. valider visage. Matériel non disponible."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Réessayez d\'activer l\'authentification faciale."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Réessayez d\'activer Face Unlock."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Impossible stocker nouv. visages. Veuillez en supprimer un."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Opération de reconnaissance faciale annulée"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Authentification faciale annulée par l\'utilisateur"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Opération de reconnaissance faciale annulée."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Face Unlock annulé par l\'utilisateur."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Trop de tentatives. Réessayez plus tard."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Trop de tentatives. Authentification faciale désactivée."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Tentatives trop nombreuses. Désactivation de Face Unlock."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Impossible de valider votre visage. Réessayez."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"L\'authentification faciale n\'est pas configurée"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Appareil incompatible avec l\'authentification faciale"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Face Unlock n\'est pas configuré."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Face Unlock n\'est pas compatible avec cet appareil."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Visage <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1360,8 +1361,8 @@
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Rétablissez la configuration d\'usine pour désactiver le mode Atelier de test."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Présence de liquide ou de saletés dans le port USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Le port USB est désactivé automatiquement. Appuyez sur cette notification pour en savoir plus."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Autoriser l\'utilisation du port USB"</string>
-    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Le téléphone ne détecte plus les liquides ni les saletés."</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Le port USB peut être utilisé"</string>
+    <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Aucun liquide ni corps étranger à signaler"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Création du rapport de bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Partager le rapport de bug ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Partage du rapport de bug…"</string>
@@ -1585,7 +1586,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Lancer le navigateur ?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Prendre l\'appel ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Toujours"</string>
-    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Définir cette activité comme toujours ouverte"</string>
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Toujours ouvrir avec cette application"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Une seule fois"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Paramètres"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s n\'est pas compatible avec le profil professionnel."</string>

@@ -201,7 +201,7 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"Cài đặt VPN không khả dụng cho người dùng này"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Cài đặt chia sẻ kết nối không khả dụng cho người dùng này"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Cài đặt tên điểm truy cập không khả dụng cho người dùng này"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"Gỡ lỗi USB"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"Gỡ lỗi qua USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Bật chế độ gỡ lỗi khi kết nối USB"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Thu hồi ủy quyền gỡ lỗi USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Phím tắt báo cáo lỗi"</string>
@@ -263,7 +263,7 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Cho phép kiểm tra thuộc tính của chế độ xem"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Luôn bật dữ liệu di động ngay cả khi Wi-Fi đang hoạt động (để chuyển đổi mạng nhanh)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Sử dụng tính năng tăng tốc phần cứng khi chia sẻ kết nối nếu có"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Cho phép gỡ lỗi USB?"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Cho phép gỡ lỗi qua USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Gỡ lỗi USB chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị của bạn mà không thông báo và đọc dữ liệu nhật ký."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Thu hồi quyền truy cập gỡ lỗi USB từ tất cả máy tính mà bạn đã ủy quyền trước đó?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Cho phép cài đặt phát triển?"</string>

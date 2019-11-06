@@ -70,6 +70,8 @@ Lcom/android/internal/R$styleable;->MenuView:[I
 Lcom/android/internal/R$styleable;->Searchable:[I
 Lcom/android/internal/R$styleable;->SearchableActionKey:[I
 Lcom/android/internal/telephony/IPhoneSubInfo$Stub;-><init>()V
+Lcom/android/internal/telephony/ITelephony;->getDataActivity()I
+Lcom/android/internal/telephony/ITelephony;->getDataState()I
 Lcom/android/internal/telephony/ITelephonyRegistry;->notifyCallForwardingChanged(Z)V
 Lcom/android/internal/telephony/ITelephonyRegistry;->notifyCellLocation(Landroid/os/Bundle;)V
 Lcom/android/internal/telephony/ITelephonyRegistry;->notifyDataActivity(I)V

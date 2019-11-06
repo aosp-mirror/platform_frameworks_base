@@ -23,7 +23,6 @@ import static com.android.server.backup.UserBackupManagerService.RUN_INITIALIZE_
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.PowerManager;
 import android.util.Slog;
 
 import com.android.server.backup.UserBackupManagerService;
@@ -57,7 +56,8 @@ public class RunInitializeReceiver extends BroadcastReceiver {
 
                 mUserBackupManagerService.clearPendingInits();
 
-                PowerManager.WakeLock wakelock = mUserBackupManagerService.getWakelock();
+                UserBackupManagerService.BackupWakeLock wakelock =
+                        mUserBackupManagerService.getWakelock();
                 wakelock.acquire();
                 OnTaskFinishedListener listener = caller -> wakelock.release();
 

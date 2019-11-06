@@ -820,4 +820,64 @@ public final class DisplayManager {
          */
         void onDisplayChanged(int displayId);
     }
+
+    /**
+     * Interface for accessing keys belonging to {@link
+     * android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER}.
+     * @hide
+     */
+    public interface DeviceConfig {
+
+        /**
+         * Key for refresh rate in the zone defined by thresholds.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.integer#config_defaultZoneBehavior
+         */
+        String KEY_REFRESH_RATE_IN_ZONE = "refresh_rate_in_zone";
+
+        /**
+         * Key for accessing the display brightness thresholds for the configured refresh rate zone.
+         * The value will be a pair of comma separated integers representing the minimum and maximum
+         * thresholds of the zone, respectively, in display backlight units (i.e. [0, 255]).
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.array#config_brightnessThresholdsOfPeakRefreshRate
+         * @hide
+         */
+        String KEY_PEAK_REFRESH_RATE_DISPLAY_BRIGHTNESS_THRESHOLDS =
+                "peak_refresh_rate_brightness_thresholds";
+
+        /**
+         * Key for accessing the ambient brightness thresholds for the configured refresh rate zone.
+         * The value will be a pair of comma separated integers representing the minimum and maximum
+         * thresholds of the zone, respectively, in lux.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.array#config_ambientThresholdsOfPeakRefreshRate
+         * @hide
+         */
+        String KEY_PEAK_REFRESH_RATE_AMBIENT_BRIGHTNESS_THRESHOLDS =
+                "peak_refresh_rate_ambient_thresholds";
+
+        /**
+         * Key for default peak refresh rate
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.integer#config_defaultPeakRefreshRate
+         * @hide
+         */
+        String KEY_PEAK_REFRESH_RATE_DEFAULT = "peak_refresh_rate_default";
+
+        /**
+         * Key for controlling which packages are explicitly blocked from running at refresh rates
+         * higher than 60hz. An app may be added to this list if they exhibit performance issues at
+         * higher refresh rates.
+         *
+         * @see android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER
+         * @see android.R.array#config_highRefreshRateBlacklist
+         * @hide
+         */
+        String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
+    }
 }

@@ -64,6 +64,7 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -83,6 +84,7 @@ import com.android.systemui.statusbar.notification.row.NotificationContentInflat
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -247,7 +249,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntryManager.setNotificationRemoveInterceptor(mRemoveInterceptor);
 
         NotificationRowBinderImpl notificationRowBinder =
-                new NotificationRowBinderImpl(mContext, true /* allowLongPress */);
+                new NotificationRowBinderImpl(mContext, true, /* allowLongPress */
+                        mock(KeyguardBypassController.class), mock(StatusBarStateController.class));
         notificationRowBinder.setUpWithPresenter(
                 mPresenter, mListContainer, mHeadsUpManager, mEntryManager, mBindCallback);
         notificationRowBinder.setNotificationClicker(mock(NotificationClicker.class));

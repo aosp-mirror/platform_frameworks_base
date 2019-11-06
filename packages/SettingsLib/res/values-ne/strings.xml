@@ -248,7 +248,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
     <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"ब्याट्रीको खपत कम गरी नेटवर्कको कार्यसम्पादनमा सुधार गर्दछ"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"मिटर गरिएको जडान भनी चिन्ह लगाइएको"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"सशुल्क वाइफाइ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"मिटर नगरिएको"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लगर बफर आकारहरू"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"लग बफर प्रति लगर आकार चयन गर्नुहोस्"</string>

@@ -510,12 +510,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 options.setLockTaskEnabled(true);
             }
             if (mWaitOption) {
-                result = mInternal.startActivityAndWait(null, null, intent, mimeType,
+                result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, intent, mimeType,
                         null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
-                res = mInternal.startActivityAsUser(null, null, intent, mimeType,
+                res = mInternal.startActivityAsUser(null, SHELL_PACKAGE_NAME, intent, mimeType,
                         null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
             }

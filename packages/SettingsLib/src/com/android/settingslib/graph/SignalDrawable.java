@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
@@ -33,6 +34,7 @@ import android.graphics.drawable.DrawableWrapper;
 import android.os.Handler;
 import android.telephony.SignalStrength;
 import android.util.LayoutDirection;
+import android.util.PathParser;
 
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;
@@ -48,7 +50,6 @@ public class SignalDrawable extends DrawableWrapper {
 
     private static final float VIEWPORT = 24f;
     private static final float PAD = 2f / VIEWPORT;
-    private static final float CUT_OUT = 7.9f / VIEWPORT;
 
     private static final float DOT_SIZE = 3f / VIEWPORT;
     private static final float DOT_PADDING = 1.5f / VIEWPORT;
@@ -65,21 +66,6 @@ public class SignalDrawable extends DrawableWrapper {
 
     private static final long DOT_DELAY = 1000;
 
-    private static float[][] X_PATH = new float[][]{
-            {21.9f / VIEWPORT, 17.0f / VIEWPORT},
-            {-1.1f / VIEWPORT, -1.1f / VIEWPORT},
-            {-1.9f / VIEWPORT, 1.9f / VIEWPORT},
-            {-1.9f / VIEWPORT, -1.9f / VIEWPORT},
-            {-1.1f / VIEWPORT, 1.1f / VIEWPORT},
-            {1.9f / VIEWPORT, 1.9f / VIEWPORT},
-            {-1.9f / VIEWPORT, 1.9f / VIEWPORT},
-            {1.1f / VIEWPORT, 1.1f / VIEWPORT},
-            {1.9f / VIEWPORT, -1.9f / VIEWPORT},
-            {1.9f / VIEWPORT, 1.9f / VIEWPORT},
-            {1.1f / VIEWPORT, -1.1f / VIEWPORT},
-            {-1.9f / VIEWPORT, -1.9f / VIEWPORT},
-    };
-
     private final Paint mForegroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mTransparentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final int mDarkModeFillColor;
@@ -87,7 +73,11 @@ public class SignalDrawable extends DrawableWrapper {
     private final Path mCutoutPath = new Path();
     private final Path mForegroundPath = new Path();
     private final Path mXPath = new Path();
+    private final Matrix mXScaleMatrix = new Matrix();
+    private final Path mScaledXPath = new Path();
     private final Handler mHandler;
+    private final float mCutoutWidthFraction;
+    private final float mCutoutHeightFraction;
     private float mDarkIntensity = -1;
     private final int mIntrinsicSize;
     private boolean mAnimating;
@@ -95,6 +85,14 @@ public class SignalDrawable extends DrawableWrapper {
 
     public SignalDrawable(Context context) {
         super(context.getDrawable(com.android.internal.R.drawable.ic_signal_cellular));
+        final String xPathString = context.getString(
+                com.android.internal.R.string.config_signalXPath);
+        mXPath.set(PathParser.createPathFromPathData(xPathString));
+        updateScaledXPath();
+        mCutoutWidthFraction = context.getResources().getFloat(
+                com.android.internal.R.dimen.config_signalCutoutWidthFraction);
+        mCutoutHeightFraction = context.getResources().getFloat(
+                com.android.internal.R.dimen.config_signalCutoutHeightFraction);
         mDarkModeFillColor = Utils.getColorStateListDefaultColor(context,
                 R.color.dark_mode_icon_color_single_tone);
         mLightModeFillColor = Utils.getColorStateListDefaultColor(context,
@@ -104,6 +102,15 @@ public class SignalDrawable extends DrawableWrapper {
         mTransparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         mHandler = new Handler();
         setDarkIntensity(0);
+    }
+
+    private void updateScaledXPath() {
+        if (getBounds().isEmpty()) {
+            mXScaleMatrix.setScale(1f, 1f);
+        } else {
+            mXScaleMatrix.setScale(getBounds().width() / VIEWPORT, getBounds().height() / VIEWPORT);
+        }
+        mXPath.transform(mXScaleMatrix, mScaledXPath);
     }
 
     @Override
@@ -170,6 +177,7 @@ public class SignalDrawable extends DrawableWrapper {
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
+        updateScaledXPath();
         invalidateSelf();
     }
 
@@ -205,19 +213,15 @@ public class SignalDrawable extends DrawableWrapper {
             canvas.drawPath(mCutoutPath, mTransparentPaint);
             canvas.drawPath(mForegroundPath, mForegroundPaint);
         } else if (isInState(STATE_CUT)) {
-            float cut = (CUT_OUT * width);
-            mCutoutPath.moveTo(width - padding, height - padding);
-            mCutoutPath.rLineTo(-cut, 0);
-            mCutoutPath.rLineTo(0, -cut);
-            mCutoutPath.rLineTo(cut, 0);
-            mCutoutPath.rLineTo(0, cut);
+            float cutX = (mCutoutWidthFraction * width / VIEWPORT);
+            float cutY = (mCutoutHeightFraction * height / VIEWPORT);
+            mCutoutPath.moveTo(width, height);
+            mCutoutPath.rLineTo(-cutX, 0);
+            mCutoutPath.rLineTo(0, -cutY);
+            mCutoutPath.rLineTo(cutX, 0);
+            mCutoutPath.rLineTo(0, cutY);
             canvas.drawPath(mCutoutPath, mTransparentPaint);
-            mXPath.reset();
-            mXPath.moveTo(X_PATH[0][0] * width, X_PATH[0][1] * height);
-            for (int i = 1; i < X_PATH.length; i++) {
-                mXPath.rLineTo(X_PATH[i][0] * width, X_PATH[i][1] * height);
-            }
-            canvas.drawPath(mXPath, mForegroundPaint);
+            canvas.drawPath(mScaledXPath, mForegroundPaint);
         }
         if (isRtl) {
             canvas.restore();

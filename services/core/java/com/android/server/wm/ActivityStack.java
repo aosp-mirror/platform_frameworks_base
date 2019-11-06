@@ -40,6 +40,7 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
@@ -162,6 +163,8 @@ import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
+
+import com.google.android.collect.Sets;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1879,8 +1882,7 @@ class ActivityStack extends ConfigurationContainer {
         mRootActivityContainer.ensureActivitiesVisible(resuming, 0, !PRESERVE_WINDOWS);
     }
 
-    private void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed,
-            String reason) {
+    void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed, String reason) {
         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
             EventLog.writeEvent(EventLogTags.AM_ADD_TO_STOPPING, r.mUserId,
                     System.identityHashCode(r), r.shortComponentName, reason);
@@ -2175,7 +2177,7 @@ class ActivityStack extends ConfigurationContainer {
                         // sure it matches the current configuration.
                         if (r != starting && notifyClients) {
                             r.ensureActivityConfiguration(0 /* globalChanges */, preserveWindows,
-                                    true /* ignoreStopState */);
+                                    true /* ignoreVisibility */);
                         }
 
                         if (!r.attachedToProcess()) {
@@ -3138,8 +3140,10 @@ class ActivityStack extends ConfigurationContainer {
             boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         TaskRecord rTask = r.getTaskRecord();
         final int taskId = rTask.taskId;
+        final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
-        if (!r.mLaunchTaskBehind && (taskForIdLocked(taskId) == null || newTask)) {
+        if (!r.mLaunchTaskBehind && allowMoveToFront
+                && (taskForIdLocked(taskId) == null || newTask)) {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
             // Might not even be in.
@@ -3198,7 +3202,9 @@ class ActivityStack extends ConfigurationContainer {
 
         task.setFrontOfTask();
 
-        if (!isHomeOrRecentsStack() || numActivities() > 0) {
+        // The transition animation and starting window are not needed if {@code allowMoveToFront}
+        // is false, because the activity won't be visible.
+        if ((!isHomeOrRecentsStack() || numActivities() > 0) && allowMoveToFront) {
             final DisplayContent dc = getDisplay().mDisplayContent;
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                     "Prepare open transition: starting " + r);
@@ -3210,6 +3216,8 @@ class ActivityStack extends ConfigurationContainer {
                 if (newTask) {
                     if (r.mLaunchTaskBehind) {
                         transit = TRANSIT_TASK_OPEN_BEHIND;
+                    } else if (getDisplay().isSingleTaskInstance()) {
+                        transit = TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
                     } else {
                         // If a new task is being launched, then mark the existing top activity as
                         // supporting picture-in-picture while pausing only if the starting activity
@@ -4018,6 +4026,14 @@ class ActivityStack extends ConfigurationContainer {
                             task.getTaskInfo());
                 }
                 getDisplay().mDisplayContent.prepareAppTransition(transit, false);
+
+                // When finishing the activity pre-emptively take the snapshot before the app window
+                // is marked as hidden and any configuration changes take place
+                if (mWindowManager.mTaskSnapshotController != null) {
+                    final ArraySet<Task> tasks = Sets.newArraySet(task.mTask);
+                    mWindowManager.mTaskSnapshotController.snapshotTasks(tasks);
+                    mWindowManager.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(tasks);
+                }
 
                 // Tell window manager to prepare for this one to be removed.
                 r.setVisibility(false);
@@ -5635,13 +5651,20 @@ class ActivityStack extends ConfigurationContainer {
     void animateResizePinnedStack(Rect sourceHintBounds, Rect toBounds, int animationDuration,
             boolean fromFullscreen) {
         if (!inPinnedWindowingMode()) return;
-        if (skipResizeAnimation(toBounds == null /* toFullscreen */)) {
-            mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
-        } else {
-            if (getTaskStack() == null) return;
-            getTaskStack().animateResizePinnedStack(toBounds, sourceHintBounds,
-                    animationDuration, fromFullscreen);
+        if (toBounds == null /* toFullscreen */) {
+            final Configuration parentConfig = getParent().getConfiguration();
+            final ActivityRecord top = topRunningNonOverlayTaskActivity();
+            if (top != null && !top.isConfigurationCompatible(parentConfig)) {
+                // The final orientation of this activity will change after moving to full screen.
+                // Start freezing screen here to prevent showing a temporary full screen window.
+                top.startFreezingScreenLocked(top.app, CONFIG_SCREEN_LAYOUT);
+                mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
+                return;
+            }
         }
+        if (getTaskStack() == null) return;
+        getTaskStack().animateResizePinnedStack(toBounds, sourceHintBounds,
+                animationDuration, fromFullscreen);
     }
 
     /**
@@ -5655,15 +5678,6 @@ class ActivityStack extends ConfigurationContainer {
             return;
         }
         stack.getAnimationOrCurrentBounds(outBounds);
-    }
-
-    private boolean skipResizeAnimation(boolean toFullscreen) {
-        if (!toFullscreen) {
-            return false;
-        }
-        final Configuration parentConfig = getParent().getConfiguration();
-        final ActivityRecord top = topRunningNonOverlayTaskActivity();
-        return top != null && !top.isConfigurationCompatible(parentConfig);
     }
 
     void setPictureInPictureAspectRatio(float aspectRatio) {

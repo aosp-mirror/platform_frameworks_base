@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ನಿಮ್ಮ ಮುಖದ ದೃಢೀಕರಣಕ್ಕಾಗಿ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ಪೂರ್ಣಗೊಳಿಸಲು ದೃಢೀಕರಿಸಿ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ನಿಮಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ಕೆಳಗೆ ಕಡಿಮೆ ಅವಸರದ ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ತೆರೆಯಲು ಮತ್ತೆ ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಸ್ವೈಪ್‌ ಮಾಡಿ"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"ತೆರೆಯಲು ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ಈ ಸಾಧನವನ್ನು ನಿಮ್ಮ ಸಂಸ್ಥೆ ನಿರ್ವಹಿಸುತ್ತಿದೆ"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ಈ ಸಾಧನವನ್ನು <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ರಿಂದ ನಿರ್ವಹಿಸಲಾಗಿದೆ"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ಫೋನ್‌ಗಾಗಿ ಐಕಾನ್‌ನಿಂದ ಸ್ವೈಪ್ ಮಾಡಿ"</string>

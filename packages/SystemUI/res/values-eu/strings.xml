@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Aurpegia bilatzen"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Autentifikatu da aurpegia"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Berretsita"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Amaitzeko, sakatu \"Berretsi\""</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Sakatu hatz-marken sentsorea"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Hatz-markaren ikonoa"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Zure bila…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Horren premiazkoak ez diren jakinarazpenak daude behean"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Irekitzeko, ukitu berriro"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Desblokeatzeko, pasatu hatza gora"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Pasatu hatza gora irekitzeko"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Zure erakundeak kudeatzen du gailua"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> erakundeak kudeatzen du gailu hau"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Pasatu hatza ikonotik, telefonoa irekitzeko"</string>
@@ -870,7 +871,7 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Memoria"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Aholkuak"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Zuzeneko aplikazioak"</string>
-    <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> exekutatzen ari da"</string>
+    <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> abian da"</string>
     <string name="instant_apps_message" msgid="1183313016396018086">"Ezer instalatu gabe ireki da aplikazioa."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Ezer instalatu gabe ireki da aplikazioa. Sakatu informazio gehiago lortzeko."</string>
     <string name="app_info" msgid="6856026610594615344">"Aplikazioari buruzko informazioa"</string>
@@ -887,7 +888,7 @@
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> arte"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Utzi bere horretan"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ordeztu"</string>
-    <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikazioak exekutatzen ari dira atzeko planoan"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikazioak abian dira atzeko planoan"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"Datu-konexioa desaktibatu nahi duzu?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> erabilita ezingo dituzu erabili datuak edo Internet. Wifi-sare baten bidez soilik konektatu ahal izango zara Internetera."</string>

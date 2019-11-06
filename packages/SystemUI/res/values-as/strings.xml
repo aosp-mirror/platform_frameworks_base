@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"আপোনাৰ মুখমণ্ডল বিচাৰি থকা হৈছে"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"নিশ্চিত কৰিলে"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"সম্পূৰ্ণ কৰিবলৈ নিশ্চিত কৰক-ত টিপক"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো স্পৰ্শ কৰক"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"আপোনাৰ মুখমণ্ডল বিচাৰি আছে…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"কম জৰুৰী জাননীসমূহ তলত"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"খুলিবলৈ পুনৰাই টিপক"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"আনলক কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"খুলিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"আপোনাৰ প্ৰতিষ্ঠানে এই ডিভাইচটো পৰিচালনা কৰে"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>ৰ দ্বাৰা পৰিচালিত।"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ফ\'নৰ বাবে আইকনৰপৰা ছোৱাইপ কৰক"</string>

@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.notification;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
-import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.app.Notification;
@@ -25,8 +24,6 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.statusbar.AlertingNotificationManager;
-import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -45,7 +42,6 @@ public class NotificationAlertingManager {
 
     private static final String TAG = "NotifAlertManager";
 
-    private final AmbientPulseManager mAmbientPulseManager;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final VisualStabilityManager mVisualStabilityManager;
     private final Lazy<ShadeController> mShadeController;
@@ -57,13 +53,11 @@ public class NotificationAlertingManager {
     @Inject
     public NotificationAlertingManager(
             NotificationEntryManager notificationEntryManager,
-            AmbientPulseManager ambientPulseManager,
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
             Lazy<ShadeController> shadeController,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationListener notificationListener) {
-        mAmbientPulseManager = ambientPulseManager;
         mRemoteInputManager = remoteInputManager;
         mVisualStabilityManager = visualStabilityManager;
         mShadeController = shadeController;
@@ -108,44 +102,31 @@ public class NotificationAlertingManager {
             // If it does and we no longer need to heads up, we should free the view.
             if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {
                 mHeadsUpManager.showNotification(entry);
-                // Mark as seen immediately
-                setNotificationShown(entry.notification);
+                if (!mShadeController.get().isDozing()) {
+                    // Mark as seen immediately
+                    setNotificationShown(entry.notification);
+                }
             } else {
                 entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
-            }
-        }
-        if ((inflatedFlags & FLAG_CONTENT_VIEW_AMBIENT) != 0) {
-            if (mNotificationInterruptionStateProvider.shouldPulse(entry)) {
-                mAmbientPulseManager.showNotification(entry);
-            } else {
-                entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_AMBIENT);
             }
         }
     }
 
     private void updateAlertState(NotificationEntry entry) {
         boolean alertAgain = alertAgain(entry, entry.notification.getNotification());
-        AlertingNotificationManager alertManager;
         boolean shouldAlert;
-        if (mShadeController.get().isDozing()) {
-            alertManager = mAmbientPulseManager;
-            shouldAlert = mNotificationInterruptionStateProvider.shouldPulse(entry);
-        } else {
-            alertManager = mHeadsUpManager;
-            shouldAlert = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
-        }
-        final boolean wasAlerting = alertManager.isAlerting(entry.key);
+        shouldAlert = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
+        final boolean wasAlerting = mHeadsUpManager.isAlerting(entry.key);
         if (wasAlerting) {
-            if (!shouldAlert) {
+            if (shouldAlert) {
+                mHeadsUpManager.updateNotification(entry.key, alertAgain);
+            } else if (!mHeadsUpManager.isEntryAutoHeadsUpped(entry.key)) {
                 // We don't want this to be interrupting anymore, let's remove it
-                alertManager.removeNotification(entry.key,
-                        false /* ignoreEarliestRemovalTime */);
-            } else {
-                alertManager.updateNotification(entry.key, alertAgain);
+                mHeadsUpManager.removeNotification(entry.key, false /* removeImmediately */);
             }
         } else if (shouldAlert && alertAgain) {
             // This notification was updated to be alerting, show it!
-            alertManager.showNotification(entry);
+            mHeadsUpManager.showNotification(entry);
         }
     }
 
@@ -171,7 +152,7 @@ public class NotificationAlertingManager {
     }
 
     private void stopAlerting(final String key) {
-        // Attempt to remove notifications from their alert managers (heads up, ambient pulse).
+        // Attempt to remove notifications from their alert manager.
         // Though the remove itself may fail, it lets the manager know to remove as soon as
         // possible.
         if (mHeadsUpManager.isAlerting(key)) {
@@ -184,9 +165,6 @@ public class NotificationAlertingManager {
                             && !FORCE_REMOTE_INPUT_HISTORY
                             || !mVisualStabilityManager.isReorderingAllowed();
             mHeadsUpManager.removeNotification(key, ignoreEarliestRemovalTime);
-        }
-        if (mAmbientPulseManager.isAlerting(key)) {
-            mAmbientPulseManager.removeNotification(key, false /* ignoreEarliestRemovalTime */);
         }
     }
 }

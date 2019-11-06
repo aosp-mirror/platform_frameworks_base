@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‎Voicemail messages‎‏‎‎‏‎"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‎‏‎‎‎‎‏‏‎‎‏‎‏‎‏‏‏‏‏‎‏‎‏‏‎‎‏‏‏‎‏‏‎‎‏‎‏‎‎‏‏‎‏‎‎‎‏‎Wi-Fi calling‎‏‎‎‏‎"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‎‎‏‏‏‎‏‏‏‏‏‎‏‏‏‏‎‏‏‎‎‎‎‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‎‎‎‏‎‎‎‎‏‏‎‏‎‏‎‏‎‎‎SIM status‎‏‎‎‏‎"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‏‏‎‎‏‏‏‏‎‎‎‏‎‎‎‏‎‏‏‏‏‏‎‏‎‏‏‏‏‎‏‏‎‎‏‎‏‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‎‏‏‏‎High priority SIM status‎‏‎‎‏‎"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‎‏‎‎‏‏‎‎‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎‎‏‏‎‎‎‎‎‏‎‏‏‎‏‎Peer requested TTY Mode FULL‎‏‎‎‏‎"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‎‎‎‎‎‎‎‎‎‏‎‏‎‏‎‏‎‏‎‎‎‎‎‏‎‎‏‏‏‎‎‎‏‏‏‎‎‏‎‏‎‏‎‎‎‎‎‎‎‏‎‎‎‎‎Peer requested TTY Mode HCO‎‏‎‎‏‎"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‎‎‏‎‏‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‏‎‎‎‏‎‏‏‎‎‎‏‎‏‏‏‏‎‏‏‏‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‎Peer requested TTY Mode VCO‎‏‎‎‏‎"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‏‏‏‏‎‏‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‎‏‏‏‏‏‎‎‎‎‎‎‎‏‎‎‎‎‎Fingerprint icon‎‏‎‎‏‎"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‏‎‏‎‏‎‏‎‎‎‎‏‎‎‏‎‎‎‏‏‎‎‏‏‏‎‎‏‏‎‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‏‎‏‏‏‎‏‎‏‎‏‎manage face authentication hardware‎‏‎‎‏‎"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎‎‏‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‏‏‏‏‏‏‏‎‏‎‎‏‏‎‏‏‎‎‎‎‎‏‎manage face unlock hardware‎‏‎‎‏‎"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‏‏‏‎‏‎‏‎‏‎‏‏‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‏‏‏‎‎‏‏‎‏‏‏‎‏‏‏‎‎‏‎‎Allows the app to invoke methods to add and delete facial templates for use.‎‏‎‎‏‎"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‎‎‏‎‏‏‎‎‎‎‏‎‏‎‎‎‎‎‏‏‎‏‏‎‎‎‏‎‎‎‏‎‏‎‏‏‏‎‏‎‏‏‎‎‏‏‎‏‏‏‎use face authentication hardware‎‏‎‎‏‎"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‎‎‏‎‏‏‎‎‎‏‎‎‎‏‏‏‏‎‏‏‎‏‏‎‏‏‎‎‎‎‏‏‎‏‏‎‏‎‎‏‏‎‎‏‏‎‎‎‎‎‎‎‎‏‎Allows the app to use face authentication hardware for authentication‎‏‎‎‏‎"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‎‏‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‏‏‏‎‏‏‎‏‏‏‎‎‏‏‏‎‏‎‏‎‏‎‏‎‎‏‏‏‏‏‏‏‎‏‏‏‎‎Face Authentication‎‏‎‎‏‎"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‏‎‎‏‏‎‏‏‎‏‎‎‎‎‎‏‏‎‏‎‎‎‎‏‏‏‎‎‎‎‏‏‎‏‎‎‎‎‎‏‏‏‎‎‎‏‏‏‏‎‎‎‎‏‎‎‎use face unlock hardware‎‏‎‎‏‎"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‏‎‎‏‏‏‏‏‎‎‎‎‎‏‎‎‏‏‎‎‎‏‏‏‏‎‎‎‎‏‏‎‎‎‎‏‎‎‎‎‏‎‏‏‎‏‏‎‏‎‏‎‏‎‎Allows the app to use face unlock hardware for authentication‎‏‎‎‏‎"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‎‎‎‏‏‏‎‏‎‏‏‏‏‏‎‏‏‏‏‎‏‎‎‏‏‏‎‎‎‎‏‏‎‎‏‏‏‎‏‏‎‏‎‏‏‎‏‏‎‏‎‎‎‎‎‎Face unlock‎‏‎‎‏‎"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‏‏‏‎‏‎‎‎‏‎‎‏‎‎‏‏‎‎‏‎‏‏‏‏‎‎‏‎‎‎‎‏‏‎‏‎‏‎‎‎‎‎‎‏‏‏‎‏‏‎‎‏‎‏‎Re-enroll your face‎‏‎‎‏‎"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‎‏‎‏‏‏‎‏‎‏‏‏‏‏‎‎‏‎‏‎‎‎‏‎‏‏‎‎‎‎‏‎‏‏‏‎‏‏‎To improve recognition, please re-enroll your face‎‏‎‎‏‎"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‏‎‎‏‏‏‏‎‎‎‏‎‎‎‎‏‎‎‏‏‏‎‎‎‎‎‏‎‏‎‎‎‏‏‎‎‏‎‏‎‏‎‎‎‎‎‎‎‏‏‏‏‏‎‎Couldn’t capture accurate face data. Try again.‎‏‎‎‏‎"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‏‏‎‎‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‏‎‎‎‏‎‏‏‎‏‏‎‏‏‎‏‎‏‎‏‎‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‎Move phone to the left.‎‏‎‎‏‎"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‏‏‎‎‎‎‏‏‎‎‏‏‏‎‎‏‎‎‏‎‏‏‏‎‏‎‏‎‎‏‏‎‎‏‎‎‎‏‎‎‎‏‎‏‎‏‎‏‎‎‎‎‎‎‎Move phone to the right.‎‏‎‎‏‎"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‏‏‎‎‎‏‏‎‏‏‏‎‏‎‎‏‎‎‎‏‎‎‎‏‎‎‏‎‏‏‏‏‏‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‎‏‎Please look more directly at your device.‎‏‎‎‏‎"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‎‏‏‎‎‏‏‎‎‏‏‎‎‏‎‎‏‏‎‏‎‏‏‏‏‎‎‎‎‏‏‎‎‎‏‏‎‏‎‏‏‎‎‎‏‎‏‏‎‏‎‎‏‎Can’t see your face. Look at the phone.‎‏‎‎‏‎"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‏‎‏‏‎‎‎‎‏‎‏‏‎‎‎‎‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‏‎‏‏‎‏‏‏‎‏‎‎‎‎‏‎‎‏‏‏‏‎‎Position your face directly in front of the phone.‎‏‎‎‏‎"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‏‏‎‏‎‎‏‎‏‎‏‏‎‎‏‏‏‎‏‏‎‎‎‏‏‏‏‎‏‎‎‏‎‎‎‎‎‎‎‎‏‏‏‏‎‎‏‎‏‏‎‎‏‏‎Too much motion. Hold phone steady.‎‏‎‎‏‎"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‏‏‎‏‎‏‎‏‎‎‏‎‎‎‏‎‎‎‏‏‎‎‎‏‎‏‎‎‏‏‎‎‎‎‏‎‏‏‏‎‏‎‎‎‏‎‎‎‏‎‎‏‏‎Please re-enroll your face.‎‏‎‎‏‎"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‏‏‎‏‏‏‏‏‏‎‎‎‎‏‎‏‎‎‎‏‎‎‎‏‎‎‏‏‎‏‎‎‏‎‏‏‎‎‏‏‎‎‏‎‏‎‏‏‏‏‏‏‎‎No longer able to recognize face. Try again.‎‏‎‎‏‎"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‏‏‎‏‏‏‏‏‏‎‎‎‏‏‎‏‎‏‎‎‎‎‏‎‎‎‎‏‎‏‏‎‏‎‏‎‏‎‏‎‎‎‏‎‏‎‏‎‎‎Turn your head a little less.‎‏‎‎‏‎"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‎‏‏‏‎‎‎‎‏‎‏‏‏‏‏‎‏‎‎‎‎‏‎‏‎‏‏‎‎‎‏‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎Turn your head a little less.‎‏‎‎‏‎"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‎‎‎‏‎‏‎‎‎‎‎‎‎‎‎‎‏‎‏‏‎‏‎‏‎‏‏‎‏‏‎‎‎‏‏‎‎‏‏‏‏‎‏‎‎‏‎‎‎‏‏‎Remove anything hiding your face.‎‏‎‎‏‎"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‏‏‎‎‎‎‏‏‎‏‎‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‎‎‎‎‎‎‎‏‏‏‎‎‎‎‏‎‏‏‎‏‏‎‏‎‎‏‏‎‎Clean the sensor at the top edge of the screen.‎‏‎‎‏‎"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‏‎‎‏‎‏‏‎‎‎‏‏‎‏‏‎‎‏‎‏‎‏‏‎‏‎‏‎‏‎‏‏‎‎‎‏‏‏‏‏‎‏‎‏‎‏‎‏‎‏‏‎Clean the top of your screen, including the black bar‎‏‎‎‏‎"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‏‏‎‎‎‎‎‏‎‎‎‎‎‎‎‏‏‏‎‎‎‎‏‎‎‏‎‏‏‎‎‏‏‎‎‎‏‎‎‏‏‎‎‎‏‎‏‏‎‎‏‎‎‎‏‎‎‎Can’t verify face. Hardware not available.‎‏‎‎‏‎"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‏‏‎‎‎‏‏‏‎‏‏‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎‏‏‏‎‎‎‎‏‏‏‏‎‏‎‎‏‏‎‎‏‏‏‏‎‎‏‏‏‎Try face authentication again.‎‏‎‎‏‎"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‏‎‎‏‏‏‏‏‎‎‎‎‏‎‎‎‎‎‎‎‏‎‏‏‏‏‎‎‎‎‎‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‏‎‏‎‏‏‏‎‎‏‎Try face unlock again.‎‏‎‎‏‎"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‏‎‏‎‎‎‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎‏‎‏‎‎‎‎‎‏‏‏‏‎‎‏‎‎‏‎‎‎‎‏‎‎‎‏‏‎‏‎‎‎‎‏‎Can’t store new face data. Delete an old one first.‎‏‎‎‏‎"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‏‎‏‎‏‎‎‏‏‎‏‏‏‎‏‏‎‎‏‎‎‎‏‎‎‎‏‏‎‎‎‏‏‎‏‎‎‏‎‎‎‏‎‏‎‎‎‏‏‏‎‏‏‎‎Face operation canceled‎‏‎‎‏‎"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‎‎‏‎‎‏‎‏‎‎‏‏‎‎‏‎‎‎‎‎‏‎‏‏‎‏‏‎‏‏‏‎‎‎‏‎‎‎‎‏‎‎‏‎‎‏‎‎‎‏‏‎Face authentication canceled by user‎‏‎‎‏‎"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‏‏‎‏‏‏‎‏‏‎‏‏‏‎‎‎‏‏‎‎‏‎‏‏‏‎‏‏‏‏‎‎‎‎‎‎‎‎‎‏‏‏‏‎Face operation canceled.‎‏‎‎‏‎"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‏‎‎‏‎‎‏‏‏‏‎‎‎‏‎‏‎‏‎‏‏‏‎‎‎‎‏‎‎‏‎‎‏‏‏‏‎‎‎‏‎‏‏‎‏‏‎‎‏‎‏‎‎‏‎‎Face unlock canceled by user.‎‏‎‎‏‎"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‎‏‎‎‏‏‎‎‏‏‏‎‎‏‏‎‎‎‏‎‏‎‎‎‎‏‎‎‎‏‏‏‏‎‏‏‏‎‎‎‎‏‎‎‎‎‏‎‏‏‎‎‎‎Too many attempts. Try again later.‎‏‎‎‏‎"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‏‎‎‎‎‎‎‎‏‎‏‏‏‏‎‎‎‎‏‏‏‎‏‎‏‏‏‏‏‎‏‏‎‎‏‏‏‏‎‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‎Too many attempts. Face authentication disabled.‎‏‎‎‏‎"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‎‎‎‏‏‎‏‏‎‎‏‎‏‎‎‎‎‎‎‎‎‎‎‏‎‎‏‎‏‏‏‎‏‏‎‏‏‏‏‏‎‎‎‎‏‎‎‎‏‎‎‎‏‏‏‎Too many attempts. Face unlock disabled.‎‏‎‎‏‎"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‎‎‏‎‎‎‏‏‏‎‎‎‎‏‏‎‎‏‏‏‏‏‎‏‎‎‏‎‎‎‏‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‏‎‎‏‏‎Can’t verify face. Try again.‎‏‎‎‏‎"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‎‎‏‏‎‎‎‎‏‏‏‎‎‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‎‏‏‏‎‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎You haven’t set up face authentication‎‏‎‎‏‎"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‏‎‎‏‏‏‏‎‏‏‎‏‎‎‏‎‎‏‏‏‏‏‎‎‏‏‏‎‏‎‏‏‏‎‎‎‎‎‎‏‏‎‏‏‏‎‎‏‎‏‎‎‎Face authentication is not supported on this device‎‏‎‎‏‎"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‎‏‏‏‎‎‎‏‎‎‏‏‏‏‏‎‏‏‏‎‏‏‏‏‏‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‎You haven’t set up face unlock.‎‏‎‎‏‎"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‎‏‏‎‏‎‏‎‎‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‏‏‎‎‏‏‎‏‏‏‎‏‏‏‎‏‎‎Face unlock is not supported on this device.‎‏‎‎‏‎"</string>
     <string name="face_name_template" msgid="7004562145809595384">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‏‏‎‏‎‏‎‎‏‏‎‏‎‎‎‎‏‎‏‎‎‎‏‏‏‎‏‏‎‎‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‎‎Face ‎‏‎‎‏‏‎<xliff:g id="FACEID">%d</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
   <string-array name="face_error_vendor">
   </string-array>

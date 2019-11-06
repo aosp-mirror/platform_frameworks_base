@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"குரலஞ்சல் செய்திகள்"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"வைஃபை அழைப்பு"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"சிம் நிலை"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"அதிக முன்னுரிமையுடைய சிம்மின் நிலை"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY Mode FULLஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY Mode HCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY Mode VCOஐ இணைச் செயல்பாடு கோரியது"</string>
@@ -365,7 +366,7 @@
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"பிற பயன்பாடுகளை மூடுதல்"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"பிற பயன்பாடுகளின் பின்புலச் செயல்முறைகளை நிறுத்த ஆப்ஸை அனுமதிக்கிறது. இதனால் பிற பயன்பாடுகள் இயங்குவதை நிறுத்தலாம்."</string>
     <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"இந்த ஆப்ஸ் பிற பயன்பாடுகளின் மேலே தோன்றலாம்"</string>
-    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்த ஆப்ஸ் பிற பயன்பாடுகளின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான பயன்பாட்டு உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்த ஆப்ஸ் பிற பயன்பாடுகளின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான ஆப்ஸ் உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"பின்னணியில் இயக்கு"</string>
     <string name="permdesc_runInBackground" msgid="7370142232209999824">"இந்த ஆப்ஸ், பின்னணியில் இயங்கலாம். இதனால் பேட்டரி விரைவாகத் தீர்ந்துவிடக்கூடும்."</string>
     <string name="permlab_useDataInBackground" msgid="8694951340794341809">"பின்னணியில் தரவைப் பயன்படுத்து"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"கைரேகை ஐகான்"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"முக அங்கீகாரத்திற்கான வன்பொருளை நிர்வகித்தல்"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"\'முகம் காட்டித் திறத்தலுக்கான\' வன்பொருளை நிர்வகித்தல்"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"உபயோகிப்பதற்காக முக டெம்ப்ளேட்டுகளை சேர்க்கும்/நீக்கும் முறைகளை இயக்க, ஆப்ஸை அனுமதிக்கும்."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"முக அங்கீகாரத்திற்கான வன்பொருளைப் பயன்படுத்துதல்"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"அடையாளம் காண்பதற்கு, முக அங்கீகார வன்பொருளைப் பயன்படுத்த ஆப்ஸை அனுமதிக்கிறது"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"முக அங்கீகாரம்"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"’முகம் காட்டித் திறத்தல்’ அம்சத்திற்கான வன்பொருளைப் பயன்படுத்துதல்"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"அடையாளம் காண \'முகம் காட்டித் திறத்தலுக்கான\' வன்பொருளைப் பயன்படுத்த ஆப்ஸை அனுமதிக்கும்"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"முகம் காட்டித் திறத்தல்"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"முகத்தை மீண்டும் பதிவுசெய்யவும்"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"அடையாளத்தை மேம்படுத்த முகத்தை மீண்டும் பதிவுசெய்யவும்"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"முகம் தெளிவாகப் பதிவாகவில்லை. மீண்டும் முயலவும்."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"மொபைலை இடப்புறம் நகர்த்தவும்."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"மொபைலை வலப்புறம் நகர்த்தவும்."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"முழுமுகம் தெரியுமாறு நேராகப் பார்க்கவும்."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"முகம் சரியாகத் தெரியவில்லை. மொபைலைப் பார்க்கவும்."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"முகத்தை மொபைலுக்கு நேராக வைக்கவும்."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"அதிகமாக அசைகிறது. மொபைலை அசைக்காமல் பிடிக்கவும்."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"உங்கள் முகத்தை மீண்டும் பதிவுசெய்யுங்கள்."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"முகத்தைக் கண்டறிய இயலவில்லை. மீண்டும் முயலவும்."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"தலையை லேசாகத் திருப்பவும்."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"உங்கள் தலையைச் சற்றுத் திருப்பவும்."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"உங்கள் முகத்தை மறைக்கும் அனைத்தையும் நீக்குக."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"திரையின் மேல்முனையிலுள்ள சென்சாரைச் சுத்தம் செய்க."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"திரையையும் அதிலுள்ள கருப்புப் பட்டியையும் சுத்தம் செய்யவும்"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"முகத்தைச் சரிபார்க்க இயலவில்லை. வன்பொருள் இல்லை."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"முக அங்கீகாரத்தை மீண்டும் முயலவும்."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"\'முகம் காட்டித் திறத்தலை\' மீண்டும் முயலவும்."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"புதிய முகங்களைச் சேர்க்க இயலவில்லை. பழையது ஒன்றை நீக்கவும்."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"முக அங்கீகாரம் பயனரால் ரத்துசெய்யப்பட்டது"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"\'முகம் காட்டித் திறத்தல்\' பயனரால் ரத்துசெய்யப்பட்டது."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"பலமுறை முயன்றுவிட்டீர்கள். பிறகு முயலவும்."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"பலமுறை முயன்றுவிட்டீர்கள். முக அங்கீகாரம் முடக்கப்பட்டது."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"பலமுறை முயன்றுவிட்டீர்கள். \'முகம் காட்டித் திறத்தல்’ முடக்கப்பட்டது."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"முகத்தைச் சரிபார்க்க இயலவில்லை. மீண்டும் முயலவும்."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"முக அங்கீகாரத்தை இன்னும் நீங்கள் அமைக்கவில்லை"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"இந்தச் சாதனத்தில் முக அங்கீகாரம் ஆதரிக்கப்படவில்லை"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"’முகம் காட்டித் திறத்தலை’ நீங்கள் அமைக்கவில்லை."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"இந்த சாதனத்தில் ’முகம் காட்டித் திறத்தல்’ ஆதரிக்கப்படவில்லை."</string>
     <string name="face_name_template" msgid="7004562145809595384">"முகம் <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

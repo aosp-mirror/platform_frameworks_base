@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mga mensahe sa voicemail"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Pagtawag gamit ang Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Status ng SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"High priority na status ng SIM"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Hiniling ng peer ang TTY Mode FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Hiniling ng peer ang TTY Mode HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Hiniling ng peer ang TTY Mode VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icon ng fingerprint"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"pamahalaan ang hardware sa authentication ng mukha"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"pamahalaan ang hardware ng face unlock"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Pumapayag na mag-invoke ang app ng paraang magdagdag at mag-delete ng template ng mukha."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"gumamit ng hardware sa pag-authenticate ng mukha"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Pumapayag na gumamit ng face authentication hardware ang app para sa pag-authenticate"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Pag-authenticate ng Mukha"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"gamitin ang hardware ng face unlock"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Pinapayagan ang app na gamitin ang hardware ng face unlock para sa pag-authenticate"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"I-enroll ulit ang iyong mukha"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Para mapahusay ang pagkilala, paki-enroll ulit ang iyong mukha"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Hindi makakuha ng tamang face data. Subukang muli."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Igalaw ang telepono pakaliwa."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Igalaw ang telepono pakanan."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Tumingin nang mas direkta sa iyong device."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Hindi makita ang mukha mo. Tumingin sa telepono."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Itapat ang mukha mo sa mismong harap ng telepono."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Masyadong magalaw. Hawakang mabuti ang telepono."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Paki-enroll muli ang iyong mukha."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Hindi na makilala ang mukha. Subukang muli."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Huwag masyadong tumingala o yumuko."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Huwag masyadong lumingon."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Alisin ang anumang humaharang sa iyong mukha."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Linisinin ang sensor sa itaas na gilid ng screen."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Linisin ang itaas ng iyong screen, kasama ang itim na bar"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Di ma-verify ang mukha. Di available ang hardware."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Subukan ulit ang pag-authenticate sa mukha."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Subukan ulit ang face unlock."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Hindi ma-store ang data ng mukha. Mag-delete muna ng iba."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Nakansela ang operation kaugnay ng mukha"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Kinansela ng user ang pag-authenticate ng mukha"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Nakansela ang operation kaugnay ng mukha."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Kinansela ng user ang face unlock."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Masyadong maraming pagsubok. Subukang muli mamaya."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Sumobra ang pagsubok. Na-disable ang face authentication."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Masyadong maraming pagsubok. Na-disable ang face unlock."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Hindi ma-verify ang mukha. Subukang muli."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Hindi pa na-set up ang pag-authenticate ng mukha"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Hindi sinusuportahan ang pag-authenticate ng mukha sa device"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Hindi mo pa nase-set up ang face unlock."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Hindi sinusuportahan ang face unlock sa device na ito."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Mukha <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

@@ -97,6 +97,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Hlasové zprávy"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Volání přes Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Stav SIM karty"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Stav SIM karty: vysoká priorita"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Partner požádal o přechod na režim TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Partner požádal o přechod na režim TTY HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Partner požádal o přechod na režim TTY VCO"</string>
@@ -556,11 +557,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona otisku prstů"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"správa hardwaru k ověření obličeje"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"správa hardwaru k odemknutí obličejem"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Umožňuje aplikaci volat metody k přidání a smazání šablon obličeje, které budou použity."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"použití hardwaru k ověření obličeje"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Umožňuje aplikaci provést ověření pomocí hardwaru k ověření obličeje"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Ověřování obličejem"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"použití hardwaru k odemknutí obličejem"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Umožňuje aplikaci provést ověření pomocí hardwaru k odemknutí obličejem"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Odemknutí obličejem"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Zaznamenejte obličej znovu"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Chcete-li rozpoznání zdokonalit, zaznamenejte obličej znovu"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Obličej se nepodařilo zachytit. Zkuste to znovu."</string>
@@ -573,7 +574,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Přesuňte telefon vlevo."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Přesuňte telefon vpravo."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Dívejte se přímo na zařízení."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Obličej není vidět. Podívejte se na telefon."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Umístěte obličej přímo před telefon."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Příliš mnoho pohybu. Držte telefon nehybně."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Zaznamenejte obličej znovu."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Obličej už nelze rozpoznat. Zkuste to znovu."</string>
@@ -582,19 +583,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Natočte hlavu o něco méně."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Natočte hlavu o něco méně."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Odstraňte vše, co vám zakrývá obličej."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Vyčistěte snímač u horního okraje obrazovky."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Očistěte horní část obrazovky včetně černé části"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Obličej nelze ověřit. Hardware není dostupný."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Zopakujte ověření obličeje."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Zopakujte odemknutí obličejem."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Údaje o novém obličeji nelze uložit. Nejdřív vymažte starý."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Operace snímání obličeje byla zrušena"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Ověření obličejem zrušil uživatel"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Operace snímání obličeje byla zrušena."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Odemknutí obličejem zrušil uživatel."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Příliš mnoho pokusů. Zkuste to později."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Příliš mnoho pokusů. Ověření obličejem je vypnuto."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Příliš mnoho pokusů. Odemknutí obličejem bylo deaktivováno."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Obličej se nepodařilo ověřit. Zkuste to znovu."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Ověření obličejem nemáte nastavené"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Ověření obličejem na tomto zařízení není podporováno"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Ověření obličejem nemáte nastavené."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Odemknutí obličejem na tomto zařízení není podporováno."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Obličej <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -824,7 +825,7 @@
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Zkusit znovu"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Funkce a data jsou k dispozici po odemčení"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Překročili jste maximální povolený počet pokusů o odemknutí obličejem."</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Není vložena SIM karta"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Chybí SIM karta"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tabletu není SIM karta."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"V televizi není SIM karta."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu není žádná SIM karta."</string>

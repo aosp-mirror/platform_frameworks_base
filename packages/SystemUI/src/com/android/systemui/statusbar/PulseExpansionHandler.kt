@@ -25,6 +25,7 @@ import android.os.PowerManager
 import android.os.PowerManager.WAKE_REASON_GESTURE
 import android.os.SystemClock
 import android.view.MotionEvent
+import android.view.VelocityTracker
 import android.view.ViewConfiguration
 
 import com.android.systemui.Gefingerpoken
@@ -35,8 +36,12 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
+import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ShadeController
+import com.android.systemui.statusbar.policy.HeadsUpManager
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -48,22 +53,46 @@ import kotlin.math.max
 @Singleton
 class PulseExpansionHandler @Inject
 constructor(context: Context,
-            private val mWakeUpCoordinator: NotificationWakeUpCoordinator) : Gefingerpoken {
+            private val wakeUpCoordinator: NotificationWakeUpCoordinator,
+            private val bypassController: KeyguardBypassController,
+            private val headsUpManager: HeadsUpManagerPhone,
+            private val roundnessManager: NotificationRoundnessManager) : Gefingerpoken {
     companion object {
         private val RUBBERBAND_FACTOR_STATIC = 0.25f
         private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
     }
     private val mPowerManager: PowerManager?
-    private var mShadeController: ShadeController? = null
+    private lateinit var shadeController: ShadeController
 
     private val mMinDragDistance: Int
     private var mInitialTouchX: Float = 0.0f
     private var mInitialTouchY: Float = 0.0f
     var isExpanding: Boolean = false
+        private set(value) {
+            val changed = field != value
+            field = value
+            bypassController.isPulseExpanding = value
+            if (changed) {
+                if (value) {
+                    val topEntry = headsUpManager.topEntry
+                    topEntry?.let {
+                        roundnessManager.setTrackingHeadsUp(it.row)
+                    }
+                } else {
+                    roundnessManager.setTrackingHeadsUp(null)
+                    if (!leavingLockscreen) {
+                        bypassController.maybePerformPendingUnlock()
+                        pulseExpandAbortListener?.run()
+                    }
+                }
+                headsUpManager.unpinAll(true /* userUnPinned */)
+            }
+        }
+    var leavingLockscreen: Boolean = false
         private set
     private val mTouchSlop: Float
-    private var mExpansionCallback: ExpansionCallback? = null
-    private lateinit var mStackScroller: NotificationStackScrollLayout
+    private lateinit var expansionCallback: ExpansionCallback
+    private lateinit var stackScroller: NotificationStackScrollLayout
     private val mTemp2 = IntArray(2)
     private var mDraggedFarEnough: Boolean = false
     private var mStartingChild: ExpandableView? = null
@@ -74,9 +103,13 @@ constructor(context: Context,
     private var mEmptyDragAmount: Float = 0.0f
     private var mWakeUpHeight: Float = 0.0f
     private var mReachedWakeUpHeight: Boolean = false
+    private var velocityTracker: VelocityTracker? = null
 
     private val isFalseTouch: Boolean
         get() = mFalsingManager.isFalseTouch
+    var qsExpanded: Boolean = false
+    var pulseExpandAbortListener: Runnable? = null
+    var bouncerShowing: Boolean = false
 
     init {
         mMinDragDistance = context.resources.getDimensionPixelSize(
@@ -91,9 +124,14 @@ constructor(context: Context,
     }
 
     private fun maybeStartExpansion(event: MotionEvent): Boolean {
-        if (!mPulsing) {
+        if (!wakeUpCoordinator.canShowPulsingHuns || qsExpanded
+                || bouncerShowing) {
             return false
         }
+        if (velocityTracker == null) {
+            velocityTracker = VelocityTracker.obtain()
+        }
+        velocityTracker!!.addMovement(event)
         val x = event.x
         val y = event.y
 
@@ -101,6 +139,7 @@ constructor(context: Context,
             MotionEvent.ACTION_DOWN -> {
                 mDraggedFarEnough = false
                 isExpanding = false
+                leavingLockscreen = false
                 mStartingChild = null
                 mInitialTouchY = y
                 mInitialTouchX = x
@@ -114,29 +153,52 @@ constructor(context: Context,
                     captureStartingChild(mInitialTouchX, mInitialTouchY)
                     mInitialTouchY = y
                     mInitialTouchX = x
-                    mWakeUpHeight = mWakeUpCoordinator.getWakeUpHeight()
+                    mWakeUpHeight = wakeUpCoordinator.getWakeUpHeight()
                     mReachedWakeUpHeight = false
                     return true
                 }
             }
+
+            MotionEvent.ACTION_UP -> {
+                recycleVelocityTracker();
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+                recycleVelocityTracker();
+            }
         }
         return false
+    }
+
+    private fun recycleVelocityTracker() {
+        velocityTracker?.recycle();
+        velocityTracker = null
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!isExpanding) {
             return maybeStartExpansion(event)
         }
+        velocityTracker!!.addMovement(event)
         val y = event.y
 
+        val moveDistance = y - mInitialTouchY
         when (event.actionMasked) {
-            MotionEvent.ACTION_MOVE -> updateExpansionHeight(y - mInitialTouchY)
-            MotionEvent.ACTION_UP -> if (!mFalsingManager.isUnlockingDisabled && !isFalseTouch) {
-                finishExpansion()
-            } else {
-                cancelExpansion()
+            MotionEvent.ACTION_MOVE -> updateExpansionHeight(moveDistance)
+            MotionEvent.ACTION_UP -> {
+                velocityTracker!!.computeCurrentVelocity(1000 /* units */)
+                val canExpand = moveDistance > 0 && velocityTracker!!.getYVelocity() > -1000
+                if (!mFalsingManager.isUnlockingDisabled && !isFalseTouch && canExpand) {
+                    finishExpansion()
+                } else {
+                    cancelExpansion()
+                }
+                recycleVelocityTracker()
             }
-            MotionEvent.ACTION_CANCEL -> cancelExpansion()
+            MotionEvent.ACTION_CANCEL -> {
+                cancelExpansion()
+                recycleVelocityTracker()
+            }
         }
         return isExpanding
     }
@@ -147,12 +209,15 @@ constructor(context: Context,
             setUserLocked(mStartingChild!!, false)
             mStartingChild = null
         }
+        if (shadeController.isDozing) {
+            isWakingToShadeLocked = true
+            wakeUpCoordinator.willWakeUp = true
+            mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), WAKE_REASON_GESTURE,
+                    "com.android.systemui:PULSEDRAG")
+        }
+        shadeController.goToLockedShade(mStartingChild)
+        leavingLockscreen = true;
         isExpanding = false
-        isWakingToShadeLocked = true
-        mWakeUpCoordinator.willWakeUp = true
-        mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), WAKE_REASON_GESTURE,
-                "com.android.systemui:PULSEDRAG")
-        mShadeController!!.goToLockedShade(mStartingChild)
         if (mStartingChild is ExpandableNotificationRow) {
             val row = mStartingChild as ExpandableNotificationRow?
             row!!.onExpandedByGesture(true /* userExpanded */)
@@ -172,17 +237,17 @@ constructor(context: Context,
             expansionHeight = max(newHeight.toFloat(), expansionHeight)
         } else {
             val target = if (mReachedWakeUpHeight) mWakeUpHeight else 0.0f
-            mWakeUpCoordinator.setNotificationsVisibleForExpansion(height > target,
+            wakeUpCoordinator.setNotificationsVisibleForExpansion(height > target,
                     true /* animate */,
                     true /* increaseSpeed */)
             expansionHeight = max(mWakeUpHeight, expansionHeight)
         }
-        val emptyDragAmount = mWakeUpCoordinator.setPulseHeight(expansionHeight)
+        val emptyDragAmount = wakeUpCoordinator.setPulseHeight(expansionHeight)
         setEmptyDragAmount(emptyDragAmount * RUBBERBAND_FACTOR_STATIC)
     }
 
     private fun captureStartingChild(x: Float, y: Float) {
-        if (mStartingChild == null) {
+        if (mStartingChild == null && !bypassController.bypassEnabled) {
             mStartingChild = findView(x, y)
             if (mStartingChild != null) {
                 setUserLocked(mStartingChild!!, true)
@@ -192,7 +257,7 @@ constructor(context: Context,
 
     private fun setEmptyDragAmount(amount: Float) {
         mEmptyDragAmount = amount
-        mExpansionCallback!!.setEmptyDragAmount(amount)
+        expansionCallback.setEmptyDragAmount(amount)
     }
 
     private fun reset(child: ExpandableView) {
@@ -227,6 +292,7 @@ constructor(context: Context,
     }
 
     private fun cancelExpansion() {
+        isExpanding = false
         mFalsingManager.onExpansionFromPulseStopped()
         if (mStartingChild != null) {
             reset(mStartingChild!!)
@@ -234,30 +300,29 @@ constructor(context: Context,
         } else {
             resetClock()
         }
-        mWakeUpCoordinator.setNotificationsVisibleForExpansion(false /* visible */,
+        wakeUpCoordinator.setNotificationsVisibleForExpansion(false /* visible */,
                 true /* animate */,
                 false /* increaseSpeed */)
-        isExpanding = false
     }
 
     private fun findView(x: Float, y: Float): ExpandableView? {
         var totalX = x
         var totalY = y
-        mStackScroller.getLocationOnScreen(mTemp2)
+        stackScroller.getLocationOnScreen(mTemp2)
         totalX += mTemp2[0].toFloat()
         totalY += mTemp2[1].toFloat()
-        val childAtRawPosition = mStackScroller.getChildAtRawPosition(totalX, totalY)
+        val childAtRawPosition = stackScroller.getChildAtRawPosition(totalX, totalY)
         return if (childAtRawPosition != null && childAtRawPosition.isContentExpandable) {
             childAtRawPosition
         } else null
     }
 
-    fun setUp(notificationStackScroller: NotificationStackScrollLayout,
-             expansionCallback: ExpansionCallback,
-             shadeController: ShadeController) {
-        mExpansionCallback = expansionCallback
-        mShadeController = shadeController
-        mStackScroller = notificationStackScroller
+    fun setUp(stackScroller: NotificationStackScrollLayout,
+              expansionCallback: ExpansionCallback,
+              shadeController: ShadeController) {
+        this.expansionCallback = expansionCallback
+        this.shadeController = shadeController
+        this.stackScroller = stackScroller
     }
 
     fun setPulsing(pulsing: Boolean) {

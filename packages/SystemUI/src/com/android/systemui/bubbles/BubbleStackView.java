@@ -745,12 +745,16 @@ public class BubbleStackView extends FrameLayout {
         }
         final Bubble previouslySelected = mExpandedBubble;
         mExpandedBubble = bubbleToSelect;
+
         if (mIsExpanded) {
             // Make the container of the expanded view transparent before removing the expanded view
             // from it. Otherwise a punch hole created by {@link android.view.SurfaceView} in the
             // expanded view becomes visible on the screen. See b/126856255
             mExpandedViewContainer.setAlpha(0.0f);
             mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
+                if (previouslySelected != null) {
+                    previouslySelected.setContentVisibility(false);
+                }
                 updateExpandedBubble();
                 updatePointerPosition();
                 requestUpdate();
@@ -779,6 +783,14 @@ public class BubbleStackView extends FrameLayout {
         }
         if (wasExpanded) {
             // Collapse the stack
+            mExpandedViewContainer.setAlpha(0.0f);
+            // TODO: In order to prevent flicker, code below should be executed after the alpha
+            // value set on the mExpandedViewContainer is reflected on the screen. However, we
+            // cannot just postpone the execution like #setSelectedBubble(), since some of member
+            // variables referred by the code are overridden before the execution.
+            if (mExpandedBubble != null) {
+                mExpandedBubble.setContentVisibility(false);
+            }
             animateExpansion(false /* expand */);
             logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
         } else {
@@ -934,14 +946,10 @@ public class BubbleStackView extends FrameLayout {
             if (shouldExpand) {
                 mExpandedViewContainer.setTranslationX(xStart);
                 mExpandedViewContainer.setTranslationY(yStart);
-                mExpandedViewContainer.setAlpha(0f);
             }
 
             mExpandedViewXAnim.animateToFinalPosition(shouldExpand ? 0f : xStart);
             mExpandedViewYAnim.animateToFinalPosition(shouldExpand ? yDest : yStart);
-            mExpandedViewContainer.animate()
-                    .setDuration(100)
-                    .alpha(shouldExpand ? 1f : 0f);
         }
     }
 

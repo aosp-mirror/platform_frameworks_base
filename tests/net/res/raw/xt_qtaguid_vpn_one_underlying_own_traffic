@@ -1,0 +1,6 @@
+idx iface acct_tag_hex uid_tag_int cnt_set rx_bytes rx_packets tx_bytes tx_packets rx_tcp_bytes rx_tcp_packets rx_udp_bytes rx_udp_packets rx_other_bytes rx_other_packets tx_tcp_bytes tx_tcp_packets tx_udp_bytes tx_udp_packets tx_other_bytes tx_other_packets
+2 test_nss_tun0 0x0 1001 0 2000 200 1000 100 0 0 0 0 0 0 0 0 0 0 0 0
+3 test_nss_tun0 0x0 1002 0 1000 100 500 50 0 0 0 0 0 0 0 0 0 0 0 0
+4 test_nss_tun0 0x0 1004 0 5000 500 6000 600 0 0 0 0 0 0 0 0 0 0 0 0
+5 test0 0x0 1004 0 8800 800 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+6 test0 0x0 1004 1 0 0 8250 750 0 0 0 0 0 0 0 0 0 0 0 0

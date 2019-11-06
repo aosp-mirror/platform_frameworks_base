@@ -167,4 +167,7 @@
       <item quantity="few">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskuse. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
       <item quantity="other">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskusov. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Privzeto"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Mehurček"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analogno"</string>
 </resources>

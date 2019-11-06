@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,7 +33,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.AmbientPulseManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -58,7 +59,6 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
     private NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
     private NotificationGroupManager mGroupManager;
-    private AmbientPulseManager mAmbientPulseManager;
     private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationEntryManager mNotificationEntryManager;
     @Captor
@@ -71,14 +71,12 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        mAmbientPulseManager = new AmbientPulseManager(mContext);
-        mDependency.injectTestDependency(AmbientPulseManager.class, mAmbientPulseManager);
         mHeadsUpManager = new HeadsUpManager(mContext) {};
 
         when(mNotificationEntryManager.getPendingNotificationsIterator())
                 .thenReturn(mPendingEntries.values());
 
-        mGroupManager = new NotificationGroupManager();
+        mGroupManager = new NotificationGroupManager(mock(StatusBarStateController.class));
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
 
@@ -89,7 +87,6 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         verify(mNotificationEntryManager).addNotificationEntryListener(mListenerCaptor.capture());
         mNotificationEntryListener = mListenerCaptor.getValue();
         mHeadsUpManager.addListener(mGroupAlertTransferHelper);
-        mAmbientPulseManager.addListener(mGroupAlertTransferHelper);
     }
 
     @Test

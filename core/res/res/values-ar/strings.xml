@@ -99,6 +99,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"رسائل البريد الصوتي"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏الاتصال عبر Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"‏حالة شريحة SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"‏حالة شريحة SIM ذات أولوية"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"‏طلب النظير وضع TTY الكامل"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏طلب النظير وضع TTY على HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏طلب النظير وضع TTY على VCO"</string>
@@ -562,11 +563,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"رمز بصمة الإصبع"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"إدارة أجهزة مصادقة الوجه"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"إدارة أجهزة \"فتح القفل بالوجه\""</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"السماح للتطبيق باستدعاء طرق لإضافة نماذج من الوجوه وحذفها"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"استخدام أجهزة مصادقة الوجه"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"السماح للتطبيق باستخدام أجهزة مصادقة الوجه"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"المصادقة بالوجه"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"استخدام أجهزة \"فتح القفل بالوجه\""</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"السماح للتطبيق باستخدام أجهزة \"فتح القفل بالوجه\" لإجراء المصادقة"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"فتح القفل بالوجه"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"إعادة تسجيل وجهك"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"لتحسين قدرة الجهاز على معرفة وجهك، يُرجى إعادة تسجيل الوجه."</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"تعذّر تسجيل بيانات دقيقة للوجه. حاول مرة أخرى."</string>
@@ -579,7 +580,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"يُرجى نقل الهاتف إلى اليمين."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"يُرجى نقل الهاتف إلى اليسار."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"يُرجى النظر إلى جهازك مباشرة أكثر."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"يتعذّر رؤية وجهك. يُرجى النظر إلى الهاتف."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"ضع وجهك أمام الهاتف مباشرة."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"حركة أكثر من اللازم يُرجى حمل بدون حركة."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"يُرجى إعادة تسجيل وجهك."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"لم يعُد يمكن التعرّف على الوجه. حاول مرة أخرى."</string>
@@ -588,19 +589,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"حرّك رأسك قليلاً نحو الأمام مباشرة."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"حرّك رأسك قليلاً نحو الوسط."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"عليك بإزالة أي شيء يُخفي وجهك."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"نظِّف المستشعر أعلى الشاشة."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"يُرجى تنظيف الجزء العلوي من الشاشة، بما في ذلك الشريط الأسود."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"يتعذّر التحقُّق من الوجه. الجهاز غير مُتاح."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"جرِّب مصادقة الوجه مرة أخرى."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"حاول استخدام \"فتح القفل بالوجه\" مرة أخرى."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"يتعذَّر تخزين بيانات الوجه الجديد. احذف الوجه القديم أولاً."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"تم إلغاء عملية مصادقة الوجه."</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"ألغَى المستخدم مصادقة الوجه."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"تمّ إلغاء عملية مصادقة الوجه."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ألغى المستخدم \"فتح القفل بالوجه\"."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"تمّ إجراء محاولات كثيرة. أعِد المحاولة لاحقًا."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"محاولات كثيرة جدًا. تم إيقاف مصادقة الوجه."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"تم إجراء عدد كبير جدًا من المحاولات. وتم إيقاف \"فتح القفل بالوجه\"."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"يتعذّر التحقق من الوجه. حاول مرة أخرى."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"لم يسبق لك إعداد مصادقة الوجه."</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"لا تتوفّر إمكانية مصادقة الوجه على هذا الجهاز."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"لم يسبق لك إعداد \"فتح القفل بالوجه\"."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"\"فتح القفل بالوجه\" غير متوفر على هذا الجهاز."</string>
     <string name="face_name_template" msgid="7004562145809595384">"الوجه <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

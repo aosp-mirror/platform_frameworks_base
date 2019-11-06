@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ভইচমেইলৰ বাৰ্তাসমূহ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ৱাই-ফাই কলিং"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"ছিমৰ স্থিতি"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"উচ্চ অগ্ৰাধিকাৰযুক্ত ছিমৰ স্থিতি"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"নেটৱৰ্ক পীয়েৰে TTY ম\'ড FULLলৈ সলনি কৰিবলৈ অনুৰোধ কৰিছে"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"নেটৱৰ্ক পীয়েৰে TTY ম\'ড HCOলৈ সলনি কৰিবলৈ অনুৰোধ কৰিছে"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"নেটৱৰ্ক পীয়েৰে TTY ম\'ড VCO লৈ সলনি কৰিবলৈ অনুৰোধ কৰিছে"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"মুখমণ্ডল সত্যাপন হাৰ্ডৱেৰ পৰিচালনা কৰক"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"মুখাৱয়বৰদ্বাৰা আনলক হার্ডৱেৰ পৰিচালনা কৰক"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"মুখমণ্ডলৰ টেম্প্লেট যোগ কৰাৰ বা মচাৰ পদ্ধতি কামত লগাবলৈ আহ্বান কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"মুখমণ্ডল সত্যাপন হাৰ্ডৱেৰ ব্যৱহাৰ কৰক"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"বিশ্বাসযোগ্য়তা প্ৰমাণীকৰণৰ বাবে এপক মুখমণ্ডল সত্যাপন হাৰ্ডৱেৰ ব্য়ৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"মুখমণ্ডলৰ বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণ"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"মুখাৱয়বৰদ্বাৰা আনলক হার্ডৱেৰ ব্যৱহাৰ কৰক"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণৰ বাবে এপ্‌ক মুখাৱয়বৰদ্বাৰা আনলক কৰা হাৰ্ডৱেৰ ব্যৱহাৰ কৰিবলৈ দিয়ে"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"মুখাৱয়বৰদ্বাৰা আনলক কৰা সুবিধা"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ণ কৰক"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"চিনাক্তকৰণৰ সুবিধাটো উন্নত কৰিবলৈ, অনুগ্ৰহ কৰি আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ন কৰক"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"সঠিক মুখমণ্ডলৰ ডেটা কেপচাৰ নহ’ল। আকৌ চেষ্টা কৰক।"</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"ফ’নটো বাওঁফালে নিয়ক।"</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"ফ’নটো সোঁফালে নিয়ক।"</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"আপোনাৰ ডিভাইচটোলৈ অধিক পোনে পোনে চাওক।"</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"আপোনাৰ মুখমণ্ডল দেখা নাই। ফ’নটোলৈ চাওক।"</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"আপোনাৰ মুখখন পোনপটীয়াকৈ ফ’নটোৰ সন্মুখত ৰাখক।"</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"বেছি লৰচৰ কৰি আছে। ফ’নটো স্থিৰকৈ ধৰক।"</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ন কৰক।"</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"মুখমণ্ডল আৰু চিনাক্ত কৰিব নোৱাৰি। আকৌ চেষ্টা কৰক।"</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"আপোনাৰ মূৰটো সামান্য কমকৈ ঘূৰাওক।"</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"আপোনাৰ মূৰটো সামান্য কমকৈ ঘূৰাওক।"</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"আপোনাৰ মুখখন ঢাকি ৰখা বস্তুবোৰ আঁতৰাওক।"</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"স্ক্ৰীণৰ একেবাৰে ওপৰৰ কাষত থকা ছেন্সৰটো চাফা কৰক।"</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"ক’লা বাৰডালকে ধৰি আপোনাৰ স্ক্রীণৰ ওপৰৰ অংশ চাফা কৰক"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"মুখমণ্ডল সত্যাপন কৰিব পৰা নগ’ল। হাৰ্ডৱেৰ নাই।"</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"আকৌ মুখমণ্ডল সত্যাপন কৰিবলৈ চেষ্টা কৰক।"</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"পুনৰ মুখাৱয়বৰদ্বাৰা আনলক কৰি চাওক।"</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"নতুন মুখমণ্ডলৰ ডেটা জমা কৰিব পৰা নাই। প্ৰথমে পুৰণি এখন মচক।"</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"মুখমণ্ডলৰ প্ৰক্ৰিয়া বাতিল কৰা হ’ল"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"ব্যৱহাৰকাৰীয়ে মুখমণ্ডল প্ৰমাণীকৰণ বাতিল কৰিছে"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"মুখমণ্ডলৰ প্ৰক্ৰিয়া বাতিল কৰা হ’ল।"</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"ব্যৱহাৰকাৰীয়ে মুখাৱয়বৰদ্বাৰা আনলক কৰাটো বাতিল কৰিছে।"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"অত্যধিক ভুল প্ৰয়াস। কিছুসময়ৰ পাছত আকৌ চেষ্টা কৰক।"</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"অতি বেছি প্ৰয়াস। মুখমণ্ডল প্ৰমাণীকৰণ অক্ষম কৰা হ’ল।"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"অতি বেছি প্ৰয়াস। মুখাৱয়বৰদ্বাৰা আনলক কৰাটো অক্ষম কৰা হৈছে।"</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"মুখমণ্ডল সত্যাপন কৰিব পৰা নগ’ল। আকৌ চেষ্টা কৰক।"</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"আপুনি মুখমণ্ডল প্ৰমাণীকৰণ ছেট আপ কৰা নাই"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"এই ডিভাইচটোত মুখমণ্ডল প্ৰমাণীকৰণ ব্যৱহাৰ কৰিব নোৱাৰি"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"আপুনি মুখাৱয়বৰদ্বাৰা আনলক কৰাটো ছেট আপ কৰা নাই।"</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"এই ডিভাইচটোত মুখাৱয়বৰদ্বাৰা আনলক কৰা সুবিধাটো নচলে।"</string>
     <string name="face_name_template" msgid="7004562145809595384">"মুখমণ্ডল <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

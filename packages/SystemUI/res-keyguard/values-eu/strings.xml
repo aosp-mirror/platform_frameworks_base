@@ -151,4 +151,7 @@
       <item quantity="other">Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. <xliff:g id="_NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu SIM txartela betiko erabilgaitz geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.</item>
       <item quantity="one">Desgaitu egin da SIM txartela. Aurrera egiteko, idatzi PUK kodea. <xliff:g id="_NUMBER_0">%d</xliff:g> saiakera geratzen zaizu SIM txartela betiko erabilgaitz geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Lehenetsia"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Puxikak"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analogikoa"</string>
 </resources>

@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Съобщения в гласовата поща"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Обаждания през Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Състояние на SIM картата"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Състояние на SIM картата с висок приоритет"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Отсрещният потребител заяви пълен TTY режим (FULL)"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Отсрещният потребител заяви TTY режим с пренос на слух (HCO)"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Отсрещният потребител заяви TTY режим с пренос на глас (VCО)"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Икона за отпечатък"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"управление на хардуера за удостоверяване с лице"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"управление на хардуера за отключване с лице"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Разрешава на прил. да извиква методи за добавяне и изтриване на лицеви шаблони за ползване"</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"използване на хардуера за удостоверяване с лице"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Разрешава на приложението при необходимост да използва хардуера за удостоверяване с лице"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Удостоверяване с лице"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"използване на хардуера за отключване с лице"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Разрешава на приложението да използва хардуера за отключване с лице с цел удостоверяване"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Отключване с лице"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Регистрирайте отново лицето си"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"С цел подобряване на разпознаването регистрирайте отново лицето си"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Лицето не бе заснето точно. Опитайте отново."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Преместете телефона наляво."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Преместете телефона надясно."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Моля, гледайте точно към устройството си."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Лицето ви не се вижда. Погледнете към телефона."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Позиционирайте лицето си директно пред телефона."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Твърде много движение. Дръжте телефона неподвижно."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Моля, регистрирайте лицето си отново."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Лицето не бе разпознато. Опитайте отново."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Не завъртайте главата си толкова много."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Не завъртайте главата си толкова много."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Премахнете всичко, което закрива лицето ви."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Изчистете сензора в горния край на екрана."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Почистете горната част на екрана си, включително черната лента"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Лицето не може да се потвърди. Хардуерът не е налице."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Опитайте отново да удостоверите с лице."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Опитайте отново да отключите с лице."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Не може да се запази ново лице. Първо изтрийте старо."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Операцията с лице е анулирана"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Удостоверяването с лице е анулирано от потребителя"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Операцията с лице е анулирана."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Отключването с лице е анулирано от потребителя."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Твърде много опити. Опитайте отново по-късно."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Твърде много опити. Удостоверяването с лице е деактивирано."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Твърде много опити. Отключването с лице е деактивирано."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Лицето не може да се потвърди. Опитайте отново."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Не сте настроили удостоверяването с лице"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Удостоверяването с лице не се поддържа на това устройство"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Не сте настроили отключването с лице."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Отключването с лице не се поддържа на това устройство."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1354,7 +1355,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Открит е аналогов аудиоаксесоар"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Свързаното устройство не е съвместимо с този телефон. Докоснете, за да научите повече."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отстраняване на грешки през USB"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Докоснете, за да изключите отстраняването на грешки през USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Докоснете, за да изключите"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Изберете, за да деактивирате отстраняването на грешки през USB."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Режимът за тестова среда е активиран"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Възстановете фабричните настройки, за да деактивирате режима за тестова среда."</string>

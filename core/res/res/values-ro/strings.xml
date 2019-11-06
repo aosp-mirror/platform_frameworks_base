@@ -96,6 +96,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mesaje din mesageria vocală"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Apelare prin Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Starea cardului SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Notificări de la SIM cu prioritate ridicată"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Cealaltă persoană a solicitat modul TTY cu setarea COMPLET"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Cealaltă persoană a solicitat modul TTY cu setarea HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Cealaltă persoană a solicitat modul TTY cu setarea VCO"</string>
@@ -553,11 +554,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Pictograma amprentă"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"să gestioneze hardware-ul de autentificare facială"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"să gestioneze hardware de deblocare facială"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Permite aplicației să invoce metode pentru a adăuga și a șterge șabloane faciale pentru utilizare."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"să folosească hardware de autentificare facială"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permite aplicației să folosească hardware de autentificare facială pentru autentificare"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Autentificare facială"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"să folosească hardware de deblocare facială"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Permite aplicației să folosească hardware de deblocare facială pentru autentificare"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Deblocare facială"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Reînregistrați-vă chipul"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Pentru a îmbunătăți recunoașterea, reînregistrați-vă chipul"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Nu s-a putut fotografia fața cu precizie. Încercați din nou."</string>
@@ -570,7 +571,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Mutați telefonul spre stânga."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Mutați telefonul spre dreapta."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Priviți mai direct spre dispozitiv."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nu vi se vede fața. Uitați-vă la telefon."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Stați cu capul direct în fața telefonului."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Prea multă mișcare. Țineți telefonul nemișcat."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Reînregistrați-vă chipul."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Nu se mai poate recunoaște fața. Încercați din nou."</string>
@@ -579,19 +580,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Întoarceți capul mai puțin."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Întoarceți capul mai puțin."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Eliminați orice vă ascunde chipul."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Curățați senzorul de la marginea de sus a ecranului."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Curățați partea de sus a ecranului, inclusiv bara neagră"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nu se poate confirma fața. Hardware-ul nu este disponibil."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Încercați din nou autentificarea facială."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Încercați din nou deblocarea facială."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nu se pot stoca date faciale noi. Ștergeți întâi unele vechi."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Operațiunea privind fața a fost anulată"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Autentificarea chipului este anulată de utilizator"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Operațiunea privind chipul a fost anulată."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Deblocarea facială este anulată de utilizator."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Prea multe încercări. Reîncercați mai târziu."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Prea multe încercări. Autentificarea facială este dezactivată"</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Prea multe încercări. Deblocarea facială este dezactivată."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nu se poate confirma fața. Încercați din nou."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Nu ați configurat autentificarea facială"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Autentificarea facială nu este acceptată pe dispozitiv"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Nu ați configurat deblocarea facială."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Deblocarea facială nu este acceptată pe dispozitiv."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Chip <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

@@ -1435,7 +1435,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     void update(@Nullable WifiConfiguration config) {
         mConfig = config;
-        if (mConfig != null) {
+        if (mConfig != null && !isPasspoint()) {
             ssid = removeDoubleQuotes(mConfig.SSID);
         }
         networkId = config != null ? config.networkId : WifiConfiguration.INVALID_NETWORK_ID;

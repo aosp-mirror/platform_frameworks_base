@@ -151,4 +151,7 @@
       <item quantity="other">സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി <xliff:g id="_NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു. വിശദാംശങ്ങൾക്ക് കാരിയറുമായി ബന്ധപ്പെടുക.</item>
       <item quantity="one">സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി <xliff:g id="_NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു. വിശദാംശങ്ങൾക്ക് കാരിയറുമായി ബന്ധപ്പെടുക.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"ഡിഫോൾട്ട്"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"ബബ്ൾ"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"അനലോഗ്"</string>
 </resources>

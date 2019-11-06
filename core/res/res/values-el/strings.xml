@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Μηνύματα αυτόματου τηλεφωνητή"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Κλήση Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Κατάσταση SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Κατάσταση SIM υψηλής προτεραιότητας"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Αίτημα peer για TTY ΠΛΗΡΗΣ Λειτουργία"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Αίτημα peer για TTY Λειτουργία HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Αίτημα peer για TTY Λειτουργία VCO"</string>
@@ -550,11 +551,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Εικονίδιο δακτυλικών αποτυπωμάτων"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"διαχείριση υλικολογισμ. ελέγχου ταυτότ. προσώπου"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"διαχείριση εξοπλισμού Face Unlock"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Επιτρέπει στην εφαρμογή να επικαλείται μεθόδους προσθήκης/διαγραφής προτύπων για χρήση."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"χρήση υλικολογισμικού ελέγχου ταυτότητας προσώπου"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί υλικολογισμικό για έλεγχο ταυτότητας"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Έλεγχος ταυτότητας προσώπου"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"χρήση εξοπλισμού Face Unlock"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί εξοπλισμό Face Unlock για έλεγχο ταυτότητας"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face Unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Εγγράψτε ξανά το πρόσωπό σας"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Για να βελτιώσετε την αναγνώριση, εγγράψτε ξανά το πρόσωπό σας"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Αδύνατη λήψη ακριβών δεδομ. προσώπου. Επανάληψη."</string>
@@ -567,7 +568,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Μετακινήστε το τηλέφωνο στα αριστερά."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Μετακινήστε το τηλέφωνο στα δεξιά."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Κοιτάξτε απευθείας τη συσκευή σας."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Δεν εντοπίστηκε το πρόσωπό σας. Δείτε το τηλέφωνο."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Στρέψτε το πρόσωπό σάς απευθείας στο τηλέφωνο."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Πάρα πολλή κίνηση. Κρατήστε σταθερό το τηλέφωνο."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Καταχωρίστε ξανά το πρόσωπό σας."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Αδύνατη η αναγνώριση του προσώπου. Επανάληψη."</string>
@@ -576,19 +577,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Στρέψτε λιγότερο το κεφάλι σας."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Στρέψτε λιγότερο το κεφάλι σας."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Απομακρύνετε οτιδήποτε κρύβει το πρόσωπό σας."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Καθαρίστε τον αισθητήρα επάνω στην οθόνη."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Καθαρίστε το επάνω μέρος της οθόνης σας, συμπεριλαμβανομένης της μαύρης γραμμής"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Αδύν. επαλήθ. προσώπου. Μη διαθέσιμος εξοπλισμός."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Επαναλάβετε τον έλεγχο ταυτότητας προσώπου."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Δοκιμάστε ξανά το Face Unlock."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Η αποθήκ. νέων δεδομ. προσώπ. είναι αδύν. Διαγρ. ένα παλιό."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Η λειτουργία προσώπου ακυρώθηκε"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Ο έλεγχ. ταυτότ. προσώπου ακυρώθηκε από τον χρήστη"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Η ενέργεια προσώπου ακυρώθηκε."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Το Face Unlock ακυρώθηκε από τον χρήστη."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Πάρα πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Υπερβ. πολλές προσπάθειες. Ο έλεγχ. ταυτ. προσώπου απενεργ."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Υπερβολικά πολλές προσπάθειες. Το Face Unlock απενεργοποιήθηκε."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Αδύνατη επαλήθευση του προσώπου. Επανάληψη."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Δεν έχετε ρυθμίσει τον έλεγχο ταυτότητας προσώπου"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Ο έλεγχος ταυτότητας προσώπου δεν υποστηρίζεται στη συσκευή"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Δεν έχετε ρυθμίσει το Face Unlock."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Το Face Unlock δεν υποστηρίζεται σε αυτήν τη συσκευή."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Πρόσωπο <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>

@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"သင့်မျက်နှာကို ရှာနေသည်"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"အတည်ပြုပြီးပြီ"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"အပြီးသတ်ရန်အတွက် \'အတည်ပြုရန်\' ကို တို့ပါ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"လက်ဗွေအာရုံခံကိရိယာကို တို့ပါ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"လက်ဗွေ သင်္ကေတ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"သင့်ကို ရှာဖွေနေသည်…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"အရေးပါမှု နည်းသည့် အကြောင်းကြားချက်များ အောက်မှာ"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ဖွင့်ရန် ထပ်ပြီး ပုတ်ပါ"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"သော့ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"ဖွင့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ဤစက်ပစ္စည်းကို သင်၏အဖွဲ့အစည်းက စီမံခန့်ခွဲထားပါသည်"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ဤစက်ပစ္စည်းကို <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> က စီမံခန့်ခွဲထားပါသည်"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ဖုန်းအတွက် သင်္ကေတပုံအား ပွတ်ဆွဲပါ"</string>

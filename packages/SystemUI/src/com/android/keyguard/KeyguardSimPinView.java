@@ -123,7 +123,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             msg = rez.getString(R.string.kg_sim_lock_esim_instructions, msg);
         }
 
-        if (mSecurityMessageDisplay != null) {
+        if (mSecurityMessageDisplay != null && getVisibility() == VISIBLE) {
             mSecurityMessageDisplay.setMessage(msg);
         }
         mSimImageView.setImageTintList(ColorStateList.valueOf(color));

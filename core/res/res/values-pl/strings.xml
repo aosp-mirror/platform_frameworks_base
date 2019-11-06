@@ -97,6 +97,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Wiadomości poczty głosowej"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Połączenia przez Wi-Fi"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"Stan karty SIM"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Stan karty SIM – wysoki priorytet"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Drugie urządzenie zażądało trybu „TTY pełny”"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Drugie urządzenie zażądało trybu „TTY HCO”"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Drugie urządzenie zażądało trybu „TTY VCO”"</string>
@@ -556,11 +557,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona odcisku palca"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"zarządzanie sprzętem do uwierzytelniania za pomocą twarzy"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"zarządzanie sprzętem do rozpoznawania twarzy"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Zezwala na aktywowanie przez aplikację metody dodawania i usuwania szablonów twarzy."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"używanie sprzętu do uwierzytelniania za pomocą twarzy"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Zezwala na używanie przez aplikację sprzętu do analizy twarzy na potrzeby uwierzytelniania"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Uwierzytelnianie twarzą"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"używanie sprzętu do rozpoznawania twarzy"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Zezwala na używanie przez aplikację sprzętu do rozpoznawania twarzy w uwierzytelniania"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Rozpoznanie twarzy"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Zarejestruj swoją twarz ponownie"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Aby poprawić rozpoznawanie, ponownie zarejestruj swoją twarz"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Nie udało się zarejestrować danych twarzy. Spróbuj ponownie."</string>
@@ -573,7 +574,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Przesuń telefon w lewo."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Przesuń telefon w prawo."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Patrz prosto na urządzenie."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nie widzę Twojej twarzy. Spójrz na telefon."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Ustaw twarz dokładnie na wprost telefonu."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Telefon się porusza. Trzymaj go nieruchomo."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Zarejestruj swoją twarz ponownie."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Nie można już rozpoznać twarzy. Spróbuj ponownie."</string>
@@ -582,19 +583,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Trochę mniej obróć głowę."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Trochę mniej obróć głowę."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Usuń wszystko, co zasłania Ci twarz."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Wyczyść czujnik na górnej krawędzi ekranu."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Wyczyść górną krawędź ekranu, w tym czarny pasek"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nie można zweryfikować twarzy. Sprzęt niedostępny."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Spróbuj uwierzytelniania twarzą ponownie."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Spróbuj rozpoznania twarzy ponownie."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nie można przechowywać nowych danych twarzy. Usuń stare."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Analiza twarzy została anulowana"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Użytkownik anulował uwierzytelnianie twarzą"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Analiza twarzy została anulowana."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Użytkownik anulował rozpoznanie twarzy."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Zbyt wiele prób. Spróbuj ponownie później."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Zbyt wiele prób. Uwierzytelnianie twarzą zostało wyłączone."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Zbyt wiele prób. Rozpoznanie twarzy zostało wyłączone."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nie można zweryfikować twarzy. Spróbuj ponownie."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Uwierzytelnianie twarzą nie jest skonfigurowane"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"To urządzenie nie obsługuje uwierzytelniania twarzą"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Rozpoznanie twarzy nie jest skonfigurowane."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"To urządzenie nie obsługuje rozpoznania twarzy."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Twarz <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1711,7 +1712,7 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Gdy skrót jest włączony, jednoczesne naciśnięcie przez trzy sekundy obu klawiszy sterowania głośnością uruchomi funkcję ułatwień dostępu.\n\nBieżąca funkcja ułatwień dostępu:\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nFunkcję możesz zmienić, wybierając Ustawienia &gt; Ułatwienia dostępu."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Wyłącz skrót"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Użyj skrótu"</string>
-    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Inwersja kolorów"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Odwrócenie kolorów"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Korekcja kolorów"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Skrót ułatwień dostępu wyłączył usługę <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Skrót ułatwień dostępu wyłączył usługę <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>

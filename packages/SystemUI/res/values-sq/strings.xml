@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Po kërkon për fytyrën tënde"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Fytyra u vërtetua"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Konfirmuar"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Trokit \"Konfirmo\" për ta përfunduar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Prek sensorin e gjurmës së gishtit"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona e gjurmës së gishtit"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Po të kërkojmë…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Njoftimet më pak urgjente, më poshtë!"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Trokit përsëri për ta hapur"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Rrëshqit për të shkyçur"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Rrëshqit lart për ta hapur"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Kjo pajisje menaxhohet nga organizata jote"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Kjo pajisje menaxhohet nga <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Rrëshqit për të hapur telefonin"</string>
@@ -543,7 +544,7 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Kreu\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Për të hequr gozhdimin e këtij ekrani, prek dhe mbaj butonat \"Prapa\" dhe \"Përmbledhja\"."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Për të hequr gozhdimin e këtij ekrani, prek dhe mbaj butonat \"Prapa\" dhe \"Kreu\"."</string>
-    <string name="screen_pinning_positive" msgid="3783985798366751226">"E kuptova!"</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"E kuptova"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Jo, faleminderit!"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Ekrani u gozhdua"</string>
     <string name="screen_pinning_exit" msgid="5187339744262325372">"Ekrani u hoq nga gozhdimi"</string>
@@ -613,7 +614,7 @@
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Të hiqet Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit nga Cilësimet dhe të ndërpritet përdorimi i të gjitha funksioneve të tij?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Aplikacioni nuk është instaluar në pajisjen tënde."</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Trego sekondat e orës"</string>
-    <string name="clock_seconds_desc" msgid="6282693067130470675">"Trego sekondat e orës në shiritin e statusit. Mund të ndikojë te jeta e baterisë."</string>
+    <string name="clock_seconds_desc" msgid="6282693067130470675">"Trego sekondat e orës në shiritin e statusit. Mund të ndikojë te kohëzgjatja e baterisë."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Risistemo Cilësimet e shpejta"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Shfaq ndriçimin te Cilësimet e shpejta"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentale"</string>

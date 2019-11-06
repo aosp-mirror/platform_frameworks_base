@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"तुमचा चेहरा शोधत आहे"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"निश्चित केले"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"पूर्ण करण्यासाठी खात्री करा वर टॅप करा"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"फिंगरप्रिंट सेन्सरला स्पर्श करा"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"फिंगरप्रिंट आयकन"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"तुमच्यासाठी शोधत आहे…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"खाली कमी तातडीच्या सूचना"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"उघडण्यासाठी पुन्हा टॅप करा"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"अनलॉक करण्यासाठी स्वाइप करा"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"उघडण्यासाठी वर स्वाइप करा"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"हे डिव्हाइस तुमची संस्था व्यवस्थापित करते"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"हे डिव्हाइस <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ने व्यवस्थापित केले आहे"</string>
     <string name="phone_hint" msgid="4872890986869209950">"फोनसाठी चिन्हावरून स्वाइप करा"</string>
@@ -746,7 +747,7 @@
     <string name="data_saver" msgid="5037565123367048522">"डेटा सेव्हर"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"डेटा सेव्हर चालू आहे"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"डेटा सेव्हर बंद आहे"</string>
-    <string name="switch_bar_on" msgid="1142437840752794229">"चालू"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"सुरू"</string>
     <string name="switch_bar_off" msgid="8803270596930432874">"बंद"</string>
     <string name="nav_bar" msgid="1993221402773877607">"नॅव्हिगेशन बार"</string>
     <string name="nav_bar_layout" msgid="3664072994198772020">"लेआउट"</string>

@@ -41,7 +41,7 @@
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Připojte dobíjecí zařízení."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Klávesy odemknete stisknutím tlačítka nabídky."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Síť je blokována"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Není vložena SIM karta"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"Chybí SIM karta"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"V tabletu není SIM karta."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"V telefonu není SIM karta."</string>
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Vložte SIM kartu."</string>
@@ -167,4 +167,7 @@
       <item quantity="other">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusů, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
       <item quantity="one">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_0">%d</xliff:g> pokus, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
     </plurals>
+    <string name="clock_title_default" msgid="6645600990069154049">"Výchozí"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bublina"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analogové"</string>
 </resources>

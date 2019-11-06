@@ -1255,23 +1255,21 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyPhysicalChannelConfiguration(List<PhysicalChannelConfig> configs) {
-        notifyPhysicalChannelConfigurationForSubscriber(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
-                configs);
-    }
-
-    public void notifyPhysicalChannelConfigurationForSubscriber(int subId,
+    /**
+     * Notify physical channel configuration according to subscripton ID and phone ID
+     */
+    public void notifyPhysicalChannelConfigurationForSubscriber(int phoneId, int subId,
             List<PhysicalChannelConfig> configs) {
         if (!checkNotifyPermission("notifyPhysicalChannelConfiguration()")) {
             return;
         }
 
         if (VDBG) {
-            log("notifyPhysicalChannelConfiguration: subId=" + subId + " configs=" + configs);
+            log("notifyPhysicalChannelConfiguration: subId=" + subId + " phoneId=" + phoneId
+                    + " configs=" + configs);
         }
 
         synchronized (mRecords) {
-            int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
                 mPhysicalChannelConfigs.set(phoneId, configs);
                 for (Record r : mRecords) {

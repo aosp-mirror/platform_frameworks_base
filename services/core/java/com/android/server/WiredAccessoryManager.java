@@ -16,33 +16,33 @@
 
 package com.android.server;
 
+import static com.android.server.input.InputManagerService.SW_HEADPHONE_INSERT;
+import static com.android.server.input.InputManagerService.SW_HEADPHONE_INSERT_BIT;
+import static com.android.server.input.InputManagerService.SW_LINEOUT_INSERT;
+import static com.android.server.input.InputManagerService.SW_LINEOUT_INSERT_BIT;
+import static com.android.server.input.InputManagerService.SW_MICROPHONE_INSERT;
+import static com.android.server.input.InputManagerService.SW_MICROPHONE_INSERT_BIT;
+
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.UEventObserver;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
-import android.media.AudioManager;
-import android.util.Log;
 import android.view.InputDevice;
 
 import com.android.internal.R;
 import com.android.server.input.InputManagerService;
 import com.android.server.input.InputManagerService.WiredAccessoryCallbacks;
 
-import static com.android.server.input.InputManagerService.SW_HEADPHONE_INSERT;
-import static com.android.server.input.InputManagerService.SW_MICROPHONE_INSERT;
-import static com.android.server.input.InputManagerService.SW_LINEOUT_INSERT;
-import static com.android.server.input.InputManagerService.SW_HEADPHONE_INSERT_BIT;
-import static com.android.server.input.InputManagerService.SW_MICROPHONE_INSERT_BIT;
-import static com.android.server.input.InputManagerService.SW_LINEOUT_INSERT_BIT;
-
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -538,7 +538,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
             synchronized (mLock) {
                 int mask = maskAndState.first;
                 int state = maskAndState.second;
-                updateLocked(name, mHeadsetState | (mask & state) & ~(mask & ~state));
+                updateLocked(name, mHeadsetState & ~(mask & ~state) | (mask & state));
                 return;
             }
         }

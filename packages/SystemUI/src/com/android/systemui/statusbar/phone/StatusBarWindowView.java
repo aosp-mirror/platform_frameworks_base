@@ -67,6 +67,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
 import com.android.systemui.tuner.TunerService;
@@ -149,6 +150,7 @@ public class StatusBarWindowView extends FrameLayout {
      * events manually as it's outside of the regular view bounds.
      */
     private boolean mExpandingBelowNotch;
+    private KeyguardBypassController mBypassController;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -271,10 +273,11 @@ public class StatusBarWindowView extends FrameLayout {
     /**
      * Called when the biometric authentication mode changes.
      * @param wakeAndUnlock If the type is {@link BiometricUnlockController#isWakeAndUnlock()}
+     * @param isUnlock If the type is {@link BiometricUnlockController#isBiometricUnlock()} ()
      */
-    public void onBiometricAuthModeChanged(boolean wakeAndUnlock) {
+    public void onBiometricAuthModeChanged(boolean wakeAndUnlock, boolean isUnlock) {
         if (mLockIcon != null) {
-            mLockIcon.onBiometricAuthModeChanged(wakeAndUnlock);
+            mLockIcon.onBiometricAuthModeChanged(wakeAndUnlock, isUnlock);
         }
     }
 
@@ -415,8 +418,7 @@ public class StatusBarWindowView extends FrameLayout {
         }
         boolean intercept = false;
         if (mNotificationPanel.isFullyExpanded()
-                && stackScrollLayout.getVisibility() == View.VISIBLE
-                && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                && mDragDownHelper.isDragDownEnabled()
                 && !mService.isBouncerShowing()
                 && !mService.isDozing()) {
             intercept = mDragDownHelper.onInterceptTouchEvent(ev);
@@ -440,8 +442,7 @@ public class StatusBarWindowView extends FrameLayout {
         if (mService.isDozing()) {
             handled = !mService.isPulsing();
         }
-        if ((mStatusBarStateController.getState() == StatusBarState.KEYGUARD && !handled)
-                || mDragDownHelper.isDraggingDown()) {
+        if ((mDragDownHelper.isDragDownEnabled() && !handled) || mDragDownHelper.isDraggingDown()) {
             // we still want to finish our drag down gesture when locking the screen
             handled = mDragDownHelper.onTouchEvent(ev);
         }
@@ -516,6 +517,16 @@ public class StatusBarWindowView extends FrameLayout {
     public void onShowingLaunchAffordanceChanged(boolean showing) {
         if (mLockIcon != null) {
             mLockIcon.onShowingLaunchAffordanceChanged(showing);
+        }
+    }
+
+    public void setBypassController(KeyguardBypassController bypassController) {
+        mBypassController = bypassController;
+    }
+
+    public void setBouncerShowingScrimmed(boolean bouncerShowing) {
+        if (mLockIcon != null) {
+            mLockIcon.setBouncerShowingScrimmed(bouncerShowing);
         }
     }
 

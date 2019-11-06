@@ -97,6 +97,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Balso pašto pranešimai"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"„Wi-Fi“ skambinimas"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM būsena"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"Didelio prioriteto SIM kortelės būsena"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Lygiavertis naudotojas pateikė užklausą dėl TTY režimo VCO"</string>
@@ -556,11 +557,11 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Piršto antspaudo piktograma"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"tvarkyti veido autentifikavimo aparatinę įrangą"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"tvarkyti Atrakinimo pagal veidą aparatinę įrangą"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Programai leidžiama aktyv. metodus, norint pridėti ir ištrinti naudojamus veidų šablonus."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"naudoti veido autentifikavimo aparatinę įrangą"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Programai leidžiama naudoti veido autentifikavimo aparatinę įrangą tapatybei nustatyti"</string>
-    <string name="face_recalibrate_notification_name" msgid="3976629945250435054">"Veido autentifikavimas"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"naudoti Atrakinimo pagal veidą aparatinę įrangą"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Programai leidžiama naudoti Atrakinimo pagal veidą aparatinę įrangą tapatybei nustatyti"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Atrakinimas pagal veidą"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Pakartotinis veido registravimas"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Kad patobulintumėte atpažinimą, iš naujo užregistruokite veidą"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Neužfiks. tikslūs veido duom. Bandykite dar kartą."</string>
@@ -573,7 +574,7 @@
     <string name="face_acquired_too_right" msgid="3667075962661863218">"Pasukite telefoną kairėn."</string>
     <string name="face_acquired_too_left" msgid="3148242963894703424">"Pasukite telefoną dešinėn."</string>
     <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Žiūrėkite tiesiai į įrenginį."</string>
-    <string name="face_acquired_not_detected" msgid="4885504661626728809">"Nematau jūsų veido. Žiūrėkite į telefoną."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Veidas turi būti prieš telefoną."</string>
     <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Įrenginys per daug judinamas. Nejudink. telefono."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Užregistruokite veidą iš naujo."</string>
     <string name="face_acquired_too_different" msgid="7663983770123789694">"Nebegalima atpažinti veido. Bandykite dar kartą."</string>
@@ -582,19 +583,19 @@
     <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Nesukite tiek galvos."</string>
     <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Nesukite tiek galvos."</string>
     <string name="face_acquired_obscured" msgid="5357207702967893283">"Patraukite viską, kas užstoja jūsų veidą."</string>
-    <string name="face_acquired_sensor_dirty" msgid="2535761002815565222">"Nuvalykite jutiklį, esantį ekrano viršuje."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Išvalykite ekrano viršų, įskaitant juodą juostą"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Nepavyko patv. veido. Aparatinė įranga negalima."</string>
-    <string name="face_error_timeout" msgid="3202585609451248103">"Bandykite naudoti veido autentifikavimą dar kartą."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Band. naudoti Atrakinimą pagal veidą dar kartą."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nepavyko išs. naujų veido duomenų. Pirm. ištrinkite senus."</string>
-    <string name="face_error_canceled" msgid="2768146728600802422">"Veido atpažinimo operacija atšaukta"</string>
-    <string name="face_error_user_canceled" msgid="9003022830076496163">"Veido autentifikavimą atšaukė naudotojas"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Veido atpažinimo operacija atšaukta."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Atrakinimą pagal veidą atšaukė naudotojas."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Per daug bandymų. Vėliau bandykite dar kartą."</string>
-    <string name="face_error_lockout_permanent" msgid="3485837851962070925">"Per daug bandymų. Veido autentifikavimas išjungtas."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Per daug bandymų. Atrakinimas pagal veidą išjungtas."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nepavyko patvirtinti veido. Bandykite dar kartą."</string>
-    <string name="face_error_not_enrolled" msgid="2600952202843125796">"Nenustatėte veido autentifikavimo"</string>
-    <string name="face_error_hw_not_present" msgid="1317845121210260372">"Veido autentifikavimo funkcija šiame įrenginyje nepalaikoma"</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Nenustatėte Atrakinimo pagal veidą."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Atrakinimas pagal veidą šiame įrenginyje nepalaikomas."</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> veidas"</string>
   <string-array name="face_error_vendor">
   </string-array>

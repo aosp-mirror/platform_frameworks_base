@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"L\'appareil recherche votre visage…"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Visage authentifié"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmé"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Touchez Confirmer pour terminer"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Touchez le capteur d\'empreintes digitales"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icône d\'empreinte digitale"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Recherche de votre visage…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notifications moins urgentes affichées ci-dessous"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Touchez à nouveau pour ouvrir"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Glissez vers le haut pour déverrouiller"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Balayez l\'écran vers le haut pour ouvrir"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Cet appareil est géré par votre organisation"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Cet appareil est géré par <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Balayez à partir de l\'icône pour accéder au téléphone"</string>
@@ -415,7 +416,7 @@
     <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • En recharge sans fil (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à la recharge complète)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"En recharge : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à charge complète)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"En recharge rapide : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à ch. comp.)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"En recharge lente : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à ch. comp.)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"Recharge lente : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Changer d\'utilisateur"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Changer d\'utilisateur (utilisateur actuel <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Utilisateur actuel : <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -885,7 +886,7 @@
     <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"Le mode Ne pas déranger a été activé par une application (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"Le mode Ne pas déranger a été activé par une règle automatique ou une application."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"Jusqu\'à <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="qs_dnd_keep" msgid="1825009164681928736">"Garder"</string>
+    <string name="qs_dnd_keep" msgid="1825009164681928736">"Conserver"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Remplacer"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Applications qui fonctionnent en arrière-plan"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Touchez pour afficher des détails sur l\'utilisation de la pile et des données"</string>

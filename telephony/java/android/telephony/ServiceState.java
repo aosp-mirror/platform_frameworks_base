@@ -2011,4 +2011,18 @@ public class ServiceState implements Parcelable {
     public void setIwlanPreferred(boolean isIwlanPreferred) {
         mIsIwlanPreferred = isIwlanPreferred;
     }
+
+    /**
+     * @return {@code true} if any data network is preferred on IWLAN.
+     *
+     * Note only when this value is true, {@link #getDataNetworkType()} will return
+     * {@link TelephonyManager#NETWORK_TYPE_IWLAN} when AP-assisted mode device camps on both
+     * cellular and IWLAN. This value does not affect legacy mode devices as the data network
+     * type is directly reported by the modem.
+     *
+     * @hide
+     */
+    public boolean isIwlanPreferred() {
+        return mIsIwlanPreferred;
+    }
 }

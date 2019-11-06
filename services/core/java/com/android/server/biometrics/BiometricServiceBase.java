@@ -286,10 +286,10 @@ public abstract class BiometricServiceBase extends SystemService
         public EnrollClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int userId, int groupId,
                 byte[] cryptoToken, boolean restricted, String owner,
-                final int[] disabledFeatures) {
+                final int[] disabledFeatures, int timeoutSec) {
             super(context, getConstants(), daemon, halDeviceId, token, listener,
                     userId, groupId, cryptoToken, restricted, owner, getBiometricUtils(),
-                    disabledFeatures);
+                    disabledFeatures, timeoutSec);
         }
 
         @Override
@@ -501,9 +501,9 @@ public abstract class BiometricServiceBase extends SystemService
         }
     }
 
-    private final class BiometricTaskStackListener extends TaskStackListener {
+    private final Runnable mOnTaskStackChangedRunnable = new Runnable() {
         @Override
-        public void onTaskStackChanged() {
+        public void run() {
             try {
                 if (!(mCurrentClient instanceof AuthenticationClient)) {
                     return;
@@ -518,14 +518,21 @@ public abstract class BiometricServiceBase extends SystemService
                     final String topPackage = runningTasks.get(0).topActivity.getPackageName();
                     if (!topPackage.contentEquals(currentClient)
                             && !mCurrentClient.isAlreadyDone()) {
-                        Slog.e(getTag(), "Stopping background authentication, top: " + topPackage
-                                + " currentClient: " + currentClient);
+                        Slog.e(getTag(), "Stopping background authentication, top: "
+                                + topPackage + " currentClient: " + currentClient);
                         mCurrentClient.stop(false /* initiatedByClient */);
                     }
                 }
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Unable to get running tasks", e);
             }
+        }
+    };
+
+    private final class BiometricTaskStackListener extends TaskStackListener {
+        @Override
+        public void onTaskStackChanged() {
+            mHandler.post(mOnTaskStackChangedRunnable);
         }
     }
 
@@ -666,8 +673,12 @@ public abstract class BiometricServiceBase extends SystemService
         mMetricsLogger.count(getConstants().tagHalDied(), 1);
         mHALDeathCount++;
         mCurrentUserId = UserHandle.USER_NULL;
-        handleError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
-                0 /*vendorCode */);
+
+        // All client lifecycle must be managed on the handler.
+        mHandler.post(() -> {
+            handleError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                    0 /*vendorCode */);
+        });
 
         StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED, statsModality(),
                 BiometricsProtoEnums.ISSUE_HAL_DEATH);
@@ -723,8 +734,6 @@ public abstract class BiometricServiceBase extends SystemService
             // already generated a new authenticator id when the new biometric is enrolled.
             if (identifier instanceof Fingerprint) {
                 updateActiveGroup(((Fingerprint)identifier).getGroupId(), null);
-            } else {
-                updateActiveGroup(mCurrentUserId, null);
             }
         }
     }
@@ -917,8 +926,12 @@ public abstract class BiometricServiceBase extends SystemService
     }
 
     protected void setActiveUserInternal(int userId) {
-        // Do not put on handler, since it should finish before returning to caller.
-        updateActiveGroup(userId, null /* clientPackage */);
+        mHandler.post(() -> {
+            if (DEBUG) {
+                Slog.d(getTag(), "setActiveUser(" + userId + ")");
+            }
+            updateActiveGroup(userId, null /* clientPackage */);
+        });
     }
 
     protected void removeInternal(RemovalClient client) {
@@ -1104,6 +1117,8 @@ public abstract class BiometricServiceBase extends SystemService
         if (DEBUG) Slog.v(getTag(), "starting client "
                 + mCurrentClient.getClass().getSuperclass().getSimpleName()
                 + "(" + mCurrentClient.getOwnerString() + ")"
+                + " targetUserId: " + mCurrentClient.getTargetUserId()
+                + " currentUserId: " + mCurrentUserId
                 + " cookie: " + cookie + "/" + mCurrentClient.getCookie());
         if (cookie != mCurrentClient.getCookie()) {
             Slog.e(getTag(), "Mismatched cookie");

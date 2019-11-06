@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Arc keresése"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Arc hitelesítve"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Megerősítve"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Koppintson a Megerősítés lehetőségre"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Érintse meg az ujjlenyomat-érzékelőt"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ujjlenyomat ikonja"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Keresem az Ön arcát…"</string>
@@ -399,7 +400,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"A kevésbé sürgős értesítések lentebb vannak"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Koppintson ismét a megnyitáshoz"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Húzza felfelé az ujját a feloldáshoz"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Csúsztasson felfelé a megnyitáshoz"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Az eszközt az Ön szervezete kezeli"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Az eszközt a(z) <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> felügyeli."</string>
     <string name="phone_hint" msgid="4872890986869209950">"A telefonhoz csúsztasson az ikonról"</string>

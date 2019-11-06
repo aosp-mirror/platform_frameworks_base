@@ -124,6 +124,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Nach deinem Gesicht wird gesucht"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Gesicht authentifiziert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Bestätigt"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Zum Abschließen auf \"Bestätigen\" tippen"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Berühre den Fingerabdrucksensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingerabdruck-Symbol"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Wir suchen nach dir…"</string>
@@ -403,7 +404,7 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Weniger dringende Benachrichtigungen unten"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Erneut tippen, um Benachrichtigung zu öffnen"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Zum Entsperren nach oben wischen"</string>
+    <string name="keyguard_unlock" msgid="6035822649218712063">"Zum Öffnen nach oben wischen"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Dieses Gerät wird von deiner Organisation verwaltet"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Dieses Gerät wird von <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> verwaltet"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Zum Öffnen des Telefons vom Symbol wegwischen"</string>
@@ -655,7 +656,7 @@
     <string name="notification_silence_title" msgid="5763240612242137433">"Lautlos"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"Benachrichtigen"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"Benachrichtigungen werden ohne Ton oder Vibration angekündigt, um deine Konzentration nicht zu stören."</string>
-    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Benachrichtigungen werden mit einem Ton oder einer Vibration angekündigt, um dich auf sie aufmerksam zu machen."</string>
+    <string name="notification_channel_summary_default" msgid="5994062840431965586">"Benachrichtigungen werden mit einem Ton oder einer Vibration angekündigt."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Diese Benachrichtigungen können nicht geändert werden."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Die Benachrichtigungsgruppe kann hier nicht konfiguriert werden"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Weitergeleitete Benachrichtigung"</string>
