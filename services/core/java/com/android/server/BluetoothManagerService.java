@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
+import static android.os.UserHandle.USER_SYSTEM;
+
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -42,6 +45,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Binder;
@@ -242,10 +246,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     }
 
                     // DISALLOW_BLUETOOTH can only be set by DO or PO on the system user.
-                    if (userId == UserHandle.USER_SYSTEM
+                    if (userId == USER_SYSTEM
                             && UserRestrictionsUtils.restrictionsChanged(prevRestrictions,
                             newRestrictions, UserManager.DISALLOW_BLUETOOTH)) {
-                        if (userId == UserHandle.USER_SYSTEM && newRestrictions.getBoolean(
+                        if (userId == USER_SYSTEM && newRestrictions.getBoolean(
                                 UserManager.DISALLOW_BLUETOOTH)) {
                             updateOppLauncherComponentState(userId, true); // Sharing disallowed
                             sendDisableMsg(BluetoothProtoEnums.ENABLE_DISABLE_REASON_DISALLOWED,
@@ -437,18 +441,18 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
 
         int systemUiUid = -1;
-        try {
-            // Check if device is configured with no home screen, which implies no SystemUI.
-            boolean noHome = mContext.getResources().getBoolean(R.bool.config_noHomeScreen);
-            if (!noHome) {
-                systemUiUid = mContext.getPackageManager()
-                        .getPackageUidAsUser("com.android.systemui", PackageManager.MATCH_SYSTEM_ONLY,
-                                UserHandle.USER_SYSTEM);
-            }
+        // Check if device is configured with no home screen, which implies no SystemUI.
+        boolean noHome = mContext.getResources().getBoolean(R.bool.config_noHomeScreen);
+        if (!noHome) {
+            PackageManagerInternal pm = LocalServices.getService(PackageManagerInternal.class);
+            systemUiUid = pm.getPackageUid(pm.getSystemUiServiceComponent().getPackageName(),
+                    MATCH_SYSTEM_ONLY, USER_SYSTEM);
+        }
+        if (systemUiUid >= 0) {
             Slog.d(TAG, "Detected SystemUiUid: " + Integer.toString(systemUiUid));
-        } catch (PackageManager.NameNotFoundException e) {
+        } else {
             // Some platforms, such as wearables do not have a system ui.
-            Slog.w(TAG, "Unable to resolve SystemUI's UID.", e);
+            Slog.w(TAG, "Unable to resolve SystemUI's UID.");
         }
         mSystemUiUid = systemUiUid;
     }

@@ -22747,6 +22747,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public ComponentName getSystemUiServiceComponent() {
+            return ComponentName.unflattenFromString(mContext.getResources().getString(
+                    com.android.internal.R.string.config_systemUIServiceComponent));
+        }
+
+        @Override
         public void setDeviceAndProfileOwnerPackages(
                 int deviceOwnerUserId, String deviceOwnerPackage,
                 SparseArray<String> profileOwnerPackages) {

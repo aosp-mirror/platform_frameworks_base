@@ -481,9 +481,12 @@ public class TileService extends Service {
      * as true on their TileService Manifest declaration, and will do nothing otherwise.
      */
     public static final void requestListeningState(Context context, ComponentName component) {
+        final ComponentName sysuiComponent = ComponentName.unflattenFromString(
+                context.getResources().getString(
+                        com.android.internal.R.string.config_systemUIServiceComponent));
         Intent intent = new Intent(ACTION_REQUEST_LISTENING);
         intent.putExtra(Intent.EXTRA_COMPONENT_NAME, component);
-        intent.setPackage("com.android.systemui");
+        intent.setPackage(sysuiComponent.getPackageName());
         context.sendBroadcast(intent, Manifest.permission.BIND_QUICK_SETTINGS_TILE);
     }
 }

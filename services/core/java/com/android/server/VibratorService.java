@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
@@ -79,7 +80,6 @@ public class VibratorService extends IVibratorService.Stub
         implements InputManager.InputDeviceListener {
     private static final String TAG = "VibratorService";
     private static final boolean DEBUG = false;
-    private static final String SYSTEM_UI_PACKAGE = "com.android.systemui";
     private static final String EXTERNAL_VIBRATOR_SERVICE = "external_vibrator_service";
     private static final String RAMPING_RINGER_ENABLED = "ramping_ringer_enabled";
 
@@ -139,6 +139,7 @@ public class VibratorService extends IVibratorService.Stub
     private final PowerManager.WakeLock mWakeLock;
     private final AppOpsManager mAppOps;
     private final IBatteryStats mBatteryStatsService;
+    private final String mSystemUiPackage;
     private PowerManagerInternal mPowerManagerInternal;
     private InputManager mIm;
     private Vibrator mVibrator;
@@ -284,7 +285,7 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         public boolean isFromSystem() {
-            return uid == Process.SYSTEM_UID || uid == 0 || SYSTEM_UI_PACKAGE.equals(opPkg);
+            return uid == Process.SYSTEM_UID || uid == 0 || mSystemUiPackage.equals(opPkg);
         }
 
         public VibrationInfo toInfo() {
@@ -372,6 +373,8 @@ public class VibratorService extends IVibratorService.Stub
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mBatteryStatsService = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                 BatteryStats.SERVICE_NAME));
+        mSystemUiPackage = LocalServices.getService(PackageManagerInternal.class)
+                .getSystemUiServiceComponent().getPackageName();
 
         mPreviousVibrationsLimit = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_previousVibrationsDumpLimit);
