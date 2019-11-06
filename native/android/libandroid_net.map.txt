@@ -1,15 +1,19 @@
-# They are also all available to vendor code.
+# The following symbols marked with # llndk are available to vendor code.
+# Unlike other VNDK libraries where keeping backwards compatibility is required
+# only within a platform release, these symbols need much longer suppport
+# because the same LLNDK library serves for both system and vendor partition
+# which might be a few years old.
 LIBANDROID_NET {
   global:
     # These functions have been part of the NDK since API 24.
-    android_getaddrinfofornetwork; # vndk
-    android_setsocknetwork; # vndk
-    android_setprocnetwork; # vndk
+    android_getaddrinfofornetwork; # llndk
+    android_setsocknetwork; # llndk
+    android_setprocnetwork; # llndk
     # These functions have been part of the NDK since API 29.
-    android_res_cancel; # vndk
-    android_res_nquery; # vndk
-    android_res_nresult; # vndk
-    android_res_nsend; # vndk
+    android_res_cancel; # llndk
+    android_res_nquery; # llndk
+    android_res_nresult; # llndk
+    android_res_nsend; # llndk
   local:
     *;
 };
