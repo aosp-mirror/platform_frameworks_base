@@ -1903,6 +1903,7 @@ class UserController implements Handler.Callback {
         }
 
         // Optimization - if there is no pending user switch, return current id
+        // (no need to acquire lock because mTargetUserId and mCurrentUserId are volatile)
         if (mTargetUserId == UserHandle.USER_NULL) {
             return getUserInfo(mCurrentUserId);
         }
@@ -1919,7 +1920,7 @@ class UserController implements Handler.Callback {
 
     int getCurrentOrTargetUserId() {
         synchronized (mLock) {
-            return mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
+            return getCurrentOrTargetUserIdLU();
         }
     }
 
