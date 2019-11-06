@@ -835,8 +835,8 @@ class TaskRecord extends Task {
         mNextAffiliateTaskId = nextAffiliate == null ? INVALID_TASK_ID : nextAffiliate.mTaskId;
     }
 
-    <T extends ActivityStack> T getStack() {
-        return (T) mStack;
+    ActivityStack getStack() {
+        return mStack;
     }
 
     // TODO(stack-unify): Can be removed on stack unified.

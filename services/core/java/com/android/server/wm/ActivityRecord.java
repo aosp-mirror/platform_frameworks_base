@@ -1167,7 +1167,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     TaskStack getStack() {
         final Task task = getTask();
         if (task != null) {
-            return task.mStack;
+            return task.getTaskStack();
         } else {
             return null;
         }
@@ -1210,8 +1210,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (getDisplayContent() != null) {
                 getDisplayContent().mClosingApps.remove(this);
             }
-        } else if (mLastParent != null && mLastParent.mStack != null) {
-            task.mStack.mExitingActivities.remove(this);
+        } else if (mLastParent != null && mLastParent.getTaskStack() != null) {
+            task.getTaskStack().mExitingActivities.remove(this);
         }
         final TaskStack stack = getStack();
 

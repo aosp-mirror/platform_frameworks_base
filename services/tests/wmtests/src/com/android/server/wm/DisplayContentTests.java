@@ -119,7 +119,7 @@ public class DisplayContentTests extends WindowTestsBase {
         waitUntilHandlersIdle();
 
         exitingApp.mIsExiting = true;
-        exitingApp.getTask().mStack.mExitingActivities.add(exitingApp);
+        exitingApp.getTask().getTaskStack().mExitingActivities.add(exitingApp);
 
         assertForAllWindowsOrder(Arrays.asList(
                 mWallpaperWindow,

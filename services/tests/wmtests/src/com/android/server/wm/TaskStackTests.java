@@ -58,12 +58,12 @@ public class TaskStackTests extends WindowTestsBase {
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
 
         // Current user task should be moved to top.
-        stack.positionChildAt(WindowContainer.POSITION_TOP, task1, false /* includingParents */);
+        stack.positionChildAt(WindowContainer.POSITION_TOP, (TaskRecord) task1, false /* includingParents */);
         assertEquals(stack.mChildren.get(0), task2);
         assertEquals(stack.mChildren.get(1), task1);
 
         // Non-current user won't be moved to top.
-        stack.positionChildAt(WindowContainer.POSITION_TOP, task2, false /* includingParents */);
+        stack.positionChildAt(WindowContainer.POSITION_TOP, (TaskRecord) task2, false /* includingParents */);
         assertEquals(stack.mChildren.get(0), task2);
         assertEquals(stack.mChildren.get(1), task1);
     }
@@ -112,12 +112,12 @@ public class TaskStackTests extends WindowTestsBase {
     public void testStackRemoveImmediately() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        assertEquals(stack, task.mStack);
+        assertEquals(stack, task.getTaskStack());
 
         // Remove stack and check if its child is also removed.
         stack.removeImmediately();
         assertNull(stack.getDisplayContent());
-        assertNull(task.mStack);
+        assertNull(task.getTaskStack());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class TaskStackTests extends WindowTestsBase {
         assertEquals(0, stack.getChildCount());
         assertNull(stack.getDisplayContent());
         assertNull(task.getDisplayContent());
-        assertNull(task.mStack);
+        assertNull(task.getTaskStack());
     }
 
     @Test
