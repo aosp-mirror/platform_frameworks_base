@@ -22,6 +22,7 @@ import static org.testng.Assert.assertThrows;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +46,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         assertTrue(runDeviceTests("com.android.tests.rollback",
                     "com.android.tests.rollback.StagedRollbackTest",
                     phase));
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        getDevice().reboot();
     }
 
     /**
