@@ -523,6 +523,40 @@ void JDrm::notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj) 
     }
 }
 
+void JDrm::sendEvent(
+        DrmPlugin::EventType eventType,
+        const hardware::hidl_vec<uint8_t> &sessionId,
+        const hardware::hidl_vec<uint8_t> &data) {
+    Parcel obj;
+    DrmUtils::WriteByteArray(obj, sessionId);
+    DrmUtils::WriteByteArray(obj, data);
+    notify(eventType, 0, &obj);
+}
+
+void JDrm::sendExpirationUpdate(
+        const hardware::hidl_vec<uint8_t> &sessionId,
+        int64_t expiryTimeInMS) {
+    Parcel obj;
+    DrmUtils::WriteExpirationUpdateToParcel(obj, sessionId, expiryTimeInMS);
+    notify(DrmPlugin::kDrmPluginEventExpirationUpdate, 0, &obj);
+}
+
+void JDrm::sendKeysChange(
+        const hardware::hidl_vec<uint8_t> &sessionId,
+        const std::vector<DrmKeyStatus> &keyStatusList,
+        bool hasNewUsableKey) {
+    Parcel obj;
+    DrmUtils::WriteKeysChange(obj, sessionId, keyStatusList, hasNewUsableKey);
+    notify(DrmPlugin::kDrmPluginEventKeysChange, 0, &obj);
+}
+
+void JDrm::sendSessionLostState(
+        const hardware::hidl_vec<uint8_t> &sessionId) {
+    Parcel obj;
+    DrmUtils::WriteByteArray(obj, sessionId);
+    notify(DrmPlugin::kDrmPluginEventSessionLostState, 0, &obj);
+}
+
 void JDrm::disconnect() {
     if (mDrm != NULL) {
         mDrm->destroyPlugin();

@@ -21,6 +21,8 @@
 
 #include <media/stagefright/foundation/ABase.h>
 #include <mediadrm/IDrm.h>
+#include <mediadrm/IDrmClient.h>
+#include <hidl/HidlSupport.h>
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 
@@ -44,7 +46,23 @@ struct JDrm : public BnDrmClient {
     status_t initCheck() const;
     sp<IDrm> getDrm() { return mDrm; }
 
-    void notify(DrmPlugin::EventType, int extra, const Parcel *obj);
+    void sendEvent(
+            DrmPlugin::EventType eventType,
+            const hardware::hidl_vec<uint8_t> &sessionId,
+            const hardware::hidl_vec<uint8_t> &data) override;
+
+    void sendExpirationUpdate(
+            const hardware::hidl_vec<uint8_t> &sessionId,
+            int64_t expiryTimeInMS) override;
+
+    void sendKeysChange(
+            const hardware::hidl_vec<uint8_t> &sessionId,
+            const std::vector<DrmKeyStatus> &keyStatusList,
+            bool hasNewUsableKey) override;
+
+    void sendSessionLostState(
+            const hardware::hidl_vec<uint8_t> &sessionId) override;
+
     status_t setListener(const sp<DrmListener>& listener);
 
     void disconnect();
@@ -62,6 +80,8 @@ private:
 
     static sp<IDrm> MakeDrm();
     static sp<IDrm> MakeDrm(const uint8_t uuid[16], const String8 &appPackageName);
+
+    void notify(DrmPlugin::EventType, int extra, const Parcel *obj);
 
     DISALLOW_EVIL_CONSTRUCTORS(JDrm);
 };
