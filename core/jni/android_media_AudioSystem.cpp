@@ -2264,6 +2264,12 @@ android_media_AudioSystem_setAudioHalPids(JNIEnv *env, jobject clazz, jintArray 
     return jStatus;
 }
 
+static jboolean
+android_media_AudioSystem_isCallScreeningModeSupported(JNIEnv *env, jobject thiz)
+{
+    return AudioSystem::isCallScreenModeSupported();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -2343,6 +2349,7 @@ static const JNINativeMethod gMethods[] = {
     {"setAllowedCapturePolicy", "(II)I", (void *)android_media_AudioSystem_setAllowedCapturePolicy},
     {"setRttEnabled",       "(Z)I",     (void *)android_media_AudioSystem_setRttEnabled},
     {"setAudioHalPids",  "([I)I", (void *)android_media_AudioSystem_setAudioHalPids},
+    {"isCallScreeningModeSupported", "()Z", (void *)android_media_AudioSystem_isCallScreeningModeSupported},
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {
