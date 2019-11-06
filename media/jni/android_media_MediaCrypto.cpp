@@ -24,11 +24,10 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
-#include <binder/IServiceManager.h>
 #include <cutils/properties.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <mediadrm/DrmUtils.h>
 #include <mediadrm/ICrypto.h>
-#include <mediadrm/IMediaDrmService.h>
 
 namespace android {
 
@@ -64,20 +63,7 @@ JCrypto::~JCrypto() {
 
 // static
 sp<ICrypto> JCrypto::MakeCrypto() {
-    sp<IServiceManager> sm = defaultServiceManager();
-
-    sp<IBinder> binder = sm->getService(String16("media.drm"));
-    sp<IMediaDrmService> service = interface_cast<IMediaDrmService>(binder);
-    if (service == NULL) {
-        return NULL;
-    }
-
-    sp<ICrypto> crypto = service->makeCrypto();
-    if (crypto == NULL || (crypto->initCheck() != OK && crypto->initCheck() != NO_INIT)) {
-        return NULL;
-    }
-
-    return crypto;
+    return DrmUtils::MakeCrypto();
 }
 
 // static
