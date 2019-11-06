@@ -5694,11 +5694,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     PackageSetting ps = it.next();
                     if (ps.getInstalled(userId)) {
                         res[i++] = ps.name;
-                    } else {
-                        res = ArrayUtils.removeElement(String.class, res, res[i]);
                     }
                 }
-                return res;
+                return ArrayUtils.trimToSize(res, i);
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
                 if (ps.getInstalled(userId)
