@@ -18,6 +18,8 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 
@@ -30,6 +32,7 @@ public class StatusBarDependenciesModule {
      * Provides our instance of CommandQueue which is considered optional.
      */
     @Provides
+    @Singleton
     public CommandQueue provideCommandQueue(Context context) {
         return new CommandQueue(context);
     }
