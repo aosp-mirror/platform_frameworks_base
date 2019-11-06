@@ -35,7 +35,7 @@ import android.os.ParcelFileDescriptor;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.cts.install.lib.Install;
 import com.android.cts.install.lib.InstallUtils;
@@ -184,7 +184,7 @@ public class StagedRollbackTest {
     @Test
     public void testNativeWatchdogTriggersRollback_Phase1() throws Exception {
         resetModuleMetadataPackage();
-        Context context = InstrumentationRegistry.getContext();
+        Context context = InstrumentationRegistry.getInstrumentation().getContext();
         PackageInfo metadataPackageInfo = context.getPackageManager().getPackageInfo(
                 MODULE_META_DATA_PACKAGE, 0);
         String metadataApkPath = metadataPackageInfo.applicationInfo.sourceDir;
@@ -268,7 +268,7 @@ public class StagedRollbackTest {
     private static String getNetworkStackPackageName() {
         Intent intent = new Intent(NETWORK_STACK_CONNECTOR_CLASS);
         ComponentName comp = intent.resolveSystemService(
-                InstrumentationRegistry.getContext().getPackageManager(), 0);
+                InstrumentationRegistry.getInstrumentation().getContext().getPackageManager(), 0);
         return comp.getPackageName();
     }
 
@@ -289,8 +289,8 @@ public class StagedRollbackTest {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
 
         int sessionId = Install.single(TestApp.A2).setStaged().setEnableRollback().commit();
-        PackageInstaller pi = InstrumentationRegistry.getContext().getPackageManager()
-                .getPackageInstaller();
+        PackageInstaller pi = InstrumentationRegistry.getInstrumentation().getContext()
+                .getPackageManager().getPackageInstaller();
         pi.abandonSession(sessionId);
 
         // Remove the first intent sender result, so that the next staged install session does not
@@ -346,8 +346,8 @@ public class StagedRollbackTest {
 
     @Nullable
     private static String getModuleMetadataPackageName() {
-        String packageName = InstrumentationRegistry.getContext().getResources().getString(
-                R.string.config_defaultModuleMetadataProvider);
+        String packageName = InstrumentationRegistry.getInstrumentation().getContext()
+                .getResources().getString(R.string.config_defaultModuleMetadataProvider);
         if (TextUtils.isEmpty(packageName)) {
             return null;
         }
