@@ -110,6 +110,7 @@ import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -204,6 +205,7 @@ import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.ForegroundServiceLifetimeExtender;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -211,6 +213,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationGuts;
 import com.android.systemui.statusbar.NotificationInfo;
+import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationSnooze;
 import com.android.systemui.statusbar.RemoteInputController;
@@ -751,9 +754,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Nullable private View mAmbientIndicationContainer;
     private String mKeyToRemoveOnGutsClosed;
     private SysuiColorExtractor mColorExtractor;
-    private ForegroundServiceController mForegroundServiceController;
     private ScreenLifecycle mScreenLifecycle;
     @VisibleForTesting WakefulnessLifecycle mWakefulnessLifecycle;
+    protected ForegroundServiceController mForegroundServiceController;
 
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
@@ -807,6 +810,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
 
         mForegroundServiceController = Dependency.get(ForegroundServiceController.class);
+        mFGSExtender = new ForegroundServiceLifetimeExtender();
+        mFGSExtender.setCallback(key -> removeNotification(key, mLatestRankingMap));
+
 
         mDisplay = mWindowManager.getDefaultDisplay();
         updateDisplaySize();
@@ -1808,6 +1814,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         Entry entry = mNotificationData.get(key);
 
+        if (entry != null && mFGSExtender.shouldExtendLifetime(entry)) {
+            extendLifetime(entry, mFGSExtender);
+            return;
+        }
+
         if (entry != null && mRemoteInputController.isRemoteInputActive(entry)
                 && (entry.row != null && !entry.row.isDismissed())) {
             mLatestRankingMap = ranking;
@@ -1846,7 +1857,33 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
         }
+        // Make sure no lifetime extension is happening anymore
+        cancelLifetimeExtension(entry);
         setAreThereNotifications();
+    }
+
+    /** Lifetime extension keeps entries around after they would've otherwise been canceled */
+    private void extendLifetime(Entry entry, NotificationLifetimeExtender extender) {
+        // Cancel any other extender which might be holding on to this notification entry
+        NotificationLifetimeExtender activeExtender = mRetainedNotifications.get(entry);
+        if (activeExtender != null && activeExtender != extender) {
+            activeExtender.setShouldManageLifetime(entry, false);
+        }
+        mRetainedNotifications.put(entry, extender);
+        extender.setShouldManageLifetime(entry, true);
+    }
+
+    /** Tells the current extender (if any) to stop extending the entry's lifetime */
+    private void cancelLifetimeExtension(NotificationData.Entry entry) {
+        NotificationLifetimeExtender activeExtender = mRetainedNotifications.remove(entry);
+        if (activeExtender != null) {
+            activeExtender.setShouldManageLifetime(entry, false);
+        }
+    }
+
+    @VisibleForTesting
+    public Map<Entry, NotificationLifetimeExtender> getRetainedNotificationMap() {
+        return mRetainedNotifications;
     }
 
     /**
@@ -3530,6 +3567,17 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             for (Entry entry : mPendingNotifications.values()) {
                 pw.println(entry.notification);
+            }
+        }
+
+        pw.println("  Lifetime-extended notifications:");
+        if (mRetainedNotifications.isEmpty()) {
+            pw.println("    None");
+        } else {
+            for (Map.Entry<NotificationData.Entry, NotificationLifetimeExtender> entry
+                    : mRetainedNotifications.entrySet()) {
+                pw.println("    " + entry.getKey().notification + " retained by "
+                        + entry.getValue().getClass().getName());
             }
         }
 
@@ -5703,6 +5751,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected RemoteInputController mRemoteInputController;
 
+    // A lifetime extender that watches for foreground service notifications
+    @VisibleForTesting protected NotificationLifetimeExtender mFGSExtender;
+    private final Map<Entry, NotificationLifetimeExtender> mRetainedNotifications =
+        new ArrayMap<>();
+
     // for heads up notifications
     protected HeadsUpManager mHeadsUpManager;
 
@@ -7383,6 +7436,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mKeyToRemoveOnGutsClosed = null;
             Log.w(TAG, "Notification that was kept for guts was updated. " + key);
         }
+
+        // No need to keep the lifetime extension around if an update comes in for it
+        cancelLifetimeExtension(entry);
 
         Notification n = notification.getNotification();
         mNotificationData.updateRanking(ranking);

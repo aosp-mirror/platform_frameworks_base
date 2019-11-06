@@ -546,6 +546,21 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         assertEquals(0, mNotificationManagerService.getNotificationRecordCount());
     }
 
+
+    @Test
+    public void testCancelImmediatelyAfterEnqueueNotifiesListeners_ForegroundServiceFlag()
+            throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        sbn.getNotification().flags =
+                Notification.FLAG_ONGOING_EVENT | Notification.FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelNotificationWithTag(PKG, "tag", sbn.getId(), sbn.getUserId());
+        waitForIdle();
+        verify(mListeners, times(1)).notifyPostedLocked(any(), any());
+        verify(mListeners, times(1)).notifyRemovedLocked(any(), anyInt());
+    }
+
     @Test
     public void testCancelNotificationWhilePostedAndEnqueued() throws Exception {
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
