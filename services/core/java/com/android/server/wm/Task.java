@@ -58,6 +58,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ToBooleanFunction;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -716,6 +717,11 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     @Override
     void forAllTasks(Consumer<Task> callback) {
         callback.accept(this);
+    }
+
+    @Override
+    boolean forAllTasks(ToBooleanFunction<Task> callback) {
+        return callback.apply(this);
     }
 
     /**
