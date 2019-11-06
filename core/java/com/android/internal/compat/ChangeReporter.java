@@ -21,6 +21,7 @@ import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +38,7 @@ public final class ChangeReporter {
     private static final String TAG = "CompatibilityChangeReporter";
     private int mSource;
 
-    private final class ChangeReport {
+    private static final class ChangeReport {
         long mChangeId;
         int mState;
 
@@ -65,9 +66,13 @@ public final class ChangeReporter {
     @GuardedBy("mReportedChanges")
     private final Map<Integer, Set<ChangeReport>> mReportedChanges;
 
+    // When true will of every time to debug (logcat).
+    private boolean mDebugLogAll;
+
     public ChangeReporter(int source) {
         mSource = source;
         mReportedChanges =  new HashMap<>();
+        mDebugLogAll = false;
     }
 
     /**
@@ -79,20 +84,76 @@ public final class ChangeReporter {
      * @param state    of the reported change - enabled/disabled/only logged
      */
     public void reportChange(int uid, long changeId, int state) {
-        ChangeReport report = new ChangeReport(changeId, state);
+        if (shouldWriteToStatsLog(uid, changeId, state)) {
+            StatsLog.write(StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid, changeId,
+                    state, mSource);
+        }
+        if (shouldWriteToDebug(uid, changeId, state)) {
+            debugLog(uid, changeId, state);
+        }
+        markAsReported(uid, new ChangeReport(changeId, state));
+    }
+
+    /**
+     * Start logging all the time to logcat.
+     */
+    public void startDebugLogAll() {
+        mDebugLogAll = true;
+    }
+
+    /**
+     * Stop logging all the time to logcat.
+     */
+    public void stopDebugLogAll() {
+        mDebugLogAll = false;
+    }
+
+
+    /**
+     * Returns whether the next report should be logged to statsLog.
+     *
+     * @param uid      affected by the change
+     * @param changeId the reported change id
+     * @param state    of the reported change - enabled/disabled/only logged
+     * @return true if the report should be logged
+     */
+    @VisibleForTesting
+    public boolean shouldWriteToStatsLog(int uid, long changeId, int state) {
+        return !isAlreadyReported(uid, new ChangeReport(changeId, state));
+    }
+
+    /**
+     * Returns whether the next report should be logged to logcat.
+     *
+     * @param uid      affected by the change
+     * @param changeId the reported change id
+     * @param state    of the reported change - enabled/disabled/only logged
+     * @return true if the report should be logged
+     */
+    @VisibleForTesting
+    public boolean shouldWriteToDebug(int uid, long changeId, int state) {
+        return mDebugLogAll || !isAlreadyReported(uid, new ChangeReport(changeId, state));
+    }
+
+    private boolean isAlreadyReported(int uid, ChangeReport report) {
+        synchronized (mReportedChanges) {
+            Set<ChangeReport> reportedChangesForUid = mReportedChanges.get(uid);
+            if (reportedChangesForUid == null) {
+                return false;
+            } else {
+                return reportedChangesForUid.contains(report);
+            }
+        }
+    }
+
+    private void markAsReported(int uid, ChangeReport report) {
         synchronized (mReportedChanges) {
             Set<ChangeReport> reportedChangesForUid = mReportedChanges.get(uid);
             if (reportedChangesForUid == null) {
                 mReportedChanges.put(uid, new HashSet<ChangeReport>());
                 reportedChangesForUid = mReportedChanges.get(uid);
             }
-            if (!reportedChangesForUid.contains(report)) {
-                debugLog(uid, changeId, state);
-                StatsLog.write(StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid, changeId,
-                        state, mSource);
-                reportedChangesForUid.add(report);
-            }
-
+            reportedChangesForUid.add(report);
         }
     }
 

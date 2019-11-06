@@ -672,17 +672,23 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * status bar, otherwise returns {@link Display#INVALID_DISPLAY}.
      */
     public int getExpandedDisplayId(Context context) {
+        final Bubble bubble = getExpandedBubble(context);
+        return bubble != null ? bubble.getDisplayId() : INVALID_DISPLAY;
+    }
+
+    @Nullable
+    private Bubble getExpandedBubble(Context context) {
         if (mStackView == null) {
-            return INVALID_DISPLAY;
+            return null;
         }
-        boolean defaultDisplay = context.getDisplay() != null
+        final boolean defaultDisplay = context.getDisplay() != null
                 && context.getDisplay().getDisplayId() == DEFAULT_DISPLAY;
-        Bubble b = mStackView.getExpandedBubble();
-        if (defaultDisplay && b != null && isStackExpanded()
+        final Bubble expandedBubble = mStackView.getExpandedBubble();
+        if (defaultDisplay && expandedBubble != null && isStackExpanded()
                 && !mStatusBarWindowController.getPanelExpanded()) {
-            return b.expandedView.getVirtualDisplayId();
+            return expandedBubble;
         }
-        return INVALID_DISPLAY;
+        return null;
     }
 
     @VisibleForTesting
@@ -791,6 +797,14 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
             if (mStackView != null && taskInfo.displayId == getExpandedDisplayId(mContext)) {
                 mBubbleData.setExpanded(false);
+            }
+        }
+
+        @Override
+        public void onSingleTaskDisplayDrawn(int displayId) {
+            final Bubble expandedBubble = getExpandedBubble(mContext);
+            if (expandedBubble != null && expandedBubble.getDisplayId() == displayId) {
+                expandedBubble.setContentVisibility(true);
             }
         }
     }

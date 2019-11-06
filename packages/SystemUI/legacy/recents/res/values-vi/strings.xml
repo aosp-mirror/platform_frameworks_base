@@ -34,7 +34,7 @@
     <string name="recents_launch_disabled_message" msgid="826461671965217243">"<xliff:g id="APP">%s</xliff:g> bị tắt ở chế độ an toàn."</string>
     <string name="recents_stack_action_button_label" msgid="1974273390109881497">"Xóa tất cả"</string>
     <string name="recents_drag_hint_message" msgid="610417221848280136">"Kéo vào đây để sử dụng chế độ chia đôi màn hình"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"Phân tách ngang"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"Chia ngang"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"Phân tách dọc"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="7368405969130304811">"Tùy chỉnh phân tách"</string>
     <string name="recents_accessibility_split_screen_top" msgid="8773505308411722524">"Chia đôi màn hình lên trên"</string>

@@ -29,6 +29,7 @@ import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.os.IBinder;
 import android.util.Slog;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -72,6 +73,9 @@ final class ColorFade {
     // See code for details.
     private static final int DEJANK_FRAMES = 3;
 
+    private static final int EGL_GL_COLORSPACE_KHR = 0x309D;
+    private static final int EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT = 0x3490;
+
     private final int mDisplayId;
 
     // Set to true when the animation context has been fully prepared.
@@ -93,6 +97,7 @@ final class ColorFade {
     private EGLSurface mEglSurface;
     private boolean mSurfaceVisible;
     private float mSurfaceAlpha;
+    private boolean mIsWideColor;
 
     // Texture names.  We only use one texture, which contains the screenshot.
     private final int[] mTexNames = new int[1];
@@ -482,6 +487,8 @@ final class ColorFade {
                     return false;
                 }
 
+                mIsWideColor = SurfaceControl.getActiveColorMode(token)
+                        == Display.COLOR_MODE_DISPLAY_P3;
                 SurfaceControl.screenshot(token, s);
                 st.updateTexImage();
                 st.getTransformMatrix(mTexMatrix);
@@ -608,8 +615,16 @@ final class ColorFade {
     private boolean createEglSurface() {
         if (mEglSurface == null) {
             int[] eglSurfaceAttribList = new int[] {
+                    EGL14.EGL_NONE,
+                    EGL14.EGL_NONE,
                     EGL14.EGL_NONE
             };
+
+            // If the current display is in wide color, then so is the screenshot.
+            if (mIsWideColor) {
+                eglSurfaceAttribList[0] = EGL_GL_COLORSPACE_KHR;
+                eglSurfaceAttribList[1] = EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT;
+            }
             // turn our SurfaceControl into a Surface
             mEglSurface = EGL14.eglCreateWindowSurface(mEglDisplay, mEglConfig, mSurface,
                     eglSurfaceAttribList, 0);

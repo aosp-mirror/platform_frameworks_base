@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"ບໍ່ສາມາດກວດຫາເຄືອຂ່າຍໄດ້"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"ບໍ່ໃຊ້"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"ບັນ​ທຶກແລ້ວ"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"ຕັດການເຊື່ອມຕໍ່ແລ້ວ"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"ປິດການນຳໃຊ້"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"ການ​ຕັ້ງ​ຄ່າ IP ລົ້ມ​ເຫຼວ"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"ບໍ່ໄດ້ເຊື່ອມຕໍ່ເນື່ອງຈາກຄຸນນະພາບເຄືອຂ່າຍຕໍ່າ"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"ມີ​ໃຫ້​ຜ່ານ %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"ແຕະເພື່ອສະໝັກ"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"ເຊື່ອມຕໍ່ແລ້ວ, ບໍ່ມີອິນເຕີເນັດ"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"ການເຊື່ອມຕໍ່ຈຳກັດ"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"ບໍ່ມີອິນເຕີເນັດ"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"ຈຳເປັນຕ້ອງເຂົ້າສູ່ລະບົບ"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ຈຸດການເຂົ້າເຖິງເຕັມຊົ່ວຄາວ"</string>
@@ -75,18 +75,16 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີມີເດຍ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"ເຊື່ອມຕໍ່ແລ້ວ (ບໍ່ມີໂທລະສັບ ຫຼື ມີເດຍ), ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"ເປີດໃຊ້ຢູ່, ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"ເປີດໃຊ້, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ແບັດເຕີຣີ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ແບັດເຕີຣີ"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"ແບັດເຕີຣີ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ແບັດເຕີຣີ, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ແບັດເຕີຣີ"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"ອອນລາຍ"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"ສຽງ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ການໂທ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ການໂອນຍ້າຍໄຟລ໌"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ອຸປະກອນປ້ອນຂໍ້ມູນ"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ການເຂົ້າເຖິງອິນເຕີເນັດ"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ່​ຕິດ​ຕໍ່"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"ການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ້​ຕິດ​ຕໍ່"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"​ໃຊ້​ສຳ​ລັບການ​ແບ່ງ​ປັນ​ລາຍ​ຊື່​ຜູ່​ຕິດ​ຕໍ່"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ການແບ່ງປັນການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"ຂໍ້ຄວາມ"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ການ​ສ້າງເຄືອຂ່າຍ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ສະແດງການຮັບຮອງຂອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"​ເປີດ​ນຳ​ໃຊ້ການ​ເກັບ​ປະ​ຫວັດ​ Verbose Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"ການຈຳກັດການສະແກນ Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືຕະຫຼອດເວລາ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"ບໍ່ສາມາດເຊື່ອມຕໍ່ໄດ້"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ສະແດງໂຕເລືອກສຳລັບການສະແດງການຮັບຮອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ເພີ່ມ​ລະ​ດັບ​ການ​ເກັບ​ປະ​ຫວັດ Wi‑Fi, ສະ​ແດງ​ຕໍ່ SSID RSSI ​ໃນ​ Wi‑Fi Picker"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"ຫຼຸດການໃຊ້ແບັດເຕີຣີ ແລະ ປັບປຸງປະສິດທິພາບເຄືອຂ່າຍ"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"ມີການວັດແທກ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"ບໍ່ໄດ້ວັດແທກ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ຂະໜາດບັບເຟີຕົວບັນທຶກ"</string>
@@ -268,8 +268,8 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"ຖອດຖອນການເຂົ້າເຖິງການດີບັ໊ກຜ່ານ USB ຈາກຄອມພິວເຕີທຸກເຄື່ອງ ທີ່ທ່ານເຄີຍອະນຸຍາດກ່ອນໜ້ານີ້?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"ອະນຸຍາດການຕັ້ງຄ່າສຳລັບນັກພັດທະນາ?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ການ​ຕັ້ງຄ່າ​ເຫຼົ່ານີ້​ແມ່ນ​ມີ​ຈຸດປະສົງ​ເພື່ອ​ການ​ພັດທະນາ​ເທົ່ານັ້ນ. ພວກ​ມັນ​ສາມາດ​ເຮັດ​ໃຫ້​ອຸປະກອນ ແລະ​ແອັບພລິເຄຊັນ​ຂອງ​ທ່ານ​ຢຸດ​ເຮັດ​ວຽກ ຫຼື​ເຮັດ​ວຽກ​ຜິດປົກກະຕິ​ໄດ້."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ຢືນຢັນແອັບຯຜ່ານທາງ USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ກວດສອບແອັບຯທີ່ຕິດຕັ້ງແລ້ວຜ່ານທາງ ADB/ADT ເພື່ອກວດຫາພຶດຕິກຳທີ່ເປັນອັນຕະລາຍ."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ຢືນຢັນແອັບຜ່ານທາງ USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ກວດສອບແອັບທີ່ຕິດຕັ້ງແລ້ວຜ່ານທາງ ADB/ADT ເພື່ອກວດຫາພຶດຕິກຳທີ່ເປັນອັນຕະລາຍ."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ຈະສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່ (ທີ່ຢູ່ MAC ເທົ່ານັ້ນ)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ປິດໃຊ້ຄຸນສົມບັດລະດັບສຽງສົມບູນຂອງ Bluetooth ໃນກໍລະນີເກີດບັນຫາລະດັບສຽງສົມບູນກັບອຸປະກອນທາງໄກ ເຊັ່ນວ່າ ລະດັບສຽງດັງເກີນຍອມຮັບໄດ້ ຫຼື ຄວບຄຸມບໍ່ໄດ້."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal ໃນໂຕເຄື່ອງ"</string>
@@ -277,7 +277,7 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"ການກວດສອບ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"ຕັ້ງວິທີການກວດສອບ HDCP"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"ການດີບັ໊ກ"</string>
-    <string name="debug_app" msgid="8349591734751384446">"ເລືອກແອັບຯສຳລັບດີບັ໊ກ"</string>
+    <string name="debug_app" msgid="8349591734751384446">"ເລືອກແອັບສຳລັບດີບັ໊ກ"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"ບໍ່ໄດ້ຕັ້ງການດີບັ໊ກແອັບພລິເຄຊັນ"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"ແອັບພລິເຄຊັນສຳລັບການດີບັ໊ກ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"ເລືອກແອັບພລິເຄຊັນ"</string>
@@ -309,21 +309,21 @@
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"ປິດ​ການ​ນຳ​ໃຊ້​ເສັ້ນ​ທາງ​ສຽງ USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"ປິດ​​ການ​ນຳ​ໃຊ້​ເສັ້ນ​ທາງ​​ອັດ​ຕະ​ໂນ​ມັດ​ໄປ​ຫາອຸ​ປະ​ກອ​ນ​ຕໍ່​ພ່ວງ​ສຽງ​ USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"ສະແດງຂອບການຈັດວາງ"</string>
-    <string name="debug_layout_summary" msgid="2001775315258637682">"ສະແດງໜ້າປົກຄລິບ, ຂອບ ແລະອື່ນໆ."</string>
+    <string name="debug_layout_summary" msgid="2001775315258637682">"ສະແດງໜ້າປົກຄລິບ, ຂອບ ແລະ ອື່ນໆ."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"ບັງ​ຄັບ​ໃຫ້ຮູບຮ່າງຂຽນຈາກຂວາຫາຊ້າຍ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ບັງຄັບໃຫ້ຮູບຮ່າງໜ້າຈໍ ຂຽນຈາກຂວາໄປຊ້າຍ ສຳລັບທຸກພາສາ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"ບັງຄັບໃຊ້ 4x MSAA"</string>
-    <string name="force_msaa_summary" msgid="9123553203895817537">"ເປິດໃຊ້ 4x MSAA ໃນແອັບຯ OpenGL ES 2.0"</string>
+    <string name="force_msaa_summary" msgid="9123553203895817537">"ເປິດໃຊ້ 4x MSAA ໃນແອັບ OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"ດີບັ໊ກການເຮັດວຽກຂອງຄລິບທີ່ບໍ່ແມ່ນສີ່ຫຼ່ຽມ"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"ການປະມວນຜົນໂປຣໄຟລ໌ HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"ເປີດໃຊ້ຊັ້ນຂໍ້ມູນດີບັກ GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ອະນຸຍາດການໂຫລດຊັ້ນຂໍ້ມູນດີບັກ GPU ສຳລັບແອັບດີບັກ"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"ຂະໜາດອະນິເມຊັນ"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"ຂະໜາດໜ້າ​ຈໍ​ຂອງອະນິເມຊັນ"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"ຂະໜາດອະນິເມຊັນ"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"ໄລຍະເວລາອະນິເມຊັນ"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"ຈຳລອງຈໍສະແດງຜົນທີ່ສອງ"</string>
-    <string name="debug_applications_category" msgid="4206913653849771549">"ແອັບຯ"</string>
-    <string name="immediately_destroy_activities" msgid="1579659389568133959">"ບໍ່ຕ້ອງຮັກສາການເຮັດວຽກ"</string>
+    <string name="debug_applications_category" msgid="4206913653849771549">"ແອັບ"</string>
+    <string name="immediately_destroy_activities" msgid="1579659389568133959">"ບໍ່ຕ້ອງຮັກສາການເຄື່ອນ​ໄຫວ"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ລຶບທຸກການເຄື່ອນໄຫວທັນທີທີ່ຜູ້ໃຊ້ອອກຈາກມັນ"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"ການຈຳກັດໂປຣເຊສໃນພື້ນຫຼັງ"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"ສະແດງ ANR ພື້ນຫຼັງ"</string>
@@ -332,11 +332,11 @@
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ສະແດງຄຳເຕືອນໃນໜ້າຈໍເມື່ອແອັບໂພສການແຈ້ງເຕືອນໂດຍບໍ່ມີຊ່ອງທີ່ຖືກຕ້ອງ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ບັງຄັບອະນຸຍາດແອັບ​ຢູ່​ພາຍນອກ"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"ເຮັດໃຫ້ທຸກແອັບມີສິດໄດ້ຮັບການຂຽນໃສ່ພື້ນທີ່ຈັດເກັບຂໍ້ມູນພາຍນອກ, ໂດຍບໍ່ຄຳນຶງເຖິງຄ່າ manifest"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"ບັງ​ຄັງ​ໃຫ້​ກິດ​ຈະ​ກຳ​ປ່ຽນ​ຂະ​ໜາດ​ໄດ້"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ເຮັດໃຫ້ທຸກກິດຈະກຳສາມາດປັບຂະໜາດໄດ້ສຳລັບຫຼາຍໜ້າຈໍ, ໂດຍບໍ່ຄຳນຶງເຖິງຄ່າ manifest."</string>
-    <string name="enable_freeform_support" msgid="1461893351278940416">"ເປີດໃຊ້ໜ້າຕ່າງຮູບແບບອິດສະຫຼະ"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"ບັງ​ຄັງ​ໃຫ້​ການ​ເຄື່ອນ​ໄຫວ​ປ່ຽນ​ຂະ​ໜາດ​ໄດ້"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ເຮັດໃຫ້ທຸກການ​ເຄື່ອນ​ໄຫວສາມາດປັບຂະໜາດໄດ້ສຳລັບຫຼາຍໜ້າຈໍ, ໂດຍບໍ່ຄຳນຶງເຖິງຄ່າ manifest."</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"ເປີດໃຊ້ໜ້າຈໍຮູບແບບອິດສະຫຼະ"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"ເປີດໃຊ້ການຮອງຮັບໜ້າຈໍຮູບແບບອິດສະຫຼະແບບທົດລອງ."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"ລະຫັດຜ່ານການສຳຮອງຂໍ້ມູນເດັກສະທັອບ"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"ລະຫັດຜ່ານການສຳຮອງຂໍ້ມູນເດັສທັອບ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ການ​ສຳຮອງ​ຂໍ້ມູນ​ເຕັມຮູບແບບ​ໃນ​ເດັສທັອບ​ຍັງ​ບໍ່​ໄດ້​ຮັບ​ການ​ປ້ອງກັນ​ໃນ​ເວລາ​ນີ້"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ແຕະເພື່ອປ່ຽນ ຫຼື ລຶບລະຫັດຂອງການສຳຮອງຂໍ້ມູນເຕັມຮູບແບບໃນເດັສທັອບ"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ຕັ້ງລະຫັດສຳຮອງໃໝ່ແລ້ວ"</string>
@@ -385,13 +385,12 @@
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"ເຫຼືອອີກປະມານ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> based on your usage"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Should last until about <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Should last until about <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g> ໂດຍອ້າງອີງຈາກການນຳໃຊ້ຂອງທ່ານ"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"ໜ້າຈະໃຊ້ໄດ້ຈົນຮອດປະມານ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"ຈົນກວ່າຈະຮອດ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"ຂະຫຍາຍອາຍຸແບັດເຕີຣີກາຍ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"ຍັງເຫຼືອໜ້ອຍກວ່າ <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"ຍັງເຫຼືອໜ້ອຍກວ່າ <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"ຍັງເຫຼືອຫຼາຍກວ່າ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ຖາມທຸກເທື່ອ"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"ຈົນກວ່າທ່ານຈະປິດ"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ຕອນນີ້"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"ອຸປະກອນນີ້"</string>
 </resources>

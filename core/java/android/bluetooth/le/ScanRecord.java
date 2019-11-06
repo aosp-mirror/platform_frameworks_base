@@ -154,7 +154,7 @@ public final class ScanRecord {
     }
 
     /**
-     * Returns the local name of the BLE device. The is a UTF-8 encoded string.
+     * Returns the local name of the BLE device. This is a UTF-8 encoded string.
      */
     @Nullable
     public String getDeviceName() {

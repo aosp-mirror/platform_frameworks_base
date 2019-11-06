@@ -198,11 +198,19 @@ message SecureSettingsProto {
         optional SettingProto silence_alarms_count = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto silence_calls_count = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto silence_enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto silence_notification_count = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // del: silence_notification_count = 5
         optional SettingProto silence_timer_count = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
         optional SettingProto skip_count = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto skip_enabled = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        optional SettingProto silence_alarms_touch_count = 9 [ (android.privacy).dest =
+            DEST_AUTOMATIC ];
+        optional SettingProto silence_calls_touch_count = 10 [ (android.privacy).dest =
+            DEST_AUTOMATIC ];
+        optional SettingProto silence_timer_touch_count = 11 [ (android.privacy).dest =
+            DEST_AUTOMATIC ];
+        optional SettingProto skip_touch_count = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Gesture gesture = 74;
 

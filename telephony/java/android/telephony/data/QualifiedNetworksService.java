@@ -27,8 +27,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
+import android.telephony.Annotation.ApnType;
 import android.telephony.Rlog;
-import android.telephony.data.ApnSetting.ApnType;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -133,7 +133,7 @@ public abstract class QualifiedNetworksService extends Service {
          * service.
          *
          * @param apnTypes APN types of the qualified networks. This must be a bitmask combination
-         * of {@link ApnSetting.ApnType}.
+         * of {@link ApnType}.
          * @param qualifiedNetworkTypes List of network types which are qualified for data
          * connection setup for {@link @apnType} in the preferred order. Each element in the list
          * is a {@link AccessNetworkType}. An empty list indicates no networks are qualified

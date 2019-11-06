@@ -77,6 +77,12 @@ public class NetworkMisc implements Parcelable {
      */
     public boolean skip464xlat;
 
+    /**
+     * Set to true if the PRIVATE_DNS_BROKEN notification has shown for this network.
+     * Reset this bit when private DNS mode is changed from strict mode to opportunistic/off mode.
+     */
+    public boolean hasShownBroken;
+
     public NetworkMisc() {
     }
 

@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Der kan ikke søges efter netværk"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ingen"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Gemt"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Afbrudt"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Deaktiveret"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-konfigurationsfejl"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ingen forbindelse på grund af lav netværkskvalitet"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Tilgængelig via %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Tryk for at registrere dig"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Tilsluttet – intet internet"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Begrænset forbindelse"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Intet internet"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Login er påkrævet"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Adgangspunktet er midlertidigt fuldt"</string>
@@ -75,12 +75,10 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon eller medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktivt, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Aktivt – venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri. Højre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktivt"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"Venstre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri. Højre: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktiv"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medielyd"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonopkald"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Filoverførsel"</string>
@@ -90,7 +88,7 @@
     <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"Brug til deling af kontakter"</string>
     <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"Deling af internetforbindelse"</string>
     <string name="bluetooth_profile_map" msgid="1019763341565580450">"Sms-beskeder"</string>
-    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM-adgang"</string>
+    <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Adgang til SIM-kort"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD-lyd: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD-lyd"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Høreapparater"</string>
@@ -202,11 +200,11 @@
     <string name="development_settings_not_available" msgid="4308569041701535607">"Valgmuligheder for udviklere er ikke tilgængelige for denne bruger"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN-indstillingerne er ikke tilgængelige for denne bruger"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Indstillingerne for netdeling er ikke tilgængelige for denne bruger"</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"Indstillingerne for Adgangspunkt (APN) er ikke tilgængelige for denne bruger"</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"Indstillingerne for adgangspunktet (APN) er ikke tilgængelige for denne bruger"</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB-fejlretning"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Fejlretningstilstand, når USB er tilsluttet"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Tilbagekald tilladelser for USB-fejlfinding"</string>
-    <string name="bugreport_in_power" msgid="7923901846375587241">"Genvej til fejlrapporting"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Tilbagekald tilladelser for USB-fejlretning"</string>
+    <string name="bugreport_in_power" msgid="7923901846375587241">"Genvej til fejlrapportering"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Vis en knap til oprettelse af fejlrapporter i afbrydermenuen"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Lås ikke"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Skærmen går ikke i dvale under opladning"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Netværk"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivér detaljeret Wi-Fi-logføring"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Begrænsning af Wi-Fi-scanning"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata er altid aktiveret"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardwareacceleration ved netdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Vis Bluetooth-enheder uden navne"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Der kunne ikke oprettes forbindelse"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis valgmuligheder for certificering af trådløs skærm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øg mængden af Wi‑Fi-logføring. Vis opdelt efter SSID RSSI i Wi‑Fi-vælgeren"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Reducerer batteriforbruget og forbedrer netværkets effektivitet"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Forbrugsafregnet"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Ikke forbrugsafregnet"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Størrelser for Logger-buffer"</string>
@@ -265,7 +265,7 @@
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Brug hardwareacceleration ved netdeling, hvis det er muligt"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Vil du tillade USB-fejlretning?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-fejlretning er kun beregnet til udvikling og kan bruges til at kopiere data mellem din computer og enheden, installere apps på enheden uden notifikation og læse logdata."</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vil du ophæve adgangen til USB-fejlfinding for alle computere, du tidligere har godkendt?"</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vil du ophæve adgangen til USB-fejlretning for alle computere, du tidligere har godkendt?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Vil du tillade udviklingsindstillinger?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse indstillinger er kun beregnet til brug i forbindelse med udvikling. De kan forårsage, at din enhed og dens apps går ned eller ikke fungerer korrekt."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificer apps via USB"</string>
@@ -276,10 +276,10 @@
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivér terminalappen, der giver lokal shell-adgang"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontrol"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Angiv HDCP-kontroladfærd"</string>
-    <string name="debug_debugging_category" msgid="6781250159513471316">"Fejlfinding"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Vælg app til fejlfinding"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"Ingen applikation til fejlfinding er angivet"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"Applikation til fejlfinding: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_debugging_category" msgid="6781250159513471316">"Fejlretning"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Vælg app til fejlretning"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"Ingen app til fejlretning er angivet"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"App til fejlretning: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Vælg applikation"</string>
     <string name="no_application" msgid="2813387563129153880">"Ingen"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Vent på fejlfinder"</string>
@@ -311,10 +311,10 @@
     <string name="debug_layout" msgid="5981361776594526155">"Vis layoutgrænser"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Vis grænser for klip, margener osv."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Tving læsning mod venstre"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tving til højre mod venstre-layout for alle sprog"</string>
-    <string name="force_msaa" msgid="7920323238677284387">"Tving 4x MSAA"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Gennemtving højre mod venstre-layout for alle sprog"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Gennemtving 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktivér 4x MSAA i apps med OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Fejlfind på ikke-rektangulære klippehandlinger"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Fejlret på ikke-rektangulære klippehandlinger"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"HWUI-profilgengivelse"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Aktivér fejlretningslag for grafikprocessor"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Tillad, at fejlretningslag indlæses for grafikprocessor i apps til fejlretning"</string>
@@ -332,12 +332,12 @@
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Viser en advarsel, når en app sender en notifikation uden en gyldig kanal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Gennemtving tilladelse til eksternt lager"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Gør det muligt at overføre enhver app til et eksternt lager uafhængigt af manifestværdier"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"Tving aktiviteter til at kunne tilpasses"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"Gennemtving, at aktiviteter kan tilpasses"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Tillad, at alle aktiviteter kan tilpasses flere vinduer uafhængigt af manifestværdier."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Aktivér vinduer i frit format"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Aktivér understøttelse af eksperimentelle vinduer i frit format."</string>
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Kode til lokal sikkerhedskopi"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Lokale fuldstændige sikkerhedskopieringer er i øjeblikket ikke beskyttet"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Kode til lokal backup"</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Lokale komplette backups er i øjeblikket ikke beskyttet"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Tryk for at skifte eller fjerne adgangskoden til fuld lokal backup"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Ny adgangskode til sikkerhedskopi er angivet"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Ny adgangskode og bekræftelse matcher ikke"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Indtil <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Forlæng batteritiden til efter <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Der er mere end <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -422,7 +421,7 @@
     <item msgid="8934126114226089439">"50 %"</item>
     <item msgid="1286113608943010849">"100 %"</item>
   </string-array>
-    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> siden"</string>
+    <string name="charge_length_format" msgid="8978516217024434156">"For <xliff:g id="ID_1">%1$s</xliff:g> siden"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> tilbage"</string>
     <string name="screen_zoom_summary_small" msgid="5867245310241621570">"Lille"</string>
     <string name="screen_zoom_summary_default" msgid="2247006805614056507">"Standard"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Spørg hver gang"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Indtil du deaktiverer"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Lige nu"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Denne enhed"</string>
 </resources>

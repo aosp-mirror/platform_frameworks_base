@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"네트워크를 검색할 수 없습니다."</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"없음"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"저장됨"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"연결 끊김"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"사용 중지됨"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP 설정 실패"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"저품질 네트워크로 인해 연결되지 않음"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s을(를) 통해 사용 가능"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"탭하여 가입"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"연결됨, 인터넷 사용 불가"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"제한된 연결"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"인터넷 연결 없음"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"로그인 필요"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"액세스 포인트가 일시적으로 가득 참"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"연결됨(미디어 없음), 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"연결됨(전화 또는 미디어 없음), 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"활성, 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"활성, 왼쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"왼쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"활성"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"미디어 오디오"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"전화 통화"</string>
@@ -158,7 +156,7 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"TTS 출력"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"말하는 속도"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"텍스트를 읽어주는 속도"</string>
-    <string name="tts_default_pitch_title" msgid="6135942113172488671">"피치"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"음조"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"합성 음성의 어조에 영향을 미침"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"언어"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"시스템 언어 사용"</string>
@@ -202,7 +200,7 @@
     <string name="development_settings_not_available" msgid="4308569041701535607">"이 사용자는 개발자 옵션을 사용할 수 없습니다."</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"이 사용자는 VPN 설정을 수정할 수 없습니다."</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"이 사용자는 테더링 설정을 수정할 수 없습니다."</string>
-    <string name="apn_settings_not_available" msgid="7873729032165324000">"이 사용자는 액세스포인트 네임(APN) 설정을 수정할 수 없습니다."</string>
+    <string name="apn_settings_not_available" msgid="7873729032165324000">"이 사용자는 액세스 포인트 이름(APN) 설정을 수정할 수 없습니다."</string>
     <string name="enable_adb" msgid="7982306934419797485">"USB 디버깅"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"USB가 연결된 경우 디버그 모드 사용"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"USB 디버깅 권한 승인 취소"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"네트워크"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"무선 디스플레이 인증서"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi 상세 로깅 사용"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi 검색 제한"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"항상 모바일 데이터 활성화"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"테더링 하드웨어 가속"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"이름이 없는 블루투스 기기 표시"</string>
@@ -248,8 +247,9 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"연결할 수 없음"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"종량제"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"무제한"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"배터리 소모를 줄이고 네트워크 성능 개선"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"종량제 네트워크"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"무제한 네트워크"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"로거 버퍼 크기"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"로그 버퍼당 로거 크기 선택"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"로거 영구 저장소를 삭제하시겠습니까?"</string>
@@ -294,13 +294,13 @@
     <string name="pointer_location" msgid="6084434787496938001">"포인터 위치"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"현재 터치 데이터 오버레이 표시"</string>
     <string name="show_touches" msgid="2642976305235070316">"탭한 항목 표시"</string>
-    <string name="show_touches_summary" msgid="6101183132903926324">"탭한 항목에 대해 시각적인 의견 표시"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"탭한 항목에 대해 시각적인 피드백 표시"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"표면 업데이트 표시"</string>
-    <string name="show_screen_updates_summary" msgid="2569622766672785529">"전체 창 표면이 업데이트되었을 때 플래시 처리"</string>
-    <string name="show_hw_screen_updates" msgid="4117270979975470789">"업데이트 보기 표시"</string>
-    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"드로잉했을 때 창 내부 보기 플래시 처리"</string>
+    <string name="show_screen_updates_summary" msgid="2569622766672785529">"전체 창 화면이 업데이트되었을 때 플래시 처리"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"보기 업데이트 표시"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"드로잉했을 때 창 내부 보기 깜박이기"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"하드웨어 레이어 업데이트 표시"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"업데이트할 때 하드웨어 레이어 녹색으로 깜박이기"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"하드웨어 레이어 업데이트 시 녹색으로 깜박이기"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU 오버드로 디버그"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"HW 오버레이 사용 안함"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"화면 합성 목적으로 항상 GPU 사용"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"약 <xliff:g id="TIME">%1$s</xliff:g>까지 사용 가능(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"약 <xliff:g id="TIME">%1$s</xliff:g>까지 사용 가능"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g>까지"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"<xliff:g id="TIME">%1$s</xliff:g> 이후 배터리 수명 연장"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> 미만 남음"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> 미만 남음(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> 이상 남음(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -455,7 +454,7 @@
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"켜기"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"사용 안함"</string>
-    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"중요 알림만"</string>
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"중요 알림만 허용"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"그때까지 알림 일시중지 상태를 유지하면 <xliff:g id="WHEN">%1$s</xliff:g>에 다음 알람을 들을 수 없습니다."</string>
     <string name="zen_alarm_warning" msgid="6236690803924413088">"<xliff:g id="WHEN">%1$s</xliff:g>에 다음 알람을 들을 수 없습니다."</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"항상 확인"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"사용 중지할 때까지"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"조금 전"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"이 기기"</string>
 </resources>

@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Rangt PIN-númer."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Ógilt kort."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Fullhlaðin"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Þráðlaus hleðsla"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Í þráðlausri hleðslu"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Í hleðslu"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hröð hleðsla"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hæg hleðsla"</string>
@@ -151,23 +151,7 @@
       <item quantity="one">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það er <xliff:g id="_NUMBER_1">%d</xliff:g> tilraun eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
       <item quantity="other">SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Það eru <xliff:g id="_NUMBER_1">%d</xliff:g> tilraunir eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="one">"<annotation name="color">"Hún er"</annotation>\n"^1\n^2</item>
-      <item quantity="other">"<annotation name="color">"Hún er"</annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"Tólf"</item>
-    <item msgid="7389464214252023751">"Eitt"</item>
-    <item msgid="8803180377002008046">"Tvö"</item>
-    <item msgid="8614897059944644719">"Þrjú"</item>
-    <item msgid="2293058674782619556">"Fjögur"</item>
-    <item msgid="4815402358455041664">"Fimm"</item>
-    <item msgid="3325754778509665687">"Sex"</item>
-    <item msgid="5805551341866280575">"Sjö"</item>
-    <item msgid="203334816668238610">"Átta"</item>
-    <item msgid="4828052671464488923">"Níu"</item>
-    <item msgid="2233497913571137419">"Tíu"</item>
-    <item msgid="5621554266768657830">"Ellefu"</item>
-  </string-array>
-    <!-- no translation found for type_clock_minutes:0 (8322049385467207985) -->
+    <string name="clock_title_default" msgid="6645600990069154049">"Sjálfgefið"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Blaðra"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Með vísum"</string>
 </resources>

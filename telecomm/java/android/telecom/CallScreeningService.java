@@ -374,6 +374,8 @@ public abstract class CallScreeningService extends Service {
                         new ComponentName(getPackageName(), getClass().getName()));
             } else if (response.getSilenceCall()) {
                 mCallScreeningAdapter.silenceCall(callDetails.getTelecomCallId());
+            } else if (response.getShouldScreenCallFurther()) {
+                mCallScreeningAdapter.screenCallFurther(callDetails.getTelecomCallId());
             } else {
                 mCallScreeningAdapter.allowCall(callDetails.getTelecomCallId());
             }

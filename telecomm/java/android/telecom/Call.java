@@ -728,6 +728,7 @@ public final class Call {
         }
 
         /** {@hide} */
+        @TestApi
         public String getTelecomCallId() {
             return mTelecomCallId;
         }
@@ -2048,6 +2049,10 @@ public final class Call {
                 return "DISCONNECTING";
             case STATE_SELECT_PHONE_ACCOUNT:
                 return "SELECT_PHONE_ACCOUNT";
+            case STATE_SIMULATED_RINGING:
+                return "SIMULATED_RINGING";
+            case STATE_AUDIO_PROCESSING:
+                return "AUDIO_PROCESSING";
             default:
                 Log.w(Call.class, "Unknown state %d", state);
                 return "UNKNOWN";
@@ -2137,6 +2142,9 @@ public final class Call {
         }
 
         int state = parcelableCall.getState();
+        if (mTargetSdkVersion < Phone.SDK_VERSION_R && state == Call.STATE_SIMULATED_RINGING) {
+            state = Call.STATE_RINGING;
+        }
         boolean stateChanged = mState != state;
         if (stateChanged) {
             mState = state;

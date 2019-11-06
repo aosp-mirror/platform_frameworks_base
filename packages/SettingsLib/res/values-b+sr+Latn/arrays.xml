@@ -254,7 +254,7 @@
     <item msgid="7899496259191969307">"Najviše četiri procesa"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="488237561639712799">"Punjenje"</item>
+    <item msgid="488237561639712799">"Puni se"</item>
     <item msgid="5220695614993094977">"MTP (protokol za transfer medija)"</item>
     <item msgid="2086000968159047375">"PTP (protokol za prenos slika)"</item>
     <item msgid="7398830860950841822">"RNDIS (USB eternet)"</item>

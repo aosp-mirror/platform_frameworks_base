@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"நெட்வொர்க்குகளுக்கு ஸ்கேன் செய்யப்படவில்லை"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"ஏதுமில்லை"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"சேமிக்கப்பட்டது"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"தொடர்பு துண்டிக்கப்பட்டது"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"முடக்கப்பட்டது"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP உள்ளமைவில் தோல்வி"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"தரம் குறைவான நெட்வொர்க்கின் காரணமாக, இணைக்கப்படவில்லை"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s வழியாகக் கிடைக்கிறது"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"பதிவு செய்யத் தட்டவும்"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"இணைக்கப்பட்டுள்ளது, ஆனால் இண்டர்நெட் இல்லை"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"வரம்பிற்கு உட்பட்ட இணைப்பு"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"இணைய இணைப்பு இல்லை"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"உள்நுழைய வேண்டும்"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"தற்காலிகமாக அணுகல் புள்ளி நிரம்பியுள்ளது"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"இணைக்கப்பட்டது (மீடியா இல்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"இணைக்கப்பட்டது (மொபைல் அல்லது மீடியா இல்லை), பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"செயலில் உள்ளது, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"செயலில் உள்ளது, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> பேட்டரி, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> பேட்டரி"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> பேட்டரி, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> பேட்டரி"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"செயலில் உள்ளது"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"மீடியா ஆடியோ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ஃபோன் அழைப்புகள்"</string>
@@ -161,7 +159,7 @@
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ஒலித்திறன்"</string>
     <string name="tts_default_pitch_summary" msgid="1944885882882650009">"உருவாக்கப்படும் பேச்சின் டோன் பாதிக்கப்படும்"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"மொழி"</string>
-    <string name="tts_lang_use_system" msgid="2679252467416513208">"அமைப்பின் மொழியில்"</string>
+    <string name="tts_lang_use_system" msgid="2679252467416513208">"அமைப்பின் மொழியைப் பயன்படுத்தவும்"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"மொழி தேர்ந்தெடுக்கப்படவில்லை"</string>
     <string name="tts_default_lang_summary" msgid="5219362163902707785">"பேசப்படும் உரைக்கு மொழி சார்ந்த குரலை அமைக்கிறது"</string>
     <string name="tts_play_example_title" msgid="7094780383253097230">"எடுத்துக்காட்டைக் கவனிக்கவும்"</string>
@@ -198,7 +196,7 @@
     <string name="category_work" msgid="8699184680584175622">"பணியிடம்"</string>
     <string name="development_settings_title" msgid="215179176067683667">"டெவெலப்பர் விருப்பங்கள்"</string>
     <string name="development_settings_enable" msgid="542530994778109538">"டெவெலப்பர் விருப்பங்களை இயக்கு"</string>
-    <string name="development_settings_summary" msgid="1815795401632854041">"பயன்பாட்டின் மேம்பாட்டிற்காக விருப்பங்களை அமை"</string>
+    <string name="development_settings_summary" msgid="1815795401632854041">"ஆப்ஸின் மேம்பாட்டிற்காக விருப்பங்களை அமை"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"இவருக்கு, டெவெலப்பர் விருப்பங்கள் இல்லை"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"இவரால் VPN அமைப்புகளை மாற்ற முடியாது"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"இவரால் இணைப்புமுறை அமைப்புகளை மாற்ற முடியாது"</string>
@@ -216,12 +214,13 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"பூட்லோடரைத் திறக்க அனுமதி"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM திறத்தலை அனுமதிக்கவா?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"எச்சரிக்கை: இந்த அமைப்பு இயக்கப்பட்டிருக்கும்போது, சாதன பாதுகாப்பு அம்சங்கள் இந்தச் சாதனத்தில் இயங்காது."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"போலி இருப்பிடப் பயன்பாட்டைத் தேர்ந்தெடு"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"போலி இருப்பிடப் பயன்பாடு அமைக்கப்படவில்லை"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"போலி இருப்பிடப் பயன்பாடு: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"போலி இருப்பிட ஆப்ஸைத் தேர்ந்தெடு"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"போலி இருப்பிட ஆப்ஸ் அமைக்கப்படவில்லை"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"போலி இருப்பிட ஆப்ஸ்: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"நெட்வொர்க்கிங்"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"வயர்லெஸ் காட்சிக்கான சான்றிதழ்"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"வைஃபை அதிவிவர நுழைவை இயக்கு"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"வைஃபை ஸ்கேனிங்கை வரம்பிடுதல்"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"மொபைல் டேட்டாவை எப்போதும் இயக்கத்திலேயே வை"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"வன்பொருள் விரைவுப்படுத்துதல் இணைப்பு முறை"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"பெயர்கள் இல்லாத புளூடூத் சாதனங்களைக் காட்டு"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"இணைக்க முடியவில்லை"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"வைஃபை நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"பேட்டரி தீர்ந்துபோவதைக் குறைத்து நெட்வொர்க்கின் செயல்திறனை மேம்படுத்தும்"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"கட்டண நெட்வொர்க்"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"கட்டணமில்லா நெட்வொர்க்"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"லாகர் பஃபர் அளவுகள்"</string>
@@ -264,26 +264,26 @@
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"வைஃபை இயங்கும் போதும் (வேகமான நெட்வொர்க் மாற்றத்திற்கு), மொபைல் டேட்டாவை எப்போதும் இயக்கத்தில் வைக்கும்."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"வன்பொருள் விரைவுப்படுத்துதல் இணைப்பு முறை கிடைக்கும் போது, அதைப் பயன்படுத்தும்"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"USB பிழைதிருத்தத்தை அனுமதிக்கவா?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB பிழைதிருத்தம் மேம்படுத்தல் நோக்கங்களுக்காக மட்டுமே. அதை உங்கள் கணினி மற்றும் சாதனத்திற்கு இடையில் தரவை நகலெடுக்கவும், அறிவிப்பு இல்லாமல் உங்கள் சாதனத்தில் பயன்பாடுகளை நிறுவவும், பதிவு தரவைப் படிக்கவும் பயன்படுத்தவும்."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB பிழைதிருத்தம் மேம்படுத்தல் நோக்கங்களுக்காக மட்டுமே. அதை உங்கள் கணினி மற்றும் சாதனத்திற்கு இடையில் தரவை நகலெடுக்கவும், அறிவிப்பு இல்லாமல் உங்கள் சாதனத்தில் ஆப்ஸை நிறுவவும், பதிவு தரவைப் படிக்கவும் பயன்படுத்தவும்."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"நீங்கள் ஏற்கனவே அனுமதித்த எல்லா கணினிகளிலிருந்தும் USB பிழைத்திருத்தத்திற்கான அணுகலைத் திரும்பப்பெற வேண்டுமா?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"மேம்பட்ட அமைப்புகளை அனுமதிக்கவா?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"இந்த அமைப்பு மேம்பட்டப் பயன்பாட்டிற்காக மட்டுமே. உங்கள் சாதனம் மற்றும் அதில் உள்ள பயன்பாடுகளைச் சிதைக்கும் அல்லது தவறாகச் செயல்படும் வகையில் பாதிப்பை ஏற்படுத்தும்."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB பயன்பாடுகளைச் சரிபார்"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"தீங்கு விளைவிக்கும் செயல்பாட்டை அறிய ADB/ADT மூலம் நிறுவப்பட்டப் பயன்பாடுகளைச் சரிபார்."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ஆப்ஸைச் சரிபார்"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"தீங்கு விளைவிக்கும் செயல்பாட்டை அறிய ADB/ADT மூலம் நிறுவப்பட்ட ஆப்ஸைச் சரிபார்."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"பெயர்கள் இல்லாத புளூடூத் சாதனங்கள் (MAC முகவரிகள் மட்டும்) காட்டப்படும்"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"மிகவும் அதிகமான ஒலியளவு அல்லது கட்டுப்பாடு இழப்பு போன்ற தொலைநிலைச் சாதனங்களில் ஏற்படும் ஒலி தொடர்பான சிக்கல்கள் இருக்கும் சமயங்களில், புளூடூத் அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கும்."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"அக முனையம்"</string>
-    <string name="enable_terminal_summary" msgid="67667852659359206">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் பயன்பாட்டை இயக்கு"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் ஆப்ஸை இயக்கு"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP சரிபார்ப்பு"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP சரிபார்க்கும் செயல்பாடுகளை அமை"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"பிழைதிருத்தம்"</string>
     <string name="debug_app" msgid="8349591734751384446">"பிழைத்திருத்தப் பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
-    <string name="debug_app_not_set" msgid="718752499586403499">"பிழைத்திருத்தப் பயன்பாடு அமைக்கப்படவில்லை"</string>
-    <string name="debug_app_set" msgid="2063077997870280017">"பிழைதிருத்தும் பயன்பாடு: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="debug_app_not_set" msgid="718752499586403499">"பிழைத்திருத்தப் ஆப்ஸ் அமைக்கப்படவில்லை"</string>
+    <string name="debug_app_set" msgid="2063077997870280017">"பிழைதிருத்தும் ஆப்ஸ்: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="no_application" msgid="2813387563129153880">"ஒன்றுமில்லை"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"பிழைதிருத்திக்குக் காத்திருக்கவும்"</string>
-    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"பிழைதிருத்தப்பட்ட பயன்பாடு செயல்படுவதற்கு முன்பு பிழைதிருத்தியை இணைப்பதற்குக் காத்திருக்கிறது"</string>
+    <string name="wait_for_debugger_summary" msgid="1766918303462746804">"பிழைதிருத்தப்பட்ட ஆப்ஸ் செயல்படுவதற்கு முன்பு பிழைதிருத்தியை இணைப்பதற்குக் காத்திருக்கிறது"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"உள்ளீடு"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"வரைபொருள்"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"வன்பொருள் முடுக்கத்துடன் கூடிய காட்சியாக்கம்"</string>
@@ -327,11 +327,11 @@
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"பயனர் வெளியேறியதும் செயல்பாடுகளை நீக்கு"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"பின்புலச் செயல்முறை வரம்பு"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"பின்புல ANRகளைக் காட்டு"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"பின்புல ஆப்ஸுக்கு, பயன்பாடு பதிலளிக்கவில்லை என்ற செய்தியைக் காட்டும்"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"பின்புல ஆப்ஸுக்கு, ஆப்ஸ் பதிலளிக்கவில்லை என்ற செய்தியைக் காட்டும்"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"அறிவிப்புச் சேனல் எச்சரிக்கைகளைக் காட்டு"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"பயன்பாடானது சரியான சேனல் இல்லாமல் அறிவிப்பை இடுகையிடும் போது, திரையில் எச்சரிக்கையைக் காட்டும்"</string>
-    <string name="force_allow_on_external" msgid="3215759785081916381">"பயன்பாடுகளை வெளிப்புறச் சேமிப்பிடத்தில் அனுமதி"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், எல்லா பயன்பாட்டையும் வெளிப்புறச் சேமிப்பிடத்தில் எழுத அனுமதிக்கும்"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ஆப்ஸானது சரியான சேனல் இல்லாமல் அறிவிப்பை இடுகையிடும் போது, திரையில் எச்சரிக்கையைக் காட்டும்"</string>
+    <string name="force_allow_on_external" msgid="3215759785081916381">"ஆப்ஸை வெளிப்புறச் சேமிப்பிடத்தில் அனுமதி"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், எல்லா ஆப்ஸையும் வெளிப்புறச் சேமிப்பிடத்தில் எழுத அனுமதிக்கும்"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"செயல்பாடுகளை அளவுமாறக்கூடியதாக அமை"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"மேனிஃபெஸ்ட் மதிப்புகளைப் பொருட்படுத்தாமல், பல சாளரத்திற்கு எல்லா செயல்பாடுகளையும் அளவுமாறக்கூடியதாக அமை."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"குறிப்பிட்ட வடிவமில்லாத சாளரங்களை இயக்கு"</string>
@@ -356,7 +356,7 @@
     <string name="inactive_apps_title" msgid="9042996804461901648">"காத்திருப்பில் உள்ள ஆப்ஸ்"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"செயலில் இல்லை. மாற்ற, தட்டவும்."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"செயலில் உள்ளது. மாற்ற, தட்டவும்."</string>
-    <string name="standby_bucket_summary" msgid="6567835350910684727">"காத்திருப்பில் உள்ள பயன்பாட்டின் நிலை:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"காத்திருப்பில் உள்ள ஆப்ஸின் நிலை:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"இயங்கும் சேவைகள்"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"தற்போது இயக்கத்தில் இருக்கும் சேவைகளைப் பார்த்து கட்டுப்படுத்து"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView செயல்படுத்தல்"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"<xliff:g id="TIME">%1$s</xliff:g> வரை பயன்படுத்த முடியும் (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"<xliff:g id="TIME">%1$s</xliff:g> வரை பயன்படுத்த முடியும்"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g> வரை"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"<xliff:g id="TIME">%1$s</xliff:g> மணிக்குப் பிறகு பேட்டரி நிலையை நீட்டிக்கவும்"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g>க்கும் குறைவாகவே பயன்படுத்த முடியும்"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g>க்கும் குறைவாகவே பயன்படுத்த முடியும் (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>க்கும் மேல் பயன்படுத்த முடியும் (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -403,7 +402,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g>ம் ஆகும்"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"சார்ஜ் ஆகிறது"</string>
@@ -438,7 +437,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"சாதன மொழிகளைப் பயன்படுத்து"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> க்கான அமைப்புகளைத் திறப்பதில் தோல்வி"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"இந்த உள்ளீட்டு முறையானது, கடவுச்சொற்கள் மற்றும் கிரெடிட் கார்டு எண்கள் போன்ற தனிப்பட்ட தகவல் உள்பட நீங்கள் உள்ளிடும் எல்லா உரையையும் சேகரிக்கக்கூடும். இது <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> பயன்பாட்டிலிருந்து வந்துள்ளது. இந்த உள்ளீட்டு முறையைப் பயன்படுத்தவா?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலைத் திறக்கும் வரை இந்தப் பயன்பாட்டால் தொடங்க முடியாது"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலைத் திறக்கும் வரை இந்த ஆப்ஸால் தொடங்க முடியாது"</string>
     <string name="ims_reg_title" msgid="7609782759207241443">"IMS பதிவின் நிலை"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"பதிவு செய்யப்பட்டது"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"பதிவு செய்யப்படவில்லை"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ஒவ்வொரு முறையும் கேள்"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"ஆஃப் செய்யும் வரை"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"சற்றுமுன்"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"இந்தச் சாதனம்"</string>
 </resources>

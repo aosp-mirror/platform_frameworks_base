@@ -38,8 +38,8 @@ using std::vector;
 LogEvent::LogEvent(log_msg& msg) {
     mContext =
             create_android_log_parser(msg.msg() + sizeof(uint32_t), msg.len() - sizeof(uint32_t));
-    mLogdTimestampNs = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
-    mLogUid = msg.entry_v4.uid;
+    mLogdTimestampNs = msg.entry.sec * NS_PER_SEC + msg.entry.nsec;
+    mLogUid = msg.entry.uid;
     init(mContext);
     if (mContext) {
         // android_log_destroy will set mContext to NULL

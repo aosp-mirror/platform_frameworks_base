@@ -64,7 +64,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     protected static final int TEST_AUTO_DISMISS_TIME = 500;
     // Number of notifications to use in tests requiring multiple notifications
     private static final int TEST_NUM_NOTIFICATIONS = 4;
-    protected static final int TEST_TIMEOUT_TIME = 10000;
+    protected static final int TEST_TIMEOUT_TIME = 15000;
     protected final Runnable TEST_TIMEOUT_RUNNABLE = () -> mTimedOut = true;
 
     private AlertingNotificationManager mAlertingNotificationManager;

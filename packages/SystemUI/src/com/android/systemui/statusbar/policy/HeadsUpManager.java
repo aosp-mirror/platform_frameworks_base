@@ -356,6 +356,10 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     public void onDensityOrFontScaleChanged() {
     }
 
+    public boolean isEntryAutoHeadsUpped(String key) {
+        return false;
+    }
+
     /**
      * This represents a notification and how long it is in a heads up mode. It also manages its
      * lifecycle automatically when created.
@@ -416,16 +420,17 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
         @Override
         protected long calculateFinishTime() {
-            return mPostTime + getRecommendedTimeoutMillis();
+            return mPostTime + getRecommendedHeadsUpTimeoutMs(mAutoDismissNotificationDecay);
         }
 
         /**
          * Get user-preferred or default timeout duration. The larger one will be returned.
          * @return milliseconds before auto-dismiss
+         * @param requestedTimeout
          */
-        private int getRecommendedTimeoutMillis() {
+        protected int getRecommendedHeadsUpTimeoutMs(int requestedTimeout) {
             return mAccessibilityMgr.getRecommendedTimeoutMillis(
-                    mAutoDismissNotificationDecay,
+                    requestedTimeout,
                     AccessibilityManager.FLAG_CONTENT_CONTROLS
                             | AccessibilityManager.FLAG_CONTENT_ICONS
                             | AccessibilityManager.FLAG_CONTENT_TEXT);

@@ -40,18 +40,23 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 /**
  * Rudimentary fake for SensorManager
  *
- * Currently only supports the proximity sensor.
+ * Currently only supports proximity, light and tap sensors.
  *
  * Note that this class ignores the "Handler" argument, so the test is responsible for calling the
  * listener on the right thread.
  */
 public class FakeSensorManager extends SensorManager {
 
+    public static final String TAP_SENSOR_TYPE = "tapSensorType";
+
     private final MockProximitySensor mMockProximitySensor;
     private final FakeGenericSensor mFakeLightSensor;
+    private final FakeGenericSensor mFakeTapSensor;
     private final FakeGenericSensor[] mSensors;
 
     public FakeSensorManager(Context context) throws Exception {
@@ -59,12 +64,13 @@ public class FakeSensorManager extends SensorManager {
                 .getDefaultSensor(Sensor.TYPE_PROXIMITY);
         if (proxSensor == null) {
             // No prox? Let's create a fake one!
-            proxSensor = createSensor(Sensor.TYPE_PROXIMITY);
+            proxSensor = createSensor(Sensor.TYPE_PROXIMITY, null);
         }
 
         mSensors = new FakeGenericSensor[]{
                 mMockProximitySensor = new MockProximitySensor(proxSensor),
-                mFakeLightSensor = new FakeGenericSensor(createSensor(Sensor.TYPE_LIGHT)),
+                mFakeLightSensor = new FakeGenericSensor(createSensor(Sensor.TYPE_LIGHT, null)),
+                mFakeTapSensor = new FakeGenericSensor(createSensor(99, TAP_SENSOR_TYPE))
         };
     }
 
@@ -74,6 +80,10 @@ public class FakeSensorManager extends SensorManager {
 
     public FakeGenericSensor getFakeLightSensor() {
         return mFakeLightSensor;
+    }
+
+    public FakeGenericSensor getFakeTapSensor() {
+        return mFakeTapSensor;
     }
 
     @Override
@@ -160,13 +170,13 @@ public class FakeSensorManager extends SensorManager {
 
     @Override
     protected boolean requestTriggerSensorImpl(TriggerEventListener listener, Sensor sensor) {
-        return false;
+        return true;
     }
 
     @Override
     protected boolean cancelTriggerSensorImpl(TriggerEventListener listener, Sensor sensor,
             boolean disable) {
-        return false;
+        return true;
     }
 
     @Override
@@ -185,12 +195,15 @@ public class FakeSensorManager extends SensorManager {
         return false;
     }
 
-    private Sensor createSensor(int type) throws Exception {
+    private Sensor createSensor(int type, @Nullable String stringType) throws Exception {
         Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
         constr.setAccessible(true);
         Sensor sensor = constr.newInstance();
 
         setSensorType(sensor, type);
+        if (stringType != null) {
+            setSensorField(sensor, "mStringType", stringType);
+        }
         setSensorField(sensor, "mName", "Mock " + sensor.getStringType() + "/" + type);
         setSensorField(sensor, "mVendor", "Mock Vendor");
         setSensorField(sensor, "mVersion", 1);

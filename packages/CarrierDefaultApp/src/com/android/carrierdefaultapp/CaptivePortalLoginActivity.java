@@ -35,7 +35,6 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -477,11 +476,11 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private static void logd(String s) {
-        Rlog.d(TAG, s);
+        Log.d(TAG, s);
     }
 
     private static void loge(String s) {
-        Rlog.d(TAG, s);
+        Log.d(TAG, s);
     }
 
 }

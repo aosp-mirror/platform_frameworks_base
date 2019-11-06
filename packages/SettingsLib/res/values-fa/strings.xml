@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"اسکن شبکه‌ها امکان‌پذیر نیست"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"هیچ‌کدام"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"ذخیره‌شده"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"اتصال قطع شد"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"غیرفعال شد"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏پیکربندی IP انجام نشد"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"اتصال ناموفق به دلیل شبکه با کیفیت پایین"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏در دسترس از طریق %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"برای ثبت‌نام ضربه بزنید"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"متصل، بدون اینترنت"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"اتصال محدود"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"عدم دسترسی به اینترنت"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"ورود به سیستم لازم است"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ظرفیت نقطه دسترسی موقتاً تکمیل شده است"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"متصل (بدون رسانه)، باتری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"متصل (بدون تلفن یا رسانه)، باتری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"فعال، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> شارژ باتری"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"فعال، چپ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> باتری، راست: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> باتری"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> شارژ باتری"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"چپ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> باتری، راست: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> باتری"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"فعال"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"رسانه صوتی"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"تماس‌های تلفنی"</string>
@@ -143,11 +141,11 @@
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"برنامه‌های حذف شده"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"برنامه‌ها و کاربران حذف شده"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"به‌روزرسانی‌های سیستم"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏اتصال داده با سیم USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"‏اشتراک‌گذاری اینترنت با USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"نقطه اتصال قابل حمل"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"اتصال اینترنت با تلفن همراه بلوتوث"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"اتصال به اینترنت با تلفن همراه"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"تترینگ و نقطه اتصال قابل حمل"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"اشتراک‌گذاری اینترنت با بلوتوث"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"اشتراک‌گذاری اینترنت"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"اشتراک‌گذاری اینترنت و نقطه اتصال قابل‌حمل"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"همه برنامه‌های کاری"</string>
     <string name="user_guest" msgid="8475274842845401871">"مهمان"</string>
     <string name="unknown" msgid="1592123443519355854">"ناشناس"</string>
@@ -201,7 +199,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"گزینه‌های برنامه‌نویس برای این کاربر موجود نیست"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"‏تنظیمات VPN برای این کاربر در دسترس نیست"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"تنظیمات تترینگ برای این کاربر در دسترس نیست"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"تنظیمات اشتراک‌گذاری اینترنت برای این کاربر در دسترس نیست"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"تنظیمات نام تقطه دسترسی برای این کاربر در دسترس نیست"</string>
     <string name="enable_adb" msgid="7982306934419797485">"‏اشکال‌زدایی USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"‏با اتصال USB، حالت اشکال‌زدایی فعال شود"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"شبکه"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"داده تلفن همراه همیشه فعال باشد"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"نمایش دستگاه‌های بلوتوث بدون نام"</string>
@@ -248,8 +247,9 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"متصل نشد"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"کنتوردار"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"بدون کنتور"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"تخلیه باتری راکاهش می‌دهد و عملکرد شبکه را بهبود می‌بخشد"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"محدودشده"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"محدودنشده"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"اندازه‌های حافظه موقت ثبت‌کننده"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"انتخاب اندازه‌ ثبت‌کننده در حافظه موقت ثبت"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"حافظه دائم ثبت‌کننده پاک شود؟"</string>
@@ -261,15 +261,15 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"مکان‌های کاذب مجاز هستند"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"مکان‌های کاذب مجاز هستند"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"فعال کردن نمایش بازبینی ویژگی"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏داده سلولی همیشه فعال نگه داشته می‌شود، حتی وقتی Wi-Fi فعال است (برای جابه‌جایی سریع شبکه)."</string>
-    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"استفاده از شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه درصورت دردسترس بودن"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"‏داده تلفن همراه همیشه فعال نگه داشته می‌شود، حتی وقتی Wi-Fi فعال است (برای جابه‌جایی سریع شبکه)."</string>
+    <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"استفاده از شتاب سخت‌افزاری اشتراک‌گذاری اینترنت درصورت دردسترس بودن"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"‏اشکال‌زدایی USB انجام شود؟"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"‏اشکال‌زدایی USB فقط برای اهداف برنامه‌نویسی در نظر گرفته شده است. از آن برای رونوشت‌برداری داده بین رایانه و دستگاهتان، نصب برنامه‌ها در دستگاهتان بدون اعلان و خواندن داده‌های گزارش استفاده کنید."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"‏دسترسی به اشکال‌زدایی USB از تمام رایانه‌هایی که قبلاً مجاز دانسته‌اید لغو شود؟"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"تنظیمات برنامه‌نویسی مجاز باشد؟"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"این تنظیمات فقط برای برنامه‌نویسی در نظر گرفته شده است. ممکن است استفاده از این تنظیمات موجب خرابی یا عملکرد نادرست دستگاه یا برنامه‌های شما شود."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏تأیید برنامه‌های نصب شده از طریق USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏برنامه‌های نصب شده از طریق ADB/ADT را ازنظر رفتار مخاطره‌آمیز بررسی کنید."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏تأیید برنامه‌ها ازطریق USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏برنامه‌های نصب‌شده ازطریق ADB/ADT را ازنظر رفتار مخاطره‌آمیز بررسی کنید."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"‏دستگاه‌های بلوتوث بدون نام (فقط نشانی‌های MAC) نشان داده خواهند شد"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"درصورت وجود مشکل در صدا با دستگاه‌های راه دور مثل صدای بلند ناخوشایند یا عدم کنترل صدا، ویژگی میزان صدای کامل بلوتوث را غیرفعال کنید."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ترمینال محلی"</string>
@@ -282,7 +282,7 @@
     <string name="debug_app_set" msgid="2063077997870280017">"در حال اشکال‌زدایی برنامه: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"انتخاب برنامه"</string>
     <string name="no_application" msgid="2813387563129153880">"هیچ چیز"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"انتظار برای اشکال‌زدا"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"منتظر اشکال‌زدا"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"برنامه اشکال‌زدایی شده منتظر پیوست شدن اشکال‌زدا قبل از اجرا است"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"ورودی"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"طراحی"</string>
@@ -310,8 +310,8 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"‏غیرفعال کردن مسیریابی خودکار به وسایل جانبی صوتی USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"نمایش محدوده‌های طرح‌بندی"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"نمایش مرزها، حاشیه‌ها و ویژگی‌های دیگر کلیپ."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"‏اجباری کردن چیدمان RTL"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"‏اجباری کردن چیدمان RTL صفحه برای همه زبان‌ها"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"اجباری کردن چیدمان راست‌چین"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"اجباری کردن چیدمان راست‌چین صفحه برای همه زبان‌ها"</string>
     <string name="force_msaa" msgid="7920323238677284387">"‏اجبار 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"‏فعال کردن 4X MSAA در برنامه‌های OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"اشکال‌زدایی عملکردهای کلیپ غیرمربعی"</string>
@@ -326,12 +326,12 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"فعالیت‌ها نگه داشته نشوند"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"از بین بردن هر فعالیت به محض خروج کاربر از آن"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"محدودیت پردازش در پس‌زمینه"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"‏نمایش موارد ANR پس‌زمینه"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"نمایش موارد «برنامه پاسخ نمی‌دهد» پس‌زمینه"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"نمایش گفتگوی \"برنامه پاسخ نمی‌دهد\" برای برنامه‌های پس‌زمینه"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"نمایش هشدارهای کانال اعلان"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"هنگامی که برنامه‌ای بدون وجود کانالی معتبر، اعلانی پست می‌کند، هشدار روی صفحه‌ای نمایش می‌دهد"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"اجازه اجباری به برنامه‌های دستگاه ذخیره خارجی"</string>
-    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"بدون توجه به مقادیر مانیفست، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
+    <string name="force_allow_on_external_summary" msgid="3640752408258034689">"بدون توجه به مقادیر آشکار، هر برنامه‌ای را برای نوشتن در حافظه خارجی واجد شرایط می‌کند"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"اجبار فعالیت‌ها به قابل تغییر اندازه بودن"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"بدون توجه به مقادیر مانیفست، اندازه همه فعالیت‌ها برای حالت چند پنجره‌ای می‌تواند تغییر کند."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"فعال کردن پنجره‌های آزاد"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"باید حدوداً تا <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) شارژ داشته باشید"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"باید حدوداً تا <xliff:g id="TIME">%1$s</xliff:g> شارژ داشته باشید"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"تا <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"افزایش عمر باتری پس از <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"کمتر از <xliff:g id="THRESHOLD">%1$s</xliff:g> باقی مانده"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"کمتر از <xliff:g id="THRESHOLD">%1$s</xliff:g> شارژ باقی مانده است (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"بیش از <xliff:g id="TIME_REMAINING">%1$s</xliff:g> شارژ باقی مانده است (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -457,14 +456,13 @@
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"هرگز"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"فقط اولویت‌دار"</string>
     <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"صدای زنگ بعدی‌تان را در ساعت <xliff:g id="WHEN">%1$s</xliff:g> نخواهید شنید، مگر اینکه قبل از آن ساعت، این تنظیم را خاموش کنید"</string>
-    <string name="zen_alarm_warning" msgid="6236690803924413088">"صدای زنگ بعدی‌تان را در ساعت <xliff:g id="WHEN">%1$s</xliff:g> نخواهید شنید"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"زنگ بعدی‌تان را در ساعت <xliff:g id="WHEN">%1$s</xliff:g> نخواهید شنید، مگر اینکه قبل‌از آن ساعت، این تنظیم را خاموش کنید"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"زنگ بعدی‌تان را در ساعت <xliff:g id="WHEN">%1$s</xliff:g> نخواهید شنید"</string>
     <string name="alarm_template" msgid="4996153414057676512">"ساعت <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"روز <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"مدت"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"هربار پرسیده شود"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"تا زمانی‌که آن را خاموش کنید"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"هم‌اکنون"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"این دستگاه"</string>
 </resources>

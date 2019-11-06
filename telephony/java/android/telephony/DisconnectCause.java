@@ -340,6 +340,19 @@ public final class DisconnectCause {
      */
     public static final int MEDIA_TIMEOUT = 77;
 
+    /**
+     * Indicates that an emergency call cannot be placed over WFC because the service is not
+     * available in the current location.
+     * @hide
+     */
+    public static final int EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE = 78;
+
+    /**
+     * Indicates that WiFi calling service is not available in the current location.
+     * @hide
+     */
+    public static final int WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION = 79;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -510,6 +523,10 @@ public final class DisconnectCause {
             return "OTASP_PROVISIONING_IN_PROCESS";
         case MEDIA_TIMEOUT:
             return "MEDIA_TIMEOUT";
+        case EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE:
+            return "EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE";
+        case WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION:
+            return "WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION";
         default:
             return "INVALID: " + cause;
         }

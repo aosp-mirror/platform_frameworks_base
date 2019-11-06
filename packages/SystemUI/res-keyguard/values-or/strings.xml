@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ଭୁଲ PIN କୋଡ୍।"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ଅମାନ୍ୟ କାର୍ଡ।"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ଚାର୍ଜ ହୋ‍ଇଗଲା"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ୱାୟାର୍‍‍ଲେସ୍‍‍ଭାବରେ ଚାର୍ଜ ହେଉଛି"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"ୱାୟାର୍‍ଲେସ୍‍ଭାବରେ <xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜ ହୋଇଛି"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଦ୍ରୁତ ଭାବେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
@@ -151,84 +151,7 @@
       <item quantity="other">SIM କାର୍ଡକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରିଦିଆଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଲେଖନ୍ତୁ। ଆଉ <xliff:g id="_NUMBER_1">%d</xliff:g> ଥର ଭୁଲ କୋଡ୍‍ ଲେଖିବା ପରେ SIM କାର୍ଡ ସ୍ଥାୟୀ ଭାବେ ଅନୁପଯୋଗୀ ହୋଇଯିବ। ବିବରଣୀ ପାଇଁ କେରିଅର୍‌ର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।</item>
       <item quantity="one">SIM କାର୍ଡକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରିଦିଆଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଲେଖନ୍ତୁ। ଆଉ <xliff:g id="_NUMBER_0">%d</xliff:g> ଥର ଭୁଲ କୋଡ୍‍ ଲେଖିବା ପରେ SIM କାର୍ଡ ସ୍ଥାୟୀ ଭାବେ ଅନୁପଯୋଗୀ ହୋଇଯିବ। ବିବରଣୀ ପାଇଁ କେରିଅର୍‌ର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="other">"<annotation name="color">"ଏହାର"</annotation>\n"^1\n^2</item>
-      <item quantity="one">"<annotation name="color">"ଏହାର"</annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"ବାର"</item>
-    <item msgid="7389464214252023751">"ଏକ"</item>
-    <item msgid="8803180377002008046">"ଦୁଇ"</item>
-    <item msgid="8614897059944644719">"ତିନି"</item>
-    <item msgid="2293058674782619556">"ଚାରି"</item>
-    <item msgid="4815402358455041664">"ପାଞ୍ଚ"</item>
-    <item msgid="3325754778509665687">"ଛଅ"</item>
-    <item msgid="5805551341866280575">"ସାତ"</item>
-    <item msgid="203334816668238610">"ଆଠ"</item>
-    <item msgid="4828052671464488923">"ନଅ"</item>
-    <item msgid="2233497913571137419">"ଦଶ"</item>
-    <item msgid="5621554266768657830">"ଏଗାର"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"ଘଣ୍ଟା"</item>
-    <item msgid="8837126587669001578">"ଏକ"</item>
-    <item msgid="4294343372940455660">"ଦୁଇ"</item>
-    <item msgid="7129166637707421536">"ତିନି"</item>
-    <item msgid="7579404865008788673">"ଚାରି"</item>
-    <item msgid="3873924689207380586">"ପାଞ୍ଚ"</item>
-    <item msgid="4849565597850069377">"ଛଅ"</item>
-    <item msgid="4404219424523572364">"ସାତ"</item>
-    <item msgid="8740481214764087329">"ଆଠ"</item>
-    <item msgid="1713216865806811237">"ନଅ"</item>
-    <item msgid="3508406095411245038">"ଦଶ"</item>
-    <item msgid="7161996337755311711">"ଏଗାର"</item>
-    <item msgid="4044549963329624197">"ବାର"</item>
-    <item msgid="333373157917379088">"ତେର"</item>
-    <item msgid="2631202907124819385">"ଚଉଦ"</item>
-    <item msgid="6472396076858033453">"ପନ୍ଦର"</item>
-    <item msgid="8656981856181581643">"ଷୋହଳ"</item>
-    <item msgid="7289026608562030619">"ସତର"</item>
-    <item msgid="3881477602692646573">"ଅଠର"</item>
-    <item msgid="3358129827772984226">"ଉଣେଇଶି"</item>
-    <item msgid="3308575407402865807">"କୋଡି଼ଏ"</item>
-    <item msgid="5346560955382229629">"ଏକୋଇଶି\n"</item>
-    <item msgid="226750304761473436">"ବାଇଶି\n"</item>
-    <item msgid="616811325336838734">"ତେଇଶି\n"</item>
-    <item msgid="616346116869053440">"ଚବିଶି\n"</item>
-    <item msgid="4642996410384042830">"ପଚିଶି\n"</item>
-    <item msgid="7506092849993571465">"ଛବିଶି\n"</item>
-    <item msgid="1915078191101042031">"ସତାଇଶି\n"</item>
-    <item msgid="4292378641900520252">"ଅଠାଇଶି\n"</item>
-    <item msgid="5339513901773103696">"ଅଣତିରିଶି\n"</item>
-    <item msgid="3574673250891657607">"ତିରିଶି"</item>
-    <item msgid="5796923836589110940">"ଏକତିରିଶି\n"</item>
-    <item msgid="5859323597571702052">"ବତିଶି\n"</item>
-    <item msgid="5133326723148876507">"ତେତିଶି\n"</item>
-    <item msgid="2693999494655663096">"ଚଉତିରିଶି\n"</item>
-    <item msgid="3316754944962836197">"ପଞ୍ଚତିରିଶି\n"</item>
-    <item msgid="816891008836796723">"ଛତିଶି\n"</item>
-    <item msgid="9158890488666520078">"ସଂଇତିରିଶି\n"</item>
-    <item msgid="1894769703213894011">"ଅଠତିରିଶ\n"</item>
-    <item msgid="5638820345598572399">"ଅଣଚାଳିଶି\n"</item>
-    <item msgid="8838304023017895439">"ଚାଳିଶି"</item>
-    <item msgid="1834742948932559597">"ଏକଚାଳିଶି\n"</item>
-    <item msgid="6573707308847773944">"ବୟାଳିଶି\n"</item>
-    <item msgid="2450149950652678001">"ତେୟାଳିଶି\n"</item>
-    <item msgid="2874667401318178036">"ଚଉରାଳିଶି\n"</item>
-    <item msgid="3391101532763048862">"ପଞ୍ଚଚାଳିଶି\n"</item>
-    <item msgid="1671489330863254362">"ଛୟାଳିଶି\n"</item>
-    <item msgid="5916017359554531038">"ସତଚାଳିଶି\n"</item>
-    <item msgid="8205413177993059967">"ଅଠଚାଳିଶି\n"</item>
-    <item msgid="6607867415142171302">"ଅଣଚାଶ\n"</item>
-    <item msgid="8358850748472089162">"ପଚାଶ"</item>
-    <item msgid="3551313125255080234">"ଏକାବନ\n"</item>
-    <item msgid="1559678130725716542">"ବାଉନ\n"</item>
-    <item msgid="431441994725492377">"ତେପନ\n"</item>
-    <item msgid="6345774640539623024">"ଚଉରାଳିଶି\n"</item>
-    <item msgid="8018192990793931120">"ପଞ୍ଚାବନ\n"</item>
-    <item msgid="6187650843754604534">"ଛପନ\n"</item>
-    <item msgid="8727240174015993259">"ସତାବନ\n"</item>
-    <item msgid="848339003778952950">"ଅଠାବନ\n"</item>
-    <item msgid="5798985802835423618">"ଅଣଷଠି\n"</item>
-  </string-array>
+    <string name="clock_title_default" msgid="6645600990069154049">"ଡିଫଲ୍ଟ"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"ବବଲ୍"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"ଆନାଲଗ୍"</string>
 </resources>

@@ -90,12 +90,16 @@ public class RecentLocationApps {
 
         for (int i = 0; i < appOpsCount; ++i) {
             AppOpsManager.PackageOps ops = appOps.get(i);
+            // Don't show the Android System in the list - it's not actionable for the user.
+            // Also don't show apps belonging to background users except managed users.
             String packageName = ops.getPackageName();
             int uid = ops.getUid();
             final UserHandle user = UserHandle.getUserHandleForUid(uid);
 
-            // Don't show apps belonging to background users except managed users.
-            if (!profiles.contains(user)) {
+            boolean isAndroidOs =
+                    (uid == android.os.Process.SYSTEM_UID) && ANDROID_SYSTEM_PACKAGE_NAME.equals(
+                            packageName);
+            if (isAndroidOs || !profiles.contains(user)) {
                 continue;
             }
 

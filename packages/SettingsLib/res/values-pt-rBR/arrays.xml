@@ -59,7 +59,7 @@
     <item msgid="45075631231212732">"Sempre usar a verificação HDCP"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="3966341281672645384">"Desativada"</item>
+    <item msgid="3966341281672645384">"Desativado"</item>
     <item msgid="1969681323976948639">"Filtro ativado"</item>
     <item msgid="8719029132154020716">"Ativada"</item>
   </string-array>
@@ -259,6 +259,6 @@
     <item msgid="2086000968159047375">"PTP (protocolo de transferência de imagens)"</item>
     <item msgid="7398830860950841822">"RNDIS (Ethernet USB)"</item>
     <item msgid="1718924214939774352">"Fonte de áudio"</item>
-    <item msgid="8126315616613006284">"MIDI"</item>
+    <item msgid="8126315616613006284">"MIDI (som)"</item>
   </string-array>
 </resources>

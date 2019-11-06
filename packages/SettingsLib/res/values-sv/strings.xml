@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Det går inte att söka efter nätverk"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ingen"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Sparat"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Frånkopplad"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Inaktiverad"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-konfigurationsfel"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ingen anslutning på grund av låg kvalitet på nätverket"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Tillgängligt via %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Tryck för att logga in"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Ansluten, inget internet"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Begränsad anslutning"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Inget internet"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Inloggning krävs"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Åtkomstpunkten har inga platser över för tillfället"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Ansluten (inga medier), batterinivå <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Ansluten (ingen mobil och inga medier), batterinivå <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktiv. <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Aktiv, V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri. H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri. H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktiv"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medialjud"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonsamtal"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Nätverk"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifiering för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivera utförlig loggning för Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Begränsning av Wi-Fi-sökning"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata alltid aktiverad"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvaruacceleration för internetdelning"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Visa namnlösa Bluetooth-enheter"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Kan inte ansluta"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Sänker batteriförbrukningen och förbättrar nätverksprestandan"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Med datapriser"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Utan datapriser"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Buffertstorlekar för logg"</string>
@@ -299,7 +299,7 @@
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Hela fönstret blinkar vid uppdatering"</string>
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Visa visningsuppdatering"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Visningar blinkar i fönster vid ritningar"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Visa maskinvaruskiktuppd."</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Visa maskinvaruskiktuppdatering"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Låt maskinvaruskikt blinka grönt vid uppdateringar"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Felsök GPU-överritning"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Inaktivera HW-överlagringar"</string>
@@ -312,7 +312,7 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Visa gränser för videoklipp, marginaler m.m."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Tvinga fram RTL-layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tvinga fram RTL-skärmlayout (hö–vä) för alla språk"</string>
-    <string name="force_msaa" msgid="7920323238677284387">"Force 4x MSAA"</string>
+    <string name="force_msaa" msgid="7920323238677284387">"Tvinga 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktivera 4x MSAA i OpenGL ES 2.0-appar"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Felsök icke-rektangulära urklippsåtgärder"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Profilens HWUI-rendering"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Bör räcka ungefär till klockan <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Bör räcka ungefär till klockan <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Till kl. <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Förläng batteritiden tills efter <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Mindre än <xliff:g id="THRESHOLD">%1$s</xliff:g> återstår"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Mindre än <xliff:g id="THRESHOLD">%1$s</xliff:g> återstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Mer än <xliff:g id="TIME_REMAINING">%1$s</xliff:g> återstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Fråga varje gång"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Tills du inaktiverar funktionen"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Nyss"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Den här enheten"</string>
 </resources>

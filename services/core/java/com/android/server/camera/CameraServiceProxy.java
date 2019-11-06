@@ -15,6 +15,7 @@
  */
 package com.android.server.camera;
 
+import android.annotation.IntDef;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +45,8 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -100,7 +103,26 @@ public class CameraServiceProxy extends SystemService
     private static final String NFC_SERVICE_BINDER_NAME = "nfc";
     private static final IBinder nfcInterfaceToken = new Binder();
 
-    private final boolean mNotifyNfc;
+    // Valid values for NFC_NOTIFICATION_PROP
+    // Do not disable active NFC for any camera use
+    private static final int NFC_NOTIFY_NONE = 0;
+    // Always disable active NFC for any camera use
+    private static final int NFC_NOTIFY_ALL = 1;
+     // Disable active NFC only for back-facing cameras
+    private static final int NFC_NOTIFY_BACK = 2;
+    // Disable active NFC only for front-facing cameras
+    private static final int NFC_NOTIFY_FRONT = 3;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"NFC_"}, value =
+         {NFC_NOTIFY_NONE,
+          NFC_NOTIFY_ALL,
+          NFC_NOTIFY_BACK,
+          NFC_NOTIFY_FRONT})
+    private @interface NfcNotifyState {};
+
+    private final @NfcNotifyState int mNotifyNfc;
+    private boolean mLastNfcPollState = true;
 
     /**
      * Structure to track camera usage
@@ -202,8 +224,12 @@ public class CameraServiceProxy extends SystemService
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper(), this);
 
-        mNotifyNfc = SystemProperties.getInt(NFC_NOTIFICATION_PROP, 0) > 0;
-        if (DEBUG) Slog.v(TAG, "Notify NFC behavior is " + (mNotifyNfc ? "active" : "disabled"));
+        int notifyNfc = SystemProperties.getInt(NFC_NOTIFICATION_PROP, 0);
+        if (notifyNfc < NFC_NOTIFY_NONE || notifyNfc > NFC_NOTIFY_FRONT) {
+            notifyNfc = NFC_NOTIFY_NONE;
+        }
+        mNotifyNfc = notifyNfc;
+        if (DEBUG) Slog.v(TAG, "Notify NFC state is " + nfcNotifyToString(mNotifyNfc));
     }
 
     @Override
@@ -270,12 +296,10 @@ public class CameraServiceProxy extends SystemService
             mCameraServiceRaw = null;
 
             // All cameras reset to idle on camera service death
-            boolean wasEmpty = mActiveCameraUsage.isEmpty();
             mActiveCameraUsage.clear();
 
-            if ( mNotifyNfc && !wasEmpty ) {
-                notifyNfcService(/*enablePolling*/ true);
-            }
+            // Ensure NFC is back on
+            notifyNfcService(/*enablePolling*/ true);
         }
     }
 
@@ -474,14 +498,32 @@ public class CameraServiceProxy extends SystemService
 
                     break;
             }
-            boolean isEmpty = mActiveCameraUsage.isEmpty();
-            if ( mNotifyNfc && (wasEmpty != isEmpty) ) {
-                notifyNfcService(isEmpty);
+            switch (mNotifyNfc) {
+                case NFC_NOTIFY_NONE:
+                    break;
+                case NFC_NOTIFY_ALL:
+                    notifyNfcService(mActiveCameraUsage.isEmpty());
+                    break;
+                case NFC_NOTIFY_BACK:
+                case NFC_NOTIFY_FRONT:
+                    boolean enablePolling = true;
+                    int targetFacing = mNotifyNfc == NFC_NOTIFY_BACK
+                            ? ICameraServiceProxy.CAMERA_FACING_BACK :
+                              ICameraServiceProxy.CAMERA_FACING_FRONT;
+                    for (int i = 0; i < mActiveCameraUsage.size(); i++) {
+                        if (mActiveCameraUsage.valueAt(i).mCameraFacing == targetFacing) {
+                            enablePolling = false;
+                            break;
+                        }
+                    }
+                    notifyNfcService(enablePolling);
+                    break;
             }
         }
     }
 
     private void notifyNfcService(boolean enablePolling) {
+        if (enablePolling == mLastNfcPollState) return;
 
         IBinder nfcServiceBinder = getBinderService(NFC_SERVICE_BINDER_NAME);
         if (nfcServiceBinder == null) {
@@ -490,9 +532,14 @@ public class CameraServiceProxy extends SystemService
         }
         INfcAdapter nfcAdapterRaw = INfcAdapter.Stub.asInterface(nfcServiceBinder);
         int flags = enablePolling ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
-        if (DEBUG) Slog.v(TAG, "Setting NFC reader mode to flags " + flags);
+        if (DEBUG) {
+            Slog.v(TAG, "Setting NFC reader mode to flags " + flags
+                    + " to turn polling " + enablePolling);
+        }
+
         try {
             nfcAdapterRaw.setReaderMode(nfcInterfaceToken, null, flags, null);
+            mLastNfcPollState = enablePolling;
         } catch (RemoteException e) {
             Slog.w(TAG, "Could not notify NFC service, remote exception: " + e);
         }
@@ -529,4 +576,13 @@ public class CameraServiceProxy extends SystemService
         return "CAMERA_FACING_UNKNOWN";
     }
 
+    private static String nfcNotifyToString(@NfcNotifyState int nfcNotifyState) {
+        switch (nfcNotifyState) {
+            case NFC_NOTIFY_NONE: return "NFC_NOTIFY_NONE";
+            case NFC_NOTIFY_ALL: return "NFC_NOTIFY_ALL";
+            case NFC_NOTIFY_BACK: return "NFC_NOTIFY_BACK";
+            case NFC_NOTIFY_FRONT: return "NFC_NOTIFY_FRONT";
+        }
+        return "UNKNOWN_NFC_NOTIFY";
+    }
 }

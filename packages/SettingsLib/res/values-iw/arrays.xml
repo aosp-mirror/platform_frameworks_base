@@ -49,7 +49,7 @@
     <item msgid="1805837518286731242">"נמנע זמנית מחיבור חלש"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">
-    <item msgid="441827799230089869">"אל תבדוק לעולם"</item>
+    <item msgid="441827799230089869">"בלי לבדוק לעולם"</item>
     <item msgid="6042769699089883931">"‏בדוק אם יש תוכן DRM בלבד"</item>
     <item msgid="9174900380056846820">"בדוק תמיד"</item>
   </string-array>

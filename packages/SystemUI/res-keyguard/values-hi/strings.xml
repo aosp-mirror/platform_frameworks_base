@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"गलत पिन कोड."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"गलत कार्ड."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"पूरी तरह चार्ज हो गया"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वायरलेस तरीके से चार्ज हो रहा है"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वायरलेस तरीके से चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तेज़ चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • धीरे चार्ज हो रहा है"</string>
@@ -81,7 +81,7 @@
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"मनचाहे पिन कोड की पुष्टि करें"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM कार्ड अनलॉक हो रहा है…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"कोई ऐसा पिन लिखें, जिसमें 4 से 8 अंक हों."</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK कोड 8 या अधिक संख्या वाला होना चाहिए."</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK कोड 8 या ज़्यादा संख्या वाला होना चाहिए."</string>
     <string name="kg_invalid_puk" msgid="5399287873762592502">"सही PUK कोड दोबारा डालें. बार-बार कोशिश करने से SIM हमेशा के लिए अक्षम हो जाएगा."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"पिन कोड का मिलान नहीं हो रहा है"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"पैटर्न के लिए बहुत ज़्यादा बार कोशिश की गई है"</string>
@@ -96,10 +96,10 @@
     <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"आपने फ़ोन का लॉक खोलने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत कोशिश करने पर, इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा मिट जाएगा."</string>
     <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"आपने टैबलेट का लॉक खोलने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"आपने फ़ोन का लॉक खोलने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. इस उपयोगकर्ता को निकाल दिया जाएगा, जिससे सभी उपयोगकर्ता डेटा हट जाएगा."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. कार्य प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, वर्क प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से कोशिश की है. <xliff:g id="NUMBER_1">%2$d</xliff:g> और असफल कोशिशों के बाद, वर्क प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"आपने टैबलेट को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. वर्क प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"आपने फ़ोन को अनलॉक करने के लिए <xliff:g id="NUMBER">%d</xliff:g> बार गलत तरीके से कोशिश की है. वर्क प्रोफ़ाइल को निकाल दिया जाएगा, जिससे सभी प्रोफ़ाइल डेटा हट जाएगा."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"आपने अपने लॉक खोलने के पैटर्न को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से ड्रॉ किया है. अगर आपने <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत ड्रॉ किया, तो आपसे अपने टैबलेट को किसी ईमेल खाते का इस्तेमाल करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड बाद फिर से कोशिश करें."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"आपने अपने लॉक खोलने के पैटर्न को <xliff:g id="NUMBER_0">%1$d</xliff:g> बार गलत तरीके से ड्रॉ किया है. अगर आपने <xliff:g id="NUMBER_1">%2$d</xliff:g> बार और गलत ड्रॉ किया, तो आपसे अपने फ़ोन को किसी ईमेल खाते का इस्तेमाल करके अनलॉक करने के लिए कहा जाएगा.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंड बाद फिर से कोशिश करें."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"गलत SIM पिन कोड, अपने डिवाइस को अनलॉक करने के लिए अब आपको अपनी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करना होगा."</string>
@@ -151,84 +151,7 @@
       <item quantity="one">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>
       <item quantity="other">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="one">"<annotation name="color">"अभी"</annotation>\n"^1\n^2 बजे हैं</item>
-      <item quantity="other">"<annotation name="color">"अभी"</annotation>\n"^1\n^2 बजे हैं</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"बारह"</item>
-    <item msgid="7389464214252023751">"एक"</item>
-    <item msgid="8803180377002008046">"दो"</item>
-    <item msgid="8614897059944644719">"तीन"</item>
-    <item msgid="2293058674782619556">"चार"</item>
-    <item msgid="4815402358455041664">"पाँच"</item>
-    <item msgid="3325754778509665687">"छह"</item>
-    <item msgid="5805551341866280575">"सात"</item>
-    <item msgid="203334816668238610">"आठ"</item>
-    <item msgid="4828052671464488923">"नौ"</item>
-    <item msgid="2233497913571137419">"दस"</item>
-    <item msgid="5621554266768657830">"ग्यारह"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"बजे"</item>
-    <item msgid="8837126587669001578">"एक"</item>
-    <item msgid="4294343372940455660">"दो"</item>
-    <item msgid="7129166637707421536">"तीन"</item>
-    <item msgid="7579404865008788673">"चार"</item>
-    <item msgid="3873924689207380586">"पाँच"</item>
-    <item msgid="4849565597850069377">"छह"</item>
-    <item msgid="4404219424523572364">"सात"</item>
-    <item msgid="8740481214764087329">"आठ"</item>
-    <item msgid="1713216865806811237">"नौ"</item>
-    <item msgid="3508406095411245038">"दस"</item>
-    <item msgid="7161996337755311711">"ग्यारह"</item>
-    <item msgid="4044549963329624197">"बारह"</item>
-    <item msgid="333373157917379088">"तेरह"</item>
-    <item msgid="2631202907124819385">"चौदह"</item>
-    <item msgid="6472396076858033453">"पंद्रह"</item>
-    <item msgid="8656981856181581643">"सोलह"</item>
-    <item msgid="7289026608562030619">"सत्रह"</item>
-    <item msgid="3881477602692646573">"अठारह"</item>
-    <item msgid="3358129827772984226">"उन्नीस"</item>
-    <item msgid="3308575407402865807">"बीस"</item>
-    <item msgid="5346560955382229629">"इक्कीस\n"</item>
-    <item msgid="226750304761473436">"बाईस\n"</item>
-    <item msgid="616811325336838734">"तेईस\n"</item>
-    <item msgid="616346116869053440">"चौबीस\n"</item>
-    <item msgid="4642996410384042830">"पच्चीस\n"</item>
-    <item msgid="7506092849993571465">"छब्बीस\n"</item>
-    <item msgid="1915078191101042031">"सत्ताईस\n"</item>
-    <item msgid="4292378641900520252">"अट्ठाइस\n"</item>
-    <item msgid="5339513901773103696">"उनतीस\n"</item>
-    <item msgid="3574673250891657607">"तीस"</item>
-    <item msgid="5796923836589110940">"इकत्तीस\n"</item>
-    <item msgid="5859323597571702052">"बत्तीस\n"</item>
-    <item msgid="5133326723148876507">"तैंतीस\n"</item>
-    <item msgid="2693999494655663096">"चौंतीस\n"</item>
-    <item msgid="3316754944962836197">"पैंतीस\n"</item>
-    <item msgid="816891008836796723">"छत्तीस\n"</item>
-    <item msgid="9158890488666520078">"सैंतीस\n"</item>
-    <item msgid="1894769703213894011">"अड़तीस\n"</item>
-    <item msgid="5638820345598572399">"उनतालीस\n"</item>
-    <item msgid="8838304023017895439">"चालीस"</item>
-    <item msgid="1834742948932559597">"इकतालीस\n"</item>
-    <item msgid="6573707308847773944">"बयालीस\n"</item>
-    <item msgid="2450149950652678001">"तैंतालीस\n"</item>
-    <item msgid="2874667401318178036">"चवालीस\n"</item>
-    <item msgid="3391101532763048862">"पैंतालीस\n"</item>
-    <item msgid="1671489330863254362">"छियालीस\n"</item>
-    <item msgid="5916017359554531038">"सैंतालीस\n"</item>
-    <item msgid="8205413177993059967">"अड़तालीस\n"</item>
-    <item msgid="6607867415142171302">"उनचास\n"</item>
-    <item msgid="8358850748472089162">"पचास"</item>
-    <item msgid="3551313125255080234">"इक्यावन\n"</item>
-    <item msgid="1559678130725716542">"बावन\n"</item>
-    <item msgid="431441994725492377">"तिरेपन\n"</item>
-    <item msgid="6345774640539623024">"चौवन\n"</item>
-    <item msgid="8018192990793931120">"पचपन\n"</item>
-    <item msgid="6187650843754604534">"छप्पन\n"</item>
-    <item msgid="8727240174015993259">"सत्तावन\n"</item>
-    <item msgid="848339003778952950">"अट्ठावन\n"</item>
-    <item msgid="5798985802835423618">"उनसठ\n"</item>
-  </string-array>
+    <string name="clock_title_default" msgid="6645600990069154049">"डिफ़ॉल्ट"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"बबल"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"एनालॉग"</string>
 </resources>

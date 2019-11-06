@@ -43,6 +43,7 @@ public class DozeDockHandler implements DozeMachine.Part {
     private final DockManager mDockManager;
 
     private int mDockState = DockManager.STATE_NONE;
+    private boolean mPulsePending;
 
     public DozeDockHandler(Context context, DozeMachine machine, DozeHost dozeHost,
             AmbientDisplayConfiguration config, Handler handler, DockManager dockManager) {
@@ -66,7 +67,8 @@ public class DozeDockHandler implements DozeMachine.Part {
                 }
                 // continue below
             case DOZE:
-                if (mDockState == DockManager.STATE_DOCKED) {
+                if (mDockState == DockManager.STATE_DOCKED && !mPulsePending) {
+                    mPulsePending = true;
                     mHandler.post(() -> requestPulse(newState));
                 }
                 break;
@@ -79,11 +81,10 @@ public class DozeDockHandler implements DozeMachine.Part {
     }
 
     private void requestPulse(State dozeState) {
-        if (mDozeHost.isPulsingBlocked() || !dozeState.canPulse()) {
-            return;
+        if (!mDozeHost.isPulsingBlocked() && dozeState.canPulse()) {
+            mMachine.requestPulse(DozeLog.PULSE_REASON_DOCKING);
         }
-
-        mMachine.requestPulse(DozeLog.PULSE_REASON_DOCKING);
+        mPulsePending = false;
     }
 
     private void requestPulseOutNow(State dozeState) {

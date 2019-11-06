@@ -35,6 +35,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 
 import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
@@ -1217,6 +1218,15 @@ class RootActivityContainer extends ConfigurationContainer
                 if (displayShouldSleep) {
                     stack.goToSleepIfPossible(false /* shuttingDown */);
                 } else {
+                    // When the display which can only contain one task turns on, start a special
+                    // transition. {@link AppTransitionController#handleAppTransitionReady} later
+                    // picks up the transition, and schedules
+                    // {@link ITaskStackListener#onSingleTaskDisplayDrawn} callback which is
+                    // triggered after contents are drawn on the display.
+                    if (display.isSingleTaskInstance()) {
+                        display.mDisplayContent.prepareAppTransition(
+                                TRANSIT_SHOW_SINGLE_TASK_DISPLAY, false);
+                    }
                     stack.awakeFromSleepingLocked();
                     if (stack.isFocusedStackOnDisplay()
                             && !mStackSupervisor.getKeyguardController()

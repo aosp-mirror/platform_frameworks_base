@@ -48,7 +48,8 @@ public class AmbientDisplayConfiguration {
         return pulseOnNotificationEnabled(user)
                 || pulseOnLongPressEnabled(user)
                 || alwaysOnEnabled(user)
-                || wakeScreenGestureEnabled(user)
+                || wakeLockScreenGestureEnabled(user)
+                || wakeDisplayGestureEnabled(user)
                 || pickupGestureEnabled(user)
                 || tapGestureEnabled(user)
                 || doubleTapGestureEnabled(user);
@@ -105,8 +106,14 @@ public class AmbientDisplayConfiguration {
     }
 
     /** {@hide} */
-    public boolean wakeScreenGestureEnabled(int user) {
-        return boolSettingDefaultOn(Settings.Secure.DOZE_WAKE_SCREEN_GESTURE, user)
+    public boolean wakeLockScreenGestureEnabled(int user) {
+        return boolSettingDefaultOn(Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE, user)
+                && wakeScreenGestureAvailable();
+    }
+
+    /** {@hide} */
+    public boolean wakeDisplayGestureEnabled(int user) {
+        return boolSettingDefaultOn(Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE, user)
                 && wakeScreenGestureAvailable();
     }
 

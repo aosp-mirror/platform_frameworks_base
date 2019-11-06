@@ -53,8 +53,8 @@ public class NavigationHandle extends View implements ButtonInterface {
         final int dualToneLightTheme = Utils.getThemeAttr(context, R.attr.lightIconTheme);
         Context lightContext = new ContextThemeWrapper(context, dualToneLightTheme);
         Context darkContext = new ContextThemeWrapper(context, dualToneDarkTheme);
-        mLightColor = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
-        mDarkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
+        mLightColor = Utils.getColorAttrDefaultColor(lightContext, R.attr.homeHandleColor);
+        mDarkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.homeHandleColor);
         mPaint.setAntiAlias(true);
         setFocusable(false);
     }

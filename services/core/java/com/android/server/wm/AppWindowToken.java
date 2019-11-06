@@ -206,6 +206,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean removed;
 
     // Information about an application starting window if displayed.
+    // Note: these are de-referenced before the starting window animates away.
     StartingData mStartingData;
     WindowState startingWindow;
     StartingSurface startingSurface;
@@ -1241,6 +1242,21 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         // Otherwise the new window is greater than the existing window.
         return true;
+    }
+
+    /**
+     * @return {@code true} if starting window is in app's hierarchy.
+     */
+    boolean hasStartingWindow() {
+        if (startingDisplayed || mStartingData != null) {
+            return true;
+        }
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            if (getChildAt(i).mAttrs.type == TYPE_APPLICATION_STARTING) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -2477,7 +2493,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // transformed the task.
         final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
         if (controller != null && controller.isAnimatingTask(getTask())
-                && controller.shouldCancelWithDeferredScreenshot()) {
+                && controller.shouldDeferCancelUntilNextTransition()) {
             return false;
         }
 

@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Није могуће скенирати мреже"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Нема"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Сачувано"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Веза је прекинута"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Онемогућено"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP конфигурација је отказала"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Није повезано због лошег квалитета мреже"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Доступна је преко приступне тачке %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Додирните да бисте се регистровали"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Веза је успостављена, нема интернета"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Ограничена веза"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Нема интернета"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Треба да се пријавите"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Приступна тачка је привремено заузета"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Повезано (без медија), ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Повезано (без телефона или медија), ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Активан, ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Активно, Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерије, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерије"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"Ниво батерије је <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> батерије, Д: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерије"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Активан"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Звук медија"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Телефонски позиви"</string>
@@ -155,7 +153,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"Подешене су неке подразумеване вредности"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Нису подешене подразумеване вредности"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Подешавања преласка из текста у говор"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Излаз за претварање текста у говор"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Претварање текста у говор"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Брзина говора"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Брзина изговарања текста"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Ниво"</string>
@@ -210,18 +208,19 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Прикажи дугме у менију напајања за прављење извештаја о грешкама"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Не закључавај"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Екран неће бити у режиму спавања током пуњења"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Омогући snoop евиденцију за Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Омогући snoop евид. за Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Сними Bluetooth пакете. (Укључите/искључите Bluetooth када промените ово подешавање)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Откључавање OEM-a"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Дозволи откључавање функције за покретање"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Желите ли да дозволите откључавање произвођача оригиналне опреме (OEM)?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"УПОЗОРЕЊЕ: Функције за заштиту уређаја неће функционисати на овом уређају док је ово подешавање укључено."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Изабери апликацију за лажну локацију"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Изаберите апликацију за лажну локацију"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Апликација за лажну локацију није подешена"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Апликација за лажну локацију: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Умрежавање"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сертификација бежичног екрана"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Омогући детаљнију евиденцију за Wi‑Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Успоравање Wi-Fi скенирања"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мобилни подаци су увек активни"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Хардверско убрзање привезивања"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Прикажи Bluetooth уређаје без назива"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Повезивање није успело"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Приказ опција за сертификацију бежичног екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Повећава ниво евидентирања за Wi‑Fi. Приказ по SSID RSSI-у у бирачу Wi‑Fi мреже"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Смањује потрошњу батерије и побољшава учинак мреже"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Са ограничењем"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Без ограничења"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Величине бафера података у програму за евидентирање"</string>
@@ -273,7 +273,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Биће приказани Bluetooth уређаји без назива (само са MAC адресама)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Онемогућава главно подешавање јачине звука на Bluetooth уређају у случају проблема са јачином звука на даљинским уређајима, као што су изузетно велика јачина звука или недостатак контроле."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локални терминал"</string>
-    <string name="enable_terminal_summary" msgid="67667852659359206">"Омогући аплик. терминала за приступ локалном командном окружењу"</string>
+    <string name="enable_terminal_summary" msgid="67667852659359206">"Омогући апл. терминала за приступ локалном командном окружењу"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP провера"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"Подешавање понашања HDCP провере"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Отклањање грешака"</string>
@@ -292,7 +292,7 @@
     <string name="strict_mode" msgid="1938795874357830695">"Омогућен је строги режим"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Нека екран трепери када апликације обављају дуге операције на главној нити"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Локација показивача"</string>
-    <string name="pointer_location_summary" msgid="840819275172753713">"Постав. елемент са тренутним подацима о додиру"</string>
+    <string name="pointer_location_summary" msgid="840819275172753713">"Преклопни елемент са тренутним подацима о додиру"</string>
     <string name="show_touches" msgid="2642976305235070316">"Приказуј додире"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Приказуј визуелне повратне информације за додире"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Прикажи ажурирања површине"</string>
@@ -314,8 +314,8 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Наметни смер распореда екрана здесна налево за све локалитете"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Наметни 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Омогући 4x MSAA у OpenGL ES 2.0 апликацијама"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Отклони грешке у вези са радњама за исецање области које нису правоугаоног облика"</string>
-    <string name="track_frame_time" msgid="6094365083096851167">"Прик. проф. помоћу HWUI-а"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Отклони грешке исецања области неправоугаоног облика"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Рендеруј помоћу HWUI-а"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Омогући слојеве за отклањање грешака GPU-a"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Омогући учитавање отк. греш. GPU-a у апл. за отк. греш."</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Размера анимације прозора"</string>
@@ -366,7 +366,7 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Конвертуј..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Већ се користи шифровање датотека"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Конвертовање у шифровање појединачних датотека"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Конвертујте шифровање партиције података у шифровање појединачних датотека.\n !!Упозорење!! Тиме бришете све податке.\n Ово је алфа верзија функције и вероватно неће функционисати исправно.\n Притисните „Избриши и конвертуј...“ да бисте наставили."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Конвертујте шифровање партиције података у шифровање појединачних датотека.\n !!Упозорење!! Тиме бришете све податке.\n Ово је алфа верзија функције и вероватно неће радити исправно.\n Притисните „Избриши и конвертуј...“ да бисте наставили."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Избриши и конвертуј..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Режим боја слика"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Користи sRGB"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Трајаће приближно до <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Трајаће приближно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"До <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Продужи трајање батерије у односу на период од <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Преостало је мање од <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Преостало је мање од <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Преостало је више од <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -406,7 +405,7 @@
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> до потпуног пуњења"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до потпуног пуњења"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Непознато"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Пуњење"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Пуни се"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"пуни се"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Не пуни се"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Прикључено је, али пуњење тренутно није могуће"</string>
@@ -463,9 +462,8 @@
     <string name="alarm_template" msgid="4996153414057676512">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Трајање"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Увек питај"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Питај сваки пут"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Док не искључите"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Управо"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Овај уређај"</string>
 </resources>

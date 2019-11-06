@@ -19,7 +19,7 @@ package com.android.server.timedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.timedetector.ITimeDetectorService;
-import android.app.timedetector.TimeSignal;
+import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -96,14 +96,14 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
-    public void suggestTime(@NonNull TimeSignal timeSignal) {
+    public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSignal) {
         enforceSetTimePermission();
         Objects.requireNonNull(timeSignal);
 
         long idToken = Binder.clearCallingIdentity();
         try {
             synchronized (mStrategyLock) {
-                mTimeDetectorStrategy.suggestTime(timeSignal);
+                mTimeDetectorStrategy.suggestPhoneTime(timeSignal);
             }
         } finally {
             Binder.restoreCallingIdentity(idToken);

@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.RemoteInputView;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -93,9 +94,11 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
 
     @Override
     public void onStateChanged(int state) {
-        if (state == StatusBarState.SHADE && mStatusBarStateController.leaveOpenOnKeyguardHide()) {
+        boolean hasPendingRemoteInput = mPendingRemoteInputView != null;
+        if (state == StatusBarState.SHADE
+                && (mStatusBarStateController.leaveOpenOnKeyguardHide() || hasPendingRemoteInput)) {
             if (!mStatusBarStateController.isKeyguardRequested()) {
-                if (mPendingRemoteInputView != null) {
+                if (hasPendingRemoteInput) {
                     mMainHandler.post(mPendingRemoteInputView::callOnClick);
                 }
                 mPendingRemoteInputView = null;
@@ -105,7 +108,9 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
 
     @Override
     public void onLockedRemoteInput(ExpandableNotificationRow row, View clicked) {
-        mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
+        if (!row.isPinned()) {
+            mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
+        }
         mShadeController.showBouncer(true /* scrimmed */);
         mPendingRemoteInputView = clicked;
     }

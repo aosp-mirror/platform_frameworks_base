@@ -26,7 +26,7 @@
 #include <core_jni_helpers.h>
 
 #include "android/media/midi/BpMidiDeviceServer.h"
-#include "media/MidiDeviceInfo.h"
+#include "MidiDeviceInfo.h"
 
 #include "include/amidi/AMidi.h"
 #include "amidi_internal.h"

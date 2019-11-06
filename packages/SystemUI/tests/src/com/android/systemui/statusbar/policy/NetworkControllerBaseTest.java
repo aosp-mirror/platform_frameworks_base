@@ -181,6 +181,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected void setDefaultSubId(int subId) {
         when(mMockSubDefaults.getDefaultDataSubId()).thenReturn(subId);
         when(mMockSubDefaults.getDefaultVoiceSubId()).thenReturn(subId);
+        when(mMockSubDefaults.getActiveDataSubId()).thenReturn(subId);
     }
 
     protected void setSubscriptions(int... subIds) {

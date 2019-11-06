@@ -116,6 +116,9 @@
     <!-- The color of the navigation bar icons. Need to be in sync with ic_sysbar_* -->
     <color name="navigation_bar_icon_color">#E5FFFFFF</color>
 
+    <color name="navigation_bar_home_handle_light_color">#EBffffff</color>
+    <color name="navigation_bar_home_handle_dark_color">#99000000</color>
+
     <!-- The shadow color for light navigation bar icons. -->
     <color name="nav_key_button_shadow_color">#30000000</color>
 

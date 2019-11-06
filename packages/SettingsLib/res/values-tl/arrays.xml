@@ -135,13 +135,13 @@
     <item msgid="7158319962230727476">"Naka-optimize para sa Kalidad ng Audio (990kbps/909kbps)"</item>
     <item msgid="2921767058740704969">"Balanse ang Kalidad ng Audio at Koneksyon (660kbps/606kbps)"</item>
     <item msgid="8860982705384396512">"Naka-optimize para sa Kalidad ng Koneksyon (330kbps/303kbps)"</item>
-    <item msgid="4414060457677684127">"Pinakamahusay na Pagsisikap (Adaptive Bit Rate)"</item>
+    <item msgid="4414060457677684127">"Pinakamahusay na Effort (Adaptive Bit Rate)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"Naka-optimize para sa Kalidad ng Audio"</item>
     <item msgid="4327143584633311908">"Balanse ang Kalidad ng Audio at Koneksyon"</item>
     <item msgid="4681409244565426925">"Naka-optimize para sa Kalidad ng Koneksyon"</item>
-    <item msgid="364670732877872677">"Pinakamahusay na Pagsisikap (Adaptive Bit Rate)"</item>
+    <item msgid="364670732877872677">"Pinakamahusay na Effort (Adaptive Bit Rate)"</item>
   </string-array>
   <string-array name="bluetooth_audio_active_device_summaries">
     <item msgid="4862957058729193940"></item>

@@ -73,13 +73,8 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         }
 
         mOnColorsChangedListeners = new ArrayList<>();
-
-        if (wallpaperManager == null) {
-            Log.w(TAG, "Can't listen to color changes!");
-        } else {
-            wallpaperManager.addOnColorsChangedListener(this, null /* handler */);
-            initExtractColors(wallpaperManager, immediately);
-        }
+        wallpaperManager.addOnColorsChangedListener(this, null /* handler */);
+        initExtractColors(wallpaperManager, immediately);
     }
 
     private void initExtractColors(WallpaperManager wallpaperManager, boolean immediately) {

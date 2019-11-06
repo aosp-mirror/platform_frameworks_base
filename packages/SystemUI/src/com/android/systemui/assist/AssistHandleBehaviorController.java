@@ -74,6 +74,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
     private boolean mHandlesShowing = false;
     private long mHandlesLastHiddenAt;
+    private long mShowAndGoEndsAt;
     /**
      * This should always be initialized as {@link AssistHandleBehavior#OFF} to ensure proper
      * behavior lifecycle.
@@ -144,7 +145,9 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
     private void showAndGoInternal() {
         maybeShowHandles(/* ignoreThreshold = */ false);
-        mHandler.postDelayed(mHideHandles, getShowAndGoDuration());
+        long showAndGoDuration = getShowAndGoDuration();
+        mShowAndGoEndsAt = SystemClock.elapsedRealtime() + showAndGoDuration;
+        mHandler.postDelayed(mHideHandles, showAndGoDuration);
     }
 
     @Override // AssistHandleCallbacks
@@ -160,6 +163,10 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     public void showAndStay() {
         clearPendingCommands();
         mHandler.post(() -> maybeShowHandles(/* ignoreThreshold = */ true));
+    }
+
+    public long getShowAndGoRemainingTimeMs() {
+        return Long.max(mShowAndGoEndsAt - SystemClock.elapsedRealtime(), 0);
     }
 
     boolean areHandlesShowing() {
@@ -271,6 +278,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     private void clearPendingCommands() {
         mHandler.removeCallbacks(mHideHandles);
         mHandler.removeCallbacks(mShowAndGo);
+        mShowAndGoEndsAt = 0;
     }
 
     @VisibleForTesting

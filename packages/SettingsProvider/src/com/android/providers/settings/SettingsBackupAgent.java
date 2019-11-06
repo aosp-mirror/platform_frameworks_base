@@ -56,6 +56,7 @@ import java.time.DateTimeException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.CRC32;
 
 /**
@@ -241,6 +242,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         HashSet<String> movedToGlobal = new HashSet<String>();
         Settings.System.getMovedToGlobalSettings(movedToGlobal);
         Settings.Secure.getMovedToGlobalSettings(movedToGlobal);
+        Set<String> movedToSecure = getMovedToSecureSettings();
+
         byte[] restoredWifiSupplicantData = null;
         byte[] restoredWifiIpConfigData = null;
 
@@ -259,16 +262,17 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
             switch (key) {
                 case KEY_SYSTEM :
-                    restoreSettings(data, Settings.System.CONTENT_URI, movedToGlobal);
+                    restoreSettings(data, Settings.System.CONTENT_URI, movedToGlobal,
+                            movedToSecure);
                     mSettingsHelper.applyAudioSettings();
                     break;
 
                 case KEY_SECURE :
-                    restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal);
+                    restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal, null);
                     break;
 
                 case KEY_GLOBAL :
-                    restoreSettings(data, Settings.Global.CONTENT_URI, null);
+                    restoreSettings(data, Settings.Global.CONTENT_URI, null, movedToSecure);
                     break;
 
                 case KEY_WIFI_SUPPLICANT :
@@ -347,20 +351,22 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             HashSet<String> movedToGlobal = new HashSet<String>();
             Settings.System.getMovedToGlobalSettings(movedToGlobal);
             Settings.Secure.getMovedToGlobalSettings(movedToGlobal);
+            Set<String> movedToSecure = getMovedToSecureSettings();
 
             // system settings data first
             int nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of settings data");
             byte[] buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
-            restoreSettings(buffer, nBytes, Settings.System.CONTENT_URI, movedToGlobal);
+            restoreSettings(buffer, nBytes, Settings.System.CONTENT_URI, movedToGlobal,
+                    movedToSecure);
 
             // secure settings
             nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of secure settings data");
             if (nBytes > buffer.length) buffer = new byte[nBytes];
             in.readFully(buffer, 0, nBytes);
-            restoreSettings(buffer, nBytes, Settings.Secure.CONTENT_URI, movedToGlobal);
+            restoreSettings(buffer, nBytes, Settings.Secure.CONTENT_URI, movedToGlobal, null);
 
             // Global only if sufficiently new
             if (version >= FULL_BACKUP_ADDED_GLOBAL) {
@@ -369,7 +375,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (nBytes > buffer.length) buffer = new byte[nBytes];
                 in.readFully(buffer, 0, nBytes);
                 movedToGlobal.clear();  // no redirection; this *is* the global namespace
-                restoreSettings(buffer, nBytes, Settings.Global.CONTENT_URI, movedToGlobal);
+                restoreSettings(buffer, nBytes, Settings.Global.CONTENT_URI, movedToGlobal,
+                        movedToSecure);
             }
 
             // locale
@@ -438,6 +445,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             data.close();
             throw new IOException("Invalid file schema");
         }
+    }
+
+    private Set<String> getMovedToSecureSettings() {
+        Set<String> movedToSecureSettings = new HashSet<>();
+        Settings.Global.getMovedToSecureSettings(movedToSecureSettings);
+        Settings.System.getMovedToSecureSettings(movedToSecureSettings);
+        return movedToSecureSettings;
     }
 
     private long[] readOldChecksums(ParcelFileDescriptor oldState) throws IOException {
@@ -564,7 +578,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     private void restoreSettings(BackupDataInput data, Uri contentUri,
-            HashSet<String> movedToGlobal) {
+            HashSet<String> movedToGlobal, Set<String> movedToSecure) {
         byte[] settings = new byte[data.getDataSize()];
         try {
             data.readEntityData(settings, 0, settings.length);
@@ -572,11 +586,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             Log.e(TAG, "Couldn't read entity data");
             return;
         }
-        restoreSettings(settings, settings.length, contentUri, movedToGlobal);
+        restoreSettings(settings, settings.length, contentUri, movedToGlobal, movedToSecure);
     }
 
     private void restoreSettings(byte[] settings, int bytes, Uri contentUri,
-            HashSet<String> movedToGlobal) {
+            HashSet<String> movedToGlobal, Set<String> movedToSecure) {
         if (DEBUG) {
             Log.i(TAG, "restoreSettings: " + contentUri);
         }
@@ -651,9 +665,14 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 continue;
             }
 
-            final Uri destination = (movedToGlobal != null && movedToGlobal.contains(key))
-                    ? Settings.Global.CONTENT_URI
-                    : contentUri;
+            final Uri destination;
+            if (movedToGlobal != null && movedToGlobal.contains(key)) {
+                destination = Settings.Global.CONTENT_URI;
+            } else if (movedToSecure != null && movedToSecure.contains(key)) {
+                destination = Settings.Secure.CONTENT_URI;
+            } else {
+                destination = contentUri;
+            }
             settingsHelper.restoreValue(this, cr, contentValues, destination, key, value,
                     mRestoredFromSdkInt);
 

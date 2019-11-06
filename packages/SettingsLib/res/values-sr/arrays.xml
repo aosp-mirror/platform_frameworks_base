@@ -254,7 +254,7 @@
     <item msgid="7899496259191969307">"Највише четири процеса"</item>
   </string-array>
   <string-array name="usb_configuration_titles">
-    <item msgid="488237561639712799">"Пуњење"</item>
+    <item msgid="488237561639712799">"Пуни се"</item>
     <item msgid="5220695614993094977">"MTP (протокол за трансфер медија)"</item>
     <item msgid="2086000968159047375">"PTP (протокол за пренос слика)"</item>
     <item msgid="7398830860950841822">"RNDIS (USB етернет)"</item>

@@ -16,10 +16,10 @@
 
 package android.app.timedetector;
 
-import android.app.timedetector.TimeSignal;
+import android.app.timedetector.PhoneTimeSuggestion;
 
 /**
- * System private API to comunicate with time detector service.
+ * System private API to communicate with time detector service.
  *
  * <p>Used by parts of the Android system with signals associated with the device's time to provide
  * information to the Time Detector Service.
@@ -32,5 +32,5 @@ import android.app.timedetector.TimeSignal;
  * {@hide}
  */
 interface ITimeDetectorService {
-  void suggestTime(in TimeSignal timeSignal);
+  void suggestPhoneTime(in PhoneTimeSuggestion timeSuggestion);
 }

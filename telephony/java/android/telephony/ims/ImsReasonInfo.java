@@ -872,6 +872,19 @@ public final class ImsReasonInfo implements Parcelable {
      */
     public static final int CODE_REJECT_ONGOING_CS_CALL = 1621;
 
+    /**
+     * An attempt was made to place an emergency call over WFC when emergency services is not
+     * currently available in the current location.
+     * @hide
+     */
+    public static final int CODE_EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE = 1622;
+
+    /**
+     * Indicates that WiFi calling service is not available in the current location.
+     * @hide
+     */
+    public static final int CODE_WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION = 1623;
+
     /*
      * OEM specific error codes. To be used by OEMs when they don't want to reveal error code which
      * would be replaced by ERROR_UNSPECIFIED.

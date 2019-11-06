@@ -842,4 +842,51 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // Ensure the activity is moved to secondary display.
         assertEquals(secondaryDisplay, topActivity.getDisplay());
     }
+
+    /**
+     * This test ensures that starting an activity with the freeze-task-list activity option will
+     * actually freeze the task list
+     */
+    @Test
+    public void testFreezeTaskListActivityOption() {
+        RecentTasks recentTasks = mock(RecentTasks.class);
+        mService.mStackSupervisor.setRecentTasks(recentTasks);
+        doReturn(true).when(recentTasks).isCallerRecents(anyInt());
+
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setFreezeRecentTasksReordering();
+
+        starter.setReason("testFreezeTaskListActivityOption")
+                .setActivityOptions(new SafeActivityOptions(options))
+                .execute();
+
+        verify(recentTasks, times(1)).setFreezeTaskListReordering();
+        verify(recentTasks, times(0)).resetFreezeTaskListReorderingOnTimeout();
+    }
+
+    /**
+     * This test ensures that if we froze the task list as a part of starting an activity that fails
+     * to start, that we also reset the task list.
+     */
+    @Test
+    public void testFreezeTaskListActivityOptionFailedStart_expectResetFreezeTaskList() {
+        RecentTasks recentTasks = mock(RecentTasks.class);
+        mService.mStackSupervisor.setRecentTasks(recentTasks);
+        doReturn(true).when(recentTasks).isCallerRecents(anyInt());
+
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setFreezeRecentTasksReordering();
+
+        starter.setReason("testFreezeTaskListActivityOptionFailedStart")
+                .setActivityOptions(new SafeActivityOptions(options))
+                .execute();
+
+        // Simulate a failed start
+        starter.postStartActivityProcessing(null, START_ABORTED, null);
+
+        verify(recentTasks, times(1)).setFreezeTaskListReordering();
+        verify(recentTasks, times(1)).resetFreezeTaskListReorderingOnTimeout();
+    }
 }

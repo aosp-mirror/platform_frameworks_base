@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -26,6 +27,8 @@ import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -430,6 +433,50 @@ public class AudioSystem
     public static final int NO_INIT            = -5;
     public static final int DEAD_OBJECT        = -6;
     public static final int WOULD_BLOCK        = -7;
+
+    /** @hide */
+    @IntDef({
+            SUCCESS,
+            ERROR,
+            BAD_VALUE,
+            INVALID_OPERATION,
+            PERMISSION_DENIED,
+            NO_INIT,
+            DEAD_OBJECT,
+            WOULD_BLOCK
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioSystemError {}
+
+    /**
+     * Convert an int error value to its String value for readability.
+     * Accepted error values are the java AudioSystem errors, matching android_media_AudioErrors.h,
+     * which map onto the native status_t type.
+     * @param error one of the java AudioSystem errors
+     * @return a human-readable string
+     */
+    public static String audioSystemErrorToString(@AudioSystemError int error) {
+        switch(error) {
+            case SUCCESS:
+                return "SUCCESS";
+            case ERROR:
+                return "ERROR";
+            case BAD_VALUE:
+                return "BAD_VALUE";
+            case INVALID_OPERATION:
+                return "INVALID_OPERATION";
+            case PERMISSION_DENIED:
+                return "PERMISSION_DENIED";
+            case NO_INIT:
+                return "NO_INIT";
+            case DEAD_OBJECT:
+                return "DEAD_OBJECT";
+            case WOULD_BLOCK:
+                return "WOULD_BLOCK";
+            default:
+                return ("unknown error:" + error);
+        }
+    }
 
     /*
      * AudioPolicyService methods

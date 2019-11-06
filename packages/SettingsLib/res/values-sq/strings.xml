@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nuk mund të skanojë për rrjete"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Asnjë"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"U ruajt"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Shkëputur"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Të çaktivizuara"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Dështim në konfigurimin e IP-së"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Nuk është lidhur për shkak të rrjetit me cilësi të dobët"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"E mundshme përmes %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Trokit për t\'u regjistruar"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"U lidh, por nuk ka internet"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Lidhje e kufizuar"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Nuk ka internet"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Kërkohet identifikimi"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Pika e qasjes është përkohësisht plot"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"E lidhur (pa media), bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"E lidhur (pa telefon ose media), bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktiv, bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Aktiv, L: Bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: Bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"Bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: Bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: Bateria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktiv"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Audioja e klipit \"media\""</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonatat"</string>
@@ -209,7 +207,7 @@
     <string name="bugreport_in_power" msgid="7923901846375587241">"Shkurtorja e raportit të defektit në kod"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Shfaq një buton në menynë e fikjes për marrjen e raportit të defekteve"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Qëndro zgjuar"</string>
-    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekrani nuk do të kalojë asnjëherë në gjendje gjumi gjatë ngarkimit"</string>
+    <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ekrani nuk do të kalojë asnjëherë në gjendje gjumi gjatë karikimit"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Aktivizo regjistrin testues të paketave HCI të Bluetooth-it"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Regjistro paketat e Bluetooth-it. (Ndrysho Bluetooth-in pas ndryshimit të këtij cilësimi)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Shkyçja e OEM-së"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Rrjetet"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikimi i ekranit valor"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivizo hyrjen Wi-Fi Verbose"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Përshpejtimi i skanimit të Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Përshpejtimi i harduerit për ndarjen e lidhjes (internet)"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Shfaq pajisjet me Bluetooth pa emra"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nuk mund të lidhej"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Zvogëlon shkarkimin e baterisë dhe përmirëson cilësinë e funksionimit të rrjetit"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Me matje"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Pa matje"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Madhësitë e regjistruesit"</string>
@@ -307,7 +307,7 @@
     <string name="simulate_color_space" msgid="6745847141353345872">"Simulo hapësirën e ngjyrës"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Aktivizo gjurmët e OpenGL-së"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Çaktivizo rrugëzuezin e audios përmes USB-së"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Çaktivizo rrugëzuesin automatik për te kufjet ose altoparlantët"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Çaktivizo router-in automatik për te kufjet ose altoparlantët"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Shfaq konturet e kuadrit"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Shfaq konturet e klipit, hapësirat etj."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Detyro drejtimin e shkrimit nga e djathta në të majtë"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Duhet të zgjasë deri në rreth <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Deri në <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Rrite kohëzgjatjen e baterisë pas orës <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Më pak se <xliff:g id="THRESHOLD">%1$s</xliff:g> të mbetura"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Mbeten më pak se <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Mbeten më shumë se <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -406,9 +405,9 @@
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura deri në ngarkimin e plotë"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të mbushet plotësisht"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"I panjohur"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"Po ngarkohet"</string>
-    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"po ngarkohet"</string>
-    <string name="battery_info_status_discharging" msgid="310932812698268588">"Nuk po ngarkohet"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"Po karikohet"</string>
+    <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"po karikohet"</string>
+    <string name="battery_info_status_discharging" msgid="310932812698268588">"Nuk po karikohet"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Në prizë, por nuk mund të ngarkohet për momentin"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"E mbushur"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolluar nga administratori"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Pyet çdo herë"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Deri sa ta çaktivizosh"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Pikërisht tani"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Kjo pajisje"</string>
 </resources>

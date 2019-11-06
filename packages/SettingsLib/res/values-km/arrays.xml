@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"កុំ​ប្រើ​ការ​ពិនិត្យ HDCP"</item>
-    <item msgid="3878793616631049349">"ប្រើ​ការ​ពិនិត្យ HDCP សម្រាប់​តែ​មាតិកា DRM ប៉ុណ្ណោះ"</item>
+    <item msgid="3878793616631049349">"ប្រើ​ការ​ពិនិត្យ HDCP សម្រាប់​តែ​ខ្លឹមសារ DRM ប៉ុណ្ណោះ"</item>
     <item msgid="45075631231212732">"ប្រើ​ការ​ពិនិត្យ HDCP ជា​និច្ច"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">

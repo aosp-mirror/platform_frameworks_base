@@ -279,7 +279,8 @@ class ScreenRotationAnimation {
                 mService.mDisplayManagerInternal.screenshot(displayId);
             if (gb != null) {
                 try {
-                    surface.attachAndQueueBuffer(gb.getGraphicBuffer());
+                    surface.attachAndQueueBufferWithColorSpace(gb.getGraphicBuffer(),
+                            gb.getColorSpace());
                 } catch (RuntimeException e) {
                     Slog.w(TAG, "Failed to attach screenshot - " + e.getMessage());
                 }

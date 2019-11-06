@@ -17,8 +17,10 @@
 package com.android.internal.compat;
 
 import android.content.pm.ApplicationInfo;
+import java.util.Map;
 
 parcelable CompatibilityChangeConfig;
+parcelable CompatibilityChangeInfo;
 
 /**
  * Platform private API for talking with the PlatformCompat service.
@@ -49,9 +51,10 @@ interface IPlatformCompat
      * you do not need to call this API directly. The change will be reported for you.
      *
      * @param changeId    The ID of the compatibility change taking effect.
+     * @param userId      The ID of the user that the operation is done for.
      * @param packageName The package name of the app in question.
      */
-     void reportChangeByPackageName(long changeId, in String packageName);
+     void reportChangeByPackageName(long changeId, in String packageName, int userId);
 
     /**
      * Reports that a compatibility change is affecting an app process now.
@@ -86,7 +89,7 @@ interface IPlatformCompat
      * be called when implementing functionality on behalf of the affected app.
      *
      * <p>Same as {@link #isChangeEnabled(long, ApplicationInfo)}, except it receives a package name
-     * instead of an {@link ApplicationInfo}
+     * and userId instead of an {@link ApplicationInfo}
      * object, and finds an app info object based on the package name. Returns {@code true} if
      * there is no installed package by that name.
      *
@@ -100,9 +103,10 @@ interface IPlatformCompat
      *
      * @param changeId    The ID of the compatibility change in question.
      * @param packageName The package name of the app in question.
+     * @param userId      The ID of the user that the operation is done for.
      * @return {@code true} if the change is enabled for the current app.
      */
-    boolean isChangeEnabledByPackageName(long changeId, in String packageName);
+    boolean isChangeEnabledByPackageName(long changeId, in String packageName, int userId);
 
     /**
      * Query if a given compatibility change is enabled for an app process. This method should
@@ -144,4 +148,21 @@ interface IPlatformCompat
      *
      */
     void clearOverrides(in String packageName);
+
+    /**
+     * Get configs for an application.
+     *
+     * @param appInfo The application whose config will be returned.
+     *
+     * @return A {@link CompatibilityChangeConfig}, representing whether a change is enabled for
+     *         the given app or not.
+     */
+    CompatibilityChangeConfig getAppConfig(in ApplicationInfo appInfo);
+
+    /**
+     * List all compatibility changes.
+     *
+     * @return An array of {@link CompatChangeInfo} known to the service.
+     */
+    CompatibilityChangeInfo[] listAllChanges();
 }

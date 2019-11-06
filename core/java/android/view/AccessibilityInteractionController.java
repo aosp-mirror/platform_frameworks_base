@@ -830,6 +830,32 @@ public final class AccessibilityInteractionController {
         return false;
     }
 
+    private void adjustBoundsInScreenIfNeeded(List<AccessibilityNodeInfo> infos) {
+        if (infos == null || shouldBypassAdjustBoundsInScreen()) {
+            return;
+        }
+        final int infoCount = infos.size();
+        for (int i = 0; i < infoCount; i++) {
+            final AccessibilityNodeInfo info = infos.get(i);
+            adjustBoundsInScreenIfNeeded(info);
+        }
+    }
+
+    private void adjustBoundsInScreenIfNeeded(AccessibilityNodeInfo info) {
+        if (info == null || shouldBypassAdjustBoundsInScreen()) {
+            return;
+        }
+        final Rect boundsInScreen = mTempRect;
+        info.getBoundsInScreen(boundsInScreen);
+        boundsInScreen.offset(mViewRootImpl.mAttachInfo.mLocationInParentDisplay.x,
+                mViewRootImpl.mAttachInfo.mLocationInParentDisplay.y);
+        info.setBoundsInScreen(boundsInScreen);
+    }
+
+    private boolean shouldBypassAdjustBoundsInScreen() {
+        return mViewRootImpl.mAttachInfo.mLocationInParentDisplay.equals(0, 0);
+    }
+
     private void applyAppScaleAndMagnificationSpecIfNeeded(AccessibilityNodeInfo info,
             MagnificationSpec spec) {
         if (info == null) {
@@ -921,6 +947,7 @@ public final class AccessibilityInteractionController {
             MagnificationSpec spec, Region interactiveRegion) {
         try {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
+            adjustBoundsInScreenIfNeeded(infos);
             applyAppScaleAndMagnificationSpecIfNeeded(infos, spec);
             adjustIsVisibleToUserIfNeeded(infos, interactiveRegion);
             callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
@@ -939,6 +966,7 @@ public final class AccessibilityInteractionController {
             MagnificationSpec spec, Region interactiveRegion) {
         try {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = 0;
+            adjustBoundsInScreenIfNeeded(info);
             applyAppScaleAndMagnificationSpecIfNeeded(info, spec);
             adjustIsVisibleToUserIfNeeded(info, interactiveRegion);
             callback.setFindAccessibilityNodeInfoResult(info, interactionId);

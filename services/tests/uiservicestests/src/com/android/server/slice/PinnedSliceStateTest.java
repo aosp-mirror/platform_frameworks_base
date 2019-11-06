@@ -7,10 +7,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -158,5 +160,26 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
 
         verify(mSliceService).removePinnedSlice(eq(TEST_URI));
         assertFalse(mPinnedSliceManager.hasPinOrListener());
+    }
+
+    @Test
+    public void testPinFailed() throws Exception {
+        // Throw exception when trying to pin
+        doAnswer(invocation -> {
+            throw new Exception("Pin failed");
+        }).when(mIContentProvider).call(
+                anyString(), anyString(), anyString(), eq(null), any());
+
+        TestableLooper.get(this).processAllMessages();
+
+        // When pinned for the first time, a pinned message should be sent.
+        mPinnedSliceManager.pin("pkg", FIRST_SPECS, mToken);
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mIContentProvider).call(anyString(), anyString(), eq(SliceProvider.METHOD_PIN),
+                eq(null), argThat(b -> {
+                    assertEquals(TEST_URI, b.getParcelable(SliceProvider.EXTRA_BIND_URI));
+                    return true;
+                }));
     }
 }

@@ -24,6 +24,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
+import android.app.AppCompatCallbacks;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -89,6 +90,7 @@ import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.compat.PlatformCompat;
+import com.android.server.compat.PlatformCompatNative;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.coverage.CoverageService;
@@ -639,8 +641,11 @@ public final class SystemServer {
         // Platform compat service is used by ActivityManagerService, PackageManagerService, and
         // possibly others in the future. b/135010838.
         traceBeginAndSlog("PlatformCompat");
-        ServiceManager.addService(Context.PLATFORM_COMPAT_SERVICE,
-                new PlatformCompat(mSystemContext));
+        PlatformCompat platformCompat = new PlatformCompat(mSystemContext);
+        ServiceManager.addService(Context.PLATFORM_COMPAT_SERVICE, platformCompat);
+        ServiceManager.addService(Context.PLATFORM_COMPAT_NATIVE_SERVICE,
+                new PlatformCompatNative(platformCompat));
+        AppCompatCallbacks.install(new long[0]);
         traceEnd();
 
         // Wait for installd to finish starting up so that it has a chance to

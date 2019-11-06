@@ -24,8 +24,8 @@ import android.annotation.SystemApi;
 import android.net.LinkAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Annotation.DataFailureCause;
 import android.telephony.DataFailCause;
-import android.telephony.DataFailCause.FailCause;
 import android.telephony.data.ApnSetting.ProtocolType;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -67,7 +67,7 @@ public final class DataCallResponse implements Parcelable {
     /** Indicates the data connection is active with physical link up. */
     public static final int LINK_STATUS_ACTIVE = 2;
 
-    private final @FailCause int mCause;
+    private final @DataFailureCause int mCause;
     private final int mSuggestedRetryTime;
     private final int mId;
     private final @LinkStatus int mLinkStatus;
@@ -103,7 +103,7 @@ public final class DataCallResponse implements Parcelable {
      *
      * @removed Use the {@link Builder()} instead.
      */
-    public DataCallResponse(@FailCause int cause, int suggestedRetryTime, int id,
+    public DataCallResponse(@DataFailureCause int cause, int suggestedRetryTime, int id,
                             @LinkStatus int linkStatus,
                             @ProtocolType int protocolType, @Nullable String interfaceName,
                             @Nullable List<LinkAddress> addresses,
@@ -150,7 +150,7 @@ public final class DataCallResponse implements Parcelable {
     /**
      * @return Data call fail cause. {@link DataFailCause#NONE} indicates no error.
      */
-    @FailCause
+    @DataFailureCause
     public int getCause() { return mCause; }
 
     /**
@@ -314,7 +314,7 @@ public final class DataCallResponse implements Parcelable {
      * </code></pre>
      */
     public static final class Builder {
-        private @FailCause int mCause;
+        private @DataFailureCause int mCause;
 
         private int mSuggestedRetryTime;
 
@@ -348,7 +348,7 @@ public final class DataCallResponse implements Parcelable {
          * @param cause Data call fail cause. {@link DataFailCause#NONE} indicates no error.
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setCause(@FailCause int cause) {
+        public @NonNull Builder setCause(@DataFailureCause int cause) {
             mCause = cause;
             return this;
         }

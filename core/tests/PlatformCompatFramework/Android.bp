@@ -1,0 +1,14 @@
+android_test {
+    name: "PlatformCompatFrameworkTests",
+    // Include all test java files.
+    srcs: ["src/**/*.java"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+    static_libs: [
+        "junit",
+        "androidx.test.rules",
+    ],
+    platform_apis: true,
+}

@@ -28,8 +28,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.AlertingNotificationManager;
-import com.android.systemui.statusbar.AmbientPulseManager;
-import com.android.systemui.statusbar.AmbientPulseManager.OnAmbientChangedListener;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -48,13 +46,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * A helper class dealing with the alert interactions between {@link NotificationGroupManager},
- * {@link HeadsUpManager}, {@link AmbientPulseManager}. In particular, this class deals with keeping
+ * A helper class dealing with the alert interactions between {@link NotificationGroupManager} and
+ * {@link HeadsUpManager}. In particular, this class deals with keeping
  * the correct notification in a group alerting based off the group suppression.
  */
 @Singleton
 public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedListener,
-        OnAmbientChangedListener, StateListener {
+        StateListener {
 
     private static final long ALERT_TRANSFER_TIMEOUT = 300;
 
@@ -70,8 +68,6 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
     private final ArrayMap<String, PendingAlertInfo> mPendingAlerts = new ArrayMap<>();
 
     private HeadsUpManager mHeadsUpManager;
-    private final AmbientPulseManager mAmbientPulseManager =
-            Dependency.get(AmbientPulseManager.class);
     private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
 
@@ -144,10 +140,9 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
 
         @Override
         public void onGroupSuppressionChanged(NotificationGroup group, boolean suppressed) {
-            AlertingNotificationManager alertManager = getActiveAlertManager();
             if (suppressed) {
-                if (alertManager.isAlerting(group.summary.key)) {
-                    handleSuppressedSummaryAlerted(group.summary, alertManager);
+                if (mHeadsUpManager.isAlerting(group.summary.key)) {
+                    handleSuppressedSummaryAlerted(group.summary, mHeadsUpManager);
                 }
             } else {
                 // Group summary can be null if we are no longer suppressed because the summary was
@@ -160,8 +155,8 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
                 // Group is no longer suppressed. We should check if we need to transfer the alert
                 // back to the summary now that it's no longer suppressed.
                 if (groupAlertEntry.mAlertSummaryOnNextAddition) {
-                    if (!alertManager.isAlerting(group.summary.key)) {
-                        alertNotificationWhenPossible(group.summary, alertManager);
+                    if (!mHeadsUpManager.isAlerting(group.summary.key)) {
+                        alertNotificationWhenPossible(group.summary, mHeadsUpManager);
                     }
                     groupAlertEntry.mAlertSummaryOnNextAddition = false;
                 } else {
@@ -170,11 +165,6 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
             }
         }
     };
-
-    @Override
-    public void onAmbientStateChanged(NotificationEntry entry, boolean isAmbient) {
-        onAlertStateChanged(entry, isAmbient, mAmbientPulseManager);
-    }
 
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
@@ -208,11 +198,10 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
             PendingAlertInfo alertInfo = mPendingAlerts.remove(entry.key);
             if (alertInfo != null) {
                 if (alertInfo.isStillValid()) {
-                    alertNotificationWhenPossible(entry, getActiveAlertManager());
+                    alertNotificationWhenPossible(entry, mHeadsUpManager);
                 } else {
                     // The transfer is no longer valid. Free the content.
-                    entry.getRow().freeContentViewWhenSafe(
-                            alertInfo.mAlertManager.getContentFlag());
+                    entry.getRow().freeContentViewWhenSafe(mHeadsUpManager.getContentFlag());
                 }
             }
         }
@@ -354,7 +343,6 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         if (SystemClock.elapsedRealtime() - groupAlertEntry.mLastAlertTransferTime
                 < ALERT_TRANSFER_TIMEOUT) {
             NotificationEntry summary = groupAlertEntry.mGroup.summary;
-            AlertingNotificationManager alertManager = getActiveAlertManager();
 
             if (!onlySummaryAlerts(summary)) {
                 return;
@@ -369,9 +357,9 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
             boolean releasedChild = false;
             for (int i = 0; i < children.size(); i++) {
                 NotificationEntry entry = children.get(i);
-                if (onlySummaryAlerts(entry) && alertManager.isAlerting(entry.key)) {
+                if (onlySummaryAlerts(entry) && mHeadsUpManager.isAlerting(entry.key)) {
                     releasedChild = true;
-                    alertManager.removeNotification(entry.key, true /* releaseImmediately */);
+                    mHeadsUpManager.removeNotification(entry.key, true /* releaseImmediately */);
                 }
                 if (mPendingAlerts.containsKey(entry.key)) {
                     // This is the child that would've been removed if it was inflated.
@@ -379,10 +367,10 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
                     mPendingAlerts.get(entry.key).mAbortOnInflation = true;
                 }
             }
-            if (releasedChild && !alertManager.isAlerting(summary.key)) {
+            if (releasedChild && !mHeadsUpManager.isAlerting(summary.key)) {
                 boolean notifyImmediately = (numChildren - numPendingChildren) > 1;
                 if (notifyImmediately) {
-                    alertNotificationWhenPossible(summary, alertManager);
+                    alertNotificationWhenPossible(summary, mHeadsUpManager);
                 } else {
                     // Should wait until the pending child inflates before alerting.
                     groupAlertEntry.mAlertSummaryOnNextAddition = true;
@@ -403,7 +391,7 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
             @NonNull AlertingNotificationManager alertManager) {
         @InflationFlag int contentFlag = alertManager.getContentFlag();
         if (!entry.getRow().isInflationFlagSet(contentFlag)) {
-            mPendingAlerts.put(entry.key, new PendingAlertInfo(entry, alertManager));
+            mPendingAlerts.put(entry.key, new PendingAlertInfo(entry));
             entry.getRow().updateInflationFlag(contentFlag, true /* shouldInflate */);
             entry.getRow().inflateViews();
             return;
@@ -413,10 +401,6 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         } else {
             alertManager.showNotification(entry);
         }
-    }
-
-    private AlertingNotificationManager getActiveAlertManager() {
-        return mIsDozing ? mAmbientPulseManager : mHeadsUpManager;
     }
 
     private boolean onlySummaryAlerts(NotificationEntry entry) {
@@ -429,10 +413,6 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
      * inflation completes.
      */
     private class PendingAlertInfo {
-        /**
-         * The alert manager when the transfer is initiated.
-         */
-        final AlertingNotificationManager mAlertManager;
 
         /**
          * The original notification when the transfer is initiated. This is used to determine if
@@ -450,10 +430,9 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
          */
         boolean mAbortOnInflation;
 
-        PendingAlertInfo(NotificationEntry entry, AlertingNotificationManager alertManager) {
+        PendingAlertInfo(NotificationEntry entry) {
             mOriginalNotification = entry.notification;
             mEntry = entry;
-            mAlertManager = alertManager;
         }
 
         /**
@@ -464,10 +443,6 @@ public class NotificationGroupAlertTransferHelper implements OnHeadsUpChangedLis
         private boolean isStillValid() {
             if (mAbortOnInflation) {
                 // Notification is aborted due to the transfer being explicitly cancelled
-                return false;
-            }
-            if (mAlertManager != getActiveAlertManager()) {
-                // Alert manager has changed
                 return false;
             }
             if (mEntry.notification.getGroupKey() != mOriginalNotification.getGroupKey()) {

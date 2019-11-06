@@ -40,8 +40,8 @@
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>
 
-    <!-- If the lock screen should be dismissed after biometric auth. -->
-    <bool name="config_faceAuthDismissesKeyguard">false</bool>
+    <!-- For how long the lock screen can be on before the display turns off. -->
+    <integer name="config_lockScreenDisplayTimeout">10000</integer>
 
     <!-- Vibrator pattern for camera gesture launch. -->
     <integer-array translatable="false" name="config_cameraLaunchGestureVibePattern">
@@ -141,6 +141,9 @@
     <!-- The number of milliseconds before the heads up notification auto-dismisses. -->
     <integer name="heads_up_notification_decay">5000</integer>
 
+    <!-- The number of milliseconds before the heads up notification sent automatically by the system auto-dismisses. -->
+    <integer name="auto_heads_up_notification_decay">3000</integer>
+
     <!-- The number of milliseconds after a heads up notification is pushed back
      before the app can interrupt again. -->
     <integer name="heads_up_default_snooze_length_ms">60000</integer>
@@ -151,15 +154,8 @@
     <!-- The number of milliseconds before the heads up notification accepts touches. -->
     <integer name="touch_acceptance_delay">700</integer>
 
-    <!-- The number of milliseconds before the ambient notification auto-dismisses. This will
-         override the default pulse length. -->
-    <integer name="ambient_notification_decay">10000</integer>
-
-    <!-- Minimum display time for a heads up notification, in milliseconds. -->
-    <integer name="ambient_notification_minimum_time">2000</integer>
-
     <!-- The number of milliseconds to extend ambient pulse by when prompted (e.g. on touch) -->
-    <integer name="ambient_notification_extension_time">6000</integer>
+    <integer name="ambient_notification_extension_time">10000</integer>
 
     <!-- In multi-window, determines whether the stack where recents lives should grow from
          the smallest position when being launched. -->
@@ -200,24 +196,8 @@
     <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
     <integer name="doze_pickup_vibration_threshold">2000</integer>
 
-    <!-- Doze: can we assume the pickup sensor includes a proximity check?
-         This is ignored if doze_pickup_subtype_performs_proximity_check is not empty.
-         @deprecated: use doze_pickup_subtype_performs_proximity_check instead.-->
+    <!-- Doze: can we assume the pickup sensor includes a proximity check? -->
     <bool name="doze_pickup_performs_proximity_check">false</bool>
-
-    <!-- Doze: a list of pickup sensor subtypes that perform a proximity check before they trigger.
-               If not empty, either * or !* must appear to specify the default.
-               If empty, falls back to doze_pickup_performs_proximity_check.
-
-               Examples: 1,2,3,!* -> subtypes 1,2 and 3 perform the check, all others don't.
-                         !1,!2,*  -> subtypes 1 and 2 don't perform the check, all others do.
-                         !8,*     -> subtype 8 does not perform the check, all others do
-                         1,1,*    -> illegal, every item may only appear once
-                         1,!1,*   -> illegal, no contradictions allowed
-                         1,2      -> illegal, need either * or !*
-                         1,,4a3   -> illegal, no empty or non-numeric terms allowed
-    -->
-    <string name="doze_pickup_subtype_performs_proximity_check"></string>
 
     <!-- Type of a sensor that provides a low-power estimate of the desired display
          brightness, suitable to listen to while the device is asleep (e.g. during
@@ -495,5 +475,14 @@
 
     <!-- ThemePicker package name for overlaying icons. -->
     <string name="themepicker_overlayable_package" translatable="false">com.android.wallpaper</string>
+
+    <!-- Default rounded corner curve (a Bezier). Must match (the curved path in) rounded.xml.
+         Note that while rounded.xml includes the entire path (including the horizontal and vertical
+         corner edges), this pulls out just the curve.
+     -->
+    <string name="config_rounded_mask" translatable="false">"M8,0C3.6,0,0,3.6,0,8"</string>
+
+    <!-- Preferred refresh rate at keyguard, if supported by the display -->
+    <integer name="config_keyguardRefreshRate">-1</integer>
 
 </resources>

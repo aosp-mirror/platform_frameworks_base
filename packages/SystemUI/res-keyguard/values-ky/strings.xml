@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN-код туура эмес."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"SIM-карта жараксыз."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Толук кубатталды"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зымсыз кубатталууда"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зымсыз кубатталууда"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Кубатталууда"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Тез кубатталууда"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Жай кубатталууда"</string>
@@ -151,84 +151,7 @@
       <item quantity="other">SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK-кодду киргизиңиз. SIM-картанын биротоло жарактан чыгарына <xliff:g id="_NUMBER_1">%d</xliff:g> аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.</item>
       <item quantity="one">SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK-кодду киргизиңиз. SIM-картанын биротоло жарактан чыгаарына <xliff:g id="_NUMBER_0">%d</xliff:g> аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="other">"<annotation name="color">"–"</annotation>\n"^1\n^2</item>
-      <item quantity="one">"<annotation name="color">"–"</annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"Он эки"</item>
-    <item msgid="7389464214252023751">"Бир"</item>
-    <item msgid="8803180377002008046">"Эки"</item>
-    <item msgid="8614897059944644719">"Үч"</item>
-    <item msgid="2293058674782619556">"Төрт"</item>
-    <item msgid="4815402358455041664">"Беш"</item>
-    <item msgid="3325754778509665687">"Алты"</item>
-    <item msgid="5805551341866280575">"Жети"</item>
-    <item msgid="203334816668238610">"Сегиз"</item>
-    <item msgid="4828052671464488923">"Тогуз"</item>
-    <item msgid="2233497913571137419">"Он"</item>
-    <item msgid="5621554266768657830">"Он бир"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"Саат"</item>
-    <item msgid="8837126587669001578">"Ноль бир"</item>
-    <item msgid="4294343372940455660">"Ноль эки"</item>
-    <item msgid="7129166637707421536">"Ноль үч"</item>
-    <item msgid="7579404865008788673">"Ноль төрт"</item>
-    <item msgid="3873924689207380586">"Ноль беш"</item>
-    <item msgid="4849565597850069377">"Ноль алты"</item>
-    <item msgid="4404219424523572364">"Ноль жети"</item>
-    <item msgid="8740481214764087329">"Ноль сегиз"</item>
-    <item msgid="1713216865806811237">"Ноль тогуз"</item>
-    <item msgid="3508406095411245038">"Он"</item>
-    <item msgid="7161996337755311711">"Он бир"</item>
-    <item msgid="4044549963329624197">"Он эки"</item>
-    <item msgid="333373157917379088">"Он үч"</item>
-    <item msgid="2631202907124819385">"Он төрт"</item>
-    <item msgid="6472396076858033453">"Он беш"</item>
-    <item msgid="8656981856181581643">"Он алты"</item>
-    <item msgid="7289026608562030619">"Он жети"</item>
-    <item msgid="3881477602692646573">"Он сегиз"</item>
-    <item msgid="3358129827772984226">"Он тогуз"</item>
-    <item msgid="3308575407402865807">"Жыйырма"</item>
-    <item msgid="5346560955382229629">"Жыйырма\nбир"</item>
-    <item msgid="226750304761473436">"Жыйырма\nэки"</item>
-    <item msgid="616811325336838734">"Жыйырма\nүч"</item>
-    <item msgid="616346116869053440">"Жыйырма\nтөрт"</item>
-    <item msgid="4642996410384042830">"Жыйырма\nбеш"</item>
-    <item msgid="7506092849993571465">"Жыйырма\nалты"</item>
-    <item msgid="1915078191101042031">"Жыйырма\nжети"</item>
-    <item msgid="4292378641900520252">"Жыйырма\nсегиз"</item>
-    <item msgid="5339513901773103696">"Жыйырма\nтогуз"</item>
-    <item msgid="3574673250891657607">"Отуз"</item>
-    <item msgid="5796923836589110940">"Отуз\nбир"</item>
-    <item msgid="5859323597571702052">"Отуз\nэки"</item>
-    <item msgid="5133326723148876507">"Отуз\nүч"</item>
-    <item msgid="2693999494655663096">"Отуз\nтөрт"</item>
-    <item msgid="3316754944962836197">"Отуз\nбеш"</item>
-    <item msgid="816891008836796723">"Отуз\nалты"</item>
-    <item msgid="9158890488666520078">"Кырк\nжети"</item>
-    <item msgid="1894769703213894011">"Отуз\nсегиз"</item>
-    <item msgid="5638820345598572399">"Отуз\nтогуз"</item>
-    <item msgid="8838304023017895439">"Кырк"</item>
-    <item msgid="1834742948932559597">"Кырк\nбир"</item>
-    <item msgid="6573707308847773944">"Кырк\nэки"</item>
-    <item msgid="2450149950652678001">"Кырк\nүч"</item>
-    <item msgid="2874667401318178036">"Кырк\nтөрт"</item>
-    <item msgid="3391101532763048862">"Кырк\nбеш"</item>
-    <item msgid="1671489330863254362">"Кырк\nалты"</item>
-    <item msgid="5916017359554531038">"Кырк\nжети"</item>
-    <item msgid="8205413177993059967">"Кырк\nсегиз"</item>
-    <item msgid="6607867415142171302">"Кырк\nтогуз"</item>
-    <item msgid="8358850748472089162">"Элүү"</item>
-    <item msgid="3551313125255080234">"Элүү\nбир"</item>
-    <item msgid="1559678130725716542">"Элүү\nэки"</item>
-    <item msgid="431441994725492377">"Элүү\nүч"</item>
-    <item msgid="6345774640539623024">"Элүү\nтөрт"</item>
-    <item msgid="8018192990793931120">"Кырк\nбеш"</item>
-    <item msgid="6187650843754604534">"Элүү\nалты"</item>
-    <item msgid="8727240174015993259">"Кырк\nжети"</item>
-    <item msgid="848339003778952950">"Элүү\nсегиз"</item>
-    <item msgid="5798985802835423618">"Элүү\nтогуз"</item>
-  </string-array>
+    <string name="clock_title_default" msgid="6645600990069154049">"Демейки"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Көбүк"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Аналог"</string>
 </resources>

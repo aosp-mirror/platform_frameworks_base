@@ -18,12 +18,11 @@ package android.telephony.ims.compat.stub;
 
 import android.os.Bundle;
 import android.os.RemoteException;
-
-import android.annotation.UnsupportedAppUsage;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsData;
 import android.telephony.ims.ImsSsInfo;
+
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
 
@@ -62,6 +61,13 @@ public class ImsUtListenerImplBase extends IImsUtListener.Stub {
     @Override
     public void utConfigurationQueryFailed(IImsUt ut, int id, ImsReasonInfo error)
             throws RemoteException {
+    }
+
+    /**
+     * Notifies the result of a line identification supplementary service query.
+     */
+    @Override
+    public void lineIdentificationSupplementaryServiceResponse(int id, ImsSsInfo config) {
     }
 
     /**

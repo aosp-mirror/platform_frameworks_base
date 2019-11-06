@@ -853,6 +853,10 @@ public class AudioPolicy {
                 Log.v(TAG, "notifyVolumeAdjust: " + adjustment);
             }
         }
+
+        public void notifyUnregistration() {
+            setRegistration(null);
+        }
     };
 
     //==================================================

@@ -26,7 +26,7 @@
     <item msgid="8513729475867537913">"Падлучэнне..."</item>
     <item msgid="515055375277271756">"Аўтэнтыфікацыя..."</item>
     <item msgid="1943354004029184381">"Атрыманне IP-адраса..."</item>
-    <item msgid="4221763391123233270">"Падлучана"</item>
+    <item msgid="4221763391123233270">"Падключана"</item>
     <item msgid="624838831631122137">"Прыпынена"</item>
     <item msgid="7979680559596111948">"Адлучэнне..."</item>
     <item msgid="1634960474403853625">"Адключана"</item>
@@ -172,13 +172,13 @@
     <item msgid="5431354956856655120">"16M на буфер журнала"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
-    <item msgid="1744840221860799971">"Адключана"</item>
+    <item msgid="1744840221860799971">"Выключана"</item>
     <item msgid="3054662377365844197">"Усе"</item>
     <item msgid="688870735111627832">"Усе, акрамя радыё"</item>
     <item msgid="2850427388488887328">"толькі ядро"</item>
   </string-array>
   <string-array name="select_logpersist_summaries">
-    <item msgid="2216470072500521830">"Адключана"</item>
+    <item msgid="2216470072500521830">"Выключана"</item>
     <item msgid="172978079776521897">"Усе буферы журналаў"</item>
     <item msgid="3873873912383879240">"Усе, акрамя буфераў журналаў радыё"</item>
     <item msgid="8489661142527693381">"толькі буфер журнала ядра"</item>
@@ -241,7 +241,7 @@
     <item msgid="2355151170975410323">"У <xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"Адключаны"</item>
+    <item msgid="8190572633763871652">"Выключана"</item>
     <item msgid="7688197031296835369">"Паказаць вобласці з перабольшваннем"</item>
     <item msgid="2290859360633824369">"Паказаць вобласці для дэйтэранамаліі"</item>
   </string-array>
