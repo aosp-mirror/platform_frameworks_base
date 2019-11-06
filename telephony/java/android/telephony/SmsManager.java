@@ -79,11 +79,6 @@ public final class SmsManager {
             SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
     private static final Object sLockObject = new Object();
 
-    /** @hide */
-    public static final int CELL_BROADCAST_RAN_TYPE_GSM = 0;
-    /** @hide */
-    public static final int CELL_BROADCAST_RAN_TYPE_CDMA = 1;
-
     /** SMS record length from TS 51.011 10.5.3
      * @hide
      */
