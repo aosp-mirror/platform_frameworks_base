@@ -21,8 +21,6 @@ import static com.android.cts.rollback.lib.RollbackUtils.getUniqueRollbackInfoFo
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.fail;
-
 import android.Manifest;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -155,10 +153,9 @@ public class StagedRollbackTest {
         RollbackUtils.sendCrashBroadcast(TestApp.A, 1);
 
         // We expect the device to be rebooted automatically. Wait for that to happen.
-        Thread.sleep(30 * 1000);
-
-        // Raise an error anyway if reboot didn't happen.
-        fail("watchdog did not trigger reboot");
+        // This device method will fail and the host will catch the assertion.
+        // If reboot doesn't happen, the host will fail the assertion.
+        Thread.sleep(TimeUnit.SECONDS.toMillis(120));
     }
 
     /**
