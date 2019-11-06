@@ -9004,4 +9004,30 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             getChildAt(i).encode(encoder);
         }
     }
+
+    /** @hide */
+    @Override
+    public final void onDescendantUnbufferedRequested() {
+        // First look at the focused child for focused events
+        int focusedChildNonPointerSource = InputDevice.SOURCE_CLASS_NONE;
+        if (mFocused != null) {
+            focusedChildNonPointerSource = mFocused.mUnbufferedInputSource
+                    & (~InputDevice.SOURCE_CLASS_POINTER);
+        }
+        mUnbufferedInputSource = focusedChildNonPointerSource;
+
+        // Request unbuffered dispatch for pointer events for this view if any child requested
+        // unbuffered dispatch for pointer events. This is because we can't expect that the pointer
+        // source would dispatch to the focused view.
+        for (int i = 0; i < mChildrenCount; i++) {
+            final View child = mChildren[i];
+            if ((child.mUnbufferedInputSource & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+                mUnbufferedInputSource |= InputDevice.SOURCE_CLASS_POINTER;
+                break;
+            }
+        }
+        if (mParent != null) {
+            mParent.onDescendantUnbufferedRequested();
+        }
+    }
 }
