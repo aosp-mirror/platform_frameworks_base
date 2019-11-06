@@ -386,9 +386,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         updateMinimumHeight();
 
         // Update height for a few views, especially due to landscape mode restricting space.
-        mHeaderTextContainerView.getLayoutParams().height =
+        /*mHeaderTextContainerView.getLayoutParams().height =
                 resources.getDimensionPixelSize(R.dimen.qs_header_tooltip_height);
-        mHeaderTextContainerView.setLayoutParams(mHeaderTextContainerView.getLayoutParams());
+        mHeaderTextContainerView.setLayoutParams(mHeaderTextContainerView.getLayoutParams());*/
 
         mSystemIconsView.getLayoutParams().height = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
