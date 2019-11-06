@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.connectivity.CellularBatteryStats;
 import android.os.connectivity.WifiBatteryStats;
 
 import com.android.internal.app.IBatteryStats;
@@ -154,6 +155,21 @@ public class BatteryStatsManager {
             mBatteryStats.noteWifiBatchedScanStoppedFromSource(ws);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves all the cellular related battery stats.
+     *
+     * @return Instance of {@link CellularBatteryStats}.
+     */
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    public @NonNull CellularBatteryStats getCellularBatteryStats() {
+        try {
+            return mBatteryStats.getCellularBatteryStats();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
         }
     }
 

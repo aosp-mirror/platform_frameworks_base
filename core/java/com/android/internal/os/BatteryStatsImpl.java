@@ -12618,20 +12618,20 @@ public class BatteryStatsImpl extends BatteryStats {
             txTimeMs[i] = counter.getTxTimeCounters()[i].getCountLocked(which);
             totalTxTimeMs += txTimeMs[i];
         }
-        s.setLoggingDurationMs(computeBatteryRealtime(rawRealTime, which) / 1000);
-        s.setKernelActiveTimeMs(getMobileRadioActiveTime(rawRealTime, which) / 1000);
+        s.setLoggingDurationMillis(computeBatteryRealtime(rawRealTime, which) / 1000);
+        s.setKernelActiveTimeMillis(getMobileRadioActiveTime(rawRealTime, which) / 1000);
         s.setNumPacketsTx(getNetworkActivityPackets(NETWORK_MOBILE_TX_DATA, which));
         s.setNumBytesTx(getNetworkActivityBytes(NETWORK_MOBILE_TX_DATA, which));
         s.setNumPacketsRx(getNetworkActivityPackets(NETWORK_MOBILE_RX_DATA, which));
         s.setNumBytesRx(getNetworkActivityBytes(NETWORK_MOBILE_RX_DATA, which));
-        s.setSleepTimeMs(sleepTimeMs);
-        s.setIdleTimeMs(idleTimeMs);
-        s.setRxTimeMs(rxTimeMs);
-        s.setEnergyConsumedMaMs(energyConsumedMaMs);
-        s.setTimeInRatMs(timeInRatMs);
-        s.setTimeInRxSignalStrengthLevelMs(timeInRxSignalStrengthLevelMs);
-        s.setTxTimeMs(txTimeMs);
-        s.setMonitoredRailChargeConsumedMaMs(monitoredRailChargeConsumedMaMs);
+        s.setSleepTimeMillis(sleepTimeMs);
+        s.setIdleTimeMillis(idleTimeMs);
+        s.setRxTimeMillis(rxTimeMs);
+        s.setEnergyConsumedMaMillis(energyConsumedMaMs);
+        s.setTimeInRatMicros(timeInRatMs);
+        s.setTimeInRxSignalStrengthLevelMicros(timeInRxSignalStrengthLevelMs);
+        s.setTxTimeMillis(txTimeMs);
+        s.setMonitoredRailChargeConsumedMaMillis(monitoredRailChargeConsumedMaMs);
         return s;
     }
 
