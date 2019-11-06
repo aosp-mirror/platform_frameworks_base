@@ -133,6 +133,7 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.volume.VolumeComponent;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -227,6 +228,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private LinearLayout mLockIconContainer;
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
     @Mock private KeyguardLiftController mKeyguardLiftController;
+    @Mock private VolumeComponent mVolumeComponent;
     @Mock private CommandQueue mCommandQueue;
     @Mock private PluginManager mPluginManager;
     @Mock private Divider mDivider;
@@ -362,6 +364,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeServiceHost,
                 mPowerManager,
                 mDozeScrimController,
+                mVolumeComponent,
                 mCommandQueue,
                 mPluginManager,
                 mRemoteInputUriController,

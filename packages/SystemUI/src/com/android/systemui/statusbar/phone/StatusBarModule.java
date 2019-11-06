@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.volume.VolumeComponent;
 
 import java.util.Optional;
 
@@ -147,6 +148,7 @@ public class StatusBarModule {
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
+            VolumeComponent volumeComponent,
             CommandQueue commandQueue,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
@@ -212,6 +214,7 @@ public class StatusBarModule {
                 dozeServiceHost,
                 powerManager,
                 dozeScrimController,
+                volumeComponent,
                 commandQueue,
                 pluginManager,
                 remoteInputUriController,

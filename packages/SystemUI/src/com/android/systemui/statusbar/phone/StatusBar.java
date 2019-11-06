@@ -341,7 +341,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private PhoneStatusBarPolicy mIconPolicy;
     private StatusBarSignalPolicy mSignalPolicy;
 
-    private VolumeComponent mVolumeComponent;
+    private final VolumeComponent mVolumeComponent;
     private BrightnessMirrorController mBrightnessMirrorController;
     private boolean mBrightnessMirrorVisible;
     private BiometricUnlockController mBiometricUnlockController;
@@ -669,6 +669,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
+            VolumeComponent volumeComponent,
             CommandQueue commandQueue,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
@@ -733,6 +734,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
+        mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
         mPluginManager = pluginManager;
         mRemoteInputUriController = remoteInputUriController;
@@ -1096,9 +1098,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         BackDropView backdrop = mStatusBarWindow.findViewById(R.id.backdrop);
         mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
                 backdrop.findViewById(R.id.backdrop_back), mScrimController, mLockscreenWallpaper);
-
-        // Other icons
-        mVolumeComponent = getComponent(VolumeComponent.class);
 
         mNotificationPanel.setUserSetupComplete(mUserSetup);
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
