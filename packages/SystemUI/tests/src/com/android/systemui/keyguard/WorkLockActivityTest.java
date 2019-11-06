@@ -19,7 +19,10 @@ package com.android.systemui.keyguard;
 import static android.app.ActivityManager.TaskDescription;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.ColorInt;
@@ -36,7 +39,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.keyguard.WorkLockActivity;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -111,5 +113,12 @@ public class WorkLockActivityTest extends SysuiTestCase {
         mActivity.setIntent(new Intent()
                 .putExtra(Intent.EXTRA_USER_ID, USER_ID));
         assertEquals(orgColor, mActivity.getPrimaryColor());
+    }
+
+    @Test
+    public void testUnregisteredFromDispatcher() {
+        mActivity.unregisterBroadcastReceiver();
+        verify(mBroadcastDispatcher).unregisterReceiver(any());
+        verify(mContext, never()).unregisterReceiver(any());
     }
 }

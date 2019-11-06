@@ -1596,8 +1596,8 @@ static jboolean nativeTransferTouchFocus(JNIEnv* env,
         return JNI_FALSE;
     }
 
-    if (im->getInputManager()->getDispatcher()->
-            transferTouchFocus(fromChannel->getToken(), toChannel->getToken())) {
+    if (im->getInputManager()->getDispatcher()->transferTouchFocus(
+            fromChannel->getConnectionToken(), toChannel->getConnectionToken())) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;

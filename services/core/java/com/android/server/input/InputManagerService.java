@@ -496,8 +496,6 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
-        // Give the output channel a token just for identity purposes.
-        inputChannels[0].setToken(new Binder());
         nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId, false /*isGestureMonitor*/);
         inputChannels[0].dispose(); // don't need to retain the Java object reference
         return inputChannels[1];
@@ -528,7 +526,6 @@ public class InputManagerService extends IInputManager.Stub
         try {
             InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
             InputMonitorHost host = new InputMonitorHost(inputChannels[0]);
-            inputChannels[0].setToken(host.asBinder());
             nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId,
                     true /*isGestureMonitor*/);
             return new InputMonitor(inputChannels[1], host);
@@ -547,7 +544,6 @@ public class InputManagerService extends IInputManager.Stub
         if (inputChannel == null) {
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
-        inputChannel.setToken(new Binder());
 
         nativeRegisterInputChannel(mPtr, inputChannel);
     }
@@ -2188,7 +2184,7 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public void pilferPointers() {
-            nativePilferPointers(mPtr, asBinder());
+            nativePilferPointers(mPtr, mInputChannel.getToken());
         }
 
         @Override

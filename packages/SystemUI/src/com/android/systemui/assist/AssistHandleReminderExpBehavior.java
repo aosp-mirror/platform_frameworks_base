@@ -249,7 +249,7 @@ final class AssistHandleReminderExpBehavior implements BehaviorController {
     public void onModeDeactivated() {
         mAssistHandleCallbacks = null;
         if (mContext != null) {
-            mContext.unregisterReceiver(mDefaultHomeBroadcastReceiver);
+            mBroadcastDispatcher.get().unregisterReceiver(mDefaultHomeBroadcastReceiver);
             Settings.Secure.putLong(mContext.getContentResolver(), LEARNING_TIME_ELAPSED_KEY, 0);
             Settings.Secure.putInt(mContext.getContentResolver(), LEARNING_EVENT_COUNT_KEY, 0);
             Settings.Secure.putLong(mContext.getContentResolver(), LEARNED_HINT_LAST_SHOWN_KEY, 0);

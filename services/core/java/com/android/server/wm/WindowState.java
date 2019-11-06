@@ -2207,7 +2207,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mInputChannel = inputChannels[0];
         mClientChannel = inputChannels[1];
         mWmService.mInputManager.registerInputChannel(mInputChannel);
-        mClientChannel.setToken(mInputChannel.getToken());
         mInputWindowHandle.token = mInputChannel.getToken();
         if (outInputChannel != null) {
             mClientChannel.transferTo(outInputChannel);

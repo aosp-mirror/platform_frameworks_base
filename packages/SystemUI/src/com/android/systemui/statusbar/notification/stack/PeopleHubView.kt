@@ -16,23 +16,39 @@
 
 package com.android.systemui.statusbar.notification.stack
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
+import android.util.FloatProperty
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.systemui.R
-import com.android.systemui.statusbar.notification.people.PersonViewModel
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin
 import com.android.systemui.statusbar.notification.people.DataListener
+import com.android.systemui.statusbar.notification.people.PersonViewModel
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
 
+private val TRANSLATE_CONTENT = object : FloatProperty<PeopleHubView>("translate") {
+    override fun setValue(view: PeopleHubView, value: Float) {
+        view.translation = value
+    }
+
+    override fun get(view: PeopleHubView) = view.translation
+}
+
 class PeopleHubView(context: Context, attrs: AttributeSet) :
-        ActivatableNotificationView(context, attrs) {
+        ActivatableNotificationView(context, attrs), SwipeableView {
 
     private lateinit var contents: ViewGroup
     private lateinit var personControllers: List<PersonDataListenerImpl>
+    private var translateAnim: ObjectAnimator? = null
+
     val personViewAdapters: Sequence<DataListener<PersonViewModel?>>
         get() = personControllers.asSequence()
 
@@ -48,6 +64,34 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
     }
 
     override fun getContentView(): View = contents
+
+    override fun hasFinishedInitialization(): Boolean = true
+
+    override fun createMenu(): NotificationMenuRowPlugin? = null
+
+    override fun getTranslateViewAnimator(
+        leftTarget: Float,
+        listener: ValueAnimator.AnimatorUpdateListener?
+    ): Animator =
+            ObjectAnimator
+                    .ofFloat(this, TRANSLATE_CONTENT, leftTarget)
+                    .apply {
+                        listener?.let { addUpdateListener(listener) }
+                        addListener(object : AnimatorListenerAdapter() {
+                            override fun onAnimationEnd(anim: Animator) {
+                                translateAnim = null
+                            }
+                        })
+                    }
+                    .also {
+                        translateAnim?.cancel()
+                        translateAnim = it
+                    }
+
+    override fun resetTranslation() {
+        translateAnim?.cancel()
+        translationX = 0f
+    }
 
     private inner class PersonDataListenerImpl(val viewGroup: ViewGroup) :
             DataListener<PersonViewModel?> {

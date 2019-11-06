@@ -31,13 +31,13 @@ import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 public class NavigationHandle extends View implements ButtonInterface {
-    private float mDarkIntensity = -1;
 
     private final Paint mPaint = new Paint();
     private @ColorInt final int mLightColor;
     private @ColorInt final int mDarkColor;
     private final int mRadius;
     private final int mBottom;
+    private boolean mRequiresInvalidate;
 
     public NavigationHandle(Context context) {
         this(context, null);
@@ -57,6 +57,15 @@ public class NavigationHandle extends View implements ButtonInterface {
         mDarkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.homeHandleColor);
         mPaint.setAntiAlias(true);
         setFocusable(false);
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        super.setAlpha(alpha);
+        if (alpha > 0f && mRequiresInvalidate) {
+            mRequiresInvalidate = false;
+            invalidate();
+        }
     }
 
     @Override
@@ -85,11 +94,15 @@ public class NavigationHandle extends View implements ButtonInterface {
 
     @Override
     public void setDarkIntensity(float intensity) {
-        if (mDarkIntensity != intensity) {
-            mPaint.setColor((int) ArgbEvaluator.getInstance().evaluate(intensity, mLightColor,
-                    mDarkColor));
-            mDarkIntensity = intensity;
-            invalidate();
+        int color = (int) ArgbEvaluator.getInstance().evaluate(intensity, mLightColor, mDarkColor);
+        if (mPaint.getColor() != color) {
+            mPaint.setColor(color);
+            if (getVisibility() == VISIBLE && getAlpha() > 0) {
+                invalidate();
+            } else {
+                // If we are currently invisible, then invalidate when we are next made visible
+                mRequiresInvalidate = true;
+            }
         }
     }
 

@@ -104,7 +104,12 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
     private void setLockedSimMessage() {
         boolean isEsimLocked = KeyguardEsimArea.isEsimLocked(mContext, mSubId);
-        int count = TelephonyManager.getDefault().getSimCount();
+        int count = 1;
+        TelephonyManager telephonyManager =
+            (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        if (telephonyManager != null) {
+            count = telephonyManager.getActiveModemCount();
+        }
         Resources rez = getResources();
         String msg;
         TypedArray array = mContext.obtainStyledAttributes(new int[] { R.attr.wallpaperTextColor });

@@ -259,10 +259,13 @@ public class InvocationLightsView extends View
         if (mUseNavBarColor) {
             @ColorInt int invocationColor = (int) ArgbEvaluator.getInstance().evaluate(
                     darkIntensity, mLightColor, mDarkColor);
+            boolean changed = true;
             for (EdgeLight light : mAssistInvocationLights) {
-                light.setColor(invocationColor);
+                changed &= light.setColor(invocationColor);
             }
-            invalidate();
+            if (changed) {
+                invalidate();
+            }
         }
     }
 

@@ -463,8 +463,11 @@ public class UserSwitcherController implements Dumpable {
     }
 
     private void listenForCallState() {
-        TelephonyManager.from(mContext).listen(mPhoneStateListener,
-                PhoneStateListener.LISTEN_CALL_STATE);
+        final TelephonyManager tele =
+            (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        if (tele != null) {
+            tele.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        }
     }
 
     private final PhoneStateListener mPhoneStateListener = new PhoneStateListener() {

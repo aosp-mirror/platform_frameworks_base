@@ -4612,16 +4612,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Check if activity should be moved to RESUMED state. The activity:
-     * - should be eligible to be made active (see {@link #shouldMakeActive(ActivityRecord)})
-     * - should be focusable
+     * Check if activity should be moved to RESUMED state.
+     * See {@link #shouldBeResumed(ActivityRecord)}
      * @param activeActivity the activity that is active or just completed pause action. We won't
      *                       resume if this activity is active.
      */
     @VisibleForTesting
     boolean shouldResumeActivity(ActivityRecord activeActivity) {
-        return shouldMakeActive(activeActivity) && isFocusable() && !isState(RESUMED)
-                && getActivityStack().getVisibility(activeActivity) == STACK_VISIBILITY_VISIBLE;
+        return shouldBeResumed(activeActivity) && !isState(RESUMED);
+    }
+
+    /**
+     * Check if activity should be RESUMED now. The activity:
+     * - should be eligible to be made active (see {@link #shouldMakeActive(ActivityRecord)})
+     * - should be focusable
+     */
+    private boolean shouldBeResumed(ActivityRecord activeActivity) {
+        return shouldMakeActive(activeActivity) && isFocusable()
+                && getActivityStack().getVisibility(activeActivity) == STACK_VISIBILITY_VISIBLE
+                && canResumeByCompat();
     }
 
     /**
@@ -6897,23 +6906,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 deferRelaunchUntilPaused = true;
                 preserveWindowOnDeferredRelaunch = preserveWindow;
                 return true;
-            } else if (mState == RESUMED) {
-                // Try to optimize this case: the configuration is changing and we need to restart
-                // the top, resumed activity. Instead of doing the normal handshaking, just say
-                // "restart!".
-                if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                        "Config is relaunching resumed " + this);
-
-                if (DEBUG_STATES && !visible) {
-                    Slog.v(TAG_STATES, "Config is relaunching resumed invisible activity " + this
-                            + " called by " + Debug.getCallers(4));
-                }
-
-                relaunchActivityLocked(true /* andResume */, preserveWindow);
             } else {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
-                        "Config is relaunching non-resumed " + this);
-                relaunchActivityLocked(false /* andResume */, preserveWindow);
+                        "Config is relaunching " + this);
+                if (DEBUG_STATES && !visible) {
+                    Slog.v(TAG_STATES, "Config is relaunching invisible activity " + this
+                            + " called by " + Debug.getCallers(4));
+                }
+                relaunchActivityLocked(preserveWindow);
             }
 
             // All done...  tell the caller we weren't able to keep this activity around.
@@ -7011,12 +7011,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 | CONFIG_SCREEN_LAYOUT)) != 0;
     }
 
-    void relaunchActivityLocked(boolean andResume, boolean preserveWindow) {
+    void relaunchActivityLocked(boolean preserveWindow) {
         if (mAtmService.mSuppressResizeConfigChanges && preserveWindow) {
             configChangeFlags = 0;
             return;
         }
 
+        final boolean andResume = shouldBeResumed(null /*activeActivity*/);
         List<ResultInfo> pendingResults = null;
         List<ReferrerIntent> pendingNewIntents = null;
         if (andResume) {

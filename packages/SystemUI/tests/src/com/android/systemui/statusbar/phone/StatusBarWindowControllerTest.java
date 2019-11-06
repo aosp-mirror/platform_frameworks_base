@@ -25,9 +25,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
+import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
@@ -52,13 +53,15 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
 
     @Mock private WindowManager mWindowManager;
     @Mock private DozeParameters mDozeParameters;
-    @Mock private ViewGroup mStatusBarView;
+    @Mock private StatusBarWindowView mStatusBarView;
     @Mock private IActivityManager mActivityManager;
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ConfigurationController mConfigurationController;
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock ColorExtractor.GradientColors mGradientColors;
+    @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    @Mock private Resources mResources;
 
     private StatusBarWindowController mStatusBarWindowController;
 
@@ -67,11 +70,14 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
+        when(mSuperStatusBarViewFactory.getStatusBarWindowView()).thenReturn(mStatusBarView);
 
         mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
                 mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mKeyguardBypassController, mColorExtractor);
-        mStatusBarWindowController.add(mStatusBarView, 100 /* height */);
+                mConfigurationController, mKeyguardBypassController, mColorExtractor,
+                mSuperStatusBarViewFactory, mResources);
+
+        mStatusBarWindowController.attach();
     }
 
     @Test

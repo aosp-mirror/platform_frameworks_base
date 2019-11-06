@@ -67,8 +67,10 @@ public final class EdgeLight {
     }
 
     /** Sets the edge light color. */
-    public void setColor(@ColorInt int color) {
+    public boolean setColor(@ColorInt int color) {
+        boolean changed = mColor != color;
         mColor = color;
+        return changed;
     }
 
     /** Returns the edge light length, in units of the total device perimeter. */

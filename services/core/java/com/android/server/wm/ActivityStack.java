@@ -1792,8 +1792,7 @@ class ActivityStack extends ConfigurationContainer {
                 if (prev.deferRelaunchUntilPaused) {
                     // Complete the deferred relaunch that was waiting for pause to complete.
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Re-launching after pause: " + prev);
-                    prev.relaunchActivityLocked(false /* andResume */,
-                            prev.preserveWindowOnDeferredRelaunch);
+                    prev.relaunchActivityLocked(prev.preserveWindowOnDeferredRelaunch);
                 } else if (wasStopping) {
                     // We are also stopping, the stop request must have gone soon after the pause.
                     // We can't clobber it, because the stop confirmation will not be handled.

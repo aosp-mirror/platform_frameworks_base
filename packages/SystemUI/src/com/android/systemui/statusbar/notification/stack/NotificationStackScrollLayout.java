@@ -4920,7 +4920,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             } else {
                 child.setMinClipTopAmount(0);
             }
-            previousChildWillBeDismissed = StackScrollAlgorithm.canChildBeDismissed(child);
+            previousChildWillBeDismissed = canChildBeDismissed(child);
         }
     }
 
@@ -5523,7 +5523,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         performDismissAllAnimations(viewsToHide, closeShade, () -> {
             for (ExpandableNotificationRow rowToRemove : viewsToRemove) {
-                if (StackScrollAlgorithm.canChildBeDismissed(rowToRemove)) {
+                if (canChildBeDismissed(rowToRemove)) {
                     if (selection == ROWS_ALL) {
                         // TODO: This is a listener method; we shouldn't be calling it. Can we just
                         // call performRemoveNotification as below?
@@ -5552,7 +5552,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean includeChildInDismissAll(
             ExpandableNotificationRow row,
             @SelectedRows int selection) {
-        return StackScrollAlgorithm.canChildBeDismissed(row) && matchesSelection(row, selection);
+        return canChildBeDismissed(row) && matchesSelection(row, selection);
     }
 
     /**
@@ -6223,7 +6223,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
          */
         @Override
         public void onChildDismissed(View view) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            if (!(view instanceof ActivatableNotificationView)) {
+                return;
+            }
+            ActivatableNotificationView row = (ActivatableNotificationView) view;
             if (!row.isDismissed()) {
                 handleChildViewDismissed(view);
             }
@@ -6259,6 +6262,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 }
                 isBlockingHelperShown =
                         row.performDismissWithBlockingHelper(false /* fromAccessibility */);
+            }
+
+            if (view instanceof PeopleHubView) {
+                PeopleHubView row = (PeopleHubView) view;
+                row.dismiss(false);
+                mSectionsManager.hidePeopleRow();
             }
 
             if (!isBlockingHelperShown) {
@@ -6349,9 +6358,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return 0;
         }
 
-                @Override
+        @Override
         public boolean canChildBeDismissed(View v) {
-            return StackScrollAlgorithm.canChildBeDismissed(v);
+            return NotificationStackScrollLayout.canChildBeDismissed(v);
         }
 
         @Override
@@ -6360,6 +6369,23 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return canChildBeDismissed(v);
         }
     };
+
+    private static boolean canChildBeDismissed(View v) {
+        if (v instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+            if (row.isBlockingHelperShowingAndTranslationFinished()) {
+                return true;
+            }
+            if (row.areGutsExposed() || !row.getEntry().hasFinishedInitialization()) {
+                return false;
+            }
+            return row.canViewBeDismissed();
+        }
+        if (v instanceof PeopleHubView) {
+            return true;
+        }
+        return false;
+    }
 
     // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
 

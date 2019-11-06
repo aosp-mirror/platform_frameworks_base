@@ -2649,8 +2649,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // that don't return the complete set of values and have different types. In Keyguard we
         // need IccCardConstants, but TelephonyManager would only give us
         // TelephonyManager.SIM_STATE*, so we retrieve it manually.
-        final TelephonyManager tele = TelephonyManager.from(mContext);
-        int simState = tele.getSimState(slotId);
+        final TelephonyManager tele =
+            (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        int simState = (tele != null) ?
+            tele.getSimState(slotId) : TelephonyManager.SIM_STATE_UNKNOWN;
         State state;
         try {
             state = State.intToState(simState);

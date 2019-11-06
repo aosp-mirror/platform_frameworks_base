@@ -107,6 +107,7 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -134,7 +135,6 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -208,7 +208,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
     @Mock private NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     @Mock private KeyguardBypassController mKeyguardBypassController;
-    @Mock private InjectionInflationController mInjectionInflationController;
     @Mock private DynamicPrivacyController mDynamicPrivacyController;
     @Mock private NewNotifPipeline mNewNotifPipeline;
     @Mock private ZenModeController mZenModeController;
@@ -234,6 +233,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private KeyguardLiftController mKeyguardLiftController;
     @Mock private CommandQueue mCommandQueue;
     @Mock private PluginManager mPluginManager;
+    @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
 
     @Before
     public void setup() throws Exception {
@@ -309,7 +309,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mStatusBarIconController,
                 mDozeLog,
-                mInjectionInflationController,
                 mPulseExpansionHandler,
                 mNotificationWakeUpCoordinator,
                 mKeyguardBypassController,
@@ -372,7 +371,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeScrimController,
                 mCommandQueue,
                 mPluginManager,
-                mRemoteInputUriController);
+                mRemoteInputUriController,
+                mSuperStatusBarViewFactory);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);

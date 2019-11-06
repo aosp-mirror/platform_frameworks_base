@@ -27,6 +27,7 @@ java_defaults {
         "androidx.annotation_annotation",
         "netd_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
+        "android.hardware.tetheroffload.control-V1.0-java",
         "tethering-client",
     ],
     manifest: "AndroidManifestBase.xml",
@@ -38,11 +39,39 @@ android_library {
     defaults: ["TetheringAndroidLibraryDefaults"],
 }
 
+cc_library_shared {
+    name: "libtetheroffloadjni",
+    srcs: [
+        "jni/com_android_server_connectivity_tethering_OffloadHardwareInterface.cpp",
+    ],
+    shared_libs: [
+        "libnativehelper",
+        "libcutils",
+        "android.hardware.tetheroffload.config@1.0",
+    ],
+    static_libs: [
+        "liblog",
+        "libbase",
+        "libhidlbase",
+        "libutils",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+}
+
 // Common defaults for compiling the actual APK.
 java_defaults {
     name: "TetheringAppDefaults",
     platform_apis: true,
     privileged: true,
+    jni_libs: [
+        "libtetheroffloadjni",
+    ],
     resource_dirs: [
         "res",
     ],
@@ -71,6 +100,8 @@ filegroup {
     name: "tethering-servicescore-srcs",
     srcs: [
         "src/com/android/server/connectivity/tethering/EntitlementManager.java",
+        "src/com/android/server/connectivity/tethering/OffloadController.java",
+        "src/com/android/server/connectivity/tethering/OffloadHardwareInterface.java",
         "src/com/android/server/connectivity/tethering/TetheringConfiguration.java",
         "src/com/android/server/connectivity/tethering/UpstreamNetworkMonitor.java",
     ],
@@ -86,5 +117,13 @@ filegroup {
         "src/android/net/ip/RouterAdvertisementDaemon.java",
         "src/android/net/util/InterfaceSet.java",
         "src/android/net/util/PrefixUtils.java",
+    ],
+}
+
+// This group would be removed when tethering migration is done.
+filegroup {
+    name: "tethering-jni-srcs",
+    srcs: [
+        "jni/com_android_server_connectivity_tethering_OffloadHardwareInterface.cpp",
     ],
 }

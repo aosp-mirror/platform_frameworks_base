@@ -1459,7 +1459,7 @@ public class BubbleStackView extends FrameLayout {
             mFlyout.setupFlyoutStartingAsDot(
                     updateMessage, mStackAnimationController.getStackPosition(), getWidth(),
                     mStackAnimationController.isStackOnLeftSide(),
-                    bubble.getIconView().getBadgeColor() /* dotColor */,
+                    bubble.getIconView().getDotColor() /* dotColor */,
                     expandFlyoutAfterDelay /* onLayoutComplete */,
                     mFlyoutOnHide,
                     bubble.getIconView().getDotCenter());

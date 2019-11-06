@@ -108,13 +108,18 @@ public class BootImageProfileTest implements IDeviceTest {
         // Test the profile contents contain common methods for core-oj that would normally be AOT
         // compiled.
         res = mTestDevice.executeShellCommand("profman --dump-classes-and-methods --profile-file="
-                + SYSTEM_SERVER_PROFILE + " --apk=/apex/com.android.art/javalib/core-oj.jar");
+                + SYSTEM_SERVER_PROFILE + " --apk=/apex/com.android.art/javalib/core-oj.jar"
+                + " --apk=/system/framework/services.jar");
         boolean sawObjectInit = false;
+        boolean sawPmInit = false;
         for (String line : res.split("\n")) {
             if (line.contains("Ljava/lang/Object;-><init>()V")) {
                 sawObjectInit = true;
+            } else if (line.contains("Lcom/android/server/pm/PackageManagerService;-><init>")) {
+                sawPmInit = true;
             }
         }
         assertTrue("Did not see Object.<init> in " + res, sawObjectInit);
+        assertTrue("Did not see PackageManagerService.<init> in " + res, sawPmInit);
     }
 }

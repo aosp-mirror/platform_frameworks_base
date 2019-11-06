@@ -21,6 +21,7 @@ import static android.service.attention.AttentionService.ATTENTION_FAILURE_CANCE
 import static android.service.attention.AttentionService.ATTENTION_FAILURE_UNKNOWN;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.attention.AttentionManagerInternal;
@@ -84,6 +85,10 @@ public class AttentionManagerService extends SystemService {
 
     /** If the check attention called within that period - cached value will be returned. */
     private static final long STALE_AFTER_MILLIS = 5_000;
+
+    /** The size of the buffer that stores recent attention check results. */
+    @VisibleForTesting
+    protected static final int ATTENTION_CACHE_BUFFER_SIZE = 5;
 
     /** DeviceConfig flag name, if {@code true}, enables AttentionManagerService features. */
     private static final String SERVICE_ENABLED = "service_enabled";
@@ -192,7 +197,8 @@ public class AttentionManagerService extends SystemService {
             userState.bindLocked();
 
             // throttle frequent requests
-            final AttentionCheckCache cache = userState.mAttentionCheckCache;
+            final AttentionCheckCache cache = userState.mAttentionCheckCacheBuffer == null ? null
+                    : userState.mAttentionCheckCacheBuffer.getLast();
             if (cache != null && now < cache.mLastComputed + STALE_AFTER_MILLIS) {
                 callbackInternal.onSuccess(cache.mResult, cache.mTimestamp);
                 return true;
@@ -236,9 +242,11 @@ public class AttentionManagerService extends SystemService {
                 }
 
                 synchronized (mLock) {
-                    userState.mAttentionCheckCache = new AttentionCheckCache(
-                            SystemClock.uptimeMillis(), result,
-                            timestamp);
+                    if (userState.mAttentionCheckCacheBuffer == null) {
+                        userState.mAttentionCheckCacheBuffer = new AttentionCheckCacheBuffer();
+                    }
+                    userState.mAttentionCheckCacheBuffer.add(
+                            new AttentionCheckCache(SystemClock.uptimeMillis(), result, timestamp));
                 }
                 StatsLog.write(
                         StatsLog.ATTENTION_MANAGER_SERVICE_RESULT_REPORTED,
@@ -421,7 +429,41 @@ public class AttentionManagerService extends SystemService {
         }
     }
 
-    private static final class AttentionCheckCache {
+    @VisibleForTesting
+    protected static final class AttentionCheckCacheBuffer {
+        private final AttentionCheckCache[] mQueue;
+        private int mStartIndex;
+        private int mSize;
+
+        AttentionCheckCacheBuffer() {
+            mQueue = new AttentionCheckCache[ATTENTION_CACHE_BUFFER_SIZE];
+            mStartIndex = 0;
+            mSize = 0;
+        }
+
+        public AttentionCheckCache getLast() {
+            int lastIdx = (mStartIndex + mSize - 1) % ATTENTION_CACHE_BUFFER_SIZE;
+            return mSize == 0 ? null : mQueue[lastIdx];
+        }
+
+        public void add(@NonNull AttentionCheckCache cache) {
+            int nextIndex = (mStartIndex + mSize) % ATTENTION_CACHE_BUFFER_SIZE;
+            mQueue[nextIndex] = cache;
+            if (mSize == ATTENTION_CACHE_BUFFER_SIZE) {
+                mStartIndex++;
+            } else {
+                mSize++;
+            }
+        }
+
+        public AttentionCheckCache get(int offset) {
+            return offset >= mSize ? null
+                    : mQueue[(mStartIndex + offset) % ATTENTION_CACHE_BUFFER_SIZE];
+        }
+    }
+
+    @VisibleForTesting
+    protected static final class AttentionCheckCache {
         private final long mLastComputed;
         private final int mResult;
         private final long mTimestamp;
@@ -463,7 +505,7 @@ public class AttentionManagerService extends SystemService {
         @GuardedBy("mLock")
         AttentionCheck mCurrentAttentionCheck;
         @GuardedBy("mLock")
-        AttentionCheckCache mAttentionCheckCache;
+        AttentionCheckCacheBuffer mAttentionCheckCacheBuffer;
         @GuardedBy("mLock")
         private boolean mBinding;
 
@@ -532,13 +574,14 @@ public class AttentionManagerService extends SystemService {
                     pw.println("is fulfilled:=" + mCurrentAttentionCheck.mIsFulfilled);
                     pw.decreaseIndent();
                 }
-                pw.println("attention check cache:");
-                if (mAttentionCheckCache != null) {
-                    pw.increaseIndent();
-                    pw.println("last computed=" + mAttentionCheckCache.mLastComputed);
-                    pw.println("timestamp=" + mAttentionCheckCache.mTimestamp);
-                    pw.println("result=" + mAttentionCheckCache.mResult);
-                    pw.decreaseIndent();
+                if (mAttentionCheckCacheBuffer != null) {
+                    pw.println("attention check cache:");
+                    for (int i = 0; i < mAttentionCheckCacheBuffer.mSize; i++) {
+                        pw.increaseIndent();
+                        pw.println("timestamp=" + mAttentionCheckCacheBuffer.get(i).mTimestamp);
+                        pw.println("result=" + mAttentionCheckCacheBuffer.get(i).mResult);
+                        pw.decreaseIndent();
+                    }
                 }
             }
         }
