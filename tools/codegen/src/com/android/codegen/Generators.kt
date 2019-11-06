@@ -343,7 +343,7 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
             }
         }
 
-        if (FieldClass.endsWith("Map") && FieldInnerType != null) {
+        if (isMap && FieldInnerType != null) {
             generateBuilderMethod(
                     name = adderName,
                     defVisibility = visibility,
@@ -351,7 +351,7 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
                     paramNames = listOf("key", "value"),
                     genJavadoc = { +javadocSeeSetter }) {
                 !singularNameCustomizationHint
-                +"if ($name == null) $setterName(new $LinkedHashMap());"
+                +"if ($name == null) $setterName(new ${if (FieldClass == "Map") LinkedHashMap else FieldClass}());"
                 +"$name.put(key, value);"
                 +"return$maybeCast this;"
             }
@@ -507,7 +507,8 @@ fun ClassPrinter.generateParcelable() {
 
                     // Create container if any
                     val containerInitExpr = when {
-                        FieldClass.endsWith("Map") -> "new $LinkedHashMap<>()"
+                        FieldClass == "Map" -> "new $LinkedHashMap<>()"
+                        isMap -> "new $FieldClass()"
                         FieldClass == "List" || FieldClass == "ArrayList" ->
                             "new ${classRef("java.util.ArrayList")}<>()"
                         else -> ""
