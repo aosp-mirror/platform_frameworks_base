@@ -57,6 +57,9 @@ public final class NetworkCapabilities implements Parcelable {
     private static final String TAG = "NetworkCapabilities";
     private static final int INVALID_UID = -1;
 
+    // Set to true when private DNS is broken.
+    private boolean mPrivateDnsBroken;
+
     /**
      * @hide
      */
@@ -86,6 +89,7 @@ public final class NetworkCapabilities implements Parcelable {
         mUids = null;
         mEstablishingVpnAppUid = INVALID_UID;
         mSSID = null;
+        mPrivateDnsBroken = false;
     }
 
     /**
@@ -104,6 +108,7 @@ public final class NetworkCapabilities implements Parcelable {
         mEstablishingVpnAppUid = nc.mEstablishingVpnAppUid;
         mUnwantedNetworkCapabilities = nc.mUnwantedNetworkCapabilities;
         mSSID = nc.mSSID;
+        mPrivateDnsBroken = nc.mPrivateDnsBroken;
     }
 
     /**
@@ -557,6 +562,9 @@ public final class NetworkCapabilities implements Parcelable {
         }
         if (mLinkUpBandwidthKbps != 0 || mLinkDownBandwidthKbps != 0) return "link bandwidth";
         if (hasSignalStrength()) return "signalStrength";
+        if (isPrivateDnsBroken()) {
+            return "privateDnsBroken";
+        }
         return null;
     }
 
@@ -1443,7 +1451,8 @@ public final class NetworkCapabilities implements Parcelable {
                 && equalsSpecifier(that)
                 && equalsTransportInfo(that)
                 && equalsUids(that)
-                && equalsSSID(that));
+                && equalsSSID(that)
+                && equalsPrivateDnsBroken(that));
     }
 
     @Override
@@ -1460,7 +1469,8 @@ public final class NetworkCapabilities implements Parcelable {
                 + (mSignalStrength * 29)
                 + Objects.hashCode(mUids) * 31
                 + Objects.hashCode(mSSID) * 37
-                + Objects.hashCode(mTransportInfo) * 41;
+                + Objects.hashCode(mTransportInfo) * 41
+                + Objects.hashCode(mPrivateDnsBroken) * 43;
     }
 
     @Override
@@ -1479,6 +1489,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeInt(mSignalStrength);
         dest.writeArraySet(mUids);
         dest.writeString(mSSID);
+        dest.writeBoolean(mPrivateDnsBroken);
     }
 
     public static final @android.annotation.NonNull Creator<NetworkCapabilities> CREATOR =
@@ -1498,6 +1509,7 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mUids = (ArraySet<UidRange>) in.readArraySet(
                         null /* ClassLoader, null for default */);
                 netCap.mSSID = in.readString();
+                netCap.mPrivateDnsBroken = in.readBoolean();
                 return netCap;
             }
             @Override
@@ -1553,6 +1565,10 @@ public final class NetworkCapabilities implements Parcelable {
 
         if (null != mSSID) {
             sb.append(" SSID: ").append(mSSID);
+        }
+
+        if (mPrivateDnsBroken) {
+            sb.append(" Private DNS is broken");
         }
 
         sb.append("]");
@@ -1705,5 +1721,29 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public boolean isMetered() {
         return !hasCapability(NET_CAPABILITY_NOT_METERED);
+    }
+
+    /**
+     * Check if private dns is broken.
+     *
+     * @return {@code true} if {@code mPrivateDnsBroken} is set when private DNS is broken.
+     * @hide
+     */
+    public boolean isPrivateDnsBroken() {
+        return mPrivateDnsBroken;
+    }
+
+    /**
+     * Set mPrivateDnsBroken to true when private dns is broken.
+     *
+     * @param broken the status of private DNS to be set.
+     * @hide
+     */
+    public void setPrivateDnsBroken(boolean broken) {
+        mPrivateDnsBroken = broken;
+    }
+
+    private boolean equalsPrivateDnsBroken(NetworkCapabilities nc) {
+        return mPrivateDnsBroken == nc.mPrivateDnsBroken;
     }
 }

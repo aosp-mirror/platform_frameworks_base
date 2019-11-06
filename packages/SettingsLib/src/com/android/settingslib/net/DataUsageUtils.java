@@ -18,15 +18,11 @@ package com.android.settingslib.net;
 
 import android.content.Context;
 import android.net.NetworkTemplate;
-import android.os.ParcelUuid;
-import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.android.internal.util.ArrayUtils;
 /**
  * Utils class for data usage
  */
@@ -41,31 +37,22 @@ public class DataUsageUtils {
                 TelephonyManager.class);
         final SubscriptionManager subscriptionManager = context.getSystemService(
                 SubscriptionManager.class);
-        final SubscriptionInfo info = subscriptionManager.getActiveSubscriptionInfo(subId);
         final NetworkTemplate mobileAll = NetworkTemplate.buildTemplateMobileAll(
                 telephonyManager.getSubscriberId(subId));
 
-        if (info == null) {
+        if (!subscriptionManager.isActiveSubId(subId)) {
             Log.i(TAG, "Subscription is not active: " + subId);
             return mobileAll;
         }
-        final ParcelUuid groupUuid = info.getGroupUuid();
-        if (groupUuid == null) {
-            Log.i(TAG, "Subscription doesn't have valid group uuid: " + subId);
+
+        final String[] mergedSubscriberIds = telephonyManager.createForSubscriptionId(subId)
+                .getMergedSubscriberIdsFromGroup();
+
+        if (ArrayUtils.isEmpty(mergedSubscriberIds)) {
+            Log.i(TAG, "mergedSubscriberIds is null.");
             return mobileAll;
         }
 
-        // Otherwise merge other subscriberId to create new NetworkTemplate
-        final List<SubscriptionInfo> groupInfos = subscriptionManager.getSubscriptionsInGroup(
-                groupUuid);
-        final List<String> mergedSubscriberIds = new ArrayList<>();
-        for (SubscriptionInfo subInfo : groupInfos) {
-            final String subscriberId = telephonyManager.getSubscriberId(
-                    subInfo.getSubscriptionId());
-            if (subscriberId != null) {
-                mergedSubscriberIds.add(subscriberId);
-            }
-        }
-        return NetworkTemplate.normalize(mobileAll, mergedSubscriberIds.toArray(new String[0]));
+        return NetworkTemplate.normalize(mobileAll, mergedSubscriberIds);
     }
 }

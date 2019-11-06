@@ -24,8 +24,6 @@ import android.util.Log;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.AmbientPulseManager;
-import com.android.systemui.statusbar.AmbientPulseManager.OnAmbientChangedListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -46,8 +44,7 @@ import javax.inject.Singleton;
  * A class to handle notifications and their corresponding groups.
  */
 @Singleton
-public class NotificationGroupManager implements OnHeadsUpChangedListener,
-        OnAmbientChangedListener, StateListener {
+public class NotificationGroupManager implements OnHeadsUpChangedListener, StateListener {
 
     private static final String TAG = "NotificationGroupManager";
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
@@ -55,12 +52,11 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private HeadsUpManager mHeadsUpManager;
-    private AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
     private boolean mIsUpdatingUnchangedGroup;
 
     @Inject
-    public NotificationGroupManager() {
-        Dependency.get(StatusBarStateController.class).addCallback(this);
+    public NotificationGroupManager(StatusBarStateController statusBarStateController) {
+        statusBarStateController.addCallback(this);
     }
 
     /**
@@ -439,23 +435,6 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     }
 
     @Override
-    public void onHeadsUpPinnedModeChanged(boolean inPinnedMode) {
-    }
-
-    @Override
-    public void onHeadsUpPinned(NotificationEntry entry) {
-    }
-
-    @Override
-    public void onHeadsUpUnPinned(NotificationEntry entry) {
-    }
-
-    @Override
-    public void onAmbientStateChanged(NotificationEntry entry, boolean isAmbient) {
-        onAlertStateChanged(entry, isAmbient);
-    }
-
-    @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
         onAlertStateChanged(entry, isHeadsUp);
     }
@@ -485,7 +464,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
         if (!sbn.isGroup() || sbn.getNotification().isGroupSummary()) {
             return false;
         }
-        if (!mHeadsUpManager.isAlerting(entry.key) && !mAmbientPulseManager.isAlerting(entry.key)) {
+        if (!mHeadsUpManager.isAlerting(entry.key)) {
             return false;
         }
         return (sbn.getNotification().fullScreenIntent != null

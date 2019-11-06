@@ -163,7 +163,8 @@ public class MobileSignalController extends SignalController<
                         | PhoneStateListener.LISTEN_CALL_STATE
                         | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
                         | PhoneStateListener.LISTEN_DATA_ACTIVITY
-                        | PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE);
+                        | PhoneStateListener.LISTEN_CARRIER_NETWORK_CHANGE
+                        | PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
         mContext.getContentResolver().registerContentObserver(Global.getUriFor(Global.MOBILE_DATA),
                 true, mObserver);
         mContext.getContentResolver().registerContentObserver(Global.getUriFor(
@@ -215,10 +216,14 @@ public class MobileSignalController extends SignalController<
 
         MobileIconGroup hGroup = TelephonyIcons.THREE_G;
         MobileIconGroup hPlusGroup = TelephonyIcons.THREE_G;
-        if (mConfig.hspaDataDistinguishable) {
+        if (mConfig.show4gFor3g) {
+            hGroup = TelephonyIcons.FOUR_G;
+            hPlusGroup = TelephonyIcons.FOUR_G;
+        } else if (mConfig.hspaDataDistinguishable) {
             hGroup = TelephonyIcons.H;
             hPlusGroup = TelephonyIcons.H_PLUS;
         }
+
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSDPA, hGroup);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSUPA, hGroup);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSPA, hGroup);
@@ -376,9 +381,9 @@ public class MobileSignalController extends SignalController<
     }
 
     private void updateDataSim() {
-        int defaultDataSub = mDefaults.getDefaultDataSubId();
-        if (SubscriptionManager.isValidSubscriptionId(defaultDataSub)) {
-            mCurrentState.dataSim = defaultDataSub == mSubscriptionInfo.getSubscriptionId();
+        int activeDataSubId = mDefaults.getActiveDataSubId();
+        if (SubscriptionManager.isValidSubscriptionId(activeDataSubId)) {
+            mCurrentState.dataSim = activeDataSubId == mSubscriptionInfo.getSubscriptionId();
         } else {
             // There doesn't seem to be a data sim selected, however if
             // there isn't a MobileSignalController with dataSim set, then
@@ -634,6 +639,13 @@ public class MobileSignalController extends SignalController<
             }
             mCurrentState.carrierNetworkChangeMode = active;
 
+            updateTelephony();
+        }
+
+        @Override
+        public void onActiveDataSubscriptionIdChanged(int subId) {
+            if (DEBUG) Log.d(mTag, "onActiveDataSubscriptionIdChanged: subId=" + subId);
+            updateDataSim();
             updateTelephony();
         }
     };

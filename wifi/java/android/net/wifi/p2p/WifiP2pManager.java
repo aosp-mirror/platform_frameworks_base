@@ -190,7 +190,7 @@ public class WifiP2pManager {
      * has changed. One extra {@link #EXTRA_WIFI_P2P_INFO} provides the p2p connection info in
      * the form of a {@link WifiP2pInfo} object. Another extra {@link #EXTRA_NETWORK_INFO} provides
      * the network info in the form of a {@link android.net.NetworkInfo}. A third extra provides
-     * the details of the group.
+     * the details of the group and may contain a {@code null}.
      *
      * All of these permissions are required to receive this broadcast:
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and

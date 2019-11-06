@@ -130,6 +130,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
@@ -323,6 +324,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     boolean mUserLeaving = false;
 
     /**
+     * The system chooser activity which worked as a delegate of
+     * {@link com.android.internal.app.ResolverActivity}.
+     */
+    private ComponentName mSystemChooserActivity;
+
+    /**
      * We don't want to allow the device to go to sleep while in the process
      * of launching an activity.  This is primarily to allow alarm intent
      * receivers to launch an activity and get that to run before the device
@@ -467,6 +474,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     public KeyguardController getKeyguardController() {
         return mKeyguardController;
+    }
+
+    ComponentName getSystemChooserActivity() {
+        if (mSystemChooserActivity == null) {
+            mSystemChooserActivity = ComponentName.unflattenFromString(
+                    mService.mContext.getResources().getString(R.string.config_chooserActivity));
+        }
+        return mSystemChooserActivity;
     }
 
     void setRecentTasks(RecentTasks recentTasks) {

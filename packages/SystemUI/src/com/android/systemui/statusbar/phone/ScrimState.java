@@ -129,7 +129,16 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mCurrentInFrontAlpha = 0f;
             mCurrentBehindTint = Color.BLACK;
+            mCurrentInFrontTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
+            mAnimationDuration = mWakeLockScreenSensorActive
+                    ? ScrimController.ANIMATION_DURATION_LONG : ScrimController.ANIMATION_DURATION;
+
+            // Wake sensor will show the wallpaper, let's fade from black. Otherwise it will
+            // feel like the screen is flashing if the wallpaper is light.
+            if (mWakeLockScreenSensorActive && previousState == AOD) {
+                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+            }
         }
 
         @Override
@@ -147,7 +156,9 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mCurrentBehindAlpha = 0;
             mCurrentInFrontAlpha = 0;
-            mAnimationDuration = StatusBar.FADE_KEYGUARD_DURATION;
+            mAnimationDuration = mKeyguardFadingAway
+                    ? mKeyguardFadingAwayDuration
+                    : StatusBar.FADE_KEYGUARD_DURATION;
             mAnimateChange = !mLaunchingAffordanceWithPreview;
 
             if (previousState == ScrimState.AOD) {
@@ -198,6 +209,8 @@ public enum ScrimState {
     boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
     boolean mWakeLockScreenSensorActive;
+    boolean mKeyguardFadingAway;
+    long mKeyguardFadingAwayDuration;
 
     ScrimState(int index) {
         mIndex = index;
@@ -284,5 +297,10 @@ public enum ScrimState {
 
     public void setWakeLockScreenSensorActive(boolean active) {
         mWakeLockScreenSensorActive = active;
+    }
+
+    public void setKeyguardFadingAway(boolean fadingAway, long duration) {
+        mKeyguardFadingAway = fadingAway;
+        mKeyguardFadingAwayDuration = duration;
     }
 }

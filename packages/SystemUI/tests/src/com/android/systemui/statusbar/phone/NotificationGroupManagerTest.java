@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -29,7 +30,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.AmbientPulseManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -53,17 +54,14 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
             new NotificationGroupTestHelper(mContext);
 
     @Mock HeadsUpManager mHeadsUpManager;
-    @Mock AmbientPulseManager mAmbientPulseManager;
 
     @Before
     public void setup() {
-        mDependency.injectTestDependency(AmbientPulseManager.class, mAmbientPulseManager);
-
         initializeGroupManager();
     }
 
     private void initializeGroupManager() {
-        mGroupManager = new NotificationGroupManager();
+        mGroupManager = new NotificationGroupManager(mock(StatusBarStateController.class));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 
@@ -140,23 +138,6 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         when(mHeadsUpManager.isAlerting(childEntry.key)).thenReturn(true);
 
         mGroupManager.onHeadsUpStateChanged(childEntry, true);
-
-        // Child entries that are heads upped should be considered separate groups visually even if
-        // they are the same group logically
-        assertEquals(childEntry, mGroupManager.getGroupSummary(childEntry.notification));
-        assertEquals(summaryEntry, mGroupManager.getLogicalGroupSummary(childEntry.notification));
-    }
-
-    @Test
-    public void testAmbientPulseEntryIsIsolated() {
-        NotificationEntry childEntry = mGroupTestHelper.createChildNotification();
-        NotificationEntry summaryEntry = mGroupTestHelper.createSummaryNotification();
-        mGroupManager.onEntryAdded(summaryEntry);
-        mGroupManager.onEntryAdded(childEntry);
-        mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
-        when(mAmbientPulseManager.isAlerting(childEntry.key)).thenReturn(true);
-
-        mGroupManager.onAmbientStateChanged(childEntry, true);
 
         // Child entries that are heads upped should be considered separate groups visually even if
         // they are the same group logically

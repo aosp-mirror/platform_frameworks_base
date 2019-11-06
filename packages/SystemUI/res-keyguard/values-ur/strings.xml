@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"‏غلط PIN کوڈ۔"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"غلط کارڈ۔"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"مکمل طور پر چارج ہو گيا"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • وائرلیس چارجنگ"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • وائرلیس طریقے سے چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • تیزی سے چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آہستہ چارج ہو رہا ہے"</string>
@@ -151,84 +151,7 @@
       <item quantity="other">‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس <xliff:g id="_NUMBER_1">%d</xliff:g> کوششیں بچی ہیں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔</item>
       <item quantity="one">‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس <xliff:g id="_NUMBER_0">%d</xliff:g> کوشش بچی ہے۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="other">"<annotation name="color">"ابھی"</annotation>\n"^1\n^2 ہو رہے ہیں</item>
-      <item quantity="one">"<annotation name="color">"ابھی"</annotation>\n"^1\n^2 ہو رہے ہیں</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"بارہ"</item>
-    <item msgid="7389464214252023751">"ایک"</item>
-    <item msgid="8803180377002008046">"دو"</item>
-    <item msgid="8614897059944644719">"تین"</item>
-    <item msgid="2293058674782619556">"چار"</item>
-    <item msgid="4815402358455041664">"پانچ"</item>
-    <item msgid="3325754778509665687">"چھ"</item>
-    <item msgid="5805551341866280575">"سات"</item>
-    <item msgid="203334816668238610">"آٹھ"</item>
-    <item msgid="4828052671464488923">"نو"</item>
-    <item msgid="2233497913571137419">"دس"</item>
-    <item msgid="5621554266768657830">"گیارہ"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"0 بجے"</item>
-    <item msgid="8837126587669001578">"ایک منٹ"</item>
-    <item msgid="4294343372940455660">"دو منٹ"</item>
-    <item msgid="7129166637707421536">"تین منٹ"</item>
-    <item msgid="7579404865008788673">"چار منٹ"</item>
-    <item msgid="3873924689207380586">"پانچ منٹ"</item>
-    <item msgid="4849565597850069377">"چھ منٹ"</item>
-    <item msgid="4404219424523572364">"سات منٹ"</item>
-    <item msgid="8740481214764087329">"آٹھ منٹ"</item>
-    <item msgid="1713216865806811237">"نو منٹ"</item>
-    <item msgid="3508406095411245038">"دس"</item>
-    <item msgid="7161996337755311711">"گیارہ"</item>
-    <item msgid="4044549963329624197">"بارہ"</item>
-    <item msgid="333373157917379088">"تیرہ"</item>
-    <item msgid="2631202907124819385">"چودہ"</item>
-    <item msgid="6472396076858033453">"پندرہ"</item>
-    <item msgid="8656981856181581643">"سولہ"</item>
-    <item msgid="7289026608562030619">"سترہ"</item>
-    <item msgid="3881477602692646573">"اٹھارہ"</item>
-    <item msgid="3358129827772984226">"انّیس"</item>
-    <item msgid="3308575407402865807">"بیس"</item>
-    <item msgid="5346560955382229629">"اکیس\n"</item>
-    <item msgid="226750304761473436">"بائیس\n"</item>
-    <item msgid="616811325336838734">"تیئیس\n"</item>
-    <item msgid="616346116869053440">"چوبیس\n"</item>
-    <item msgid="4642996410384042830">"پچیس\n"</item>
-    <item msgid="7506092849993571465">"چھبیس\n"</item>
-    <item msgid="1915078191101042031">"ستائیں\n"</item>
-    <item msgid="4292378641900520252">"اٹھائیس\n"</item>
-    <item msgid="5339513901773103696">"انتیس\n"</item>
-    <item msgid="3574673250891657607">"تیس"</item>
-    <item msgid="5796923836589110940">"اکتیس\n"</item>
-    <item msgid="5859323597571702052">"بتّیس\n"</item>
-    <item msgid="5133326723148876507">"تینتیس\n"</item>
-    <item msgid="2693999494655663096">"چونتیس\n"</item>
-    <item msgid="3316754944962836197">"پینتیس\n"</item>
-    <item msgid="816891008836796723">"چھتیس\n"</item>
-    <item msgid="9158890488666520078">"سینتیس\n"</item>
-    <item msgid="1894769703213894011">"اڑتیس\n"</item>
-    <item msgid="5638820345598572399">"انچالیس\n"</item>
-    <item msgid="8838304023017895439">"چالیس"</item>
-    <item msgid="1834742948932559597">"اکتالیس\n"</item>
-    <item msgid="6573707308847773944">"بیالیس\n"</item>
-    <item msgid="2450149950652678001">"تینتالیس\n"</item>
-    <item msgid="2874667401318178036">"چوالیس\n"</item>
-    <item msgid="3391101532763048862">"پینتالیس\n"</item>
-    <item msgid="1671489330863254362">"چھیالیس\n"</item>
-    <item msgid="5916017359554531038">"سینتالیس\n"</item>
-    <item msgid="8205413177993059967">"اڑتالیس\n"</item>
-    <item msgid="6607867415142171302">"انچاس\n"</item>
-    <item msgid="8358850748472089162">"پچاس"</item>
-    <item msgid="3551313125255080234">"اکیاون\n"</item>
-    <item msgid="1559678130725716542">"باون\n"</item>
-    <item msgid="431441994725492377">"تریپن\n"</item>
-    <item msgid="6345774640539623024">"چوّن\n"</item>
-    <item msgid="8018192990793931120">"پچپن\n"</item>
-    <item msgid="6187650843754604534">"چھپّن\n"</item>
-    <item msgid="8727240174015993259">"ستاون\n"</item>
-    <item msgid="848339003778952950">"اٹھاون\n"</item>
-    <item msgid="5798985802835423618">"انسٹھ\n"</item>
-  </string-array>
+    <string name="clock_title_default" msgid="6645600990069154049">"ڈیفالٹ"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"بلبلہ"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"اینالاگ"</string>
 </resources>

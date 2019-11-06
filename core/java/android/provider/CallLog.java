@@ -42,7 +42,7 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.internal.telephony.CallerInfo;
+import android.telephony.CallerInfo;
 import com.android.internal.telephony.PhoneConstants;
 
 import java.util.List;
@@ -728,10 +728,11 @@ public class CallLog {
             String accountAddress = getLogAccountAddress(context, accountHandle);
 
             int numberPresentation = getLogNumberPresentation(number, presentation);
+            String name = (ci != null) ? ci.getName() : "";
             if (numberPresentation != PRESENTATION_ALLOWED) {
                 number = "";
                 if (ci != null) {
-                    ci.name = "";
+                    name = "";
                 }
             }
 
@@ -760,9 +761,7 @@ public class CallLog {
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
             values.put(NEW, Integer.valueOf(1));
-            if ((ci != null) && (ci.name != null)) {
-                values.put(CACHED_NAME, ci.name);
-            }
+            values.put(CACHED_NAME, name);
             values.put(ADD_FOR_ALL_USERS, addForAllUsers ? 1 : 0);
 
             if (callType == MISSED_TYPE) {
@@ -773,7 +772,7 @@ public class CallLog {
             values.put(CALL_SCREENING_APP_NAME, charSequenceToString(callScreeningAppName));
             values.put(CALL_SCREENING_COMPONENT_NAME, callScreeningComponentName);
 
-            if ((ci != null) && (ci.contactIdOrZero > 0)) {
+            if ((ci != null) && (ci.getContactId() > 0)) {
                 // Update usage information for the number associated with the contact ID.
                 // We need to use both the number and the ID for obtaining a data ID since other
                 // contacts may have the same number.
@@ -787,17 +786,18 @@ public class CallLog {
                     cursor = resolver.query(Phone.CONTENT_URI,
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =? AND " + Phone.NORMALIZED_NUMBER + " =?",
-                            new String[] { String.valueOf(ci.contactIdOrZero),
+                            new String[] { String.valueOf(ci.getContactId()),
                                     normalizedPhoneNumber},
                             null);
                 } else {
-                    final String phoneNumber = ci.phoneNumber != null ? ci.phoneNumber : number;
+                    final String phoneNumber = ci.getPhoneNumber() != null
+                        ? ci.getPhoneNumber() : number;
                     cursor = resolver.query(
                             Uri.withAppendedPath(Callable.CONTENT_FILTER_URI,
                                     Uri.encode(phoneNumber)),
                             new String[] { Phone._ID },
                             Phone.CONTACT_ID + " =?",
-                            new String[] { String.valueOf(ci.contactIdOrZero) },
+                            new String[] { String.valueOf(ci.getContactId()) },
                             null);
                 }
 

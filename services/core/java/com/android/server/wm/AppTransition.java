@@ -23,12 +23,14 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_RELAUNCH;
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
@@ -1801,8 +1803,10 @@ public class AppTransition implements Dump {
         }
         final boolean toShade =
                 (mNextAppTransitionFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0;
+        final boolean subtle =
+                (mNextAppTransitionFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION) != 0;
         return mService.mPolicy.createHiddenByKeyguardExit(
-                transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER, toShade);
+                transit == TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER, toShade, subtle);
     }
 
     int getAppStackClipMode() {
@@ -2079,6 +2083,9 @@ public class AppTransition implements Dump {
             }
             case TRANSIT_CRASHING_ACTIVITY_CLOSE: {
                 return "TRANSIT_CRASHING_ACTIVITY_CLOSE";
+            }
+            case TRANSIT_SHOW_SINGLE_TASK_DISPLAY: {
+                return "TRANSIT_SHOW_SINGLE_TASK_DISPLAY";
             }
             default: {
                 return "<UNKNOWN: " + transition + ">";

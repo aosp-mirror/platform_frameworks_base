@@ -83,8 +83,9 @@ public @interface UnsupportedAppUsage {
      * <p>Possible values are:
      * <ul>
      *     <li>
-     *         {@link android.os.Build.VERSION_CODES#O} or {@link android.os.Build.VERSION_CODES#P},
-     *         to limit access to apps targeting these SDKs (or earlier).
+     *         An API level like {@link android.os.Build.VERSION_CODES#O} - in which case the API is
+     *         available up to and including the specified release. Or, in other words, the API is
+     *         blacklisted (unavailable) from the next API level from the one specified.
      *     </li>
      *     <li>
      *         absent (default value) - All apps can access this API, but doing so may result in
@@ -93,10 +94,6 @@ public @interface UnsupportedAppUsage {
      *     </li>
      *
      * </ul>
-     *
-     * Note, if this is set to {@link android.os.Build.VERSION_CODES#O}, apps targeting O
-     * maintenance releases will also be allowed to use the API, and similarly for any future
-     * maintenance releases of P.
      *
      * @return The maximum value for an apps targetSdkVersion in order to access this API.
      */

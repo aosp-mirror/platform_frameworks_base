@@ -50,6 +50,9 @@
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityRequestedOrientationChange" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskDescriptionChange" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityViewTestActivity" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityInActivityView"
+                  android:resizeableActivity="true" />
         <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity"
                   android:showWhenLocked="true" />
     </application>

@@ -103,10 +103,11 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
         final boolean userSwitcherEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.USER_SWITCHER_ENABLED, 0) != 0;
 
-        if (!UserManager.supportsMultipleUsers()
-                || mUserManager.hasUserRestriction(UserManager.DISALLOW_USER_SWITCH)
+        // TODO(b/138661450) Move IPC calls to background
+        if (!userSwitcherEnabled
+                || !UserManager.supportsMultipleUsers()
                 || UserManager.isDeviceInDemoMode(mContext)
-                || !userSwitcherEnabled) {
+                || mUserManager.hasUserRestriction(UserManager.DISALLOW_USER_SWITCH)) {
             return false;
         }
 

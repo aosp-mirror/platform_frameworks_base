@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"نیٹ ورکس کیلئے اسکین نہيں کر سکتے ہیں"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"کوئی نہیں"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"محفوظ کردیا گیا"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"غیر منسلک"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"غیر فعال"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏IP کنفیگریشن کی ناکامی"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"کم معیاری نیٹ ورک کی وجہ سے منسلک نہیں ہے"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏دستیاب بذریعہ ‎%1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"سائن اپ کے لیے تھپتھپائیں"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"منسلک، انٹرنیٹ نہیں ہے"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"محدود کنکشن"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"انٹرنیٹ نہیں ہے"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"سائن ان درکار ہے"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"رسائی پوائنٹ عارضی طور پر فُل ہے"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"منسلک ہے (میڈیا کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"منسلک ہے (فون یا میڈیا کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"فعال، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"فعال، بائيں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> بیٹری، دائیں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"بائيں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> بیٹری، دائیں: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"فعال"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"میڈيا آڈیو"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"فون کالز"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"نیٹ ورکنگ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"وائرلیس ڈسپلے سرٹیفیکیشن"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏Wi‑Fi وربوس لاگنگ فعال کریں"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"‏Wi‑Fi اسکین کو زبردستی روکا جا رہا ہے"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"موبائل ڈیٹا ہمیشہ فعال رکھیں"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ٹیدرنگ ہارڈویئر سرعت کاری"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"بغیر نام والے بلوٹوتھ آلات دکھائیں"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"منسلک نہیں ہو سکا"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"بیٹری ڈرین کم کرتا ہے اور نیٹ ورک کارکردگی کو بہتر بناتا ہے"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"میٹرڈ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"غیر میٹر شدہ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"لاگر بفر کے سائز"</string>
@@ -333,7 +333,7 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"بیرونی پر ایپس کو زبردستی اجازت دیں"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"‏manifest اقدار سے قطع نظر، کسی بھی ایپ کو بیرونی اسٹوریج پر لکھے جانے کا اہل بناتا ہے"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"سرگرمیوں کو ری سائز ایبل بنائیں"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"‏manifest اقدار سے قطع نظر، ملٹی ونڈو کیلئے تمام سرگرمیوں کو ری سائز ایبل بنائیں۔"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"مینی فیسٹ اقدار سے قطع نظر، ملٹی ونڈو کیلئے تمام سرگرمیوں کو ری سائز ایبل بنائیں۔"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"‏freeform ونڈوز فعال کریں"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"تجرباتی فری فارم ونڈوز کیلئے سپورٹ فعال کریں۔"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ڈیسک ٹاپ کا بیک اپ پاس ورڈ"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g> تک"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"<xliff:g id="TIME">%1$s</xliff:g> کے بعد بیٹری لائف بڑھائیں"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ہر بار پوچھیں"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"یہاں تک کہ آپ آف کر دیں"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"ابھی ابھی"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"یہ آلہ"</string>
 </resources>

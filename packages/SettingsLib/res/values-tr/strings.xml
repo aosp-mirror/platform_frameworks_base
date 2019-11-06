@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Ağlar taranamıyor"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Yok"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Kaydedildi"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Bağlı değil"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Devre dışı"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP Yapılandırması Hatası"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ağ kalitesi düşük olduğundan bağlanamadı"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s üzerinden kullanılabilir"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Kaydolmak için dokunun"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Bağlı, internet yok"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Sınırlı bağlantı"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"İnternet yok"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Oturum açılması gerekiyor"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Erişim noktası geçici olarak dolu"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> cihazına bağlandı (medya yok), pil <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> cihazına bağlandı (telefon veya medya yok), pil seviyesi <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Etkin, pil düzeyi <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Etkin, Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> pil, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> pil"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"Pil düzeyi <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"Sol: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> pil, Sağ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> pil"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Etkin"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medya sesi"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefon çağrıları"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Ağ işlemleri"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Kablosuz ekran sertifikası"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Kablosuz Ayrıntılı Günlük Kaydını etkinleştir"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Kablosuz ağ taramasını kısma"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil veri her zaman etkin"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tethering donanım hızlandırıcısı"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Adsız Bluetooth cihazlarını göster"</string>
@@ -244,10 +243,11 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Kapalı"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Otomatik"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Gizli DNS sağlayıcının ana makine adı"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS sağlayıcının ana makine adını gir"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS sağlayıcının ana makine adını girin"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Bağlanılamadı"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Kablosuz ekran sertifikası seçeneklerini göster"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Kablosuz günlük kaydı seviyesini artır. Kablosuz Seçici\'de her bir SSID RSSI için göster."</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Pili daha az harcar ve ağ performansını iyileştirir"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Sayaçlı"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sayaçsız"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Günlük Kaydedici arabellek boyutları"</string>
@@ -284,13 +284,13 @@
     <string name="no_application" msgid="2813387563129153880">"Hiçbiri"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Hata ayıklayıcıyı bekle"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Hata ayıklanan uygulama, çalıştırılmadan önce hata ayıklayıcının eklenmesini bekler"</string>
-    <string name="debug_input_category" msgid="1811069939601180246">"Girdi"</string>
+    <string name="debug_input_category" msgid="1811069939601180246">"Giriş"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Çizim"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Donanım hızlandırmalı oluşturma"</string>
     <string name="media_category" msgid="4388305075496848353">"Medya"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"İzleme"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Yüksek düzey modu etkin"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Uyg. ana işlem parçasında uzun işlem yap. ekr. yakıp söndür"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Uygulamalar ana iş parçacığında uzun işlem yaparken ekranı yanıp söndür"</string>
     <string name="pointer_location" msgid="6084434787496938001">"İşaretçi konumu"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Mevcut dokunmatik verilerini gösteren yer paylaşımı"</string>
     <string name="show_touches" msgid="2642976305235070316">"Dokunmayı göster"</string>
@@ -300,7 +300,7 @@
     <string name="show_hw_screen_updates" msgid="4117270979975470789">"Görünüm güncellemelerini göster"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Çizim yapılırken görünümleri pencerede çiz"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Donanım katmanı güncellemelerini göster"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Flash donanım katmanları güncellendiğinde yeşildir"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Güncellenirken donanım katmanlarını yeşil renkte yanıp söndür"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU fazla çizim hatasını ayıkla"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Donanım katmanlarını devre dışı bırak"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Ekran oluştururken her zaman GPU\'yu kullan"</string>
@@ -359,8 +359,8 @@
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Uygulamayı beklemeye alma durumu: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Çalışan hizmetler"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Şu anda çalışan hizmetleri görüntüle ve denetle"</string>
-    <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView kullanımı"</string>
-    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView kullanımını ayarla"</string>
+    <string name="select_webview_provider_title" msgid="4628592979751918907">"Web Görünümü kullanımı"</string>
+    <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Web Görünümü kullanımını ayarla"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Bu seçenek artık geçerli değil. Tekrar deneyin."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Dosya şifrelemeye dönüştür"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Dönüştür…"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Saat yaklaşık <xliff:g id="TIME">%1$s</xliff:g> olana kadar kullanılabilmelidir (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Saat yaklaşık <xliff:g id="TIME">%1$s</xliff:g> olana kadar kullanılabilmelidir"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Şu saate kadar: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Şu saatten sonra pil ömrünü uzat: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"En fazla <xliff:g id="THRESHOLD">%1$s</xliff:g> kaldı"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"En çok <xliff:g id="THRESHOLD">%1$s</xliff:g> kaldı (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"En az <xliff:g id="TIME_REMAINING">%1$s</xliff:g> kaldı (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -432,7 +431,7 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Özel (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menü"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Demo modunda sıfırlamak için şifreyi girin"</string>
-    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Sonraki"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"İleri"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Şifre gerekli"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Etkin giriş yöntemleri"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Sistem dillerini kullan"</string>
@@ -451,7 +450,7 @@
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Daha uzun süre."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Daha kısa süre."</string>
     <string name="cancel" msgid="6859253417269739139">"İptal"</string>
-    <string name="okay" msgid="1997666393121016642">"TAMAM"</string>
+    <string name="okay" msgid="1997666393121016642">"Tamam"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Aç"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Rahatsız Etmeyin\'i açın"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Hiçbir zaman"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Her zaman sor"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Siz kapatana kadar"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Az önce"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Bu cihaz"</string>
 </resources>

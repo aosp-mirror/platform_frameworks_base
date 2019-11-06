@@ -91,6 +91,7 @@ public abstract class AbsSeekBar extends ProgressBar {
     @UnsupportedAppUsage
     private float mDisabledAlpha;
 
+    private int mThumbExclusionMaxSize;
     private int mScaledTouchSlop;
     private float mTouchDownX;
     @UnsupportedAppUsage
@@ -171,6 +172,8 @@ public abstract class AbsSeekBar extends ProgressBar {
         applyTickMarkTint();
 
         mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mThumbExclusionMaxSize = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.seekbar_thumb_exclusion_max_size);
     }
 
     /**
@@ -763,9 +766,27 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
         mGestureExclusionRects.clear();
         thumb.copyBounds(mThumbRect);
+        mThumbRect.offset(mPaddingLeft - mThumbOffset, mPaddingTop);
+        growRectTo(mThumbRect, Math.min(getHeight(), mThumbExclusionMaxSize));
         mGestureExclusionRects.add(mThumbRect);
         mGestureExclusionRects.addAll(mUserGestureExclusionRects);
         super.setSystemGestureExclusionRects(mGestureExclusionRects);
+    }
+
+    /**
+     * Grows {@code r} from its center such that each dimension is at least {@code minimumSize}.
+     */
+    private void growRectTo(Rect r, int minimumSize) {
+        int dy = (minimumSize - r.height()) / 2;
+        if (dy > 0) {
+            r.top -= dy;
+            r.bottom += dy;
+        }
+        int dx = (minimumSize - r.width()) / 2;
+        if (dx > 0) {
+            r.left -= dx;
+            r.right += dx;
+        }
     }
 
     /**

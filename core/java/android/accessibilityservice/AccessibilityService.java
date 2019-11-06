@@ -309,7 +309,7 @@ public abstract class AccessibilityService extends Service {
      * Name under which an AccessibilityService component publishes information
      * about itself. This meta-data must reference an XML resource containing an
      * <code>&lt;{@link android.R.styleable#AccessibilityService accessibility-service}&gt;</code>
-     * tag. This is a a sample XML file configuring an accessibility service:
+     * tag. This is a sample XML file configuring an accessibility service:
      * <pre> &lt;accessibility-service
      *     android:accessibilityEventTypes="typeViewClicked|typeViewFocused"
      *     android:packageNames="foo.bar, foo.baz"

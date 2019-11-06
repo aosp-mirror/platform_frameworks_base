@@ -925,7 +925,7 @@ public class ActivityManager {
      * (which tends to consume a lot more RAM).
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     static public boolean isHighEndGfx() {
         return !isLowRamDeviceStatic()
                 && !RoSystemProperties.CONFIG_AVOID_GFX_ACCEL

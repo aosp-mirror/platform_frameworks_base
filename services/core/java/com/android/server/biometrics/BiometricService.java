@@ -170,6 +170,8 @@ public class BiometricService extends SystemService {
         // the authentication.
         byte[] mTokenEscrow;
 
+        // Timestamp when authentication started
+        private long mStartTimeMs;
         // Timestamp when hardware authentication occurred
         private long mAuthenticatedTimeMs;
 
@@ -519,8 +521,8 @@ public class BiometricService extends SystemService {
             List<EnabledOnKeyguardCallback> callbacks = mEnabledOnKeyguardCallbacks;
             for (int i = 0; i < callbacks.size(); i++) {
                 callbacks.get(i).notify(BiometricSourceType.FACE,
-                        mFaceEnabledOnKeyguard.getOrDefault(userId,
-                                DEFAULT_KEYGUARD_ENABLED));
+                        mFaceEnabledOnKeyguard.getOrDefault(userId, DEFAULT_KEYGUARD_ENABLED),
+                        userId);
             }
         }
     }
@@ -538,9 +540,9 @@ public class BiometricService extends SystemService {
             }
         }
 
-        void notify(BiometricSourceType sourceType, boolean enabled) {
+        void notify(BiometricSourceType sourceType, boolean enabled, int userId) {
             try {
-                mCallback.onChanged(sourceType, enabled);
+                mCallback.onChanged(sourceType, enabled, userId);
             } catch (DeadObjectException e) {
                 Slog.w(TAG, "Death while invoking notify", e);
                 mEnabledOnKeyguardCallbacks.remove(this);
@@ -766,10 +768,16 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public int canAuthenticate(String opPackageName) {
-            checkPermission();
+        public int canAuthenticate(String opPackageName, int userId) {
+            Slog.d(TAG, "canAuthenticate: User=" + userId
+                    + ", Caller=" + UserHandle.getCallingUserId());
 
-            final int userId = UserHandle.getCallingUserId();
+            if (userId != UserHandle.getCallingUserId()) {
+                checkInternalPermission();
+            } else {
+                checkPermission();
+            }
+
             final long ident = Binder.clearCallingIdentity();
             int error;
             try {
@@ -781,6 +789,23 @@ public class BiometricService extends SystemService {
             return error;
         }
 
+        @Override
+        public boolean hasEnrolledBiometrics(int userId) {
+            checkInternalPermission();
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                for (int i = 0; i < mAuthenticators.size(); i++) {
+                    if (mAuthenticators.get(i).mAuthenticator.hasEnrolledTemplates(userId)) {
+                        return true;
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            return false;
+        }
+
         @Override // Binder call
         public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback)
                 throws RemoteException {
@@ -788,7 +813,8 @@ public class BiometricService extends SystemService {
             mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
             try {
                 callback.onChanged(BiometricSourceType.FACE,
-                        mSettingObserver.getFaceEnabledOnKeyguard());
+                        mSettingObserver.getFaceEnabledOnKeyguard(),
+                        UserHandle.getCallingUserId());
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
             }
@@ -965,6 +991,11 @@ public class BiometricService extends SystemService {
             }
         }
 
+        Slog.d(TAG, "checkAndGetBiometricModality: user=" + userId
+                + " isHardwareDetected=" + isHardwareDetected
+                + " hasTemplatesEnrolled=" + hasTemplatesEnrolled
+                + " enabledForApps=" + enabledForApps);
+
         // Check error conditions
         if (!isHardwareDetected) {
             return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
@@ -1065,6 +1096,9 @@ public class BiometricService extends SystemService {
                     latency,
                     Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
         } else {
+
+            final long latency = System.currentTimeMillis() - mCurrentAuthSession.mStartTimeMs;
+
             int error = reason == BiometricPrompt.DISMISSED_REASON_NEGATIVE
                     ? BiometricConstants.BIOMETRIC_ERROR_NEGATIVE_BUTTON
                     : reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL
@@ -1076,7 +1110,8 @@ public class BiometricService extends SystemService {
                         + ", IsCrypto: " + mCurrentAuthSession.isCrypto()
                         + ", Action: " + BiometricsProtoEnums.ACTION_AUTHENTICATE
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
-                        + ", Error: " + error);
+                        + ", Error: " + error
+                        + ", Latency: " + latency);
             }
             // Auth canceled
             StatsLog.write(StatsLog.BIOMETRIC_ERROR_OCCURRED,
@@ -1087,7 +1122,8 @@ public class BiometricService extends SystemService {
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     error,
                     0 /* vendorCode */,
-                    Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId));
+                    Utils.isDebugEnabled(getContext(), mCurrentAuthSession.mUserId),
+                    latency);
         }
     }
 
@@ -1411,6 +1447,9 @@ public class BiometricService extends SystemService {
                     && mCurrentAuthSession.mState == STATE_AUTH_PAUSED;
 
             mCurrentAuthSession = mPendingAuthSession;
+
+            // Time starts when lower layers are ready to start the client.
+            mCurrentAuthSession.mStartTimeMs = System.currentTimeMillis();
             mPendingAuthSession = null;
 
             mCurrentAuthSession.mState = STATE_AUTH_STARTED;

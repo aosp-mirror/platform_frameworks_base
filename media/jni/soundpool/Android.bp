@@ -7,6 +7,10 @@ cc_library_shared {
         "SoundPoolThread.cpp",
     ],
 
+    header_libs: [
+        "libmedia_headers",
+    ],
+
     shared_libs: [
         "liblog",
         "libcutils",

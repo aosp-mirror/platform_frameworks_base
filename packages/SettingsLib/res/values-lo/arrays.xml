@@ -64,7 +64,7 @@
     <item msgid="8719029132154020716">"ເປີດໃຊ້ແລ້ວ"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="5347678900838034763">"AVRCP 1.4 (Default)"</item>
+    <item msgid="5347678900838034763">"AVRCP 1.4 (ຄ່າ​ເລີ່ມ​ຕົ້ນ)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>
     <item msgid="6199178154704729352">"AVRCP 1.5"</item>
     <item msgid="5172170854953034852">"AVRCP 1.6"</item>

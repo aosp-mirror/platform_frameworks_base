@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"குரலஞ்சல் செய்திகள்"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"வைஃபை அழைப்பு"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"சிம் நிலை"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"அதிக முன்னுரிமையுடைய சிம்மின் நிலை"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"TTY Mode FULLஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"TTY Mode HCOஐ இணைச் செயல்பாடு கோரியது"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"TTY Mode VCOஐ இணைச் செயல்பாடு கோரியது"</string>
@@ -131,6 +132,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> வைஃபை அழைப்பு"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> வைஃபை அழைப்பு"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN அழைப்பு"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN அழைப்பு"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> வைஃபை"</string>
@@ -141,10 +143,8 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"வைஃபை அழைப்பு"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ஆஃப்"</string>
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
-    <skip />
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"வைஃபை மூலம் அழை"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"மொபைல் நெட்வொர்க் மூலமாக அழை"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"வைஃபை மட்டும்"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: பகிரப்படவில்லை"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -185,13 +185,13 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"உங்கள் பணிக் கணக்கு நிர்வாகி கண்காணிக்கிறார்"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> இன் படி"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"பணிக் கணக்கு நீக்கப்பட்டது"</string>
-    <string name="work_profile_deleted_details" msgid="6307630639269092360">"பணிக் கணக்கு நிர்வாகிப் பயன்பாடு இல்லை அல்லது அது சிதைந்துள்ளது. இதன் விளைவாக, உங்கள் பணிக் கணக்குமும் அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
+    <string name="work_profile_deleted_details" msgid="6307630639269092360">"பணிக் கணக்கு நிர்வாகி ஆப்ஸ் இல்லை அல்லது அது சிதைந்துள்ளது. இதன் விளைவாக, உங்கள் பணிக் கணக்குமும் அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"இந்தச் சாதனத்தில் இனி பணிக் கணக்கு கிடைக்காது"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"கடவுச்சொல்லை அதிக முறை தவறாக முயற்சித்துவிட்டீர்கள்"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"சாதனம் நிர்வகிக்கப்படுகிறது"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம். விவரங்களுக்கு, தட்டவும்."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"சாதனத் தரவு அழிக்கப்படும்"</string>
-    <string name="factory_reset_message" msgid="9024647691106150160">"நிர்வாகிப் பயன்பாட்டை உபயோகிக்க முடியாது. இப்போது, உங்கள் சாதனம் ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
+    <string name="factory_reset_message" msgid="9024647691106150160">"நிர்வாகி ஆப்ஸை உபயோகிக்க முடியாது. இப்போது, உங்கள் சாதனம் ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"பிரிண்ட் செய்வதை <xliff:g id="OWNER_APP">%s</xliff:g> தடுத்துள்ளது."</string>
     <string name="me" msgid="6545696007631404292">"நான்"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"டேப்லெட் விருப்பங்கள்"</string>
@@ -230,8 +230,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"பிழை அறிக்கை"</string>
     <string name="global_action_logout" msgid="935179188218826050">"அமர்வை முடிக்கிறது"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"ஸ்கிரீன்ஷாட்"</string>
-    <!-- no translation found for bugreport_title (5981047024855257269) -->
-    <skip />
+    <string name="bugreport_title" msgid="5981047024855257269">"பிழை அறிக்கை"</string>
     <string name="bugreport_message" msgid="398447048750350456">"உங்கள் நடப்புச் சாதன நிலையை மின்னஞ்சல் செய்தியாக அனுப்ப, அது குறித்த தகவலை இது சேகரிக்கும். பிழை அறிக்கையைத் தொடங்குவதில் இருந்து, அது அனுப்புவதற்குத் தயாராகும் வரை, இதற்குச் சிறிது நேரம் ஆகும்; பொறுமையாகக் காத்திருக்கவும்."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ஊடாடத்தக்க அறிக்கை"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"பெரும்பாலான சூழ்நிலைகளில் இதைப் பயன்படுத்தவும். இது அறிக்கையின் நிலையைக் கண்காணிக்க, சிக்கலைப் பற்றி மேலும் விவரங்களை உள்ளிட மற்றும் ஸ்கிரீன் ஷாட்டுகளை எடுக்க அனுமதிக்கும். அறிக்கையிட நீண்ட நேரம் எடுக்கக்கூடிய குறைவாகப் பயன்படுத்தப்படும் பிரிவுகள் சிலவற்றை இது தவிர்க்கக்கூடும்."</string>
@@ -264,13 +263,13 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"நெட்வொர்க் விழிப்பூட்டல்கள்"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"நெட்வொர்க் உள்ளது"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN நிலை"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"சாதன நிர்வாகம்"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"IT நிர்வாகியிடம் இருந்து வரும் விழிப்பூட்டல்கள்"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"விழிப்பூட்டல்கள்"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"விற்பனையாளர் டெமோ"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB இணைப்பு"</string>
-    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"பயன்பாடு இயங்குகிறது"</string>
-    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"பேட்டரியைப் பயன்படுத்தும் பயன்பாடுகள்"</string>
-    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> பயன்பாடு பேட்டரியைப் பயன்படுத்துகிறது"</string>
+    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"ஆப்ஸ் இயங்குகிறது"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"பேட்டரியைப் பயன்படுத்தும் ஆப்ஸ்"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸ் பேட்டரியைப் பயன்படுத்துகிறது"</string>
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"<xliff:g id="NUMBER">%1$d</xliff:g> பயன்பாடுகள் பேட்டரியைப் பயன்படுத்துகின்றன"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"பேட்டரி மற்றும் டேட்டா உபயோக விவரங்களைக் காண, தட்டவும்"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
@@ -280,19 +279,16 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"பணிச் சுயவிவரத்திற்கு மாற்றவும்"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"தொடர்புகள்"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"தொடர்புகளை அணுக வேண்டும்"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"தொடர்புகளை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"தொடர்புகளை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"இருப்பிடம்"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ள"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"இந்தச் சாதனத்தின் இருப்பிடத்தை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
-    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
-    <skip />
-    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
-    <skip />
-    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; இந்தச் சாதனத்தின் இருப்பிடத்தை அணுகுவதற்கு அனுமதிக்கவா?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"இந்த ஆப்ஸை நீங்கள் உபயோகிக்கும்போது மட்டுமே இருப்பிடத்தை அணுகும்"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸிற்கு &lt;b&gt;எப்போதும்&lt;/b&gt; இந்தச் சாதனத்தின் இருப்பிட அணுகலை அனுமதிக்கவா?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"நீங்கள் ஆப்ஸை உபயோகிக்கும்போது மட்டுமே அது இருப்பிடத்தை அணுக முடியும்"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"கேலெண்டர்"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"கேலெண்டரை அணுகலாம்"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"கேலெண்டரை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"கேலெண்டரை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"மெசேஜ்களை அனுப்பவும், பார்க்கவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
@@ -301,13 +297,13 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"உங்கள் சாதனத்திலுள்ள படங்கள், மீடியா, ஃபைல்கள் ஆகியவற்றை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"மைக்ரோஃபோன்"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ஒலிப் பதிவு செய்யலாம்"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ஆடியோவைப் பதிவு செய்ய &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"செயல்பாட்டைக் கண்டறிதல்"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"செயல்பாட்டைக் கண்டறியும்"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"உங்கள் உடல் செயல்பாட்டைக் கண்டறிய &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ஆடியோவைப் பதிவு செய்ய &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"உடல் செயல்பாடுகள்"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"உடல் செயல்பாட்டைக் கண்காணிக்கும்"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"உடல் செயல்பாட்டைக் கண்காணிக்க &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"கேமரா"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"படங்கள் மற்றும் வீடியோக்கள் எடுக்கலாம்"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"படங்கள் எடுக்கவும், வீடியோ பதிவு செய்யவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"படங்கள் எடுக்கவும், வீடியோ பதிவு செய்யவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"அழைப்புப் பதிவுகள்"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"மொபைல் அழைப்புப் பதிவைப் படிக்கும், எழுதும்"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"உங்கள் மொபைல் அழைப்புப் பதிவுகளை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
@@ -316,16 +312,7 @@
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"மொபைல் அழைப்புகள் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"உடல் சென்சார்கள்"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடல் இயக்கம் பற்றி உணர்விகள் கூறும் தகவலைப் பார்க்கலாம்"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"உங்கள் உடலியக்கக் குறிகள் பற்றிய சென்சார் தரவை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
-    <string name="permgrouplab_aural" msgid="965607064083134896">"இசை"</string>
-    <string name="permgroupdesc_aural" msgid="4870189506255958055">"இசையைக் கேட்கலாம்"</string>
-    <string name="permgrouprequest_aural" msgid="6787926123071735620">"இசையை அணுக &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
-    <string name="permgrouplab_visual" msgid="6477382108771145134">"படங்கள் &amp; வீடியோக்கள்"</string>
-    <string name="permgroupdesc_visual" msgid="3415827902566663546">"படங்கள் &amp; வீடியோக்களைப் பார்க்கலாம்"</string>
-    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
-    <skip />
-    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"உங்கள் உடலியக்கக் குறிகள் பற்றிய சென்சார் தரவை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ஆப்ஸை அனுமதிக்கவா?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறும்"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றிக் கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
@@ -339,95 +326,95 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"கைரேகை சைகைகள்"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"சாதனத்தின் கைரேகை சென்சார்மேல் செய்யப்படும் சைகைகளைக் கேப்ட்சர் செய்ய முடியும்."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"நிலைப் பட்டியை முடக்குதல் அல்லது மாற்றுதல்"</string>
-    <string name="permdesc_statusBar" msgid="8434669549504290975">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_statusBar" msgid="8434669549504290975">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"நிலைப் பட்டியில் இருக்கும்"</string>
-    <string name="permdesc_statusBarService" msgid="716113660795976060">"நிலைப் பட்டியில் இருக்க பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_statusBarService" msgid="716113660795976060">"நிலைப் பட்டியில் இருக்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"நிலைப் பட்டியை விரிவாக்குதல்/சுருக்குதல்"</string>
-    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"நிலைப் பட்டியை விரிவாக்க அல்லது சுருக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"நிலைப் பட்டியை விரிவாக்க அல்லது சுருக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"குறுக்குவழிகளை நிறுவுதல்"</string>
-    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"பயனரின் அனுமதி இல்லாமல் முகப்புத்திரையின் குறுக்குவழிகளைச் சேர்க்கப் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_install_shortcut" msgid="8341295916286736996">"பயனரின் அனுமதி இல்லாமல் முகப்புத்திரையின் குறுக்குவழிகளைச் சேர்க்கப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"குறுக்குவழிகளை நிறுவல் நீக்குதல்"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"பயனரின் அனுமதி இல்லாமல் முகப்புத்திரையின் குறுக்குவழிகளை அகற்ற பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"பயனரின் அனுமதி இல்லாமல் முகப்புத்திரையின் குறுக்குவழிகளை அகற்ற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"வெளிச்செல்லும் அழைப்புகளுக்கு மீண்டும் வழிகாட்டுதல்"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"மற்றொரு எண்ணிற்கு அழைப்பைத் திருப்பிவிடு அல்லது அழைப்பை முழுமையாக ரத்துசெய் என்னும் விருப்பத்துடன், வெளிச்செல்லும் அழைப்பை மேற்கொள்ளும்போது டயல் செய்யப்படுகின்ற எண்ணைப் பார்க்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"மற்றொரு எண்ணிற்கு அழைப்பைத் திருப்பிவிடு அல்லது அழைப்பை முழுமையாக ரத்துசெய் என்னும் விருப்பத்துடன், வெளிச்செல்லும் அழைப்பை மேற்கொள்ளும்போது டயல் செய்யப்படுகின்ற எண்ணைப் பார்க்க, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"ஃபோன் அழைப்புகளுக்குப் பதிலளி"</string>
-    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"உள்வரும் ஃபோன் அழைப்பிற்குப் பதிலளிக்க, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"உள்வரும் ஃபோன் அழைப்பிற்குப் பதிலளிக்க, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"உரைச் செய்திகளை (SMS) பெறுதல்"</string>
-    <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிப்பதற்கு அல்லது நீக்குவதற்குப் பயன்பாட்டால் முடியும் என்பதாகும்."</string>
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS செய்திகளைப் பெற, செயற்படுத்தப் ஆப்ஸை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிப்பதற்கு அல்லது நீக்குவதற்கு ஆப்ஸால் முடியும் என்பதாகும்."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"உரைச் செய்திகளை (MMS) பெறுதல்"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்கவோ, நீக்கவோ பயன்பாட்டால் முடியும் என்பதாகும்."</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS செய்திகளைப் பெற, செயற்படுத்தப் ஆப்ஸை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்கவோ, நீக்கவோ ஆப்ஸால் முடியும் என்பதாகும்."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"செல் அலைபரப்புச் செய்திகளைப் படித்தல்"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"உங்கள் சாதனத்தில் பெறப்படும் செல் அலைபரப்புச் செய்திகளைப் படிப்பதற்குப் பயன்பாட்டை அனுமதிக்கிறது. அவசரநிலை சூழ்நிலைகளை உங்களுக்கு எச்சரிக்கைச் செய்வதற்கு சில இடங்களில் செல் அலைபரப்பு விழிப்பூட்டல்கள் வழங்கப்படும். அவசரநிலை மொபைல் அலைபரப்புப் பெறப்படும்போது உங்கள் சாதனத்தின் செயல்திறன் அல்லது செயல்பாட்டுடன் தீங்கிழைக்கும் பயன்பாடுகள் அதைத் தடுக்கலாம்."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"உங்கள் சாதனத்தில் பெறப்படும் செல் அலைபரப்புச் செய்திகளைப் படிப்பதற்குப் ஆப்ஸை அனுமதிக்கிறது. அவசரநிலை சூழ்நிலைகளை உங்களுக்கு எச்சரிக்கைச் செய்வதற்கு சில இடங்களில் செல் அலைபரப்பு விழிப்பூட்டல்கள் வழங்கப்படும். அவசரநிலை மொபைல் அலைபரப்புப் பெறப்படும்போது உங்கள் சாதனத்தின் செயல்திறன் அல்லது செயல்பாட்டுடன் தீங்கிழைக்கும் பயன்பாடுகள் அதைத் தடுக்கலாம்."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"குழுசேர்ந்த ஊட்டங்களைப் படித்தல்"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"தற்போது ஒத்திசைந்த ஊட்டங்களைப் பற்றிய விவரங்களைப் பெற பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"தற்போது ஒத்திசைந்த ஊட்டங்களைப் பற்றிய விவரங்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS செய்திகளை அனுப்புதல் மற்றும் பார்த்தல்"</string>
-    <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS செய்திகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இதற்கு எதிர்பாராத பேமெண்ட்கள் விதிக்கப்படலாம். தீங்கு விளைவிக்கும் பயன்பாடுகள் உங்களின் உறுதிப்படுத்தல் எதுவுமின்றி செய்திகளை அனுப்பி உங்களுக்குக் கட்டணம் விதிக்கலாம்."</string>
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS செய்திகளை அனுப்ப ஆப்ஸை அனுமதிக்கிறது. இதற்கு எதிர்பாராத பேமெண்ட்கள் விதிக்கப்படலாம். தீங்கு விளைவிக்கும் பயன்பாடுகள் உங்களின் உறுதிப்படுத்தல் எதுவுமின்றி செய்திகளை அனுப்பி உங்களுக்குக் கட்டணம் விதிக்கலாம்."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"உங்கள் உரைச் செய்திகளை (SMS அல்லது MMS) படித்தல்"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"இந்தப் பயன்பாடு உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"இந்தப் பயன்பாடு உங்கள் டிவியில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
-    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"இந்தப் பயன்பாடு உங்கள் மொபைலில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"இந்த ஆப்ஸ் உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"இந்த ஆப்ஸ் உங்கள் டிவியில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
+    <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"இந்த ஆப்ஸ் உங்கள் மொபைலில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"உரைச் செய்திகளைப் (WAP) பெறுதல்"</string>
-    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP செய்திகளைப் பெற, செயற்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது. உங்களுக்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்க அல்லது நீக்குவதற்கான திறன் இந்த அனுமதியில் உள்ளடங்கும்."</string>
-    <string name="permlab_getTasks" msgid="6466095396623933906">"இயங்கும் பயன்பாடுகளை மீட்டெடுத்தல்"</string>
-    <string name="permdesc_getTasks" msgid="7454215995847658102">"நடப்பில் மற்றும் சமீபத்தில் இயங்கும் காரியங்களின் தகவலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. சாதனத்தில் எந்தப் பயன்பாடுகள் பயன்படுத்தப்படுகின்றன என்பது குறித்த தகவலைக் கண்டறிய பயன்பாட்டை இது அனுமதிக்கலாம்."</string>
+    <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP செய்திகளைப் பெற, செயற்படுத்தப் ஆப்ஸை அனுமதிக்கிறது. உங்களுக்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்க அல்லது நீக்குவதற்கான திறன் இந்த அனுமதியில் உள்ளடங்கும்."</string>
+    <string name="permlab_getTasks" msgid="6466095396623933906">"இயங்கும் ஆப்ஸை மீட்டெடுத்தல்"</string>
+    <string name="permdesc_getTasks" msgid="7454215995847658102">"நடப்பில் மற்றும் சமீபத்தில் இயங்கும் காரியங்களின் தகவலைப் பெற ஆப்ஸை அனுமதிக்கிறது. சாதனத்தில் எந்த ஆப்ஸ் பயன்படுத்தப்படுகின்றன என்பது குறித்த தகவலைக் கண்டறிய ஆப்ஸை இது அனுமதிக்கலாம்."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"சுயவிவரத்தையும் சாதன உரிமையாளர்களையும் நிர்வகித்தல்"</string>
-    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"சுயவிவர உரிமையாளர்களையும் சாதன உரிமையாளரையும் அமைக்க, பயன்பாடுகளை அனுமதிக்கிறது."</string>
-    <string name="permlab_reorderTasks" msgid="2018575526934422779">"இயங்கும் பயன்பாடுகளை மறுவரிசைப்படுத்தல்"</string>
-    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"பின்புலத்திலும், முன்புலத்திலும் காரியங்களை நகர்த்த பயன்பாட்டை அனுமதிக்கிறது. உங்கள் உள்ளீடு இல்லாமலே பயன்பாடு இதைச் செய்யலாம்."</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"சுயவிவர உரிமையாளர்களையும் சாதன உரிமையாளரையும் அமைக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permlab_reorderTasks" msgid="2018575526934422779">"இயங்கும் ஆப்ஸை மறுவரிசைப்படுத்தல்"</string>
+    <string name="permdesc_reorderTasks" msgid="7734217754877439351">"பின்புலத்திலும், முன்புலத்திலும் காரியங்களை நகர்த்த ஆப்ஸை அனுமதிக்கிறது. உங்கள் உள்ளீடு இல்லாமலே ஆப்ஸ் இதைச் செய்யலாம்."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"கார் பயன்முறையை இயக்குதல்"</string>
-    <string name="permdesc_enableCarMode" msgid="4853187425751419467">"கார் முறையை இயக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"பிற பயன்பாடுகளை மூடுதல்"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"பிற பயன்பாடுகளின் பின்புலச் செயல்முறைகளை நிறுத்த பயன்பாட்டை அனுமதிக்கிறது. இதனால் பிற பயன்பாடுகள் இயங்குவதை நிறுத்தலாம்."</string>
-    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"இந்தப் பயன்பாடு பிற பயன்பாடுகளின் மேலே தோன்றலாம்"</string>
-    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்தப் பயன்பாடு பிற பயன்பாடுகளின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான பயன்பாட்டு உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
+    <string name="permdesc_enableCarMode" msgid="4853187425751419467">"கார் முறையை இயக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"பிற ஆப்ஸை மூடுதல்"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"பிற ஆப்ஸின் பின்புலச் செயல்முறைகளை நிறுத்த ஆப்ஸை அனுமதிக்கிறது. இதனால் பிற பயன்பாடுகள் இயங்குவதை நிறுத்தலாம்."</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"இந்த ஆப்ஸ் பிற ஆப்ஸின் மேலே தோன்றலாம்"</string>
+    <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"இந்த ஆப்ஸ் பிற ஆப்ஸின் மேலே அல்லது திரையின் பிற பகுதிகளில் தோன்றலாம். இது வழக்கமான ஆப்ஸ் உபயோகத்தில் குறுக்கிட்டு, பிற பயன்பாடுகள் தோன்றும் விதத்தை மாற்றக்கூடும்."</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"பின்னணியில் இயக்கு"</string>
-    <string name="permdesc_runInBackground" msgid="7370142232209999824">"இந்தப் பயன்பாடு, பின்னணியில் இயங்கலாம். இதனால் பேட்டரி விரைவாகத் தீர்ந்துவிடக்கூடும்."</string>
+    <string name="permdesc_runInBackground" msgid="7370142232209999824">"இந்த ஆப்ஸ், பின்னணியில் இயங்கலாம். இதனால் பேட்டரி விரைவாகத் தீர்ந்துவிடக்கூடும்."</string>
     <string name="permlab_useDataInBackground" msgid="8694951340794341809">"பின்னணியில் தரவைப் பயன்படுத்து"</string>
-    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"இந்தப் பயன்பாடு, பின்னணியில் டேட்டாவை உபயோகிக்கலாம். இதனால் டேட்டா உபயோகம் அதிகரிக்கக்கூடும்."</string>
-    <string name="permlab_persistentActivity" msgid="8841113627955563938">"பயன்பாட்டை எப்போதும் இயங்குமாறு செய்தல்"</string>
-    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"நினைவகத்தில் நிலையாக இருக்கும் தன்னுடைய பகுதிகளை உருவாக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதனால பிற பயன்பாடுகளுக்குக் கிடைக்கும் நினைவகம் வரையறுக்கப்பட்டு, டேப்லெட்டின் வேகத்தைக் குறைக்கலாம்."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"பயன்பாடு தனது உள்ளடக்கத்தை நினைவகத்தில் தொடர்ந்து வைத்திருக்க, அனுமதிக்கிறது. பிற பயன்பாடுகளுக்கென இருக்கும் நினைவகத்தை இது கட்டுப்படுத்தி, டிவியின் செயல்திறனைக் குறைக்கலாம்."</string>
-    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"நினைவகத்தில் நிலையாக இருக்கும் தன்னுடைய பகுதிகளை உருவாக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதனால பிற பயன்பாடுகளுக்குக் கிடைக்கும் நினைவகம் வரையறுக்கப்பட்டு, மொபைலின் வேகத்தைக் குறைக்கலாம்"</string>
+    <string name="permdesc_useDataInBackground" msgid="6049514223791806027">"இந்த ஆப்ஸ், பின்னணியில் டேட்டாவை உபயோகிக்கலாம். இதனால் டேட்டா உபயோகம் அதிகரிக்கக்கூடும்."</string>
+    <string name="permlab_persistentActivity" msgid="8841113627955563938">"ஆப்ஸை எப்போதும் இயங்குமாறு செய்தல்"</string>
+    <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"நினைவகத்தில் நிலையாக இருக்கும் தன்னுடைய பகுதிகளை உருவாக்கப் ஆப்ஸை அனுமதிக்கிறது. இதனால பிற பயன்பாடுகளுக்குக் கிடைக்கும் நினைவகம் வரையறுக்கப்பட்டு, டேப்லெட்டின் வேகத்தைக் குறைக்கலாம்."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"ஆப்ஸ் தனது உள்ளடக்கத்தை நினைவகத்தில் தொடர்ந்து வைத்திருக்க, அனுமதிக்கிறது. பிற ஆப்ஸ்களுக்கென இருக்கும் நினைவகத்தை இது கட்டுப்படுத்தி, டிவியின் செயல்திறனைக் குறைக்கலாம்."</string>
+    <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"நினைவகத்தில் நிலையாக இருக்கும் தன்னுடைய பகுதிகளை உருவாக்கப் ஆப்ஸை அனுமதிக்கிறது. இதனால பிற பயன்பாடுகளுக்குக் கிடைக்கும் நினைவகம் வரையறுக்கப்பட்டு, மொபைலின் வேகத்தைக் குறைக்கலாம்"</string>
     <string name="permlab_foregroundService" msgid="3310786367649133115">"முன்புலத்தில் இயங்கும் சேவையை இயக்குதல்"</string>
-    <string name="permdesc_foregroundService" msgid="6471634326171344622">"முன்புலத்தில் இயங்கும் சேவைகளை உபயோகிக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"முன்புலத்தில் இயங்கும் சேவைகளை உபயோகிக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"பயன்பாட்டுச் சேமிப்பு இடத்தை அளவிடல்"</string>
-    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"பயன்பாடு, அதன் குறியீடு, தரவு, மற்றும் தற்காலிகச் சேமிப்பு அளவுகளை மீட்டெடுக்க அனுமதிக்கிறது"</string>
+    <string name="permdesc_getPackageSize" msgid="3921068154420738296">"ஆப்ஸ், அதன் குறியீடு, தரவு, மற்றும் தற்காலிகச் சேமிப்பு அளவுகளை மீட்டெடுக்க அனுமதிக்கிறது"</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"சாதன அமைப்புகளை மாற்றுதல்"</string>
-    <string name="permdesc_writeSettings" msgid="7775723441558907181">"முறைமையின் அமைப்பு தரவைத் திருத்த, பயன்பாட்டை அனுமதிக்கிறது. தீங்குவிளைவிக்கும் பயன்பாடுகள், முறைமையின் உள்ளமைவைச் சிதைக்கலாம்."</string>
+    <string name="permdesc_writeSettings" msgid="7775723441558907181">"முறைமையின் அமைப்பு தரவைத் திருத்த, ஆப்ஸை அனுமதிக்கிறது. தீங்குவிளைவிக்கும் பயன்பாடுகள், முறைமையின் உள்ளமைவைச் சிதைக்கலாம்."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"தொடக்கத்தில் இயக்குதல்"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"மறுஇயக்கம் முடிந்தது, விரைவில் தானாகவே தொடங்க, பயன்பாட்டை அனுமதிக்கிறது. இதனால் டேப்லெட் நீண்ட நேரம் கழித்து தொடங்கும் மற்றும் எப்போதும் இயங்குகின்ற டேப்லெட்டின் ஒட்டுமொத்தச் செயல்பாட்டையும் தாமதமாகும்."</string>
-    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"சாதனம் தொடங்குவது முடிந்தவுடன், பயன்பாடு தானாகவே விரைவில் தொடங்க அனுமதிக்கிறது. இது டிவி தொடங்குவதற்கான நேரத்தைத் தாமதமாக்குவதோடு, எப்போதும் இயங்கிக்கொண்டிருப்பதன் மூலம் ஒட்டுமொத்த டேப்லெட்டின் வேகத்தைக் குறைக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"மறுஇயக்கம் முடிந்தது, விரைவில் தானாகவே தொடங்க, பயன்பாட்டை அனுமதிக்கிறது. இதனால் மொபைல் நீண்ட நேரம் கழித்து தொடங்கும் மற்றும் எப்போதும் இயங்குகின்ற மொபைலின் ஒட்டுமொத்தச் செயல்பாட்டையும் தாமதமாகும்."</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"மறுஇயக்கம் முடிந்தது, விரைவில் தானாகவே தொடங்க, ஆப்ஸை அனுமதிக்கிறது. இதனால் டேப்லெட் நீண்ட நேரம் கழித்து தொடங்கும் மற்றும் எப்போதும் இயங்குகின்ற டேப்லெட்டின் ஒட்டுமொத்தச் செயல்பாட்டையும் தாமதமாகும்."</string>
+    <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"சாதனம் தொடங்குவது முடிந்தவுடன், ஆப்ஸ் தானாகவே விரைவில் தொடங்க அனுமதிக்கிறது. இது டிவி தொடங்குவதற்கான நேரத்தைத் தாமதமாக்குவதோடு, எப்போதும் இயங்கிக்கொண்டிருப்பதன் மூலம் ஒட்டுமொத்த டேப்லெட்டின் வேகத்தைக் குறைக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"மறுஇயக்கம் முடிந்தது, விரைவில் தானாகவே தொடங்க, ஆப்ஸை அனுமதிக்கிறது. இதனால் மொபைல் நீண்ட நேரம் கழித்து தொடங்கும் மற்றும் எப்போதும் இயங்குகின்ற மொபைலின் ஒட்டுமொத்தச் செயல்பாட்டையும் தாமதமாகும்."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"தொடர்ந்து அணுகத்தக்க வலைபரப்பை அனுப்புதல்"</string>
-    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"வலைபரப்பு முடிந்த பின்னும் இருக்கும், தொடர்ந்து அணுகத்தக்க வலைபரப்பை அனுப்பப் பயன்பாட்டை அனுமதிக்கிறது. அதிகமாகப் பயன்படுத்தினால், டேப்லெட்டானது நினைவகத்தை மிக அதிகமாகப் பயன்படுத்துவதால் வேகம் குறைந்ததாகவும், நிலையற்றதாகவும் ஆகலாம்."</string>
-    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"அலைபரப்பு முடிந்த பின்னரும் தங்கிவிடும் ஸ்டிக்கி அலைபரப்புகளை அனுப்ப, பயன்பாட்டை அனுமதிக்கிறது. அளவுக்கதிகமான உபயோகமானது, டிவியின் வேகத்தைக் குறைக்கலாம் அல்லது அதிகமான நினைவகம் பயன்பட்டால் நிலையற்றதாகலாம்."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"அலைபரப்பு முடிந்த பின்னும் இருக்கும், தொடர்ந்து அணுகத்தக்க அலைபரப்பை அனுப்பப் பயன்பாட்டை அனுமதிக்கிறது. அதிகமாகப் பயன்படுத்தினால், மொபைலானது நினைவகத்தை மிக அதிகமாகப் பயன்படுத்துவதால் வேகம் குறைந்ததாகவும், நிலையற்றதாகவும் ஆகலாம்."</string>
+    <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"வலைபரப்பு முடிந்த பின்னும் இருக்கும், தொடர்ந்து அணுகத்தக்க வலைபரப்பை அனுப்பப் ஆப்ஸை அனுமதிக்கிறது. அதிகமாகப் பயன்படுத்தினால், டேப்லெட்டானது நினைவகத்தை மிக அதிகமாகப் பயன்படுத்துவதால் வேகம் குறைந்ததாகவும், நிலையற்றதாகவும் ஆகலாம்."</string>
+    <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"அலைபரப்பு முடிந்த பின்னரும் தங்கிவிடும் ஸ்டிக்கி அலைபரப்புகளை அனுப்ப, ஆப்ஸை அனுமதிக்கிறது. அளவுக்கதிகமான உபயோகமானது, டிவியின் வேகத்தைக் குறைக்கலாம் அல்லது அதிகமான நினைவகம் பயன்பட்டால் நிலையற்றதாகலாம்."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"அலைபரப்பு முடிந்த பின்னும் இருக்கும், தொடர்ந்து அணுகத்தக்க அலைபரப்பை அனுப்பப் ஆப்ஸை அனுமதிக்கிறது. அதிகமாகப் பயன்படுத்தினால், மொபைலானது நினைவகத்தை மிக அதிகமாகப் பயன்படுத்துவதால் வேகம் குறைந்ததாகவும், நிலையற்றதாகவும் ஆகலாம்."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"உங்கள் தொடர்புகளைப் படித்தல்"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"குறிப்பிட்டவர்களுடன் நீங்கள் அழைத்த, மின்னஞ்சல் அனுப்பிய அல்லது வேறு வழியில் தொடர்புகொண்டதின் எண்ணிக்கை உட்பட, உங்கள் டேப்லெட்டில் சேமிக்கப்பட்ட உங்கள் தொடர்புகள் குறித்த தரவைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. இந்த அனுமதி, உங்கள் தொடர்பு தரவைச் சேமிக்க பயன்பாடுகளை அனுமதிக்கிறது, மேலும் தீங்கிழைக்கும் பயன்பாடுகள் உங்களுக்குத் தெரியாமல் தொடர்பு தரவைப் பகிரலாம்."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"உங்கள் டிவியில் சேமிக்கப்பட்ட தொடர்புகள் பற்றிய தரவைப் படிக்க, பயன்பாட்டை அனுமதிக்கிறது, இதில் குறிப்பிட்ட தனிநபர் எண்ணை எத்தனைமுறை அழைத்தீர்கள், மின்னஞ்சல் செய்தீர்கள் அல்லது பிறவழிகளில் தொடர்புகொண்டீர்கள் என்பதும் அடங்கும். இந்த அனுமதியானது உங்கள் தொடர்புத் தரவைச் சேமிக்கப் பயன்பாட்டை அனுமதிக்கிறது மற்றும் தீங்குவிளைவிக்கும் பயன்பாடுகள் உங்கள் அனுமதியின்றி தொடர்புத் தரவைப் பகிரலாம்."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"குறிப்பிட்டவர்களுடன் நீங்கள் அழைத்த, மின்னஞ்சல் அனுப்பிய அல்லது வேறு வழியில் தொடர்புகொண்ட எண்ணிக்கை உட்பட, உங்கள் மொபைலில் சேமிக்கப்பட்ட உங்கள் தொடர்புகள் குறித்த தரவைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. இந்த அனுமதி, உங்கள் தொடர்பு தரவைச் சேமிக்க பயன்பாடுகளை அனுமதிக்கிறது, மேலும் தீங்கிழைக்கும் பயன்பாடுகள் உங்களுக்குத் தெரியாமல் தொடர்பு தரவைப் பகிரலாம்."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"குறிப்பிட்டவர்களுடன் நீங்கள் அழைத்த, மின்னஞ்சல் அனுப்பிய அல்லது வேறு வழியில் தொடர்புகொண்டதின் எண்ணிக்கை உட்பட, உங்கள் டேப்லெட்டில் சேமிக்கப்பட்ட உங்கள் தொடர்புகள் குறித்த தரவைப் படிக்க ஆப்ஸை அனுமதிக்கிறது. இந்த அனுமதி, உங்கள் தொடர்பு தரவைச் சேமிக்க ஆப்ஸை அனுமதிக்கிறது, மேலும் தீங்கிழைக்கும் பயன்பாடுகள் உங்களுக்குத் தெரியாமல் தொடர்பு தரவைப் பகிரலாம்."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"உங்கள் டிவியில் சேமிக்கப்பட்ட தொடர்புகள் பற்றிய தரவைப் படிக்க, ஆப்ஸை அனுமதிக்கிறது, இதில் குறிப்பிட்ட தனிநபர் எண்ணை எத்தனைமுறை அழைத்தீர்கள், மின்னஞ்சல் செய்தீர்கள் அல்லது பிறவழிகளில் தொடர்புகொண்டீர்கள் என்பதும் அடங்கும். இந்த அனுமதியானது உங்கள் தொடர்புத் தரவைச் சேமிக்கப் ஆப்ஸை அனுமதிக்கிறது மற்றும் தீங்குவிளைவிக்கும் பயன்பாடுகள் உங்கள் அனுமதியின்றி தொடர்புத் தரவைப் பகிரலாம்."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"குறிப்பிட்டவர்களுடன் நீங்கள் அழைத்த, மின்னஞ்சல் அனுப்பிய அல்லது வேறு வழியில் தொடர்புகொண்ட எண்ணிக்கை உட்பட, உங்கள் மொபைலில் சேமிக்கப்பட்ட உங்கள் தொடர்புகள் குறித்த தரவைப் படிக்க ஆப்ஸை அனுமதிக்கிறது. இந்த அனுமதி, உங்கள் தொடர்பு தரவைச் சேமிக்க ஆப்ஸை அனுமதிக்கிறது, மேலும் தீங்கிழைக்கும் பயன்பாடுகள் உங்களுக்குத் தெரியாமல் தொடர்பு தரவைப் பகிரலாம்."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"உங்கள் தொடர்புகளை மாற்றுதல்"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"குறிப்பிட்ட தொடர்புகளுடன் நீங்கள் அழைத்த, மின்னஞ்சல் அனுப்பிய அல்லது வேறு வழியில் தொடர்புகொண்டதின் எண்ணிக்கை உள்பட, உங்கள் டேப்லெட்டில் சேமிக்கப்பட்ட உங்கள் தொடர்புகள் குறித்த தரவைத் திருத்த பயன்பாட்டை அனுமதிக்கிறது. இந்த அனுமதியானது தொடர்புத் தரவை நீக்கப் பயன்பாடுகளை அனுமதிக்கிறது."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"உங்கள் டிவியில் சேமிக்கப்பட்ட தொடர்புகள் பற்றிய தரவை மாற்ற, பயன்பாட்டை அனுமதிக்கிறது, இதில் குறிப்பிட்ட தொடர்பை எத்தனைமுறை அழைத்தீர்கள், மின்னஞ்சல் செய்தீர்கள் அல்லது பிறவழிகளில் தொடர்புகொண்டீர்கள் என்பதும் அடங்கும். இது தொடர்புத் தரவை நீக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"குறிப்பிட்ட தொடர்புகளுடன் நீங்கள் அழைத்த, மின்னஞ்சல் அனுப்பிய அல்லது வேறு வழியில் தொடர்புகொண்டதின் எண்ணிக்கை உள்பட, உங்கள் மொபைலில் சேமிக்கப்பட்ட உங்கள் தொடர்புகள் குறித்த தரவைத் திருத்த பயன்பாட்டை அனுமதிக்கிறது. இந்த அனுமதியானது தொடர்புத் தரவை நீக்கப் பயன்பாடுகளை அனுமதிக்கிறது."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"குறிப்பிட்ட தொடர்புகளுடன் நீங்கள் அழைத்த, மின்னஞ்சல் அனுப்பிய அல்லது வேறு வழியில் தொடர்புகொண்டதின் எண்ணிக்கை உள்பட, உங்கள் டேப்லெட்டில் சேமிக்கப்பட்ட உங்கள் தொடர்புகள் குறித்த தரவைத் திருத்த ஆப்ஸை அனுமதிக்கிறது. இந்த அனுமதியானது தொடர்புத் தரவை நீக்க ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"உங்கள் டிவியில் சேமிக்கப்பட்ட தொடர்புகள் பற்றிய தரவை மாற்ற, ஆப்ஸை அனுமதிக்கிறது, இதில் குறிப்பிட்ட தொடர்பை எத்தனைமுறை அழைத்தீர்கள், மின்னஞ்சல் செய்தீர்கள் அல்லது பிறவழிகளில் தொடர்புகொண்டீர்கள் என்பதும் அடங்கும். இது தொடர்புத் தரவை நீக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"குறிப்பிட்ட தொடர்புகளுடன் நீங்கள் அழைத்த, மின்னஞ்சல் அனுப்பிய அல்லது வேறு வழியில் தொடர்புகொண்டதின் எண்ணிக்கை உள்பட, உங்கள் மொபைலில் சேமிக்கப்பட்ட உங்கள் தொடர்புகள் குறித்த தரவைத் திருத்த ஆப்ஸை அனுமதிக்கிறது. இந்த அனுமதியானது தொடர்புத் தரவை நீக்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"அழைப்புப் பதிவைப் படித்தல்"</string>
-    <string name="permdesc_readCallLog" msgid="3204122446463552146">"இந்தப் பயன்பாடு உங்கள் அழைப்பு வரலாற்றைப் படிக்கலாம்."</string>
+    <string name="permdesc_readCallLog" msgid="3204122446463552146">"இந்த ஆப்ஸ் உங்கள் அழைப்பு வரலாற்றைப் படிக்கலாம்."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"அழைப்புப் பதிவை எழுதுதல்"</string>
-    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்பட உங்கள் டேப்லெட்டின் அழைப்புப் பதிவைத் திருத்துவதற்குப் பயன்பாட்டை அனுமதிக்கிறது. உங்கள் அழைப்பின் பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்ளிட்ட உங்கள் டிவியின் அழைப்பு பதிவைத் திருத்த, பயன்பாட்டை அனுமதிக்கிறது. உங்கள் அழைப்பு பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
-    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்பட உங்கள் மொபைல் அழைப்புப் பதிவைத் திருத்துவதற்குப் பயன்பாட்டை அனுமதிக்கிறது. உங்கள் அழைப்பின் பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
+    <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்பட உங்கள் டேப்லெட்டின் அழைப்புப் பதிவைத் திருத்துவதற்குப் ஆப்ஸை அனுமதிக்கிறது. உங்கள் அழைப்பின் பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்ளிட்ட உங்கள் டிவியின் அழைப்பு பதிவைத் திருத்த, ஆப்ஸை அனுமதிக்கிறது. உங்கள் அழைப்பு பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
+    <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"உள்வரும் மற்றும் வெளிச்செல்லும் அழைப்புகள் குறித்த தகவல் உள்பட உங்கள் மொபைல் அழைப்புப் பதிவைத் திருத்துவதற்குப் ஆப்ஸை அனுமதிக்கிறது. உங்கள் அழைப்பின் பதிவை அழிக்க அல்லது திருத்த தீங்கு விளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"உடல் உணர்விகளை (இதயத் துடிப்பு மானிட்டர்கள் போன்றவை) அணுகுதல்"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"உங்கள் இதயத்துடிப்பு விகிதம் போன்ற உங்கள் உடல்நிலையைக் கண்காணிக்கும் உணர்விகளில் இருந்து தரவை அணுக பயன்பாடுகளை அனுமதிக்கும்."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"உங்கள் இதயத்துடிப்பு விகிதம் போன்ற உங்கள் உடல்நிலையைக் கண்காணிக்கும் உணர்விகளில் இருந்து தரவை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"கேலெண்டர் நிகழ்வுகளையும் விவரங்களையும் படிக்கலாம்"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"இந்தப் பயன்பாடு உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"இந்தப் பயன்பாடு உங்கள் டிவியில் சேமிக்கப்பட்டுள்ள எல்லா கேலெண்டர் நிகழ்வுகளையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"இந்தப் பயன்பாடு உங்கள் மொபைலில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"இந்த ஆப்ஸ் உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"இந்த ஆப்ஸ் உங்கள் டிவியில் சேமிக்கப்பட்டுள்ள எல்லா கேலெண்டர் நிகழ்வுகளையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"இந்த ஆப்ஸ் உங்கள் மொபைலில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"உரிமையாளருக்குத் தெரியாமல் கேலெண்டர் நிகழ்வுகளைச் சேர்த்தல் அல்லது மாற்றுதல் மற்றும் விருந்தினர்களுக்கு மின்னஞ்சல் அனுப்புதல்"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"இந்தப் பயன்பாடு உங்கள் டேப்லெட்டில் கேலெண்டர் நிகழ்வுகளைச் சேர்க்கலாம், அகற்றலாம் அல்லது மாற்றலாம். இந்தப் பயன்பாடு கேலெண்டர் உரிமையாளர்கள் அனுப்பியது போல் தோன்றும் செய்திகளை அனுப்பலாம் அல்லது உரிமையாளர்களிடம் தெரிவிக்காமலே கேலெண்டரில் நிகழ்வுகளை மாற்றலாம்."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"இந்தப் பயன்பாடு உங்கள் டிவியில் கேலெண்டர் நிகழ்வுகளைச் சேர்க்கலாம், அகற்றலாம் அல்லது மாற்றலாம். இந்தப் பயன்பாடு கேலெண்டர் உரிமையாளர்கள் அனுப்பியது போல் தோன்றும் செய்திகளை அனுப்பலாம் அல்லது உரிமையாளர்களிடம் தெரிவிக்காமலே கேலெண்டரில் நிகழ்வுகளை மாற்றலாம்."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"இந்தப் பயன்பாடு உங்கள் மொபைலில் கேலெண்டர் நிகழ்வுகளைச் சேர்க்கலாம், அகற்றலாம் அல்லது மாற்றலாம். இந்தப் பயன்பாடு கேலெண்டர் உரிமையாளர்கள் அனுப்பியது போல் தோன்றும் செய்திகளை அனுப்பலாம் அல்லது உரிமையாளர்களிடம் தெரிவிக்காமலே கேலெண்டரில் நிகழ்வுகளை மாற்றலாம்."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"இந்த ஆப்ஸ் உங்கள் டேப்லெட்டில் கேலெண்டர் நிகழ்வுகளைச் சேர்க்கலாம், அகற்றலாம் அல்லது மாற்றலாம். இந்த ஆப்ஸ் கேலெண்டர் உரிமையாளர்கள் அனுப்பியது போல் தோன்றும் செய்திகளை அனுப்பலாம் அல்லது உரிமையாளர்களிடம் தெரிவிக்காமலே கேலெண்டரில் நிகழ்வுகளை மாற்றலாம்."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"இந்த ஆப்ஸ் உங்கள் டிவியில் கேலெண்டர் நிகழ்வுகளைச் சேர்க்கலாம், அகற்றலாம் அல்லது மாற்றலாம். இந்த ஆப்ஸ் கேலெண்டர் உரிமையாளர்கள் அனுப்பியது போல் தோன்றும் செய்திகளை அனுப்பலாம் அல்லது உரிமையாளர்களிடம் தெரிவிக்காமலே கேலெண்டரில் நிகழ்வுகளை மாற்றலாம்."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"இந்த ஆப்ஸ் உங்கள் மொபைலில் கேலெண்டர் நிகழ்வுகளைச் சேர்க்கலாம், அகற்றலாம் அல்லது மாற்றலாம். இந்த ஆப்ஸ் கேலெண்டர் உரிமையாளர்கள் அனுப்பியது போல் தோன்றும் செய்திகளை அனுப்பலாம் அல்லது உரிமையாளர்களிடம் தெரிவிக்காமலே கேலெண்டரில் நிகழ்வுகளை மாற்றலாம்."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"கூடுதல் இட வழங்குநரின் கட்டளைகளின் அணுகல்"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"கூடுதல் இட வழங்குநர் கட்டளைகளை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. இது, GPS அல்லது பிற இருப்பிட மூலங்களின் செயல்பாட்டை இடைமறிக்க பயன்பாட்டை அனுமதிக்கலாம்."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"கூடுதல் இட வழங்குநர் கட்டளைகளை அணுகப் ஆப்ஸை அனுமதிக்கிறது. இது, GPS அல்லது பிற இருப்பிட மூலங்களின் செயல்பாட்டை இடைமறிக்க ஆப்ஸை அனுமதிக்கலாம்."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"முன்புலத்தில் இயங்கும்போது மட்டும் துல்லியமான இருப்பிடத்தைக் கண்டறிதல்"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"இந்த ஆப்ஸ் முன்புலத்தில் இயங்கும்போது மட்டுமே நீங்கள் இருக்கும் இடத்தைத் துல்லியமாகக் கண்டறியும். உங்கள் மொபைலில், இருப்பிடச் சேவைகளை ஆப்ஸ் பயன்படுத்துவதற்கு வசதியாக, அவை ஆன் செய்யப்பட்டிருக்க வேண்டும். இதனால் பேட்டரி அதிகம் பயன்படுத்தப்படலாம்."</string>
     <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"முன்புலத்தில் இயங்கும்போது மட்டும் தோராயமான இருப்பிடத்தைக் கண்டறிதல் (நெட்வொர்க் அடிப்படையில்)"</string>
@@ -437,112 +424,104 @@
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"பின்புலத்தில் இருப்பிடத்தை அணுகுதல்"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"தோராயமான அல்லது துல்லியமான \'இருப்பிட அணுகலுடன்\' சேர்ந்து இதற்கும் அனுமதி வழங்கப்பட்டால், ஆப்ஸ் பின்புலத்தில் இயங்கினாலும் இருப்பிடத்தை அணுக இயலும்."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"எனது ஆடியோ அமைப்புகளை மாற்றுதல்"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ஒலியளவு மற்றும் வெளியீட்டிற்கு ஸ்பீக்கர்கள் பயன்படுத்தப்படுவது போன்ற ஒட்டுமொத்த ஆடியோ அமைப்புகளைக் கட்டுப்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ஒலியளவு மற்றும் வெளியீட்டிற்கு ஸ்பீக்கர்கள் பயன்படுத்தப்படுவது போன்ற ஒட்டுமொத்த ஆடியோ அமைப்புகளைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ஆடியோவைப் பதிவுசெய்தல்"</string>
-    <string name="permdesc_recordAudio" msgid="4245930455135321433">"இந்தப் பயன்பாடு எப்போது வேண்டுமானாலும் மைக்ரோஃபோனைப் பயன்படுத்தி ஆடியோவை ரெக்கார்டு செய்யலாம்."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"இந்த ஆப்ஸ் எப்போது வேண்டுமானாலும் மைக்ரோஃபோனைப் பயன்படுத்தி ஆடியோவை ரெக்கார்டு செய்யலாம்."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"கட்டளைகளை சிம்மிற்கு அனுப்புதல்"</string>
-    <string name="permdesc_sim_communication" msgid="5725159654279639498">"சிம் க்குக் கட்டளைகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இது மிகவும் ஆபத்தானதாகும்."</string>
+    <string name="permdesc_sim_communication" msgid="5725159654279639498">"சிம் க்குக் கட்டளைகளை அனுப்ப ஆப்ஸை அனுமதிக்கிறது. இது மிகவும் ஆபத்தானதாகும்."</string>
     <string name="permlab_activityRecognition" msgid="3634590230567608356">"உடல் செயல்பாட்டைக் கண்டறிதல்"</string>
     <string name="permdesc_activityRecognition" msgid="3143453925156552894">"உங்கள் உடல் செயல்பாட்டை இந்த ஆப்ஸால் கண்டறிய முடியும்."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"படங்கள் மற்றும் வீடியோக்களை எடுத்தல்"</string>
-    <string name="permdesc_camera" msgid="5392231870049240670">"இந்தப் பயன்பாடு எப்போது வேண்டுமானாலும் கேமராவைப் பயன்படுத்தி படங்களை எடுக்கலாம், வீடியோக்களை ரெக்கார்டு செய்யலாம்."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"இந்த ஆப்ஸ் எப்போது வேண்டுமானாலும் கேமராவைப் பயன்படுத்தி படங்களை எடுக்கலாம், வீடியோக்களை ரெக்கார்டு செய்யலாம்."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"அதிர்வைக் கட்டுப்படுத்துதல்"</string>
-    <string name="permdesc_vibrate" msgid="6284989245902300945">"அதிர்வைக் கட்டுப்படுத்தப் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_vibrate" msgid="6284989245902300945">"அதிர்வைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"உங்கள் தலையீட்டின்றி மொபைல் எண்களை அழைக்கப் பயன்பாட்டை அனுமதிக்கிறது. இதன் விளைவாக எதிர்பாராத கட்டணங்களோ அழைப்புகளோ ஏற்படலாம். அவசரகால எண்களை அழைக்க இது பயன்பாட்டை அனுமதிக்காது என்பதை நினைவில்கொள்ளவும். தீங்கிழைக்கும் பயன்பாடுகள், உங்கள் உறுதிப்படுத்தல் இன்றி அழைப்புகளைச் செய்வதால் உங்களுக்குச் செலவு ஏற்படக்கூடும்."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"உங்கள் தலையீட்டின்றி மொபைல் எண்களை அழைக்கப் ஆப்ஸை அனுமதிக்கிறது. இதன் விளைவாக எதிர்பாராத கட்டணங்களோ அழைப்புகளோ ஏற்படலாம். அவசரகால எண்களை அழைக்க இது ஆப்ஸை அனுமதிக்காது என்பதை நினைவில்கொள்ளவும். தீங்கிழைக்கும் பயன்பாடுகள், உங்கள் உறுதிப்படுத்தல் இன்றி அழைப்புகளைச் செய்வதால் உங்களுக்குச் செலவு ஏற்படக்கூடும்."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS அழைப்புச் சேவையை அணுகுதல்"</string>
-    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"உங்கள் குறுக்கீடின்றி IMS சேவையைப் பயன்படுத்தி அழைப்பதற்கு, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"உங்கள் குறுக்கீடின்றி IMS சேவையைப் பயன்படுத்தி அழைப்பதற்கு, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"மொபைல் நிலை மற்றும் அடையாளத்தைப் படித்தல்"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"சாதனத்தின் மொபைல் அம்சங்களை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. மொபைல் மற்றும் சாதன ஐடிகள், அழைப்பு செயலில் உள்ளதா மற்றும் அழைப்பு மூலம் இணைக்கப்பட்ட தொலைக் கட்டுப்பாட்டு எண் ஆகியவற்றைத் தீர்மானிக்க இந்த அனுமதி பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"சாதனத்தின் மொபைல் அம்சங்களை அணுகப் ஆப்ஸை அனுமதிக்கிறது. மொபைல் மற்றும் சாதன ஐடிகள், அழைப்பு செயலில் உள்ளதா மற்றும் அழைப்பு மூலம் இணைக்கப்பட்ட தொலைக் கட்டுப்பாட்டு எண் ஆகியவற்றைத் தீர்மானிக்க இந்த அனுமதி ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"சிஸ்டம் மூலம் அழைப்புகளை ரூட் செய்தல்"</string>
-    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"அழைக்கும் அனுபவத்தை மேம்படுத்தும் பொருட்டு, சிஸ்டம் மூலம் தனது அழைப்புகளை ரூட் செய்ய பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"அழைக்கும் அனுபவத்தை மேம்படுத்தும் பொருட்டு, சிஸ்டம் மூலம் தனது அழைப்புகளை ரூட் செய்ய ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_callCompanionApp" msgid="3599252979411970473">"சிஸ்டம் மூலமாக அழைப்புகளைப் பார்த்தலும் கட்டுப்படுத்துதலும்."</string>
     <string name="permdesc_callCompanionApp" msgid="4567344683275099090">"செயலில் உள்ள அழைப்புகளைச் சாதனத்தில் பார்க்கவும் கட்டுப்படுத்தவும் ஆப்ஸை அனுமதிக்கிறது. அழைப்பு எண்கள் மற்றும் அழைப்புகளின் நிலை போன்ற தகவல்களும் இதில் அடங்கும்."</string>
     <string name="permlab_acceptHandover" msgid="2661534649736022409">"மற்றொரு பயன்பாட்டிலிருந்து அழைப்பைத் தொடருதல்"</string>
-    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"மற்றொரு பயன்பாட்டில் தொடங்கப்பட்ட அழைப்பைத் தொடருவதற்கு, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"மற்றொரு பயன்பாட்டில் தொடங்கப்பட்ட அழைப்பைத் தொடருவதற்கு, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ஃபோன் எண்களைப் படித்தல்"</string>
-    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"சாதனத்தின் ஃபோன் எண்களை அணுக, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"சாதனத்தின் ஃபோன் எண்களை அணுக, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"டேப்லெட் உறக்க நிலைக்குச் செல்வதைத் தடுத்தல்"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"டிவி உறக்கநிலைக்குச் செல்வதைத் தடுத்தல்"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"தொலைபேசி உறக்கநிலைக்குச் செல்வதைத் தடுத்தல்"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"உறக்கநிலைக்குச் செல்லாமல் டேப்லெட்டைத் தடுக்க பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"டிவி உறக்க நிலைக்குச் செல்வதைத் தடுக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"உறக்கநிலைக்குச் செல்லாமல் மொபைலைத் தடுக்க பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"உறக்கநிலைக்குச் செல்லாமல் டேப்லெட்டைத் தடுக்க ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"டிவி உறக்க நிலைக்குச் செல்வதைத் தடுக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"உறக்கநிலைக்குச் செல்லாமல் மொபைலைத் தடுக்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"டிரான்ஸ்மிட் அகச்சிவப்பு"</string>
-    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"டேப்லெட்டின் அகச்சிவப்பு டிரான்ஸ்மிட்டரைப் பயன்படுத்த, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"டிவியின் அகச்சிவப்பு டிரான்ஸ்மிட்டரைப் பயன்படுத்த, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"தொலைபேசியின் அகச்சிவப்பு டிரான்ஸ்மிட்டரைப் பயன்படுத்த, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"டேப்லெட்டின் அகச்சிவப்பு டிரான்ஸ்மிட்டரைப் பயன்படுத்த, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"டிவியின் அகச்சிவப்பு டிரான்ஸ்மிட்டரைப் பயன்படுத்த, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"தொலைபேசியின் அகச்சிவப்பு டிரான்ஸ்மிட்டரைப் பயன்படுத்த, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"வால்பேப்பரை அமைத்தல்"</string>
-    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"முறைமை வால்பேப்பரை அமைக்க பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_setWallpaper" msgid="7373447920977624745">"முறைமை வால்பேப்பரை அமைக்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"உங்கள் வால்பேப்பர் அளவைத் திருத்துதல்"</string>
-    <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"முறைமை வால்பேப்பர் அளவுக் குறிப்புகளை அமைக்க பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"முறைமை வால்பேப்பர் அளவுக் குறிப்புகளை அமைக்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"நேர மண்டலத்தை அமைத்தல்"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"டேப்லெட்டின் நேர மண்டலத்தை மாற்ற, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"டிவியின் நேர மண்டலத்தை மாற்ற, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"மொபைலின் நேர மண்டலத்தை மாற்ற, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"டேப்லெட்டின் நேர மண்டலத்தை மாற்ற, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"டிவியின் நேர மண்டலத்தை மாற்ற, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"மொபைலின் நேர மண்டலத்தை மாற்ற, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"சாதனத்தில் கணக்குகளைக் கண்டறிதல்"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"டேப்லெட் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. நீங்கள் நிறுவிய பயன்பாடுகள் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"டிவி அறிந்த கணக்குகளின் பட்டியலைப் பெற, பயன்பாட்டை அனுமதிக்கிறது. இதில் நிறுவிய பயன்பாடுகளினால் உருவாக்கப்பட்ட எல்லா கணக்குகளும் அடங்கலாம்."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"மொபைல் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற பயன்பாட்டை அனுமதிக்கிறது. நீங்கள் நிறுவிய பயன்பாடுகள் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"டேப்லெட் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற ஆப்ஸை அனுமதிக்கிறது. நீங்கள் நிறுவிய ஆப்ஸ் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"டிவி அறிந்த கணக்குகளின் பட்டியலைப் பெற, ஆப்ஸை அனுமதிக்கிறது. இதில் நிறுவிய பயன்பாடுகளினால் உருவாக்கப்பட்ட எல்லா கணக்குகளும் அடங்கலாம்."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"மொபைல் மூலம் அறியப்பட்ட கணக்குகளின் பட்டியலைப் பெற ஆப்ஸை அனுமதிக்கிறது. நீங்கள் நிறுவிய ஆப்ஸ் மூலம் உருவாக்கப்பட்ட எல்லா கணக்குகளும் இதில் உள்ளடங்கலாம்."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"நெட்வொர்க் இணைப்புகளைக் காட்டு"</string>
-    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"தற்போது இருக்கும் நெட்வொர்க்குகள் எவை மற்றும் இணைக்கப்பட்டுள்ளவை எவை போன்ற நெட்வொர்க் இணைப்புகள் குறித்த தகவலைப் பார்க்கப் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"தற்போது இருக்கும் நெட்வொர்க்குகள் எவை மற்றும் இணைக்கப்பட்டுள்ளவை எவை போன்ற நெட்வொர்க் இணைப்புகள் குறித்த தகவலைப் பார்க்கப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"முழுமையான நெட்வொர்க் அணுகலைக் கொண்டிருக்கும்"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"நெட்வொர்க் சாக்கெட்டுகளை உருவாக்கவும் மற்றும் தனிப்பயன் நெட்வொர்க் நெறிமுறைகளைப் பயன்படுத்தவும் பயன்பாட்டை அனுமதிக்கிறது. இணையத்தில் தரவை அனுப்ப உலாவியும், பிற பயன்பாடுகளும் இருப்பதால், இணையத்திற்குத் தரவை அனுப்ப இந்த அனுமதி தேவையில்லை."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"நெட்வொர்க் சாக்கெட்டுகளை உருவாக்கவும் மற்றும் தனிப்பயன் நெட்வொர்க் நெறிமுறைகளைப் பயன்படுத்தவும் ஆப்ஸை அனுமதிக்கிறது. இணையத்தில் தரவை அனுப்ப உலாவியும், பிற பயன்பாடுகளும் இருப்பதால், இணையத்திற்குத் தரவை அனுப்ப இந்த அனுமதி தேவையில்லை."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"பிணைய இணைப்புத்தன்மையை மாற்றுதல்"</string>
-    <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"நெட்வொர்க் இணைப்பின் நிலையை மாற்ற, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"நெட்வொர்க் இணைப்பின் நிலையை மாற்ற, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"இணைக்கப்பட்ட இணைப்புநிலையை மாற்றுதல்"</string>
-    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"இணைக்கப்பட்ட நெட்வொர்க் இணைப்பின் நிலையை மாற்ற, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_changeTetherState" msgid="1524441344412319780">"இணைக்கப்பட்ட நெட்வொர்க் இணைப்பின் நிலையை மாற்ற, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"வைஃபை இணைப்புகளைக் காட்டு"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"வைஃபை இயக்கப்பட்டுள்ளதா என்பதையும், இணைக்கப்பட்ட வைஃபை சாதனங்களின் பெயர் போன்ற வைஃபை நெட்வொர்க் குறித்த தகவலைப் பார்க்கவும் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"வைஃபை இயக்கப்பட்டுள்ளதா என்பதையும், இணைக்கப்பட்ட வைஃபை சாதனங்களின் பெயர் போன்ற வைஃபை நெட்வொர்க் குறித்த தகவலைப் பார்க்கவும் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"வைஃபை உடன் இணைக்கவும் மற்றும் அதனுடனான தொடர்பைத் துண்டித்தல்"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"வைஃபை ஆக்சஸ் பாயிண்ட்களில் இணைக்கவும், அவற்றிலிருந்து துண்டிக்கவும் மற்றும் வைஃபை நெட்வொர்க்குகளுக்கான சாதன உள்ளமைவில் மாற்றங்களைச் செய்யவும் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"வைஃபை ஆக்சஸ் பாயிண்ட்களில் இணைக்கவும், அவற்றிலிருந்து துண்டிக்கவும் மற்றும் வைஃபை நெட்வொர்க்குகளுக்கான சாதன உள்ளமைவில் மாற்றங்களைச் செய்யவும் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"வைஃபை பலமுகவரி பெறுதலை இயக்குதல்"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"உங்கள் டேப்லெட் மட்டுமல்லாமல், பலமுகவரி பயன்முறையின் முகவரிகளைப் பயன்படுத்தி வைஃபை நெட்வொர்க்கில் எல்லா சாதனங்களுக்கும் அனுப்பிய தொகுப்பைப் பெற பயன்பாட்டை அனுமதிக்கிறது. பலமுகவரியற்ற பயன்முறையை விட இது அதிகமான சக்தியைப் பயன்படுத்துகிறது."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"உங்கள் டிவிக்கு மட்டுமல்லாமல், மல்டிகாஸ்ட் முகவரிகளைப் பயன்படுத்தி வைஃபை நெட்வொர்க்கில் உள்ள எல்லா சாதனங்களுக்கும் அனுப்பப்பட்ட தொகுப்புகளைப் பெற, பயன்பாட்டை அனுமதிக்கிறது. இது மல்டிகாஸ்ட் அல்லாத பயன்முறைக்கான ஆற்றலை விட அதிகமாக பயன்படுத்துகிறது."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"உங்கள் மொபைல் மட்டுமல்லாமல், பலமுகவரி பயன்முறையின் முகவரிகளைப் பயன்படுத்தி வைஃபை நெட்வொர்க்கில் எல்லா சாதனங்களுக்கும் அனுப்பிய தொகுப்பைப் பெற பயன்பாட்டை அனுமதிக்கிறது. பலமுகவரியற்ற பயன்முறையை விட இது அதிகமான சக்தியைப் பயன்படுத்துகிறது."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"உங்கள் டேப்லெட் மட்டுமல்லாமல், பலமுகவரி பயன்முறையின் முகவரிகளைப் பயன்படுத்தி வைஃபை நெட்வொர்க்கில் எல்லா சாதனங்களுக்கும் அனுப்பிய தொகுப்பைப் பெற ஆப்ஸை அனுமதிக்கிறது. பலமுகவரியற்ற பயன்முறையை விட இது அதிகமான சக்தியைப் பயன்படுத்துகிறது."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"உங்கள் டிவிக்கு மட்டுமல்லாமல், மல்டிகாஸ்ட் முகவரிகளைப் பயன்படுத்தி வைஃபை நெட்வொர்க்கில் உள்ள எல்லா சாதனங்களுக்கும் அனுப்பப்பட்ட தொகுப்புகளைப் பெற, ஆப்ஸை அனுமதிக்கிறது. இது மல்டிகாஸ்ட் அல்லாத பயன்முறைக்கான ஆற்றலை விட அதிகமாக பயன்படுத்துகிறது."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"உங்கள் மொபைல் மட்டுமல்லாமல், பலமுகவரி பயன்முறையின் முகவரிகளைப் பயன்படுத்தி வைஃபை நெட்வொர்க்கில் எல்லா சாதனங்களுக்கும் அனுப்பிய தொகுப்பைப் பெற ஆப்ஸை அனுமதிக்கிறது. பலமுகவரியற்ற பயன்முறையை விட இது அதிகமான சக்தியைப் பயன்படுத்துகிறது."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"புளூடூத் அமைப்புகளை அணுகுதல்"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"டேப்லெட்டில் அக புளூடூத் ஐ உள்ளமைக்க, தொலைநிலை சாதனங்களைக் கண்டறிந்து இணைக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"அக புளூடூத் டிவியை உள்ளமைக்க மற்றும் தொலைநிலை சாதனங்களைக் கண்டறிந்து இணைக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"மொபைலில் அக புளூடூத் ஐ உள்ளமைக்க, தொலைநிலை சாதனங்களைக் கண்டறிந்து இணைக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"டேப்லெட்டில் அக புளூடூத் ஐ உள்ளமைக்க, தொலைநிலை சாதனங்களைக் கண்டறிந்து இணைக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"அக புளூடூத் டிவியை உள்ளமைக்க மற்றும் தொலைநிலை சாதனங்களைக் கண்டறிந்து இணைக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"மொபைலில் அக புளூடூத் ஐ உள்ளமைக்க, தொலைநிலை சாதனங்களைக் கண்டறிந்து இணைக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX உடன் இணை மற்றும் அதனுடனான தொடர்பைத் துண்டி"</string>
-    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX இணைக்கப்பட்டுள்ளதா என்பதையும், இணைக்கப்பட்டுள்ள WiMAX நெட்வொர்க்குகள் ஏதேனும் குறித்த தகவலைத் தீர்மானிக்கவும் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX இணைக்கப்பட்டுள்ளதா என்பதையும், இணைக்கப்பட்டுள்ள WiMAX நெட்வொர்க்குகள் ஏதேனும் குறித்த தகவலைத் தீர்மானிக்கவும் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX நிலையை மாற்றுதல்"</string>
-    <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAX நெட்வொர்க்குகளில் டேப்லெட்டை இணைக்கவும், அவற்றிலிருந்து துண்டிக்கவும் பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"டிவியுடன் இணைக்க மற்றும் WiMAX நெட்வொர்க்குகளிலிருந்து டிவியைத் துண்டிக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX நெட்வொர்க்குகளில் மொபைலை இணைக்கவும், அவற்றிலிருந்து துண்டிக்கவும் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAX நெட்வொர்க்குகளில் டேப்லெட்டை இணைக்கவும், அவற்றிலிருந்து துண்டிக்கவும் ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"டிவியுடன் இணைக்க மற்றும் WiMAX நெட்வொர்க்குகளிலிருந்து டிவியைத் துண்டிக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX நெட்வொர்க்குகளில் மொபைலை இணைக்கவும், அவற்றிலிருந்து துண்டிக்கவும் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"புளூடூத் சாதனங்களுடன் இணைத்தல்"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"டேப்லெட்டில் புளூடூத் இன் உள்ளமைவைப் பார்க்க மற்றும் இணைந்த சாதனங்களுடன் இணைப்புகளை ஏற்படுத்த மற்றும் ஏற்க பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"டிவியில் உள்ள புளூடூத்தின் உள்ளமைவைப் பார்க்க மற்றும் இணைக்கப்பட்ட சாதனங்களுடன் இணைப்பை உருவாக்க, ஏற்றுக்கொள்ள பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"மொபைலில் புளூடூத் இன் உள்ளமைவைப் பார்க்க மற்றும் இணைந்த சாதனங்களுடன் இணைப்புகளை ஏற்படுத்த மற்றும் ஏற்க பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"டேப்லெட்டில் புளூடூத் இன் உள்ளமைவைப் பார்க்க மற்றும் இணைந்த சாதனங்களுடன் இணைப்புகளை ஏற்படுத்த மற்றும் ஏற்க ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"டிவியில் உள்ள புளூடூத்தின் உள்ளமைவைப் பார்க்க மற்றும் இணைக்கப்பட்ட சாதனங்களுடன் இணைப்பை உருவாக்க, ஏற்றுக்கொள்ள ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"மொபைலில் புளூடூத் இன் உள்ளமைவைப் பார்க்க மற்றும் இணைந்த சாதனங்களுடன் இணைப்புகளை ஏற்படுத்த மற்றும் ஏற்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"குறுகிய இடைவெளி தகவல்பரிமாற்றத்தைக் கட்டுப்படுத்துதல்"</string>
-    <string name="permdesc_nfc" msgid="7120611819401789907">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_nfc" msgid="7120611819401789907">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"உங்கள் திரைப் பூட்டை முடக்குதல்"</string>
-    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
-    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
-    <skip />
-    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
-    <skip />
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் ஆப்ஸை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
+    <string name="permlab_requestPasswordComplexity" msgid="202650535669249674">"திரைப் பூட்டு தொடர்பான சிக்கலைத் தீர்க்க அனுமதி கோருதல்"</string>
+    <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"திரைப் பூட்டு தொடர்பான சிக்கலின் தன்மையை (அதிகம், நடுத்தரம், குறைவு அல்லது ஏதுமில்லை) அறிந்துகொள்ள ஆப்ஸை அனுமதிக்கிறது. இதன் மூலம் திரைப் பூட்டின் அளவு வரம்பையும் வகையையும் தெரிந்துகொள்ளலாம். மேலும் திரைப் பூட்டைக் குறிப்பிட்ட நிலைக்கு மாற்றிக் கொள்ளலாம் என்பதையும் பயனர்களுக்கு ஆப்ஸ் பரிந்துரைக்க முடியும். ஆனால் தங்கள் விருப்பப்படி அவற்றைப் பயனர்கள் நிராகரிக்கவோ ஏற்கவோ இயலும். கவனத்திற்கு: திரைப் பூட்டு எளிய உரையிலானதாக சேமிக்கப்படுவதில்லை என்பதால் சரியான கடவுச்சொல்லை ஆப்ஸால் அறிய இயலாது."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"பயோமெட்ரிக் வன்பொருளைப் பயன்படுத்து"</string>
-    <string name="permdesc_useBiometric" msgid="8389855232721612926">"பயோமெட்ரிக் வன்பொருளைப் பயன்படுத்தி அங்கீகரிப்பதற்கு, பயன்பாட்டை அனுமதிக்கும்"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"பயோமெட்ரிக் வன்பொருளைப் பயன்படுத்தி அங்கீகரிப்பதற்கு, ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"கைரேகை வன்பொருளை நிர்வகி"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"பயன்படுத்துவதற்காக, கைரேகை டெம்ப்ளேட்களைச் சேர்க்க மற்றும் நீக்குவதற்கான செயல்முறைகளை இயக்குவதற்குப் பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"பயன்படுத்துவதற்காக, கைரேகை டெம்ப்ளேட்களைச் சேர்க்க மற்றும் நீக்குவதற்கான செயல்முறைகளை இயக்குவதற்குப் ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"கைரேகை வன்பொருளைப் பயன்படுத்து"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"அங்கீகரிப்பதற்கு, கைரேகை வன்பொருளைப் பயன்படுத்த, பயன்பாட்டை அனுமதிக்கும்"</string>
-    <string name="permlab_audioRead" msgid="6617225220728465565">"இசைத் தொகுப்பை அணுகுதல்"</string>
-    <string name="permdesc_audioRead" msgid="5034032570243484805">"உங்களின் இசைத் தொகுப்பை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"அங்கீகரிப்பதற்கு, கைரேகை வன்பொருளைப் பயன்படுத்த, ஆப்ஸை அனுமதிக்கும்"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"இசைத் தொகுப்பை மாற்றுதல்"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"உங்களின் இசைத் தொகுப்பை மாற்ற ஆப்ஸை அனுமதிக்கும்."</string>
-    <string name="permlab_videoRead" msgid="9182618678674737229">"வீடியோ தொகுப்பை அணுகுதல்"</string>
-    <string name="permdesc_videoRead" msgid="7045676429859396194">"உங்களின் வீடியோ தொகுப்பை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"வீடியோ தொகுப்பை மாற்றுதல்"</string>
     <string name="permdesc_videoWrite" msgid="5448565757490640841">"உங்களின் வீடியோ தொகுப்பை மாற்ற ஆப்ஸை அனுமதிக்கும்."</string>
-    <string name="permlab_imagesRead" msgid="3015078545742665304">"படத் தொகுப்பை அணுகுதல்"</string>
-    <string name="permdesc_imagesRead" msgid="3144263806038695580">"உங்களின் படத் தொகுப்பை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_imagesWrite" msgid="3391306186247235510">"படத் தொகுப்பை மாற்றுதல்"</string>
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"உங்களின் படத் தொகுப்பை மாற்ற ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"மீடியா தொகுப்பிலிருந்து இடங்களை அறிதல்"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"உங்களின் மீடியா தொகுப்பிலிருந்து இடங்களை அறிந்துகொள்ள ஆப்ஸை அனுமதிக்கும்."</string>
-    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g>ஐப் பயன்படுத்த அங்கீகாரத்தை உறுதிசெய்க."</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"நீங்கள்தான் என உறுதிசெய்க"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"பயோமெட்ரிக் வன்பொருள் இல்லை"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"அங்கீகரிப்பு ரத்தானது"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"அடையாளங்காணபடவில்லை"</string>
@@ -572,123 +551,107 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"கைரேகை ஐகான்"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"முக அங்கீகாரத்திற்கான வன்பொருளை நிர்வகித்தல்"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"\'முகம் காட்டித் திறத்தலுக்கான\' வன்பொருளை நிர்வகித்தல்"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"உபயோகிப்பதற்காக முக டெம்ப்ளேட்டுகளை சேர்க்கும்/நீக்கும் முறைகளை இயக்க, ஆப்ஸை அனுமதிக்கும்."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"முக அங்கீகாரத்திற்கான வன்பொருளைப் பயன்படுத்துதல்"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"அடையாளம் காண்பதற்கு, முக அங்கீகார வன்பொருளைப் பயன்படுத்த ஆப்ஸை அனுமதிக்கிறது"</string>
-    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
-    <skip />
-    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
-    <skip />
-    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"’முகம் காட்டித் திறத்தல்’ அம்சத்திற்கான வன்பொருளைப் பயன்படுத்துதல்"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"அடையாளம் காண \'முகம் காட்டித் திறத்தலுக்கான\' வன்பொருளைப் பயன்படுத்த ஆப்ஸை அனுமதிக்கும்"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"முகம் காட்டித் திறத்தல்"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"முகத்தை மீண்டும் பதிவுசெய்யவும்"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"அடையாளத்தை மேம்படுத்த முகத்தை மீண்டும் பதிவுசெய்யவும்"</string>
+    <string name="face_acquired_insufficient" msgid="2767330364802375742">"முகம் தெளிவாகப் பதிவாகவில்லை. மீண்டும் முயலவும்."</string>
+    <string name="face_acquired_too_bright" msgid="5005650874582450967">"அதிக ஒளிர்வு. மிதமான ஒளியில் முயலவும்."</string>
+    <string name="face_acquired_too_dark" msgid="1966194696381394616">"இருட்டாக உள்ளது. பிரகாசமான ஒளியில் முயலவும்."</string>
+    <string name="face_acquired_too_close" msgid="1401011882624272753">"மொபைலை முகத்தில் இருந்து தள்ளிப் பிடிக்கவும்."</string>
+    <string name="face_acquired_too_far" msgid="1210969240069012510">"மொபைலை அருகில் நகர்த்தவும்."</string>
+    <string name="face_acquired_too_high" msgid="3362395713403348013">"மொபைலை மேலே நகர்த்தவும்."</string>
+    <string name="face_acquired_too_low" msgid="488983581737550912">"மொபைலைக் கீழே நகர்த்தவும்."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"மொபைலை இடப்புறம் நகர்த்தவும்."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"மொபைலை வலப்புறம் நகர்த்தவும்."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"முழுமுகம் தெரியுமாறு நேராகப் பார்க்கவும்."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"முகத்தை மொபைலுக்கு நேராக வைக்கவும்."</string>
+    <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"அதிகமாக அசைகிறது. மொபைலை அசைக்காமல் பிடிக்கவும்."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"உங்கள் முகத்தை மீண்டும் பதிவுசெய்யுங்கள்."</string>
-    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="7663983770123789694">"முகத்தைக் கண்டறிய இயலவில்லை. மீண்டும் முயலவும்."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"மீண்டும் அதே போஸ் தருகிறீர்கள், வேறு முயலுங்கள்."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
-    <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
-    <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"உங்கள் தலையை நேராக வைக்கவும்."</string>
-    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
-    <skip />
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"தலையை லேசாகத் திருப்பவும்."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"தலையை லேசாகத் திருப்பவும்."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"உங்கள் தலையைச் சற்றுத் திருப்பவும்."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"உங்கள் முகத்தை மறைக்கும் அனைத்தையும் நீக்குக."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"திரையையும் அதிலுள்ள கருப்புப் பட்டியையும் சுத்தம் செய்யவும்"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="6255891785768984615">"முக அங்கீகாரத்திற்கான வன்பொருள் இல்லை."</string>
-    <!-- no translation found for face_error_timeout (2605673935810019129) -->
-    <skip />
-    <string name="face_error_no_space" msgid="8224993703466381314">"முகத்தைச் சேமிக்க இயலாது."</string>
+    <string name="face_error_hw_not_available" msgid="396883585636963908">"முகத்தைச் சரிபார்க்க இயலவில்லை. வன்பொருள் இல்லை."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"\'முகம் காட்டித் திறத்தலை\' மீண்டும் முயலவும்."</string>
+    <string name="face_error_no_space" msgid="2712120617457553825">"புதிய முகங்களைச் சேர்க்க இயலவில்லை. பழையது ஒன்றை நீக்கவும்."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
-    <string name="face_error_user_canceled" msgid="8943921120862164539">"பயனர், முக அங்கீகாரத்தை ரத்துசெய்தார்."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"\'முகம் காட்டித் திறத்தல்\' பயனரால் ரத்துசெய்யப்பட்டது."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"பலமுறை முயன்றுவிட்டீர்கள். பிறகு முயலவும்."</string>
-    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"பலமுறை தோல்வி. முக அங்கீகாரம் முடக்கப்பட்டது."</string>
-    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
-    <skip />
-    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"பலமுறை முயன்றுவிட்டீர்கள். \'முகம் காட்டித் திறத்தல்’ முடக்கப்பட்டது."</string>
+    <string name="face_error_unable_to_process" msgid="4940944939691171539">"முகத்தைச் சரிபார்க்க இயலவில்லை. மீண்டும் முயலவும்."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"’முகம் காட்டித் திறத்தலை’ நீங்கள் அமைக்கவில்லை."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"இந்த சாதனத்தில் ’முகம் காட்டித் திறத்தல்’ ஆதரிக்கப்படவில்லை."</string>
     <string name="face_name_template" msgid="7004562145809595384">"முகம் <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
     <string name="face_icon_content_description" msgid="4024817159806482191">"முக ஐகான்"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ஒத்திசைவு அமைப்புகளைப் படித்தல்"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் பயன்பாடு கணக்குடன் ஒத்திசைக்கப்பட்டுள்ளதா என்பதை இது தீர்மானிக்கலாம்."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைப் படிக்க ஆப்ஸை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் ஆப்ஸ் கணக்குடன் ஒத்திசைக்கப்பட்டுள்ளதா என்பதை இது தீர்மானிக்கலாம்."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ஒத்திசைவை இயக்குவதையும், முடக்குவதையும் மாற்றுதல்"</string>
-    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைத் திருத்த பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் பயன்பாட்டைக் கணக்குடன் ஒத்திசைவை இயக்குவதற்கு இது பயன்படுத்தப்படலாம்."</string>
+    <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைத் திருத்த ஆப்ஸை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் ஆப்ஸைக் கணக்குடன் ஒத்திசைவை இயக்குவதற்கு இது பயன்படுத்தப்படலாம்."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"ஒத்திசைவு புள்ளிவிவரங்களைப் படித்தல்"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"நிகழ்வுகள் ஒத்திசைவின் வரலாறு மற்றும் ஒத்திசைக்கப்பட்ட தரவு எவ்வளவு ஆகியன உட்பட, கணக்கிற்கான ஒத்திசைவு புள்ளிவிவரங்களைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"நிகழ்வுகள் ஒத்திசைவின் வரலாறு மற்றும் ஒத்திசைக்கப்பட்ட தரவு எவ்வளவு ஆகியன உட்பட, கணக்கிற்கான ஒத்திசைவு புள்ளிவிவரங்களைப் படிக்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_sdcardRead" msgid="1438933556581438863">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களைப் பார்த்தல்"</string>
     <string name="permdesc_sdcardRead" msgid="1804941689051236391">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களைப் பார்க்க ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_sdcardWrite" msgid="9220937740184960897">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களை மாற்றும் அல்லது நீக்கும்"</string>
     <string name="permdesc_sdcardWrite" msgid="2834431057338203959">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கத்தில் மாற்றங்களைச் செய்ய அனுமதிக்கும்."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP அழைப்புகளைச் செய்தல்/பெறுதல்"</string>
-    <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP அழைப்புகளைச் செய்ய/பெற, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP அழைப்புகளைச் செய்ய/பெற, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"புதிய நிறுவன சிம் இணைப்புகளைப் பதிவுசெய்தல்"</string>
-    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"புதிய நிறுவன சிம் இணைப்புகளைப் பதிவுசெய்ய, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"புதிய நிறுவன சிம் இணைப்புகளைப் பதிவுசெய்ய, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_register_call_provider" msgid="108102120289029841">"புதிய நிறுவன இணைப்புகளைப் பதிவுசெய்தல்"</string>
-    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"புதிய தொலைத்தொடர்பு இணைப்புகளைப் பதிவுசெய்ய, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"புதிய தொலைத்தொடர்பு இணைப்புகளைப் பதிவுசெய்ய, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"தொலைத்தொடர்பு இணைப்புகளை நிர்வகி"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"தொலைத்தொடர்பு இணைப்புகளை நிர்வகிக்க, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"தொலைத்தொடர்பு இணைப்புகளை நிர்வகிக்க, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"உள்வரும் அழைப்பிற்கான திரையுடன் ஊடாடுதல்"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"உள்வரும் அழைப்பிற்கான திரையைப் பயனர் எப்போது மற்றும் எப்படிக் காணவேண்டும் என்பதைக் கட்டுப்படுத்துவதற்குப் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"உள்வரும் அழைப்பிற்கான திரையைப் பயனர் எப்போது மற்றும் எப்படிக் காணவேண்டும் என்பதைக் கட்டுப்படுத்துவதற்குப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"டெலிஃபோனி சேவைகளுடனான ஊடாடல்"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"அழைப்புகளைச் செய்ய/பெற, டெலிஃபோனி சேவைகளுடன் ஊடாட பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"அழைப்புகளைச் செய்ய/பெற, டெலிஃபோனி சேவைகளுடன் ஊடாட ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"அழைப்பின் பயனர் அனுபவத்தை வழங்குதல்"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"அழைப்பின் பயனர் அனுபவத்தை வழங்க பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"அழைப்பின் பயனர் அனுபவத்தை வழங்க ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"பிணைய பயன்பாட்டு வரலாற்றைப் படித்தல்"</string>
-    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"குறிப்பிட்ட நெட்வொர்க்குகள் மற்றும் பயன்பாடுகளுக்கான நெட்வொர்க் பயன்பாட்டின் வரலாற்றைப் படிக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"குறிப்பிட்ட நெட்வொர்க்குகள் மற்றும் பயன்பாடுகளுக்கான நெட்வொர்க் ஆப்ஸின் வரலாற்றைப் படிக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"பிணைய கொள்கையை நிர்வகித்தல்"</string>
-    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"நெட்வொர்க் கொள்கைகளை நிர்வகிக்க மற்றும் பயன்பாடு சார்ந்த விதிகளை வரையறுக்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"நெட்வொர்க் கொள்கைகளை நிர்வகிக்க மற்றும் ஆப்ஸ் சார்ந்த விதிகளை வரையறுக்க, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"பிணைய பயன்பாட்டு கணக்கிடுதலை மாற்றுதல்"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"பயன்பாடுகளுக்கு எதிராக நெட்வொர்க் பயன்பாடு எவ்வாறு கணக்கிடப்படுகிறது என்பதை மாற்ற பயன்பாட்டை அனுமதிக்கிறது. இயல்பான பயன்பாடுகளால் பயன்படுத்தப்படுவதற்காக அல்ல."</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ஆப்ஸ்களுக்கு எதிராக நெட்வொர்க் ஆப்ஸ் எவ்வாறு கணக்கிடப்படுகிறது என்பதை மாற்ற ஆப்ஸை அனுமதிக்கிறது. இயல்பான ஆப்ஸ்களால் பயன்படுத்தப்படுவதற்காக அல்ல."</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"அறிவிப்புகளின் அணுகல்"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"பிற பயன்பாடுகளால் இடுகையிடப்பட்ட அறிவிப்புகள் உள்பட எல்லா அறிவிப்புகளையும் பெற, பார்க்க மற்றும் அழிக்கப் பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"பிற பயன்பாடுகளால் இடுகையிடப்பட்ட அறிவிப்புகள் உள்பட எல்லா அறிவிப்புகளையும் பெற, பார்க்க மற்றும் அழிக்கப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"அறிவிப்புகளைக் கண்காணிக்கும் சேவையுடன் இணைத்தல்"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"அறிவிப்புகளைக் கண்காணிக்கும் சேவையின் உயர் நிலை இடைமுகத்துடன் இணைப்பதற்கு ஹோல்டரை அனுமதிக்கிறது. இயல்பான பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"நிபந்தனை வழங்குநர் சேவையுடன் இணைத்தல்"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"நிபந்தனை வழங்குநர் சேவையின் உயர் நிலை இடைமுகத்துடன் இணைப்பதற்கு ஹோல்டரை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"டிரீம் சேவையுடன் இணை"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"டிரீம் சேவையின் உயர் நிலை இடைமுகத்துடன் இணைப்பதற்கு ஹோல்டரை அனுமதிக்கிறது. இயல்பான பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"மொபைல் நிறுவனம் வழங்கிய உள்ளமைவு பயன்பாட்டை செயலாக்குதல்"</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"மொபைல் நிறுவனம் வழங்கிய உள்ளமைவு ஆப்ஸை செயலாக்குதல்"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"மொபைல் நிறுவனம் வழங்கிய உள்ளமைவு பயன்பாட்டைச் செயல்படுத்த ஹோல்டரை அனுமதிக்கிறது. இயல்பான பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"பிணைய நிலைகள் பற்றிய அறிவிப்புகளைக் கவனித்தல்"</string>
-    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"பிணைய நிலைகள் பற்றிய அறிவிப்புகளைக் கவனிக்க பயன்பாட்டை அனுமதிக்கிறது. இயல்பான பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"பிணைய நிலைகள் பற்றிய அறிவிப்புகளைக் கவனிக்க ஆப்ஸை அனுமதிக்கிறது. இயல்பான பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_setInputCalibration" msgid="4902620118878467615">"உள்ளீட்டுச் சாதனத்தின் அளவுத்திருத்தத்தை மாற்றுதல்"</string>
-    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"தொடுதல் திரையின் அளவு திருத்த அளபுருக்களை மாற்ற, பயன்பாட்டை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்குத் தேவைப்படாது."</string>
+    <string name="permdesc_setInputCalibration" msgid="4527511047549456929">"தொடுதல் திரையின் அளவு திருத்த அளபுருக்களை மாற்ற, ஆப்ஸை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்குத் தேவைப்படாது."</string>
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM சான்றிதழ்களை அணுகுதல்"</string>
-    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM சான்றிதழ்களை வழங்க மற்றும் பயன்படுத்த, பயன்பாட்டை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதும் தேவைப்படாது."</string>
+    <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"DRM சான்றிதழ்களை வழங்க மற்றும் பயன்படுத்த, ஆப்ஸை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதும் தேவைப்படாது."</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android பீம் பரிமாற்ற நிலையைப் பெறுதல்"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"நடப்பு Android பீம் பரிமாற்றங்கள் குறித்த தகவலைப் பெற, பயன்பாட்டை அனுமதிக்கிறது"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"நடப்பு Android பீம் பரிமாற்றங்கள் குறித்த தகவலைப் பெற, ஆப்ஸை அனுமதிக்கிறது"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM சான்றிதழ்களை அகற்று"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM சான்றிதழ்களை அகற்ற, பயன்பாட்டை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
+    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM சான்றிதழ்களை அகற்ற, ஆப்ஸை அனுமதிக்கிறது. சாதாரண பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"மொபைல் நிறுவனச் செய்தியிடல் சேவையுடன் இணைத்தல்"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"மொபைல் நிறுவனச் செய்தியிடல் சேவையின் உயர்-நிலை இடைமுகத்துடன் ஹோல்டரை இணைக்க அனுமதிக்கும். இயல்பான பயன்பாடுகளுக்குத் தேவைப்படாது."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"மொபைல் நிறுவன சேவைகளுடன் இணைத்தல்"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"மொபைல் நிறுவன சேவைகளுடன் இணைக்க, ஹோல்டரை அனுமதிக்கும். சாதாரணப் பயன்பாடுகளுக்கு எப்போதுமே தேவைப்படாது."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"தொந்தரவு செய்ய வேண்டாம் அம்சத்தை அணுகுதல்"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"தொந்தரவு செய்ய வேண்டாம் உள்ளமைவைப் படிக்கவும் எழுதவும், பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"தொந்தரவு செய்ய வேண்டாம் உள்ளமைவைப் படிக்கவும் எழுதவும், ஆப்ஸை அனுமதிக்கிறது."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"அனுமதி உபயோகத்தை அணுகுதல்"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"ஆப்ஸிற்கான அனுமதி உபயோகத்தை ஹோல்டருக்கு வழங்கும். இயல்பான ஆப்ஸிற்கு இது எப்போதுமே தேவைப்படாது."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"கடவுச்சொல் விதிகளை அமைக்கவும்"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"திரைப் பூட்டின் கடவுச்சொற்கள் மற்றும் பின்களில் அனுமதிக்கப்படும் நீளத்தையும் எழுத்துக்குறிகளையும் கட்டுப்படுத்தும்."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"திரையைத் திறப்பதற்கான முயற்சிகளைக் கண்காணி"</string>
@@ -833,7 +796,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"வீடு"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"அலுவலகம்"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"மற்றவை"</string>
-    <string name="quick_contacts_not_available" msgid="746098007828579688">"இதைப் பார்ப்பதற்குகந்த பயன்பாடு எதுவும் நிறுவப்படவில்லை."</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"இதைப் பார்ப்பதற்குகந்த ஆப்ஸ் எதுவும் நிறுவப்படவில்லை."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"பின் குறியீட்டை உள்ளிடவும்"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK மற்றும் புதிய பின் குறியீட்டை உள்ளிடவும்"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK குறியீடு"</string>
@@ -925,7 +888,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"திறப்பதற்கான பகுதியை விவரிக்கவும்."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"ஸ்லைடு மூலம் திறத்தல்."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"வடிவம் மூலம் திறத்தல்."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"முகத்தால் திறத்தல்."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"முகம் காட்டித் திறத்தல்."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin மூலம் திறத்தல்."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"சிம்மைத் திறக்கும் பின்."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"சிம்மைத் திறக்கும் Puk."</string>
@@ -971,17 +934,17 @@
     <string name="autofill_area" msgid="3547409050889952423">"பகுதி"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"எமிரேட்"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"உங்கள் இணையப் புத்தக்கக்குறிகள் மற்றும் வரலாற்றைப் படித்தல்"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"உலாவி மூலம் பார்வையிட்ட எல்லா URLகளின் வரலாற்றையும், உலாவியில் குறிக்கப்பட்ட எல்லா புத்தகக்குறிகளையும் படிக்கப் பயன்பாட்டை அனுமதிக்கிறது. குறிப்பு: மூன்றாம் தரப்பு உலாவிகள் அல்லது இணைய உலாவல் திறன்களுடன் கூடிய பிற பயன்பாடுகளால் இந்த அனுமதி செயற்படுத்தப்படாமல் போகலாம்."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"உலாவி மூலம் பார்வையிட்ட எல்லா URLகளின் வரலாற்றையும், உலாவியில் குறிக்கப்பட்ட எல்லா புத்தகக்குறிகளையும் படிக்கப் ஆப்ஸை அனுமதிக்கிறது. குறிப்பு: மூன்றாம் தரப்பு உலாவிகள் அல்லது இணைய உலாவல் திறன்களுடன் கூடிய பிற பயன்பாடுகளால் இந்த அனுமதி செயற்படுத்தப்படாமல் போகலாம்."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"இணையப் புத்தகக்குறிகளையும், வரலாற்றையும் எழுதுதல்"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"உங்கள் டேப்லெட்டில் சேமிக்கப்பட்ட உலாவியின் வரலாறு அல்லது புத்தகக்குறிகளைத் திருத்த பயன்பாட்டை அனுமதிக்கிறது. இது உலாவியின் தரவை அழிக்கவோ, திருத்தவோ பயன்பாட்டை அனுமதிக்கலாம். குறிப்பு: இணைய உலாவல் செயல்திறன்கள் மூலம் மூன்றாம் தரப்பு உலாவிகள் அல்லது பிற பயன்பாடுகள் இந்த அனுமதியைச் செயற்படுத்த முடியாது."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"டிவியில் சேமிக்கப்பட்ட உலாவியின் வரலாறு அல்லது புத்தகக்குறிகளைத் திருத்த, பயன்பாட்டை அனுமதிக்கிறது. இது உலாவியின் தரவை அழிக்க அல்லது திருத்த பயன்பாட்டை அனுமதிக்கலாம். குறிப்பு: இந்த அனுமதி, மூன்றாம் தரப்பு உலாவிகள் அல்லது இணைய உலாவல் திறன்களுடன் கூடிய பிற பயன்பாடுகள் போன்றவற்றில் செயல்படாமல் போகலாம்."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"உங்கள் மொபைலில் சேமிக்கப்பட்ட உலாவியின் வரலாறு அல்லது புத்தகக்குறிகளைத் திருத்த பயன்பாட்டை அனுமதிக்கிறது. இது உலாவியின் தரவை அழிக்கவோ, திருத்தவோ பயன்பாட்டை அனுமதிக்கலாம். குறிப்பு: இணைய உலாவல் செயல்திறன்கள் மூலம் மூன்றாம் தரப்பு உலாவிகள் அல்லது பிற பயன்பாடுகள் இந்த அனுமதியைச் செயற்படுத்த முடியாது."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"உங்கள் டேப்லெட்டில் சேமிக்கப்பட்ட உலாவியின் வரலாறு அல்லது புத்தகக்குறிகளைத் திருத்த ஆப்ஸை அனுமதிக்கிறது. இது உலாவியின் தரவை அழிக்கவோ, திருத்தவோ ஆப்ஸை அனுமதிக்கலாம். குறிப்பு: இணைய உலாவல் செயல்திறன்கள் மூலம் மூன்றாம் தரப்பு உலாவிகள் அல்லது பிற பயன்பாடுகள் இந்த அனுமதியைச் செயற்படுத்த முடியாது."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"டிவியில் சேமிக்கப்பட்ட உலாவியின் வரலாறு அல்லது புத்தகக்குறிகளைத் திருத்த, ஆப்ஸை அனுமதிக்கிறது. இது உலாவியின் தரவை அழிக்க அல்லது திருத்த ஆப்ஸை அனுமதிக்கலாம். குறிப்பு: இந்த அனுமதி, மூன்றாம் தரப்பு உலாவிகள் அல்லது இணைய உலாவல் திறன்களுடன் கூடிய பிற பயன்பாடுகள் போன்றவற்றில் செயல்படாமல் போகலாம்."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"உங்கள் மொபைலில் சேமிக்கப்பட்ட உலாவியின் வரலாறு அல்லது புத்தகக்குறிகளைத் திருத்த ஆப்ஸை அனுமதிக்கிறது. இது உலாவியின் தரவை அழிக்கவோ, திருத்தவோ ஆப்ஸை அனுமதிக்கலாம். குறிப்பு: இணைய உலாவல் செயல்திறன்கள் மூலம் மூன்றாம் தரப்பு உலாவிகள் அல்லது பிற பயன்பாடுகள் இந்த அனுமதியைச் செயற்படுத்த முடியாது."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"அலாரத்தை அமைத்தல்"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"நிறுவிய அலார கடிகாரப் பயன்பாட்டில் அலாரத்தை அமைக்க, பயன்பாட்டை அனுமதிக்கிறது. சில அலார கடிகார பயன்பாடுகளில் இந்த அம்சம் இல்லாமல் இருக்கலாம்."</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"நிறுவிய அலார கடிகாரப் பயன்பாட்டில் அலாரத்தை அமைக்க, ஆப்ஸை அனுமதிக்கிறது. சில அலார கடிகார பயன்பாடுகளில் இந்த அம்சம் இல்லாமல் இருக்கலாம்."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"குரலஞ்சலைச் சேர்த்தல்"</string>
-    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"குரலஞ்சல் இன்பாக்ஸில் செய்திகளைச் சேர்க்க, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_addVoicemail" msgid="6604508651428252437">"குரலஞ்சல் இன்பாக்ஸில் செய்திகளைச் சேர்க்க, ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"உலாவியின் புவியியல் இருப்பிடம் சார்ந்த அனுமதிகளைத் திருத்துதல்"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"உலாவியின் புவியியல் இருப்பிடம் சார்ந்த அனுமதிகளைத் திருத்த, பயன்பாட்டை அனுமதிக்கிறது. இடத் தகவலை தன்னிச்சையான இணையதளங்களுக்கு அனுப்புவதை அனுமதிக்க, தீங்குவிளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"உலாவியின் புவியியல் இருப்பிடம் சார்ந்த அனுமதிகளைத் திருத்த, ஆப்ஸை அனுமதிக்கிறது. இடத் தகவலை தன்னிச்சையான இணையதளங்களுக்கு அனுப்புவதை அனுமதிக்க, தீங்குவிளைவிக்கும் பயன்பாடுகள் இதைப் பயன்படுத்தலாம்."</string>
     <string name="save_password_message" msgid="767344687139195790">"இந்தக் கடவுச்சொல்லை உலாவி நினைவில்கொள்ள விரும்புகிறீர்களா?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"இப்போது இல்லை"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"நினைவில்கொள்"</string>
@@ -1153,7 +1116,7 @@
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> இயக்குகிறது"</string>
-    <string name="app_running_notification_text" msgid="1197581823314971177">"மேலும் தகவலுக்கு அல்லது பயன்பாட்டை நிறுத்த, தட்டவும்."</string>
+    <string name="app_running_notification_text" msgid="1197581823314971177">"மேலும் தகவலுக்கு அல்லது ஆப்ஸை நிறுத்த, தட்டவும்."</string>
     <string name="ok" msgid="5970060430562524910">"சரி"</string>
     <string name="cancel" msgid="6442560571259935130">"ரத்துசெய்"</string>
     <string name="yes" msgid="5362982303337969312">"சரி"</string>
@@ -1168,8 +1131,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"இதன்மூலம் திற"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s மூலம் திற"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"திற"</string>
-    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"மூலம் <xliff:g id="HOST">%1$s</xliff:g> இணைப்புகளைத் திறப்பதற்கான அணுகலை வழங்குதல்"</string>
-    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="APPLICATION">%2$s</xliff:g> மூலம் <xliff:g id="HOST">%1$s</xliff:g> இணைப்புகளைத் திறப்பதற்கான அணுகலை வழங்குதல்"</string>
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"<xliff:g id="HOST">%1$s</xliff:g> இணைப்புகளை இதன் மூலம் திற:"</string>
+    <string name="whichOpenLinksWith" msgid="6392123355599572804">"இணைப்புகளை இதன் மூலம் திற:"</string>
+    <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"இணைப்புகளை <xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸில் திறத்தல்"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"<xliff:g id="HOST">%1$s</xliff:g> இணைப்புகளை <xliff:g id="APPLICATION">%2$s</xliff:g> ஆப்ஸில் திறத்தல்"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"அணுகலை வழங்கு"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"இதன் மூலம் திருத்து"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s மூலம் திருத்து"</string>
@@ -1196,12 +1161,12 @@
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> செயலிழந்தது"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> தொடர்ந்து செயலிழக்கிறது"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> தொடர்ந்து செயலிழக்கிறது"</string>
-    <string name="aerr_restart" msgid="7581308074153624475">"பயன்பாட்டை மீண்டும் திற"</string>
+    <string name="aerr_restart" msgid="7581308074153624475">"ஆப்ஸை மீண்டும் திற"</string>
     <string name="aerr_report" msgid="5371800241488400617">"கருத்து தெரிவி"</string>
     <string name="aerr_close" msgid="2991640326563991340">"மூடு"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"சாதனம் மீண்டும் தொடங்கும் வரை முடக்கு"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"காத்திரு"</string>
-    <string name="aerr_close_app" msgid="3269334853724920302">"பயன்பாட்டை மூடு"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"ஆப்ஸை மூடு"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> பதிலளிக்கவில்லை"</string>
     <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> பதிலளிக்கவில்லை"</string>
@@ -1211,7 +1176,7 @@
     <string name="report" msgid="4060218260984795706">"புகாரளி"</string>
     <string name="wait" msgid="7147118217226317732">"காத்திரு"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"இந்தப் பக்கம் செயல்படாததாக மாறிவிட்டது.\n\nஇதை மூட நினைக்கிறீர்களா?"</string>
-    <string name="launch_warning_title" msgid="1547997780506713581">"பயன்பாடு திசைதிருப்பப்பட்டது"</string>
+    <string name="launch_warning_title" msgid="1547997780506713581">"ஆப்ஸ் திசைதிருப்பப்பட்டது"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> இப்போது இயங்குகிறது."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> உண்மையாக வெளியிடப்பட்டது."</string>
     <string name="screen_compat_mode_scale" msgid="3202955667675944499">"அளவு"</string>
@@ -1219,10 +1184,10 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"சிஸ்டம் அமைப்பு &gt; பயன்பாடுகள் &gt; பதிவிறக்கம் என்பதில் இதை மீண்டும் இயக்கவும்."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"தற்போதைய திரை அளவு அமைப்பை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காததால், அது வழக்கத்திற்கு மாறாகச் செயல்படக்கூடும்."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"எப்போதும் காட்டு"</string>
-    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> பயன்பாடானது, இந்தச் சாதனத்தின் Android OSக்கு இணக்கமற்ற பதிப்பிற்காக உருவாக்கப்பட்டதால், இதில் சரியாகச் செயல்படாது. இந்தப் பயன்பாட்டின் புதுப்பிக்கப்பட்ட பதிப்பானது தற்போது கிடைக்கக்கூடும்."</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> பயன்பாடானது, இந்தச் சாதனத்தின் Android OSக்கு இணக்கமற்ற பதிப்பிற்காக உருவாக்கப்பட்டதால், இதில் சரியாகச் செயல்படாது. இந்த ஆப்ஸின் புதுப்பிக்கப்பட்ட பதிப்பானது தற்போது கிடைக்கக்கூடும்."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"எப்போதும் காட்டு"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"புதுப்பிப்பு உள்ளதா எனப் பார்"</string>
-    <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாடு (செயல்முறை <xliff:g id="PROCESS">%2$s</xliff:g>), தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
+    <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> ஆப்ஸ் (செயல்முறை <xliff:g id="PROCESS">%2$s</xliff:g>), தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> செயல்முறை, தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
     <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"மொபைல் புதுப்பிக்கப்படுகிறது…"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"டேப்லெட் புதுப்பிக்கப்படுகிறது…"</string>
@@ -1234,7 +1199,7 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"சேமிப்பகத்தை உகந்ததாக்குகிறது."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"சிஸ்டம் புதுப்பிப்பை நிறைவுசெய்கிறது…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g>ஐ மேம்படுத்துகிறது…"</string>
-    <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> பயன்பாட்டை ஒருங்கிணைக்கிறது."</string>
+    <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> ஆப்ஸை ஒருங்கிணைக்கிறது."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g>ஐத் தயார்செய்கிறது."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"பயன்பாடுகள் தொடங்கப்படுகின்றன."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"துவக்குதலை முடிக்கிறது."</string>
@@ -1246,16 +1211,12 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> பயன்பாட்டைத் திற"</string>
     <string name="new_app_description" msgid="5894852887817332322">"சேமிக்கப்படாமலேயே <xliff:g id="OLD_APP">%1$s</xliff:g> மூடப்படும்"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"நினைவக வரம்பை <xliff:g id="PROC">%1$s</xliff:g> மீறியது"</string>
-    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
-    <skip />
+    <string name="dump_heap_ready_notification" msgid="1162196579925048701">"<xliff:g id="PROC">%1$s</xliff:g> ஹீப் டம்ப் தயார்"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"ஹீப் டம்ப் சேகரிக்கப்பட்டது. பகிர, தட்டவும்."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ஹீப் டம்பைப் பகிரவா?"</string>
-    <!-- no translation found for dump_heap_text (8546022920319781701) -->
-    <skip />
-    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
-    <skip />
-    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
-    <skip />
+    <string name="dump_heap_text" msgid="8546022920319781701">"தனது நினைவக வரம்பான <xliff:g id="SIZE">%2$s</xliff:g> அளவை <xliff:g id="PROC">%1$s</xliff:g> செயலாக்கம் மீறியுள்ளது. உங்களுக்கான ஹீப் டம்ப்பினை அதன் டெவெலப்பருடன் பகிரலாம். கவனத்திற்கு: ஆப்ஸ் அணுகக்கூடிய ஏதேனும் தனிப்பட்ட தகவல் இந்த ஹீப் டம்ப்பில் இருக்கக்கூடும்."</string>
+    <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="SIZE">%2$s</xliff:g> அளவான தனது நினைவக வரம்பை <xliff:g id="PROC">%1$s</xliff:g> செயலாக்கம் மீறியுள்ளது. உங்களுக்கான ஹீப் டம்ப் பகிர்வதற்குக் கிடைக்கிறது. கவனத்திற்கு: நீங்கள் உள்ளிட்டவை உட்பட செயலாக்கத்திற்கு அணுகலுள்ள தனிப்பட்ட தகவல்கள் இந்த ஹீப் டம்பில் இருக்கக்கூடும்"</string>
+    <string name="dump_heap_ready_text" msgid="1778041771455343067">"<xliff:g id="PROC">%1$s</xliff:g> செயலாக்கத்திற்கான ஹீப் டம்ப் நீங்கள் பகிர்வதற்குக் கிடைக்கிறது. கவனத்திற்கு: நீங்கள் உள்ளிட்டவை உட்பட செயலாக்கத்திற்கு அணுகலுள்ள தனிப்பட்ட தகவல்கள் இந்த ஹீப் டம்பில் இருக்கக்கூடும்."</string>
     <string name="sendText" msgid="5209874571959469142">"உரைக்கான செயலைத் தேர்வுசெய்யவும்"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"ரிங்கரின் ஒலியளவு"</string>
     <string name="volume_music" msgid="5421651157138628171">"மீடியாவின் ஒலியளவு"</string>
@@ -1294,10 +1255,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"எல்லா நெட்வொர்க்குகளையும் பார்க்க, தட்டவும்"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"இணை"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"எல்லா நெட்வொர்க்குகளும்"</string>
-    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="9099832833531486167">"வைஃபை நெட்வொக்குகளுடன் இணைக்கவா?"</string>
+    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> ஆப்ஸால் பரிந்துரைக்கப்பட்டது"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"சரி"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"வேண்டாம்"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"வைஃபை தானாக ஆன் ஆகும்"</string>
@@ -1309,14 +1268,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"நெட்வொர்க்கில் உள்நுழையவும்"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> நெட்வொர்க்கிற்கு இணைய அணுகல் இல்லை"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"விருப்பங்களுக்கு, தட்டவும்"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"இணைக்கப்பட்டது"</string>
-    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
-    <skip />
-    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
-    <skip />
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> வரம்பிற்கு உட்பட்ட இணைப்புநிலையைக் கொண்டுள்ளது"</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"எப்படியேனும் இணைப்பதற்குத் தட்டவும்"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"உங்கள் ஹாட்ஸ்பாட் அமைப்புகளில் செய்யப்பட்டுள்ள மாற்றங்கள்"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"உங்கள் ஹாட்ஸ்பாட்டின் அலைவரிசை மாறிவிட்டது."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"இந்தச் சாதனத்தில், ’5GHz மட்டும்’ எனும் முன்னுரிமைத் தேர்வு ஆதரிக்கப்படவில்லை. எனினும் 5GHz அலைவரிசை கிடைக்கும்போது, சாதனம் அதைப் பயன்படுத்திக்கொள்ளும்."</string>
@@ -1335,8 +1291,8 @@
     <!-- no translation found for wifi_watchdog_network_disabled_detailed (4917472096696322767) -->
     <skip />
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"இணைப்பை அனுமதிக்கவா?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%2$s வைஃபை நெட்வொர்க்குடன், %1$s பயன்பாடு இணைக்க விரும்புகிறது"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"ஒரு பயன்பாடு"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%2$s வைஃபை நெட்வொர்க்குடன், %1$s ஆப்ஸ் இணைக்க விரும்புகிறது"</string>
+    <string name="wifi_connect_default_application" msgid="7143109390475484319">"ஒரு ஆப்ஸ்"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"வைஃபை டைரக்ட்"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"வைஃபை Direct ஐத் தொடங்குக. இது வைஃபை க்ளையண்ட்/ஹாட்ஸ்பாட்டை முடக்கும்."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"வைஃபை Direct ஐத் தொடங்க முடியவில்லை."</string>
@@ -1355,7 +1311,7 @@
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> உடன் மொபைல் இணைக்கப்படும்போது, வைஃபையிலிருந்து தற்காலிகமாகத் துண்டிக்கப்படும்."</string>
     <string name="select_character" msgid="3365550120617701745">"எழுத்துக்குறியைச் செருகு"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS குறுந்தகவல்களை அனுப்புகிறது"</string>
-    <string name="sms_control_message" msgid="3867899169651496433">"அதிக எண்ணிக்கையிலான SMS குறுஞ்செய்திகளை &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; அனுப்புகிறது. செய்திகளை அனுப்புவதைத் தொடர இந்தப் பயன்பாட்டை அனுமதிக்க விரும்புகிறீர்களா?"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"அதிக எண்ணிக்கையிலான SMS குறுஞ்செய்திகளை &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; அனுப்புகிறது. செய்திகளை அனுப்புவதைத் தொடர இந்த ஆப்ஸை அனுமதிக்க விரும்புகிறீர்களா?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"அனுமதி"</string>
     <string name="sms_control_no" msgid="625438561395534982">"நிராகரி"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; க்குச் செய்தியை அனுப்ப விரும்புகிறது."</string>
@@ -1402,13 +1358,11 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB பிழைதிருத்தத்தை ஆஃப் செய்ய, தட்டவும்"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB பிழைதிருத்தத்தை முடக்க, தேர்ந்தெடுக்கவும்."</string>
-    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
-    <skip />
-    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
-    <skip />
+    <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"\'தன்னியக்க சோதனைப்\' பயன்முறை இயக்கப்பட்டது"</string>
+    <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"’தன்னியக்க சோதனைப்\' பயன்முறையை முடக்க ஆரம்பநிலைக்கு மீட்டமைக்கவும்."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB போர்ட்டில் சேதம் உள்ளது"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB போர்ட் தானாகவே முடக்கப்பட்டது மேலும் அறிய, தட்டவும்."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB போர்ட்டைப் பாதுகாப்பாகப் பயன்படுத்தலாம்"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB போர்ட்டைப் பயன்படுத்தலாம்"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"மொபைலில் எந்தச் சேதாரமும் கண்டறியப்படவில்லை."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"பிழை அறிக்கையை எடுக்கிறது…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"பிழை அறிக்கையைப் பகிரவா?"</string>
@@ -1424,7 +1378,7 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"பிற ஆப்ஸின் மேலே காட்டு"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> பிற பயன்பாடுகளின் மீது தோன்றுகிறது"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> பிற ஆப்ஸின் மீது தோன்றுகிறது"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> பிற ஆப்ஸின் மீது தோன்றுகிறது"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால், அமைப்புகளைத் திறந்து அதை முடக்க, தட்டவும்."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ஆஃப் செய்"</string>
@@ -1470,15 +1424,15 @@
     <string name="ext_media_status_missing" msgid="5638633895221670766">"செருகப்படவில்லை"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"பொருந்தும் செயல்பாடுகள் கண்டறியப்படவில்லை."</string>
     <string name="permlab_route_media_output" msgid="6243022988998972085">"மீடியா அவுட்புட்டை ரூட் செய்தல்"</string>
-    <string name="permdesc_route_media_output" msgid="4932818749547244346">"மீடியாவைப் பிற வெளிப்புறச் சாதனங்களுக்கு வெளியீடாக வழிகாட்ட பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permdesc_route_media_output" msgid="4932818749547244346">"மீடியாவைப் பிற வெளிப்புறச் சாதனங்களுக்கு வெளியீடாக வழிகாட்ட ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_readInstallSessions" msgid="3713753067455750349">"நிறுவல் அமர்வுகளைப் படித்தல்"</string>
-    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"நிறுவல் அமர்வுகளைப் படிக்க, பயன்பாட்டை அனுமதிக்கிறது. இது செயல்படும் தொகுப்பு நிறுவல்களைப் பற்றிய விவரங்களைப் பார்க்க அனுமதிக்கிறது."</string>
+    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"நிறுவல் அமர்வுகளைப் படிக்க, ஆப்ஸை அனுமதிக்கிறது. இது செயல்படும் தொகுப்பு நிறுவல்களைப் பற்றிய விவரங்களைப் பார்க்க அனுமதிக்கிறது."</string>
     <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"நிறுவல் தொகுப்புகளைக் கோருதல்"</string>
-    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"தொகுப்புகளின் நிறுவலைக் கோர, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"தொகுப்புகளின் நிறுவலைக் கோர, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"தொகுப்புகளை நீக்க கோரு"</string>
-    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"தொகுப்புகளை நீக்க கோர, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"தொகுப்புகளை நீக்க கோர, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோரு"</string>
-    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"பயன்பாட்டிற்கான பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோர, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"பயன்பாட்டிற்கான பேட்டரி மேம்படுத்தல்களைப் புறக்கணிப்பதற்கான அனுமதியைக் கோர, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"அளவை மாற்றுவதற்கான கட்டுப்பாட்டிற்கு, இருமுறை தட்டவும்"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"விட்ஜெட்டைச் சேர்க்க முடியவில்லை."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"செல்"</string>
@@ -1554,7 +1508,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"நீக்குதல்களைச் செயல்தவிர்"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"இப்போது எதுவும் செய்ய வேண்டாம்"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"கணக்கைத் தேர்வுசெய்யவும்"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"கணக்கைச் சேர்க்கவும்"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"கணக்கைச் சேர்"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"கணக்கைச் சேர்"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"அதிகரி"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"குறை"</string>
@@ -1633,6 +1587,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"உலாவியைத் துவக்கவா?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"அழைப்பை ஏற்கவா?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"எப்போதும்"</string>
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"எப்போதும் திறக்குமாறு அமைத்தல்"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"இப்போது மட்டும்"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"அமைப்புகள்"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s பணிக் கணக்கை ஆதரிக்காது"</string>
@@ -1662,8 +1617,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"மேலோட்ட #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", பாதுகாப்பானது"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> என்பதன் பின்னணிச் செயல்பாடு இனிவரும் Q பதிப்புகளில் தடுக்கப்படும். go/q-bg-block என்பதைப் பார்க்கவும்."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> என்பதன் பின்னணிச் செயல்பாடு தடுக்கப்பட்டுள்ளது. go/q-bg-block என்பதைப் பார்க்கவும்."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"வடிவத்தை மறந்துவிட்டீர்களா"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"தவறான வடிவம்"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"தவறான கடவுச்சொல்"</string>
@@ -1717,8 +1670,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"அணுகல்தன்மை ஷார்ட்கட்டானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ இயக்கியது"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"அணுகல்தன்மை ஷார்ட்கட்டானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ முடக்கியது"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐப் பயன்படுத்த 3 விநாடிகளுக்கு இரண்டு ஒலியளவு பட்டன்களையும் அழுத்திப் பிடிக்கவும்"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"அணுகல்தன்மைப் பொத்தானைத் தட்டி, பயன்படுத்துவதற்கான அம்சத்தைத் தேர்ந்தெடுக்கவும்:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"அம்சங்களை மாற்ற, அணுகல்தன்மைப் பொத்தானைத் தொட்டுப் பிடித்திருக்கவும்."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"அணுகல்தன்மை பட்டனுக்கான சேவையைத் தேர்வுசெய்யவும்:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"அணுகல்தன்மை சைகைக்கான சேவையைத் தேர்வுசெய்யவும் (இரண்டு விரல்களால் திரையின் கீழிருந்து மேல் நோக்கி ஸ்வைப் செய்யவும்):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"அணுகல்தன்மை சைகைக்கான சேவையைத் தேர்வுசெய்யவும் (மூன்று விரல்களால் திரையின் கீழிருந்து மேல் நோக்கி ஸ்வைப் செய்யவும்):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"சேவைகளுக்கு இடையே மாற அணுகல்தன்மை பட்டனைத் தொட்டுப் பிடிக்கவும்."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"சேவைகளுக்கு இடையே மாற இரண்டு விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"சேவைகளுக்கு இடையே மாற மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"பெரிதாக்கல்"</string>
     <string name="user_switched" msgid="3768006783166984410">"நடப்பு பயனர் <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>க்கு மாறுகிறது…"</string>
@@ -1726,7 +1683,7 @@
     <string name="owner_name" msgid="2716755460376028154">"உரிமையாளர்"</string>
     <string name="error_message_title" msgid="4510373083082500195">"பிழை"</string>
     <string name="error_message_change_not_allowed" msgid="1238035947357923497">"உங்கள் நிர்வாகி இந்த மாற்றத்தை அனுமதிக்கவில்லை"</string>
-    <string name="app_not_found" msgid="3429141853498927379">"இந்தச் செயலைச் செய்ய பயன்பாடு எதுவுமில்லை"</string>
+    <string name="app_not_found" msgid="3429141853498927379">"இந்தச் செயலைச் செய்ய ஆப்ஸ் எதுவுமில்லை"</string>
     <string name="revoke" msgid="5404479185228271586">"திரும்பப்பெறு"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
     <string name="mediasize_iso_a1" msgid="3333060421529791786">"ISO A1"</string>
@@ -1851,9 +1808,10 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"உங்கள் நிர்வாகி நிறுவியுள்ளார்"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"பேட்டரி இயங்கும் நேரத்தை அதிகரிக்க, \'பேட்டரி சேமிப்பான்\' அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும். "<annotation id="url">"மேலும் அறிக"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"பேட்டரி இயங்கும் நேரத்தை அதிகரிக்க, \'பேட்டரி சேமிப்பான்\' அம்சமானது சில சாதன அம்சங்களை ஆஃப் செய்து, ஆப்ஸைக் கட்டுப்படுத்தும்."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில பயன்பாடுகளை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் பயன்பாடானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
+    <string name="confirm_battery_saver" msgid="639106420541753635">"சரி"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"பேட்டரி நிலையை நீட்டிப்பதற்காகப் பின்னணிச் செயல்பாடு, விஷுவல் எஃபெக்ட்ஸ் மற்றும் அதிக மின்சக்தியைப் பயன்படுத்தும் அம்சங்களைப் பேட்டரி சேமிப்பான் ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும். "<annotation id="url">"மேலும் அறிக"</annotation></string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"பேட்டரி நிலையை நீட்டிப்பதற்காகப் பின்னணிச் செயல்பாடு, விஷுவல் எஃபெக்ட்ஸ் மற்றும் அதிக மின்சக்தியைப் பயன்படுத்தும் அம்சங்களைப் பேட்டரி சேமிப்பான் ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில ஆப்ஸை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் ஆப்ஸானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"இயக்கு"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1946,18 +1904,16 @@
     <string name="work_mode_off_title" msgid="1118691887588435530">"பணிச் சுயவிவரத்தை ஆன் செய்யவா?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"பணி ஆப்ஸ், அறிவிப்புகள், தரவு மற்றும் பிற பணிச் சுயவிவர அம்சங்கள் ஆன் செய்யப்படும்"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"இயக்கு"</string>
-    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"இந்தப் பயன்பாடு Android இன் பழைய பதிப்புக்காக உருவாக்கப்பட்டதால், சரியாக வேலை செய்யாமல் போகலாம். புதுப்பிப்புகள் ஏதேனும் உள்ளதா எனப் பார்க்கவும் அல்லது டெவெலப்பரைத் தொடர்புகொள்ளவும்."</string>
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"இந்த ஆப்ஸ் Android இன் பழைய பதிப்புக்காக உருவாக்கப்பட்டதால், சரியாக வேலை செய்யாமல் போகலாம். புதுப்பிப்புகள் ஏதேனும் உள்ளதா எனப் பார்க்கவும் அல்லது டெவெலப்பரைத் தொடர்புகொள்ளவும்."</string>
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"புதுப்பிப்பு உள்ளதா எனப் பார்"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"புதிய செய்திகள் வந்துள்ளன"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"பார்க்க, SMS பயன்பாட்டைத் திறக்கவும்"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"சில செயல்பாடு வரம்பிடப்பட்டிருக்கலாம்"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"திறக்க, தட்டவும்"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"பயனர் தரவு பூட்டப்பட்டது"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"சில செயலுக்கு கட்டுப்பாடு இருக்கலாம்"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"பணிக் கணக்கு பூட்டியுள்ளது"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"பணிக் கணக்கை திறக்க, தட்டுக"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> உடன் இணைக்கப்பட்டது"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"கோப்புகளைப் பார்க்க, தட்டவும்"</string>
-    <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
+    <string name="app_info" msgid="6856026610594615344">"ஆப்ஸ் தகவல்"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"டெமோவைத் தொடங்குகிறது…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"சாதனத்தை மீட்டமைக்கிறது…"</string>
@@ -1965,7 +1921,7 @@
     <string name="conference_call" msgid="3751093130790472426">"குழு அழைப்பு"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"உதவிக்குறிப்பு"</string>
     <string name="app_category_game" msgid="5431836943981492993">"கேம்ஸ்"</string>
-    <string name="app_category_audio" msgid="1659853108734301647">"இசையும் ஆடியோவும்"</string>
+    <string name="app_category_audio" msgid="1659853108734301647">"இசை &amp; ஆடியோ"</string>
     <string name="app_category_video" msgid="2728726078629384196">"திரைப்படங்களும் வீடியோவும்"</string>
     <string name="app_category_image" msgid="4867854544519846048">"புகைப்படங்களும் படங்களும்"</string>
     <string name="app_category_social" msgid="5842783057834965912">"சமூகமும் தகவல்தொடர்பும்"</string>
@@ -2021,15 +1977,15 @@
     <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"சிம் <xliff:g id="SIMNUMBER">%d</xliff:g> அனுமதிக்கப்படவில்லை"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"பாப்அப் சாளரம்"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"பயன்பாடு முந்தையப் பதிப்பிற்கு மாற்றப்பட்டது, அல்லது இந்த ஷார்ட்கட் வேலை செய்யவில்லை"</string>
-    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"காப்புப் பிரதி மற்றும் மீட்டமைவைப் பயன்பாடு ஆதரிக்காத காரணத்தால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"ஆப்ஸ் முந்தையப் பதிப்பிற்கு மாற்றப்பட்டது, அல்லது இந்த ஷார்ட்கட் வேலை செய்யவில்லை"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"காப்புப் பிரதி மற்றும் மீட்டமைவைப் ஆப்ஸ் ஆதரிக்காத காரணத்தால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"பயன்பாட்டுச் சான்றுகள் பொருந்தாத காரணத்தினால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"ஷார்ட்கட் முடக்கப்பட்டுள்ளது"</string>
     <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"நிறுவல் நீக்கு"</string>
     <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"பரவாயில்லை, திற"</string>
-    <string name="harmful_app_warning_title" msgid="8982527462829423432">"தீங்கிழைக்கும் பயன்பாடு உள்ளது"</string>
-    <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_2">%2$s</xliff:g> பயன்பாட்டின் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP_0">%1$s</xliff:g> அனுமதி கேட்கிறது"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"தீங்கிழைக்கும் ஆப்ஸ் உள்ளது"</string>
+    <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_2">%2$s</xliff:g> ஆப்ஸின் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP_0">%1$s</xliff:g> அனுமதி கேட்கிறது"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"திருத்து"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு அதிரும்"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு ஒலியை முடக்கும்"</string>
@@ -2043,26 +1999,18 @@
     <string name="notification_app_name_settings" msgid="7751445616365753381">"அமைப்புகள்"</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"கேமரா"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"மைக்ரோஃபோன்"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"உங்கள் திரையில் உள்ள பிற பயன்பாடுகளின் மேல் காட்டுகிறது"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"உங்கள் திரையில் உள்ள பிற ஆப்ஸின் மேல் காட்டுகிறது"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"பேட்டரி நிலையை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
-    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
-    <skip />
-    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
-    <skip />
-    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
-    <skip />
-    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
-    <skip />
-    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
-    <skip />
+    <string name="battery_saver_notification_channel_name" msgid="2083316159716201806">"பேட்டரி சேமிப்பான்"</string>
+    <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"பேட்டரி மறுபடியும் குறையும் வரை பேட்டரி சேமிப்பானை இயக்க இயலாது"</string>
+    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"பேட்டரி போதுமான அளவு சார்ஜ் செய்யப்பட்டுள்ளது. பேட்டரி குறையும் வரை பேட்டரி சேமிப்பானை மீண்டும் இயக்க இயலாது."</string>
+    <string name="battery_saver_charged_notification_title" product="default" msgid="2960978289873161288">"மொபைல் <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> சார்ஜ் செய்யப்பட்டது"</string>
+    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7555713825806482451">"டேப்லெட் <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> சார்ஜ் செய்யப்பட்டது"</string>
+    <string name="battery_saver_charged_notification_title" product="device" msgid="5954873381559605660">"சாதனம் <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> சார்ஜ் செய்யப்பட்டது"</string>
+    <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"பேட்டரி சேமிப்பான் ஆஃப் செய்யப்பட்டுள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
+    <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"பேட்டரி சேமிப்பான் ஆஃப் செய்யப்பட்டுள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>
     <string name="mime_type_folder" msgid="7111951698626315204">"கோப்புறை"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Android ஆப்ஸ்"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"ஃபைல்"</string>
@@ -2086,6 +2034,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ஃபைல்கள்</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ஃபைல்</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"நேரடிப் பகிர்வு இல்லை"</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"ஆப்ஸ் பட்டியல்"</string>
 </resources>

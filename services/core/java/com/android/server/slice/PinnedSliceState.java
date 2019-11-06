@@ -188,7 +188,7 @@ public class PinnedSliceState {
             b.putParcelable(SliceProvider.EXTRA_BIND_URI, mUri);
             try {
                 client.call(SliceProvider.METHOD_PIN, null, b);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 Log.w(TAG, "Unable to contact " + mUri, e);
             }
         }
@@ -201,7 +201,7 @@ public class PinnedSliceState {
             b.putParcelable(SliceProvider.EXTRA_BIND_URI, mUri);
             try {
                 client.call(SliceProvider.METHOD_UNPIN, null, b);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 Log.w(TAG, "Unable to contact " + mUri, e);
             }
         }

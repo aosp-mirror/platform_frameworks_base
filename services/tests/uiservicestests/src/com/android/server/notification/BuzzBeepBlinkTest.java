@@ -156,7 +156,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.setUsageStats(mUsageStats);
         mService.setAccessibilityManager(accessibilityManager);
         mService.mScreenOn = false;
-        mService.mInCall = false;
+        mService.mInCallStateOffHook = false;
         mService.mNotificationPulseEnabled = true;
     }
 
@@ -681,7 +681,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
         Mockito.reset(mRingtonePlayer);
 
-        mService.mInCall = true;
+        mService.mInCallStateOffHook = true;
         mService.buzzBeepBlinkLocked(r);
 
         verify(mService, times(1)).playInCallNotification();
@@ -1137,7 +1137,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     @Test
     public void testLightsInCall() {
-        mService.mInCall = true;
+        mService.mInCallStateOffHook = true;
         NotificationRecord r = getLightsNotification();
         mService.buzzBeepBlinkLocked(r);
         verifyNeverLights();

@@ -129,7 +129,7 @@ class RemoteAnimationController implements DeathRecipient {
                 writeStartDebugStatement();
             }
         });
-        sendRunningRemoteAnimation(true);
+        setRunningRemoteAnimation(true);
     }
 
     void cancelAnimation(String reason) {
@@ -216,7 +216,7 @@ class RemoteAnimationController implements DeathRecipient {
                 mService.closeSurfaceTransaction("RemoteAnimationController#finished");
             }
         }
-        sendRunningRemoteAnimation(false);
+        setRunningRemoteAnimation(false);
         if (DEBUG_REMOTE_ANIMATIONS) Slog.i(TAG, "Finishing remote animation");
     }
 
@@ -235,12 +235,18 @@ class RemoteAnimationController implements DeathRecipient {
         }
     }
 
-    private void sendRunningRemoteAnimation(boolean running) {
+    private void setRunningRemoteAnimation(boolean running) {
         final int pid = mRemoteAnimationAdapter.getCallingPid();
+        final int uid = mRemoteAnimationAdapter.getCallingUid();
         if (pid == 0) {
             throw new RuntimeException("Calling pid of remote animation was null");
         }
-        mService.sendSetRunningRemoteAnimation(pid, running);
+        final WindowProcessController wpc = mService.mAtmService.getProcessController(pid, uid);
+        if (wpc == null) {
+            Slog.w(TAG, "Unable to find process with pid=" + pid + " uid=" + uid);
+            return;
+        }
+        wpc.setRunningRemoteAnimation(running);
     }
 
     private void linkToDeathOfRunner() throws RemoteException {
@@ -417,7 +423,7 @@ class RemoteAnimationController implements DeathRecipient {
                 mHandler.removeCallbacks(mTimeoutRunnable);
                 releaseFinishedCallback();
                 invokeAnimationCancelled();
-                sendRunningRemoteAnimation(false);
+                setRunningRemoteAnimation(false);
             }
         }
 

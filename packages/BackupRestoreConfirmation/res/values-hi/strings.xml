@@ -16,8 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="backup_confirm_title" msgid="827563724209303345">"पूर्ण सुरक्षा"</string>
-    <string name="restore_confirm_title" msgid="5469365809567486602">"पूर्ण पुनर्स्‍थापना"</string>
+    <string name="backup_confirm_title" msgid="827563724209303345">"पूरा बैकअप"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"पूरी तरह से पुनर्स्‍थापना"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"कनेक्‍ट कि‍ए गए डेस्‍कटॉप कंप्‍यूटर से पूरे डेटा के बैकअप का अनुरोध कि‍या गया है. क्‍या आप इसकी अनुमति‍ देना चाहते हैं?\n\nअगर आपने बैकअप का अनुरोध नहीं कि‍या है, तो इस प्रक्रि‍या को जारी रखने की अनुमति‍ न दें."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"मेरे डेटा का बैकअप लें"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"बैकअप न लें"</string>
@@ -27,13 +27,13 @@
     <string name="current_password_text" msgid="8268189555578298067">"कृपया नीचे अपना वर्तमान सुरक्षित करने का पासवर्ड डालें:"</string>
     <string name="device_encryption_restore_text" msgid="1570864916855208992">"कृपया नीचे अपना डिवाइस सुरक्षित करने का पासवर्ड डालें."</string>
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"कृपया अपना डिवाइस सुरक्षित तरीका पासवर्ड नीचे दर्ज करें. बैकअप मेमोरी को एन्‍क्रिप्‍ट करने के लिए भी इसका उपयोग किया जाएगा."</string>
-    <string name="backup_enc_password_text" msgid="4981585714795233099">"कृपया संपूर्ण सुरक्षित डेटा को एन्‍क्रि‍प्‍ट करने में उपयोग के लि‍ए पासवर्ड डालें. यदि‍ यह खाली छोड़ दि‍या जाता है, तो आपके वर्तमान बैकअप पासवर्ड का उपयोग कि‍या जाएगा:"</string>
-    <string name="backup_enc_password_optional" msgid="1350137345907579306">"यदि‍ आप संपूर्ण सुरक्षित डेटा को एन्‍क्रि‍प्‍ट करना चाहते हैं, तो नीचे पासवर्ड डालें:"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"कृपया संपूर्ण सुरक्षित डेटा को एन्‍क्रि‍प्‍ट करने में उपयोग के लि‍ए पासवर्ड डालें. अगर‍ यह खाली छोड़ दि‍या जाता है, तो आपके वर्तमान बैकअप पासवर्ड का उपयोग कि‍या जाएगा:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"अगर‍ आप संपूर्ण सुरक्षित डेटा को एन्‍क्रि‍प्‍ट करना चाहते हैं, तो नीचे पासवर्ड डालें:"</string>
     <string name="backup_enc_password_required" msgid="7889652203371654149">"चूंकि आपका डिवाइस एन्क्रिप्ट किया हुआ है, इसलिए आपको अपने बैकअप को एन्क्रिप्ट करना आवश्यक है. कृपया नीचे पासवर्ड डालें:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"अगर रिस्टोर किया गया डेटा सुरक्षित कि‍या गया है, तो कृपया नीचे पासवर्ड डालें:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"सुरक्षित करना शुरु हो रहा है..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"सुरक्षित करना पूर्ण"</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"बैकअप करना पूरा हुआ"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"पुनर्स्‍थापना प्रारंभ हो रही है..."</string>
-    <string name="toast_restore_ended" msgid="1764041639199696132">"पुनर्स्‍थापना समाप्त"</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"पुनर्स्‍थापना खत्म"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"काम नहीं हो सका. टाइम आउट हो गया"</string>
 </resources>

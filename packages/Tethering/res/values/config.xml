@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    OEMs that wish to change the below settings must do so via a runtime resource overlay package
+    and *NOT* by changing this file. This file is part of the tethering mainline module.
+    -->
+</resources>

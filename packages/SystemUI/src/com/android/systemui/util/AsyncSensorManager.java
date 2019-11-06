@@ -156,17 +156,21 @@ public class AsyncSensorManager extends SensorManager
      * Requests for all sensors that match the given type from all plugins.
      * @param sensor
      * @param listener
+     * @return true if there were plugins to register the listener to
      */
-    public void registerPluginListener(SensorManagerPlugin.Sensor sensor,
+    public boolean registerPluginListener(SensorManagerPlugin.Sensor sensor,
             SensorManagerPlugin.SensorEventListener listener) {
         if (mPlugins.isEmpty()) {
             Log.w(TAG, "No plugins registered");
+            return false;
         }
         mHandler.post(() -> {
             for (int i = 0; i < mPlugins.size(); i++) {
                 mPlugins.get(i).registerListener(sensor, listener);
             }
         });
+
+        return true;
     }
 
     /**

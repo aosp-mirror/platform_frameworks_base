@@ -29,9 +29,12 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,12 +54,17 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
             = mock(NotificationLockscreenUserManager.class);
     private DynamicPrivacyController.Listener mListener
             = mock(DynamicPrivacyController.Listener.class);
+    private KeyguardMonitor mKeyguardMonitor = mock(KeyguardMonitor.class);
 
     @Before
     public void setUp() throws Exception {
         when(mCache.canSkipBouncer()).thenReturn(false);
+        when(mKeyguardMonitor.isShowing()).thenReturn(true);
         mDynamicPrivacyController = new DynamicPrivacyController(
-                mLockScreenUserManager, mCache);
+                mLockScreenUserManager, mKeyguardMonitor, mCache,
+                mock(StatusBarStateController.class));
+        mDynamicPrivacyController.setStatusBarKeyguardViewManager(
+                mock(StatusBarKeyguardViewManager.class));
         mDynamicPrivacyController.addListener(mListener);
     }
 

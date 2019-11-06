@@ -33,6 +33,7 @@ import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_DNS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_FALLBACK;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTP;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_HTTPS;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_PRIVDNS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_PARTIAL;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
@@ -492,6 +493,8 @@ public class ConnectivityServiceTest {
         private INetworkMonitor mNetworkMonitor;
         private INetworkMonitorCallbacks mNmCallbacks;
         private int mNmValidationResult = VALIDATION_RESULT_BASE;
+        private int mProbesCompleted;
+        private int mProbesSucceeded;
         private String mNmValidationRedirectUrl = null;
         private boolean mNmProvNotificationRequested = false;
 
@@ -559,6 +562,7 @@ public class ConnectivityServiceTest {
                 mNmProvNotificationRequested = false;
             }
 
+            mNmCallbacks.notifyProbeStatusChanged(mProbesCompleted, mProbesSucceeded);
             mNmCallbacks.notifyNetworkTested(
                     mNmValidationResult, mNmValidationRedirectUrl);
 
@@ -581,7 +585,7 @@ public class ConnectivityServiceTest {
          * @param validated Indicate if network should pretend to be validated.
          */
         public void connect(boolean validated) {
-            connect(validated, true);
+            connect(validated, true, false /* isStrictMode */);
         }
 
         /**
@@ -589,13 +593,13 @@ public class ConnectivityServiceTest {
          * @param validated Indicate if network should pretend to be validated.
          * @param hasInternet Indicate if network should pretend to have NET_CAPABILITY_INTERNET.
          */
-        public void connect(boolean validated, boolean hasInternet) {
+        public void connect(boolean validated, boolean hasInternet, boolean isStrictMode) {
             assertFalse(getNetworkCapabilities().hasCapability(NET_CAPABILITY_INTERNET));
 
             ConnectivityManager.NetworkCallback callback = null;
             final ConditionVariable validatedCv = new ConditionVariable();
             if (validated) {
-                setNetworkValid();
+                setNetworkValid(isStrictMode);
                 NetworkRequest request = new NetworkRequest.Builder()
                         .addTransportType(getNetworkCapabilities().getTransportTypes()[0])
                         .clearCapabilities()
@@ -620,15 +624,15 @@ public class ConnectivityServiceTest {
             if (validated) {
                 // Wait for network to validate.
                 waitFor(validatedCv);
-                setNetworkInvalid();
+                setNetworkInvalid(isStrictMode);
             }
 
             if (callback != null) mCm.unregisterNetworkCallback(callback);
         }
 
-        public void connectWithCaptivePortal(String redirectUrl) {
-            setNetworkPortal(redirectUrl);
-            connect(false);
+        public void connectWithCaptivePortal(String redirectUrl, boolean isStrictMode) {
+            setNetworkPortal(redirectUrl, isStrictMode);
+            connect(false, true /* hasInternet */, isStrictMode);
         }
 
         public void connectWithPartialConnectivity() {
@@ -636,34 +640,75 @@ public class ConnectivityServiceTest {
             connect(false);
         }
 
-        public void connectWithPartialValidConnectivity() {
-            setNetworkPartialValid();
-            connect(false);
+        public void connectWithPartialValidConnectivity(boolean isStrictMode) {
+            setNetworkPartialValid(isStrictMode);
+            connect(false, true /* hasInternet */, isStrictMode);
         }
 
-        void setNetworkValid() {
+        void setNetworkValid(boolean isStrictMode) {
             mNmValidationResult = VALIDATION_RESULT_VALID;
             mNmValidationRedirectUrl = null;
+            int probesSucceeded = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTP;
+            if (isStrictMode) {
+                probesSucceeded |= NETWORK_VALIDATION_PROBE_PRIVDNS;
+            }
+            // The probesCompleted equals to probesSucceeded for the case of valid network, so put
+            // the same value into two different parameter of the method.
+            setProbesStatus(probesSucceeded, probesSucceeded);
         }
 
-        void setNetworkInvalid() {
+        void setNetworkInvalid(boolean isStrictMode) {
             mNmValidationResult = VALIDATION_RESULT_INVALID;
             mNmValidationRedirectUrl = null;
+            int probesCompleted = VALIDATION_RESULT_BASE;
+            int probesSucceeded = VALIDATION_RESULT_INVALID;
+            // If the isStrictMode is true, it means the network is invalid when NetworkMonitor
+            // tried to validate the private DNS but failed.
+            if (isStrictMode) {
+                probesCompleted &= ~NETWORK_VALIDATION_PROBE_HTTP;
+                probesSucceeded = probesCompleted;
+                probesCompleted |= NETWORK_VALIDATION_PROBE_PRIVDNS;
+            }
+            setProbesStatus(probesCompleted, probesSucceeded);
         }
 
-        void setNetworkPortal(String redirectUrl) {
-            setNetworkInvalid();
+        void setNetworkPortal(String redirectUrl, boolean isStrictMode) {
+            setNetworkInvalid(isStrictMode);
             mNmValidationRedirectUrl = redirectUrl;
+            // Suppose the portal is found when NetworkMonitor probes NETWORK_VALIDATION_PROBE_HTTP
+            // in the beginning, so the NETWORK_VALIDATION_PROBE_HTTPS hasn't probed yet.
+            int probesCompleted = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTPS;
+            int probesSucceeded = VALIDATION_RESULT_INVALID;
+            if (isStrictMode) {
+                probesCompleted |= NETWORK_VALIDATION_PROBE_PRIVDNS;
+            }
+            setProbesStatus(probesCompleted, probesSucceeded);
         }
 
         void setNetworkPartial() {
             mNmValidationResult = VALIDATION_RESULT_PARTIAL;
             mNmValidationRedirectUrl = null;
+            int probesCompleted = VALIDATION_RESULT_BASE;
+            int probesSucceeded = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTPS;
+            setProbesStatus(probesCompleted, probesSucceeded);
         }
 
-        void setNetworkPartialValid() {
-            mNmValidationResult = VALIDATION_RESULT_PARTIAL | VALIDATION_RESULT_VALID;
-            mNmValidationRedirectUrl = null;
+        void setNetworkPartialValid(boolean isStrictMode) {
+            setNetworkPartial();
+            mNmValidationResult |= VALIDATION_RESULT_VALID;
+            int probesCompleted = VALIDATION_RESULT_BASE;
+            int probesSucceeded = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTPS;
+            // Suppose the partial network cannot pass the private DNS validation as well, so only
+            // add NETWORK_VALIDATION_PROBE_DNS in probesCompleted but not probesSucceeded.
+            if (isStrictMode) {
+                probesCompleted |= NETWORK_VALIDATION_PROBE_PRIVDNS;
+            }
+            setProbesStatus(probesCompleted, probesSucceeded);
+        }
+
+        void setProbesStatus(int probesCompleted, int probesSucceeded) {
+            mProbesCompleted = probesCompleted;
+            mProbesSucceeded = probesSucceeded;
         }
 
         public String waitForRedirectUrl() {
@@ -2226,7 +2271,7 @@ public class ConnectivityServiceTest {
 
         // With HTTPS probe disabled, NetworkMonitor should pass the network validation with http
         // probe.
-        mWiFiNetworkAgent.setNetworkPartialValid();
+        mWiFiNetworkAgent.setNetworkPartialValid(false /* isStrictMode */);
         // If the user chooses yes to use this partial connectivity wifi, switch the default
         // network to wifi and check if wifi becomes valid or not.
         mCm.setAcceptPartialConnectivity(mWiFiNetworkAgent.getNetwork(), true /* accept */,
@@ -2299,7 +2344,7 @@ public class ConnectivityServiceTest {
         callback.expectCallback(CallbackEntry.LOSING, mCellNetworkAgent);
         assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
         callback.expectCapabilitiesWith(NET_CAPABILITY_PARTIAL_CONNECTIVITY, mWiFiNetworkAgent);
-        mWiFiNetworkAgent.setNetworkValid();
+        mWiFiNetworkAgent.setNetworkValid(false /* isStrictMode */);
 
         // Need a trigger point to let NetworkMonitor tell ConnectivityService that network is
         // validated.
@@ -2317,7 +2362,7 @@ public class ConnectivityServiceTest {
         // NetworkMonitor will immediately (once the HTTPS probe fails...) report the network as
         // valid, because ConnectivityService calls setAcceptPartialConnectivity before it calls
         // notifyNetworkConnected.
-        mWiFiNetworkAgent.connectWithPartialValidConnectivity();
+        mWiFiNetworkAgent.connectWithPartialValidConnectivity(false /* isStrictMode */);
         callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         verify(mWiFiNetworkAgent.mNetworkMonitor, times(1)).setAcceptPartialConnectivity();
         callback.expectCallback(CallbackEntry.LOSING, mCellNetworkAgent);
@@ -2343,7 +2388,7 @@ public class ConnectivityServiceTest {
         // Expect onAvailable callback of listen for NET_CAPABILITY_CAPTIVE_PORTAL.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         String redirectUrl = "http://android.com/path";
-        mWiFiNetworkAgent.connectWithCaptivePortal(redirectUrl);
+        mWiFiNetworkAgent.connectWithCaptivePortal(redirectUrl, false /* isStrictMode */);
         captivePortalCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         assertEquals(mWiFiNetworkAgent.waitForRedirectUrl(), redirectUrl);
 
@@ -2361,7 +2406,7 @@ public class ConnectivityServiceTest {
                 mWiFiNetworkAgent);
 
         // Report partial connectivity is accepted.
-        mWiFiNetworkAgent.setNetworkPartialValid();
+        mWiFiNetworkAgent.setNetworkPartialValid(false /* isStrictMode */);
         mCm.setAcceptPartialConnectivity(mWiFiNetworkAgent.getNetwork(), true /* accept */,
                 false /* always */);
         waitForIdle();
@@ -2392,7 +2437,7 @@ public class ConnectivityServiceTest {
         // Expect onAvailable callback of listen for NET_CAPABILITY_CAPTIVE_PORTAL.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         String firstRedirectUrl = "http://example.com/firstPath";
-        mWiFiNetworkAgent.connectWithCaptivePortal(firstRedirectUrl);
+        mWiFiNetworkAgent.connectWithCaptivePortal(firstRedirectUrl, false /* isStrictMode */);
         captivePortalCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         assertEquals(mWiFiNetworkAgent.waitForRedirectUrl(), firstRedirectUrl);
 
@@ -2405,13 +2450,13 @@ public class ConnectivityServiceTest {
         // Expect onAvailable callback of listen for NET_CAPABILITY_CAPTIVE_PORTAL.
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         String secondRedirectUrl = "http://example.com/secondPath";
-        mWiFiNetworkAgent.connectWithCaptivePortal(secondRedirectUrl);
+        mWiFiNetworkAgent.connectWithCaptivePortal(secondRedirectUrl, false /* isStrictMode */);
         captivePortalCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         assertEquals(mWiFiNetworkAgent.waitForRedirectUrl(), secondRedirectUrl);
 
         // Make captive portal disappear then revalidate.
         // Expect onLost callback because network no longer provides NET_CAPABILITY_CAPTIVE_PORTAL.
-        mWiFiNetworkAgent.setNetworkValid();
+        mWiFiNetworkAgent.setNetworkValid(false /* isStrictMode */);
         mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), true);
         captivePortalCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
 
@@ -2423,7 +2468,7 @@ public class ConnectivityServiceTest {
 
         // Break network connectivity.
         // Expect NET_CAPABILITY_VALIDATED onLost callback.
-        mWiFiNetworkAgent.setNetworkInvalid();
+        mWiFiNetworkAgent.setNetworkInvalid(false /* isStrictMode */);
         mCm.reportNetworkConnectivity(mWiFiNetworkAgent.getNetwork(), false);
         validatedCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
     }
@@ -2454,7 +2499,7 @@ public class ConnectivityServiceTest {
         mServiceContext.expectNoStartActivityIntent(fastTimeoutMs);
 
         // Turn into a captive portal.
-        mWiFiNetworkAgent.setNetworkPortal("http://example.com");
+        mWiFiNetworkAgent.setNetworkPortal("http://example.com", false /* isStrictMode */);
         mCm.reportNetworkConnectivity(wifiNetwork, false);
         captivePortalCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
         validatedCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
@@ -2475,7 +2520,7 @@ public class ConnectivityServiceTest {
         assertEquals(testValue, signInIntent.getStringExtra(testKey));
 
         // Report that the captive portal is dismissed, and check that callbacks are fired
-        mWiFiNetworkAgent.setNetworkValid();
+        mWiFiNetworkAgent.setNetworkValid(false /* isStrictMode */);
         mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
         validatedCallback.expectAvailableCallbacksValidated(mWiFiNetworkAgent);
         captivePortalCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
@@ -2504,7 +2549,7 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         String firstRedirectUrl = "http://example.com/firstPath";
 
-        mWiFiNetworkAgent.connectWithCaptivePortal(firstRedirectUrl);
+        mWiFiNetworkAgent.connectWithCaptivePortal(firstRedirectUrl, false /* isStrictMode */);
         mWiFiNetworkAgent.expectDisconnected();
         mWiFiNetworkAgent.expectPreventReconnectReceived();
 
@@ -3219,7 +3264,7 @@ public class ConnectivityServiceTest {
         Network wifiNetwork = mWiFiNetworkAgent.getNetwork();
 
         // Fail validation on wifi.
-        mWiFiNetworkAgent.setNetworkInvalid();
+        mWiFiNetworkAgent.setNetworkInvalid(false /* isStrictMode */);
         mCm.reportNetworkConnectivity(wifiNetwork, false);
         defaultCallback.expectCapabilitiesWithout(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
         validatedWifiCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
@@ -3263,7 +3308,7 @@ public class ConnectivityServiceTest {
         wifiNetwork = mWiFiNetworkAgent.getNetwork();
 
         // Fail validation on wifi and expect the dialog to appear.
-        mWiFiNetworkAgent.setNetworkInvalid();
+        mWiFiNetworkAgent.setNetworkInvalid(false /* isStrictMode */);
         mCm.reportNetworkConnectivity(wifiNetwork, false);
         defaultCallback.expectCapabilitiesWithout(NET_CAPABILITY_VALIDATED, mWiFiNetworkAgent);
         validatedWifiCallback.expectCallback(CallbackEntry.LOST, mWiFiNetworkAgent);
@@ -4299,7 +4344,7 @@ public class ConnectivityServiceTest {
         mCm.registerNetworkCallback(request, callback);
 
         // Bring up wifi aware network.
-        wifiAware.connect(false, false);
+        wifiAware.connect(false, false, false /* isStrictMode */);
         callback.expectAvailableCallbacksUnvalidated(wifiAware);
 
         assertNull(mCm.getActiveNetworkInfo());
@@ -4534,6 +4579,44 @@ public class ConnectivityServiceTest {
         assertTrue(ArrayUtils.containsAll(resolvrParams.servers,
                 new String[]{"2001:db8::1", "192.0.2.1"}));
         reset(mMockDnsResolver);
+    }
+
+    @Test
+    public void testPrivateDnsNotification() throws Exception {
+        NetworkRequest request = new NetworkRequest.Builder()
+                .clearCapabilities().addCapability(NET_CAPABILITY_INTERNET)
+                .build();
+        TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+        // Bring up wifi.
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        callback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        // Private DNS resolution failed, checking if the notification will be shown or not.
+        mWiFiNetworkAgent.setNetworkInvalid(true /* isStrictMode */);
+        mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
+        waitForIdle();
+        // If network validation failed, NetworkMonitor will re-evaluate the network.
+        // ConnectivityService should filter the redundant notification. This part is trying to
+        // simulate that situation and check if ConnectivityService could filter that case.
+        mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
+        waitForIdle();
+        verify(mNotificationManager, timeout(TIMEOUT_MS).times(1)).notifyAsUser(anyString(),
+                eq(NotificationType.PRIVATE_DNS_BROKEN.eventId), any(), eq(UserHandle.ALL));
+        // If private DNS resolution successful, the PRIVATE_DNS_BROKEN notification shouldn't be
+        // shown.
+        mWiFiNetworkAgent.setNetworkValid(true /* isStrictMode */);
+        mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
+        waitForIdle();
+        verify(mNotificationManager, timeout(TIMEOUT_MS).times(1)).cancelAsUser(anyString(),
+                eq(NotificationType.PRIVATE_DNS_BROKEN.eventId), eq(UserHandle.ALL));
+        // If private DNS resolution failed again, the PRIVATE_DNS_BROKEN notification should be
+        // shown again.
+        mWiFiNetworkAgent.setNetworkInvalid(true /* isStrictMode */);
+        mWiFiNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
+        waitForIdle();
+        verify(mNotificationManager, timeout(TIMEOUT_MS).times(2)).notifyAsUser(anyString(),
+                eq(NotificationType.PRIVATE_DNS_BROKEN.eventId), any(), eq(UserHandle.ALL));
     }
 
     @Test
@@ -4793,7 +4876,7 @@ public class ConnectivityServiceTest {
         // by NetworkMonitor
         assertFalse(NetworkMonitorUtils.isValidationRequired(
                 vpnNetworkAgent.getNetworkCapabilities()));
-        vpnNetworkAgent.setNetworkValid();
+        vpnNetworkAgent.setNetworkValid(false /* isStrictMode */);
 
         vpnNetworkAgent.connect(false);
         mMockVpn.connect();
@@ -4882,7 +4965,8 @@ public class ConnectivityServiceTest {
         ranges.add(new UidRange(uid, uid));
         mMockVpn.setNetworkAgent(vpnNetworkAgent);
         mMockVpn.setUids(ranges);
-        vpnNetworkAgent.connect(true /* validated */, false /* hasInternet */);
+        vpnNetworkAgent.connect(true /* validated */, false /* hasInternet */,
+                false /* isStrictMode */);
         mMockVpn.connect();
 
         defaultCallback.assertNoCallback();
@@ -4913,7 +4997,8 @@ public class ConnectivityServiceTest {
         ranges.add(new UidRange(uid, uid));
         mMockVpn.setNetworkAgent(vpnNetworkAgent);
         mMockVpn.setUids(ranges);
-        vpnNetworkAgent.connect(true /* validated */, true /* hasInternet */);
+        vpnNetworkAgent.connect(true /* validated */, true /* hasInternet */,
+                false /* isStrictMode */);
         mMockVpn.connect();
 
         defaultCallback.expectAvailableThenValidatedCallbacks(vpnNetworkAgent);
@@ -4945,7 +5030,8 @@ public class ConnectivityServiceTest {
         ranges.add(new UidRange(uid, uid));
         mMockVpn.setNetworkAgent(vpnNetworkAgent);
         mMockVpn.setUids(ranges);
-        vpnNetworkAgent.connect(false /* validated */, true /* hasInternet */);
+        vpnNetworkAgent.connect(false /* validated */, true /* hasInternet */,
+                false /* isStrictMode */);
         mMockVpn.connect();
 
         // Even though the VPN is unvalidated, it becomes the default network for our app.
@@ -4968,7 +5054,7 @@ public class ConnectivityServiceTest {
                 vpnNetworkAgent.getNetworkCapabilities()));
 
         // Pretend that the VPN network validates.
-        vpnNetworkAgent.setNetworkValid();
+        vpnNetworkAgent.setNetworkValid(false /* isStrictMode */);
         vpnNetworkAgent.mNetworkMonitor.forceReevaluation(Process.myUid());
         // Expect to see the validated capability, but no other changes, because the VPN is already
         // the default network for the app.
@@ -5000,7 +5086,8 @@ public class ConnectivityServiceTest {
         mMockVpn.setNetworkAgent(vpnNetworkAgent);
         mMockVpn.connect();
         mMockVpn.setUids(ranges);
-        vpnNetworkAgent.connect(true /* validated */, false /* hasInternet */);
+        vpnNetworkAgent.connect(true /* validated */, false /* hasInternet */,
+                false /* isStrictMode */);
 
         vpnNetworkCallback.expectAvailableThenValidatedCallbacks(vpnNetworkAgent);
         nc = mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork());
@@ -5099,7 +5186,8 @@ public class ConnectivityServiceTest {
         mMockVpn.setNetworkAgent(vpnNetworkAgent);
         mMockVpn.connect();
         mMockVpn.setUids(ranges);
-        vpnNetworkAgent.connect(true /* validated */, false /* hasInternet */);
+        vpnNetworkAgent.connect(true /* validated */, false /* hasInternet */,
+                false /* isStrictMode */);
 
         vpnNetworkCallback.expectAvailableThenValidatedCallbacks(vpnNetworkAgent);
         nc = mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork());

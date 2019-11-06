@@ -756,7 +756,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final ISystemGestureExclusionListener.Stub verifier =
                 new ISystemGestureExclusionListener.Stub() {
             @Override
-            public void onSystemGestureExclusionChanged(int displayId, Region actual) {
+            public void onSystemGestureExclusionChanged(int displayId, Region actual,
+                    Region unrestricted) {
                 Region expected = Region.obtain();
                 expected.set(10, 20, 30, 40);
                 assertEquals(expected, actual);
@@ -790,7 +791,14 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final Region expected = Region.obtain();
         expected.set(20, 30, 40, 50);
-        assertEquals(expected, dc.calculateSystemGestureExclusion());
+        assertEquals(expected, calculateSystemGestureExclusion(dc));
+    }
+
+    private Region calculateSystemGestureExclusion(DisplayContent dc) {
+        Region out = Region.obtain();
+        Region unrestricted = Region.obtain();
+        dc.calculateSystemGestureExclusion(out, unrestricted);
+        return out;
     }
 
     @Test
@@ -814,7 +822,7 @@ public class DisplayContentTests extends WindowTestsBase {
         win2.setHasSurface(true);
 
         final Region expected = Region.obtain();
-        assertEquals(expected, dc.calculateSystemGestureExclusion());
+        assertEquals(expected, calculateSystemGestureExclusion(dc));
     }
 
     @Test
@@ -839,7 +847,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
             final Region expected = Region.obtain();
             expected.set(dc.getBounds());
-            assertEquals(expected, dc.calculateSystemGestureExclusion());
+            assertEquals(expected, calculateSystemGestureExclusion(dc));
 
             win.setHasSurface(false);
         }

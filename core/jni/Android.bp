@@ -169,7 +169,6 @@ cc_library_shared {
         "android_media_AudioVolumeGroups.cpp",
         "android_media_AudioVolumeGroupCallback.cpp",
         "android_media_DeviceCallback.cpp",
-        "android_media_JetPlayer.cpp",
         "android_media_MediaMetricsJNI.cpp",
         "android_media_MicrophoneInfo.cpp",
         "android_media_midi.cpp",

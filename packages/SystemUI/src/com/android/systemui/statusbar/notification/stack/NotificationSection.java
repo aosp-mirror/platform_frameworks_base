@@ -254,7 +254,7 @@ class NotificationSection {
                 newTop = (int) Math.ceil(firstView.getTranslationY());
             }
             top = Math.max(newTop, top);
-            if (firstView.showingAmbientPulsing()) {
+            if (firstView.showingPulsing()) {
                 // If we're pulsing, the notification can actually go below!
                 bottom = Math.max(bottom, finalTranslationY
                         + ExpandableViewState.getFinalActualHeight(firstView));

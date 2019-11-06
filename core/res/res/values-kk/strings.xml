@@ -95,6 +95,7 @@
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Дауыстық пошта хабарлары"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi қоңыраулары"</string>
     <string name="notification_channel_sim" msgid="4052095493875188564">"SIM күйі"</string>
+    <string name="notification_channel_sim_high_prio" msgid="1787666807724243207">"SIM картасы туралы маңызды хабарландырулар"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Пир TTY режимі ТОЛЫҚ сұрады"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Пир TTY режимінің HCO сұрады"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Пир TTY режимінің VCO сұрады"</string>
@@ -131,6 +132,7 @@
     <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
     <skip />
     <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi қоңыраулары"</string>
+    <string name="wfcSpnFormat_spn_wifi_calling_vo_hyphen" msgid="1730997175789582756">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi қоңырауы"</string>
     <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN қоңырауы"</string>
     <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN қоңырауы"</string>
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
@@ -141,10 +143,8 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="1336669776254502831">"WiFi қоңыраулары"</string>
     <string name="wfcSpnFormat_vowifi" msgid="1765176406171272629">"VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Өшірулі"</string>
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (7335489823608689868) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (7081742743152286290) -->
-    <skip />
+    <string name="wfc_mode_wifi_preferred_summary" msgid="7335489823608689868">"Wi-Fi арқылы қоңырау шалу"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="7081742743152286290">"Мобильдік желі арқылы қоңырау шалу"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Тек Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Басқа нөмірге бағытталмады"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -230,8 +230,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Вирус туралы хабарлау"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Сеансты аяқтау"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Скриншот"</string>
-    <!-- no translation found for bugreport_title (5981047024855257269) -->
-    <skip />
+    <string name="bugreport_title" msgid="5981047024855257269">"Қате туралы есеп"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Құрылғының қазіргі күйі туралы ақпаратты жинап, электрондық хабармен жібереді. Есеп әзір болғанша біраз уақыт кетеді, шыдай тұрыңыз."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивті есеп"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Бұл көптеген жағдайларда пайдаланылады. Ол есептің орындалу барысын бақылауға, мәселе туралы қосымша мәліметтер енгізуге және скриншоттар алуға мүмкіндік береді. Ол есеп беруіне ұзақ уақыт кететін кейбір азырақ пайдаланылатын бөлімдерді өткізіп жіберуі мүмкін."</string>
@@ -264,7 +263,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Желі дабылдары"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Желі қолжетімді"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN күйі"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Құрылғыны басқару"</string>
+    <string name="notification_channel_device_admin" msgid="8353118887482520565">"АТ әкімшісі жіберген ескертулер"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Дабылдар"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Бөлшек саудаға арналған демо нұсқасы"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB байланысы"</string>
@@ -284,12 +283,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Орналасу"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"бұл құрылғының орналасқан жерін көру"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына құрылғының орналасқан жері туралы мәліметтерді пайдалануға рұқсат берілсін бе?"</string>
-    <!-- no translation found for permgrouprequestdetail_location (1347189607421252902) -->
-    <skip />
-    <!-- no translation found for permgroupbackgroundrequest_location (5039063878675613235) -->
-    <skip />
-    <!-- no translation found for permgroupbackgroundrequestdetail_location (4597006851453417387) -->
-    <skip />
+    <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Қолданбаны пайдалану кезінде ғана оған геодеректеріңізді көруге рұқсат етіледі."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына құрылғының геодеректері &lt;b&gt;үнемі&lt;/b&gt; көрсетіліп тұрсын ба?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Қолданба геодеректерді тек жұмыс кезінде ғана пайдалана алады."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнтізбе"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"күнтізбеге кіру"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына күнтізбеге кіруге рұқсат берілсін бе?"</string>
@@ -301,31 +297,22 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына құрылғыдағы суреттерге, медиафайлдарға және басқа файлдарға кіруге рұқсат берілсін бе?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"аудио жазу"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына аудиомазмұн жазуға рұқсат берілсін бе?"</string>
-    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Әрекетті тану"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"әрекетті тану"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына физикалық әрекетті тануға рұқсат етілсін бе?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына дыбыс жазуға рұқсат берілсін бе?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Физикалық әрекет"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"физикалық әрекет дерегін алу"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына физикалық әрекет дерегін алуға рұқсат етілсін бе?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"суретке түсіріп, бейне жазу"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына суретке түсіруге және бейне жазуға рұқсат берілсін бе?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Қоңырау журналдары"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"телефонның қоңыраулар журналын оқу және жазу"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына телефонның қоңыраулар журналына кіруге рұқсат етілсін бе?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына телефонның қоңыраулар журналына кіруге рұқсат берілсін бе?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"қоңырау шалу және телефон қоңырауларын басқару"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына қоңыраулар шалуға және басқаруға рұқсат берілсін бе?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Дене датчиктері"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ағза күйінің көрсеткіштері туралы сенсор деректеріне қатынасу"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына негізгі физиологиялық көрсеткіштерді көрсететін сенсорлық деректерді пайдалануға рұқсат берілсін бе?"</string>
-    <string name="permgrouplab_aural" msgid="965607064083134896">"Музыка"</string>
-    <string name="permgroupdesc_aural" msgid="4870189506255958055">"музыка мазмұнына кіру"</string>
-    <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына музыка мазмұнына кіруге рұқсат етілсін бе?"</string>
-    <string name="permgrouplab_visual" msgid="6477382108771145134">"Суреттер және бейнелер"</string>
-    <string name="permgroupdesc_visual" msgid="3415827902566663546">"суреттер мен бейнелерге кіру"</string>
-    <!-- no translation found for permgrouprequest_visual (4926581398380334943) -->
-    <skip />
-    <!-- no translation found for permgrouprequestdetail_visual (3827237829805228971) -->
-    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмұнын оқып отыру"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ашық тұрған терезе мазмұнын тексеру."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Explore by Touch функциясын қосу"</string>
@@ -518,31 +505,23 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экран бекітпесін істен шығару"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
-    <!-- no translation found for permlab_requestPasswordComplexity (202650535669249674) -->
-    <skip />
-    <!-- no translation found for permdesc_requestPasswordComplexity (4730994229754212347) -->
-    <skip />
+    <string name="permlab_requestPasswordComplexity" msgid="202650535669249674">"экранды құлыптау күрделілігін сұрау"</string>
+    <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Қолданбаға экран құлпының күрделілік деңгейін (жоғары, орташа, төмен немесе жоқ), соның ішінде ұзындығының ықтимал ауқымын және оның түрін анықтауға мүмкіндік береді. Сонымен қатар қолданба пайдаланушыларға құлыпты белгілі бір деңгейге жаңартуды ұсынады. Бірақ бұл ұсыныстарды елемеуге болады. Экран құлпы қарапайым мәтін түрінде сақталмайтындықтан, құпия сөз қолданбаға белгісіз болатынын ескеріңіз."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"биометрикалық жабдықты пайдалану"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Аутентификациялау үшін қолданбаға биометрикалық жабдықты пайдалануға рұқсат береді"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"саусақ ізі жабдығын басқару"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Қолданбаға пайдаланатын саусақ ізі үлгілерін қосу және жою әдістерін шақыруға мүмкіндік береді."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"саусақ ізі жабдығын пайдалану"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Қолданбаға аутентификацияалу үшін саусақ ізі жабдығын пайдалануға мүмкіндік береді"</string>
-    <string name="permlab_audioRead" msgid="6617225220728465565">"музыка жинағын оқу"</string>
-    <string name="permdesc_audioRead" msgid="5034032570243484805">"Қолданбаға музыка жинағын оқуға мүмкіндік береді."</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"музыка жинағын өзгерту"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Қолданбаға музыка жинағын өзгертуге мүмкіндік береді."</string>
-    <string name="permlab_videoRead" msgid="9182618678674737229">"бейнелер жинағын оқу"</string>
-    <string name="permdesc_videoRead" msgid="7045676429859396194">"Қолданбаға бейнелер жинағын оқуға мүмкіндік береді."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"бейнелер жинағын өзгерту"</string>
     <string name="permdesc_videoWrite" msgid="5448565757490640841">"Қолданбаға бейнелер жинағын өзгертуге мүмкіндік береді."</string>
-    <string name="permlab_imagesRead" msgid="3015078545742665304">"суреттер жинағын оқу"</string>
-    <string name="permdesc_imagesRead" msgid="3144263806038695580">"Қолданбаға суреттер жинағын оқуға мүмкіндік береді."</string>
     <string name="permlab_imagesWrite" msgid="3391306186247235510">"суреттер жинағын өзгерту"</string>
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Қолданбаға суреттер жинағын өзгертуге мүмкіндік береді."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"медиамазмұн жинағынан геодеректерді оқу"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Қолданбаға медиамазмұн жинағынан геодеректерді оқуға мүмкіндік береді."</string>
-    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> қолданбасына аутентификация қажет."</string>
+    <string name="biometric_dialog_default_title" msgid="881952973720613213">"Бұл сіз екеніңізді растаңыз"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Биометрикалық жабдық жоқ"</string>
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Аутентификациядан бас тартылды."</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Танылмады"</string>
@@ -572,63 +551,45 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Саусақ ізі белгішесі"</string>
-    <string name="permlab_manageFace" msgid="2137540986007309781">"бетті тану жабдығын басқару"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"Face Unlock жабдығын басқару"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Қолданбаға пайдаланатын бет үлгілерін енгізу және жою әдістерін шақыруға мүмкіндік береді."</string>
-    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"бетті тану жабдығын пайдалану"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Қолданбаға бетті тану жабдығын қолдануға рұқсат етеді"</string>
-    <!-- no translation found for face_acquired_insufficient (2767330364802375742) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_bright (5005650874582450967) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_dark (1966194696381394616) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_close (1401011882624272753) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_far (1210969240069012510) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_high (3362395713403348013) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_low (488983581737550912) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_right (941726879175375970) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_left (5873592047381190672) -->
-    <skip />
-    <!-- no translation found for face_acquired_poor_gaze (8471716624377228327) -->
-    <skip />
-    <!-- no translation found for face_acquired_not_detected (4885504661626728809) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_much_motion (3149332171102108851) -->
-    <skip />
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"Face Unlock жабдығын пайдалану"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Аутентификациялау үшін қолданбаға Face Unlock жабдығын пайдалануға рұқсат береді."</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face Unlock"</string>
+    <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Бетті қайта тіркеу"</string>
+    <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Құрылғы жүзіңізді жақсырақ тануы үшін, бетіңізді қайта тіркеңіз."</string>
+    <string name="face_acquired_insufficient" msgid="2767330364802375742">"Бет деректері дұрыс алынбады. Әрекетті қайталаңыз."</string>
+    <string name="face_acquired_too_bright" msgid="5005650874582450967">"Тым ашық. Күңгірттеу жарық керек."</string>
+    <string name="face_acquired_too_dark" msgid="1966194696381394616">"Тым қараңғы. Молырақ жарық керек."</string>
+    <string name="face_acquired_too_close" msgid="1401011882624272753">"Телефонды алшақ ұстаңыз."</string>
+    <string name="face_acquired_too_far" msgid="1210969240069012510">"Телефонды жақынырақ ұстаңыз."</string>
+    <string name="face_acquired_too_high" msgid="3362395713403348013">"Телефонды жоғарырақ ұстаңыз."</string>
+    <string name="face_acquired_too_low" msgid="488983581737550912">"Телефонды төменірек ұстаңыз."</string>
+    <string name="face_acquired_too_right" msgid="3667075962661863218">"Телефонды солға жылжытыңыз."</string>
+    <string name="face_acquired_too_left" msgid="3148242963894703424">"Телефонды оңға жылжытыңыз."</string>
+    <string name="face_acquired_poor_gaze" msgid="5606479370806754905">"Құрылғының камерасына тура қараңыз."</string>
+    <string name="face_acquired_not_detected" msgid="1879714205006680222">"Бетіңізді телефонға тура қаратыңыз."</string>
+    <string name="face_acquired_too_much_motion" msgid="3149332171102108851">"Қозғалыс тым көп. Телефонды қозғалтпаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Қайта тіркеліңіз."</string>
-    <!-- no translation found for face_acquired_too_different (7663983770123789694) -->
-    <skip />
+    <string name="face_acquired_too_different" msgid="7663983770123789694">"Енді бет анықтау мүмкін емес. Әрекетті қайталаңыз."</string>
     <string name="face_acquired_too_similar" msgid="1508776858407646460">"Алдыңғысына тым ұқсас, басқаша қалыпта түсіңіз."</string>
-    <!-- no translation found for face_acquired_pan_too_extreme (1852495480382773759) -->
-    <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (1290820400317982049) -->
-    <skip />
-    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Басыңызды тік ұстаңыз."</string>
-    <!-- no translation found for face_acquired_obscured (5747521031647744553) -->
-    <skip />
-    <!-- no translation found for face_acquired_sensor_dirty (364493868630891300) -->
-    <skip />
+    <string name="face_acquired_pan_too_extreme" msgid="4581629343077288178">"Басыңызды түзурек ұстаңыз."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="4019954263012496468">"Басыңызды түзурек ұстаңыз."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="6312973147689664409">"Басыңызды кішкене бұрыңыз."</string>
+    <string name="face_acquired_obscured" msgid="5357207702967893283">"Бетіңізді жауып тұрған нәрсені алып тастаңыз."</string>
+    <string name="face_acquired_sensor_dirty" msgid="7905138627046865579">"Экранның жоғарғы жағын, сонымен қатар қара жолақты өшіріңіз."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Бетті тану жабдығы қолжетімді емес."</string>
-    <!-- no translation found for face_error_timeout (2605673935810019129) -->
-    <skip />
-    <string name="face_error_no_space" msgid="8224993703466381314">"Бетті сақтау мүмкін емес."</string>
+    <string name="face_error_hw_not_available" msgid="396883585636963908">"Бетті тану мүмкін емес. Жабдық қолжетімді емес."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Face Unlock функциясын қайта қолданып көріңіз."</string>
+    <string name="face_error_no_space" msgid="2712120617457553825">"Жаңа бетті сақтау мүмкін емес. Алдымен ескісін жойыңыз."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Бетті танудан бас тартылды."</string>
-    <string name="face_error_user_canceled" msgid="8943921120862164539">"Пайдаланушы бетті тану әрекетінен бас тартты."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Пайдаланушы Face Unlock функциясынан бас тартты."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Тым көп әрекет жасалды. Кейінірек қайталаңыз."</string>
-    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Тым көп әрекет жасалды. Бетті тану функциясы өшірілді."</string>
-    <!-- no translation found for face_error_unable_to_process (4940944939691171539) -->
-    <skip />
-    <!-- no translation found for face_error_not_enrolled (4245760276260427472) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (5296043240874659926) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Тым көп әрекет жасалды. Face Unlock функциясы өшірілді."</string>
+    <string name="face_error_unable_to_process" msgid="4940944939691171539">"Бетті тану мүмкін емес. Әрекетті қайталаңыз."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Face Unlock реттелмеді."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Бұл құрылғыда Face Unlock функциясы істемейді."</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> беті"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -689,6 +650,8 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Иесіне оператор қызметтеріне қосылуға мүмкіндік береді. Қалыпты қолданбалар үшін қажет болмайды."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"\"Мазаламау\" режиміне кіру"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Қолданбаға «Мазаламау» конфигурациясын оқу және жазу мүмкіндігін береді."</string>
+    <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"рұқсаттарды пайдалану туралы деректерді көру"</string>
+    <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Пайдаланушы қолданбаға берілетін рұқсаттарды басқара алады. Ондай рұқсаттар әдеттегі қолданбаларға керек емес."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Құпия сөз ережелерін тағайындау"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Экран құлпын ашу әркеттерін бақылау"</string>
@@ -871,7 +834,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Тоқтату"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Кері айналдыру"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Жылдам алға айналдыру"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Төтенше қоңыраулар ғана"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Құтқару қызметіне ғана қоңырау шалынады"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Желі бекітілген"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM картасы PUK арқылы бекітілген."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Пайдаланушы нұсқаулығын қараңыз немесе тұтынушыларды қолдау орталығына хабарласыңыз."</string>
@@ -1168,8 +1131,10 @@
     <string name="whichViewApplication" msgid="3272778576700572102">"Басқаша ашу"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s қолданбасымен ашу"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Ашу"</string>
-    <string name="whichGiveAccessToApplication" msgid="8279395245414707442">"<xliff:g id="HOST">%1$s</xliff:g> сілтемелерін келесі қолданбамен ашу үшін рұқсат беру:"</string>
-    <string name="whichGiveAccessToApplicationNamed" msgid="7992388824107710849">"<xliff:g id="HOST">%1$s</xliff:g> сілтемелерін <xliff:g id="APPLICATION">%2$s</xliff:g> қолданбасымен ашу үшін рұқсат беру"</string>
+    <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"<xliff:g id="HOST">%1$s</xliff:g> сілтемелерін келесімен ашу:"</string>
+    <string name="whichOpenLinksWith" msgid="6392123355599572804">"Сілтемелерді келесімен ашу:"</string>
+    <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"Сілтемелерді <xliff:g id="APPLICATION">%1$s</xliff:g> браузерімен ашу"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"<xliff:g id="HOST">%1$s</xliff:g> сілтемелерін <xliff:g id="APPLICATION">%2$s</xliff:g> браузерімен ашу"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Рұқсат беру"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Келесімен өңдеу"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s көмегімен өңдеу"</string>
@@ -1246,19 +1211,15 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> қолданбасын ашу"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> қолданбасының жұмысы сақталмай жабылады"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> жад шегінен асты"</string>
-    <!-- no translation found for dump_heap_ready_notification (1162196579925048701) -->
-    <skip />
+    <string name="dump_heap_ready_notification" msgid="1162196579925048701">"<xliff:g id="PROC">%1$s</xliff:g> процесінің дамп файлы дайын."</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Үйінді дамп жиналды. Бөлісу үшін түртіңіз."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Үйінді дамппен бөлісу қажет пе?"</string>
-    <!-- no translation found for dump_heap_text (8546022920319781701) -->
-    <skip />
-    <!-- no translation found for dump_heap_system_text (1205466256312104134) -->
-    <skip />
-    <!-- no translation found for dump_heap_ready_text (6759394977904051000) -->
-    <skip />
+    <string name="dump_heap_text" msgid="8546022920319781701">"<xliff:g id="PROC">%1$s</xliff:g> процесі өзінің <xliff:g id="SIZE">%2$s</xliff:g> жад шегінен асты. Дамп файлын оның әзірлеушісімен бөлісе аласыз. Бұл дамп файлында процесс кезінде пайдаланылған кез келген жеке ақпарат болуы мүмкін екенін ескеріңіз."</string>
+    <string name="dump_heap_system_text" msgid="3236094872980706024">"<xliff:g id="PROC">%1$s</xliff:g> процесі өзінің <xliff:g id="SIZE">%2$s</xliff:g> жад шегінен асты. Дамп файлын бөлісе аласыз. Бұл дамп файлында процесс кезінде пайдаланылған кез келген құпия жеке ақпарат (соның ішінде сіз енгізген деректер) болуы мүмкін екенін ескеріңіз."</string>
+    <string name="dump_heap_ready_text" msgid="1778041771455343067">"<xliff:g id="PROC">%1$s</xliff:g> процесінің дамп файлы бөлісуге дайын. Бұл дамп файлында процесс кезінде пайдаланылған кез келген құпия жеке ақпарат (соның ішінде сіз енгізген деректер) болуы мүмкін екенін ескеріңіз."</string>
     <string name="sendText" msgid="5209874571959469142">"Мәтін үшін әрекет таңдау"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Қоңырау шырылының қаттылығы"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Meдиа дыбысының қаттылығы"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Mультимeдиа дыбыс деңгейі"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth арқылы ойнату"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Үнсіз қоңырау әуенін орнату"</string>
     <string name="volume_call" msgid="3941680041282788711">"Келетін қоңырау дыбысының қаттылығы"</string>
@@ -1268,8 +1229,8 @@
     <string name="volume_unknown" msgid="1400219669770445902">"Дыбыс қаттылығы"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth дыбысының қаттылығы"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Қоңырау әуенінің дыбыс қаттылығы"</string>
-    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Қоңырау дыбысының қаттылығы"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Meдиа дыбысының қаттылығы"</string>
+    <string name="volume_icon_description_incall" msgid="8890073218154543397">"Сөйлескендегі дыбыс деңгейі"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Mультимeдиа дыбыс деңгейі"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Хабар дыбысының қаттылығы"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Әдепкі рингтон"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Әдепкі (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1294,10 +1255,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Барлық желілерді көру үшін түртіңіз"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Қосылу"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Барлық желілер"</string>
-    <!-- no translation found for wifi_suggestion_title (9099832833531486167) -->
-    <skip />
-    <!-- no translation found for wifi_suggestion_content (5883181205841582873) -->
-    <skip />
+    <string name="wifi_suggestion_title" msgid="9099832833531486167">"Wi-Fi желісіне жалғансын ба?"</string>
+    <string name="wifi_suggestion_content" msgid="5883181205841582873">"<xliff:g id="NAME">%s</xliff:g> ұсынған."</string>
     <string name="wifi_suggestion_action_allow_app" msgid="3689946344485394085">"Иә"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="7977918905605931385">"Жоқ"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматты түрде қосылады"</string>
@@ -1309,14 +1268,11 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Желіге кіру"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <!-- no translation found for wifi_no_internet (5198100389964214865) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="5198100389964214865">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> желісінің интернетті пайдалану мүмкіндігі шектеулі."</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Опциялар үшін түртіңіз"</string>
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Жалғанды"</string>
-    <!-- no translation found for network_partial_connectivity (7774883385494762741) -->
-    <skip />
-    <!-- no translation found for network_partial_connectivity_detailed (1959697814165325217) -->
-    <skip />
+    <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> желісінің қосылу мүмкіндігі шектеулі."</string>
+    <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Бәрібір жалғау үшін түртіңіз."</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Хотспот параметрлеріне өзгерістер енгізілді"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Хотспот жолағы өзгертілді."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Бұл құрылғы тек 5 ГГц жиілікте жұмыс істей алмайды. Бұл жиілік мүмкін болған жағдайда ғана қолданылады."</string>
@@ -1402,13 +1358,11 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB түзетуі қосылған"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"USB арқылы түзетуді өшіру үшін түртіңіз"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB түзетуін өшіру үшін таңдаңыз."</string>
-    <!-- no translation found for test_harness_mode_notification_title (2216359742631914387) -->
-    <skip />
-    <!-- no translation found for test_harness_mode_notification_message (1343197173054407119) -->
-    <skip />
+    <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Сынақ бағдарламасы режимі қосылды"</string>
+    <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Сынақ бағдарламасы режимін өшіру үшін зауыттық күйіне қайтарыңыз."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB портына сұйықтық немесе қоқыс кірді"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB порты автоматты түрде өшірілді. Толығырақ ақпарат алу үшін түртіңіз."</string>
-    <string name="usb_contaminant_not_detected_title" msgid="4202417484434906086">"USB портын пайдалана беруге болады"</string>
+    <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB портын пайдалана беруге болады"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Телефон бұдан былай сұйықтықты немесе қоқысты анықтамайды."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Қате туралы есеп алынуда…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Қате туралы есепті бөлісу керек пе?"</string>
@@ -1417,7 +1371,7 @@
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"БӨЛІСУ"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"ҚАБЫЛДАМАУ"</string>
     <string name="select_input_method" msgid="4653387336791222978">"Енгізу әдісін таңдау"</string>
-    <string name="show_ime" msgid="2506087537466597099">"Физикалық пернетақта белсенді кезде оны экранда ұстау"</string>
+    <string name="show_ime" msgid="2506087537466597099">"Физикалық пернетақта қосулы кезде оны экранға шығару"</string>
     <string name="hardware" msgid="194658061510127999">"Виртуалды пернетақтаны көрсету"</string>
     <string name="select_keyboard_layout_notification_title" msgid="597189518763083494">"Физикалық пернетақтаны конфигурациялау"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Тіл мен пернетақта схемасын таңдау үшін түртіңіз"</string>
@@ -1519,7 +1473,7 @@
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Желіні не VPN параметрлерін өзгерту"</string>
     <string name="upload_file" msgid="2897957172366730416">"Файлды таңдау"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ешқандай файл таңдалмаған"</string>
-    <string name="reset" msgid="2448168080964209908">"Қайта реттеу"</string>
+    <string name="reset" msgid="2448168080964209908">"Бастапқы күйге қайтару"</string>
     <string name="submit" msgid="1602335572089911941">"Жіберу"</string>
     <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Көлік жүргізу қолданбасы қосулы"</string>
     <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Көлік жүргізу қолданбасынан шығу үшін түртіңіз."</string>
@@ -1544,7 +1498,7 @@
     <string name="find_next" msgid="5742124618942193978">"Келесіні табу"</string>
     <string name="find_previous" msgid="2196723669388360506">"Алдыңғыны табу"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Орын туралы өтініші жіберген <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Орын туралы өтініш"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Орын туралы сұрау"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Өтініш жіберген <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Иә"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Жоқ"</string>
@@ -1633,6 +1587,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Браузер қосылсын ба?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Қоңырауды қабылдау?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Үнемі"</string>
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Әрдайым ашық күйге орнату"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Бір рет қана"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Параметрлер"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s жұмыс профилін қолдамайды"</string>
@@ -1648,7 +1603,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Сымсыз дисплей"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Трансляциялау"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Құрылғыға жалғау"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Экранды құрылғымен байланыстыру"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Экран трансляциясы"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Құрылғыларды іздеуде…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Параметрлер"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Ажырату"</string>
@@ -1662,8 +1617,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"№<xliff:g id="ID">%1$d</xliff:g> қабаттама"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", қауіпсіз"</string>
-    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> сайтындағы фондық әрекеттерге болашақ Q құрамаларында тыйым салынады. go/q-bg-block бетін қараңыз."</string>
-    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> сайтындағы фондық әрекеттерге тыйым салынған. go/q-bg-block бетін қараңыз."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Кескінді ұмытып қалу"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Қате өрнек"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Қате кілтсөз"</string>
@@ -1717,8 +1670,12 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін қосты"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін өшірді"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін пайдалану үшін дыбыс деңгейін реттейтін екі түймені де 3 секунд басып тұрыңыз"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"\"Арнайы мүмкіндіктер\" түймесін түрткенде пайдаланатын мүмкіндікті таңдаңыз:"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Мүмкіндіктерді өзгерту үшін \"Арнайы мүмкіндіктер\" түймесін түртіп, ұстап тұрыңыз."</string>
+    <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"\"Арнайы мүмкіндіктер\" түймесін түрткенде пайдаланатын қызметті таңдаңыз:"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Арнайы мүмкіндіктер қимылымен пайдаланатын қызметті таңдаңыз (екі саусақпен экранның төменгі жағынан жоғары қарай сырғытыңыз):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Арнайы мүмкіндіктер қимылымен пайдаланатын қызметті таңдаңыз (үш саусақпен экранның төменгі жағынан жоғары қарай сырғытыңыз):"</string>
+    <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Бір қызметтен екінші қызметке ауысу үшін арнайы мүмкіндіктер түймесін түртіп, оны ұстап тұрыңыз."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Бір қызметтен екінші қызметке ауысу үшін екі саусақпен жоғары қарай сырғытып, ұстап тұрыңыз."</string>
+    <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Бір қызметтен екінші қызметке ауысу үшін үш саусақпен жоғары қарай сырғытып, ұстап тұрыңыз."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Ұлғайту"</string>
     <string name="user_switched" msgid="3768006783166984410">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> ауысу орындалуда…"</string>
@@ -1851,8 +1808,9 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Әкімші орнатқан"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Әкімші жаңартқан"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Әкімші жойған"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver функциясы кейбір құрылғы мүмкіндіктерін өшіреді және қолданбаларды шектейді. "<annotation id="url">"Толығырақ"</annotation></string>
-    <string name="battery_saver_description" msgid="769989536172631582">"Батарея жұмысының ұзақтығын арттыру үшін Battery Saver функциясы кейбір құрылғы мүмкіндіктерін өшіреді және қолданбаларды шектейді."</string>
+    <string name="confirm_battery_saver" msgid="639106420541753635">"Жарайды"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Battery Saver функциясы батарея қуатын үнемдеу үшін фондық әрекеттерді, кейбір көрнекі әсерлерді және басқа да қуатты көп пайдаланатын мүмкіндіктерді өшіреді немесе шектейді. "<annotation id="url">"Толығырақ"</annotation></string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"Battery Saver функциясы батарея қуатын үнемдеу үшін фондық әрекеттерді, кейбір көрнекі әсерлерді және басқа да қуатты көп пайдаланатын мүмкіндіктерді өшіреді немесе шектейді."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Дерек шығынын азайту үшін Data Saver функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге және алуға жол бермейді. Ашық тұрған қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Saver функциясын қосу керек пе?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Қосу"</string>
@@ -1950,9 +1908,7 @@
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Жаңартылған нұсқаны тексеру"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Сізде жаңа хабарлар бар"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Көру үшін SMS қолданбасын ашыңыз"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Кейбір функциялар істемеуі мүмкін"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Құлыпты ашу үшін түртіңіз"</string>
-    <string name="user_encrypted_detail" msgid="5708447464349420392">"Пайдаланушы деректері құлыптаулы"</string>
+    <string name="profile_encrypted_title" msgid="4260432497586829134">"Кейбір функциялар істемеуі мүмкін."</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Жұмыс профилі құлыптаулы"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Жұмыс профилінің құлпын ашу үшін түртіңіз"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> қосылу орындалды"</string>
@@ -2047,22 +2003,14 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Батарея заряды азаюы мүмкін"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Батарея ұзаққа жетуі үшін, Battery Saver іске қосылды"</string>
-    <!-- no translation found for battery_saver_notification_channel_name (2083316159716201806) -->
-    <skip />
-    <!-- no translation found for battery_saver_sticky_disabled_notification_title (6376147579378764641) -->
-    <skip />
-    <!-- no translation found for battery_saver_sticky_disabled_notification_summary (8090192609249817945) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_title (2960978289873161288) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_title (7555713825806482451) -->
-    <skip />
-    <!-- no translation found for battery_saver_charged_notification_title (5954873381559605660) -->
-    <skip />
-    <!-- no translation found for battery_saver_off_notification_summary (1374222493681267143) -->
-    <skip />
-    <!-- no translation found for battery_saver_off_alternative_notification_summary (4340727818546508436) -->
-    <skip />
+    <string name="battery_saver_notification_channel_name" msgid="2083316159716201806">"Battery Saver"</string>
+    <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"Батарея қуаты азаймайынша, Battery Saver қайта қосылмайды."</string>
+    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"Батарея сәйкес деңгейге дейін зарядталды. Батарея қуаты азаймайынша, Battery Saver қайта қосылмайды."</string>
+    <string name="battery_saver_charged_notification_title" product="default" msgid="2960978289873161288">"Телефон батареясының қуат деңгейі: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
+    <string name="battery_saver_charged_notification_title" product="tablet" msgid="7555713825806482451">"Планшет батареясының қуат деңгейі: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
+    <string name="battery_saver_charged_notification_title" product="device" msgid="5954873381559605660">"Құрылғының батарея қуатының деңгейі: <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g>"</string>
+    <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"Battery Saver өшірулі. Функцияларға енді шектеу қойылмайды."</string>
+    <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"Battery Saver өшірілді. Функцияларға енді шектеу қойылмайды."</string>
     <string name="mime_type_folder" msgid="7111951698626315204">"Қалта"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"Android қолданбасы"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"Файл"</string>
@@ -2086,6 +2034,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> файл</item>
     </plurals>
-    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
-    <skip />
+    <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Тікелей бөлісу мүмкін емес."</string>
+    <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Қолданбалар тізімі"</string>
 </resources>

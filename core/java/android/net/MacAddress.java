@@ -416,7 +416,6 @@ public final class MacAddress implements Parcelable {
      * @param mask MacAddress representing the mask to use during comparison.
      * @return true if this MAC Address matches the given range.
      *
-     * @hide
      */
     public boolean matches(@NonNull MacAddress baseAddress, @NonNull MacAddress mask) {
         Preconditions.checkNotNull(baseAddress);
@@ -430,7 +429,6 @@ public final class MacAddress implements Parcelable {
      * IPv6 address per RFC 4862.
      *
      * @return A link-local Inet6Address constructed from the MAC address.
-     * @hide
      */
     public @Nullable Inet6Address getLinkLocalIpv6FromEui48Mac() {
         byte[] macEui48Bytes = toByteArray();

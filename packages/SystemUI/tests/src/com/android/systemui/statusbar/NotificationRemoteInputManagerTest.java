@@ -1,3 +1,4 @@
+
 package com.android.systemui.statusbar;
 
 import static junit.framework.Assert.assertEquals;
@@ -22,12 +23,14 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputActiveExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.RemoteInputHistoryExtender;
 import com.android.systemui.statusbar.NotificationRemoteInputManager.SmartReplyHistoryExtender;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
 
 import com.google.android.collect.Sets;
@@ -54,6 +57,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Mock private SmartReplyController mSmartReplyController;
     @Mock private NotificationListenerService.RankingMap mRanking;
     @Mock private ExpandableNotificationRow mRow;
+    @Mock private StatusBarStateController mStateController;
 
     // Dependency mocks:
     @Mock private NotificationEntryManager mEntryManager;
@@ -73,6 +77,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
                 mLockscreenUserManager, mSmartReplyController, mEntryManager,
                 () -> mock(ShadeController.class),
+                mStateController,
                 Handler.createAsync(Looper.myLooper()));
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
@@ -196,15 +201,15 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
     private class TestableNotificationRemoteInputManager extends NotificationRemoteInputManager {
 
-
         TestableNotificationRemoteInputManager(Context context,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationEntryManager notificationEntryManager,
                 Lazy<ShadeController> shadeController,
+                StatusBarStateController statusBarStateController,
                 Handler mainHandler) {
             super(context, lockscreenUserManager, smartReplyController, notificationEntryManager,
-                    shadeController, mainHandler);
+                    shadeController, statusBarStateController, mainHandler);
         }
 
         public void setUpWithPresenterForTest(Callback callback,

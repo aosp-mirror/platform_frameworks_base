@@ -56,8 +56,7 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
     }
 
     // + 1 to ensure null terminator if MAX_PAYLOAD buffer is received
-    char buffer[sizeof_log_id_t + sizeof(uint16_t) + sizeof(log_time) + LOGGER_ENTRY_MAX_PAYLOAD +
-                1];
+    char buffer[sizeof(android_log_header_t) + LOGGER_ENTRY_MAX_PAYLOAD + 1];
     struct iovec iov = {buffer, sizeof(buffer) - 1};
 
     alignas(4) char control[CMSG_SPACE(sizeof(struct ucred))];

@@ -66,7 +66,7 @@
     <string name="could_not_create_file" msgid="3425025039427448443">"Faylni yaratib bo‘lmadi"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"Ayrim chop etish xizmatlari o‘chirib qo‘yilgan"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"Printerlar qidirilmoqda"</string>
-    <string name="print_no_print_services" msgid="8561247706423327966">"Hech qaysi chop etish xizmati yoqilmagan"</string>
+    <string name="print_no_print_services" msgid="8561247706423327966">"Hech qanday chop etish xizmati yoqilmagan"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Printerlar topilmadi"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"Printerlarni qo‘shib bo‘lmaydi"</string>
     <string name="select_to_add_printers" msgid="3800709038689830974">"Printer qo‘shish uchun tanlang"</string>

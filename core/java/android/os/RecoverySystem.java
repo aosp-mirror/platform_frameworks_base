@@ -31,6 +31,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.provider.Settings;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.euicc.EuiccManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -56,10 +58,12 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -87,10 +91,13 @@ public class RecoverySystem {
     private static final long PUBLISH_PROGRESS_INTERVAL_MS = 500;
 
     private static final long DEFAULT_EUICC_FACTORY_RESET_TIMEOUT_MILLIS = 30000L; // 30 s
-
     private static final long MIN_EUICC_FACTORY_RESET_TIMEOUT_MILLIS = 5000L; // 5 s
-
     private static final long MAX_EUICC_FACTORY_RESET_TIMEOUT_MILLIS = 60000L; // 60 s
+
+    private static final long DEFAULT_EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS =
+            45000L; // 45 s
+    private static final long MIN_EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS = 15000L; // 15 s
+    private static final long MAX_EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS = 90000L; // 90 s
 
     /** Used to communicate with recovery.  See bootable/recovery/recovery.cpp. */
     private static final File RECOVERY_DIR = new File("/cache/recovery");
@@ -99,9 +106,14 @@ public class RecoverySystem {
     private static final String LAST_PREFIX = "last_";
     private static final String ACTION_EUICC_FACTORY_RESET =
             "com.android.internal.action.EUICC_FACTORY_RESET";
+    private static final String ACTION_EUICC_REMOVE_INVISIBLE_SUBSCRIPTIONS =
+            "com.android.internal.action.EUICC_REMOVE_INVISIBLE_SUBSCRIPTIONS";
 
-    /** used in {@link #wipeEuiccData} as package name of callback intent */
-    private static final String PACKAGE_NAME_WIPING_EUICC_DATA_CALLBACK = "android";
+    /**
+     * Used in {@link #wipeEuiccData} & {@link #removeEuiccInvisibleSubs} as package name of
+     * callback intent.
+     */
+    private static final String PACKAGE_NAME_EUICC_DATA_MANAGEMENT_CALLBACK = "android";
 
     /**
      * The recovery image uses this file to identify the location (i.e. blocks)
@@ -754,8 +766,11 @@ public class RecoverySystem {
         // Block until the ordered broadcast has completed.
         condition.block();
 
+        EuiccManager euiccManager = context.getSystemService(EuiccManager.class);
         if (wipeEuicc) {
-            wipeEuiccData(context, PACKAGE_NAME_WIPING_EUICC_DATA_CALLBACK);
+            wipeEuiccData(context, PACKAGE_NAME_EUICC_DATA_MANAGEMENT_CALLBACK);
+        } else {
+            removeEuiccInvisibleSubs(context, euiccManager);
         }
 
         String shutdownArg = null;
@@ -849,6 +864,110 @@ public class RecoverySystem {
             return wipingSucceeded.get();
         }
         return false;
+    }
+
+    private static void removeEuiccInvisibleSubs(
+            Context context, EuiccManager euiccManager) {
+        ContentResolver cr = context.getContentResolver();
+        if (Settings.Global.getInt(cr, Settings.Global.EUICC_PROVISIONED, 0) == 0) {
+            // If the eUICC isn't provisioned, there's no need to remove euicc invisible profiles,
+            // as there's nothing to be removed.
+            Log.i(TAG, "Skip removing eUICC invisible profiles as it is not provisioned.");
+            return;
+        } else if (euiccManager == null || !euiccManager.isEnabled()) {
+            Log.i(TAG, "Skip removing eUICC invisible profiles as eUICC manager is not available.");
+            return;
+        }
+        SubscriptionManager subscriptionManager =
+                context.getSystemService(SubscriptionManager.class);
+        List<SubscriptionInfo> availableSubs =
+                subscriptionManager.getAvailableSubscriptionInfoList();
+        if (availableSubs == null || availableSubs.isEmpty()) {
+            Log.i(TAG, "Skip removing eUICC invisible profiles as no available profiles found.");
+            return;
+        }
+        List<SubscriptionInfo> invisibleSubs = new ArrayList<>();
+        for (SubscriptionInfo sub : availableSubs) {
+            if (sub.isEmbedded() && !subscriptionManager.isSubscriptionVisible(sub)) {
+                invisibleSubs.add(sub);
+            }
+        }
+        removeEuiccInvisibleSubs(context, invisibleSubs, euiccManager);
+    }
+
+    private static boolean removeEuiccInvisibleSubs(
+            Context context, List<SubscriptionInfo> subscriptionInfos, EuiccManager euiccManager) {
+        if (subscriptionInfos == null || subscriptionInfos.isEmpty()) {
+            Log.i(TAG, "There are no eUICC invisible profiles needed to be removed.");
+            return true;
+        }
+        CountDownLatch removeSubsLatch = new CountDownLatch(subscriptionInfos.size());
+        final AtomicInteger removedSubsCount = new AtomicInteger(0);
+
+        BroadcastReceiver removeEuiccSubsReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (ACTION_EUICC_REMOVE_INVISIBLE_SUBSCRIPTIONS.equals(intent.getAction())) {
+                    if (getResultCode() != EuiccManager.EMBEDDED_SUBSCRIPTION_RESULT_OK) {
+                        int detailedCode = intent.getIntExtra(
+                                EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE, 0);
+                        Log.e(TAG, "Error removing euicc opportunistic profile, Detailed code = "
+                                + detailedCode);
+                    } else {
+                        Log.e(TAG, "Successfully remove euicc opportunistic profile.");
+                        removedSubsCount.incrementAndGet();
+                    }
+                    removeSubsLatch.countDown();
+                }
+            }
+        };
+
+        Intent intent = new Intent(ACTION_EUICC_REMOVE_INVISIBLE_SUBSCRIPTIONS);
+        intent.setPackage(PACKAGE_NAME_EUICC_DATA_MANAGEMENT_CALLBACK);
+        PendingIntent callbackIntent = PendingIntent.getBroadcastAsUser(
+                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT, UserHandle.SYSTEM);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ACTION_EUICC_REMOVE_INVISIBLE_SUBSCRIPTIONS);
+        HandlerThread euiccHandlerThread =
+                new HandlerThread("euiccRemovingSubsReceiverThread");
+        euiccHandlerThread.start();
+        Handler euiccHandler = new Handler(euiccHandlerThread.getLooper());
+        context.getApplicationContext()
+                .registerReceiver(
+                        removeEuiccSubsReceiver, intentFilter, null, euiccHandler);
+        for (SubscriptionInfo subscriptionInfo : subscriptionInfos) {
+            Log.i(
+                    TAG,
+                    "Remove invisible subscription " + subscriptionInfo.getSubscriptionId()
+                            + " from card " + subscriptionInfo.getCardId());
+            euiccManager.createForCardId(subscriptionInfo.getCardId())
+                    .deleteSubscription(subscriptionInfo.getSubscriptionId(), callbackIntent);
+        }
+        try {
+            long waitingTimeMillis = Settings.Global.getLong(
+                    context.getContentResolver(),
+                    Settings.Global.EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS,
+                    DEFAULT_EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS);
+            if (waitingTimeMillis < MIN_EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS) {
+                waitingTimeMillis = MIN_EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS;
+            } else if (waitingTimeMillis > MAX_EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS) {
+                waitingTimeMillis = MAX_EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS;
+            }
+            if (!removeSubsLatch.await(waitingTimeMillis, TimeUnit.MILLISECONDS)) {
+                Log.e(TAG, "Timeout removing invisible euicc profiles.");
+                return false;
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.e(TAG, "Removing invisible euicc profiles interrupted", e);
+            return false;
+        } finally {
+            context.getApplicationContext().unregisterReceiver(removeEuiccSubsReceiver);
+            if (euiccHandlerThread != null) {
+                euiccHandlerThread.quit();
+            }
+        }
+        return removedSubsCount.get() == subscriptionInfos.size();
     }
 
     /** {@hide} */

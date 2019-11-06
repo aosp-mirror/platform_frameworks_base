@@ -261,6 +261,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_TASK_CHANGE_WINDOWING_MODE = 27;
 
     /**
+     * A display which can only contain one task is being shown because the first activity is
+     * started or it's being turned on.
+     * @hide
+     */
+    int TRANSIT_SHOW_SINGLE_TASK_DISPLAY = 28;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_" }, value = {
@@ -287,7 +294,8 @@ public interface WindowManager extends ViewManager {
             TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
             TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
             TRANSIT_CRASHING_ACTIVITY_CLOSE,
-            TRANSIT_TASK_CHANGE_WINDOWING_MODE
+            TRANSIT_TASK_CHANGE_WINDOWING_MODE,
+            TRANSIT_SHOW_SINGLE_TASK_DISPLAY
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionType {}
@@ -309,6 +317,12 @@ public interface WindowManager extends ViewManager {
      * @hide
      */
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER = 0x4;
+
+    /**
+     * Transition flag: Keyguard is going away with subtle animation.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = 0x8;
 
     /**
      * @hide

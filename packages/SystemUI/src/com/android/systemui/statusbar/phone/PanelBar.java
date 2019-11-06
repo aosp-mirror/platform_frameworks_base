@@ -107,8 +107,12 @@ public abstract class PanelBar extends FrameLayout {
         return mExpanded;
     }
 
-    private void updateVisibility() {
-        mPanel.setVisibility(mExpanded || mBouncerShowing ? VISIBLE : INVISIBLE);
+    protected void updateVisibility() {
+        mPanel.setVisibility(shouldPanelBeVisible() ? VISIBLE : INVISIBLE);
+    }
+
+    protected boolean shouldPanelBeVisible() {
+        return mExpanded || mBouncerShowing;
     }
 
     public boolean panelEnabled() {

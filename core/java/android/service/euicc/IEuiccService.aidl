@@ -52,6 +52,8 @@ oneway interface IEuiccService {
     void updateSubscriptionNickname(int slotId, String iccid, String nickname,
             in IUpdateSubscriptionNicknameCallback callback);
     void eraseSubscriptions(int slotId, in IEraseSubscriptionsCallback callback);
+    void eraseSubscriptionsWithOptions(
+            int slotIndex, int options, in IEraseSubscriptionsCallback callback);
     void retainSubscriptionsForFactoryReset(
             int slotId, in IRetainSubscriptionsForFactoryResetCallback callback);
 }

@@ -52,7 +52,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private static final int BACKGROUND_ANIMATION_LENGTH_MS = 220;
     private static final int ACTIVATE_ANIMATION_LENGTH = 220;
-    private static final long DARK_ANIMATION_LENGTH = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
 
     /**
      * The amount of width, which is kept in the end when performing a disappear animation (also
@@ -85,11 +84,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private static final float VERTICAL_ANIMATION_START = 1.0f;
 
     /**
-     * Scale for the background to animate from when exiting dark mode.
-     */
-    private static final float DARK_EXIT_SCALE_START = 0.93f;
-
-    /**
      * A sentinel value when no color should be used. Can be used with {@link #setTintColor(int)}
      * or {@link #setOverrideTintColor(int, float)}.
      */
@@ -105,7 +99,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private final DoubleTapHelper mDoubleTapHelper;
 
     private boolean mDimmed;
-    protected boolean mDark;
 
     protected int mBgTint = NO_COLOR;
     private float mBgAlpha = 1f;
@@ -440,16 +433,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return true;
     }
 
-    public void setDark(boolean dark, boolean fade, long delay) {
-        super.setDark(dark, fade, delay);
-        if (mDark == dark) {
-            return;
-        }
-        mDark = dark;
-        updateBackground();
-        updateBackgroundTint(false);
-    }
-
     private void updateOutlineAlpha() {
         float alpha = NotificationStackScrollLayout.BACKGROUND_ALPHA_DIMMED;
         alpha = (alpha + (1.0f - alpha) * mNormalBackgroundVisibilityAmount);
@@ -542,10 +525,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      *                       used and the background color not at all.
      */
     public void setOverrideTintColor(int color, float overrideAmount) {
-        if (mDark) {
-            color = NO_COLOR;
-            overrideAmount = 0;
-        }
         mOverrideTint = color;
         mOverrideAmount = overrideAmount;
         int newColor = calculateBgColor();
@@ -1055,6 +1034,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public boolean isHeadsUpAnimatingAway() {
         return false;
+    }
+
+    public boolean isHeadsUp() {
+        return false;
+    }
+
+    public int getHeadsUpHeightWithoutHeader() {
+        return getHeight();
     }
 
     public interface OnActivatedListener {

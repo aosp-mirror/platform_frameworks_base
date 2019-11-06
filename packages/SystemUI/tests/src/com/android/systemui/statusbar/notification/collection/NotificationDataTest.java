@@ -69,6 +69,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -127,7 +128,7 @@ public class NotificationDataTest extends SysuiTestCase {
 
         mDependency.injectTestDependency(ForegroundServiceController.class, mFsc);
         mDependency.injectTestDependency(NotificationGroupManager.class,
-                new NotificationGroupManager());
+                new NotificationGroupManager(mock(StatusBarStateController.class)));
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);

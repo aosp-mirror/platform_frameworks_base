@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
@@ -40,6 +41,8 @@ import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -54,8 +57,10 @@ import android.app.ActivityOptions;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PauseActivityItem;
+import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.MergedConfiguration;
@@ -67,6 +72,7 @@ import android.view.RemoteAnimationTarget;
 
 import androidx.test.filters.MediumTest;
 
+import com.android.internal.R;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
@@ -603,6 +609,15 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.updateOptionsLocked(ActivityOptions.makeBasic());
         assertNotNull(mActivity.takeOptionsLocked(false /* fromClient */));
         assertNull(mActivity.pendingOptions);
+    }
+
+    @Test
+    public void testCanLaunchHomeActivityFromChooser() {
+        ComponentName chooserComponent = ComponentName.unflattenFromString(
+                Resources.getSystem().getString(R.string.config_chooserActivity));
+        ActivityRecord chooserActivity = new ActivityBuilder(mService).setComponent(
+                chooserComponent).build();
+        assertThat(mActivity.canLaunchHomeActivity(NOBODY_UID, chooserActivity)).isTrue();
     }
 
     /** Setup {@link #mActivity} as a size-compat-mode-able activity without fixed orientation. */

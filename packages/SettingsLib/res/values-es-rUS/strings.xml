@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"No se pueden buscar las redes."</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ninguna"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Guardada"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Desconectada"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Inhabilitada"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Error de configuración IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"No se estableció conexión debido a la mala calidad de la red"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible a través de %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Presiona para registrarte"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Conectado pero sin conexión a Internet"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Conexión limitada"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Sin Internet"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Acceso obligatorio"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"El punto de acceso está completo temporalmente"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Conectado (sin archivos multimedia) a <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería)"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Conectado (sin teléfono ni archivos multimedia) a <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería)"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Activado (batería: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>)"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Activo, I: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"I: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Activado"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Audio multimedia"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Llamadas telefónicas"</string>
@@ -143,9 +141,9 @@
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicaciones eliminadas"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplicaciones y usuarios eliminados"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"Actualizaciones del sistema"</string>
-    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Conexión mediante USB"</string>
+    <string name="tether_settings_title_usb" msgid="6688416425801386511">"Conexión a red por USB"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Hotspot portátil"</string>
-    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Conexión mediante Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Conexión Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Compartir conexión"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Hotspots y dispositivos portátiles"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Todas las apps de trabajo"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Redes"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Habilitar registro detallado de Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Limitación de búsqueda de Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datos móviles siempre activados"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleración de hardware de conexión mediante dispositivo portátil"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostrar dispositivos Bluetooth sin nombre"</string>
@@ -244,10 +243,11 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Desactivado"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automático"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nombre de host del proveedor de DNS privado"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ingresa el nombre de host del proveedor de DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ingresa el host del proveedor de DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"No se pudo establecer conexión"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Reduce el consumo de batería y mejora el rendimiento de la red"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Con uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Sin tarifa plana"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños de búfer de Logger"</string>
@@ -261,7 +261,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Ubicaciones de prueba"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Permitir ubicaciones de prueba"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Habilitar inspección de atributos de vista"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Siempre mantén los datos móviles activos, incluso cuando esté activada la conexión Wi‑Fi (para cambiar de red de forma rápida)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Mantener siempre los datos móviles activos, incluso cuando esté activada la conexión Wi‑Fi (para cambiar de red de forma rápida)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Usar la aceleración de hardware de conexión mediante dispositivo portátil si está disponible"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"¿Permitir depuración por USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"La depuración por USB solo está indicada para actividades de programación. Úsala para copiar datos entre tu computadora y el dispositivo, para instalar aplicaciones en el dispositivo sin recibir notificaciones y para leer datos de registro."</string>
@@ -286,7 +286,7 @@
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Esperar que se conecte el depurador para iniciar la aplicación"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Entrada"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Dibujo"</string>
-    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Representación acelerada mediante hardware"</string>
+    <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Procesamiento acelerado mediante hardware"</string>
     <string name="media_category" msgid="4388305075496848353">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Supervisión"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Modo estricto"</string>
@@ -297,7 +297,7 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Mostrar información visual para presiones"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Ver actualiz. de superficie"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Destello en superficie por actualización"</string>
-    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Mostrar actualizaciones"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Mostrar cambios de vista"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Mostrar vistas de ventanas procesadas"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ver actualiz. de capas de hardware"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Luz verde en capas de hardware al actualizarse"</string>
@@ -329,7 +329,7 @@
     <string name="show_all_anrs" msgid="4924885492787069007">"Mostrar ANR en 2.° plano"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Mostrar diálogo cuando las apps en segundo plano no responden"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Alertas de notificaciones"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"App que publica notificación sin canal válido"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Advertencia en pantalla cuando una app publica una notificación sin canal válido"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Forzar permisos en almacenamiento externo"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Cualquier app puede escribirse en un almacenamiento externo, sin importar los valores del manifiesto"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Forzar actividades para que cambien de tamaño"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Duración aproximada hasta: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Debería durar aproximadamente hasta <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Hasta <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Extender la duración de la batería después de las <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Tiempo restante: más de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Preguntar siempre"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Hasta que lo desactives"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Recién"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Este dispositivo"</string>
 </resources>

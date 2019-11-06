@@ -95,7 +95,7 @@ genrule {
     ],
 }
 
-cc_library_shared {
+cc_library {
     name: "libstatslog",
     host_supported: true,
     generated_sources: ["statslog.cpp"],

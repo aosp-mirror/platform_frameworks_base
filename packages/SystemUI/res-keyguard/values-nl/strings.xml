@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Onjuiste pincode."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Ongeldige kaart."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Volledig opgeladen"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Draadloos opladen"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Draadloos opladen"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Opladen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Snel opladen"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Langzaam opladen"</string>
@@ -151,84 +151,7 @@
       <item quantity="other">De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_1">%d</xliff:g> pogingen over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
       <item quantity="one">De simkaart is nu uitgeschakeld. Geef de pukcode op om door te gaan. Je hebt nog <xliff:g id="_NUMBER_0">%d</xliff:g> poging over voordat de simkaart definitief onbruikbaar wordt. Neem contact op met je provider voor meer informatie.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="other">"<annotation name="color">"Het is"</annotation>\n"^1\n^2</item>
-      <item quantity="one">"<annotation name="color">"Het is"</annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"Twaalf"</item>
-    <item msgid="7389464214252023751">"Eén"</item>
-    <item msgid="8803180377002008046">"Twee"</item>
-    <item msgid="8614897059944644719">"Drie"</item>
-    <item msgid="2293058674782619556">"Vier"</item>
-    <item msgid="4815402358455041664">"Vijf"</item>
-    <item msgid="3325754778509665687">"Zes"</item>
-    <item msgid="5805551341866280575">"Zeven"</item>
-    <item msgid="203334816668238610">"Acht"</item>
-    <item msgid="4828052671464488923">"Negen"</item>
-    <item msgid="2233497913571137419">"Tien"</item>
-    <item msgid="5621554266768657830">"Elf"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"uur"</item>
-    <item msgid="8837126587669001578">"Nul één"</item>
-    <item msgid="4294343372940455660">"Nul twee"</item>
-    <item msgid="7129166637707421536">"Nul drie"</item>
-    <item msgid="7579404865008788673">"Nul vier"</item>
-    <item msgid="3873924689207380586">"Nul vijf"</item>
-    <item msgid="4849565597850069377">"Nul zes"</item>
-    <item msgid="4404219424523572364">"Nul zeven"</item>
-    <item msgid="8740481214764087329">"Nul acht"</item>
-    <item msgid="1713216865806811237">"Nul negen"</item>
-    <item msgid="3508406095411245038">"Tien"</item>
-    <item msgid="7161996337755311711">"Elf"</item>
-    <item msgid="4044549963329624197">"Twaalf"</item>
-    <item msgid="333373157917379088">"Dertien"</item>
-    <item msgid="2631202907124819385">"Veertien"</item>
-    <item msgid="6472396076858033453">"Vijftien"</item>
-    <item msgid="8656981856181581643">"Zestien"</item>
-    <item msgid="7289026608562030619">"Zeventien"</item>
-    <item msgid="3881477602692646573">"Achttien"</item>
-    <item msgid="3358129827772984226">"Negentien"</item>
-    <item msgid="3308575407402865807">"Twintig"</item>
-    <item msgid="5346560955382229629">"Eénentwintig\n"</item>
-    <item msgid="226750304761473436">"Tweeëntwintig\n"</item>
-    <item msgid="616811325336838734">"Drieëntwintig\n"</item>
-    <item msgid="616346116869053440">"Vierentwintig\n"</item>
-    <item msgid="4642996410384042830">"Vijfentwintig\n"</item>
-    <item msgid="7506092849993571465">"Zesentwintig\n"</item>
-    <item msgid="1915078191101042031">"Zevenentwintig\n"</item>
-    <item msgid="4292378641900520252">"Achtentwintig\n"</item>
-    <item msgid="5339513901773103696">"Negenentwintig\n"</item>
-    <item msgid="3574673250891657607">"Dertig"</item>
-    <item msgid="5796923836589110940">"Eénendertig\n"</item>
-    <item msgid="5859323597571702052">"Tweeëndertig\n"</item>
-    <item msgid="5133326723148876507">"Drieëndertig\n"</item>
-    <item msgid="2693999494655663096">"Vierendertig\n"</item>
-    <item msgid="3316754944962836197">"Vijfendertig\n"</item>
-    <item msgid="816891008836796723">"Zesendertig\n"</item>
-    <item msgid="9158890488666520078">"Zevenendertig\n"</item>
-    <item msgid="1894769703213894011">"Achtendertig\n"</item>
-    <item msgid="5638820345598572399">"Negenendertig\n"</item>
-    <item msgid="8838304023017895439">"Veertig"</item>
-    <item msgid="1834742948932559597">"Eenenveertig\n"</item>
-    <item msgid="6573707308847773944">"Tweeënveertig\n"</item>
-    <item msgid="2450149950652678001">"Drieënveertig\n"</item>
-    <item msgid="2874667401318178036">"Vierenveertig\n"</item>
-    <item msgid="3391101532763048862">"Vijfenveertig\n"</item>
-    <item msgid="1671489330863254362">"Zesenveertig\n"</item>
-    <item msgid="5916017359554531038">"Zevenenveertig\n"</item>
-    <item msgid="8205413177993059967">"Achtenveertig\n"</item>
-    <item msgid="6607867415142171302">"Negenenveertig\n"</item>
-    <item msgid="8358850748472089162">"Vijftig"</item>
-    <item msgid="3551313125255080234">"Eenenvijftig\n"</item>
-    <item msgid="1559678130725716542">"Tweeënvijftig\n"</item>
-    <item msgid="431441994725492377">"Drieënvijftig\n"</item>
-    <item msgid="6345774640539623024">"Vierenvijftig\n"</item>
-    <item msgid="8018192990793931120">"Vijfenvijftig\n"</item>
-    <item msgid="6187650843754604534">"Zesenvijftig\n"</item>
-    <item msgid="8727240174015993259">"Zevenenvijftig\n"</item>
-    <item msgid="848339003778952950">"Achtenvijftig\n"</item>
-    <item msgid="5798985802835423618">"Negenenvijftig\n"</item>
-  </string-array>
+    <string name="clock_title_default" msgid="6645600990069154049">"Standaard"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Bel"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analoog"</string>
 </resources>

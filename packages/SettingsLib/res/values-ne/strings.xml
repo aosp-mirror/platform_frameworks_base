@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"सञ्जालका लागि स्क्यान गर्न सक्दैन"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"कुनै पनि होइन"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"सुरक्षित गरियो"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"विच्छेद गरियो"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"असक्षम पारियो"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP विन्यास असफल"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"कम गुणस्तरको नेटवर्कका कारण जडान गर्न सकिएन"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s मार्फत उपलब्ध"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"साइन अप गर्न ट्याप गर्नुहोस्"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"जडान गरियो तर इन्टरनेट छैन"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"सीमित जडान"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"इन्टरनेटमाथिको पहुँच छैन"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"साइन इन गर्न आवश्यक छ"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"पहुँचसम्बन्धी स्थान अस्थायी रूपमा भरिएको छ"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"जडान गरियो (मिडियाबाहेक), ब्याट्री <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"जडान गरियो (फोन वा मिडियाबाहेक), ब्याट्री <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"सक्रिय, ब्याट्रीको स्तर: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"सक्रिय, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ब्याट्री, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ब्याट्री"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"ब्याट्रीको स्तर: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ब्याट्री, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ब्याट्री"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"सक्रिय"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"मिडिया अडियो"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"फोन कलहरू"</string>
@@ -155,7 +153,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"केही पूर्वनिर्धारितहरू सेट गरिएका छन्"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"कुनै पूर्वनिर्धारित सेट गरिएको छैन"</string>
     <string name="tts_settings" msgid="8186971894801348327">"पाठ-वाचन सेटिङहरू"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"पाठवाचकको उत्पादन"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"पाठवाचकको आउटपुट"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"वाणी दर"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"पाठ वाचन हुने गति"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"पिच"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"नेटवर्किङ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ताररहित प्रदर्शन प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi वर्बोज लग सक्षम पार्नुहोस्"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi स्क्यान थ्रोटलिङ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा सधैँ सक्रिय राख्नुहोस्"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू देखाउनुहोस्"</string>
@@ -248,7 +247,8 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"जडान गर्न सकिएन"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"मिटर गरिएको जडान भनी चिन्ह लगाइएको"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"ब्याट्रीको खपत कम गरी नेटवर्कको कार्यसम्पादनमा सुधार गर्दछ"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"सशुल्क वाइफाइ"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"मिटर नगरिएको"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लगर बफर आकारहरू"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"लग बफर प्रति लगर आकार चयन गर्नुहोस्"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g> सम्म"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"ब्याट्रीको आयु <xliff:g id="TIME">%1$s</xliff:g> पछिसम्म विस्तार गरियो"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी छ"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"प्रत्येक पटक सोध्नुहोस्"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"तपाईंले निष्क्रिय नपार्दासम्म"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"अहिले भर्खरै"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"यो यन्त्र"</string>
 </resources>

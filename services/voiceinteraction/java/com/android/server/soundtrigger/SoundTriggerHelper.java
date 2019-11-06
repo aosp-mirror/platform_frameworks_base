@@ -104,8 +104,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     // This is an indirect indication of the microphone being open in some other application.
     private boolean mServiceDisabled = false;
 
-    // Whether we have ANY recognition (keyphrase or generic) running.
-    private boolean mRecognitionRunning = false;
+    // Whether ANY recognition (keyphrase or generic) has been requested.
+    private boolean mRecognitionRequested = false;
 
     private PowerSaveModeListener mPowerSaveModeListener;
 
@@ -252,11 +252,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
 
-            // Initialize power save, call active state monitoring logic.
-            if (!mRecognitionRunning) {
-                initializeTelephonyAndPowerStateListeners();
-            }
-
             // If the existing SoundModel is different (for the same UUID for Generic and same
             // keyphrase ID for voice), ensure that it is unloaded and stopped before proceeding.
             // This works for both keyphrase and generic models. This logic also ensures that a
@@ -326,8 +321,16 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             modelData.setRecognitionConfig(recognitionConfig);
             modelData.setSoundModel(soundModel);
 
-            return startRecognitionLocked(modelData,
+            int status = startRecognitionLocked(modelData,
                     false /* Don't notify for synchronous calls */);
+
+                                // Initialize power save, call active state monitoring logic.
+            if (status == STATUS_OK && !mRecognitionRequested) {
+                initializeTelephonyAndPowerStateListeners();
+                mRecognitionRequested = true;
+            }
+
+            return status;
         }
     }
 
@@ -450,7 +453,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             modelData.clearCallback();
             modelData.setRecognitionConfig(null);
 
-            if (!computeRecognitionRunningLocked()) {
+            if (!computeRecognitionRequestedLocked()) {
                 internalClearGlobalStateLocked();
             }
 
@@ -1196,20 +1199,20 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     // Computes whether we have any recognition running at all (voice or generic). Sets
-    // the mRecognitionRunning variable with the result.
-    private boolean computeRecognitionRunningLocked() {
+    // the mRecognitionRequested variable with the result.
+    private boolean computeRecognitionRequestedLocked() {
         if (mModuleProperties == null || mModule == null) {
-            mRecognitionRunning = false;
-            return mRecognitionRunning;
+            mRecognitionRequested = false;
+            return mRecognitionRequested;
         }
         for (ModelData modelData : mModelDataMap.values()) {
-            if (modelData.isModelStarted()) {
-                mRecognitionRunning = true;
-                return mRecognitionRunning;
+            if (modelData.isRequested()) {
+                mRecognitionRequested = true;
+                return mRecognitionRequested;
             }
         }
-        mRecognitionRunning = false;
-        return mRecognitionRunning;
+        mRecognitionRequested = false;
+        return mRecognitionRequested;
     }
 
     // This class encapsulates the callbacks, state, handles and any other information that

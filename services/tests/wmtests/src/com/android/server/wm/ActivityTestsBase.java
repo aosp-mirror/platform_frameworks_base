@@ -85,6 +85,7 @@ import org.mockito.invocation.InvocationOnMock;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A base class to handle common operations in activity related unit tests.
@@ -169,13 +170,21 @@ class ActivityTestsBase {
      * Delegates task creation to {@link #TaskBuilder} to avoid the dependency of window hierarchy
      * when starting activity in unit tests.
      */
-    void mockTaskRecordFactory() {
-        final TaskRecord task = new TaskBuilder(mSupervisor).setCreateStack(false).build();
+    void mockTaskRecordFactory(Consumer<TaskBuilder> taskBuilderSetup) {
+        final TaskBuilder taskBuilder = new TaskBuilder(mSupervisor).setCreateStack(false);
+        if (taskBuilderSetup != null) {
+            taskBuilderSetup.accept(taskBuilder);
+        }
+        final TaskRecord task = taskBuilder.build();
         final TaskRecordFactory factory = mock(TaskRecordFactory.class);
         TaskRecord.setTaskRecordFactory(factory);
         doReturn(task).when(factory).create(any() /* service */, anyInt() /* taskId */,
                 any() /* info */, any() /* intent */, any() /* voiceSession */,
                 any() /* voiceInteractor */);
+    }
+
+    void mockTaskRecordFactory() {
+        mockTaskRecordFactory(null /* taskBuilderSetup */);
     }
 
     /**

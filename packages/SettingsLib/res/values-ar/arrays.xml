@@ -59,7 +59,7 @@
     <item msgid="45075631231212732">"‏استخدام التحقق من HDCP دومًا"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
-    <item msgid="3966341281672645384">"موقوف"</item>
+    <item msgid="3966341281672645384">"غير مفعّل"</item>
     <item msgid="1969681323976948639">"تمّ تفعيل التصفية"</item>
     <item msgid="8719029132154020716">"مفعّل"</item>
   </string-array>
@@ -211,7 +211,7 @@
     <item msgid="1069584980746680398">"‏حجم الرسوم المتحركة 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="1606809880904982133">"بدون"</item>
+    <item msgid="1606809880904982133">"بدون محاكاة"</item>
     <item msgid="9033194758688161545">"480 بكسل"</item>
     <item msgid="1025306206556583600">"480 بكسل (العرض آمن)"</item>
     <item msgid="1853913333042744661">"720 بكسل"</item>

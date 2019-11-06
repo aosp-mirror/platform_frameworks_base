@@ -246,7 +246,7 @@
     <item msgid="2290859360633824369">"Deuteranomaly ਲਈ ਖੇਤਰ ਦਿਖਾਓ"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="3401625457385943795">"ਸਟੈਂਡਰਡ ਸੀਮਾ"</item>
+    <item msgid="3401625457385943795">"ਮਿਆਰੀ ਸੀਮਾ"</item>
     <item msgid="4071574792028999443">"ਕੋਈ ਪਿਛੋਕੜ ਪ੍ਰਕਿਰਿਆਵਾਂ ਨਹੀਂ"</item>
     <item msgid="4810006996171705398">"ਵੱਧ ਤੋਂ ਵੱਧ 1 ਪ੍ਰਕਿਰਿਆ"</item>
     <item msgid="8586370216857360863">"ਵੱਧ ਤੋਂ ਵੱਧ 2 ਪ੍ਰਕਿਰਿਆਵਾਂ"</item>

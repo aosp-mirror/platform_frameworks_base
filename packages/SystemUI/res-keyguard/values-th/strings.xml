@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"รหัส PIN ไม่ถูกต้อง"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"การ์ดไม่ถูกต้อง"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"ชาร์จเต็มแล้ว"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จแบบไร้สาย"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จแบบไร้สาย"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จอย่างเร็ว"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จอย่างช้าๆ"</string>
@@ -69,7 +69,7 @@
       <item quantity="other">ลองอีกครั้งใน <xliff:g id="NUMBER">%d</xliff:g> วินาที</item>
       <item quantity="one">ลองอีกครั้งใน 1 วินาที</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="5547646893001491340">"วาดรูปแบบของคุณ"</string>
+    <string name="kg_pattern_instructions" msgid="5547646893001491340">"ลากรูปแบบของคุณ"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"ป้อน PIN ของซิม"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"ป้อน PIN ของซิมสำหรับ \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
     <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ปิดใช้ eSIM เพื่อใช้อุปกรณ์โดยไม่มีบริการมือถือ"</string>
@@ -151,84 +151,7 @@
       <item quantity="other">ซิมถูกปิดใช้งานในขณะนี้ โปรดป้อนรหัส PUK เพื่อทำต่อ คุณพยายามได้อีก <xliff:g id="_NUMBER_1">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ</item>
       <item quantity="one">ซิมถูกปิดใช้งานในขณะนี้ โปรดป้อนรหัส PUK เพื่อทำต่อ คุณพยายามได้อีก <xliff:g id="_NUMBER_0">%d</xliff:g> ครั้งก่อนที่ซิมจะไม่สามารถใช้งานได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="other">"<annotation name="color">"เวลา"</annotation>\n"^1\n^2</item>
-      <item quantity="one">"<annotation name="color">"เวลา"</annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"สิบสอง"</item>
-    <item msgid="7389464214252023751">"หนึ่ง"</item>
-    <item msgid="8803180377002008046">"สอง"</item>
-    <item msgid="8614897059944644719">"สาม"</item>
-    <item msgid="2293058674782619556">"สี่"</item>
-    <item msgid="4815402358455041664">"ห้า"</item>
-    <item msgid="3325754778509665687">"หก"</item>
-    <item msgid="5805551341866280575">"เจ็ด"</item>
-    <item msgid="203334816668238610">"แปด"</item>
-    <item msgid="4828052671464488923">"เก้า"</item>
-    <item msgid="2233497913571137419">"สิบ"</item>
-    <item msgid="5621554266768657830">"สิบเอ็ด"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"นาฬิกา"</item>
-    <item msgid="8837126587669001578">"ศูนย์หนึ่ง"</item>
-    <item msgid="4294343372940455660">"ศูนย์สอง"</item>
-    <item msgid="7129166637707421536">"ศูนย์สาม"</item>
-    <item msgid="7579404865008788673">"ศูนย์สี่"</item>
-    <item msgid="3873924689207380586">"ศูนย์ห้า"</item>
-    <item msgid="4849565597850069377">"ศูนย์หก"</item>
-    <item msgid="4404219424523572364">"ศูนย์เจ็ด"</item>
-    <item msgid="8740481214764087329">"ศูนย์แปด"</item>
-    <item msgid="1713216865806811237">"ศูนย์เก้า"</item>
-    <item msgid="3508406095411245038">"สิบ"</item>
-    <item msgid="7161996337755311711">"สิบเอ็ด"</item>
-    <item msgid="4044549963329624197">"สิบสอง"</item>
-    <item msgid="333373157917379088">"สิบสาม"</item>
-    <item msgid="2631202907124819385">"สิบสี่"</item>
-    <item msgid="6472396076858033453">"สิบห้า"</item>
-    <item msgid="8656981856181581643">"สิบหก"</item>
-    <item msgid="7289026608562030619">"สิบเจ็ด"</item>
-    <item msgid="3881477602692646573">"สิบแปด"</item>
-    <item msgid="3358129827772984226">"สิบเก้า"</item>
-    <item msgid="3308575407402865807">"ยี่สิบ"</item>
-    <item msgid="5346560955382229629">"ยี่สิบ\nเอ็ด"</item>
-    <item msgid="226750304761473436">"ยี่สิบ\nสอง"</item>
-    <item msgid="616811325336838734">"ยี่สิบ\nสาม"</item>
-    <item msgid="616346116869053440">"ยี่สิบ\nสี่"</item>
-    <item msgid="4642996410384042830">"ยี่สิบ\nห้า"</item>
-    <item msgid="7506092849993571465">"ยี่สิบ\nหก"</item>
-    <item msgid="1915078191101042031">"ยี่สิบ\nเจ็ด"</item>
-    <item msgid="4292378641900520252">"ยี่สิบ\nแปด"</item>
-    <item msgid="5339513901773103696">"ยี่สิบ\nเก้า"</item>
-    <item msgid="3574673250891657607">"สามสิบ"</item>
-    <item msgid="5796923836589110940">"สามสิบ\nเอ็ด"</item>
-    <item msgid="5859323597571702052">"สามสิบ\nสอง"</item>
-    <item msgid="5133326723148876507">"สามสิบ\nสาม"</item>
-    <item msgid="2693999494655663096">"สามสิบ\nสี่"</item>
-    <item msgid="3316754944962836197">"สามสิบ\nห้า"</item>
-    <item msgid="816891008836796723">"สามสิบ\nหก"</item>
-    <item msgid="9158890488666520078">"สามสิบ\nเจ็ด"</item>
-    <item msgid="1894769703213894011">"สามสิบ\nแปด"</item>
-    <item msgid="5638820345598572399">"สามสิบ\nเก้า"</item>
-    <item msgid="8838304023017895439">"สี่สิบ"</item>
-    <item msgid="1834742948932559597">"สี่สิบ\nเอ็ด"</item>
-    <item msgid="6573707308847773944">"สี่สิบ\nสอง"</item>
-    <item msgid="2450149950652678001">"สี่สิบ\nสาม"</item>
-    <item msgid="2874667401318178036">"สี่สิบ\nสี่"</item>
-    <item msgid="3391101532763048862">"สี่สิบ\nห้า"</item>
-    <item msgid="1671489330863254362">"สี่สิบ\nหก"</item>
-    <item msgid="5916017359554531038">"สี่สิบ\nเจ็ด"</item>
-    <item msgid="8205413177993059967">"สี่สิบ\nแปด"</item>
-    <item msgid="6607867415142171302">"สี่สิบ\nเก้า"</item>
-    <item msgid="8358850748472089162">"ห้าสิบ"</item>
-    <item msgid="3551313125255080234">"ห้าสิบ\nเอ็ด"</item>
-    <item msgid="1559678130725716542">"ห้าสิบ\nสอง"</item>
-    <item msgid="431441994725492377">"ห้าสิบ\nสาม"</item>
-    <item msgid="6345774640539623024">"ห้าสิบ\nสี่"</item>
-    <item msgid="8018192990793931120">"ห้าสิบ\nห้า"</item>
-    <item msgid="6187650843754604534">"ห้าสิบ\nหก"</item>
-    <item msgid="8727240174015993259">"ห้าสิบ\nเจ็ด"</item>
-    <item msgid="848339003778952950">"ห้าสิบ\nแปด"</item>
-    <item msgid="5798985802835423618">"ห้าสิบ\nเก้า"</item>
-  </string-array>
+    <string name="clock_title_default" msgid="6645600990069154049">"ค่าเริ่มต้น"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"ลูกโป่ง"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"แอนะล็อก"</string>
 </resources>

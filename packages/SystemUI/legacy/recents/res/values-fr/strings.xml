@@ -32,7 +32,7 @@
     <string name="recents_search_bar_label" msgid="638132045925945941">"rechercher"</string>
     <string name="recents_launch_error_message" msgid="9107963563503438012">"Impossible de lancer l\'application <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="826461671965217243">"L\'application <xliff:g id="APP">%s</xliff:g> est désactivée en mode sécurisé."</string>
-    <string name="recents_stack_action_button_label" msgid="1974273390109881497">"Tout effacer"</string>
+    <string name="recents_stack_action_button_label" msgid="1974273390109881497">"Tout fermer"</string>
     <string name="recents_drag_hint_message" msgid="610417221848280136">"Faire glisser ici pour utiliser l\'écran partagé"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"Séparation horizontale"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"Séparation verticale"</string>

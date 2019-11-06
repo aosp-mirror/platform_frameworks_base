@@ -26,7 +26,7 @@
     <item msgid="8513729475867537913">"ସଂଯୋଗ କରୁଛି…"</item>
     <item msgid="515055375277271756">"ପ୍ରାମାଣିକୀକରଣ କରାଯାଉଛି…"</item>
     <item msgid="1943354004029184381">"IP ଠିକଣା ପ୍ରାପ୍ତ କରୁଛି…"</item>
-    <item msgid="4221763391123233270">"ସଂଯୋଜିତ"</item>
+    <item msgid="4221763391123233270">"ସଂଯୁକ୍ତ"</item>
     <item msgid="624838831631122137">"ନିଲମ୍ବିତ"</item>
     <item msgid="7979680559596111948">"ବିଚ୍ଛିନ୍ନ ହେଉଛି…"</item>
     <item msgid="1634960474403853625">"ବିଚ୍ଛିନ୍ନ"</item>
@@ -86,7 +86,7 @@
     <item msgid="3304843301758635896">"ବିକଳ୍ପ କୋଡେକ୍‌ଗୁଡ଼ିକୁ ଅକ୍ଷମ କରନ୍ତୁ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"ସିଷ୍ଟମ୍‌ର ଚୟନ (ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ) ବ୍ୟବହାର କରନ୍ତୁ"</item>
+    <item msgid="5062108632402595000">"ସିଷ୍ଟମ୍‌ର ଚୟନ (ଡିଫଲ୍ଟ୍) ବ୍ୟବହାର କରନ୍ତୁ"</item>
     <item msgid="6898329690939802290">"SBC"</item>
     <item msgid="6839647709301342559">"AAC"</item>
     <item msgid="7848030269621918608">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ଅଡିଓ"</item>
@@ -96,21 +96,21 @@
     <item msgid="741805482892725657">"ବିକଳ୍ପ କୋଡେକ୍ସ ଅକ୍ଷମ କରନ୍ତୁ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="3093023430402746802">"ସିଷ୍ଟମ୍‌ର ଚୟନ (ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ) ବ୍ୟବହାର କରନ୍ତୁ"</item>
+    <item msgid="3093023430402746802">"ସିଷ୍ଟମ୍‌ର ଚୟନ (ଡିଫଲ୍ଟ୍) ବ୍ୟବହାର କରନ୍ତୁ"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
     <item msgid="2909915718994807056">"48.0 kHz"</item>
     <item msgid="3347287377354164611">"88.2 kHz"</item>
     <item msgid="1234212100239985373">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="3214516120190965356">"ସିଷ୍ଟମ୍‌ ଚୟନ ବ୍ୟବହାର କରନ୍ତୁ (ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ)"</item>
+    <item msgid="3214516120190965356">"ସିଷ୍ଟମ୍‌ ଚୟନ ବ୍ୟବହାର କରନ୍ତୁ (ଡିଫଲ୍ଟ୍)"</item>
     <item msgid="4482862757811638365">"44.1 kHz"</item>
     <item msgid="354495328188724404">"48.0 kHz"</item>
     <item msgid="7329816882213695083">"88.2 kHz"</item>
     <item msgid="6967397666254430476">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2684127272582591429">"ସିଷ୍ଟମ୍‌ର ଚୟନ (ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ) ବ୍ୟବହାର କରନ୍ତୁ"</item>
+    <item msgid="2684127272582591429">"ସିଷ୍ଟମ୍‌ର ଚୟନ (ଡିଫଲ୍ଟ୍) ବ୍ୟବହାର କରନ୍ତୁ"</item>
     <item msgid="5618929009984956469">"16 ବିଟ୍ସ/ସାମ୍ପଲ୍‌"</item>
     <item msgid="3412640499234627248">"24 ବିଟ୍ସ/ନମୁନା"</item>
     <item msgid="121583001492929387">"32 ବିଟସ୍‌/ନମୂନା"</item>
@@ -127,7 +127,7 @@
     <item msgid="5571632958424639155">"ଷ୍ଟେରିଓ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="4118561796005528173">"ସିଷ୍ଟମ୍ ଚୟନ ବ୍ୟବହାର କରନ୍ତୁ(ପୂର୍ବ-ନିର୍ଦ୍ଧାରିତ)"</item>
+    <item msgid="4118561796005528173">"ସିଷ୍ଟମ୍ ଚୟନ ବ୍ୟବହାର କରନ୍ତୁ(ଡିଫଲ୍ଟ୍)"</item>
     <item msgid="8900559293912978337">"ମୋନୋ"</item>
     <item msgid="8883739882299884241">"ଷ୍ଟେରିଓ"</item>
   </string-array>
@@ -167,7 +167,7 @@
     <item msgid="6921048829791179331">"ବନ୍ଦ"</item>
     <item msgid="2969458029344750262">"64K ପିଛା ଲଗ୍‌ ବଫର୍‌"</item>
     <item msgid="1342285115665698168">"256K ଲଗ୍‌ ପ୍ରତି ବଫର୍‌"</item>
-    <item msgid="1314234299552254621">"ଲଗ୍‌ ବଫର୍‌ ପ୍ରତି 1M"</item>
+    <item msgid="1314234299552254621">"1M ପ୍ରତି ଲଗ୍‌ ବଫର୍‌"</item>
     <item msgid="3606047780792894151">"ଲଗ୍‌ ବଫର୍‌ ପ୍ରତି 4M"</item>
     <item msgid="5431354956856655120">"16M ଲଗ ପିଛା ବଫର୍‌"</item>
   </string-array>
@@ -195,7 +195,7 @@
   <string-array name="transition_animation_scale_entries">
     <item msgid="8464255836173039442">"ଆନିମେଶନ୍‌ ବନ୍ଦ କରନ୍ତୁ"</item>
     <item msgid="3375781541913316411">"ଆନିମେଶନ୍‌ ସ୍କେଲ୍‌ .5x"</item>
-    <item msgid="1991041427801869945">"ଆନିମେଶନ୍‌ ସ୍କେଲ୍‌ 1x"</item>
+    <item msgid="1991041427801869945">"ଆନିମେସନ୍‌ ସ୍କେଲ୍‌ 1x"</item>
     <item msgid="4012689927622382874">"ଆନିମେସନ୍‌ ସ୍କେଲ 1.5x"</item>
     <item msgid="3289156759925947169">"ଆନିମେଶନ୍‌ ସ୍କେଲ୍‌ 2x"</item>
     <item msgid="7705857441213621835">"ଆନିମେଶନ୍‌ ସ୍କେଲ୍‌ 5x"</item>
@@ -246,7 +246,7 @@
     <item msgid="2290859360633824369">"ଡିଉଟେରାନୋମାଲୀ ପାଇଁ କ୍ଷେତ୍ର ଦେଖନ୍ତୁ"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="3401625457385943795">"ସାଧାରଣ ସୀମା"</item>
+    <item msgid="3401625457385943795">"ମାନକ ସୀମା"</item>
     <item msgid="4071574792028999443">"କୌଣସି ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ପ୍ରୋସେସ୍ ଚାଲୁନାହିଁ"</item>
     <item msgid="4810006996171705398">"ସର୍ବାଧିକ 1ଟି ପ୍ରକ୍ରିୟା"</item>
     <item msgid="8586370216857360863">"ସର୍ବାଧିକ 2 ଟି ପ୍ରକ୍ରିୟା"</item>

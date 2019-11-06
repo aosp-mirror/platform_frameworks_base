@@ -37,7 +37,7 @@
     <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> तुमच्या टीव्हीवर इंस्टॉल केले जाऊ शकत नाही."</string>
     <string name="install_failed_msg" product="default" msgid="6484461562647915707">"<xliff:g id="APP_NAME">%1$s</xliff:g> तुमच्या फोनवर इंस्टॉल केले जाऊ शकत नाही."</string>
     <string name="launch" msgid="3952550563999890101">"उघडा"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"अज्ञात स्रोतांकडून मिळवलेल्या अॅप्स इंस्टॉलेशनला तुमचा प्रशासक अनुमती देत नाही"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"अज्ञात स्रोतांकडून मिळवलेल्या अ‍ॅप्स इंस्टॉलेशनला तुमचा प्रशासक अनुमती देत नाही"</string>
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"या वापरकर्त्याद्वारे अज्ञात अ‍ॅप्स इंस्टॉल केली जाऊ शकत नाहीत"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"या वापरकर्त्याला अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही"</string>
     <string name="ok" msgid="7871959885003339302">"ओके"</string>
@@ -67,8 +67,8 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> अनइंस्टॉल केले"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"अनइंस्टॉल करता आले नाही."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> अनइंस्टॉल करता आले नाही."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"अॅक्टिव्ह डिव्हाइस प्रशासक अ‍ॅप अनइंस्टॉल करू शकत नाही"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> साठी अॅक्टिव्ह डिव्हाइस प्रशासक अ‍ॅप अनइंस्टॉल करू शकत नाही"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"अ‍ॅक्टिव्ह डिव्हाइस प्रशासक अ‍ॅप अनइंस्टॉल करू शकत नाही"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> साठी अ‍ॅक्टिव्ह डिव्हाइस प्रशासक अ‍ॅप अनइंस्टॉल करू शकत नाही"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"हे अ‍ॅप काही वापरकर्ते किंवा प्रोफाइलसाठी आवश्यक आहे आणि इतरांसाठी अनइंस्टॉल करण्यात आले"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"तुमच्या प्रोफाइलसाठी हे अ‍ॅप आवश्यक आहे आणि अनइंस्टॉल केले जाऊ शकत नाही."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"तुमच्या डिव्हाइस प्रशासकास हे अ‍ॅप आवश्यक आहे आणि ते अनइंस्टॉल केले जाऊ शकत नाही."</string>

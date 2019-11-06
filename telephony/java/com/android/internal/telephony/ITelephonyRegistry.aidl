@@ -43,8 +43,8 @@ interface ITelephonyRegistry {
     void listenForSubscriber(in int subId, String pkg, IPhoneStateListener callback, int events,
             boolean notifyNow);
     @UnsupportedAppUsage
-    void notifyCallState(int state, String incomingNumber);
-    void notifyCallStateForPhoneId(in int phoneId, in int subId, int state, String incomingNumber);
+    void notifyCallStateForAllSubs(int state, String incomingNumber);
+    void notifyCallState(in int phoneId, in int subId, int state, String incomingNumber);
     void notifyServiceStateForPhoneId(in int phoneId, in int subId, in ServiceState state);
     void notifySignalStrengthForPhoneId(in int phoneId, in int subId,
             in SignalStrength signalStrength);
@@ -68,8 +68,7 @@ interface ITelephonyRegistry {
     void notifyOtaspChanged(in int subId, in int otaspMode);
     @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);
-    void notifyPhysicalChannelConfiguration(in List<PhysicalChannelConfig> configs);
-    void notifyPhysicalChannelConfigurationForSubscriber(in int subId,
+    void notifyPhysicalChannelConfigurationForSubscriber(in int phoneId, in int subId,
             in List<PhysicalChannelConfig> configs);
     void notifyPreciseCallState(int phoneId, int subId, int ringingCallState,
             int foregroundCallState, int backgroundCallState);

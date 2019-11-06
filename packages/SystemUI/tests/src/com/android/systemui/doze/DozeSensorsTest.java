@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -77,7 +78,9 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Mock
     private AlwaysOnDisplayPolicy mAlwaysOnDisplayPolicy;
     @Mock
-    private TriggerSensor mMockTriggerSensor;
+    private TriggerSensor mTriggerSensor;
+    @Mock
+    private TriggerSensor mProxGatedTriggerSensor;
     private SensorManagerPlugin.SensorEventListener mWakeLockScreenListener;
     private TestableLooper mTestableLooper;
     private DozeSensors mDozeSensors;
@@ -85,6 +88,7 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mProxGatedTriggerSensor.performsProxCheck()).thenReturn(true);
         mTestableLooper = TestableLooper.get(this);
         when(mAmbientDisplayConfiguration.getWakeLockScreenDebounce()).thenReturn(5000L);
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
@@ -114,21 +118,34 @@ public class DozeSensorsTest extends SysuiTestCase {
 
     @Test
     public void testSetListening_firstTrue_registerSettingsObserver() {
-        mDozeSensors.mSensors = new TriggerSensor[] {mMockTriggerSensor};
-
         mDozeSensors.setListening(true);
 
-        verify(mMockTriggerSensor).registerSettingsObserver(any(ContentObserver.class));
+        verify(mTriggerSensor).registerSettingsObserver(any(ContentObserver.class));
     }
 
     @Test
     public void testSetListening_twiceTrue_onlyRegisterSettingsObserverOnce() {
-        mDozeSensors.mSensors = new TriggerSensor[] {mMockTriggerSensor};
+        mDozeSensors.setListening(true);
         mDozeSensors.setListening(true);
 
-        mDozeSensors.setListening(true);
+        verify(mTriggerSensor, times(1)).registerSettingsObserver(any(ContentObserver.class));
+    }
 
-        verify(mMockTriggerSensor, times(1)).registerSettingsObserver(any(ContentObserver.class));
+    @Test
+    public void testSetPaused_onlyPausesNonGatedSensors() {
+        mDozeSensors.setListening(true);
+        verify(mTriggerSensor).setListening(eq(true));
+        verify(mProxGatedTriggerSensor).setListening(eq(true));
+
+        clearInvocations(mTriggerSensor, mProxGatedTriggerSensor);
+        mDozeSensors.setPaused(true);
+        verify(mTriggerSensor).setListening(eq(false));
+        verify(mProxGatedTriggerSensor).setListening(eq(true));
+
+        clearInvocations(mTriggerSensor, mProxGatedTriggerSensor);
+        mDozeSensors.setPaused(false);
+        verify(mTriggerSensor).setListening(eq(true));
+        verify(mProxGatedTriggerSensor).setListening(eq(true));
     }
 
     private class TestableDozeSensors extends DozeSensors {
@@ -144,6 +161,7 @@ public class DozeSensorsTest extends SysuiTestCase {
                     mWakeLockScreenListener = (PluginSensor) sensor;
                 }
             }
+            mSensors = new TriggerSensor[] {mTriggerSensor, mProxGatedTriggerSensor};
         }
     }
 }

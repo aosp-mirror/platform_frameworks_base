@@ -28,6 +28,10 @@ import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 public class CrossFadeHelper {
     public static final long ANIMATION_DURATION_LENGTH = 210;
 
+    public static void fadeOut(final View view) {
+        fadeOut(view, null);
+    }
+
     public static void fadeOut(final View view, final Runnable endRunnable) {
         fadeOut(view, ANIMATION_DURATION_LENGTH, 0, endRunnable);
     }

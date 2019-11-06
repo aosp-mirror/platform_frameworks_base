@@ -9334,6 +9334,16 @@ public class PackageManagerService extends IPackageManager.Stub
             pkgSetting = originalPkgSetting == null ? installedPkgSetting : originalPkgSetting;
             pkgAlreadyExists = pkgSetting != null;
             final String disabledPkgName = pkgAlreadyExists ? pkgSetting.name : pkg.packageName;
+            if (scanSystemPartition && !pkgAlreadyExists
+                    && mSettings.getDisabledSystemPkgLPr(disabledPkgName) != null) {
+                // The updated-package data for /system apk remains inconsistently
+                // after the package data for /data apk is lost accidentally.
+                // To recover it, enable /system apk and install it as non-updated system app.
+                Slog.w(TAG, "Inconsistent package setting of updated system app for "
+                        + disabledPkgName + ". To recover it, enable the system app"
+                        + "and install it as non-updated system app.");
+                mSettings.removeDisabledSystemPackageLPw(disabledPkgName);
+            }
             disabledPkgSetting = mSettings.getDisabledSystemPkgLPr(disabledPkgName);
             isSystemPkgUpdated = disabledPkgSetting != null;
 
@@ -17041,11 +17051,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     commitPackagesLocked(commitRequest);
                     success = true;
                 } finally {
-                    for (PrepareResult result : prepareResults.values()) {
-                        if (result.freezer != null) {
-                            result.freezer.close();
-                        }
-                    }
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
             }
@@ -19871,6 +19876,9 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         };
 
+        final AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+        final int uid = UserHandle.getUid(userId, ps.pkg.applicationInfo.uid);
+
         final int permissionCount = ps.pkg.requestedPermissions.size();
         for (int i = 0; i < permissionCount; i++) {
             final String permName = ps.pkg.requestedPermissions.get(i);
@@ -19930,6 +19938,14 @@ public class PackageManagerService extends IPackageManager.Stub
             if ((oldFlags & FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0) {
                 mPermissionManager.grantRuntimePermission(permName, packageName, false,
                         Process.SYSTEM_UID, userId, delayingPermCallback);
+                // Allow app op later as we are holding mPackages
+                // PermissionPolicyService will handle the app op for foreground/background
+                // permissions.
+                String appOp = AppOpsManager.permissionToOp(permName);
+                if (appOp != null) {
+                    mHandler.post(() -> appOpsManager.setUidMode(appOp, uid,
+                            AppOpsManager.MODE_ALLOWED));
+                }
             // If permission review is enabled the permissions for a legacy apps
             // are represented as constantly granted runtime ones, so don't revoke.
             } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {

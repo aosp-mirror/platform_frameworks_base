@@ -50,8 +50,6 @@ public class NotificationContentViewTest extends SysuiTestCase {
 
     NotificationContentView mView;
 
-    private Icon mActionIcon;
-
     @Before
     @UiThreadTest
     public void setup() {
@@ -62,12 +60,11 @@ public class NotificationContentViewTest extends SysuiTestCase {
         doReturn(10).when(mockRow).getIntrinsicHeight();
 
         mView.setContainingNotification(mockRow);
-        mView.setHeights(10, 20, 30, 40);
+        mView.setHeights(10, 20, 30);
 
         mView.setContractedChild(createViewWithHeight(10));
         mView.setExpandedChild(createViewWithHeight(20));
         mView.setHeadsUpChild(createViewWithHeight(30));
-        mView.setAmbientChild(createViewWithHeight(40));
 
         mView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
@@ -77,16 +74,6 @@ public class NotificationContentViewTest extends SysuiTestCase {
         View view = new View(mContext, null);
         view.setMinimumHeight(height);
         return view;
-    }
-
-    @Test
-    @UiThreadTest
-    public void animationStartType_getsClearedAfterUpdatingVisibilitiesWithoutAnimation() {
-        mView.setHeadsUp(true);
-        mView.setDark(true, false, 0);
-        mView.setDark(false, true, 0);
-        mView.setHeadsUpAnimatingAway(true);
-        assertFalse(mView.isAnimatingVisibleType());
     }
 
     @Test
@@ -101,14 +88,10 @@ public class NotificationContentViewTest extends SysuiTestCase {
         NotificationHeaderView mockHeadsUp = mock(NotificationHeaderView.class);
         when(mockHeadsUp.findViewById(com.android.internal.R.id.notification_header))
                 .thenReturn(mockHeadsUp);
-        NotificationHeaderView mockAmbient = mock(NotificationHeaderView.class);
-        when(mockAmbient.findViewById(com.android.internal.R.id.notification_header))
-                .thenReturn(mockAmbient);
 
         mView.setContractedChild(mockContracted);
         mView.setExpandedChild(mockExpanded);
         mView.setHeadsUpChild(mockHeadsUp);
-        mView.setAmbientChild(mockAmbient);
 
         ArraySet<Integer> ops = new ArraySet<>();
         ops.add(AppOpsManager.OP_ANSWER_PHONE_CALLS);
@@ -116,7 +99,6 @@ public class NotificationContentViewTest extends SysuiTestCase {
 
         verify(mockContracted, times(1)).showAppOpsIcons(ops);
         verify(mockExpanded, times(1)).showAppOpsIcons(ops);
-        verify(mockAmbient, never()).showAppOpsIcons(ops);
         verify(mockHeadsUp, times(1)).showAppOpsIcons(any());
     }
 }

@@ -79,10 +79,11 @@ public class NotificationDozeHelper {
         animator.start();
     }
 
-    public void setIntensityDark(Consumer<Float> listener, boolean dark,
+    public void setDozing(Consumer<Float> listener, boolean dozing,
             boolean animate, long delay, View view) {
         if (animate) {
-            startIntensityAnimation(a -> listener.accept((Float) a.getAnimatedValue()), dark, delay,
+            startIntensityAnimation(a -> listener.accept((Float) a.getAnimatedValue()), dozing,
+                    delay,
                     new AnimatorListenerAdapter() {
 
                         @Override
@@ -100,7 +101,7 @@ public class NotificationDozeHelper {
             if (animator != null) {
                 animator.cancel();
             }
-            listener.accept(dark ? 1f : 0f);
+            listener.accept(dozing ? 1f : 0f);
         }
     }
 

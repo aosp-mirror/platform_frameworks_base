@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Няправільны PIN-код."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Несапраўдная картка."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Акумулятар поўнасцю зараджаны"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе бесправадная зарадка"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе бесправадная зарадка"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе зарадка"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе хуткая зарадка"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе павольная зарадка"</string>
@@ -167,86 +167,7 @@
       <item quantity="many">SIM-карта заблакіравана. Каб працягнуць, увядзіце PUK-код. У вас ёсць яшчэ <xliff:g id="_NUMBER_1">%d</xliff:g> спроб, пасля чаго SIM-карта будзе заблакіравана назаўсёды. Звярніцеся да аператара, каб даведацца больш.</item>
       <item quantity="other">SIM-карта заблакіравана. Каб працягнуць, увядзіце PUK-код. У вас ёсць яшчэ <xliff:g id="_NUMBER_1">%d</xliff:g> спробы, пасля чаго SIM-карта будзе заблакіравана назаўсёды. Звярніцеся да аператара, каб даведацца больш.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="one">"<annotation name="color"></annotation>\n"^1\n^2</item>
-      <item quantity="few">"<annotation name="color"></annotation>\n"^1\n^2</item>
-      <item quantity="many">"<annotation name="color"></annotation>\n"^1\n^2</item>
-      <item quantity="other">"<annotation name="color"></annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"Дванаццаць"</item>
-    <item msgid="7389464214252023751">"Адна"</item>
-    <item msgid="8803180377002008046">"Дзве"</item>
-    <item msgid="8614897059944644719">"Тры"</item>
-    <item msgid="2293058674782619556">"Чатыры"</item>
-    <item msgid="4815402358455041664">"Пяць"</item>
-    <item msgid="3325754778509665687">"Шэсць"</item>
-    <item msgid="5805551341866280575">"Сем"</item>
-    <item msgid="203334816668238610">"Восем"</item>
-    <item msgid="4828052671464488923">"Дзевяць"</item>
-    <item msgid="2233497913571137419">"Дзесяць"</item>
-    <item msgid="5621554266768657830">"Адзінаццаць"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"нуль нуль"</item>
-    <item msgid="8837126587669001578">"нуль адна"</item>
-    <item msgid="4294343372940455660">"нуль дзве"</item>
-    <item msgid="7129166637707421536">"нуль тры"</item>
-    <item msgid="7579404865008788673">"нуль чатыры"</item>
-    <item msgid="3873924689207380586">"нуль пяць"</item>
-    <item msgid="4849565597850069377">"нуль шэсць"</item>
-    <item msgid="4404219424523572364">"нуль сем"</item>
-    <item msgid="8740481214764087329">"нуль восем"</item>
-    <item msgid="1713216865806811237">"нуль дзевяць"</item>
-    <item msgid="3508406095411245038">"дзесяць"</item>
-    <item msgid="7161996337755311711">"адзінаццаць"</item>
-    <item msgid="4044549963329624197">"дванаццаць"</item>
-    <item msgid="333373157917379088">"трынаццаць"</item>
-    <item msgid="2631202907124819385">"чатырнаццаць"</item>
-    <item msgid="6472396076858033453">"пятнаццаць"</item>
-    <item msgid="8656981856181581643">"шаснаццаць"</item>
-    <item msgid="7289026608562030619">"сямнаццаць"</item>
-    <item msgid="3881477602692646573">"васямнаццаць"</item>
-    <item msgid="3358129827772984226">"дзевятнаццаць"</item>
-    <item msgid="3308575407402865807">"дваццаць"</item>
-    <item msgid="5346560955382229629">"дваццаць\nадна"</item>
-    <item msgid="226750304761473436">"дваццаць\nдзве"</item>
-    <item msgid="616811325336838734">"дваццаць\nтры"</item>
-    <item msgid="616346116869053440">"дваццаць\nчатыры"</item>
-    <item msgid="4642996410384042830">"дваццаць\nпяць"</item>
-    <item msgid="7506092849993571465">"дваццаць\nшэсць"</item>
-    <item msgid="1915078191101042031">"дваццаць\nсем"</item>
-    <item msgid="4292378641900520252">"дваццаць\nвосем"</item>
-    <item msgid="5339513901773103696">"дваццаць\nдзевяць"</item>
-    <item msgid="3574673250891657607">"трыццаць"</item>
-    <item msgid="5796923836589110940">"трыццаць\nадна"</item>
-    <item msgid="5859323597571702052">"трыццаць\nдзве"</item>
-    <item msgid="5133326723148876507">"трыццаць\nтры"</item>
-    <item msgid="2693999494655663096">"трыццаць\nчатыры"</item>
-    <item msgid="3316754944962836197">"трыццаць\nпяць"</item>
-    <item msgid="816891008836796723">"трыццаць\nшэсць"</item>
-    <item msgid="9158890488666520078">"трыццаць\nсем"</item>
-    <item msgid="1894769703213894011">"трыццаць\nвосем"</item>
-    <item msgid="5638820345598572399">"трыццаць\nдзевяць"</item>
-    <item msgid="8838304023017895439">"сорак"</item>
-    <item msgid="1834742948932559597">"сорак\nадна"</item>
-    <item msgid="6573707308847773944">"сорак\nдзве"</item>
-    <item msgid="2450149950652678001">"сорак\nтры"</item>
-    <item msgid="2874667401318178036">"сорак\nчатыры"</item>
-    <item msgid="3391101532763048862">"сорак\nпяць"</item>
-    <item msgid="1671489330863254362">"сорак\nшэсць"</item>
-    <item msgid="5916017359554531038">"сорак\nсем"</item>
-    <item msgid="8205413177993059967">"сорак\nвосем"</item>
-    <item msgid="6607867415142171302">"сорак\nдзевяць"</item>
-    <item msgid="8358850748472089162">"пяцьдзясят"</item>
-    <item msgid="3551313125255080234">"пяцьдзясят\nадна"</item>
-    <item msgid="1559678130725716542">"пяцьдзясят\nдзве"</item>
-    <item msgid="431441994725492377">"пяцьдзясят\nтры"</item>
-    <item msgid="6345774640539623024">"пяцьдзясят\nчатыры"</item>
-    <item msgid="8018192990793931120">"пяцьдзясят\nпяць"</item>
-    <item msgid="6187650843754604534">"пяцьдзясят\nшэсць"</item>
-    <item msgid="8727240174015993259">"пяцьдзясят\nсем"</item>
-    <item msgid="848339003778952950">"пяцьдзясят\nвосем"</item>
-    <item msgid="5798985802835423618">"пяцьдзясят\nдзевяць"</item>
-  </string-array>
+    <string name="clock_title_default" msgid="6645600990069154049">"Стандартны"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Бурбалкі"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Са стрэлкамі"</string>
 </resources>

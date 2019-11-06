@@ -50,6 +50,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
@@ -1435,7 +1436,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     void update(@Nullable WifiConfiguration config) {
         mConfig = config;
-        if (mConfig != null) {
+        if (mConfig != null && !isPasspoint()) {
             ssid = removeDoubleQuotes(mConfig.SSID);
         }
         networkId = config != null ? config.networkId : WifiConfiguration.INVALID_NETWORK_ID;
@@ -1569,7 +1570,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
                         NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY)) {
                     return context.getString(R.string.wifi_limited_connection);
                 } else if (!nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
-                    return context.getString(R.string.wifi_connected_no_internet);
+                    final String mode = Settings.Global.getString(context.getContentResolver(),
+                            Settings.Global.PRIVATE_DNS_MODE);
+                    if (nc.isPrivateDnsBroken()) {
+                        return context.getString(R.string.private_dns_broken);
+                    } else {
+                        return context.getString(R.string.wifi_connected_no_internet);
+                    }
                 }
             }
         }

@@ -47,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.ViewState;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -177,7 +178,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
-            AlarmManager alarmManager) {
+            AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         mScrimStateListener = scrimStateListener;
@@ -197,6 +198,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // to make sure that text on top of it is legible.
         mScrimBehindAlpha = mScrimBehindAlphaResValue;
         mDozeParameters = dozeParameters;
+        keyguardMonitor.addCallback(new KeyguardMonitor.Callback() {
+            @Override
+            public void onKeyguardFadingAwayChanged() {
+                setKeyguardFadingAway(keyguardMonitor.isKeyguardFadingAway(),
+                        keyguardMonitor.getKeyguardFadingAwayDuration());
+            }
+        });
 
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
@@ -484,6 +492,22 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
 
         mState.AOD.setAodFrontScrimAlpha(alpha);
+    }
+
+    /**
+     * Set front scrim to black, cancelling animations, in order to prepare to fade them
+     * away once the display turns on.
+     */
+    public void prepareForGentleWakeUp() {
+        if (mState == ScrimState.AOD) {
+            mCurrentInFrontAlpha = 1f;
+            mCurrentInFrontTint = Color.BLACK;
+            mCurrentBehindTint = Color.BLACK;
+            mAnimateChange = false;
+            updateScrims();
+            mAnimateChange = true;
+            mAnimationDuration = ANIMATION_DURATION_LONG;
+        }
     }
 
     /**
@@ -929,6 +953,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
                 mCurrentBehindAlpha = newBehindAlpha;
                 updateScrims();
             }
+        }
+    }
+
+    private void setKeyguardFadingAway(boolean fadingAway, long duration) {
+        for (ScrimState state : ScrimState.values()) {
+            state.setKeyguardFadingAway(fadingAway, duration);
         }
     }
 
