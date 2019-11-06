@@ -251,11 +251,11 @@ public class StagedRollbackTest {
 
     @Test
     public void testNetworkFailedRollback_Phase3() throws Exception {
-        // Sleep for > health check deadline
+        // Sleep for > health check deadline (120s to trigger rollback + 120s to reboot)
         // The device is expected to reboot during sleeping. This device method will fail and
         // the host will catch the assertion. If reboot doesn't happen, the host will fail the
         // assertion.
-        Thread.sleep(TimeUnit.SECONDS.toMillis(120));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(240));
     }
 
     @Test
