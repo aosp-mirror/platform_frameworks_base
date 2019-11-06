@@ -6410,6 +6410,10 @@ package android.provider {
 
 package android.security.keystore {
 
+  public class AndroidKeyStoreProvider extends java.security.Provider {
+    method @NonNull public static java.security.KeyStore getKeyStoreForUid(int) throws java.security.KeyStoreException, java.security.NoSuchProviderException;
+  }
+
   public abstract class AttestationUtils {
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static java.security.cert.X509Certificate[] attestDeviceIds(android.content.Context, @NonNull int[], @NonNull byte[]) throws android.security.keystore.DeviceIdAttestationException;
     field public static final int ID_TYPE_IMEI = 2; // 0x2
@@ -6421,6 +6425,10 @@ package android.security.keystore {
   public class DeviceIdAttestationException extends java.lang.Exception {
     ctor public DeviceIdAttestationException(@Nullable String);
     ctor public DeviceIdAttestationException(@Nullable String, @Nullable Throwable);
+  }
+
+  public static final class KeyGenParameterSpec.Builder {
+    method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setUid(int);
   }
 
 }
