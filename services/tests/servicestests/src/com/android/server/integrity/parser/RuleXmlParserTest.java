@@ -30,47 +30,250 @@ import org.junit.runners.JUnit4;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 @RunWith(JUnit4.class)
 public class RuleXmlParserTest {
 
-    private static final String VALID_RULE_XML = "<RuleList>"
-            + "<Rule>"
-            + "<OpenFormula>"
-            + "<Connector>" + OpenFormula.NOT + "</Connector>"
-            + "<AtomicFormula>"
-            + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
-            + "<Operator>" + AtomicFormula.EQ + "</Operator>"
-            + "<Value>com.app.test</Value>"
-            + "</AtomicFormula>"
-            + "</OpenFormula>"
-            + "<Effect>" + Rule.DENY + "</Effect>"
-            + "</Rule>"
-            + "</RuleList>";
-
     @Test
-    public void testXmlString_validRule() {
+    public void testXmlStream_validOpenFormula() throws Exception {
+        String ruleXmlOpenFormula = "<RuleList>"
+                + "<Rule>"
+                + "<OpenFormula>"
+                + "<Connector>" + OpenFormula.NOT + "</Connector>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>com.app.test</Value>"
+                + "</AtomicFormula>"
+                + "</OpenFormula>"
+                + "<Effect>" + Rule.DENY + "</Effect>"
+                + "</Rule>"
+                + "</RuleList>";
         RuleParser xmlParser = new RuleXmlParser();
-
-        List<Rule> rules = xmlParser.parse(VALID_RULE_XML);
-
-        assertThat(rules).isEmpty();
-    }
-
-    @Test
-    public void testXmlStream_validRule() {
-        RuleParser xmlParser = new RuleXmlParser();
-        InputStream inputStream = new ByteArrayInputStream(VALID_RULE_XML.getBytes());
+        InputStream inputStream = new ByteArrayInputStream(ruleXmlOpenFormula.getBytes());
+        Rule expectedRule = new Rule(new OpenFormula(OpenFormula.NOT, Collections.singletonList(
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"))),
+                Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(inputStream);
 
-        assertThat(rules).isEmpty();
+        assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
     }
 
     @Test
-    public void testXmlString_validAtomicFormula_stringValue() {
+    public void testXmlString_validOpenFormula_notConnector() throws Exception {
+        String ruleXmlOpenFormula = "<RuleList>"
+                + "<Rule>"
+                + "<OpenFormula>"
+                + "<Connector>" + OpenFormula.NOT + "</Connector>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>com.app.test</Value>"
+                + "</AtomicFormula>"
+                + "</OpenFormula>"
+                + "<Effect>" + Rule.DENY + "</Effect>"
+                + "</Rule>"
+                + "</RuleList>";
+        RuleParser xmlParser = new RuleXmlParser();
+        Rule expectedRule = new Rule(new OpenFormula(OpenFormula.NOT, Collections.singletonList(
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"))),
+                Rule.DENY);
+
+        List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
+
+        assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
+    }
+
+    @Test
+    public void testXmlString_validOpenFormula_andConnector() throws Exception {
+        String ruleXmlOpenFormula = "<RuleList>"
+                + "<Rule>"
+                + "<OpenFormula>"
+                + "<Connector>" + OpenFormula.AND + "</Connector>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>com.app.test</Value>"
+                + "</AtomicFormula>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.APP_CERTIFICATE + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>test_cert</Value>"
+                + "</AtomicFormula>"
+                + "</OpenFormula>"
+                + "<Effect>" + Rule.DENY + "</Effect>"
+                + "</Rule>"
+                + "</RuleList>";
+        RuleParser xmlParser = new RuleXmlParser();
+        Rule expectedRule = new Rule(new OpenFormula(OpenFormula.AND, Arrays.asList(
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert"))),
+                Rule.DENY);
+
+        List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
+
+        assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
+    }
+
+    @Test
+    public void testXmlString_validOpenFormula_orConnector() throws Exception {
+        String ruleXmlOpenFormula = "<RuleList>"
+                + "<Rule>"
+                + "<OpenFormula>"
+                + "<Connector>" + OpenFormula.OR + "</Connector>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>com.app.test</Value>"
+                + "</AtomicFormula>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.APP_CERTIFICATE + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>test_cert</Value>"
+                + "</AtomicFormula>"
+                + "</OpenFormula>"
+                + "<Effect>" + Rule.DENY + "</Effect>"
+                + "</Rule>"
+                + "</RuleList>";
+        RuleParser xmlParser = new RuleXmlParser();
+        Rule expectedRule = new Rule(new OpenFormula(OpenFormula.OR, Arrays.asList(
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert"))),
+                Rule.DENY);
+
+        List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
+
+        assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
+    }
+
+    @Test
+    public void testXmlString_validOpenFormula_differentTagOrder() throws Exception {
+        String ruleXmlOpenFormula = "<RuleList>"
+                + "<Rule>"
+                + "<OpenFormula>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>com.app.test</Value>"
+                + "</AtomicFormula>"
+                + "<Connector>" + OpenFormula.NOT + "</Connector>"
+                + "</OpenFormula>"
+                + "<Effect>" + Rule.DENY + "</Effect>"
+                + "</Rule>"
+                + "</RuleList>";
+        RuleParser xmlParser = new RuleXmlParser();
+        Rule expectedRule = new Rule(new OpenFormula(OpenFormula.NOT, Collections.singletonList(
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"))),
+                Rule.DENY);
+
+        List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
+
+        assertThat(rules).isEqualTo(Collections.singletonList(expectedRule));
+    }
+
+    @Test
+    public void testXmlString_invalidOpenFormula_invalidNumberOfFormulas() throws Exception {
+        String ruleXmlOpenFormula = "<RuleList>"
+                + "<Rule>"
+                + "<OpenFormula>"
+                + "<Connector>" + OpenFormula.NOT + "</Connector>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>com.app.test</Value>"
+                + "</AtomicFormula>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.VERSION_CODE + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>1</Value>"
+                + "</AtomicFormula>"
+                + "</OpenFormula>"
+                + "<Effect>" + Rule.DENY + "</Effect>"
+                + "</Rule>"
+                + "</RuleList>";
+        RuleParser xmlParser = new RuleXmlParser();
+
+        assertExpectException(
+                RuleParseException.class,
+                /* expectedExceptionMessageRegex */ "Connector NOT must have 1 formula only",
+                () -> xmlParser.parse(ruleXmlOpenFormula));
+    }
+
+    @Test
+    public void testXmlString_invalidOpenFormula_invalidOperator() throws Exception {
+        String ruleXmlOpenFormula = "<RuleList>"
+                + "<Rule>"
+                + "<OpenFormula>"
+                + "<Connector>" + OpenFormula.NOT + "</Connector>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
+                + "<Operator>INVALID_OPERATOR</Operator>"
+                + "<Value>com.app.test</Value>"
+                + "</AtomicFormula>"
+                + "</OpenFormula>"
+                + "<Effect>" + Rule.DENY + "</Effect>"
+                + "</Rule>"
+                + "</RuleList>";
+        RuleParser xmlParser = new RuleXmlParser();
+
+        assertExpectException(
+                RuleParseException.class,
+                /* expectedExceptionMessageRegex */ "For input string: \"INVALID_OPERATOR\"",
+                () -> xmlParser.parse(ruleXmlOpenFormula));
+    }
+
+    @Test
+    public void testXmlString_invalidOpenFormula_invalidEffect() throws Exception {
+        String ruleXmlOpenFormula = "<RuleList>"
+                + "<Rule>"
+                + "<OpenFormula>"
+                + "<Connector>" + OpenFormula.NOT + "</Connector>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>com.app.test</Value>"
+                + "</AtomicFormula>"
+                + "</OpenFormula>"
+                + "<Effect>INVALID_EFFECT</Effect>"
+                + "</Rule>"
+                + "</RuleList>";
+        RuleParser xmlParser = new RuleXmlParser();
+
+        assertExpectException(
+                RuleParseException.class,
+                /* expectedExceptionMessageRegex */ "For input string: \"INVALID_EFFECT\"",
+                () -> xmlParser.parse(ruleXmlOpenFormula));
+    }
+
+    @Test
+    public void testXmlString_invalidOpenFormula_invalidTags() throws Exception {
+        String ruleXmlOpenFormula = "<RuleList>"
+                + "<Rule>"
+                + "<OpenFormula>"
+                + "<InvalidConnector>" + OpenFormula.NOT + "</InvalidConnector>"
+                + "<AtomicFormula>"
+                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
+                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
+                + "<Value>com.app.test</Value>"
+                + "</AtomicFormula>"
+                + "</OpenFormula>"
+                + "<Effect>" + Rule.DENY + "</Effect>"
+                + "</Rule>"
+                + "</RuleList>";
+        RuleParser xmlParser = new RuleXmlParser();
+
+        assertExpectException(
+                RuleParseException.class,
+                /* expectedExceptionMessageRegex */ "Found unexpected tag: InvalidConnector",
+                () -> xmlParser.parse(ruleXmlOpenFormula));
+    }
+
+    @Test
+    public void testXmlString_validAtomicFormula_stringValue() throws Exception {
         String ruleXmlAtomicFormula = "<RuleList>"
                 + "<Rule>"
                 + "<AtomicFormula>"
@@ -92,7 +295,7 @@ public class RuleXmlParserTest {
     }
 
     @Test
-    public void testXmlString_validAtomicFormula_integerValue() {
+    public void testXmlString_validAtomicFormula_integerValue() throws Exception {
         String ruleXmlAtomicFormula = "<RuleList>"
                 + "<Rule>"
                 + "<AtomicFormula>"
@@ -114,7 +317,7 @@ public class RuleXmlParserTest {
     }
 
     @Test
-    public void testXmlString_validAtomicFormula_booleanValue() {
+    public void testXmlString_validAtomicFormula_booleanValue() throws Exception {
         String ruleXmlAtomicFormula = "<RuleList>"
                 + "<Rule>"
                 + "<AtomicFormula>"
@@ -136,7 +339,7 @@ public class RuleXmlParserTest {
     }
 
     @Test
-    public void testXmlString_validAtomicFormula_differentTagOrder() {
+    public void testXmlString_validAtomicFormula_differentTagOrder() throws Exception {
         String ruleXmlAtomicFormula = "<RuleList>"
                 + "<Rule>"
                 + "<AtomicFormula>"
@@ -158,7 +361,7 @@ public class RuleXmlParserTest {
     }
 
     @Test
-    public void testXmlString_invalidAtomicFormula_invalidTags() {
+    public void testXmlString_invalidAtomicFormula_invalidTags() throws Exception {
         String ruleXmlAtomicFormula = "<RuleList>"
                 + "<Rule>"
                 + "<AtomicFormula>"
@@ -171,13 +374,14 @@ public class RuleXmlParserTest {
                 + "</RuleList>";
         RuleParser xmlParser = new RuleXmlParser();
 
-        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);
-
-        assertThat(rules).isEmpty();
+        assertExpectException(
+                RuleParseException.class,
+                /* expectedExceptionMessageRegex */ "Found unexpected tag: BadKey",
+                () -> xmlParser.parse(ruleXmlAtomicFormula));
     }
 
     @Test
-    public void testXmlString_invalidAtomicFormula() {
+    public void testXmlString_invalidAtomicFormula() throws Exception {
         String ruleXmlAtomicFormula = "<RuleList>"
                 + "<Rule>"
                 + "<AtomicFormula>"
@@ -190,16 +394,17 @@ public class RuleXmlParserTest {
                 + "</RuleList>";
         RuleParser xmlParser = new RuleXmlParser();
 
-        List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);
-
-        assertThat(rules).isEmpty();
+        assertExpectException(
+                RuleParseException.class,
+                /* expectedExceptionMessageRegex */ "For input string: \"com.app.test\"",
+                () -> xmlParser.parse(ruleXmlAtomicFormula));
     }
 
     @Test
     public void testXmlString_withNoRuleList() {
         String ruleXmlWithNoRuleList = "<Rule>"
                 + "<OpenFormula>"
-                + "<Connector>NOT</Connector>"
+                + "<Connector>" + OpenFormula.NOT + "</Connector>"
                 + "<AtomicFormula>"
                 + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
                 + "<Operator>" + AtomicFormula.EQ + "</Operator>"
@@ -211,7 +416,7 @@ public class RuleXmlParserTest {
         RuleParser xmlParser = new RuleXmlParser();
 
         assertExpectException(
-                RuntimeException.class,
+                RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Rules must start with <RuleList> tag.",
                 () -> xmlParser.parse(ruleXmlWithNoRuleList));
     }
@@ -220,7 +425,7 @@ public class RuleXmlParserTest {
     public void testXmlStream_withNoRuleList() {
         String ruleXmlWithNoRuleList = "<Rule>"
                 + "<OpenFormula>"
-                + "<Connector>NOT</Connector>"
+                + "<Connector>" + OpenFormula.NOT + "</Connector>"
                 + "<AtomicFormula>"
                 + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
                 + "<Operator>" + AtomicFormula.EQ + "</Operator>"
@@ -233,7 +438,7 @@ public class RuleXmlParserTest {
         RuleParser xmlParser = new RuleXmlParser();
 
         assertExpectException(
-                RuntimeException.class,
+                RuleParseException.class,
                 /* expectedExceptionMessageRegex */ "Rules must start with <RuleList> tag.",
                 () -> xmlParser.parse(inputStream));
     }

@@ -16,17 +16,17 @@
 
 package com.android.server.integrity.parser;
 
-import com.android.server.integrity.model.Rule;
+import android.annotation.NonNull;
 
-import java.io.InputStream;
-import java.util.List;
+/**
+ * Thrown when rule parsing fails.
+ */
+public class RuleParseException extends Exception {
+    public RuleParseException(@NonNull String message) {
+        super(message);
+    }
 
-/** A helper class to parse rules into the {@link Rule} model. */
-public interface RuleParser {
-
-    /** Parse rules from a string. */
-    List<Rule> parse(String ruleText) throws RuleParseException;
-
-    /** Parse rules from an input stream. */
-    List<Rule> parse(InputStream inputStream) throws RuleParseException;
+    public RuleParseException(@NonNull String message, @NonNull Throwable cause) {
+        super(message, cause);
+    }
 }
