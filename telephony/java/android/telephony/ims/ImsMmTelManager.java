@@ -979,24 +979,24 @@ public class ImsMmTelManager implements RegistrationManager {
 
     /**
      * Get the status of the MmTel Feature registered on this subscription.
+     * @param executor The executor that will be used to call the callback.
      * @param callback A callback containing an Integer describing the current state of the
      *                 MmTel feature, Which will be one of the following:
      *                 {@link ImsFeature#STATE_UNAVAILABLE},
      *                {@link ImsFeature#STATE_INITIALIZING},
      *                {@link ImsFeature#STATE_READY}. Will be called using the executor
      *                 specified when the service state has been retrieved from the IMS service.
-     * @param executor The executor that will be used to call the callback.
      * @throws ImsException if the IMS service associated with this subscription is not available or
      * the IMS service is not available.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void getFeatureState(@NonNull @ImsFeature.ImsState Consumer<Integer> callback,
-            @NonNull @CallbackExecutor Executor executor) throws ImsException {
-        if (callback == null) {
-            throw new IllegalArgumentException("Must include a non-null Consumer.");
-        }
+    public void getFeatureState(@NonNull @CallbackExecutor Executor executor,
+            @NonNull @ImsFeature.ImsState Consumer<Integer> callback) throws ImsException {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must include a non-null Consumer.");
         }
         try {
             getITelephony().getImsMmTelFeatureState(mSubId, new IIntegerConsumer.Stub() {
