@@ -636,6 +636,16 @@ public abstract class Window {
 
         /** Returns whether the window belongs to the task root. */
         boolean isTaskRoot();
+
+        /**
+         * Update the status bar color to a forced one.
+         */
+        void updateStatusBarColor(int color);
+
+        /**
+         * Update the navigation bar color to a forced one.
+         */
+        void updateNavigationBarColor(int color);
     }
 
     /**

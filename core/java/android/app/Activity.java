@@ -3928,6 +3928,26 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Update the forced status bar color.
+     * @hide
+     */
+    @Override
+    public void updateStatusBarColor(int color) {
+        mTaskDescription.setStatusBarColor(color);
+        setTaskDescription(mTaskDescription);
+    }
+
+    /**
+     * Update the forced navigation bar color.
+     * @hide
+     */
+    @Override
+    public void updateNavigationBarColor(int color) {
+        mTaskDescription.setNavigationBarColor(color);
+        setTaskDescription(mTaskDescription);
+    }
+
+    /**
      * Puts the activity in picture-in-picture mode if the activity supports.
      * @see android.R.attr#supportsPictureInPicture
      * @hide
