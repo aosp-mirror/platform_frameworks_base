@@ -2474,15 +2474,10 @@ public class Activity extends ContextThemeWrapper
 
         if (mAutoFillResetNeeded) {
             getAutofillManager().onInvisibleForAutofill();
-        }
-
-        if (isFinishing() && !mAutoFillResetNeeded && mIntent != null
-                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
-            // Activity was launched when user tapped a link in the Autofill Save UI - since
-            // user launched another activity, the Save UI should not be restored when this
-            // activity is finished.
-            getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_CANCEL,
-                    mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
+        } else if (mIntent != null
+                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)
+                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY)) {
+            restoreAutofillSaveUi();
         }
         mEnterAnimationComplete = false;
     }
@@ -5530,6 +5525,21 @@ public class Activity extends ContextThemeWrapper
      */
     @Override
     public void startActivity(Intent intent, @Nullable Bundle options) {
+        if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)
+                && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY)) {
+            if (TextUtils.equals(getPackageName(),
+                    intent.resolveActivity(getPackageManager()).getPackageName())) {
+                // Apply Autofill restore mechanism on the started activity by startActivity()
+                final IBinder token =
+                        mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
+                // Remove restore ability from current activity
+                mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
+                mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY);
+                // Put restore token
+                intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
+                intent.putExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY, true);
+            }
+        }
         if (options != null) {
             startActivityForResult(intent, -1, options);
         } else {
@@ -6260,9 +6270,21 @@ public class Activity extends ContextThemeWrapper
         // Activity was launched when user tapped a link in the Autofill Save UI - Save UI must
         // be restored now.
         if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
-            getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_RESTORE,
-                    mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
+            restoreAutofillSaveUi();
         }
+    }
+
+    /**
+     * Restores Autofill Save UI
+     */
+    private void restoreAutofillSaveUi() {
+        final IBinder token =
+                mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
+        // Make only restore Autofill once
+        mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN);
+        mIntent.removeExtra(AutofillManager.EXTRA_RESTORE_CROSS_ACTIVITY);
+        getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_RESTORE,
+                token);
     }
 
     /**

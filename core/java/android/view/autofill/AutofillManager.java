@@ -208,6 +208,10 @@ public final class AutofillManager {
     public static final String EXTRA_RESTORE_SESSION_TOKEN =
             "android.view.autofill.extra.RESTORE_SESSION_TOKEN";
 
+    /** @hide */
+    public static final String EXTRA_RESTORE_CROSS_ACTIVITY =
+            "android.view.autofill.extra.RESTORE_CROSS_ACTIVITY";
+
     /**
      * Internal extra used to pass a binder to the {@link IAugmentedAutofillManagerClient}.
      *
