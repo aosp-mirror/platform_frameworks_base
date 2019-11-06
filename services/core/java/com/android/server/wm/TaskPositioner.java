@@ -30,6 +30,7 @@ import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.IActivityTaskManager;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -104,6 +105,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
 
     @VisibleForTesting
     Task mTask;
+    WindowState mWindow;
     private boolean mResizing;
     private boolean mPreserveOrientation;
     private boolean mStartOrientationWasLandscape;
@@ -238,8 +240,9 @@ class TaskPositioner implements IBinder.DeathRecipient {
 
     /**
      * @param displayContent The Display that the window being dragged is on.
+     * @param win The window which will be dragged.
      */
-    void register(DisplayContent displayContent) {
+    void register(DisplayContent displayContent, @NonNull WindowState win) {
         final Display display = displayContent.getDisplay();
 
         if (DEBUG_TASK_POSITIONING) {
@@ -309,6 +312,17 @@ class TaskPositioner implements IBinder.DeathRecipient {
         display.getRealSize(mMaxVisibleSize);
 
         mDragEnded = false;
+
+        try {
+            mClientCallback = win.mClient.asBinder();
+            mClientCallback.linkToDeath(this, 0 /* flags */);
+        } catch (RemoteException e) {
+            // The caller has died, so clean up TaskPositioningController.
+            mService.mTaskPositioningController.finishTaskPositioning();
+            return;
+        }
+        mWindow = win;
+        mTask = win.getTask();
     }
 
     void unregister() {
@@ -341,25 +355,19 @@ class TaskPositioner implements IBinder.DeathRecipient {
         ProtoLog.d(WM_DEBUG_ORIENTATION, "Resuming rotation after re-position");
         mDisplayContent.getDisplayRotation().resume();
         mDisplayContent = null;
-        mClientCallback.unlinkToDeath(this, 0 /* flags */);
+        if (mClientCallback != null) {
+            mClientCallback.unlinkToDeath(this, 0 /* flags */);
+        }
+        mWindow = null;
     }
 
-    void startDrag(WindowState win, boolean resize, boolean preserveOrientation, float startX,
-                   float startY) {
+    void startDrag(boolean resize, boolean preserveOrientation, float startX,
+            float startY) {
         if (DEBUG_TASK_POSITIONING) {
-            Slog.d(TAG, "startDrag: win=" + win + ", resize=" + resize
+            Slog.d(TAG, "startDrag: win=" + mWindow + ", resize=" + resize
                     + ", preserveOrientation=" + preserveOrientation + ", {" + startX + ", "
                     + startY + "}");
         }
-        try {
-            mClientCallback = win.mClient.asBinder();
-            mClientCallback.linkToDeath(this, 0 /* flags */);
-        } catch (RemoteException e) {
-            // The caller has died, so clean up TaskPositioningController.
-            mService.mTaskPositioningController.finishTaskPositioning();
-            return;
-        }
-        mTask = win.getTask();
         // Use the bounds of the task which accounts for
         // multiple app windows. Don't use any bounds from win itself as it
         // may not be the same size as the task.

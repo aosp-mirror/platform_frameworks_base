@@ -169,7 +169,7 @@ class TaskPositioningController {
         mPositioningDisplay = displayContent;
 
         mTaskPositioner = TaskPositioner.create(mService);
-        mTaskPositioner.register(displayContent);
+        mTaskPositioner.register(displayContent, win);
 
         // We need to grab the touch focus so that the touch events during the
         // resizing/scrolling are not sent to the app. 'win' is the main window
@@ -187,7 +187,7 @@ class TaskPositioningController {
             return false;
         }
 
-        mTaskPositioner.startDrag(win, resize, preserveOrientation, startX, startY);
+        mTaskPositioner.startDrag(resize, preserveOrientation, startX, startY);
         return true;
     }
 
