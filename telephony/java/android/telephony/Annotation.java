@@ -116,7 +116,8 @@ public class Annotation {
             ApnSetting.TYPE_CBS,
             ApnSetting.TYPE_IA,
             ApnSetting.TYPE_EMERGENCY,
-            ApnSetting.TYPE_MCX
+            ApnSetting.TYPE_MCX,
+            ApnSetting.TYPE_XCAP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApnType {

@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.hardware.radio.V1_4.ApnTypes;
+import android.hardware.radio.V1_5.ApnTypes;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -110,6 +110,8 @@ public class ApnSetting implements Parcelable {
     public static final int TYPE_EMERGENCY = ApnTypes.EMERGENCY;
     /** APN type for MCX (Mission Critical Service) where X can be PTT/Video/Data */
     public static final int TYPE_MCX = ApnTypes.MCX;
+    /** APN type for XCAP. */
+    public static final int TYPE_XCAP = ApnTypes.XCAP;
 
     // Possible values for authentication types.
     /** No authentication type. */
@@ -198,6 +200,7 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_STRING_MAP.put("ia", TYPE_IA);
         APN_TYPE_STRING_MAP.put("emergency", TYPE_EMERGENCY);
         APN_TYPE_STRING_MAP.put("mcx", TYPE_MCX);
+        APN_TYPE_STRING_MAP.put("xcap", TYPE_XCAP);
         APN_TYPE_INT_MAP = new ArrayMap<Integer, String>();
         APN_TYPE_INT_MAP.put(TYPE_DEFAULT, "default");
         APN_TYPE_INT_MAP.put(TYPE_MMS, "mms");
@@ -210,6 +213,7 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_INT_MAP.put(TYPE_IA, "ia");
         APN_TYPE_INT_MAP.put(TYPE_EMERGENCY, "emergency");
         APN_TYPE_INT_MAP.put(TYPE_MCX, "mcx");
+        APN_TYPE_INT_MAP.put(TYPE_XCAP, "xcap");
 
         PROTOCOL_STRING_MAP = new ArrayMap<String, Integer>();
         PROTOCOL_STRING_MAP.put("IP", PROTOCOL_IP);
@@ -1944,8 +1948,9 @@ public class ApnSetting implements Parcelable {
          * {@link ApnSetting} built from this builder otherwise.
          */
         public ApnSetting build() {
-            if ((mApnTypeBitmask & (TYPE_DEFAULT | TYPE_MMS | TYPE_SUPL | TYPE_DUN | TYPE_HIPRI |
-                    TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX)) == 0
+            if ((mApnTypeBitmask & (TYPE_DEFAULT | TYPE_MMS | TYPE_SUPL | TYPE_DUN | TYPE_HIPRI
+                    | TYPE_FOTA | TYPE_IMS | TYPE_CBS | TYPE_IA | TYPE_EMERGENCY | TYPE_MCX
+                    | TYPE_XCAP)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
                 return null;
             }
