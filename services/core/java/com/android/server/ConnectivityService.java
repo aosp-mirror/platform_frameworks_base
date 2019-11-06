@@ -109,6 +109,7 @@ import android.net.SocketKeepalive;
 import android.net.TetheringManager;
 import android.net.UidRange;
 import android.net.Uri;
+import android.net.VpnManager;
 import android.net.VpnService;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
@@ -4317,7 +4318,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throwIfLockdownEnabled();
             Vpn vpn = mVpns.get(userId);
             if (vpn != null) {
-                return vpn.prepare(oldPackage, newPackage, false);
+                return vpn.prepare(oldPackage, newPackage, VpnManager.TYPE_VPN_SERVICE);
             } else {
                 return false;
             }
@@ -4325,26 +4326,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Set whether the VPN package has the ability to launch VPNs without user intervention.
-     * This method is used by system-privileged apps.
-     * VPN permissions are checked in the {@link Vpn} class. If the caller is not {@code userId},
-     * {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
+     * Set whether the VPN package has the ability to launch VPNs without user intervention. This
+     * method is used by system-privileged apps. VPN permissions are checked in the {@link Vpn}
+     * class. If the caller is not {@code userId}, {@link
+     * android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
      *
      * @param packageName The package for which authorization state should change.
      * @param userId User for whom {@code packageName} is installed.
      * @param authorized {@code true} if this app should be able to start a VPN connection without
-     *                   explicit user approval, {@code false} if not.
-     *
+     *     explicit user approval, {@code false} if not.
+     * @param vpnType The {@link VpnManager.VpnType} constant representing what class of VPN
+     *     permissions should be granted. When unauthorizing an app, {@link
+     *     VpnManager.TYPE_VPN_NONE} should be used.
      * @hide
      */
     @Override
-    public void setVpnPackageAuthorization(String packageName, int userId, boolean authorized) {
+    public void setVpnPackageAuthorization(
+            String packageName, int userId, @VpnManager.VpnType int vpnType) {
         enforceCrossUserPermission(userId);
 
         synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn != null) {
-                vpn.setPackageAuthorization(packageName, authorized);
+                vpn.setPackageAuthorization(packageName, vpnType);
             }
         }
     }
@@ -7217,7 +7221,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 final String alwaysOnPackage = getAlwaysOnVpnPackage(userId);
                 if (alwaysOnPackage != null) {
                     setAlwaysOnVpnPackage(userId, null, false, null);
-                    setVpnPackageAuthorization(alwaysOnPackage, userId, false);
+                    setVpnPackageAuthorization(alwaysOnPackage, userId, VpnManager.TYPE_VPN_NONE);
                 }
 
                 // Turn Always-on VPN off
@@ -7240,7 +7244,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     } else {
                         // Prevent this app (packagename = vpnConfig.user) from initiating
                         // VPN connections in the future without user intervention.
-                        setVpnPackageAuthorization(vpnConfig.user, userId, false);
+                        setVpnPackageAuthorization(
+                                vpnConfig.user, userId, VpnManager.TYPE_VPN_NONE);
 
                         prepareVpn(null, VpnConfig.LEGACY_VPN, userId);
                     }
