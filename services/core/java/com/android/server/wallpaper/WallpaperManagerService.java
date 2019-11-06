@@ -130,6 +130,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     static final boolean DEBUG = false;
     static final boolean DEBUG_LIVE = DEBUG || true;
 
+    // This 100MB limitation is defined in DisplayListCanvas.
+    private static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024;
+
     public static class Lifecycle extends SystemService {
         private IWallpaperManagerService mService;
 
@@ -688,7 +691,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
 
             // scale if the crop height winds up not matching the recommended metrics
-            needScale = (wallpaper.height != cropHint.height());
+            // also take care of invalid dimensions.
+            needScale = wallpaper.height != cropHint.height()
+                    || cropHint.height() > GLHelper.getMaxTextureSize()
+                    || cropHint.width() > GLHelper.getMaxTextureSize();
 
             if (DEBUG) {
                 Slog.v(TAG, "crop: w=" + cropHint.width() + " h=" + cropHint.height());
@@ -700,13 +706,28 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (!needCrop && !needScale) {
                 // Simple case:  the nominal crop fits what we want, so we take
                 // the whole thing and just copy the image file directly.
-                if (DEBUG) {
-                    Slog.v(TAG, "Null crop of new wallpaper; copying");
+
+                // TODO: It is not accurate to estimate bitmap size without decoding it,
+                //  may be we can try to remove this optimized way in the future,
+                //  that means, we will always go into the 'else' block.
+
+                // This is just a quick estimation, may be smaller than it is.
+                long estimateSize = options.outWidth * options.outHeight * 4;
+
+                // A bitmap over than MAX_BITMAP_SIZE will make drawBitmap() fail.
+                // Please see: DisplayListCanvas#throwIfCannotDraw.
+                if (estimateSize < MAX_BITMAP_SIZE) {
+                    success = FileUtils.copyFile(wallpaper.wallpaperFile, wallpaper.cropFile);
                 }
-                success = FileUtils.copyFile(wallpaper.wallpaperFile, wallpaper.cropFile);
+
                 if (!success) {
                     wallpaper.cropFile.delete();
                     // TODO: fall back to default wallpaper in this case
+                }
+
+                if (DEBUG) {
+                    Slog.v(TAG, "Null crop of new wallpaper, estimate size=" + estimateSize
+                            + ", success=" + success);
                 }
             } else {
                 // Fancy case: crop and scale.  First, we decode and scale down if appropriate.
@@ -721,46 +742,76 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     // We calculate the largest power-of-two under the actual ratio rather than
                     // just let the decode take care of it because we also want to remap where the
                     // cropHint rectangle lies in the decoded [super]rect.
-                    final BitmapFactory.Options scaler;
                     final int actualScale = cropHint.height() / wallpaper.height;
                     int scale = 1;
-                    while (2*scale < actualScale) {
+                    while (2*scale <= actualScale) {
                         scale *= 2;
                     }
-                    if (scale > 1) {
-                        scaler = new BitmapFactory.Options();
-                        scaler.inSampleSize = scale;
+                    options.inSampleSize = scale;
+                    options.inJustDecodeBounds = false;
+
+                    final Rect estimateCrop = new Rect(cropHint);
+                    estimateCrop.scale(1f / options.inSampleSize);
+                    final float hRatio = (float) wallpaper.height / estimateCrop.height();
+                    final int destHeight = (int) (estimateCrop.height() * hRatio);
+                    final int destWidth = (int) (estimateCrop.width() * hRatio);
+
+                    // We estimated an invalid crop, try to adjust the cropHint to get a valid one.
+                    if (destWidth > GLHelper.getMaxTextureSize()) {
+                        int newHeight = (int) (wallpaper.height / hRatio);
+                        int newWidth = (int) (wallpaper.width / hRatio);
+
                         if (DEBUG) {
-                            Slog.v(TAG, "Downsampling cropped rect with scale " + scale);
+                            Slog.v(TAG, "Invalid crop dimensions, trying to adjust.");
                         }
-                    } else {
-                        scaler = null;
+
+                        estimateCrop.set(cropHint);
+                        estimateCrop.left += (cropHint.width() - newWidth) / 2;
+                        estimateCrop.top += (cropHint.height() - newHeight) / 2;
+                        estimateCrop.right = estimateCrop.left + newWidth;
+                        estimateCrop.bottom = estimateCrop.top + newHeight;
+                        cropHint.set(estimateCrop);
+                        estimateCrop.scale(1f / options.inSampleSize);
                     }
-                    Bitmap cropped = decoder.decodeRegion(cropHint, scaler);
+
+                    // We've got the safe cropHint; now we want to scale it properly to
+                    // the desired rectangle.
+                    // That's a height-biased operation: make it fit the hinted height.
+                    final int safeHeight = (int) (estimateCrop.height() * hRatio);
+                    final int safeWidth = (int) (estimateCrop.width() * hRatio);
+
+                    if (DEBUG) {
+                        Slog.v(TAG, "Decode parameters:");
+                        Slog.v(TAG, "  cropHint=" + cropHint + ", estimateCrop=" + estimateCrop);
+                        Slog.v(TAG, "  down sampling=" + options.inSampleSize
+                                + ", hRatio=" + hRatio);
+                        Slog.v(TAG, "  dest=" + destWidth + "x" + destHeight);
+                        Slog.v(TAG, "  safe=" + safeWidth + "x" + safeHeight);
+                        Slog.v(TAG, "  maxTextureSize=" + GLHelper.getMaxTextureSize());
+                    }
+
+                    Bitmap cropped = decoder.decodeRegion(cropHint, options);
                     decoder.recycle();
 
                     if (cropped == null) {
                         Slog.e(TAG, "Could not decode new wallpaper");
                     } else {
-                        // We've got the extracted crop; now we want to scale it properly to
-                        // the desired rectangle.  That's a height-biased operation: make it
-                        // fit the hinted height, and accept whatever width we end up with.
-                        cropHint.offsetTo(0, 0);
-                        cropHint.right /= scale;    // adjust by downsampling factor
-                        cropHint.bottom /= scale;
-                        final float heightR = ((float)wallpaper.height) / ((float)cropHint.height());
-                        if (DEBUG) {
-                            Slog.v(TAG, "scale " + heightR + ", extracting " + cropHint);
-                        }
-                        final int destWidth = (int)(cropHint.width() * heightR);
+                        // We are safe to create final crop with safe dimensions now.
                         final Bitmap finalCrop = Bitmap.createScaledBitmap(cropped,
-                                destWidth, wallpaper.height, true);
+                                safeWidth, safeHeight, true);
                         if (DEBUG) {
                             Slog.v(TAG, "Final extract:");
                             Slog.v(TAG, "  dims: w=" + wallpaper.width
                                     + " h=" + wallpaper.height);
-                            Slog.v(TAG, "   out: w=" + finalCrop.getWidth()
+                            Slog.v(TAG, "  out: w=" + finalCrop.getWidth()
                                     + " h=" + finalCrop.getHeight());
+                        }
+
+                        // A bitmap over than MAX_BITMAP_SIZE will make drawBitmap() fail.
+                        // Please see: DisplayListCanvas#throwIfCannotDraw.
+                        if (finalCrop.getByteCount() > MAX_BITMAP_SIZE) {
+                            throw new RuntimeException(
+                                    "Too large bitmap, limit=" + MAX_BITMAP_SIZE);
                         }
 
                         f = new FileOutputStream(wallpaper.cropFile);
@@ -798,6 +849,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     final IPackageManager mIPackageManager;
     final MyPackageMonitor mMonitor;
     final AppOpsManager mAppOpsManager;
+
     /**
      * Map of color listeners per user id.
      * The key will be the id of a user or UserHandle.USER_ALL - for wildcard listeners.
@@ -1726,6 +1778,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (!isWallpaperSupported(callingPackage)) {
             return;
         }
+
+        // Make sure both width and height are not larger than max texture size.
+        width = Math.min(width, GLHelper.getMaxTextureSize());
+        height = Math.min(height, GLHelper.getMaxTextureSize());
+
         synchronized (mLock) {
             int userId = UserHandle.getCallingUserId();
             WallpaperData wallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
