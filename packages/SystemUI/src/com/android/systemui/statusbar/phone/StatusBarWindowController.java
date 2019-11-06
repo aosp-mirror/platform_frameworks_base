@@ -41,11 +41,13 @@ import android.view.WindowManager.LayoutParams;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.RemoteInputController.Callback;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -69,6 +71,7 @@ import javax.inject.Singleton;
 public class StatusBarWindowController implements Callback, Dumpable, ConfigurationListener {
 
     private static final String TAG = "StatusBarWindowController";
+    private static final boolean DEBUG = false;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
@@ -83,7 +86,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private LayoutParams mLp;
     private boolean mHasTopUi;
     private boolean mHasTopUiChanged;
-    private int mBarHeight;
+    private int mBarHeight = -1;
     private float mScreenBrightnessDoze;
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
@@ -92,13 +95,17 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
             mCallbacks = Lists.newArrayList();
 
     private final SysuiColorExtractor mColorExtractor;
+    private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    private final Resources mResources;
 
     @Inject
     public StatusBarWindowController(Context context, WindowManager windowManager,
             IActivityManager activityManager, DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
-            KeyguardBypassController keyguardBypassController, SysuiColorExtractor colorExtractor) {
+            KeyguardBypassController keyguardBypassController, SysuiColorExtractor colorExtractor,
+            SuperStatusBarViewFactory superStatusBarViewFactory,
+            @MainResources Resources resources) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
@@ -108,6 +115,15 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mLpChanged = new LayoutParams();
         mKeyguardBypassController = keyguardBypassController;
         mColorExtractor = colorExtractor;
+        mSuperStatusBarViewFactory = superStatusBarViewFactory;
+        mStatusBarView = mSuperStatusBarViewFactory.getStatusBarWindowView();
+        mResources = resources;
+
+        if (mBarHeight < 0) {
+            mBarHeight = mResources.getDimensionPixelSize(
+                    com.android.internal.R.dimen.status_bar_height);
+        }
+
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
         ((SysuiStatusBarStateController) statusBarStateController)
@@ -149,20 +165,36 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
                 || res.getBoolean(R.bool.config_enableLockScreenRotation);
     }
 
+    public int getStatusBarHeight() {
+        return mBarHeight;
+    }
+
+    /**
+     * Rereads the status_bar_height from configuration and reapplys the current state if the height
+     * is different.
+     */
+    public void refreshStatusBarHeight() {
+        int heightFromConfig = mResources.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+
+        if (mBarHeight != heightFromConfig) {
+            mBarHeight = heightFromConfig;
+            apply(mCurrentState);
+        }
+
+        if (DEBUG) Log.v(TAG, "defineSlots");
+    }
+
     /**
      * Adds the status bar view to the window manager.
-     *
-     * @param statusBarView The view to add.
-     * @param barHeight The height of the status bar in collapsed state.
      */
-    public void add(ViewGroup statusBarView, int barHeight) {
-
+    public void attach() {
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
         mLp = new LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                barHeight,
+                mBarHeight,
                 LayoutParams.TYPE_STATUS_BAR,
                 LayoutParams.FLAG_NOT_FOCUSABLE
                         | LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
@@ -176,8 +208,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mLp.setTitle("StatusBar");
         mLp.packageName = mContext.getPackageName();
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        mStatusBarView = statusBarView;
-        mBarHeight = barHeight;
         mWindowManager.addView(mStatusBarView, mLp);
         mLpChanged.copyFrom(mLp);
         onThemeChanged();
@@ -531,11 +561,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
 
     public void setDozing(boolean dozing) {
         mCurrentState.dozing = dozing;
-        apply(mCurrentState);
-    }
-
-    public void setBarHeight(int barHeight) {
-        mBarHeight = barHeight;
         apply(mCurrentState);
     }
 
