@@ -97,6 +97,8 @@ public class WifiManagerTest {
     private static final String TEST_PACKAGE_NAME = "TestPackage";
     private static final String TEST_COUNTRY_CODE = "US";
     private static final String[] TEST_MAC_ADDRESSES = {"da:a1:19:0:0:0"};
+    private static final int TEST_AP_FREQUENCY = 2412;
+    private static final int TEST_AP_BANDWIDTH = SoftApInfo.CHANNEL_WIDTH_20MHZ;
 
     @Mock Context mContext;
     @Mock android.net.wifi.IWifiManager mWifiService;
@@ -122,7 +124,6 @@ public class WifiManagerTest {
         mApplicationInfo.targetSdkVersion = Build.VERSION_CODES.Q;
         when(mContext.getApplicationInfo()).thenReturn(mApplicationInfo);
         when(mContext.getOpPackageName()).thenReturn(TEST_PACKAGE_NAME);
-
         mWifiManager = new WifiManager(mContext, mWifiService, mLooper.getLooper());
         verify(mWifiService).getVerboseLoggingLevel();
     }
@@ -776,11 +777,34 @@ public class WifiManagerTest {
         verify(mSoftApCallback).onConnectedClientsChanged(testClients);
     }
 
+
+    /*
+     * Verify client-provided callback is being called through callback proxy
+     */
+    @Test
+    public void softApCallbackProxyCallsOnSoftApInfoChanged() throws Exception {
+        SoftApInfo testSoftApInfo = new SoftApInfo();
+        testSoftApInfo.setFrequency(TEST_AP_FREQUENCY);
+        testSoftApInfo.setBandwidth(TEST_AP_BANDWIDTH);
+        ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
+        mWifiManager.registerSoftApCallback(mSoftApCallback, mHandler);
+        verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
+                anyInt());
+
+        callbackCaptor.getValue().onInfoChanged(testSoftApInfo);
+        mLooper.dispatchAll();
+        verify(mSoftApCallback).onInfoChanged(testSoftApInfo);
+    }
+
     /*
      * Verify client-provided callback is being called through callback proxy on multiple events
      */
     @Test
     public void softApCallbackProxyCallsOnMultipleUpdates() throws Exception {
+        SoftApInfo testSoftApInfo = new SoftApInfo();
+        testSoftApInfo.setFrequency(TEST_AP_FREQUENCY);
+        testSoftApInfo.setBandwidth(TEST_AP_BANDWIDTH);
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
         mWifiManager.registerSoftApCallback(mSoftApCallback, mHandler);
@@ -790,11 +814,13 @@ public class WifiManagerTest {
         final List<WifiClient> testClients = new ArrayList();
         callbackCaptor.getValue().onStateChanged(WIFI_AP_STATE_ENABLING, 0);
         callbackCaptor.getValue().onConnectedClientsChanged(testClients);
+        callbackCaptor.getValue().onInfoChanged(testSoftApInfo);
         callbackCaptor.getValue().onStateChanged(WIFI_AP_STATE_FAILED, SAP_START_FAILURE_GENERAL);
 
         mLooper.dispatchAll();
         verify(mSoftApCallback).onStateChanged(WIFI_AP_STATE_ENABLING, 0);
         verify(mSoftApCallback).onConnectedClientsChanged(testClients);
+        verify(mSoftApCallback).onInfoChanged(testSoftApInfo);
         verify(mSoftApCallback).onStateChanged(WIFI_AP_STATE_FAILED, SAP_START_FAILURE_GENERAL);
     }
 

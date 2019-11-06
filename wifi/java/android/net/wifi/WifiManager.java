@@ -3315,6 +3315,15 @@ public class WifiManager {
          * @param clients the currently connected clients
          */
         void onConnectedClientsChanged(@NonNull List<WifiClient> clients);
+
+        /**
+         * Called when information of softap changes.
+         *
+         * @param softApInfo is the softap information. {@link SoftApInfo}
+         */
+        default void onInfoChanged(@NonNull SoftApInfo softApInfo) {
+            // Do nothing: can be updated to add SoftApInfo details (e.g. channel) to the UI.
+        }
     }
 
     /**
@@ -3352,6 +3361,16 @@ public class WifiManager {
 
             mHandler.post(() -> {
                 mCallback.onConnectedClientsChanged(clients);
+            });
+        }
+
+        @Override
+        public void onInfoChanged(SoftApInfo softApInfo) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "SoftApCallbackProxy: onInfoChange: softApInfo=" + softApInfo);
+            }
+            mHandler.post(() -> {
+                mCallback.onInfoChanged(softApInfo);
             });
         }
     }
