@@ -16,6 +16,11 @@
 
 package android.media.tv.tuner;
 
+import android.annotation.Nullable;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+
 import java.util.List;
 
 /**
@@ -34,8 +39,9 @@ public final class Tuner implements AutoCloseable  {
         nativeInit();
     }
 
-    private FrontendCallback mFrontendCallback;
     private List<Integer> mFrontendIds;
+    private Frontend mFrontend;
+    private EventHandler mHandler;
 
     public Tuner() {
         nativeSetup();
@@ -80,10 +86,65 @@ public final class Tuner implements AutoCloseable  {
         void onEvent(int frontendEventType);
     }
 
-    protected static class Frontend {
-        int mId;
+    @Nullable
+    private EventHandler createEventHandler() {
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            return new EventHandler(looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            return new EventHandler(looper);
+        }
+        return null;
+    }
+
+    private class EventHandler extends Handler {
+        private EventHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ON_FRONTEND_EVENT:
+                    if (mFrontend != null && mFrontend.mCallback != null) {
+                        mFrontend.mCallback.onEvent(msg.arg1);
+                    }
+                    break;
+                default:
+                    // fall through
+            }
+        }
+    }
+
+    protected class Frontend {
+        private int mId;
+        private FrontendCallback mCallback;
+
         private Frontend(int id) {
             mId = id;
+        }
+
+        public void setCallback(@Nullable FrontendCallback callback, @Nullable Handler handler) {
+            mCallback = callback;
+
+            if (mCallback == null) {
+                return;
+            }
+
+            if (handler == null) {
+                // use default looper if handler is null
+                if (mHandler == null) {
+                    mHandler = createEventHandler();
+                }
+                return;
+            }
+
+            Looper looper = handler.getLooper();
+            if (mHandler != null && mHandler.getLooper() == looper) {
+                // the same looper. reuse mHandler
+                return;
+            }
+            mHandler = new EventHandler(looper);
         }
     }
 
@@ -94,12 +155,19 @@ public final class Tuner implements AutoCloseable  {
 
     private Frontend openFrontendById(int id) {
         if (mFrontendIds == null) {
-            getFrontendIds();
+            mFrontendIds = getFrontendIds();
         }
         if (!mFrontendIds.contains(id)) {
             return null;
         }
-        return nativeOpenFrontendById(id);
+        mFrontend = nativeOpenFrontendById(id);
+        return mFrontend;
+    }
+
+    private void onFrontendEvent(int eventType) {
+        if (mHandler != null) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_ON_FRONTEND_EVENT, eventType, 0));
+        }
     }
 
     protected class Filter {
