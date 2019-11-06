@@ -569,7 +569,7 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testCantReceiveTouchWhenAppTokenHiddenRequested() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-        win0.mActivityRecord.hiddenRequested = true;
+        win0.mActivityRecord.mVisibleRequested = false;
         assertTrue(win0.cantReceiveTouchInput());
     }
 

@@ -394,7 +394,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(window1, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
 
         // Make sure top focused display not changed if there is a focused app.
-        window1.mActivityRecord.hiddenRequested = true;
+        window1.mActivityRecord.mVisibleRequested = false;
         window1.getDisplayContent().setFocusedApp(window1.mActivityRecord);
         updateFocusedWindow();
         assertTrue(!window1.isFocused());
