@@ -22,8 +22,6 @@ import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEF
 import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.TYPE_TOP_BAR;
 
 import static com.android.systemui.statusbar.phone.StatusBar.ONLY_CORE_APPS;
 
@@ -34,7 +32,6 @@ import android.app.StatusBarManager.WindowType;
 import android.app.StatusBarManager.WindowVisibleState;
 import android.content.ComponentName;
 import android.content.Context;
-import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
@@ -45,9 +42,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.view.InsetsFlags;
 import android.view.InsetsState.InternalInsetType;
-import android.view.View;
 import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.os.SomeArgs;
@@ -459,42 +454,6 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         synchronized (mLock) {
             mHandler.removeMessages(MSG_EXPAND_SETTINGS);
             mHandler.obtainMessage(MSG_EXPAND_SETTINGS, subPanel).sendToTarget();
-        }
-    }
-
-    // TODO(b/118118435): Remove this function after migration
-    @Override
-    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
-            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
-            boolean navbarColorManagedByIme) {
-        synchronized (mLock) {
-            final boolean hasDockedStack = !dockedStackBounds.isEmpty();
-            final boolean transientStatus = (vis & View.STATUS_BAR_TRANSIENT) != 0;
-            final boolean transientNavigation = (vis & View.NAVIGATION_BAR_TRANSIENT) != 0;
-            if (transientStatus && transientNavigation) {
-                showTransient(displayId, new int[]{TYPE_TOP_BAR, TYPE_NAVIGATION_BAR});
-            } else if (transientStatus) {
-                showTransient(displayId, new int[]{TYPE_TOP_BAR});
-                abortTransient(displayId, new int[]{TYPE_NAVIGATION_BAR});
-            } else if (transientNavigation) {
-                showTransient(displayId, new int[]{TYPE_NAVIGATION_BAR});
-                abortTransient(displayId, new int[]{TYPE_TOP_BAR});
-            } else {
-                abortTransient(displayId, new int[]{TYPE_TOP_BAR, TYPE_NAVIGATION_BAR});
-            }
-            SomeArgs args = SomeArgs.obtain();
-            args.argi1 = displayId;
-            args.argi2 = InsetsFlags.getAppearance(vis);
-            args.argi3 = navbarColorManagedByIme ? 1 : 0;
-            final int fullscreenAppearance = InsetsFlags.getAppearance(fullscreenStackVis);
-            final int dockedAppearance = InsetsFlags.getAppearance(dockedStackVis);
-            args.arg1 = hasDockedStack
-                    ? new AppearanceRegion[]{
-                            new AppearanceRegion(fullscreenAppearance, fullscreenStackBounds),
-                            new AppearanceRegion(dockedAppearance, dockedStackBounds)}
-                    : new AppearanceRegion[]{
-                            new AppearanceRegion(fullscreenAppearance, fullscreenStackBounds)};
-            mHandler.obtainMessage(MSG_SYSTEM_BAR_APPEARANCE_CHANGED, args).sendToTarget();
         }
     }
 
