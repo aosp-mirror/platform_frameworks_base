@@ -18,12 +18,11 @@ package com.android.server.location;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.ContentObserver;
 import android.location.Geofence;
 import android.location.Location;
 import android.location.LocationListener;
@@ -31,13 +30,14 @@ import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
+import android.util.Log;
 import android.util.Slog;
 
+import com.android.server.FgThread;
 import com.android.server.LocationManagerService;
 import com.android.server.PendingIntentUtils;
 
@@ -48,7 +48,7 @@ import java.util.List;
 
 public class GeofenceManager implements LocationListener, PendingIntent.OnFinished {
     private static final String TAG = "GeofenceManager";
-    private static final boolean D = LocationManagerService.D;
+    private static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int MSG_UPDATE_FENCES = 1;
 
@@ -64,10 +64,6 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
      */
     private static final long MAX_AGE_NANOS = 5 * 60 * 1000000000L; // five minutes
 
-    /**
-     * The default value of most frequent update interval allowed.
-     */
-    private static final long DEFAULT_MIN_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 
     /**
      * Least frequent update interval allowed.
@@ -75,11 +71,13 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     private static final long MAX_INTERVAL_MS = 2 * 60 * 60 * 1000; // two hours
 
     private final Context mContext;
+    private final GeofenceHandler mHandler;
+
     private final LocationManager mLocationManager;
     private final AppOpsManager mAppOps;
     private final PowerManager.WakeLock mWakeLock;
-    private final GeofenceHandler mHandler;
-    private final LocationBlacklist mBlacklist;
+
+    private final LocationSettingsStore mSettingsStore;
 
     private final Object mLock = new Object();
 
@@ -113,43 +111,17 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
      */
     private boolean mPendingUpdate;
 
-    /**
-     * The actual value of most frequent update interval allowed.
-     */
-    private long mEffectiveMinIntervalMs;
-    private ContentResolver mResolver;
-
-    public GeofenceManager(Context context, LocationBlacklist blacklist) {
+    public GeofenceManager(Context context, LocationSettingsStore settingsStore) {
         mContext = context;
-        mLocationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        mAppOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
-        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        mHandler = new GeofenceHandler();
-        mBlacklist = blacklist;
-        mResolver = mContext.getContentResolver();
-        updateMinInterval();
-        mResolver.registerContentObserver(
-            Settings.Global.getUriFor(
-                    Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS),
-            true,
-            new ContentObserver(mHandler) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    synchronized (mLock) {
-                        updateMinInterval();
-                    }
-                }
-            }, UserHandle.USER_ALL);
-    }
+        mHandler = new GeofenceHandler(FgThread.getHandler().getLooper());
 
-    /**
-     * Updates the minimal location request frequency.
-     */
-    private void updateMinInterval() {
-        mEffectiveMinIntervalMs = Settings.Global.getLong(mResolver,
-                Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
-                DEFAULT_MIN_INTERVAL_MS);
+        mLocationManager = mContext.getSystemService(LocationManager.class);
+        mAppOps = mContext.getSystemService(AppOpsManager.class);
+
+        mWakeLock = mContext.getSystemService(PowerManager.class).newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        mSettingsStore = settingsStore;
     }
 
     public void addFence(LocationRequest request, Geofence geofence, PendingIntent intent,
@@ -294,7 +266,8 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
             double minFenceDistance = Double.MAX_VALUE;
             boolean needUpdates = false;
             for (GeofenceState state : mFences) {
-                if (mBlacklist.isBlacklisted(state.mPackageName)) {
+                if (mSettingsStore.isLocationPackageBlacklisted(ActivityManager.getCurrentUser(),
+                        state.mPackageName)) {
                     if (D) {
                         Slog.d(TAG, "skipping geofence processing for blacklisted app: "
                                 + state.mPackageName);
@@ -340,10 +313,11 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
                 // Compute a location update interval based on the distance to the nearest fence.
                 long intervalMs;
                 if (location != null && Double.compare(minFenceDistance, Double.MAX_VALUE) != 0) {
-                    intervalMs = (long)Math.min(MAX_INTERVAL_MS, Math.max(mEffectiveMinIntervalMs,
+                    intervalMs = (long) Math.min(MAX_INTERVAL_MS, Math.max(
+                            mSettingsStore.getBackgroundThrottleProximityAlertIntervalMs(),
                             minFenceDistance * 1000 / MAX_SPEED_M_S));
                 } else {
-                    intervalMs = mEffectiveMinIntervalMs;
+                    intervalMs = mSettingsStore.getBackgroundThrottleProximityAlertIntervalMs();
                 }
                 if (!mReceivingLocationUpdates || mLocationUpdateInterval != intervalMs) {
                     mReceivingLocationUpdates = true;
@@ -436,13 +410,16 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) { }
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
 
     @Override
-    public void onProviderEnabled(String provider) { }
+    public void onProviderEnabled(String provider) {
+    }
 
     @Override
-    public void onProviderDisabled(String provider) { }
+    public void onProviderDisabled(String provider) {
+    }
 
     @Override
     public void onSendFinished(PendingIntent pendingIntent, Intent intent, int resultCode,
@@ -457,17 +434,14 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     }
 
     private final class GeofenceHandler extends Handler {
-        public GeofenceHandler() {
-            super(true /*async*/);
+        private GeofenceHandler(Looper looper) {
+            super(looper);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_UPDATE_FENCES: {
-                    updateFences();
-                    break;
-                }
+            if (msg.what == MSG_UPDATE_FENCES) {
+                updateFences();
             }
         }
     }
