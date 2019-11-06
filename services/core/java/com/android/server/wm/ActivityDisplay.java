@@ -41,7 +41,6 @@ import static com.android.server.am.ActivityDisplayProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityDisplayProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.am.ActivityDisplayProto.STACKS;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_STACK;
@@ -1523,7 +1522,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             final ActivityStack stack = getChildAt(i);
             final ArrayList<TaskRecord> tasks = stack.getAllTasks();
             for (int j = tasks.size() - 1; j >= 0; --j) {
-                stack.removeTask(tasks.get(j), "removeAllTasks", REMOVE_TASK_MODE_DESTROYING);
+                stack.removeChild(tasks.get(j), "removeAllTasks");
             }
         }
     }

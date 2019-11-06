@@ -50,6 +50,7 @@ import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
+import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
@@ -1842,7 +1843,7 @@ class ActivityStarter {
             // {@code ActivityRecord} removing its reference to the {@code TaskRecord}. The task
             // reference is needed in the call below to {@link setTargetStackAndMoveToFrontIfNeeded}
             if (targetTaskTop.getTaskRecord() == null) {
-                targetTaskTop.setTask(targetTask);
+                targetTask.addChild(targetTaskTop);
             }
 
             if (top != null) {
@@ -1862,8 +1863,8 @@ class ActivityStarter {
                     // Go ahead and reset it.
                     mTargetStack = computeStackFocus(mSourceRecord, false /* newTask */,
                             mLaunchFlags, mOptions);
-                    mTargetStack.addTask(targetTask,
-                            !mLaunchTaskBehind /* toTop */, "complyActivityFlags");
+                    mTargetStack.addChild(targetTask, !mLaunchTaskBehind /* toTop */,
+                            (mStartActivity.info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0);
                 }
             }
         } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) == 0 && !mAddingToTask

@@ -196,9 +196,6 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         doReturn(app).when(mService).getProcessController(eq(recentActivity.processName), anyInt());
         ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
         doNothing().when(lifecycleManager).scheduleTransaction(any());
-        AppWarnings appWarnings = mService.getAppWarningsLocked();
-        spyOn(appWarnings);
-        doNothing().when(appWarnings).onStartActivity(any());
 
         startRecentsActivity();
 

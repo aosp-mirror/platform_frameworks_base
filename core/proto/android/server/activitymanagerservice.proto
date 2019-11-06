@@ -100,7 +100,8 @@ message ActivityStackProto {
 message TaskRecordProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    // To be removed soon.
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1 [deprecated=true];
     optional int32 id = 2;
     repeated ActivityRecordProto activities = 3;
     optional int32 stack_id = 4;
@@ -113,6 +114,7 @@ message TaskRecordProto {
     optional .android.graphics.RectProto bounds = 11;
     optional int32 min_width = 12;
     optional int32 min_height = 13;
+    optional .com.android.server.wm.TaskProto task = 14;
 }
 
 message ActivityRecordProto {

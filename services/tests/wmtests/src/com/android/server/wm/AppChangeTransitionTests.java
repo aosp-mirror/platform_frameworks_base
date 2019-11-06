@@ -165,7 +165,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         // setup currently defaults to no snapshot.
         setUpOnDisplay(mDisplayContent);
 
-        mTask.mTaskRecord.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
         assertEquals(1, mDisplayContent.mChangingApps.size());
         assertTrue(mActivity.isInChangeTransition());
 

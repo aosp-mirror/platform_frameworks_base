@@ -36,7 +36,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 
@@ -272,8 +271,7 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         assertTrue(pinnedActivity.isFocusable());
 
         // Without the overridding activity, stack should not be focusable.
-        pinnedStack.removeTask(pinnedActivity.getTaskRecord(), "testFocusability",
-                REMOVE_TASK_MODE_DESTROYING);
+        pinnedStack.removeChild(pinnedActivity.getTaskRecord(), "testFocusability");
         assertFalse(pinnedStack.isFocusable());
     }
 

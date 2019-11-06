@@ -48,7 +48,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
@@ -63,7 +63,6 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 /**
  * Tests for the {@link ActivityRecord} class.
@@ -209,9 +208,11 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testSizeCompatBounds() {
+        // TODO(task-merge): Move once Task is merged into TaskRecord
+        final TaskRecord tr = (TaskRecord) mTask;
         // Disable the real configuration resolving because we only simulate partial flow.
         // TODO: Have test use full flow.
-        doNothing().when(mTask.mTaskRecord).computeConfigResourceOverrides(any(), any());
+        doNothing().when(tr).computeConfigResourceOverrides(any(), any());
         final Rect fixedBounds = mActivity.getRequestedOverrideConfiguration().windowConfiguration
                 .getBounds();
         fixedBounds.set(0, 0, 1200, 1600);
@@ -337,11 +338,9 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         mDisplayContent.getDisplayRotation().setFixedToUserRotation(
                 DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
-
-        mTask.mTaskRecord = Mockito.mock(TaskRecord.class, RETURNS_DEEP_STUBS);
+        reset(mTask);
         mActivity.reportDescendantOrientationChangeIfNeeded();
-
-        verify(mTask.mTaskRecord).onConfigurationChanged(any(Configuration.class));
+        verify(mTask).onConfigurationChanged(any(Configuration.class));
     }
 
     @Test
@@ -451,6 +450,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testTransitionAnimationBounds() {
+        removeGlobalMinSizeRestriction();
         final Rect stackBounds = new Rect(0, 0, 1000, 600);
         final Rect taskBounds = new Rect(100, 400, 600, 800);
         mStack.setBounds(stackBounds);
@@ -458,16 +458,16 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         // Check that anim bounds for freeform window match task bounds
         mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertEquals(taskBounds, mActivity.getAnimationBounds(STACK_CLIP_NONE));
+        assertEquals(mTask.getBounds(), mActivity.getAnimationBounds(STACK_CLIP_NONE));
 
         // STACK_CLIP_AFTER_ANIM should use task bounds since they will be clipped by
         // bounds animation layer.
         mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        assertEquals(taskBounds, mActivity.getAnimationBounds(STACK_CLIP_AFTER_ANIM));
+        assertEquals(mTask.getBounds(), mActivity.getAnimationBounds(STACK_CLIP_AFTER_ANIM));
 
         // STACK_CLIP_BEFORE_ANIM should use stack bounds since it won't be clipped later.
         mTask.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        assertEquals(stackBounds, mActivity.getAnimationBounds(STACK_CLIP_BEFORE_ANIM));
+        assertEquals(mStack.getBounds(), mActivity.getAnimationBounds(STACK_CLIP_BEFORE_ANIM));
     }
 
     @Test

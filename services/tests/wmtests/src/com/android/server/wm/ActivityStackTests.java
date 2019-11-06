@@ -38,7 +38,6 @@ import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
@@ -90,21 +89,6 @@ public class ActivityStackTests extends ActivityTestsBase {
                 true /* onTop */);
         spyOn(mStack);
         mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();
-    }
-
-    @Test
-    public void testEmptyTaskCleanupOnRemove() {
-        assertNotNull(mTask.getTask());
-        mStack.removeTask(mTask, "testEmptyTaskCleanupOnRemove", REMOVE_TASK_MODE_DESTROYING);
-        assertNull(mTask.getTask());
-    }
-
-    @Test
-    public void testOccupiedTaskCleanupOnRemove() {
-        final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
-        assertNotNull(mTask.getTask());
-        mStack.removeTask(mTask, "testOccupiedTaskCleanupOnRemove", REMOVE_TASK_MODE_DESTROYING);
-        assertNotNull(mTask.getTask());
     }
 
     @Test
@@ -993,27 +977,6 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         mStack.startPausingLocked(false /* userLeaving */, false /* uiSleeping */, topActivity);
         verify(mStack).completePauseLocked(anyBoolean(), eq(topActivity));
-    }
-
-    @Test
-    public void testAdjustFocusedStackToHomeWhenNoActivity() {
-        final ActivityStack homeStask = mDefaultDisplay.getHomeStack();
-        TaskRecord homeTask = homeStask.topTask();
-        if (homeTask == null) {
-            // Create home task if there isn't one.
-            homeTask = new TaskBuilder(mSupervisor).setStack(homeStask).build();
-        }
-
-        final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
-        mStack.moveToFront("testAdjustFocusedStack");
-
-        // Simulate that home activity has not been started or is force-stopped.
-        homeStask.removeTask(homeTask, "testAdjustFocusedStack", REMOVE_TASK_MODE_DESTROYING);
-
-        // Finish the only activity.
-        topActivity.finishIfPossible("testAdjustFocusedStack", false /* oomAdj */);
-        // Although home stack is empty, it should still be the focused stack.
-        assertEquals(homeStask, mDefaultDisplay.getFocusedStack());
     }
 
     @Test
