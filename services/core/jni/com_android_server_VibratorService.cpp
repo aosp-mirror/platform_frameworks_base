@@ -67,7 +67,11 @@ class VibratorShim : public V1_4::IVibrator {
     Return<bool> supportsAmplitudeControl() override {
         int32_t cap = 0;
         if (!mVib->getCapabilities(&cap).isOk()) return false;
-        return (cap & aidl::IVibrator::CAP_AMPLITUDE_CONTROL) > 0;
+        if (mUnderExternalControl) {
+           return (cap & aidl::IVibrator::CAP_EXTERNAL_AMPLITUDE_CONTROL) > 0;
+        } else {
+           return (cap & aidl::IVibrator::CAP_AMPLITUDE_CONTROL) > 0;
+        }
     }
 
     Return<V1_0::Status> setAmplitude(uint8_t amplitude) override {
@@ -96,7 +100,11 @@ class VibratorShim : public V1_4::IVibrator {
     }
 
     Return<V1_0::Status> setExternalControl(bool enabled) override {
-        return toHidlStatus(mVib->setExternalControl(enabled));
+        Return<V1_0::Status> status = toHidlStatus(mVib->setExternalControl(enabled));
+        if (status.isOk() && status == V1_0::Status::OK) {
+            mUnderExternalControl = enabled;
+        }
+        return status;
     }
 
     Return<void> perform_1_3(V1_3::Effect effect, V1_0::EffectStrength strength,
@@ -167,6 +175,7 @@ class VibratorShim : public V1_4::IVibrator {
     }
   private:
     sp<aidl::IVibrator> mVib;
+    bool mUnderExternalControl = false;
 
     Return<V1_0::Status> toHidlStatus(const android::binder::Status& status) {
         switch(status.exceptionCode()) {
