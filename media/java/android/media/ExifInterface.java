@@ -235,11 +235,56 @@ public class ExifInterface {
     public static final String TAG_NEW_SUBFILE_TYPE = "NewSubfileType";
     /** Type is String. */
     public static final String TAG_OECF = "OECF";
-    /** Type is String. {@hide} */
+    /**
+     *  <p>A tag used to record the offset from UTC (the time difference from Universal Time
+     *  Coordinated including daylight saving time) of the time of DateTime tag. The format when
+     *  recording the offset is "±HH:MM". The part of "±" shall be recorded as "+" or "-". When
+     *  the offsets are unknown, all the character spaces except colons (":") should be filled
+     *  with blank characters, or else the Interoperability field should be filled with blank
+     *  characters. The character string length is 7 Bytes including NULL for termination. When
+     *  the field is left blank, it is treated as unknown.</p>
+     *
+     *  <ul>
+     *      <li>Tag = 36880</li>
+     *      <li>Type = String</li>
+     *      <li>Length = 7</li>
+     *      <li>Default = None</li>
+     *  </ul>
+     */
     public static final String TAG_OFFSET_TIME = "OffsetTime";
-    /** Type is String. {@hide} */
+    /**
+     *  <p>A tag used to record the offset from UTC (the time difference from Universal Time
+     *  Coordinated including daylight saving time) of the time of DateTimeOriginal tag. The format
+     *  when recording the offset is "±HH:MM". The part of "±" shall be recorded as "+" or "-". When
+     *  the offsets are unknown, all the character spaces except colons (":") should be filled
+     *  with blank characters, or else the Interoperability field should be filled with blank
+     *  characters. The character string length is 7 Bytes including NULL for termination. When
+     *  the field is left blank, it is treated as unknown.</p>
+     *
+     *  <ul>
+     *      <li>Tag = 36881</li>
+     *      <li>Type = String</li>
+     *      <li>Length = 7</li>
+     *      <li>Default = None</li>
+     *  </ul>
+     */
     public static final String TAG_OFFSET_TIME_ORIGINAL = "OffsetTimeOriginal";
-    /** Type is String. {@hide} */
+    /**
+     *  <p>A tag used to record the offset from UTC (the time difference from Universal Time
+     *  Coordinated including daylight saving time) of the time of DateTimeDigitized tag. The format
+     *  when recording the offset is "±HH:MM". The part of "±" shall be recorded as "+" or "-". When
+     *  the offsets are unknown, all the character spaces except colons (":") should be filled
+     *  with blank characters, or else the Interoperability field should be filled with blank
+     *  characters. The character string length is 7 Bytes including NULL for termination. When
+     *  the field is left blank, it is treated as unknown.</p>
+     *
+     *  <ul>
+     *      <li>Tag = 36882</li>
+     *      <li>Type = String</li>
+     *      <li>Length = 7</li>
+     *      <li>Default = None</li>
+     *  </ul>
+     */
     public static final String TAG_OFFSET_TIME_DIGITIZED = "OffsetTimeDigitized";
     /** Type is int. */
     public static final String TAG_PIXEL_X_DIMENSION = "PixelXDimension";
