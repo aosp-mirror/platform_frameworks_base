@@ -17,6 +17,7 @@
 package com.android.systemui.screenshot;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
+import static android.os.AsyncTask.THREAD_POOL_EXECUTOR;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
@@ -29,7 +30,9 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.Notification;
 import android.app.Notification.BigPictureStyle;
 import android.app.NotificationManager;
@@ -42,6 +45,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -64,7 +68,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -82,9 +89,12 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -97,8 +107,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -156,6 +169,8 @@ public class GlobalScreenshot {
         private final BigPictureStyle mNotificationStyle;
         private final int mImageWidth;
         private final int mImageHeight;
+        private final Handler mHandler;
+        private final ScreenshotNotificationSmartActionsProvider mSmartActionsProvider;
 
         SaveImageInBackgroundTask(Context context, SaveImageInBackgroundData data,
                 NotificationManager nManager) {
@@ -166,6 +181,11 @@ public class GlobalScreenshot {
             mImageTime = System.currentTimeMillis();
             String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(mImageTime));
             mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
+
+            // Initialize screenshot notification smart actions provider.
+            mHandler = new Handler();
+            mSmartActionsProvider =
+                SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider();
 
             // Create the large notification icon
             mImageWidth = data.image.getWidth();
@@ -242,6 +262,23 @@ public class GlobalScreenshot {
             mNotificationStyle.bigLargeIcon((Bitmap) null);
         }
 
+        private int getUserHandleOfForegroundApplication(Context context) {
+            // This logic matches
+            // com.android.systemui.statusbar.phone.PhoneStatusBarPolicy#updateManagedProfile
+            try {
+                return ActivityTaskManager.getService().getLastResumedActivityUserId();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "getUserHandleOfForegroundApplication: ", e);
+                return context.getUserId();
+            }
+        }
+
+        private boolean isManagedProfile(Context context) {
+            UserManager manager = UserManager.get(context);
+            UserInfo info = manager.getUserInfo(getUserHandleOfForegroundApplication(context));
+            return info.isManagedProfile();
+        }
+
         /**
          * Generates a new hardware bitmap with specified values, copying the content from the
          * passed in bitmap.
@@ -268,6 +305,12 @@ public class GlobalScreenshot {
 
             Context context = mParams.context;
             Bitmap image = mParams.image;
+            boolean smartActionsEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags.ENABLE_SCREENSHOT_NOTIFICATION_SMART_ACTIONS, true);
+            CompletableFuture<List<Notification.Action>> smartActionsFuture = getSmartActionsFuture(
+                    context, image, mSmartActionsProvider, mHandler, smartActionsEnabled,
+                    isManagedProfile(context));
+
             Resources r = context.getResources();
 
             try {
@@ -378,6 +421,18 @@ public class GlobalScreenshot {
                 mParams.imageUri = uri;
                 mParams.image = null;
                 mParams.errorMsgResId = 0;
+
+                if (smartActionsEnabled) {
+                    int timeoutMs = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
+                            SystemUiDeviceConfigFlags
+                                    .SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS,
+                            1000);
+                    List<Notification.Action> smartActions = getSmartActions(smartActionsFuture,
+                            timeoutMs);
+                    for (Notification.Action action : smartActions) {
+                        mNotificationBuilder.addAction(action);
+                    }
+                }
             } catch (Exception e) {
                 // IOException/UnsupportedOperationException may be thrown if external storage is
                 // not mounted
@@ -1037,6 +1092,58 @@ public class GlobalScreenshot {
                 .bigText(errorMsg)
                 .build();
         nManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT, n);
+    }
+
+    @VisibleForTesting
+    static CompletableFuture<List<Notification.Action>> getSmartActionsFuture(Context context,
+            Bitmap image, ScreenshotNotificationSmartActionsProvider smartActionsProvider,
+            Handler handler, boolean smartActionsEnabled, boolean isManagedProfile) {
+        if (!smartActionsEnabled) {
+            Slog.i(TAG, "Screenshot Intelligence not enabled, returning empty list.");
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+        if (image.getConfig() != Bitmap.Config.HARDWARE) {
+            Slog.w(TAG, String.format(
+                    "Bitmap expected: Hardware, Bitmap found: %s. Returning empty list.",
+                    image.getConfig()));
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+
+        Slog.d(TAG, "Screenshot from a managed profile: " + isManagedProfile);
+        CompletableFuture<List<Notification.Action>> smartActionsFuture;
+        try {
+            ActivityManager.RunningTaskInfo runningTask =
+                    ActivityManagerWrapper.getInstance().getRunningTask();
+            ComponentName componentName =
+                    (runningTask != null && runningTask.topActivity != null)
+                            ? runningTask.topActivity
+                            : new ComponentName("", "");
+            smartActionsFuture = smartActionsProvider.getActions(image, context,
+                    THREAD_POOL_EXECUTOR,
+                    handler,
+                    componentName,
+                    isManagedProfile);
+        } catch (Throwable e) {
+            smartActionsFuture = CompletableFuture.completedFuture(Collections.emptyList());
+            Slog.e(TAG, "Failed to get future for screenshot notification smart actions.", e);
+        }
+        return smartActionsFuture;
+    }
+
+    @VisibleForTesting
+    static List<Notification.Action> getSmartActions(
+            CompletableFuture<List<Notification.Action>> smartActionsFuture, int timeoutMs) {
+        try {
+            long startTimeMs = SystemClock.uptimeMillis();
+            List<Notification.Action> actions = smartActionsFuture.get(timeoutMs,
+                    TimeUnit.MILLISECONDS);
+            Slog.d(TAG, String.format("Wait time for smart actions: %d ms",
+                    SystemClock.uptimeMillis() - startTimeMs));
+            return actions;
+        } catch (Throwable e) {
+            Slog.e(TAG, "Failed to obtain screenshot notification smart actions.", e);
+            return Collections.emptyList();
+        }
     }
 
     /**
