@@ -454,7 +454,7 @@ public class TelephonyManager {
      */
     @Nullable
     public TelephonyManager createForPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
-        int subId = getSubIdForPhoneAccountHandle(phoneAccountHandle);
+        int subId = getSubscriptionId(phoneAccountHandle);
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             return null;
         }
@@ -9429,7 +9429,7 @@ public class TelephonyManager {
      *         permission.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getSubIdForPhoneAccountHandle(@NonNull PhoneAccountHandle phoneAccountHandle) {
+    public int getSubscriptionId(@NonNull PhoneAccountHandle phoneAccountHandle) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
             ITelephony service = getITelephony();
@@ -9438,7 +9438,7 @@ public class TelephonyManager {
                         phoneAccountHandle, mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
-            Log.e(TAG, "getSubIdForPhoneAccountHandle RemoteException", ex);
+            Log.e(TAG, "getSubscriptionId RemoteException", ex);
             ex.rethrowAsRuntimeException();
         }
         return retval;
