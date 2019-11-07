@@ -161,6 +161,7 @@ public class StatusBarModule {
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
+            LightsOutNotifController lightsOutNotifController,
             SuperStatusBarViewFactory superStatusBarViewFactory) {
         return new StatusBar(
                 context,
@@ -230,6 +231,7 @@ public class StatusBarModule {
                 pluginManager,
                 remoteInputUriController,
                 dividerOptional,
+                lightsOutNotifController,
                 superStatusBarViewFactory);
     }
 }

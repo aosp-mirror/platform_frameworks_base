@@ -237,6 +237,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private PluginManager mPluginManager;
     @Mock private Divider mDivider;
     @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    @Mock private LightsOutNotifController mLightsOutNotifController;
 
     @Before
     public void setup() throws Exception {
@@ -376,6 +377,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mPluginManager,
                 mRemoteInputUriController,
                 Optional.of(mDivider),
+                mLightsOutNotifController,
                 mSuperStatusBarViewFactory);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(

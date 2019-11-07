@@ -71,6 +71,7 @@ import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -175,6 +176,7 @@ public class CarStatusBarModule {
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
             SuperStatusBarViewFactory superStatusBarViewFactory,
+            LightsOutNotifController lightsOutNotifController,
             CarNavigationBarController carNavigationBarController) {
         return new CarStatusBar(
                 context,
@@ -244,6 +246,7 @@ public class CarStatusBarModule {
                 remoteInputUriController,
                 dividerOptional,
                 superStatusBarViewFactory,
+                lightsOutNotifController,
                 carNavigationBarController);
     }
 }
