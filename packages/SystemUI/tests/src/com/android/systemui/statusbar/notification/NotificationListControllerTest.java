@@ -30,7 +30,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
@@ -60,7 +59,6 @@ public class NotificationListControllerTest extends SysuiTestCase {
 
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationListContainer mListContainer;
-    @Mock private ForegroundServiceController mForegroundServiceController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
 
     @Captor private ArgumentCaptor<NotificationEntryListener> mEntryListenerCaptor;
@@ -88,7 +86,6 @@ public class NotificationListControllerTest extends SysuiTestCase {
         mController = new NotificationListController(
                 mEntryManager,
                 mListContainer,
-                mForegroundServiceController,
                 mDeviceProvisionedController);
         mController.bind();
 

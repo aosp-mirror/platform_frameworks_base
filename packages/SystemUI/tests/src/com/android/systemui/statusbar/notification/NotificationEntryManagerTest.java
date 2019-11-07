@@ -258,8 +258,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         NotificationRowBinderImpl notificationRowBinder =
                 new NotificationRowBinderImpl(mContext, true, /* allowLongPress */
                         mock(KeyguardBypassController.class),
-                        mock(StatusBarStateController.class),
-                        mock(NotifLog.class));
+                        mock(StatusBarStateController.class));
         notificationRowBinder.setUpWithPresenter(
                 mPresenter, mListContainer, mHeadsUpManager, mEntryManager, mBindCallback);
         notificationRowBinder.setNotificationClicker(mock(NotificationClicker.class));
