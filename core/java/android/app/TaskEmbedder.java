@@ -655,20 +655,11 @@ public class TaskEmbedder {
             // color of the surface view during resizing.
             final int displayId = getDisplayId();
             final List<ActivityManager.StackInfo> stackInfoList =
-                    mActivityTaskManager.getAllStackInfos();
-
-            // Iterate through stacks from top to bottom.
-            final int stackCount = stackInfoList.size();
-            for (int i = 0; i < stackCount; i++) {
-                final ActivityManager.StackInfo stackInfo = stackInfoList.get(i);
-                // Only look for stacks on our virtual display.
-                if (stackInfo.displayId != displayId) {
-                    continue;
-                }
-                // Found the topmost stack on target display.
-                return stackInfo;
+                    mActivityTaskManager.getAllStackInfosOnDisplay(displayId);
+            if (stackInfoList.isEmpty()) {
+                return null;
             }
-            return null;
+            return stackInfoList.get(0);
         }
     }
 }

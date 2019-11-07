@@ -1243,6 +1243,15 @@ class RootActivityContainer extends ConfigurationContainer
         return null;
     }
 
+    private <T extends ActivityStack> T getStack(int windowingMode, int activityType,
+            int displayId) {
+        ActivityDisplay display = getActivityDisplay(displayId);
+        if (display == null) {
+            return null;
+        }
+        return display.getStack(windowingMode, activityType);
+    }
+
     private ActivityManager.StackInfo getStackInfo(ActivityStack stack) {
         final int displayId = stack.mDisplayId;
         final ActivityDisplay display = getActivityDisplay(displayId);
@@ -1296,14 +1305,31 @@ class RootActivityContainer extends ConfigurationContainer
         return (stack != null) ? getStackInfo(stack) : null;
     }
 
-    ArrayList<ActivityManager.StackInfo> getAllStackInfos() {
+    ActivityManager.StackInfo getStackInfo(int windowingMode, int activityType, int displayId) {
+        final ActivityStack stack = getStack(windowingMode, activityType, displayId);
+        return (stack != null) ? getStackInfo(stack) : null;
+    }
+
+    /** If displayId == INVALID_DISPLAY, this will get stack infos on all displays */
+    ArrayList<ActivityManager.StackInfo> getAllStackInfos(int displayId) {
         ArrayList<ActivityManager.StackInfo> list = new ArrayList<>();
-        for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                list.add(getStackInfo(stack));
+        if (displayId == INVALID_DISPLAY) {
+            for (int displayNdx = 0; displayNdx < mActivityDisplays.size(); ++displayNdx) {
+                final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+                for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+                    final ActivityStack stack = display.getChildAt(stackNdx);
+                    list.add(getStackInfo(stack));
+                }
             }
+            return list;
+        }
+        final ActivityDisplay display = getActivityDisplay(displayId);
+        if (display == null) {
+            return list;
+        }
+        for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = display.getChildAt(stackNdx);
+            list.add(getStackInfo(stack));
         }
         return list;
     }
