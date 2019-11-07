@@ -89,6 +89,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
@@ -221,7 +222,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
     @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
-    @Mock private NotifLog mNotifLog;
     @Mock private DozeParameters mDozeParameters;
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     @Mock private LockscreenWallpaper mLockscreenWallpaper;
@@ -230,6 +230,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
     @Mock private KeyguardLiftController mKeyguardLiftController;
     @Mock private CommandQueue mCommandQueue;
+    @Mock private Recents mRecents;
     @Mock private PluginManager mPluginManager;
     @Mock private Divider mDivider;
     @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
@@ -368,6 +369,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mPowerManager, mScreenPinningRequest,
                 mDozeScrimController,
                 mCommandQueue,
+                Optional.of(mRecents),
                 mPluginManager,
                 mRemoteInputUriController,
                 Optional.of(mDivider),

@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
@@ -152,6 +153,7 @@ public class StatusBarModule {
             ScreenPinningRequest screenPinningRequest,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
+            Optional<Recents> recentsOptional,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
@@ -221,6 +223,7 @@ public class StatusBarModule {
                 screenPinningRequest,
                 dozeScrimController,
                 commandQueue,
+                recentsOptional,
                 pluginManager,
                 remoteInputUriController,
                 dividerOptional,

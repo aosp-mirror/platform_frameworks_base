@@ -79,6 +79,7 @@ import com.android.systemui.navigationbar.car.CarNavigationBarView;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
@@ -298,6 +299,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             ScreenPinningRequest screenPinningRequest,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
+            Optional<Recents> recents,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
@@ -369,6 +371,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 screenPinningRequest,
                 dozeScrimController,
                 commandQueue,
+                recents,
                 pluginManager,
                 remoteInputUriController,
                 dividerOptional,

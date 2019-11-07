@@ -36,6 +36,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.car.CarNavigationBarController;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
@@ -167,6 +168,7 @@ public class CarStatusBarModule {
             ScreenPinningRequest screenPinningRequest,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
+            Optional<Recents> recentsOptional,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
@@ -236,6 +238,7 @@ public class CarStatusBarModule {
                 screenPinningRequest,
                 dozeScrimController,
                 commandQueue,
+                recentsOptional,
                 pluginManager,
                 remoteInputUriController,
                 dividerOptional,
