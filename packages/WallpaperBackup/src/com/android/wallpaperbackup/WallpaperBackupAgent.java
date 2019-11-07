@@ -39,6 +39,8 @@ import android.os.UserHandle;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -89,7 +91,7 @@ public class WallpaperBackupAgent extends BackupAgent {
             Slog.v(TAG, "onCreate()");
         }
 
-        File wallpaperDir = Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM);
+        File wallpaperDir = getWallpaperDir();
         mWallpaperInfo = new File(wallpaperDir, WALLPAPER_INFO);
         mWallpaperFile = new File(wallpaperDir, WALLPAPER);
         mLockWallpaperFile = new File(wallpaperDir, WALLPAPER_LOCK);
@@ -100,6 +102,11 @@ public class WallpaperBackupAgent extends BackupAgent {
         if (DEBUG) {
             Slog.v(TAG, "quota file " + mQuotaFile.getPath() + " exists=" + mQuotaExceeded);
         }
+    }
+
+    @VisibleForTesting
+    protected File getWallpaperDir() {
+        return Environment.getUserSystemDirectory(UserHandle.USER_SYSTEM);
     }
 
     @Override
@@ -119,7 +126,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                 FileOutputStream touch = new FileOutputStream(empty);
                 touch.close();
             }
-            fullBackupFile(empty, data);
+            backupFile(empty, data);
 
             SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             final int lastSysGeneration = prefs.getInt(SYSTEM_GENERATION, -1);
@@ -155,7 +162,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                     FileUtils.copyFileOrThrow(mWallpaperInfo, infoStage);
                 }
                 if (DEBUG) Slog.v(TAG, "Storing wallpaper metadata");
-                fullBackupFile(infoStage, data);
+                backupFile(infoStage, data);
             }
             if (sysEligible && mWallpaperFile.exists()) {
                 if (sysChanged || !imageStage.exists()) {
@@ -163,7 +170,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                     FileUtils.copyFileOrThrow(mWallpaperFile, imageStage);
                 }
                 if (DEBUG) Slog.v(TAG, "Storing system wallpaper image");
-                fullBackupFile(imageStage, data);
+                backupFile(imageStage, data);
                 prefs.edit().putInt(SYSTEM_GENERATION, sysGeneration).apply();
             }
 
@@ -174,7 +181,7 @@ public class WallpaperBackupAgent extends BackupAgent {
                     FileUtils.copyFileOrThrow(mLockWallpaperFile, lockImageStage);
                 }
                 if (DEBUG) Slog.v(TAG, "Storing lock wallpaper image");
-                fullBackupFile(lockImageStage, data);
+                backupFile(lockImageStage, data);
                 prefs.edit().putInt(LOCK_GENERATION, lockGeneration).apply();
             }
         } catch (Exception e) {
@@ -187,6 +194,12 @@ public class WallpaperBackupAgent extends BackupAgent {
             // quota.
             mQuotaFile.delete();
         }
+    }
+
+    @VisibleForTesting
+    // fullBackupFile is final, so we intercept backups here in tests.
+    protected void backupFile(File file, FullBackupDataOutput data) {
+        fullBackupFile(file, data);
     }
 
     @Override
