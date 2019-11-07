@@ -23,6 +23,13 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Binder;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.telephony.ims.aidl.IImsRcsController;
+import android.telephony.ims.aidl.IRcsUceControllerCallback;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,6 +43,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 public class RcsUceAdapter {
+    private static final String TAG = "RcsUceAdapter";
 
     /**
      * An unknown error has caused the request to fail.
@@ -188,7 +196,6 @@ public class RcsUceAdapter {
 
     /**
      * Not to be instantiated directly, use
-     * {@link ImsRcsManager#createForSubscriptionId(Context, int)} and
      * {@link ImsRcsManager#getUceAdapter()} to instantiate this manager class.
      */
     RcsUceAdapter(int subId) {
@@ -218,7 +225,45 @@ public class RcsUceAdapter {
     public void requestCapabilities(@CallbackExecutor Executor executor,
             @NonNull List<Uri> contactNumbers,
             @NonNull CapabilitiesCallback c) throws ImsException {
-        throw new UnsupportedOperationException("isUceSettingEnabled is not supported.");
+        if (c == null) {
+            throw new IllegalArgumentException("Must include a non-null AvailabilityCallback.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        if (contactNumbers == null) {
+            throw new IllegalArgumentException("Must include non-null contact number list.");
+        }
+
+        IImsRcsController imsRcsController = getIImsRcsController();
+        if (imsRcsController == null) {
+            Log.e(TAG, "requestCapabilities: IImsRcsController is null");
+            throw new ImsException("Can not find remote IMS service",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
+        IRcsUceControllerCallback internalCallback = new IRcsUceControllerCallback.Stub() {
+            @Override
+            public void onCapabilitiesReceived(List<RcsContactUceCapability> contactCapabilities) {
+                Binder.withCleanCallingIdentity(() ->
+                        executor.execute(() ->
+                                c.onCapabilitiesReceived(contactCapabilities)));
+            }
+            @Override
+            public void onError(int errorCode) {
+                Binder.withCleanCallingIdentity(() ->
+                        executor.execute(() ->
+                                c.onError(errorCode)));
+            }
+        };
+
+        try {
+            imsRcsController.requestCapabilities(mSubId, contactNumbers, internalCallback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling IImsRcsController#requestCapabilities", e);
+            throw new ImsException("Remote IMS Service is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
     }
 
     /**
@@ -233,7 +278,20 @@ public class RcsUceAdapter {
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @PublishState int getUcePublishState() throws ImsException {
-        throw new UnsupportedOperationException("getPublishState is not supported.");
+        IImsRcsController imsRcsController = getIImsRcsController();
+        if (imsRcsController == null) {
+            Log.e(TAG, "getUcePublishState: IImsRcsController is null");
+            throw new ImsException("Can not find remote IMS service",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
+        try {
+            return imsRcsController.getUcePublishState(mSubId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling IImsRcsController#getUcePublishState", e);
+            throw new ImsException("Remote IMS Service is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
     }
 
     /**
@@ -252,9 +310,22 @@ public class RcsUceAdapter {
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isUceSettingEnabled() throws ImsException {
-        // TODO: add SubscriptionController column for this property.
-        throw new UnsupportedOperationException("isUceSettingEnabled is not supported.");
+        IImsRcsController imsRcsController = getIImsRcsController();
+        if (imsRcsController == null) {
+            Log.e(TAG, "isUceSettingEnabled: IImsRcsController is null");
+            throw new ImsException("Can not find remote IMS service",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
+        try {
+            return imsRcsController.isUceSettingEnabled(mSubId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling IImsRcsController#isUceSettingEnabled", e);
+            throw new ImsException("Remote IMS Service is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
     }
+
     /**
      * Change the user’s setting for whether or not UCE is enabled for the associated subscription.
      * @param isEnabled the user's setting for whether or not they wish for Presence and User
@@ -270,7 +341,24 @@ public class RcsUceAdapter {
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setUceSettingEnabled(boolean isEnabled) throws ImsException {
-        // TODO: add SubscriptionController column for this property.
-        throw new UnsupportedOperationException("setUceSettingEnabled is not supported.");
+        IImsRcsController imsRcsController = getIImsRcsController();
+        if (imsRcsController == null) {
+            Log.e(TAG, "setUceSettingEnabled: IImsRcsController is null");
+            throw new ImsException("Can not find remote IMS service",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
+        try {
+            imsRcsController.setUceSettingEnabled(mSubId, isEnabled);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling IImsRcsController#setUceSettingEnabled", e);
+            throw new ImsException("Remote IMS Service is not available",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    private IImsRcsController getIImsRcsController() {
+        IBinder binder = ServiceManager.getService(Context.TELEPHONY_IMS_SERVICE);
+        return IImsRcsController.Stub.asInterface(binder);
     }
 }
