@@ -1443,39 +1443,6 @@ please see styles_device_defaults.xml.
         <item name="drawableTintMode">src_atop</item>
     </style>
 
-    <!-- Wifi dialog styles -->
-    <!-- @hide -->
-    <style name="wifi_item">
-        <item name="layout_width">200dip</item>
-        <item name="layout_height">wrap_content</item>
-        <item name="layout_marginTop">8dip</item>
-        <item name="layout_marginStart">16dip</item>
-        <item name="layout_marginEnd">16dip</item>
-        <item name="orientation">vertical</item>
-        <item name="gravity">start</item>
-    </style>
-
-    <!-- @hide -->
-    <style name="wifi_item_label">
-        <item name="layout_width">wrap_content</item>
-        <item name="layout_height">wrap_content</item>
-        <item name="textSize">14sp</item>
-    </style>
-
-    <!-- @hide -->
-    <style name="wifi_item_content">
-        <item name="layout_width">match_parent</item>
-        <item name="layout_height">wrap_content</item>
-        <item name="textSize">18sp</item>
-    </style>
-
-    <!-- @hide -->
-    <style name="wifi_section">
-        <item name="layout_width">match_parent</item>
-        <item name="layout_height">wrap_content</item>
-        <item name="orientation">vertical</item>
-    </style>
-
     <style name="Widget.FastScroll">
         <item name="thumbDrawable">?attr/fastScrollThumbDrawable</item>
         <item name="trackDrawable">?attr/fastScrollTrackDrawable</item>

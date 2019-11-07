@@ -3379,52 +3379,6 @@
     <!-- If there is ever a ringtone set for some setting, but that ringtone can no longer be resolved, t his is shown instead.  For example, if the ringtone was on a SD card and it had been removed, this woudl be shown for ringtones on that SD card. -->
     <string name="ringtone_unknown">Unknown</string>
 
-    <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's title. -->
-    <plurals name="wifi_available">
-        <item quantity="one">Wi-Fi network available</item>
-        <item quantity="other">Wi-Fi networks available</item>
-    </plurals>
-    <!-- A notification is shown when there are open wireless networks nearby.  This is the notification's message. -->
-    <plurals name="wifi_available_detailed">
-        <item quantity="one">Open Wi-Fi network available</item>
-        <item quantity="other">Open Wi-Fi networks available</item>
-    </plurals>
-
-    <!-- Notification title for a nearby open wireless network.-->
-    <string name="wifi_available_title">Connect to open Wi\u2011Fi network</string>
-    <!-- Notification title when the system is connecting to the specified network. The network name is specified in the notification content. -->
-    <string name="wifi_available_title_connecting">Connecting to Wi\u2011Fi network</string>
-    <!-- Notification title when the system has connected to the network. The network name is specified in the notification content. -->
-    <string name="wifi_available_title_connected">Connected to Wi\u2011Fi network</string>
-    <!-- Notification title when the system failed to connect to the specified network. -->
-    <string name="wifi_available_title_failed_to_connect">Could not connect to Wi\u2011Fi network</string>
-    <!-- Notification content when the system failed to connect to the specified network. This informs the user that tapping on this notification will open the wifi picker. -->
-    <string name="wifi_available_content_failed_to_connect">Tap to see all networks</string>
-    <!-- Notification action name for connecting to the network specified in the notification body. -->
-    <string name="wifi_available_action_connect">Connect</string>
-    <!-- Notification action name for opening the wifi picker, showing the user all the nearby networks. -->
-    <string name="wifi_available_action_all_networks">All networks</string>
-
-    <!-- Notification title for a connection to a app suggested wireless network.-->
-    <string name="wifi_suggestion_title">Allow suggested Wi\u2011Fi networks?</string>
-    <!-- Notification content for a connection to a app suggested wireless network.-->
-    <string name="wifi_suggestion_content"><xliff:g id="name" example="App123">%s</xliff:g> suggested networks. Device may connect automatically. </string>
-    <!-- Notification action for allowing app specified in the notification body.-->
-    <string name="wifi_suggestion_action_allow_app">Allow</string>
-    <!-- Notification action for disallowing app specified in the notification body.-->
-    <string name="wifi_suggestion_action_disallow_app">No thanks</string>
-
-    <!--Notification title for Wi-Fi Wake onboarding. This is displayed the first time a user disables Wi-Fi with the feature enabled. -->
-    <string name="wifi_wakeup_onboarding_title">Wi\u2011Fi will turn on automatically</string>
-    <!--Notification subtext for Wi-Fi Wake onboarding.-->
-    <string name="wifi_wakeup_onboarding_subtext">When you\'re near a high quality saved network</string>
-    <!--Notification action to disable Wi-Fi Wake during onboarding.-->
-    <string name="wifi_wakeup_onboarding_action_disable">Don\'t turn back on</string>
-    <!--Notification title for when Wi-Fi Wake enables Wi-Fi.-->
-    <string name="wifi_wakeup_enabled_title">Wi\u2011Fi turned on automatically</string>
-    <!--Notification content for when Wi-Fi Wake enables Wi-Fi. %1$s is the SSID of the nearby saved network that triggered the wakeup. -->
-    <string name="wifi_wakeup_enabled_content">You\u0027re near a saved network: <xliff:g id="network_ssid">%1$s</xliff:g></string>
-
     <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
     <string name="wifi_available_sign_in">Sign in to Wi-Fi network</string>
 
@@ -3457,21 +3411,6 @@
     <!-- A notification is shown when the user connects to a network that doesn't have access to some services (e.g. Push notifications may not work). This is the notification's message. [CHAR LIMIT=50] -->
     <string name="network_partial_connectivity_detailed">Tap to connect anyway</string>
 
-    <!-- A notification is shown when the user's softap config has been changed due to underlying
-         hardware restrictions. This is the notifications's title.
-         [CHAR_LIMIT=NONE] -->
-    <string name="wifi_softap_config_change">Changes to your hotspot settings</string>
-
-    <!-- A notification is shown when the user's softap config has been changed due to underlying
-         hardware restrictions. This is the notification's summary message.
-         [CHAR_LIMIT=NONE] -->
-    <string name="wifi_softap_config_change_summary">Your hotspot band has changed.</string>
-
-    <!-- A notification is shown when the user's softap config has been changed due to underlying
-         hardware restrictions. This is the notification's full message.
-         [CHAR_LIMIT=NONE] -->
-    <string name="wifi_softap_config_change_detailed">This device doesn\u2019t support your preference for 5GHz only. Instead, this device will use the 5GHz band when available.</string>
-
     <!-- A notification might be shown if the device switches to another network type (e.g., mobile data) because it detects that the network it was using (e.g., Wi-Fi) has lost Internet connectivity. This is the notification's title. %1$s is the network type that the device switched to, e.g., cellular data. It is one of the strings in the network_switch_type_name array. -->
     <string name="network_switch_metered">Switched to <xliff:g id="network_type">%1$s</xliff:g></string>
 
@@ -3493,43 +3432,8 @@
     <!-- Network type name displayed if one of the types is not found in network_switch_type_name. -->
     <string name="network_switch_type_name_unknown">an unknown network type</string>
 
-     <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is the notification's title / ticker. -->
-     <string name="wifi_watchdog_network_disabled">Couldn\'t connect to Wi-Fi</string>
-     <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  The complete alert msg is: <hotspot name> + this string, i.e. "Linksys has a poor internet connection" -->
-    <string name="wifi_watchdog_network_disabled_detailed">\u0020has a poor internet connection.</string>
-
-    <!-- Do not translate. Default access point SSID used for tethering -->
-    <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
-    <!-- Do not translate. Default access point SSID used for local only hotspot -->
-    <string name="wifi_localhotspot_configure_ssid_default" translatable="false">AndroidShare</string>
-
-    <!-- A notification is shown the first time a connection is attempted on an app owned AP -->
-    <!-- title for this message -->
-    <string name="wifi_connect_alert_title">Allow connection?</string>
-    <!-- message explaining who is connecting to what -->
-    <string name="wifi_connect_alert_message">Application %1$s would like to connect to Wifi Network %2$s</string>
-    <!-- default application in case name can not be found -->
-    <string name="wifi_connect_default_application">An application</string>
-
-    <string name="wifi_p2p_dialog_title">Wi-Fi Direct</string>
-    <string name="wifi_p2p_turnon_message">Start Wi-Fi Direct. This will turn off Wi-Fi client/hotspot.</string>
-    <string name="wifi_p2p_failed_message">Couldn\'t start Wi-Fi Direct.</string>
-    <string name="wifi_p2p_enabled_notification_title">Wi-Fi Direct is on</string>
-    <string name="wifi_p2p_enabled_notification_message">Tap for settings</string>
-
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
-    <string name="wifi_p2p_invitation_sent_title">Invitation sent</string>
-    <string name="wifi_p2p_invitation_to_connect_title">Invitation to connect</string>
-
-    <string name="wifi_p2p_from_message">From: </string>
-    <string name="wifi_p2p_to_message">To: </string>
-    <string name="wifi_p2p_enter_pin_message">Type the required PIN: </string>
-    <string name="wifi_p2p_show_pin_message">PIN: </string>
-
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet">The tablet will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv">Your Android TV device will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default">The phone will temporarily disconnect from Wi-Fi while it\'s connected to <xliff:g id="device_name">%1$s</xliff:g></string>
 
     <!-- Name of the dialog that lets the user choose an accented character to insert -->
     <string name="select_character">Insert character</string>
