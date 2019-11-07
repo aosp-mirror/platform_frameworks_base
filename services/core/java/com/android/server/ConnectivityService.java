@@ -6352,14 +6352,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             ensureRunningOnConnectivityServiceThread();
             final NetworkAgentInfo currentNetwork = nri.mSatisfier;
             final boolean satisfies = newNetwork.satisfies(nri.request);
-            if (newNetwork == currentNetwork && satisfies) {
-                if (VDBG) {
-                    log("Network " + newNetwork.name() + " was already satisfying" +
-                            " request " + nri.request.requestId + ". No change.");
-                }
-                keep = true;
-                continue;
-            }
+            if (newNetwork == currentNetwork && satisfies) continue;
 
             // check if it satisfies the NetworkCapabilities
             if (VDBG) log("  checking if request is satisfied: " + nri.request);
@@ -6414,7 +6407,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 reassignedRequests.entrySet()) {
             final NetworkRequestInfo nri = entry.getKey();
             final NetworkAgentInfo previousSatisfier = nri.mSatisfier;
-            if (entry.getValue() == null) {
+            final NetworkAgentInfo newSatisfier = entry.getValue();
+            if (newSatisfier == null) {
                 // If "newNetwork" is listed as satisfying "nri" but no longer satisfies "nri",
                 // mark it as no longer satisfying "nri".  Because networks are processed by
                 // rematchAllNetworksAndRequests() in descending score order, "currentNetwork" will
