@@ -1850,7 +1850,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
         checkPasswordReadPermission(userId);
         VerifyCredentialResponse response = doVerifyCredential(credential, type,
-                                        false, 0, userId, progressCallback);
+                                        CHALLENGE_NONE, 0, userId, progressCallback);
         if ((response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) &&
                                            (userId == UserHandle.USER_OWNER)) {
                 //TODO(b/127810705): Update to credentials to use byte[]

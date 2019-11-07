@@ -513,5 +513,7 @@ number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.
     <string name="clock_title_bubble">Bubble</string>
     <!-- Name of the "Analog" clock face [CHAR LIMIT=15]-->
     <string name="clock_title_analog">Analog</string>
+    <!-- Name of the "Typographic" clock face, which shows the time and date by text [CHAR LIMIT=15] -->
+    <string name="clock_title_type" translatable="false">Type</string>
 
 </resources>

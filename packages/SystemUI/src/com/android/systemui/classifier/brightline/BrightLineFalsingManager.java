@@ -52,8 +52,6 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final FalsingDataProvider mDataProvider;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private boolean mSessionStarted;
-    private boolean mShowingAod;
-    private boolean mScreenOn;
     private MetricsLogger mMetricsLogger;
     private int mIsFalseTouchCalls;
     private boolean mShowingAod;

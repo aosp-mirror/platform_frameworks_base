@@ -502,6 +502,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
     private final NotificationSectionsManager mSectionsManager;
     private boolean mAnimateBottomOnLayout;
+    private int mPulseReason;
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
     private boolean mWillExpand;
