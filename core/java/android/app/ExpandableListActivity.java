@@ -150,7 +150,11 @@ import java.util.Map;
  * 
  * @see #setListAdapter
  * @see android.widget.ExpandableListView
+ *
+ * @deprecated Use {@link androidx.recyclerview.widget.RecyclerView} or use
+ *   {@link android.widget.ExpandableListView} directly
  */
+@Deprecated
 public class ExpandableListActivity extends Activity implements
         OnCreateContextMenuListener,
         ExpandableListView.OnChildClickListener, ExpandableListView.OnGroupCollapseListener,
