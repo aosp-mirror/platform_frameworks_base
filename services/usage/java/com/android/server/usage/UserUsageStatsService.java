@@ -175,12 +175,44 @@ class UserUsageStatsService {
     }
 
     void onPackageRemoved(String packageName, long timeRemoved) {
-        mDatabase.onPackageRemoved(packageName, timeRemoved);
+        final int token = mDatabase.onPackageRemoved(packageName, timeRemoved);
+        if (token != PackagesTokenData.UNASSIGNED_TOKEN) {
+            UsageStatsIdleService.scheduleJob(mContext, mUserId, token);
+        }
     }
 
     private void readPackageMappingsLocked() {
         mDatabase.readMappingsLocked();
+        updatePackageMappingsLocked();
         cleanUpPackageMappingsLocked();
+    }
+
+    /**
+     * Queries Job Scheduler for any pending data prune jobs and if any exist, it updates the
+     * package mappings in memory by removing those tokens.
+     * This will only happen once per device boot, when the user is unlocked for the first time.
+     */
+    private void updatePackageMappingsLocked() {
+        final long timeNow = System.currentTimeMillis();
+        final int[] removedTokens = UsageStatsIdleService.fetchRemovedTokens(mContext, mUserId);
+        if (removedTokens == null) {
+            return;
+        }
+
+        for (int i = removedTokens.length - 1; i >= 0; i--) {
+            final String packageName =
+                    mDatabase.mPackagesTokenData.getPackageString(removedTokens[i]);
+            if (packageName == null) {
+                continue;
+            }
+            /*
+             Note: in most cases, packageName returned will be null since the package mappings file
+             on disk should have been updated when it was last persisted. This is to handle the rare
+             case of system crashing after a package was removed but the package mappings file
+             wasn't persisted to disk.
+             */
+            mDatabase.mPackagesTokenData.removePackage(packageName, timeNow);
+        }
     }
 
     /**
@@ -220,6 +252,10 @@ class UserUsageStatsService {
         for (int i = removedPackages.size() - 1; i >= 0; i--) {
             mDatabase.mPackagesTokenData.removePackage(removedPackages.get(i), timeNow);
         }
+    }
+
+    boolean pruneUninstalledPackagesData() {
+        return mDatabase.pruneUninstalledPackagesData();
     }
 
     private void onTimeChanged(long oldTime, long newTime) {
