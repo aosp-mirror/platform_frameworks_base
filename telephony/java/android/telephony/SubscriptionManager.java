@@ -1826,17 +1826,40 @@ public class SubscriptionManager {
         return subId;
     }
 
-    /** @hide */
-    public void setDefaultVoiceSubId(int subId) {
-        if (VDBG) logd("setDefaultVoiceSubId sub id = " + subId);
+    /**
+     * Sets the system's default voice subscription id.
+     *
+     * On a data-only device, this is a no-op.
+     *
+     * May throw a {@link RuntimeException} if the provided subscription id is equal to
+     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}
+     *
+     * @param subscriptionId A valid subscription ID to set as the system default, or
+     *                       {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setDefaultVoiceSubscriptionId(int subscriptionId) {
+        if (VDBG) logd("setDefaultVoiceSubId sub id = " + subscriptionId);
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                iSub.setDefaultVoiceSubId(subId);
+                iSub.setDefaultVoiceSubId(subscriptionId);
             }
         } catch (RemoteException ex) {
             // ignore it
         }
+    }
+
+    /**
+     * Same as {@link #setDefaultVoiceSubscriptionId(int)}, but preserved for backwards
+     * compatibility.
+     * @hide
+     */
+    public void setDefaultVoiceSubId(int subId) {
+        setDefaultVoiceSubscriptionId(subId);
     }
 
     /**
