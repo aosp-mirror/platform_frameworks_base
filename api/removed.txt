@@ -217,11 +217,6 @@ package android.location {
     method @Deprecated public void removeVerticalAccuracy();
   }
 
-  public class LocationManager {
-    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addNmeaListener(android.location.GpsStatus.NmeaListener);
-    method @Deprecated public void removeNmeaListener(android.location.GpsStatus.NmeaListener);
-  }
-
 }
 
 package android.media {

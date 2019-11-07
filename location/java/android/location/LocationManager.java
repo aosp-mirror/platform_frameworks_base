@@ -1963,23 +1963,21 @@ public class LocationManager {
     /**
      * No-op method to keep backward-compatibility.
      *
-     * @deprecated use {@link #addNmeaListener(OnNmeaMessageListener)} instead.
-     * @removed
+     * @deprecated Use {@link #addNmeaListener} instead.
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
-    public boolean addNmeaListener(GpsStatus.NmeaListener listener) {
+    public boolean addNmeaListener(@NonNull GpsStatus.NmeaListener listener) {
         return false;
     }
 
     /**
      * No-op method to keep backward-compatibility.
      *
-     * @deprecated use {@link #removeNmeaListener(OnNmeaMessageListener)} instead.
-     * @removed
+     * @deprecated Use {@link #removeNmeaListener(OnNmeaMessageListener)} instead.
      */
     @Deprecated
-    public void removeNmeaListener(GpsStatus.NmeaListener listener) {}
+    public void removeNmeaListener(@NonNull GpsStatus.NmeaListener listener) {}
 
     /**
      * Adds an NMEA listener.
