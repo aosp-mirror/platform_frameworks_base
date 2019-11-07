@@ -4001,7 +4001,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     stack.animateResizePinnedStack(null /* sourceHintBounds */,
                             null /* destBounds */, animationDuration, false /* fromFullscreen */);
                 } else {
-                    mStackSupervisor.moveTasksToFullscreenStackLocked(stack, true /* onTop */);
+                    stack.dismissPip();
                 }
             }
         } finally {
@@ -4017,11 +4017,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    /**
-     * NOTE: For the pinned stack, this method is usually called after the bounds animation has
-     *       animated the stack to the fullscreen, but can also be called if we are relaunching an
-     *       activity and clearing the task at the same time.
-     */
     @Override
     // TODO: API should just be about changing windowing modes...
     public void moveTasksToFullscreenStack(int fromStackId, boolean onTop) {
