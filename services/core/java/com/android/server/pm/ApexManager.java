@@ -38,6 +38,8 @@ import android.sysprop.ApexProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
@@ -216,7 +218,8 @@ abstract class ApexManager {
      * An implementation of {@link ApexManager} that should be used in case device supports updating
      * APEX packages.
      */
-    private static class ApexManagerImpl extends ApexManager {
+    @VisibleForTesting
+    static class ApexManagerImpl extends ApexManager {
         private final IApexService mApexService;
         private final Context mContext;
         private final Object mLock = new Object();
@@ -260,7 +263,9 @@ abstract class ApexManager {
             mContext.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    populateAllPackagesCacheIfNeeded();
+                    // Post populateAllPackagesCacheIfNeeded to a background thread, since it's
+                    // expensive to run it in broadcast handler thread.
+                    BackgroundThread.getHandler().post(() -> populateAllPackagesCacheIfNeeded());
                     mContext.unregisterReceiver(this);
                 }
             }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
@@ -332,8 +337,8 @@ abstract class ApexManager {
                 if (!packageInfo.packageName.equals(packageName)) {
                     continue;
                 }
-                if ((!matchActive || isActive(packageInfo))
-                        && (!matchFactory || isFactory(packageInfo))) {
+                if ((matchActive && isActive(packageInfo))
+                        || (matchFactory && isFactory(packageInfo))) {
                     return packageInfo;
                 }
             }
