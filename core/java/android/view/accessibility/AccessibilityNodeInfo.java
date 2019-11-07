@@ -3570,8 +3570,7 @@ public class AccessibilityNodeInfo implements Parcelable {
                 for (int i = 0; i < actionCount; i++) {
                     AccessibilityAction action = mActions.get(i);
                     if (!isDefaultStandardAction(action)) {
-                        parcel.writeInt(action.getId());
-                        parcel.writeCharSequence(action.getLabel());
+                        action.writeToParcel(parcel, flags);
                     }
                 }
             } else {
@@ -3777,8 +3776,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             addStandardActions(standardActions);
             final int nonStandardActionCount = parcel.readInt();
             for (int i = 0; i < nonStandardActionCount; i++) {
-                final AccessibilityAction action = new AccessibilityAction(
-                        parcel.readInt(), parcel.readCharSequence());
+                final AccessibilityAction action =
+                        AccessibilityAction.CREATOR.createFromParcel(parcel);
                 addActionUnchecked(action);
             }
         }
@@ -4177,7 +4176,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * can discover the set of supported actions.
      * </p>
      */
-    public static final class AccessibilityAction {
+    public static final class AccessibilityAction implements Parcelable {
 
         /** @hide */
         public static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<>();
@@ -4653,6 +4652,38 @@ public class AccessibilityNodeInfo implements Parcelable {
         @Override
         public String toString() {
             return "AccessibilityAction: " + getActionSymbolicName(mActionId) + " - " + mLabel;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        /**
+         * Write data into a parcel.
+         */
+        public void writeToParcel(@NonNull Parcel out, int flags) {
+            out.writeInt(mActionId);
+            out.writeCharSequence(mLabel);
+        }
+
+        public static final @NonNull Parcelable.Creator<AccessibilityAction> CREATOR =
+                new Parcelable.Creator<AccessibilityAction>() {
+                    public AccessibilityAction createFromParcel(Parcel in) {
+                        return new AccessibilityAction(in);
+                    }
+
+                    public AccessibilityAction[] newArray(int size) {
+                        return new AccessibilityAction[size];
+                    }
+                };
+
+        private AccessibilityAction(Parcel in) {
+            mActionId = in.readInt();
+            mLabel = in.readCharSequence();
         }
     }
 
