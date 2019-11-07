@@ -2474,7 +2474,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
-        mApexManager = new ApexManager(context);
+        mApexManager = ApexManager.create(context);
+        // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
         // writer
         synchronized (mPackages) {
