@@ -1865,6 +1865,10 @@
     <bool name="config_showDefaultEmergency">false</bool>
     <!-- Whether the default home settings should be shown. -->
     <bool name="config_showDefaultHome">true</bool>
+    <!-- The name of the package that will hold the call redirection role by default. -->
+    <string name="config_defaultCallRedirection" translatable="false"></string>
+    <!-- The name of the package that will hold the call screening role by default. -->
+    <string name="config_defaultCallScreening" translatable="false"></string>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->

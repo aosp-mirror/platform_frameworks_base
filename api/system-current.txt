@@ -261,6 +261,8 @@ package android {
   public static final class R.string {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultBrowser = 17039394; // 0x1040022
+    field public static final int config_defaultCallRedirection = 17039400; // 0x1040028
+    field public static final int config_defaultCallScreening = 17039401; // 0x1040029
     field public static final int config_defaultDialer = 17039395; // 0x1040023
     field public static final int config_defaultSms = 17039396; // 0x1040024
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
