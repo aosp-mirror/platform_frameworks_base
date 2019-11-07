@@ -230,4 +230,15 @@ interface ITunerResourceManager {
      * @param lnbId the id of the released Tuner Lnb.
      */
     void releaseLnb(in int lnbId);
+
+    /*
+     * Compare two clients' priority.
+     *
+     * @param challengerProfile the {@link ResourceClientProfile} of the challenger.
+     * @param holderProfile the {@link ResourceClientProfile} of the holder of the resource.
+     *
+     * @return true if the challenger has higher priority than the holder.
+     */
+    boolean isHigherPriority(in ResourceClientProfile challengerProfile,
+            in ResourceClientProfile holderProfile);
 }
