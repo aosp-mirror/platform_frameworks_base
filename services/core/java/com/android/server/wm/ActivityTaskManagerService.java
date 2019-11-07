@@ -4176,6 +4176,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 final Runnable enterPipRunnable = () -> {
                     synchronized (mGlobalLock) {
+                        if (r.getParent() == null) {
+                            Slog.e(TAG, "Skip enterPictureInPictureMode, destroyed " + r);
+                            return;
+                        }
                         // Only update the saved args from the args that are set
                         r.pictureInPictureArgs.copyOnlySet(params);
                         final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
