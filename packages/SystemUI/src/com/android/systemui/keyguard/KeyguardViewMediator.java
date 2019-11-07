@@ -283,7 +283,7 @@ public class KeyguardViewMediator extends SystemUI {
      * var being non-null as an indicator that there is an in progress request.
      */
     private IKeyguardExitCallback mExitSecureCallback;
-    private final DismissCallbackRegistry mDismissCallbackRegistry = new DismissCallbackRegistry();
+    private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     // the properties of the keyguard
 
@@ -691,12 +691,14 @@ public class KeyguardViewMediator extends SystemUI {
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
-            Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy) {
+            Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy,
+            DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
         mBroadcastDispatcher = broadcastDispatcher;
         mStatusBarKeyguardViewManagerLazy = statusBarKeyguardViewManagerLazy;
+        mDismissCallbackRegistry = dismissCallbackRegistry;
     }
 
     public void userActivity() {

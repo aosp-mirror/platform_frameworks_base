@@ -151,6 +151,7 @@ import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -389,6 +390,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Optional<Divider> mDividerOptional;
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private final LightsOutNotifController mLightsOutNotifController;
+    private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -674,7 +676,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
             LightsOutNotifController lightsOutNotifController,
-            SuperStatusBarViewFactory superStatusBarViewFactory) {
+            SuperStatusBarViewFactory superStatusBarViewFactory,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            ViewMediatorCallback viewMediatorCallback,
+            DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFeatureFlags = featureFlags;
         mLightBarController = lightBarController;
@@ -740,6 +745,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
         mLightsOutNotifController =  lightsOutNotifController;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mKeyguardViewMediatorCallback = viewMediatorCallback;
+        mDismissCallbackRegistry = dismissCallbackRegistry;
+
         mBubbleExpandListener =
                 (isExpanding, key) -> {
                     mEntryManager.updateNotifications("onBubbleExpandChanged");
@@ -1390,17 +1399,17 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected void startKeyguard() {
         Trace.beginSection("StatusBar#startKeyguard");
         mBiometricUnlockController = mBiometricUnlockControllerLazy.get();
-        mStatusBarKeyguardViewManager = mKeyguardViewMediator.registerStatusBar(this,
-                getBouncerContainer(), mNotificationPanel, mBiometricUnlockController,
+        mStatusBarKeyguardViewManager.registerStatusBar(
+                /* statusBar= */ this, getBouncerContainer(), mNotificationPanel,
+                mBiometricUnlockController, mDismissCallbackRegistry,
                 mStatusBarWindow.findViewById(R.id.lock_icon_container), mStackScroller,
-                mKeyguardBypassController);
+                mKeyguardBypassController, mFalsingManager);
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mRemoteInputManager.getController().addCallback(mStatusBarKeyguardViewManager);
         mDynamicPrivacyController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
 
-        mKeyguardViewMediatorCallback = mKeyguardViewMediator.getViewMediatorCallback();
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
         mMediaManager.setBiometricUnlockController(mBiometricUnlockController);
         Dependency.get(KeyguardDismissUtil.class).setDismissHandler(this::executeWhenUnlocked);

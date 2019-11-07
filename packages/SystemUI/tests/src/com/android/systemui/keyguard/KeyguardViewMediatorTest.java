@@ -57,6 +57,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private @Mock StatusBarWindowController mStatusBarWindowController;
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
+    private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
 
     private FalsingManagerFake mFalsingManager;
 
@@ -75,7 +76,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         TestableLooper.get(this).runWithLooper(() -> {
             mViewMediator = new KeyguardViewMediator(
                     mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
-                    () -> mStatusBarKeyguardViewManager);
+                    () -> mStatusBarKeyguardViewManager, mDismissCallbackRegistry);
         });
     }
 

@@ -24,11 +24,13 @@ import android.util.DisplayMetrics;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -73,6 +75,7 @@ import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -167,6 +170,9 @@ public class CarStatusBarModule {
             Optional<Divider> dividerOptional,
             SuperStatusBarViewFactory superStatusBarViewFactory,
             LightsOutNotifController lightsOutNotifController,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            ViewMediatorCallback viewMediatorCallback,
+            DismissCallbackRegistry dismissCallbackRegistry,
             CarNavigationBarController carNavigationBarController) {
         return new CarStatusBar(
                 context,
@@ -232,6 +238,9 @@ public class CarStatusBarModule {
                 dividerOptional,
                 superStatusBarViewFactory,
                 lightsOutNotifController,
+                statusBarKeyguardViewManager,
+                viewMediatorCallback,
+                dismissCallbackRegistry,
                 carNavigationBarController);
     }
 }
