@@ -26,7 +26,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * CachedBluetoothDeviceManager manages the set of remote Bluetooth devices.
@@ -229,14 +228,6 @@ public class CachedBluetoothDeviceManager {
         }
     }
 
-    public synchronized void onActiveDeviceChanged(CachedBluetoothDevice activeDevice,
-            int bluetoothProfile) {
-        for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
-            boolean isActive = Objects.equals(cachedDevice, activeDevice);
-            cachedDevice.onActiveDeviceChanged(isActive, bluetoothProfile);
-        }
-    }
-
     public synchronized boolean onProfileConnectionStateChangedIfProcessed(CachedBluetoothDevice
             cachedDevice, int state) {
         return mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
@@ -254,12 +245,6 @@ public class CachedBluetoothDeviceManager {
             // Sub device unpaired, to unpair main device
             mainDevice.unpair();
             mainDevice.setSubDevice(null);
-        }
-    }
-
-    public synchronized void dispatchAudioModeChanged() {
-        for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
-            cachedDevice.onAudioModeChanged();
         }
     }
 
