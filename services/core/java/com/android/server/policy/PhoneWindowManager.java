@@ -2805,6 +2805,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     attrs.hideTimeoutMilliseconds = TOAST_WINDOW_TIMEOUT;
                 }
                 attrs.windowAnimations = com.android.internal.R.style.Animation_Toast;
+                // Toasts can't be clickable
+                attrs.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
                 break;
         }
 
