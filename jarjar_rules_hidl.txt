@@ -1,1 +1,0 @@
-rule android.hidl.** android.internal.hidl.@1
