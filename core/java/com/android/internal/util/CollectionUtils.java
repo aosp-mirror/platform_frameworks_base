@@ -231,6 +231,15 @@ public class CollectionUtils {
     }
 
     /**
+     * Returns whether there exists at least one element in the set for which
+     * condition {@code predicate} is true
+     */
+    public static <T> boolean any(@Nullable Set<T> items,
+            java.util.function.Predicate<T> predicate) {
+        return find(items, predicate) != null;
+    }
+
+    /**
      * Returns the first element from the list for which
      * condition {@code predicate} is true, or null if there is no such element
      */
@@ -240,6 +249,37 @@ public class CollectionUtils {
         for (int i = 0; i < items.size(); i++) {
             final T item = items.get(i);
             if (predicate.test(item)) return item;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the first element from the set for which
+     * condition {@code predicate} is true, or null if there is no such element
+     */
+    public static @Nullable <T> T find(@Nullable Set<T> cur,
+            java.util.function.Predicate<T> predicate) {
+        if (cur == null || predicate == null) return null;
+        int size = cur.size();
+        if (size == 0) return null;
+        try {
+            if (cur instanceof ArraySet) {
+                ArraySet<T> arraySet = (ArraySet<T>) cur;
+                for (int i = 0; i < size; i++) {
+                    T item = arraySet.valueAt(i);
+                    if (predicate.test(item)) {
+                        return item;
+                    }
+                }
+            } else {
+                for (T t : cur) {
+                    if (predicate.test(t)) {
+                        return t;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw ExceptionUtils.propagate(e);
         }
         return null;
     }
