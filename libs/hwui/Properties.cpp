@@ -16,7 +16,6 @@
 
 #include "Properties.h"
 #include "Debug.h"
-#include "DeviceInfo.h"
 #ifdef __ANDROID__
 #include "HWUIProperties.sysprop.h"
 #endif

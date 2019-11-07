@@ -15,74 +15,21 @@
  */
 
 #include <DeviceInfo.h>
-
-#include "Properties.h"
-
 #include <gui/SurfaceComposerClient.h>
+#include <log/log.h>
 #include <ui/GraphicTypes.h>
 
 #include <mutex>
 #include <thread>
 
-#include <log/log.h>
+#include "Properties.h"
 
 namespace android {
 namespace uirenderer {
 
-static constexpr android::DisplayInfo sDummyDisplay{
-        1080,   // w
-        1920,   // h
-        320.0,  // xdpi
-        320.0,  // ydpi
-        60.0,   // fps
-        2.0,    // density
-        0,      // orientation
-        false,  // secure?
-        0,      // appVsyncOffset
-        0,      // presentationDeadline
-        1080,   // viewportW
-        1920,   // viewportH
-};
-
 DeviceInfo* DeviceInfo::get() {
-        static DeviceInfo sDeviceInfo;
-        return &sDeviceInfo;
-}
-
-static DisplayInfo QueryDisplayInfo() {
-    if (Properties::isolatedProcess) {
-        return sDummyDisplay;
-    }
-
-    const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
-    LOG_ALWAYS_FATAL_IF(token == nullptr,
-                        "Failed to get display info because internal display is disconnected");
-
-    DisplayInfo displayInfo;
-    status_t status = SurfaceComposerClient::getDisplayInfo(token, &displayInfo);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to get display info, error %d", status);
-    return displayInfo;
-}
-
-static float QueryMaxRefreshRate() {
-    if (Properties::isolatedProcess) {
-        return sDummyDisplay.fps;
-    }
-
-    const sp<IBinder> token = SurfaceComposerClient::getInternalDisplayToken();
-    LOG_ALWAYS_FATAL_IF(token == nullptr,
-                        "Failed to get display info because internal display is disconnected");
-
-    Vector<DisplayInfo> configs;
-    configs.reserve(10);
-    status_t status = SurfaceComposerClient::getDisplayConfigs(token, &configs);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to getDisplayConfigs, error %d", status);
-    LOG_ALWAYS_FATAL_IF(configs.size() == 0, "getDisplayConfigs returned 0 configs?");
-    float max = 0.0f;
-    for (auto& info : configs) {
-        max = std::max(max, info.fps);
-    }
-    return max;
+    static DeviceInfo sDeviceInfo;
+    return &sDeviceInfo;
 }
 
 static void queryWideColorGamutPreference(sk_sp<SkColorSpace>* colorSpace, SkColorType* colorType) {
@@ -123,14 +70,17 @@ static void queryWideColorGamutPreference(sk_sp<SkColorSpace>* colorSpace, SkCol
     }
 }
 
-DeviceInfo::DeviceInfo() : mMaxRefreshRate(QueryMaxRefreshRate()) {
+DeviceInfo::DeviceInfo() {
 #if HWUI_NULL_GPU
         mMaxTextureSize = NULL_GPU_MAX_TEXTURE_SIZE;
 #else
         mMaxTextureSize = -1;
 #endif
-    mDisplayInfo = QueryDisplayInfo();
-    queryWideColorGamutPreference(&mWideColorSpace, &mWideColorType);
+        updateDisplayInfo();
+        queryWideColorGamutPreference(&mWideColorSpace, &mWideColorType);
+}
+DeviceInfo::~DeviceInfo() {
+    ADisplay_release(mDisplays);
 }
 
 int DeviceInfo::maxTextureSize() const {
@@ -143,7 +93,36 @@ void DeviceInfo::setMaxTextureSize(int maxTextureSize) {
 }
 
 void DeviceInfo::onDisplayConfigChanged() {
-    mDisplayInfo = QueryDisplayInfo();
+    updateDisplayInfo();
+}
+
+void DeviceInfo::updateDisplayInfo() {
+    if (Properties::isolatedProcess) {
+        return;
+    }
+
+    if (mCurrentConfig == nullptr) {
+        mDisplaysSize = ADisplay_acquirePhysicalDisplays(&mDisplays);
+        LOG_ALWAYS_FATAL_IF(mDisplays == nullptr || mDisplaysSize <= 0,
+                            "Failed to get physical displays: no connected display: %d!", mDisplaysSize);
+        for (size_t i = 0; i < mDisplaysSize; i++) {
+            ADisplayType type = ADisplay_getDisplayType(mDisplays[i]);
+            if (type == ADisplayType::DISPLAY_TYPE_INTERNAL) {
+                mPhysicalDisplayIndex = i;
+                break;
+            }
+        }
+        LOG_ALWAYS_FATAL_IF(mPhysicalDisplayIndex < 0, "Failed to find a connected physical display!");
+        mMaxRefreshRate = ADisplay_getMaxSupportedFps(mDisplays[mPhysicalDisplayIndex]);
+    }
+    status_t status = ADisplay_getCurrentConfig(mDisplays[mPhysicalDisplayIndex], &mCurrentConfig);
+    LOG_ALWAYS_FATAL_IF(status, "Failed to get display config, error %d", status);
+    mWidth = ADisplayConfig_getWidth(mCurrentConfig);
+    mHeight = ADisplayConfig_getHeight(mCurrentConfig);
+    mDensity = ADisplayConfig_getDensity(mCurrentConfig);
+    mRefreshRate = ADisplayConfig_getFps(mCurrentConfig);
+    mCompositorOffset = ADisplayConfig_getCompositorOffsetNanos(mCurrentConfig);
+    mAppOffset = ADisplayConfig_getAppVsyncOffsetNanos(mCurrentConfig);
 }
 
 } /* namespace uirenderer */

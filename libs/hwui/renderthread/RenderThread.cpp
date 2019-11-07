@@ -179,12 +179,11 @@ void RenderThread::initThreadLocals() {
     mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
     mVkManager = new VulkanManager();
-    mCacheManager = new CacheManager(DeviceInfo::get()->displayInfo());
+    mCacheManager = new CacheManager();
 }
 
 void RenderThread::setupFrameInterval() {
-    auto& displayInfo = DeviceInfo::get()->displayInfo();
-    nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / displayInfo.fps);
+    nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / DeviceInfo::getRefreshRate());
     mTimeLord.setFrameInterval(frameIntervalNanos);
     mDispatchFrameDelay = static_cast<nsecs_t>(frameIntervalNanos * .25f);
 }
