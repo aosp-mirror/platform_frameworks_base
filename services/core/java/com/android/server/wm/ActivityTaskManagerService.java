@@ -3432,7 +3432,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 if (stack.inFreeformWindowingMode()) {
                     stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-                } else if (!mSizeCompatFreeform) {
+                } else if (!mSizeCompatFreeform && r.inSizeCompatMode()) {
                     throw new IllegalStateException("Size-compat windows are currently not"
                             + "freeform-enabled");
                 } else if (stack.getParent().inFreeformWindowingMode()) {
