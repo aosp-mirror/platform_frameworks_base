@@ -138,7 +138,8 @@ public class WifiScanner {
     public List<Integer> getAvailableChannels(@WifiBand int band) {
         try {
             Bundle bundle = mService.getAvailableChannels(band, mContext.getOpPackageName());
-            return bundle.getIntegerArrayList(GET_AVAILABLE_CHANNELS_EXTRA);
+            List<Integer> channels = bundle.getIntegerArrayList(GET_AVAILABLE_CHANNELS_EXTRA);
+            return channels == null ? new ArrayList<>() : channels;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
