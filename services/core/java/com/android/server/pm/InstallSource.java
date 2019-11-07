@@ -31,6 +31,9 @@ final class InstallSource {
      */
     static final InstallSource EMPTY = new InstallSource(null, null, null, false);
 
+    /** We also memoize this case because it is common - all un-updated system apps. */
+    private static final InstallSource EMPTY_ORPHANED = new InstallSource(null, null, null, true);
+
     /** The package that requested the installation, if known. */
     @Nullable
     final String initiatingPackageName;
@@ -57,16 +60,22 @@ final class InstallSource {
     static InstallSource create(@Nullable String initiatingPackageName,
             @Nullable String originatingPackageName, @Nullable String installerPackageName,
             boolean isOrphaned) {
-
-        if (initiatingPackageName == null && originatingPackageName == null
-                && installerPackageName == null && !isOrphaned) {
-            return EMPTY;
-        }
-        return new InstallSource(
-                initiatingPackageName == null ? null : initiatingPackageName.intern(),
-                originatingPackageName == null ? null : originatingPackageName.intern(),
-                installerPackageName == null ? null : installerPackageName.intern(),
+        return createInternal(
+                intern(initiatingPackageName),
+                intern(originatingPackageName),
+                intern(installerPackageName),
                 isOrphaned);
+    }
+
+    private static InstallSource createInternal(@Nullable String initiatingPackageName,
+            @Nullable String originatingPackageName, @Nullable String installerPackageName,
+            boolean isOrphaned) {
+        if (initiatingPackageName == null && originatingPackageName == null
+                && installerPackageName == null) {
+            return isOrphaned ? EMPTY_ORPHANED : EMPTY;
+        }
+        return new InstallSource(initiatingPackageName, originatingPackageName,
+                installerPackageName, isOrphaned);
     }
 
     private InstallSource(@Nullable String initiatingPackageName,
@@ -85,8 +94,8 @@ final class InstallSource {
         if (Objects.equals(installerPackageName, this.installerPackageName)) {
             return this;
         }
-        return create(initiatingPackageName, originatingPackageName, installerPackageName,
-                isOrphaned);
+        return createInternal(initiatingPackageName, originatingPackageName,
+                intern(installerPackageName), isOrphaned);
     }
 
     /**
@@ -96,7 +105,7 @@ final class InstallSource {
         if (isOrphaned == this.isOrphaned) {
             return this;
         }
-        return create(initiatingPackageName, originatingPackageName, installerPackageName,
+        return createInternal(initiatingPackageName, originatingPackageName, installerPackageName,
                 isOrphaned);
     }
 
@@ -132,7 +141,12 @@ final class InstallSource {
         if (!modified) {
             return this;
         }
-        return create(initiatingPackageName, originatingPackageName, installerPackageName,
+        return createInternal(initiatingPackageName, originatingPackageName, installerPackageName,
                 isOrphaned);
+    }
+
+    @Nullable
+    private static String intern(@Nullable String packageName) {
+        return packageName == null ? null : packageName.intern();
     }
 }
