@@ -6520,37 +6520,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             } catch (RemoteException ignored) {
             }
-
-            // This has to happen after the notifyNetworkCallbacks as that tickles each
-            // ConnectivityManager instance so that legacy requests correctly bind dns
-            // requests to this network.  The legacy users are listening for this broadcast
-            // and will generally do a dns request so they can ensureRouteToHost and if
-            // they do that before the callbacks happen they'll use the default network.
-            //
-            // TODO: Is there still a race here? We send the broadcast
-            // after sending the callback, but if the app can receive the
-            // broadcast before the callback, it might still break.
-            //
-            // This *does* introduce a race where if the user uses the new api
-            // (notification callbacks) and then uses the old api (getNetworkInfo(type))
-            // they may get old info.  Reverse this after the old startUsing api is removed.
-            // This is on top of the multiple intent sequencing referenced in the todo above.
-            for (int i = 0; i < newNetwork.numNetworkRequests(); i++) {
-                NetworkRequest nr = newNetwork.requestAt(i);
-                if (nr.legacyType != TYPE_NONE && nr.isRequest()) {
-                    // legacy type tracker filters out repeat adds
-                    mLegacyTypeTracker.add(nr.legacyType, newNetwork);
-                }
-            }
-
-            // A VPN generally won't get added to the legacy tracker in the "for (nri)" loop above,
-            // because usually there are no NetworkRequests it satisfies (e.g., mDefaultRequest
-            // wants the NOT_VPN capability, so it will never be satisfied by a VPN). So, add the
-            // newNetwork to the tracker explicitly (it's a no-op if it has already been added).
-            if (newNetwork.isVPN()) {
-                mLegacyTypeTracker.add(TYPE_VPN, newNetwork);
-            }
         }
+
+        // This has to happen after the notifyNetworkCallbacks as that tickles each
+        // ConnectivityManager instance so that legacy requests correctly bind dns
+        // requests to this network.  The legacy users are listening for this broadcast
+        // and will generally do a dns request so they can ensureRouteToHost and if
+        // they do that before the callbacks happen they'll use the default network.
+        //
+        // TODO: Is there still a race here? We send the broadcast
+        // after sending the callback, but if the app can receive the
+        // broadcast before the callback, it might still break.
+        //
+        // This *does* introduce a race where if the user uses the new api
+        // (notification callbacks) and then uses the old api (getNetworkInfo(type))
+        // they may get old info.  Reverse this after the old startUsing api is removed.
+        // This is on top of the multiple intent sequencing referenced in the todo above.
+        addNetworkToLegacyTypeTracker(newNetwork);
     }
 
     /**
@@ -6589,6 +6575,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     teardownUnneededNetwork(nai);
                 }
             }
+        }
+    }
+
+    private void addNetworkToLegacyTypeTracker(@NonNull final NetworkAgentInfo nai) {
+        for (int i = 0; i < nai.numNetworkRequests(); i++) {
+            NetworkRequest nr = nai.requestAt(i);
+            if (nr.legacyType != TYPE_NONE && nr.isRequest()) {
+                // legacy type tracker filters out repeat adds
+                mLegacyTypeTracker.add(nr.legacyType, nai);
+            }
+        }
+
+        // A VPN generally won't get added to the legacy tracker in the "for (nri)" loop above,
+        // because usually there are no NetworkRequests it satisfies (e.g., mDefaultRequest
+        // wants the NOT_VPN capability, so it will never be satisfied by a VPN). So, add the
+        // newNetwork to the tracker explicitly (it's a no-op if it has already been added).
+        if (nai.isVPN()) {
+            mLegacyTypeTracker.add(TYPE_VPN, nai);
         }
     }
 
