@@ -32,11 +32,13 @@ import android.app.Person;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.media.IRingtonePlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Process;
@@ -56,6 +58,7 @@ import java.util.Collections;
  * Implementation of `cmd notification` in NotificationManagerService.
  */
 public class NotificationShellCmd extends ShellCommand {
+    private static final String TAG = "NotifShellCmd";
     private static final String USAGE = "usage: cmd notification SUBCMD [args]\n\n"
             + "SUBCMDs:\n"
             + "  allow_listener COMPONENT [user_id (current user if not specified)]\n"
@@ -98,24 +101,38 @@ public class NotificationShellCmd extends ShellCommand {
             + "an <intentspec> is (broadcast|service|activity) <args>\n"
             + "  <args> are as described in `am start`";
 
-    public static final int NOTIFICATION_ID = 1138;
-    public static final String NOTIFICATION_PACKAGE = "android";
-    public static final String CHANNEL_ID = "shellcmd";
+    public static final int NOTIFICATION_ID = 2020;
+    public static final String CHANNEL_ID = "shell_cmd";
     public static final String CHANNEL_NAME = "Shell command";
     public static final int CHANNEL_IMP = NotificationManager.IMPORTANCE_DEFAULT;
 
     private final NotificationManagerService mDirectService;
     private final INotificationManager mBinderService;
+    private final PackageManager mPm;
 
     public NotificationShellCmd(NotificationManagerService service) {
         mDirectService = service;
         mBinderService = service.getBinderService();
+        mPm = mDirectService.getContext().getPackageManager();
     }
 
     @Override
     public int onCommand(String cmd) {
         if (cmd == null) {
             return handleDefaultCommands(cmd);
+        }
+        String callingPackage = null;
+        final int callingUid = Binder.getCallingUid();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            String[] packages = mPm.getPackagesForUid(callingUid);
+            if (packages != null && packages.length > 0) {
+                callingPackage = packages[0];
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to get caller pkg", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
         final PrintWriter pw = getOutPrintWriter();
         try {
@@ -139,8 +156,7 @@ public class NotificationShellCmd extends ShellCommand {
                             interruptionFilter = INTERRUPTION_FILTER_ALL;
                     }
                     final int filter = interruptionFilter;
-                    Binder.withCleanCallingIdentity(() -> mBinderService.setInterruptionFilter(
-                            mDirectService.getContext().getPackageName(), filter));
+                    mBinderService.setInterruptionFilter(callingPackage, filter);
                 }
                 break;
                 case "allow_dnd": {
@@ -258,7 +274,7 @@ public class NotificationShellCmd extends ShellCommand {
                 }
                 case "post":
                 case "notify":
-                    doNotify(pw);
+                    doNotify(pw, callingPackage, callingUid);
                     break;
                 default:
                     return handleDefaultCommands(cmd);
@@ -270,27 +286,14 @@ public class NotificationShellCmd extends ShellCommand {
         return 0;
     }
 
-    void ensureChannel() throws RemoteException {
-        final int uid = Process.myUid();
-        final int userid = UserHandle.getCallingUserId();
-        final long token = Binder.clearCallingIdentity();
-        try {
-            if (mBinderService.getNotificationChannelForPackage(NOTIFICATION_PACKAGE,
-                    uid, CHANNEL_ID, false) == null) {
-                final NotificationChannel chan = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME,
-                        CHANNEL_IMP);
-                Slog.v(NotificationManagerService.TAG,
-                        "creating shell channel for user " + userid + " uid " + uid + ": " + chan);
-                mBinderService.createNotificationChannelsForPackage(NOTIFICATION_PACKAGE, uid,
-                        new ParceledListSlice<NotificationChannel>(
-                                Collections.singletonList(chan)));
-                Slog.v(NotificationManagerService.TAG, "created channel: "
-                        + mBinderService.getNotificationChannelForPackage(NOTIFICATION_PACKAGE,
-                                uid, CHANNEL_ID, false));
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+    void ensureChannel(String callingPackage, int callingUid) throws RemoteException {
+        final NotificationChannel channel =
+                new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, CHANNEL_IMP);
+        mBinderService.createNotificationChannels(callingPackage,
+                new ParceledListSlice<>(Collections.singletonList(channel)));
+        Slog.v(NotificationManagerService.TAG, "created channel: "
+                + mBinderService.getNotificationChannel(callingPackage,
+                UserHandle.getUserId(callingUid), callingPackage, CHANNEL_ID));
     }
 
     Icon parseIcon(Resources res, String encoded) throws IllegalArgumentException {
@@ -319,7 +322,8 @@ public class NotificationShellCmd extends ShellCommand {
         return null;
     }
 
-    private int doNotify(PrintWriter pw) throws RemoteException, URISyntaxException {
+    private int doNotify(PrintWriter pw, String callingPackage, int callingUid)
+            throws RemoteException, URISyntaxException {
         final Context context = mDirectService.getContext();
         final Resources res = context.getResources();
         final Notification.Builder builder = new Notification.Builder(context, CHANNEL_ID);
@@ -513,26 +517,18 @@ public class NotificationShellCmd extends ShellCommand {
             builder.setSmallIcon(smallIcon);
         }
 
-        ensureChannel();
+        ensureChannel(callingPackage, callingUid);
 
         final Notification n = builder.build();
         pw.println("posting:\n  " + n);
         Slog.v("NotificationManager", "posting: " + n);
 
-        final int userId = UserHandle.getCallingUserId();
-        final long token = Binder.clearCallingIdentity();
-        try {
-            mBinderService.enqueueNotificationWithTag(
-                    NOTIFICATION_PACKAGE, NOTIFICATION_PACKAGE,
-                    tag, NOTIFICATION_ID,
-                    n, userId);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        mBinderService.enqueueNotificationWithTag(callingPackage, callingPackage, tag,
+                NOTIFICATION_ID, n, UserHandle.getUserId(callingUid));
 
         if (verbose) {
             NotificationRecord nr = mDirectService.findNotificationLocked(
-                    NOTIFICATION_PACKAGE, tag, NOTIFICATION_ID, userId);
+                    callingPackage, tag, NOTIFICATION_ID, UserHandle.getUserId(callingUid));
             for (int tries = 3; tries-- > 0; ) {
                 if (nr != null) break;
                 try {
@@ -541,7 +537,7 @@ public class NotificationShellCmd extends ShellCommand {
                 } catch (InterruptedException e) {
                 }
                 nr = mDirectService.findNotificationLocked(
-                        NOTIFICATION_PACKAGE, tag, NOTIFICATION_ID, userId);
+                        callingPackage, tag, NOTIFICATION_ID, UserHandle.getUserId(callingUid));
             }
             if (nr == null) {
                 pw.println("warning: couldn't find notification after enqueueing");
