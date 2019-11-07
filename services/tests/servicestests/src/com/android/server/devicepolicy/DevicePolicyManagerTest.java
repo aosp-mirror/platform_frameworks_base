@@ -5162,11 +5162,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureProfileOwnerForDeviceIdAccess(admin1, DpmMockContext.CALLER_USER_HANDLE);
     }
 
-    private static void configureContextForAccess(DpmMockContext context, boolean granted) {
+    private void configureContextForAccess(DpmMockContext context, boolean granted) {
         when(context.spiedContext.checkCallingPermission(
                 android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS))
                 .thenReturn(granted ? PackageManager.PERMISSION_GRANTED
                         : PackageManager.PERMISSION_DENIED);
+
+        when(getServices().userManager.getProfileParent(any()))
+                .thenReturn(UserHandle.SYSTEM);
     }
 
     public void testGrantDeviceIdsAccess_byAuthorizedManagedProvisioning() throws Exception {
@@ -5433,6 +5436,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private void configureProfileOwnerForDeviceIdAccess(ComponentName who, int userId) {
+        when(getServices().userManager.getProfileParent(eq(UserHandle.of(userId))))
+                .thenReturn(UserHandle.SYSTEM);
+
         final long ident = mServiceContext.binder.clearCallingIdentity();
         mServiceContext.binder.callingUid =
                 UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
