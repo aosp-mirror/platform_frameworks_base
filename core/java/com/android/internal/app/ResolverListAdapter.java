@@ -634,8 +634,7 @@ public class ResolverListAdapter extends BaseAdapter {
                 subLabel = null;
             }
 
-            if (!TextUtils.equals(text2.getText(), subLabel)
-                    && !TextUtils.isEmpty(subLabel)) {
+            if (!TextUtils.equals(text2.getText(), subLabel)) {
                 text2.setVisibility(View.VISIBLE);
                 text2.setText(subLabel);
             }
