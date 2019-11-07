@@ -18,10 +18,14 @@ package android.media;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -30,6 +34,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,12 +45,40 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
-
 /**
  * A new Media Router
  * @hide
  */
 public class MediaRouter2 {
+
+    /** @hide */
+    @Retention(SOURCE)
+    @IntDef(value = {
+            SELECT_REASON_UNKNOWN,
+            SELECT_REASON_USER_SELECTED,
+            SELECT_REASON_FALLBACK})
+    public @interface SelectReason {}
+
+    /**
+     * Passed to {@link Callback#onRouteSelected(MediaRoute2Info, int, Bundle)} when the reason
+     * the route was selected is unknown.
+     */
+    public static final int SELECT_REASON_UNKNOWN = 0;
+
+    /**
+     * Passed to {@link Callback#onRouteSelected(MediaRoute2Info, int, Bundle)} when the route
+     * is selected in response to a user's request. For example, when a user has selected
+     * a different device to play media to.
+     */
+    public static final int SELECT_REASON_USER_SELECTED = 1;
+
+    /**
+     * Passed to {@link Callback#onRouteSelected(MediaRoute2Info, int, Bundle)} when the route
+     * is selected as a fallback route. For example, when Wi-Fi is disconnected, the device speaker
+     * may be selected as a fallback route.
+     */
+    public static final int SELECT_REASON_FALLBACK = 2;
+
     private static final String TAG = "MR2";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final Object sLock = new Object();
@@ -457,10 +490,31 @@ public class MediaRouter2 {
         public void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
-         * Called when routes are changed.
+         * Called when routes are changed. For example, it is called when the route's name
+         * or volume have been changed.
+         *
+         * TODO: Write here what the developers should do when this method is called.
+         * How they can find the exact point how a route is changed?
+         * It can be a volume, name, client package name, ....
+         *
          * @param routes the list of routes that have been changed. It's never empty.
          */
         public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
+
+        // TODO: Make this callback be called when we add requestSelectRoute().
+        /**
+         * Called when a route is selected. Exactly one route can be selected at a time.
+         * @param route the selected route.
+         * @param reason the reason why the route is selected.
+         * @param connectionHints An optional bundle of provider-specific arguments which may be
+         *                        used to control the selected route. Can be empty.
+         * @see #SELECT_REASON_UNKNOWN
+         * @see #SELECT_REASON_USER_SELECTED
+         * @see #SELECT_REASON_FALLBACK
+         * @see #getSelectedRoute()
+         */
+        public void onRouteSelected(@NonNull MediaRoute2Info route, @SelectReason int reason,
+                @NonNull Bundle connectionHints) {}
     }
 
     final class CallbackRecord {
