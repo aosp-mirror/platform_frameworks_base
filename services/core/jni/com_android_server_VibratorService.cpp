@@ -50,159 +50,40 @@ namespace android {
 
 static jmethodID sMethodIdOnComplete;
 
-// TODO(b/141828236): remove HIDL 1.4 and re-write all of this code to remove
-// shim
-class VibratorShim : public V1_4::IVibrator {
-  public:
-    VibratorShim(const sp<aidl::IVibrator>& vib) : mVib(vib) {}
+static_assert(static_cast<uint8_t>(V1_0::EffectStrength::LIGHT) ==
+                static_cast<uint8_t>(aidl::EffectStrength::LIGHT));
+static_assert(static_cast<uint8_t>(V1_0::EffectStrength::MEDIUM) ==
+                static_cast<uint8_t>(aidl::EffectStrength::MEDIUM));
+static_assert(static_cast<uint8_t>(V1_0::EffectStrength::STRONG) ==
+                static_cast<uint8_t>(aidl::EffectStrength::STRONG));
 
-    Return<V1_0::Status> on(uint32_t timeoutMs) override {
-        return on_1_4(timeoutMs, nullptr);
-    }
+static_assert(static_cast<uint8_t>(V1_3::Effect::CLICK) ==
+                static_cast<uint8_t>(aidl::Effect::CLICK));
+static_assert(static_cast<uint8_t>(V1_3::Effect::DOUBLE_CLICK) ==
+                static_cast<uint8_t>(aidl::Effect::DOUBLE_CLICK));
+static_assert(static_cast<uint8_t>(V1_3::Effect::TICK) ==
+                static_cast<uint8_t>(aidl::Effect::TICK));
+static_assert(static_cast<uint8_t>(V1_3::Effect::THUD) ==
+                static_cast<uint8_t>(aidl::Effect::THUD));
+static_assert(static_cast<uint8_t>(V1_3::Effect::POP) ==
+                static_cast<uint8_t>(aidl::Effect::POP));
+static_assert(static_cast<uint8_t>(V1_3::Effect::HEAVY_CLICK) ==
+                static_cast<uint8_t>(aidl::Effect::HEAVY_CLICK));
+static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_1) ==
+                static_cast<uint8_t>(aidl::Effect::RINGTONE_1));
+static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_2) ==
+                static_cast<uint8_t>(aidl::Effect::RINGTONE_2));
+static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_15) ==
+                static_cast<uint8_t>(aidl::Effect::RINGTONE_15));
+static_assert(static_cast<uint8_t>(V1_3::Effect::TEXTURE_TICK) ==
+                static_cast<uint8_t>(aidl::Effect::TEXTURE_TICK));
 
-    Return<V1_0::Status> off() override {
-        return toHidlStatus(mVib->off());
-    }
+static_assert(static_cast<int32_t>(V1_4::Capabilities::ON_COMPLETION_CALLBACK) ==
+                static_cast<int32_t>(aidl::IVibrator::CAP_ON_CALLBACK));
+static_assert(static_cast<int32_t>(V1_4::Capabilities::PERFORM_COMPLETION_CALLBACK) ==
+                static_cast<int32_t>(aidl::IVibrator::CAP_PERFORM_CALLBACK));
 
-    Return<bool> supportsAmplitudeControl() override {
-        int32_t cap = 0;
-        if (!mVib->getCapabilities(&cap).isOk()) return false;
-        if (mUnderExternalControl) {
-           return (cap & aidl::IVibrator::CAP_EXTERNAL_AMPLITUDE_CONTROL) > 0;
-        } else {
-           return (cap & aidl::IVibrator::CAP_AMPLITUDE_CONTROL) > 0;
-        }
-    }
-
-    Return<V1_0::Status> setAmplitude(uint8_t amplitude) override {
-        return toHidlStatus(mVib->setAmplitude(amplitude));
-    }
-
-    Return<void> perform(V1_0::Effect effect, V1_0::EffectStrength strength,
-                         perform_cb _hidl_cb) override {
-        return perform_1_4(static_cast<V1_3::Effect>(effect), strength, nullptr, _hidl_cb);
-    }
-
-    Return<void> perform_1_1(V1_1::Effect_1_1 effect, V1_0::EffectStrength strength,
-                             perform_1_1_cb _hidl_cb) override {
-        return perform_1_4(static_cast<V1_3::Effect>(effect), strength, nullptr, _hidl_cb);
-    }
-
-    Return<void> perform_1_2(V1_2::Effect effect, V1_0::EffectStrength strength,
-                             perform_1_2_cb _hidl_cb) override {
-        return perform_1_4(static_cast<V1_3::Effect>(effect), strength, nullptr, _hidl_cb);
-    }
-
-    Return<bool> supportsExternalControl() override {
-        int32_t cap = 0;
-        if (!mVib->getCapabilities(&cap).isOk()) return false;
-        return (cap & aidl::IVibrator::CAP_EXTERNAL_CONTROL) > 0;
-    }
-
-    Return<V1_0::Status> setExternalControl(bool enabled) override {
-        Return<V1_0::Status> status = toHidlStatus(mVib->setExternalControl(enabled));
-        if (status.isOk() && status == V1_0::Status::OK) {
-            mUnderExternalControl = enabled;
-        }
-        return status;
-    }
-
-    Return<void> perform_1_3(V1_3::Effect effect, V1_0::EffectStrength strength,
-                             perform_1_3_cb _hidl_cb) override {
-        return perform_1_4(static_cast<V1_3::Effect>(effect), strength, nullptr, _hidl_cb);
-    }
-
-    Return<uint32_t> getCapabilities() override {
-        static_assert(static_cast<int32_t>(V1_4::Capabilities::ON_COMPLETION_CALLBACK) ==
-                      static_cast<int32_t>(aidl::IVibrator::CAP_ON_CALLBACK));
-        static_assert(static_cast<int32_t>(V1_4::Capabilities::PERFORM_COMPLETION_CALLBACK) ==
-                      static_cast<int32_t>(aidl::IVibrator::CAP_PERFORM_CALLBACK));
-
-        int32_t cap;
-        if (!mVib->getCapabilities(&cap).isOk()) return 0;
-        return (cap & (aidl::IVibrator::CAP_ON_CALLBACK |
-                       aidl::IVibrator::CAP_PERFORM_CALLBACK)) > 0;
-    }
-
-    Return<V1_0::Status> on_1_4(uint32_t timeoutMs,
-                                const sp<V1_4::IVibratorCallback>& callback) override {
-        sp<aidl::IVibratorCallback> cb = callback ? new CallbackShim(callback) : nullptr;
-        return toHidlStatus(mVib->on(timeoutMs, cb));
-    }
-
-    Return<void> perform_1_4(V1_3::Effect effect, V1_0::EffectStrength strength,
-                             const sp<V1_4::IVibratorCallback>& callback,
-                             perform_1_4_cb _hidl_cb) override {
-        static_assert(static_cast<uint8_t>(V1_0::EffectStrength::LIGHT) ==
-                      static_cast<uint8_t>(aidl::EffectStrength::LIGHT));
-        static_assert(static_cast<uint8_t>(V1_0::EffectStrength::MEDIUM) ==
-                      static_cast<uint8_t>(aidl::EffectStrength::MEDIUM));
-        static_assert(static_cast<uint8_t>(V1_0::EffectStrength::STRONG) ==
-                      static_cast<uint8_t>(aidl::EffectStrength::STRONG));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::CLICK) ==
-                      static_cast<uint8_t>(aidl::Effect::CLICK));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::DOUBLE_CLICK) ==
-                      static_cast<uint8_t>(aidl::Effect::DOUBLE_CLICK));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::TICK) ==
-                      static_cast<uint8_t>(aidl::Effect::TICK));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::THUD) ==
-                      static_cast<uint8_t>(aidl::Effect::THUD));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::POP) ==
-                      static_cast<uint8_t>(aidl::Effect::POP));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::HEAVY_CLICK) ==
-                      static_cast<uint8_t>(aidl::Effect::HEAVY_CLICK));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_1) ==
-                      static_cast<uint8_t>(aidl::Effect::RINGTONE_1));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_2) ==
-                      static_cast<uint8_t>(aidl::Effect::RINGTONE_2));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_15) ==
-                      static_cast<uint8_t>(aidl::Effect::RINGTONE_15));
-        static_assert(static_cast<uint8_t>(V1_3::Effect::TEXTURE_TICK) ==
-                      static_cast<uint8_t>(aidl::Effect::TEXTURE_TICK));
-
-        sp<aidl::IVibratorCallback> cb = callback ? new CallbackShim(callback) : nullptr;
-        int timeoutMs = 0;
-        Return<V1_0::Status> status = toHidlStatus(
-            mVib->perform(static_cast<aidl::Effect>(effect),
-                          static_cast<aidl::EffectStrength>(strength), cb, &timeoutMs));
-
-        if (status.isOk()) {
-            _hidl_cb(status, timeoutMs);
-            return android::hardware::Status::ok();
-        } else {
-            return android::hardware::details::StatusOf<V1_0::Status, void>(status);
-        }
-    }
-  private:
-    sp<aidl::IVibrator> mVib;
-    bool mUnderExternalControl = false;
-
-    Return<V1_0::Status> toHidlStatus(const android::binder::Status& status) {
-        switch(status.exceptionCode()) {
-            using android::hardware::Status;
-            case Status::EX_NONE: return V1_0::Status::OK;
-            case Status::EX_ILLEGAL_ARGUMENT: return V1_0::Status::BAD_VALUE;
-            case Status::EX_UNSUPPORTED_OPERATION: return V1_0::Status::UNSUPPORTED_OPERATION;
-            case Status::EX_TRANSACTION_FAILED: {
-                return Status::fromStatusT(status.transactionError());
-            }
-        }
-        return V1_0::Status::UNKNOWN_ERROR;
-    }
-
-    class CallbackShim : public aidl::BnVibratorCallback {
-      public:
-        CallbackShim(const sp<V1_4::IVibratorCallback>& cb) : mCb(cb) {}
-        binder::Status onComplete() {
-            mCb->onComplete();
-            return binder::Status::ok(); // oneway, local call
-        }
-      private:
-        sp<V1_4::IVibratorCallback> mCb;
-    };
-};
-
-class VibratorCallback : public V1_4::IVibratorCallback {
+class VibratorCallback {
     public:
         VibratorCallback(JNIEnv *env, jobject vibration) :
         mVibration(MakeGlobalRefOrDie(env, vibration)) {}
@@ -212,47 +93,106 @@ class VibratorCallback : public V1_4::IVibratorCallback {
             env->DeleteGlobalRef(mVibration);
         }
 
-        Return<void> onComplete() override {
+        void onComplete() {
             auto env = AndroidRuntime::getJNIEnv();
             env->CallVoidMethod(mVibration, sMethodIdOnComplete);
-            return Void();
         }
 
     private:
         jobject mVibration;
 };
 
+class HidlVibratorCallback : public V1_4::IVibratorCallback {
+  public:
+    HidlVibratorCallback(JNIEnv *env, jobject vibration) :
+    mCb(env, vibration) {}
+
+    Return<void> onComplete() override {
+        mCb.onComplete();
+        return Void();
+    }
+
+  private:
+    VibratorCallback mCb;
+};
+
+class AidlVibratorCallback : public aidl::BnVibratorCallback {
+  public:
+    AidlVibratorCallback(JNIEnv *env, jobject vibration) :
+    mCb(env, vibration) {}
+
+    binder::Status onComplete() override {
+        mCb.onComplete();
+        return binder::Status::ok(); // oneway, local call
+    }
+
+  private:
+    VibratorCallback mCb;
+};
+
 static constexpr int NUM_TRIES = 2;
+
+template<class R>
+inline R NoneStatus() {
+    using ::android::hardware::Status;
+    return Status::fromExceptionCode(Status::EX_NONE);
+}
+
+template<>
+inline binder::Status NoneStatus() {
+    using binder::Status;
+    return Status::fromExceptionCode(Status::EX_NONE);
+}
 
 // Creates a Return<R> with STATUS::EX_NULL_POINTER.
 template<class R>
-inline Return<R> NullptrStatus() {
+inline R NullptrStatus() {
     using ::android::hardware::Status;
-    return Return<R>{Status::fromExceptionCode(Status::EX_NULL_POINTER)};
+    return Status::fromExceptionCode(Status::EX_NULL_POINTER);
+}
+
+template<>
+inline binder::Status NullptrStatus() {
+    using binder::Status;
+    return Status::fromExceptionCode(Status::EX_NULL_POINTER);
+}
+
+template <typename I>
+sp<I> getService() {
+    return I::getService();
+}
+
+template <>
+sp<aidl::IVibrator> getService() {
+    return waitForVintfService<aidl::IVibrator>();
+}
+
+template <typename I>
+sp<I> tryGetService() {
+    return I::tryGetService();
+}
+
+template <>
+sp<aidl::IVibrator> tryGetService() {
+    return checkVintfService<aidl::IVibrator>();
 }
 
 template <typename I>
 class HalWrapper {
   public:
     static std::unique_ptr<HalWrapper> Create() {
-        sp<aidl::IVibrator> aidlVib = waitForVintfService<aidl::IVibrator>();
-        if (aidlVib) {
-            return std::unique_ptr<HalWrapper>(new HalWrapper(new VibratorShim(aidlVib)));
-        }
-
         // Assume that if getService returns a nullptr, HAL is not available on the
         // device.
-        auto hal = I::getService();
+        auto hal = getService<I>();
         return hal ? std::unique_ptr<HalWrapper>(new HalWrapper(std::move(hal))) : nullptr;
     }
 
     // Helper used to transparently deal with the vibrator HAL becoming unavailable.
     template<class R, class... Args0, class... Args1>
-    Return<R> call(Return<R> (I::* fn)(Args0...), Args1&&... args1) {
+    R call(R (I::* fn)(Args0...), Args1&&... args1) {
         // Return<R> doesn't have a default constructor, so make a Return<R> with
         // STATUS::EX_NONE.
-        using ::android::hardware::Status;
-        Return<R> ret{Status::fromExceptionCode(Status::EX_NONE)};
+        R ret{NoneStatus<R>()};
 
         // Note that ret is guaranteed to be changed after this loop.
         for (int i = 0; i < NUM_TRIES; ++i) {
@@ -266,12 +206,7 @@ class HalWrapper {
             ALOGE("Failed to issue command to vibrator HAL. Retrying.");
 
             // Restoring connection to the HAL.
-            sp<aidl::IVibrator> aidlVib = checkVintfService<aidl::IVibrator>();
-            if (aidlVib) {
-                mHal = new VibratorShim(aidlVib);
-            } else {
-                mHal = I::tryGetService();
-            }
+            mHal = tryGetService<I>();
         }
         return ret;
     }
@@ -290,7 +225,7 @@ static auto getHal() {
 }
 
 template<class R, class I, class... Args0, class... Args1>
-Return<R> halCall(Return<R> (I::* fn)(Args0...), Args1&&... args1) {
+R halCall(R (I::* fn)(Args0...), Args1&&... args1) {
     auto hal = getHal<I>();
     return hal ? hal->call(fn, std::forward<Args1>(args1)...) : NullptrStatus<R>();
 }
@@ -307,110 +242,196 @@ bool isValidEffect(jlong effect) {
 
 static void vibratorInit(JNIEnv *env, jclass clazz)
 {
-    halCall(&V1_0::IVibrator::ping).isOk();
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        // IBinder::pingBinder isn't accessible as a pointer function
+        // but getCapabilities can serve the same purpose
+        int32_t cap;
+        hal->call(&aidl::IVibrator::getCapabilities, &cap).isOk();
+    } else {
+        halCall(&V1_0::IVibrator::ping).isOk();
+    }
 }
 
 static jboolean vibratorExists(JNIEnv* /* env */, jclass /* clazz */)
 {
-    return halCall(&V1_0::IVibrator::ping).isOk() ? JNI_TRUE : JNI_FALSE;
+    bool ok;
+
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        // IBinder::pingBinder isn't accessible as a pointer function
+        // but getCapabilities can serve the same purpose
+        int32_t cap;
+        ok = hal->call(&aidl::IVibrator::getCapabilities, &cap).isOk();
+    } else {
+        ok = halCall(&V1_0::IVibrator::ping).isOk();
+    }
+    return ok ? JNI_TRUE : JNI_FALSE;
 }
 
 static void vibratorOn(JNIEnv* /* env */, jclass /* clazz */, jlong timeout_ms)
 {
-    Status retStatus = halCall(&V1_0::IVibrator::on, timeout_ms).withDefault(Status::UNKNOWN_ERROR);
-    if (retStatus != Status::OK) {
-        ALOGE("vibratorOn command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        auto status = hal->call(&aidl::IVibrator::on, timeout_ms, nullptr);
+        if (!status.isOk()) {
+            ALOGE("vibratorOn command failed: %s", status.toString8().string());
+        }
+    } else {
+        Status retStatus = halCall(&V1_0::IVibrator::on, timeout_ms).withDefault(Status::UNKNOWN_ERROR);
+        if (retStatus != Status::OK) {
+            ALOGE("vibratorOn command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
+        }
     }
 }
 
 static void vibratorOff(JNIEnv* /* env */, jclass /* clazz */)
 {
-    Status retStatus = halCall(&V1_0::IVibrator::off).withDefault(Status::UNKNOWN_ERROR);
-    if (retStatus != Status::OK) {
-        ALOGE("vibratorOff command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        auto status = hal->call(&aidl::IVibrator::off);
+        if (!status.isOk()) {
+            ALOGE("vibratorOff command failed: %s", status.toString8().string());
+        }
+    } else {
+        Status retStatus = halCall(&V1_0::IVibrator::off).withDefault(Status::UNKNOWN_ERROR);
+        if (retStatus != Status::OK) {
+            ALOGE("vibratorOff command failed (%" PRIu32 ").", static_cast<uint32_t>(retStatus));
+        }
     }
 }
 
 static jlong vibratorSupportsAmplitudeControl(JNIEnv*, jclass) {
-    return halCall(&V1_0::IVibrator::supportsAmplitudeControl).withDefault(false);
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        int32_t cap = 0;
+        if (!hal->call(&aidl::IVibrator::getCapabilities, &cap).isOk()) {
+            return false;
+        }
+        return (cap & aidl::IVibrator::CAP_AMPLITUDE_CONTROL) > 0;
+    } else {
+        return halCall(&V1_0::IVibrator::supportsAmplitudeControl).withDefault(false);
+    }
 }
 
 static void vibratorSetAmplitude(JNIEnv*, jclass, jint amplitude) {
-    Status status = halCall(&V1_0::IVibrator::setAmplitude, static_cast<uint32_t>(amplitude))
-        .withDefault(Status::UNKNOWN_ERROR);
-    if (status != Status::OK) {
-      ALOGE("Failed to set vibrator amplitude (%" PRIu32 ").",
-            static_cast<uint32_t>(status));
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        auto status = hal->call(&aidl::IVibrator::IVibrator::setAmplitude, amplitude);
+        if (!status.isOk()) {
+            ALOGE("Failed to set vibrator amplitude: %s", status.toString8().string());
+        }
+    } else {
+        Status status = halCall(&V1_0::IVibrator::setAmplitude, static_cast<uint32_t>(amplitude))
+            .withDefault(Status::UNKNOWN_ERROR);
+        if (status != Status::OK) {
+            ALOGE("Failed to set vibrator amplitude (%" PRIu32 ").",
+                  static_cast<uint32_t>(status));
+        }
     }
 }
 
 static jboolean vibratorSupportsExternalControl(JNIEnv*, jclass) {
-    return halCall(&V1_3::IVibrator::supportsExternalControl).withDefault(false);
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        int32_t cap = 0;
+        if (!hal->call(&aidl::IVibrator::getCapabilities, &cap).isOk()) {
+            return false;
+        }
+        return (cap & aidl::IVibrator::CAP_EXTERNAL_CONTROL) > 0;
+    } else {
+        return halCall(&V1_3::IVibrator::supportsExternalControl).withDefault(false);
+    }
 }
 
 static void vibratorSetExternalControl(JNIEnv*, jclass, jboolean enabled) {
-    Status status = halCall(&V1_3::IVibrator::setExternalControl, static_cast<uint32_t>(enabled))
-        .withDefault(Status::UNKNOWN_ERROR);
-    if (status != Status::OK) {
-      ALOGE("Failed to set vibrator external control (%" PRIu32 ").",
-            static_cast<uint32_t>(status));
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        auto status = hal->call(&aidl::IVibrator::IVibrator::setExternalControl, enabled);
+        if (!status.isOk()) {
+            ALOGE("Failed to set vibrator external control: %s", status.toString8().string());
+        }
+    } else {
+        Status status = halCall(&V1_3::IVibrator::setExternalControl, static_cast<uint32_t>(enabled))
+            .withDefault(Status::UNKNOWN_ERROR);
+        if (status != Status::OK) {
+            ALOGE("Failed to set vibrator external control (%" PRIu32 ").",
+                static_cast<uint32_t>(status));
+        }
     }
 }
 
 static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong strength,
                                    jobject vibration) {
-    Status status;
-    uint32_t lengthMs;
-    auto callback = [&status, &lengthMs](Status retStatus, uint32_t retLengthMs) {
-        status = retStatus;
-        lengthMs = retLengthMs;
-    };
-    EffectStrength effectStrength(static_cast<EffectStrength>(strength));
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        int32_t lengthMs;
+        sp<AidlVibratorCallback> effectCallback = new AidlVibratorCallback(env, vibration);
+        aidl::Effect effectType(static_cast<aidl::Effect>(strength));
+        aidl::EffectStrength effectStrength(static_cast<aidl::EffectStrength>(strength));
 
-    Return<void> ret;
-    if (auto hal = getHal<V1_4::IVibrator>(); hal && isValidEffect<V1_3::Effect>(effect)) {
-        sp<VibratorCallback> effectCallback = new VibratorCallback(env, vibration);
-        ret = hal->call(&V1_4::IVibrator::perform_1_4, static_cast<V1_3::Effect>(effect),
-                effectStrength, effectCallback, callback);
-    } else if (isValidEffect<V1_0::Effect>(effect)) {
-        ret = halCall(&V1_0::IVibrator::perform, static_cast<V1_0::Effect>(effect),
-                effectStrength, callback);
-    } else if (isValidEffect<Effect_1_1>(effect)) {
-        ret = halCall(&V1_1::IVibrator::perform_1_1, static_cast<Effect_1_1>(effect),
-                           effectStrength, callback);
-    } else if (isValidEffect<V1_2::Effect>(effect)) {
-        ret = halCall(&V1_2::IVibrator::perform_1_2, static_cast<V1_2::Effect>(effect),
-                           effectStrength, callback);
-    } else if (isValidEffect<V1_3::Effect>(effect)) {
-        ret = halCall(&V1_3::IVibrator::perform_1_3, static_cast<V1_3::Effect>(effect),
-                           effectStrength, callback);
-    } else {
-        ALOGW("Unable to perform haptic effect, invalid effect ID (%" PRId32 ")",
-                static_cast<int32_t>(effect));
-        return -1;
-    }
-
-    if (!ret.isOk()) {
-        ALOGW("Failed to perform effect (%" PRId32 ")", static_cast<int32_t>(effect));
-        return -1;
-    }
-
-    if (status == Status::OK) {
+        auto status = hal->call(&aidl::IVibrator::perform, effectType, effectStrength, effectCallback, &lengthMs);
+        if (!status.isOk()) {
+            if (status.exceptionCode() != binder::Status::EX_UNSUPPORTED_OPERATION) {
+                ALOGE("Failed to perform haptic effect: effect=%" PRId64 ", strength=%" PRId32
+                        ": %s", static_cast<int64_t>(effect), static_cast<int32_t>(strength), status.toString8().string());
+            }
+            return -1;
+        }
         return lengthMs;
-    } else if (status != Status::UNSUPPORTED_OPERATION) {
-        // Don't warn on UNSUPPORTED_OPERATION, that's a normal event and just means the motor
-        // doesn't have a pre-defined waveform to perform for it, so we should just give the
-        // opportunity to fall back to the framework waveforms.
-        ALOGE("Failed to perform haptic effect: effect=%" PRId64 ", strength=%" PRId32
-                ", error=%" PRIu32 ").", static_cast<int64_t>(effect),
-                static_cast<int32_t>(strength), static_cast<uint32_t>(status));
+    } else {
+        Status status;
+        uint32_t lengthMs;
+        auto callback = [&status, &lengthMs](Status retStatus, uint32_t retLengthMs) {
+            status = retStatus;
+            lengthMs = retLengthMs;
+        };
+        EffectStrength effectStrength(static_cast<EffectStrength>(strength));
+
+        Return<void> ret;
+        if (auto hal = getHal<V1_4::IVibrator>(); hal && isValidEffect<V1_3::Effect>(effect)) {
+            sp<HidlVibratorCallback> effectCallback = new HidlVibratorCallback(env, vibration);
+            ret = hal->call(&V1_4::IVibrator::perform_1_4, static_cast<V1_3::Effect>(effect),
+                    effectStrength, effectCallback, callback);
+        } else if (isValidEffect<V1_0::Effect>(effect)) {
+            ret = halCall(&V1_0::IVibrator::perform, static_cast<V1_0::Effect>(effect),
+                    effectStrength, callback);
+        } else if (isValidEffect<Effect_1_1>(effect)) {
+            ret = halCall(&V1_1::IVibrator::perform_1_1, static_cast<Effect_1_1>(effect),
+                            effectStrength, callback);
+        } else if (isValidEffect<V1_2::Effect>(effect)) {
+            ret = halCall(&V1_2::IVibrator::perform_1_2, static_cast<V1_2::Effect>(effect),
+                            effectStrength, callback);
+        } else if (isValidEffect<V1_3::Effect>(effect)) {
+            ret = halCall(&V1_3::IVibrator::perform_1_3, static_cast<V1_3::Effect>(effect),
+                            effectStrength, callback);
+        } else {
+            ALOGW("Unable to perform haptic effect, invalid effect ID (%" PRId32 ")",
+                    static_cast<int32_t>(effect));
+            return -1;
+        }
+
+        if (!ret.isOk()) {
+            ALOGW("Failed to perform effect (%" PRId32 ")", static_cast<int32_t>(effect));
+            return -1;
+        }
+
+        if (status == Status::OK) {
+            return lengthMs;
+        } else if (status != Status::UNSUPPORTED_OPERATION) {
+            // Don't warn on UNSUPPORTED_OPERATION, that's a normal event and just means the motor
+            // doesn't have a pre-defined waveform to perform for it, so we should just give the
+            // opportunity to fall back to the framework waveforms.
+            ALOGE("Failed to perform haptic effect: effect=%" PRId64 ", strength=%" PRId32
+                    ", error=%" PRIu32 ").", static_cast<int64_t>(effect),
+                    static_cast<int32_t>(strength), static_cast<uint32_t>(status));
+        }
     }
 
     return -1;
 }
 
 static jlong vibratorGetCapabilities(JNIEnv*, jclass) {
-    return halCall(&V1_4::IVibrator::getCapabilities).withDefault(0);
+    if (auto hal = getHal<aidl::IVibrator>()) {
+        int32_t cap = 0;
+        if (!hal->call(&aidl::IVibrator::getCapabilities, &cap).isOk()) {
+            return 0;
+        }
+        return cap;
+    } else {
+        return halCall(&V1_4::IVibrator::getCapabilities).withDefault(0);
+    }
 }
 
 static const JNINativeMethod method_table[] = {
