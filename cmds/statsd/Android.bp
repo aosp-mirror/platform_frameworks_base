@@ -117,6 +117,10 @@ cc_defaults {
         "src/uid_data.proto",
     ],
 
+    cflags: [
+        // "-DNEW_ENCODING_SCHEME",
+    ],
+
     local_include_dirs: [
         "src",
     ],
@@ -168,7 +172,6 @@ cc_binary {
         "-Os",
         // "-g",
         // "-O0",
-        // "-DNEW_ENCODING_SCHEME",
     ],
 
     product_variables: {
@@ -283,7 +286,10 @@ cc_test {
         include_dirs: ["external/protobuf/src"],
     },
 
-    shared_libs: ["libprotobuf-cpp-lite"],
+    shared_libs: [
+        "libprotobuf-cpp-lite",
+        "libstatssocket"
+    ],
 
 }
 
@@ -327,7 +333,6 @@ cc_benchmark {
 
         // Bug: http://b/29823425 Disable -Wvarargs for Clang update to r271374
         "-Wno-varargs",
-        // "-DNEW_ENCODING_SCHEME",
     ],
 
     static_libs: [
