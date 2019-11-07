@@ -1126,8 +1126,9 @@ public final class Telephony {
              * values:</p>
              *
              * <ul>
-             *   <li><em>"message"</em> - An SmsCbMessage object containing the broadcast message
-             *   data, including ETWS or CMAS warning notification info if present.</li>
+             *   <li><em>"message"</em> - An {@link android.telephony.SmsCbMessage} object
+             *   containing the broadcast message data, including ETWS or CMAS warning notification
+             *   info if present.</li>
              * </ul>
              *
              * <p>The extra values can be extracted using
@@ -1138,11 +1139,12 @@ public final class Telephony {
              *
              * <p>Requires {@link android.Manifest.permission#RECEIVE_EMERGENCY_BROADCAST} to
              * receive.</p>
-             * @removed
+             * @hide
              */
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            public static final String SMS_EMERGENCY_CB_RECEIVED_ACTION =
-                    "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+            @SystemApi
+            public static final String ACTION_SMS_EMERGENCY_CB_RECEIVED =
+                    "android.provider.action.SMS_EMERGENCY_CB_RECEIVED";
 
             /**
              * Broadcast Action: A new CDMA SMS has been received containing Service Category

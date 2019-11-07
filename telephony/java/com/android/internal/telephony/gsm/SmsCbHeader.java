@@ -33,7 +33,7 @@ import java.util.Locale;
  * All relevant header information is now sent as a Parcelable
  * {@link android.telephony.SmsCbMessage} object in the "message" extra of the
  * {@link android.provider.Telephony.Sms.Intents#SMS_CB_RECEIVED_ACTION} or
- * {@link android.provider.Telephony.Sms.Intents#SMS_EMERGENCY_CB_RECEIVED_ACTION} intent.
+ * {@link android.provider.Telephony.Sms.Intents#ACTION_SMS_EMERGENCY_CB_RECEIVED} intent.
  * The raw PDU is no longer sent to SMS CB applications.
  */
 public class SmsCbHeader {

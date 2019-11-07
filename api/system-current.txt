@@ -6124,6 +6124,10 @@ package android.provider {
     field public static final String SERVICE_CATEGORY = "service_category";
   }
 
+  public static final class Telephony.Sms.Intents {
+    field public static final String ACTION_SMS_EMERGENCY_CB_RECEIVED = "android.provider.action.SMS_EMERGENCY_CB_RECEIVED";
+  }
+
   public final class TimeZoneRulesDataContract {
     field public static final String AUTHORITY = "com.android.timezone";
   }
