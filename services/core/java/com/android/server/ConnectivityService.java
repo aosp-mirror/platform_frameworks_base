@@ -6339,10 +6339,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // - Tears down newNetwork if it just became validated
     //   but turns out to be unneeded.
     //
-    // - If reapUnvalidatedNetworks==REAP, tears down unvalidated
-    //   networks that have no chance (i.e. even if validated)
-    //   of becoming the highest scoring network.
-    //
     // NOTE: This function only adds NetworkRequests that "newNetwork" could satisfy,
     // it does not remove NetworkRequests that other Networks could better satisfy.
     // If you need to handle decreases in score, use {@link rematchAllNetworksAndRequests}.
@@ -6350,11 +6346,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // as it performs better by a factor of the number of Networks.
     //
     // @param newNetwork is the network to be matched against NetworkRequests.
-    // @param reapUnvalidatedNetworks indicates if an additional pass over all networks should be
-    //               performed to tear down unvalidated networks that have no chance (i.e. even if
-    //               validated) of becoming the highest scoring network.
-    private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork,
-            ReapUnvalidatedNetworks reapUnvalidatedNetworks, long now) {
+    // @param now the time the rematch starts, as returned by SystemClock.elapsedRealtime();
+    private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork, long now) {
         ensureRunningOnConnectivityServiceThread();
         if (!newNetwork.everConnected) return;
         boolean keep = newNetwork.isVPN();
@@ -6553,25 +6546,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mLegacyTypeTracker.add(TYPE_VPN, newNetwork);
             }
         }
-        if (reapUnvalidatedNetworks == ReapUnvalidatedNetworks.REAP) {
-            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                if (unneeded(nai, UnneededFor.TEARDOWN)) {
-                    if (nai.getLingerExpiry() > 0) {
-                        // This network has active linger timers and no requests, but is not
-                        // lingering. Linger it.
-                        //
-                        // One way (the only way?) this can happen if this network is unvalidated
-                        // and became unneeded due to another network improving its score to the
-                        // point where this network will no longer be able to satisfy any requests
-                        // even if it validates.
-                        updateLingerState(nai, now);
-                    } else {
-                        if (DBG) log("Reaping " + nai.name());
-                        teardownUnneededNetwork(nai);
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -6592,13 +6566,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // callbacks and inadvertently unlinger networks.
         Arrays.sort(nais);
         for (NetworkAgentInfo nai : nais) {
-            rematchNetworkAndRequests(nai,
-                    // Only reap the last time through the loop.  Reaping before all rematching
-                    // is complete could incorrectly teardown a network that hasn't yet been
-                    // rematched.
-                    (nai != nais[nais.length - 1]) ? ReapUnvalidatedNetworks.DONT_REAP
-                            : ReapUnvalidatedNetworks.REAP,
-                    now);
+            rematchNetworkAndRequests(nai, now);
+        }
+        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            if (unneeded(nai, UnneededFor.TEARDOWN)) {
+                if (nai.getLingerExpiry() > 0) {
+                    // This network has active linger timers and no requests, but is not
+                    // lingering. Linger it.
+                    //
+                    // One way (the only way?) this can happen if this network is unvalidated
+                    // and became unneeded due to another network improving its score to the
+                    // point where this network will no longer be able to satisfy any requests
+                    // even if it validates.
+                    updateLingerState(nai, now);
+                } else {
+                    if (DBG) log("Reaping " + nai.name());
+                    teardownUnneededNetwork(nai);
+                }
+            }
         }
     }
 
