@@ -44,6 +44,10 @@ namespace android {
 struct FilterCallback : public IFilterCallback {
     virtual Return<void> onFilterEvent(const DemuxFilterEvent& filterEvent);
     virtual Return<void> onFilterStatus(const DemuxFilterStatus status);
+
+    void setFilter(const jobject filter);
+private:
+    jweak mFilter;
 };
 
 struct FrontendCallback : public IFrontendCallback {
@@ -76,7 +80,6 @@ private:
     sp<IFrontend> mFe;
     sp<IDemux> mDemux;
     int mDemuxId;
-    std::unordered_map<int, sp<IFilter>> mFilters;
 };
 
 }  // namespace android
