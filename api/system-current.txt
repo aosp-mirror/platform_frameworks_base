@@ -7462,6 +7462,7 @@ package android.telephony {
 
   public final class CallQuality implements android.os.Parcelable {
     ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int);
+    ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int, boolean, boolean, boolean);
     method public int describeContents();
     method public int getAverageRelativeJitter();
     method public int getAverageRoundTripTime();
@@ -7474,6 +7475,9 @@ package android.telephony {
     method public int getNumRtpPacketsTransmitted();
     method public int getNumRtpPacketsTransmittedLost();
     method public int getUplinkCallQualityLevel();
+    method public boolean isIncomingSilenceDetected();
+    method public boolean isOutgoingSilenceDetected();
+    method public boolean isRtpInactivityDetected();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALL_QUALITY_BAD = 4; // 0x4
     field public static final int CALL_QUALITY_EXCELLENT = 0; // 0x0
