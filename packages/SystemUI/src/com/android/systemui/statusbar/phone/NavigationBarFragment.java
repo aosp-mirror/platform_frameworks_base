@@ -163,7 +163,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private int mDisabledFlags2;
     private StatusBar mStatusBar;
     private Recents mRecents;
-    private Divider mDivider;
+    private final Divider mDivider;
     private WindowManager mWindowManager;
     private final CommandQueue mCommandQueue;
     private long mLastLockToAppLongPress;
@@ -266,7 +266,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             StatusBarStateController statusBarStateController,
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            Divider divider) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mStatusBarStateController = statusBarStateController;
@@ -279,6 +280,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mNavBarMode = navigationModeController.addListener(this);
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
+        mDivider = divider;
     }
 
     // ----- Fragment Lifecycle Callbacks -----
@@ -289,7 +291,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mCommandQueue.observe(getLifecycle(), this);
         mStatusBar = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
         mRecents = SysUiServiceProvider.getComponent(getContext(), Recents.class);
-        mDivider = SysUiServiceProvider.getComponent(getContext(), Divider.class);
         mWindowManager = getContext().getSystemService(WindowManager.class);
         mAccessibilityManager = getContext().getSystemService(AccessibilityManager.class);
         mContentResolver = getContext().getContentResolver();

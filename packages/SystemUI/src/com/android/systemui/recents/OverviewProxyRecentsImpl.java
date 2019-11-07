@@ -57,8 +57,8 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
     private final static String TAG = "OverviewProxyRecentsImpl";
     @Nullable
     private final Lazy<StatusBar> mStatusBarLazy;
+    private final Optional<Divider> mDividerOptional;
 
-    private SysUiServiceProvider mSysUiServiceProvider;
     private Context mContext;
     private Handler mHandler;
     private TrustManager mTrustManager;
@@ -66,14 +66,15 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy) {
+    public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy,
+            Optional<Divider> dividerOptional) {
         mStatusBarLazy = statusBarLazy.orElse(null);
+        mDividerOptional = dividerOptional;
     }
 
     @Override
     public void onStart(Context context, SysUiServiceProvider sysUiServiceProvider) {
         mContext = context;
-        mSysUiServiceProvider = sysUiServiceProvider;
         mHandler = new Handler();
         mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
@@ -164,10 +165,8 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
                         runningTask.id, stackCreateMode, initialBounds)) {
                     // The overview service is handling split screen, so just skip the wait for the
                     // first draw and notify the divider to start animating now
-                    final Divider divider = mSysUiServiceProvider.getComponent(Divider.class);
-                    if (divider != null) {
-                        divider.onRecentsDrawn();
-                    }
+                    mDividerOptional.ifPresent(Divider::onRecentsDrawn);
+
                     return true;
                 }
             } else {
