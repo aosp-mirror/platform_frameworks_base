@@ -18,7 +18,6 @@ package com.android.server.search;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.ISearchManager;
 import android.app.SearchManager;
@@ -29,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.os.Binder;
 import android.os.Bundle;
@@ -265,11 +265,17 @@ public class SearchManagerService extends ISearchManager.Stub {
     }
 
     @Override
-    public void launchAssist(Bundle args) {
-        StatusBarManagerInternal statusBarManager =
-                LocalServices.getService(StatusBarManagerInternal.class);
-        if (statusBarManager != null) {
-            statusBarManager.startAssist(args);
+    public void launchAssist(int userHandle, Bundle args) {
+        if ((mContext.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION) {
+            // On TV, use legacy handling until assistants are implemented in the proper way.
+            launchLegacyAssist(null, userHandle, args);
+        } else {
+            StatusBarManagerInternal statusBarManager =
+                    LocalServices.getService(StatusBarManagerInternal.class);
+            if (statusBarManager != null) {
+                statusBarManager.startAssist(args);
+            }
         }
     }
 
@@ -298,8 +304,7 @@ public class SearchManagerService extends ISearchManager.Stub {
         return null;
     }
 
-    @Override
-    public boolean launchLegacyAssist(String hint, int userHandle, Bundle args) {
+    private boolean launchLegacyAssist(String hint, int userHandle, Bundle args) {
         ComponentName comp = getLegacyAssistComponent(userHandle);
         if (comp == null) {
             return false;
