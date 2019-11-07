@@ -43,7 +43,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import dagger.Module;
@@ -118,11 +117,6 @@ public class SystemUIFactory {
 
     public SystemUIRootComponent getRootComponent() {
         return mRootComponent;
-    }
-
-    public StatusBarKeyguardViewManager createStatusBarKeyguardViewManager(Context context,
-            ViewMediatorCallback viewMediatorCallback, LockPatternUtils lockPatternUtils) {
-        return new StatusBarKeyguardViewManager(context, viewMediatorCallback, lockPatternUtils);
     }
 
     /**

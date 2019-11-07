@@ -41,12 +41,13 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -91,16 +92,21 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectMockDependency(StatusBarWindowController.class);
-        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
-        mDependency.injectMockDependency(NotificationMediaManager.class);
-        mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
-        mDependency.injectTestDependency(KeyguardStateController.class, mKeyguardStateController);
         when(mLockIconContainer.getParent()).thenReturn(mock(ViewGroup.class));
         when(mLockIconContainer.animate()).thenReturn(mock(ViewPropertyAnimator.class,
                 RETURNS_DEEP_STUBS));
-        mStatusBarKeyguardViewManager = new TestableStatusBarKeyguardViewManager(getContext(),
-                mViewMediatorCallback, mLockPatternUtils);
+        mStatusBarKeyguardViewManager = new TestableStatusBarKeyguardViewManager(
+                getContext(),
+                mViewMediatorCallback,
+                mLockPatternUtils,
+                mStatusBarStateController,
+                mock(ConfigurationController.class),
+                mock(KeyguardUpdateMonitor.class),
+                mock(NavigationModeController.class),
+                mock(DockManager.class),
+                mock(StatusBarWindowController.class),
+                mKeyguardStateController,
+                mock(NotificationMediaManager.class));
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
                 mNotificationPanelView, mBiometrucUnlockController, mDismissCallbackRegistry,
                 mLockIconContainer, mNotificationContainer, mBypassController,
@@ -258,8 +264,19 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
         public TestableStatusBarKeyguardViewManager(Context context,
                 ViewMediatorCallback callback,
-                LockPatternUtils lockPatternUtils) {
-            super(context, callback, lockPatternUtils);
+                LockPatternUtils lockPatternUtils,
+                SysuiStatusBarStateController sysuiStatusBarStateController,
+                ConfigurationController configurationController,
+                KeyguardUpdateMonitor keyguardUpdateMonitor,
+                NavigationModeController navigationModeController,
+                DockManager dockManager,
+                StatusBarWindowController statusBarWindowController,
+                KeyguardStateController keyguardStateController,
+                NotificationMediaManager notificationMediaManager) {
+            super(context, callback, lockPatternUtils, sysuiStatusBarStateController,
+                    configurationController, keyguardUpdateMonitor, navigationModeController,
+                    dockManager, statusBarWindowController, keyguardStateController,
+                    notificationMediaManager);
         }
 
         @Override

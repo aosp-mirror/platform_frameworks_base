@@ -83,6 +83,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -232,6 +233,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private Divider mDivider;
     @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     @Mock private LightsOutNotifController mLightsOutNotifController;
+    @Mock private ViewMediatorCallback mViewMediatorCallback;
+    @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
 
     @Before
     public void setup() throws Exception {
@@ -367,7 +370,10 @@ public class StatusBarTest extends SysuiTestCase {
                 mRemoteInputUriController,
                 Optional.of(mDivider),
                 mLightsOutNotifController,
-                mSuperStatusBarViewFactory);
+                mSuperStatusBarViewFactory,
+                mStatusBarKeyguardViewManager,
+                mViewMediatorCallback,
+                mDismissCallbackRegistry);
 
         when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);

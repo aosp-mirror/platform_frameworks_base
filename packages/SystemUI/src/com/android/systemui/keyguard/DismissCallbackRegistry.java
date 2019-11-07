@@ -22,13 +22,20 @@ import com.android.systemui.UiOffloadThread;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Registry holding the current set of {@link IKeyguardDismissCallback}s.
  */
+@Singleton
 public class DismissCallbackRegistry {
 
     private final ArrayList<DismissCallbackWrapper> mDismissCallbacks = new ArrayList<>();
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+
+    @Inject
+    public DismissCallbackRegistry() {}
 
     public void addCallback(IKeyguardDismissCallback callback) {
         mDismissCallbacks.add(new DismissCallbackWrapper(callback));

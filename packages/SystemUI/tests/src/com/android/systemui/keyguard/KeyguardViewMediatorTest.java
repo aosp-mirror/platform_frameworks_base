@@ -18,14 +18,12 @@ package com.android.systemui.keyguard;
 
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
-import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -34,8 +32,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
@@ -60,8 +56,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock KeyguardUpdateMonitor mUpdateMonitor;
     private @Mock StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private @Mock StatusBarWindowController mStatusBarWindowController;
-    private @Mock SystemUIFactory mSystemUIFactory;
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
+    private @Mock DismissCallbackRegistry mDismissCallbackRegistry;
 
     private FalsingManagerFake mFalsingManager;
 
@@ -76,15 +72,11 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mStatusBarWindowController);
 
         when(mLockPatternUtils.getDevicePolicyManager()).thenReturn(mDevicePolicyManager);
-        when(mSystemUIFactory.createStatusBarKeyguardViewManager(
-                any(Context.class),
-                any(ViewMediatorCallback.class),
-                any(LockPatternUtils.class))).thenReturn(mStatusBarKeyguardViewManager);
 
         TestableLooper.get(this).runWithLooper(() -> {
             mViewMediator = new KeyguardViewMediator(
                     mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
-                    mSystemUIFactory);
+                    () -> mStatusBarKeyguardViewManager, mDismissCallbackRegistry);
         });
     }
 

@@ -18,12 +18,8 @@ package com.android.systemui;
 
 import android.content.Context;
 
-import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.navigationbar.car.CarFacetButtonController;
-import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import javax.inject.Singleton;
 
@@ -48,11 +44,6 @@ public class CarSystemUIFactory extends SystemUIFactory {
 
     public CarDependencyComponent getCarDependencyComponent() {
         return mCarDependencyComponent;
-    }
-
-    public StatusBarKeyguardViewManager createStatusBarKeyguardViewManager(Context context,
-            ViewMediatorCallback viewMediatorCallback, LockPatternUtils lockPatternUtils) {
-        return new CarStatusBarKeyguardViewManager(context, viewMediatorCallback, lockPatternUtils);
     }
 
     @Singleton
