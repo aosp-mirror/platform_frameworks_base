@@ -118,6 +118,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -162,8 +163,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private int mDisabledFlags1;
     private int mDisabledFlags2;
     private StatusBar mStatusBar;
-    private Recents mRecents;
     private final Divider mDivider;
+    private final Optional<Recents> mRecentsOptional;
     private WindowManager mWindowManager;
     private final CommandQueue mCommandQueue;
     private long mLastLockToAppLongPress;
@@ -267,7 +268,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue,
-            Divider divider) {
+            Divider divider,
+            Optional<Recents> recentsOptional) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mStatusBarStateController = statusBarStateController;
@@ -281,6 +283,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
         mDivider = divider;
+        mRecentsOptional = recentsOptional;
     }
 
     // ----- Fragment Lifecycle Callbacks -----
@@ -290,7 +293,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         super.onCreate(savedInstanceState);
         mCommandQueue.observe(getLifecycle(), this);
         mStatusBar = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
-        mRecents = SysUiServiceProvider.getComponent(getContext(), Recents.class);
         mWindowManager = getContext().getSystemService(WindowManager.class);
         mAccessibilityManager = getContext().getSystemService(AccessibilityManager.class);
         mContentResolver = getContext().getContentResolver();
@@ -906,7 +908,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     private boolean onLongPressRecents() {
-        if (mRecents == null || !ActivityTaskManager.supportsMultiWindow(getContext())
+        if (mRecentsOptional.isPresent() || !ActivityTaskManager.supportsMultiWindow(getContext())
                 || !mDivider.getView().getSnapAlgorithm().isSplitScreenFeasible()
                 || ActivityManager.isLowRamDeviceStatic()
                 // If we are connected to the overview service, then disable the recents button

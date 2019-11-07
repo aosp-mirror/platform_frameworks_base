@@ -79,6 +79,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
@@ -97,6 +99,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private Divider mDivider;
+    @Mock
+    private Recents mRecents;
 
     private AccessibilityManagerWrapper mAccessibilityWrapper =
             new AccessibilityManagerWrapper(mContext) {
@@ -154,14 +158,12 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
 
     private void setupSysuiDependency() {
         mSysuiContext.putComponent(StatusBar.class, mock(StatusBar.class));
-        mSysuiContext.putComponent(Recents.class, mock(Recents.class));
 
         Display display = new Display(DisplayManagerGlobal.getInstance(), EXTERNAL_DISPLAY_ID,
                 new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS);
         mSysuiTestableContextExternal = (SysuiTestableContext) mSysuiContext.createDisplayContext(
                 display);
         mSysuiTestableContextExternal.putComponent(StatusBar.class, mock(StatusBar.class));
-        mSysuiTestableContextExternal.putComponent(Recents.class, mock(Recents.class));
 
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         WindowManager windowManager = mock(WindowManager.class);
@@ -252,7 +254,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 mMockSysUiState,
                 mBroadcastDispatcher,
                 mCommandQueue,
-                mDivider);
+                mDivider,
+                Optional.of(mRecents));
     }
 
     private class HostCallbacksForExternalDisplay extends
