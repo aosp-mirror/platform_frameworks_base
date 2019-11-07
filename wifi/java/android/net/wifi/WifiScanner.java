@@ -65,14 +65,17 @@ public class WifiScanner {
     /** @hide */
     public static final int WIFI_BAND_INDEX_5_GHZ_DFS_ONLY = 2;
     /** @hide */
-    public static final int WIFI_BAND_COUNT = 3;
+    public static final int WIFI_BAND_INDEX_6_GHZ = 3;
+    /** @hide */
+    public static final int WIFI_BAND_COUNT = 4;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"WIFI_BAND_INDEX_"}, value = {
             WIFI_BAND_INDEX_24_GHZ,
             WIFI_BAND_INDEX_5_GHZ,
-            WIFI_BAND_INDEX_5_GHZ_DFS_ONLY})
+            WIFI_BAND_INDEX_5_GHZ_DFS_ONLY,
+            WIFI_BAND_INDEX_6_GHZ})
     public @interface WifiBandIndex {}
 
     /** no band specified; use channel list instead */
@@ -83,6 +86,8 @@ public class WifiScanner {
     public static final int WIFI_BAND_5_GHZ = 1 << WIFI_BAND_INDEX_5_GHZ;
     /** DFS channels from 5 GHz band only */
     public static final int WIFI_BAND_5_GHZ_DFS_ONLY  = 1 << WIFI_BAND_INDEX_5_GHZ_DFS_ONLY;
+    /** 6 GHz band */
+    public static final int WIFI_BAND_6_GHZ = 1 << WIFI_BAND_INDEX_6_GHZ;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -90,7 +95,8 @@ public class WifiScanner {
             WIFI_BAND_UNSPECIFIED,
             WIFI_BAND_24_GHZ,
             WIFI_BAND_5_GHZ,
-            WIFI_BAND_5_GHZ_DFS_ONLY})
+            WIFI_BAND_5_GHZ_DFS_ONLY,
+            WIFI_BAND_6_GHZ})
     public @interface WifiBandBasic {}
 
     /**
@@ -111,6 +117,11 @@ public class WifiScanner {
     /** Both 2.4 GHz band and 5 GHz band; with DFS channels */
     public static final int WIFI_BAND_BOTH_WITH_DFS =
             WIFI_BAND_24_GHZ | WIFI_BAND_5_GHZ | WIFI_BAND_5_GHZ_DFS_ONLY;
+    /** 2.4 GHz band and 5 GHz band (no DFS channels) and 6 GHz */
+    public static final int WIFI_BAND_24_5_6_GHZ = WIFI_BAND_BOTH | WIFI_BAND_6_GHZ;
+    /** 2.4 GHz band and 5 GHz band; with DFS channels and 6 GHz */
+    public static final int WIFI_BAND_24_5_WITH_DFS_6_GHZ =
+            WIFI_BAND_BOTH_WITH_DFS | WIFI_BAND_6_GHZ;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -122,14 +133,17 @@ public class WifiScanner {
             WIFI_BAND_5_GHZ_DFS_ONLY,
             WIFI_BAND_24_GHZ_WITH_5GHZ_DFS,
             WIFI_BAND_5_GHZ_WITH_DFS,
-            WIFI_BAND_BOTH_WITH_DFS})
+            WIFI_BAND_BOTH_WITH_DFS,
+            WIFI_BAND_6_GHZ,
+            WIFI_BAND_24_5_6_GHZ,
+            WIFI_BAND_24_5_WITH_DFS_6_GHZ})
     public @interface WifiBand {}
 
     /**
      * Max band value
      * @hide
      */
-    public static final int WIFI_BAND_MAX = 8;
+    public static final int WIFI_BAND_MAX = 0x10;
 
     /** Minimum supported scanning period */
     public static final int MIN_SCAN_PERIOD_MS = 1000;
@@ -174,7 +188,7 @@ public class WifiScanner {
     @SystemApi
     @NonNull
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
-    public List<Integer> getAvailableChannels(@WifiBand int band) {
+    public List<Integer> getAvailableChannels(int band) {
         try {
             Bundle bundle = mService.getAvailableChannels(band, mContext.getOpPackageName(),
                     mContext.getFeatureId());
