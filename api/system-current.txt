@@ -5155,6 +5155,7 @@ package android.net.wifi.rtt {
     field public static final int CHANNEL_WIDTH_80MHZ = 2; // 0x2
     field public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.rtt.ResponderConfig> CREATOR;
+    field public static final int PREAMBLE_HE = 3; // 0x3
     field public static final int PREAMBLE_HT = 1; // 0x1
     field public static final int PREAMBLE_LEGACY = 0; // 0x0
     field public static final int PREAMBLE_VHT = 2; // 0x2
