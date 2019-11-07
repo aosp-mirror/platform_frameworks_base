@@ -623,13 +623,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         return false;
     }
 
-    public void blessInputSurface(int displayId, SurfaceControl surface,
-            InputChannel outInputChannel) {
+    public void grantInputChannel(int displayId, SurfaceControl surface,
+            IWindow window, IBinder hostInputToken, InputChannel outInputChannel) {
         final int callerUid = Binder.getCallingUid();
         final int callerPid = Binder.getCallingPid();
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.blessInputSurface(callerUid, callerPid, displayId, surface, outInputChannel);
+            mService.grantInputChannel(callerUid, callerPid, displayId, surface, window,
+                    hostInputToken, outInputChannel);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

@@ -16,12 +16,11 @@
 
 package android.view;
 
-import android.content.res.Resources;
-import android.content.Context;
-import android.view.SurfaceControl;
-import android.view.View;
-
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.content.Context;
+import android.os.IBinder;
 
 /**
  * Utility class for adding a view hierarchy to a SurfaceControl.
@@ -31,10 +30,13 @@ import android.annotation.TestApi;
  */
 @TestApi
 public class WindowlessViewRoot {
-    ViewRootImpl mViewRoot;
-    WindowlessWindowManager mWm;
-    public WindowlessViewRoot(Context c, Display d, SurfaceControl rootSurface) {
-        mWm = new WindowlessWindowManager(c.getResources().getConfiguration(), rootSurface);
+    private ViewRootImpl mViewRoot;
+    private WindowlessWindowManager mWm;
+    public WindowlessViewRoot(@NonNull Context c, @NonNull Display d,
+            @NonNull SurfaceControl rootSurface,
+            @Nullable IBinder hostInputToken) {
+        mWm = new WindowlessWindowManager(c.getResources().getConfiguration(), rootSurface,
+                hostInputToken);
         mViewRoot = new ViewRootImpl(c, d, mWm);
     }
 
@@ -48,5 +50,9 @@ public class WindowlessViewRoot {
         mWm.setCompletionCallback(mViewRoot.mWindow.asBinder(), (SurfaceControl.Transaction t) -> {
             t.apply();
         });
+    }
+
+    public void dispose() {
+        mViewRoot.dispatchDetachedFromWindow();
     }
 }

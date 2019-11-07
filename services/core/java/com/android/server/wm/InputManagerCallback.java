@@ -87,12 +87,20 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         ActivityRecord activity = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
+        int windowPid = INVALID_PID;
         //TODO(b/141764879) Limit scope of wm lock when input calls notifyANR
         synchronized (mService.mGlobalLock) {
             if (token != null) {
                 windowState = mService.mInputToWindowMap.get(token);
                 if (windowState != null) {
                     activity = windowState.mActivityRecord;
+                    windowPid = windowState.mSession.mPid;
+                } else {
+                    // Check if this is an embedded window and if so get the embedded app pid
+                    windowPid = mService.mEmbeddedWindowController.getOwnerPid(token);
+                    WindowState hostWindowState =
+                            mService.mEmbeddedWindowController.getHostWindow(token);
+                    aboveSystem = isWindowAboveSystem(hostWindowState);
                 }
             }
 
@@ -107,9 +115,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                 // Figure out whether this window is layered above system windows.
                 // We need to do this here to help the activity manager know how to
                 // layer its ANR dialog.
-                int systemAlertLayer = mService.mPolicy.getWindowLayerFromTypeLw(
-                        TYPE_APPLICATION_OVERLAY, windowState.mOwnerCanAddInternalSystemWindow);
-                aboveSystem = windowState.mBaseLayer > systemAlertLayer;
+                aboveSystem = isWindowAboveSystem(windowState);
             } else if (activity != null) {
                 Slog.i(TAG_WM, "Input event dispatching timed out "
                         + "sending to application " + activity.stringName
@@ -128,18 +134,17 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         if (activity != null && activity.appToken != null) {
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
-            final boolean abort = activity.keyDispatchingTimedOut(reason,
-                    (windowState != null) ? windowState.mSession.mPid : INVALID_PID);
+            final boolean abort = activity.keyDispatchingTimedOut(reason, windowPid);
             if (!abort) {
                 // The activity manager declined to abort dispatching.
                 // Wait a bit longer and timeout again later.
                 return activity.mInputDispatchingTimeoutNanos;
             }
-        } else if (windowState != null) {
+        } else if (windowState != null || windowPid != INVALID_PID) {
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
-            long timeout = mService.mAmInternal.inputDispatchingTimedOut(
-                    windowState.mSession.mPid, aboveSystem, reason);
+            long timeout = mService.mAmInternal.inputDispatchingTimedOut(windowPid, aboveSystem,
+                    reason);
             if (timeout >= 0) {
                 // The activity manager declined to abort dispatching.
                 // Wait a bit longer and timeout again later.
@@ -147,6 +152,12 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             }
         }
         return 0; // abort dispatching
+    }
+
+    private boolean isWindowAboveSystem(WindowState windowState) {
+        int systemAlertLayer = mService.mPolicy.getWindowLayerFromTypeLw(
+                TYPE_APPLICATION_OVERLAY, windowState.mOwnerCanAddInternalSystemWindow);
+        return windowState.mBaseLayer > systemAlertLayer;
     }
 
     /** Notifies that the input device configuration has changed. */

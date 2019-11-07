@@ -20,6 +20,8 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLA
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAYER;
 
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
@@ -34,6 +36,7 @@ import android.graphics.Region;
 import android.graphics.RenderNode;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -1441,6 +1444,19 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      */
     public SurfaceControl getSurfaceControl() {
         return mSurfaceControl;
+    }
+
+    /**
+     * @return The token used to identify the windows input channel.
+     * @hide
+     */
+    @TestApi
+    public @Nullable IBinder getInputToken() {
+        final ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot == null) {
+            return null;
+        }
+        return viewRoot.getInputToken();
     }
 
     /**

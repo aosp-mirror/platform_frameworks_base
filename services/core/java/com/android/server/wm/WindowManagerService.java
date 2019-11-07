@@ -224,6 +224,7 @@ import android.view.IWindowId;
 import android.view.IWindowManager;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
+import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -698,6 +699,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
+    final EmbeddedWindowController mEmbeddedWindowController;
 
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
@@ -1283,6 +1285,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 new HandlerExecutor(mH), mPropertiesChangedListener);
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
+        mEmbeddedWindowController = new EmbeddedWindowController(mGlobalLock);
     }
 
     /**
@@ -1868,10 +1871,13 @@ public class WindowManagerService extends IWindowManager.Stub
     void removeWindow(Session session, IWindow client) {
         synchronized (mGlobalLock) {
             WindowState win = windowForClientLocked(session, client, false);
-            if (win == null) {
+            if (win != null) {
+                win.removeIfPossible();
                 return;
             }
-            win.removeIfPossible();
+
+            // Remove embedded window map if the token belongs to an embedded window
+            mEmbeddedWindowController.remove(client);
         }
     }
 
@@ -1894,6 +1900,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (dc.mCurrentFocus == null) {
             dc.mWinRemovedSinceNullFocus.add(win);
         }
+        mEmbeddedWindowController.removeWindowsWithHost(win);
         mPendingRemove.remove(win);
         mResizingWindows.remove(win);
         updateNonSystemOverlayWindowsVisibilityIfNeeded(win, false /* surfaceShown */);
@@ -4574,7 +4581,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     // First notify the accessibility manager for the change so it has
-                    // the windows before the newly focused one starts firing eventgs.
+                    // the windows before the newly focused one starts firing events.
                     if (accessibilityController != null) {
                         accessibilityController.onWindowFocusChangedNotLocked(
                                 displayContent.getDisplayId());
@@ -7643,7 +7650,12 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void onPointerDownOutsideFocusLocked(IBinder touchedToken) {
-        final WindowState touchedWindow = mInputToWindowMap.get(touchedToken);
+        WindowState touchedWindow = mInputToWindowMap.get(touchedToken);
+        if (touchedWindow == null) {
+            // if a user taps outside the currently focused window onto an embedded window, treat
+            // it as if the host window was tapped.
+            touchedWindow = mEmbeddedWindowController.getHostWindow(touchedToken);
+        }
         if (touchedWindow == null || !touchedWindow.canReceiveKeys()) {
             return;
         }
@@ -7706,20 +7718,37 @@ public class WindowManagerService extends IWindowManager.Stub
      * Used by WindowlessWindowManager to enable input on SurfaceControl embedded
      * views.
      */
-    void blessInputSurface(int callingUid, int callingPid, int displayId, SurfaceControl surface,
-            InputChannel outInputChannel) {
-        String name = "Blessed Surface";
-        InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
-        InputChannel inputChannel = inputChannels[0];
-        InputChannel clientChannel = inputChannels[1];
+    void grantInputChannel(int callingUid, int callingPid, int displayId, SurfaceControl surface,
+            IWindow window, IBinder hostInputToken, InputChannel outInputChannel) {
+        final InputApplicationHandle applicationHandle;
+        final String name;
+        final InputChannel[] inputChannels;
+        final InputChannel clientChannel;
+        final InputChannel serverChannel;
+        synchronized (mGlobalLock) {
+            final WindowState hostWindow = mInputToWindowMap.get(hostInputToken);
+            if (hostWindow == null) {
+                Slog.e(TAG, "Failed to grant input channel");
+                return;
+            }
+            name = "EmbeddedWindow{ u" + UserHandle.getUserId(callingUid)
+                    + " " + hostWindow.getWindowTag() + "}";
+
+            inputChannels = InputChannel.openInputChannelPair(name);
+            serverChannel = inputChannels[0];
+            clientChannel = inputChannels[1];
+            mInputManager.registerInputChannel(serverChannel);
+            mEmbeddedWindowController.add(serverChannel.getToken(), window, hostWindow, callingUid,
+                    callingPid);
+            applicationHandle = new InputApplicationHandle(
+                hostWindow.mInputWindowHandle.inputApplicationHandle);
+        }
 
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
 
-        mInputManager.registerInputChannel(inputChannel);
-
-        InputWindowHandle h = new InputWindowHandle(null, displayId);
-        h.token = inputChannel.getToken();
+        InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
+        h.token = serverChannel.getToken();
         h.name = name;
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         h.layoutParamsType = 0;
@@ -7744,7 +7773,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // Prevent the java finalizer from breaking the input channel. But we won't
         // do any further management so we just release the java ref and let the
         // InputDispatcher hold the last ref.
-        inputChannel.release();
+        serverChannel.release();
     }
 
     /** Return whether layer tracing is enabled */
