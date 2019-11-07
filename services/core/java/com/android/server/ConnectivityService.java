@@ -6521,22 +6521,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             } catch (RemoteException ignored) {
             }
         }
-
-        // This has to happen after the notifyNetworkCallbacks as that tickles each
-        // ConnectivityManager instance so that legacy requests correctly bind dns
-        // requests to this network.  The legacy users are listening for this broadcast
-        // and will generally do a dns request so they can ensureRouteToHost and if
-        // they do that before the callbacks happen they'll use the default network.
-        //
-        // TODO: Is there still a race here? We send the broadcast
-        // after sending the callback, but if the app can receive the
-        // broadcast before the callback, it might still break.
-        //
-        // This *does* introduce a race where if the user uses the new api
-        // (notification callbacks) and then uses the old api (getNetworkInfo(type))
-        // they may get old info.  Reverse this after the old startUsing api is removed.
-        // This is on top of the multiple intent sequencing referenced in the todo above.
-        addNetworkToLegacyTypeTracker(newNetwork);
     }
 
     /**
@@ -6559,6 +6543,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (NetworkAgentInfo nai : nais) {
             rematchNetworkAndRequests(nai, now);
         }
+
+        // Now that all the callbacks have been sent, send the legacy network broadcasts
+        // as needed. This is necessary so that legacy requests correctly bind dns
+        // requests to this network. The legacy users are listening for this broadcast
+        // and will generally do a dns request so they can ensureRouteToHost and if
+        // they do that before the callbacks happen they'll use the default network.
+        //
+        // TODO: Is there still a race here? The legacy broadcast will be sent after sending
+        // callbacks, but if apps can receive the broadcast before the callback, they still might
+        // have an inconsistent view of networking.
+        //
+        // This *does* introduce a race where if the user uses the new api
+        // (notification callbacks) and then uses the old api (getNetworkInfo(type))
+        // they may get old info. Reverse this after the old startUsing api is removed.
+        // This is on top of the multiple intent sequencing referenced in the todo above.
+        for (NetworkAgentInfo nai : nais) {
+            addNetworkToLegacyTypeTracker(nai);
+        }
+
+        // Tear down all unneeded networks.
         for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
             if (unneeded(nai, UnneededFor.TEARDOWN)) {
                 if (nai.getLingerExpiry() > 0) {
