@@ -1548,6 +1548,7 @@ public class PduPersister {
     public void release() {
         Uri uri = Uri.parse(TEMPORARY_DRM_OBJECT_URI);
         SqliteWrapper.delete(mContext, mContentResolver, uri, null, null);
+        mDrmManagerClient.release();
     }
 
     /**
