@@ -170,6 +170,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.TelephonyRegistryManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
+import android.telephony.ims.ImsManager;
 import android.telephony.ims.RcsMessageManager;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -628,6 +629,14 @@ public final class SystemServiceRegistry {
                     @Override
                     public RcsMessageManager createService(ContextImpl ctx) {
                         return new RcsMessageManager(ctx.getOuterContext());
+                    }
+                });
+
+        registerService(Context.TELEPHONY_IMS_SERVICE, ImsManager.class,
+                new CachedServiceFetcher<ImsManager>() {
+                    @Override
+                    public ImsManager createService(ContextImpl ctx) {
+                        return new ImsManager(ctx.getOuterContext());
                     }
                 });
 
