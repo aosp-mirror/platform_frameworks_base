@@ -80,6 +80,9 @@ public final class CallQuality implements Parcelable {
     private int mMaxRelativeJitter;
     private int mAverageRoundTripTime;
     private int mCodecType;
+    private boolean mRtpInactivityDetected;
+    private boolean mRxSilenceDetected;
+    private boolean mTxSilenceDetected;
 
     /** @hide **/
     public CallQuality(Parcel in) {
@@ -94,6 +97,9 @@ public final class CallQuality implements Parcelable {
         mMaxRelativeJitter = in.readInt();
         mAverageRoundTripTime = in.readInt();
         mCodecType = in.readInt();
+        mRtpInactivityDetected = in.readBoolean();
+        mRxSilenceDetected = in.readBoolean();
+        mTxSilenceDetected = in.readBoolean();
     }
 
     /** @hide **/
@@ -109,7 +115,7 @@ public final class CallQuality implements Parcelable {
      * @param numRtpPacketsReceived RTP packets received from network
      * @param numRtpPacketsTransmittedLost RTP packets which were lost in network and never
      * transmitted
-     * @param numRtpPacketsNotReceived RTP packets which were lost in network and never recieved
+     * @param numRtpPacketsNotReceived RTP packets which were lost in network and never received
      * @param averageRelativeJitter average relative jitter in milliseconds
      * @param maxRelativeJitter maximum relative jitter in milliseconds
      * @param averageRoundTripTime average round trip delay in milliseconds
@@ -127,6 +133,48 @@ public final class CallQuality implements Parcelable {
             int maxRelativeJitter,
             int averageRoundTripTime,
             int codecType) {
+        this(downlinkCallQualityLevel, uplinkCallQualityLevel, callDuration,
+            numRtpPacketsTransmitted, numRtpPacketsReceived, numRtpPacketsTransmittedLost,
+            numRtpPacketsNotReceived, averageRelativeJitter, maxRelativeJitter,
+            averageRoundTripTime, codecType, false, false, false);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param callQualityLevel the call quality level (see #CallQualityLevel)
+     * @param callDuration the call duration in milliseconds
+     * @param numRtpPacketsTransmitted RTP packets sent to network
+     * @param numRtpPacketsReceived RTP packets received from network
+     * @param numRtpPacketsTransmittedLost RTP packets which were lost in network and never
+     * transmitted
+     * @param numRtpPacketsNotReceived RTP packets which were lost in network and never received
+     * @param averageRelativeJitter average relative jitter in milliseconds
+     * @param maxRelativeJitter maximum relative jitter in milliseconds
+     * @param averageRoundTripTime average round trip delay in milliseconds
+     * @param codecType the codec type
+     * @param rtpInactivityDetected True if no incoming RTP is received for a continuous duration of
+     * 4 seconds
+     * @param rxSilenceDetected True if only silence RTP packets are received for 20 seconds
+     * immediately after call is connected
+     * @param txSilenceDetected True if only silence RTP packets are sent for 20 seconds immediately
+     * after call is connected
+     */
+    public CallQuality(
+            @CallQualityLevel int downlinkCallQualityLevel,
+            @CallQualityLevel int uplinkCallQualityLevel,
+            int callDuration,
+            int numRtpPacketsTransmitted,
+            int numRtpPacketsReceived,
+            int numRtpPacketsTransmittedLost,
+            int numRtpPacketsNotReceived,
+            int averageRelativeJitter,
+            int maxRelativeJitter,
+            int averageRoundTripTime,
+            int codecType,
+            boolean rtpInactivityDetected,
+            boolean rxSilenceDetected,
+            boolean txSilenceDetected) {
         this.mDownlinkCallQualityLevel = downlinkCallQualityLevel;
         this.mUplinkCallQualityLevel = uplinkCallQualityLevel;
         this.mCallDuration = callDuration;
@@ -138,6 +186,9 @@ public final class CallQuality implements Parcelable {
         this.mMaxRelativeJitter = maxRelativeJitter;
         this.mAverageRoundTripTime = averageRoundTripTime;
         this.mCodecType = codecType;
+        this.mRtpInactivityDetected = rtpInactivityDetected;
+        this.mRxSilenceDetected = rxSilenceDetected;
+        this.mTxSilenceDetected = txSilenceDetected;
     }
 
     // getters
@@ -226,6 +277,29 @@ public final class CallQuality implements Parcelable {
     }
 
     /**
+     * Returns true if no rtp packets are received continuously for the last 4 seconds
+     */
+    public boolean isRtpInactivityDetected() {
+        return mRtpInactivityDetected;
+    }
+
+    /**
+     * Returns true if only silence rtp packets are received for a duration of 20 seconds starting
+     * at call setup
+     */
+    public boolean isIncomingSilenceDetected() {
+        return mRxSilenceDetected;
+    }
+
+    /**
+      * Returns true if only silence rtp packets are sent for a duration of 20 seconds starting at
+      * call setup
+      */
+    public boolean isOutgoingSilenceDetected() {
+        return mTxSilenceDetected;
+    }
+
+    /**
      * Returns the codec type. This value corresponds to the AUDIO_QUALITY_* constants in
      * {@link ImsStreamMediaProfile}.
      *
@@ -270,6 +344,9 @@ public final class CallQuality implements Parcelable {
                 + " maxRelativeJitter=" + mMaxRelativeJitter
                 + " averageRoundTripTime=" + mAverageRoundTripTime
                 + " codecType=" + mCodecType
+                + " rtpInactivityDetected=" + mRtpInactivityDetected
+                + " txSilenceDetected=" + mRxSilenceDetected
+                + " rxSilenceDetected=" + mTxSilenceDetected
                 + "}";
     }
 
@@ -286,7 +363,10 @@ public final class CallQuality implements Parcelable {
                 mAverageRelativeJitter,
                 mMaxRelativeJitter,
                 mAverageRoundTripTime,
-                mCodecType);
+                mCodecType,
+                mRtpInactivityDetected,
+                mRxSilenceDetected,
+                mTxSilenceDetected);
     }
 
     @Override
@@ -311,7 +391,10 @@ public final class CallQuality implements Parcelable {
                 && mAverageRelativeJitter == s.mAverageRelativeJitter
                 && mMaxRelativeJitter == s.mMaxRelativeJitter
                 && mAverageRoundTripTime == s.mAverageRoundTripTime
-                && mCodecType == s.mCodecType);
+                && mCodecType == s.mCodecType
+                && mRtpInactivityDetected == s.mRtpInactivityDetected
+                && mRxSilenceDetected == s.mRxSilenceDetected
+                && mTxSilenceDetected == s.mTxSilenceDetected);
     }
 
     /**
@@ -336,6 +419,9 @@ public final class CallQuality implements Parcelable {
         dest.writeInt(mMaxRelativeJitter);
         dest.writeInt(mAverageRoundTripTime);
         dest.writeInt(mCodecType);
+        dest.writeBoolean(mRtpInactivityDetected);
+        dest.writeBoolean(mRxSilenceDetected);
+        dest.writeBoolean(mTxSilenceDetected);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<CallQuality> CREATOR = new Parcelable.Creator() {
