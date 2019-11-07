@@ -8464,6 +8464,7 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void simulatePackageSuspendBroadcast(boolean suspend, String pkg) {
+        checkCallerIsSystemOrShell();
         // only use for testing: mimic receive broadcast that package is (un)suspended
         // but does not actually (un)suspend the package
         final Bundle extras = new Bundle();
