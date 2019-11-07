@@ -6407,6 +6407,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             } else if (newNetwork.isSatisfyingRequest(nri.request.requestId)) {
                 reassignedRequests.put(nri, null);
+            }
+        }
+
+        for (final Map.Entry<NetworkRequestInfo, NetworkAgentInfo> entry :
+                reassignedRequests.entrySet()) {
+            final NetworkRequestInfo nri = entry.getKey();
+            final NetworkAgentInfo previousSatisfier = nri.mSatisfier;
+            if (entry.getValue() == null) {
                 // If "newNetwork" is listed as satisfying "nri" but no longer satisfies "nri",
                 // mark it as no longer satisfying "nri".  Because networks are processed by
                 // rematchAllNetworksAndRequests() in descending score order, "currentNetwork" will
@@ -6419,7 +6427,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             " request " + nri.request.requestId);
                 }
                 newNetwork.removeRequest(nri.request.requestId);
-                if (currentNetwork == newNetwork) {
+                if (previousSatisfier == newNetwork) {
                     nri.mSatisfier = null;
                     if (isDefaultRequest(nri)) mDefaultNetworkNai = null;
                     sendUpdatedScoreToFactories(nri.request, null);
@@ -6438,6 +6446,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 callCallbackForRequest(nri, newNetwork, ConnectivityManager.CALLBACK_LOST, 0);
             }
         }
+
         if (isNewDefault) {
             updateDataActivityTracking(newNetwork, oldDefaultNetwork);
             // Notify system services that this network is up.
