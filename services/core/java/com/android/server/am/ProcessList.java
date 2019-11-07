@@ -1413,15 +1413,11 @@ public final class ProcessList {
 
     /**
      * @return {@code true} if process start is successful, false otherwise.
-     * @param app
-     * @param hostingRecord
-     * @param disableHiddenApiChecks
-     * @param abiOverride
      */
     @GuardedBy("mService")
     boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
-            boolean disableHiddenApiChecks, boolean mountExtStorageFull,
-            String abiOverride) {
+            boolean disableHiddenApiChecks, boolean disableTestApiChecks,
+            boolean mountExtStorageFull, String abiOverride) {
         if (app.pendingStart) {
             return true;
         }
@@ -1566,6 +1562,10 @@ public final class ProcessList {
                     throw new IllegalStateException("Invalid API policy: " + policy);
                 }
                 runtimeFlags |= policyBits;
+
+                if (disableTestApiChecks) {
+                    runtimeFlags |= Zygote.DISABLE_TEST_API_ENFORCEMENT_POLICY;
+                }
             }
 
             String useAppImageCache = SystemProperties.get(
@@ -1847,7 +1847,8 @@ public final class ProcessList {
     final boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
             String abiOverride) {
         return startProcessLocked(app, hostingRecord,
-                false /* disableHiddenApiChecks */, false /* mountExtStorageFull */, abiOverride);
+                false /* disableHiddenApiChecks */, false /* disableTestApiChecks */,
+                false /* mountExtStorageFull */, abiOverride);
     }
 
     @GuardedBy("mService")

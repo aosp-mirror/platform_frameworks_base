@@ -52,7 +52,6 @@ import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
@@ -83,6 +82,7 @@ import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.Manifest;
 import android.app.Activity;
@@ -1420,7 +1420,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // WM resizeTask must be done after the task is moved to the correct stack,
                 // because Task's setBounds() also updates dim layer's bounds, but that has
                 // dependency on the stack.
-                task.resizeWindowContainer();
+                task.resize(false /* relayout */, false /* forced */);
             }
         }
 
@@ -1885,26 +1885,22 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final ActivityStack stack =
                 mRootActivityContainer.getLaunchStack(null, aOptions, task, onTop);
         final ActivityStack currentStack = task.getStack();
-        if (currentStack != null) {
-            // Task has already been restored once. See if we need to do anything more
-            if (currentStack == stack) {
-                // Nothing else to do since it is already restored in the right stack.
-                return true;
-            }
-            // Remove current stack association, so we can re-associate the task with the
-            // right stack below.
-            currentStack.removeTask(task, "restoreRecentTaskLocked", REMOVE_TASK_MODE_MOVING);
+
+        if (currentStack == stack) {
+            // Nothing else to do since it is already restored in the right stack.
+            return true;
         }
 
-        stack.addTask(task, onTop, "restoreRecentTask");
-        // TODO: move call for creation here and other place into Stack.addTask()
-        task.createTask(onTop, true /* showForAllUsers */);
+        if (currentStack != null) {
+            // Task has already been restored once. Just re-parent it to the new stack.
+            task.reparent(stack.mTaskStack,
+                    POSITION_TOP, true /*moveParents*/, "restoreRecentTaskLocked");
+            return true;
+        }
+
+        stack.addChild(task, onTop, true /* showForAllUsers */);
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS,
                 "Added restored task=" + task + " to stack=" + stack);
-        for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
-            final ActivityRecord r = task.getChildAt(activityNdx);
-            r.setTask(task);
-        }
         return true;
     }
 

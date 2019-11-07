@@ -34,13 +34,18 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.stackdivider.DividerView;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Dispatches shortcut to System UI components
  */
+@Singleton
 public class ShortcutKeyDispatcher extends SystemUI
         implements ShortcutKeyServiceProxy.Callbacks {
 
     private static final String TAG = "ShortcutKeyDispatcher";
+    private final Divider mDivider;
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
     private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -53,8 +58,10 @@ public class ShortcutKeyDispatcher extends SystemUI
     protected final long SC_DOCK_LEFT = META_MASK | KeyEvent.KEYCODE_LEFT_BRACKET;
     protected final long SC_DOCK_RIGHT = META_MASK | KeyEvent.KEYCODE_RIGHT_BRACKET;
 
-    public ShortcutKeyDispatcher(Context context) {
+    @Inject
+    public ShortcutKeyDispatcher(Context context, Divider divider) {
         super(context);
+        mDivider = divider;
     }
 
     /**
@@ -95,7 +102,7 @@ public class ShortcutKeyDispatcher extends SystemUI
                         : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
             } else {
                 // If there is already a docked window, we respond by resizing the docking pane.
-                DividerView dividerView = getComponent(Divider.class).getView();
+                DividerView dividerView = mDivider.getView();
                 DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
                 int dividerPosition = dividerView.getCurrentPosition();
                 DividerSnapAlgorithm.SnapTarget currentTarget =

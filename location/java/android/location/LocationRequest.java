@@ -505,6 +505,23 @@ public final class LocationRequest implements Parcelable {
     }
 
     /**
+     * Returns the realtime at which this request expires, taking into account both
+     * {@link #setExpireAt(long)} and {@link #setExpireIn(long)} relative to the given realtime.
+     *
+     * @hide
+     */
+    public long getExpirationRealtimeMs(long startRealtimeMs) {
+        long expirationRealtimeMs;
+        // Check for > Long.MAX_VALUE overflow (elapsedRealtime > 0):
+        if (mExpireIn > Long.MAX_VALUE - startRealtimeMs) {
+            expirationRealtimeMs = Long.MAX_VALUE;
+        } else {
+            expirationRealtimeMs = startRealtimeMs + mExpireIn;
+        }
+        return Math.min(expirationRealtimeMs, mExpireAt);
+    }
+
+    /**
      * Set the number of location updates.
      *
      * <p>By default locations are continuously updated until the request is explicitly

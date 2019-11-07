@@ -53,8 +53,6 @@ import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STARTED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
@@ -136,13 +134,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testStackCleanupOnActivityRemoval() {
-        mTask.mTask.removeChild(mActivity);
+        mTask.removeChild(mActivity);
         verify(mStack, times(1)).onActivityRemovedFromStack(any());
     }
 
     @Test
     public void testStackCleanupOnTaskRemoval() {
-        mStack.removeTask(mTask, null /*reason*/, REMOVE_TASK_MODE_MOVING);
+        mStack.removeChild(mTask, null /*reason*/);
         // Stack should be gone on task removal.
         assertNull(mService.mRootActivityContainer.getStack(mStack.mStackId));
     }
@@ -325,7 +323,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 : ORIENTATION_PORTRAIT;
         mTask.onRequestedOverrideConfigurationChanged(newConfig);
 
-        doReturn(true).when(mTask.mTask).isDragResizing();
+        doReturn(true).when(mTask).isDragResizing();
 
         mActivity.mRelaunchReason = ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
@@ -382,7 +380,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         }
 
         // Mimic the behavior that display doesn't handle app's requested orientation.
-        final DisplayContent dc = mTask.mTask.getDisplayContent();
+        final DisplayContent dc = mTask.getDisplayContent();
         doReturn(false).when(dc).onDescendantOrientationChanged(any(), any());
         doReturn(false).when(dc).handlesOrientationChangeFromDescendant();
 
@@ -1174,7 +1172,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Empty the home stack.
         final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
         for (TaskRecord t : homeStack.getAllTasks()) {
-            homeStack.removeTask(t, "test", REMOVE_TASK_MODE_DESTROYING);
+            homeStack.removeChild(t, "test");
         }
         mActivity.finishing = true;
         doReturn(false).when(mRootActivityContainer).resumeFocusedStacksTopActivities();
@@ -1200,7 +1198,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Empty the home stack.
         final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
         for (TaskRecord t : homeStack.getAllTasks()) {
-            homeStack.removeTask(t, "test", REMOVE_TASK_MODE_DESTROYING);
+            homeStack.removeChild(t, "test");
         }
         mActivity.finishing = true;
         spyOn(mStack);

@@ -1922,11 +1922,13 @@ public class AppTransition implements Dump {
         if (taskId < 0) {
             return null;
         }
-        ArrayList<Task> tasks = new ArrayList<>();
+        final ArrayList<Task> tasks = new ArrayList<>();
         mDisplayContent.forAllTasks(task -> {
             if (task.mTaskId == taskId) {
                 tasks.add(task);
+                return true;
             }
+            return false;
         });
         return tasks.size() == 1 ? tasks.get(0) : null;
     }

@@ -19,11 +19,10 @@ package com.android.tests.rollback.host;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertThrows;
 
-import com.android.ddmlib.Log.LogLevel;
-import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +48,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                     phase));
     }
 
+    @Before
+    public void setUp() throws Exception {
+        getDevice().reboot();
+    }
+
     /**
      * Tests watchdog triggered staged rollbacks involving only apks.
      */
@@ -57,17 +61,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testBadApkOnly_Phase1");
         getDevice().reboot();
         runPhase("testBadApkOnly_Phase2");
-        try {
-            // This is expected to fail due to the device being rebooted out
-            // from underneath the test. If this fails for reasons other than
-            // the device reboot, those failures should result in failure of
-            // the testApkOnlyConfirmRollback phase.
-            CLog.logAndDisplay(LogLevel.INFO, "testBadApkOnlyTriggerRollback is expected to fail");
-            runPhase("testBadApkOnly_Phase3");
-        } catch (AssertionError e) {
-            // AssertionError is expected.
-        }
 
+        assertThrows(AssertionError.class, () -> runPhase("testBadApkOnly_Phase3"));
         getDevice().waitForDeviceAvailable();
 
         runPhase("testBadApkOnly_Phase4");

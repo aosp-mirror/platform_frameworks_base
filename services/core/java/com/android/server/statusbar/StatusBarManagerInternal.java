@@ -16,7 +16,6 @@
 
 package com.android.server.statusbar;
 
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.InsetsState.InternalInsetType;
 import android.view.WindowInsetsController.Appearance;
@@ -79,9 +78,7 @@ public interface StatusBarManagerInternal {
     void startAssist(Bundle args);
     void onCameraLaunchGestureDetected(int source);
     void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive);
-    void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis, int dockedStackVis,
-            int mask, Rect fullscreenBounds, Rect dockedBounds, boolean isNavbarColorManagedByIme,
-            String cause);
+    void setDisableFlags(int displayId, int flags, String cause);
     void toggleSplitScreen();
     void appTransitionFinished(int displayId);
 

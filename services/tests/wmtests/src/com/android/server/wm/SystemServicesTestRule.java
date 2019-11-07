@@ -437,6 +437,10 @@ public class SystemServicesTestRule implements TestRule {
             spyOn(getLockTaskController());
             spyOn(getTaskChangeNotificationController());
             initRootActivityContainerMocks();
+
+            AppWarnings appWarnings = getAppWarningsLocked();
+            spyOn(appWarnings);
+            doNothing().when(appWarnings).onStartActivity(any());
         }
 
         void initRootActivityContainerMocks() {

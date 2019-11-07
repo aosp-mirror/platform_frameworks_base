@@ -4755,6 +4755,21 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setWpa2Passphrase(@Nullable String);
   }
 
+  public final class SoftApInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getBandwidth();
+    method public int getFrequency();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CHANNEL_WIDTH_160MHZ = 6; // 0x6
+    field public static final int CHANNEL_WIDTH_20MHZ = 2; // 0x2
+    field public static final int CHANNEL_WIDTH_20MHZ_NOHT = 1; // 0x1
+    field public static final int CHANNEL_WIDTH_40MHZ = 3; // 0x3
+    field public static final int CHANNEL_WIDTH_80MHZ = 4; // 0x4
+    field public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 5; // 0x5
+    field public static final int CHANNEL_WIDTH_INVALID = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.SoftApInfo> CREATOR;
+  }
+
   public final class WifiClient implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.net.MacAddress getMacAddress();
@@ -7504,6 +7519,21 @@ package android.telephony {
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setMultiSimPolicy(int);
   }
 
+  public class CbGeoUtils {
+  }
+
+  public static interface CbGeoUtils.Geometry {
+    method public boolean contains(@NonNull android.telephony.CbGeoUtils.LatLng);
+  }
+
+  public static class CbGeoUtils.LatLng {
+    ctor public CbGeoUtils.LatLng(double, double);
+    method public double distance(@NonNull android.telephony.CbGeoUtils.LatLng);
+    method @NonNull public android.telephony.CbGeoUtils.LatLng subtract(@NonNull android.telephony.CbGeoUtils.LatLng);
+    field public final double lat;
+    field public final double lng;
+  }
+
   public abstract class CellBroadcastService extends android.app.Service {
     ctor public CellBroadcastService();
     method @CallSuper public android.os.IBinder onBind(@Nullable android.content.Intent);
@@ -8331,6 +8361,7 @@ package android.telephony {
     method public int getGeographicalScope();
     method @Nullable public String getLanguageCode();
     method @NonNull public android.telephony.SmsCbLocation getLocation();
+    method public int getMaximumWaitingDuration();
     method @Nullable public String getMessageBody();
     method public int getMessageFormat();
     method public int getMessagePriority();

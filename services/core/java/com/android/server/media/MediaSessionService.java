@@ -1316,7 +1316,6 @@ public class MediaSessionService extends SystemService implements Monitor {
          * pressed.
          *
          * @param packageName The caller's package name, obtained by Context#getPackageName()
-         * @param opPackageName The caller's op package name, obtained by Context#getOpPackageName()
          * @param sessionToken token for the session that the controller is pointing to
          * @param keyEvent media key event
          * @see #dispatchVolumeKeyEvent
@@ -1330,14 +1329,14 @@ public class MediaSessionService extends SystemService implements Monitor {
             try {
                 synchronized (mLock) {
                     MediaSessionRecord record = getMediaSessionRecordLocked(sessionToken);
-                    if (record == null) {
-                        Log.w(TAG, "Failed to find session to dispatch key event.");
-                        return false;
-                    }
-                    if (DEBUG) {
+                    if (DEBUG_KEY_EVENT) {
                         Log.d(TAG, "dispatchMediaKeyEventToSessionAsSystemService, pkg="
                                 + packageName + ", pid=" + pid + ", uid=" + uid + ", sessionToken="
                                 + sessionToken + ", event=" + keyEvent + ", session=" + record);
+                    }
+                    if (record == null) {
+                        Log.w(TAG, "Failed to find session to dispatch key event.");
+                        return false;
                     }
                     return record.sendMediaButton(packageName, pid, uid, true /* asSystemService */,
                             keyEvent, 0, null);
@@ -1688,18 +1687,18 @@ public class MediaSessionService extends SystemService implements Monitor {
             try {
                 synchronized (mLock) {
                     MediaSessionRecord record = getMediaSessionRecordLocked(sessionToken);
+                    if (DEBUG_KEY_EVENT) {
+                        Log.d(TAG, "dispatchVolumeKeyEventToSessionAsSystemService, pkg="
+                                + packageName + ", opPkg=" + opPackageName + ", pid=" + pid
+                                + ", uid=" + uid + ", sessionToken=" + sessionToken + ", event="
+                                + keyEvent + ", session=" + record);
+                    }
                     if (record == null) {
                         Log.w(TAG, "Failed to find session to dispatch key event, token="
                                 + sessionToken + ". Fallbacks to the default handling.");
                         dispatchVolumeKeyEventLocked(packageName, opPackageName, pid, uid, true,
                                 keyEvent, AudioManager.USE_DEFAULT_STREAM_TYPE, false);
                         return;
-                    }
-                    if (DEBUG) {
-                        Log.d(TAG, "dispatchVolumeKeyEventToSessionAsSystemService, pkg="
-                                + packageName + ", opPkg=" + opPackageName + ", pid=" + pid
-                                + ", uid=" + uid + ", sessionToken=" + sessionToken + ", event="
-                                + keyEvent + ", session=" + record);
                     }
                     switch (keyEvent.getAction()) {
                         case KeyEvent.ACTION_DOWN: {

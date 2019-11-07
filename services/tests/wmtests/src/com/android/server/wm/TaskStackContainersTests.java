@@ -121,7 +121,7 @@ public class TaskStackContainersTests extends WindowTestsBase {
                 false /* includingParents */);
 
         // Move the task of {@code mDisplayContent} to top.
-        stack.positionChildAt(WindowContainer.POSITION_TOP, task, true /* includingParents */);
+        stack.positionChildAt(WindowContainer.POSITION_TOP, (TaskRecord) task, true /* includingParents */);
         final int indexOfDisplayWithPinnedStack = mWm.mRoot.mChildren.indexOf(mDisplayContent);
 
         assertEquals("The testing DisplayContent should be moved to top with task",

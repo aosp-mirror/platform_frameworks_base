@@ -237,7 +237,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * This gets used during some open/close transitions as well as during a change transition
      * where it represents the starting-state snapshot.
      */
-    AppWindowThumbnail mThumbnail;
+    WindowContainerThumbnail mThumbnail;
     final Rect mTransitStartRect = new Rect();
     final Point mTmpPoint = new Point();
     protected final Rect mTmpRect = new Rect();
@@ -428,7 +428,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             parent.mTreeWeight += child.mTreeWeight;
             parent = parent.getParent();
         }
-        onChildPositionChanged();
+        onChildPositionChanged(child);
     }
 
     /**
@@ -454,7 +454,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             parent.mTreeWeight -= child.mTreeWeight;
             parent = parent.getParent();
         }
-        onChildPositionChanged();
+        onChildPositionChanged(child);
     }
 
     /**
@@ -583,7 +583,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 if (mChildren.peekLast() != child) {
                     mChildren.remove(child);
                     mChildren.add(child);
-                    onChildPositionChanged();
+                    onChildPositionChanged(child);
                 }
                 if (includingParents && getParent() != null) {
                     getParent().positionChildAt(POSITION_TOP, this /* child */,
@@ -594,7 +594,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 if (mChildren.peekFirst() != child) {
                     mChildren.remove(child);
                     mChildren.addFirst(child);
-                    onChildPositionChanged();
+                    onChildPositionChanged(child);
                 }
                 if (includingParents && getParent() != null) {
                     getParent().positionChildAt(POSITION_BOTTOM, this /* child */,
@@ -608,14 +608,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 //       doing this adjustment here and remove any adjustments in the callers.
                 mChildren.remove(child);
                 mChildren.add(position, child);
-                onChildPositionChanged();
+                onChildPositionChanged(child);
         }
     }
 
     /**
      * Notify that a child's position has changed. Possible changes are adding or removing a child.
      */
-    void onChildPositionChanged() { }
+    void onChildPositionChanged(WindowContainer child) { }
 
     /**
      * Update override configuration and recalculate full config.
@@ -1121,6 +1121,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
+    /**
+     * For all tasks at or below this container call the callback.
+     *
+     * @param callback Calls the {@link ToBooleanFunction#apply} method for each task found and
+     *                 stops the search if {@link ToBooleanFunction#apply} returns {@code true}.
+     */
+    boolean forAllTasks(ToBooleanFunction<Task> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).forAllTasks(callback)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     WindowState getWindow(Predicate<WindowState> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState w = mChildren.get(i).getWindow(callback);
@@ -1520,8 +1535,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WC#applyAnimation");
             if (okToAnimate()) {
-                Pair<AnimationAdapter, AnimationAdapter> adapters = getAnimationAdapter(lp, transit,
-                        enter, isVoiceInteraction);
+                final Pair<AnimationAdapter, AnimationAdapter> adapters = getAnimationAdapter(lp,
+                        transit, enter, isVoiceInteraction);
                 AnimationAdapter adapter = adapters.first;
                 AnimationAdapter thumbnailAdapter = adapters.second;
                 if (adapter != null) {
@@ -1580,18 +1595,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             final DisplayInfo displayInfo = getDisplayContent().getDisplayInfo();
             mTmpRect.offsetTo(mTmpPoint.x, mTmpPoint.y);
 
-            AnimationAdapter adapter = new LocalAnimationAdapter(
+            final AnimationAdapter adapter = new LocalAnimationAdapter(
                     new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect, displayInfo,
                             durationScale, true /* isAppAnimation */, false /* isThumbnail */),
                     getSurfaceAnimationRunner());
 
-            AnimationAdapter thumbnailAdapter = null;
-            if (mThumbnail != null) {
-                thumbnailAdapter = new LocalAnimationAdapter(
-                        new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect, displayInfo,
-                                durationScale, true /* isAppAnimation */, true /* isThumbnail */),
-                        getSurfaceAnimationRunner());
-            }
+            final AnimationAdapter thumbnailAdapter = mThumbnail != null
+                    ? new LocalAnimationAdapter(new WindowChangeAnimationSpec(mTransitStartRect,
+                    mTmpRect, displayInfo, durationScale, true /* isAppAnimation */,
+                    true /* isThumbnail */), getSurfaceAnimationRunner())
+                    : null;
             resultAdapters = new Pair<>(adapter, thumbnailAdapter);
             mTransit = transit;
             mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();

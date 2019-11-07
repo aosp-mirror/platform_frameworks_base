@@ -42,7 +42,7 @@ class WindowTestUtils {
                     .setUserId(userId)
                     .setStack(stack.mActivityStack)
                     .build();
-            return task.mTask;
+            return task;
         }
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
@@ -24,6 +25,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.EMPTY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 
+import static com.android.server.EventLogTags.WM_TASK_CREATED;
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.TaskProto.APP_WINDOW_TOKENS;
@@ -56,6 +58,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ToBooleanFunction;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -63,17 +66,19 @@ import java.util.function.Consumer;
 class Task extends WindowContainer<ActivityRecord> implements ConfigurationContainerListener{
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
 
-    // TODO: Track parent marks like this in WindowContainer.
-    TaskStack mStack;
+    final ActivityTaskManagerService mAtmService;
+
     /* Unique identifier for this task. */
     final int mTaskId;
     /* User for which this task was created. */
-    final int mUserId;
+    // TODO: Make final
+    int mUserId;
 
     final Rect mPreparedFrozenBounds = new Rect();
     final Configuration mPreparedFrozenMergedConfig = new Configuration();
 
     // If non-empty, bounds used to display the task during animations/interactions.
+    // TODO(b/119687367): This member is temporary.
     private final Rect mOverrideDisplayedBounds = new Rect();
 
     /** ID of the display which rotation {@link #mRotation} has. */
@@ -90,11 +95,12 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     private Rect mTmpRect2 = new Rect();
 
     // Resize mode of the task. See {@link ActivityInfo#resizeMode}
-    private int mResizeMode;
+    // Based on the {@link ActivityInfo#resizeMode} of the root activity.
+    int mResizeMode;
 
-    // Whether the task supports picture-in-picture.
-    // See {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE}
-    private boolean mSupportsPictureInPicture;
+    // Whether or not this task and its activities support PiP. Based on the
+    // {@link ActivityInfo#FLAG_SUPPORTS_PICTURE_IN_PICTURE} flag of the root activity.
+    boolean mSupportsPictureInPicture;
 
     // Whether the task is currently being drag-resized
     private boolean mDragResizing;
@@ -116,78 +122,67 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     /** @see #setCanAffectSystemUiFlags */
     private boolean mCanAffectSystemUiFlags = true;
 
-    // TODO: remove after unification
-    TaskRecord mTaskRecord;
-
-    // TODO: Remove after unification.
-    @Override
-    public void onConfigurationChanged(Configuration newParentConfig, boolean forwardToChildren) {
-        // Forward configuration changes in cases
-        // - children won't get it from TaskRecord
-        // - it's a pinned task
-        forwardToChildren &= (mTaskRecord == null) || inPinnedWindowingMode();
-        super.onConfigurationChanged(newParentConfig, forwardToChildren);
-    }
-
-    Task(int taskId, TaskStack stack, int userId, WindowManagerService service, int resizeMode,
-            boolean supportsPictureInPicture, TaskDescription taskDescription,
-            TaskRecord taskRecord) {
-        super(service);
+    Task(int taskId, TaskStack stack, int userId, int resizeMode, boolean supportsPictureInPicture,
+            TaskDescription taskDescription, ActivityTaskManagerService atm) {
+        super(atm.mWindowManager);
+        mAtmService = atm;
         mTaskId = taskId;
-        mStack = stack;
         mUserId = userId;
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
-        mTaskRecord = taskRecord;
         mTaskDescription = taskDescription;
+        EventLog.writeEvent(WM_TASK_CREATED, mTaskId,
+                stack != null ? stack.mStackId : INVALID_STACK_ID);
 
         // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
         setOrientation(SCREEN_ORIENTATION_UNSET);
-        if (mTaskRecord != null) {
-            // This can be null when we call createTaskInStack in WindowTestUtils. Remove this after
-            // unification.
-            mTaskRecord.registerConfigurationChangeListener(this);
-        } else {
-            setBounds(getResolvedOverrideBounds());
-        }
+        // TODO(task-merge): Is this really needed?
+        //setBounds(getResolvedOverrideBounds());
     }
 
     @Override
     DisplayContent getDisplayContent() {
-        return mStack != null ? mStack.getDisplayContent() : null;
+        return getTaskStack() != null ? getTaskStack().getDisplayContent() : null;
     }
 
-    private int getAdjustedAddPosition(int suggestedPosition) {
-        final int size = mChildren.size();
-        if (suggestedPosition >= size) {
-            return Math.min(size, suggestedPosition);
+    TaskStack getTaskStack() {
+        return (TaskStack) getParent();
+    }
+
+    int getAdjustedAddPosition(ActivityRecord r, int suggestedPosition) {
+        int maxPosition = mChildren.size();
+        if (!r.mTaskOverlay) {
+            // We want to place all non-overlay activities below overlays.
+            while (maxPosition > 0) {
+                final ActivityRecord current = mChildren.get(maxPosition - 1);
+                if (current.mTaskOverlay && !current.removed) {
+                    --maxPosition;
+                    continue;
+                }
+                break;
+            }
+            if (maxPosition < 0) {
+                maxPosition = 0;
+            }
         }
 
-        for (int pos = 0; pos < size && pos < suggestedPosition; ++pos) {
+        if (suggestedPosition >= maxPosition) {
+            return Math.min(maxPosition, suggestedPosition);
+        }
+
+        for (int pos = 0; pos < maxPosition && pos < suggestedPosition; ++pos) {
             // TODO: Confirm that this is the behavior we want long term.
             if (mChildren.get(pos).removed) {
                 // suggestedPosition assumes removed tokens are actually gone.
                 ++suggestedPosition;
             }
         }
-        return Math.min(size, suggestedPosition);
-    }
-
-    @Override
-    void addChild(ActivityRecord child, int position) {
-        position = getAdjustedAddPosition(position);
-        super.addChild(child, position);
-
-        // Inform the TaskRecord side of the child addition
-        // TODO(task-unify): Will be removed after task unification.
-        if (mTaskRecord != null) {
-            mTaskRecord.onChildAdded(child, position);
-        }
+        return Math.min(maxPosition, suggestedPosition);
     }
 
     @Override
     void positionChildAt(int position, ActivityRecord child, boolean includingParents) {
-        position = getAdjustedAddPosition(position);
+        position = getAdjustedAddPosition(child, position);
         super.positionChildAt(position, child, includingParents);
     }
 
@@ -206,7 +201,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             // No reason to defer removal of a Task that doesn't have any child.
             return false;
         }
-        return hasWindowsAlive() && mStack.isAnimating(TRANSITION | CHILDREN);
+        return hasWindowsAlive() && getTaskStack().isAnimating(TRANSITION | CHILDREN);
     }
 
     @Override
@@ -222,92 +217,40 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     void removeImmediately() {
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeTask");
-        if (mTaskRecord != null) {
-            mTaskRecord.unregisterConfigurationChangeListener(this);
-        }
-
         super.removeImmediately();
     }
 
-    void reparent(TaskStack stack, int position, boolean moveParents) {
-        if (stack == mStack) {
-            throw new IllegalArgumentException(
-                    "task=" + this + " already child of stack=" + mStack);
-        }
-        if (stack == null) {
-            throw new IllegalArgumentException("reparent: could not find stack.");
-        }
+    // TODO: Consolidate this with TaskRecord.reparent()
+    void reparent(TaskStack stack, int position, boolean moveParents, String reason) {
         if (DEBUG_STACK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
-                + " from stack=" + mStack);
+                + " from stack=" + getTaskStack());
         EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "reParentTask");
-        final DisplayContent prevDisplayContent = getDisplayContent();
 
-        // If we are moving from the fullscreen stack to the pinned stack
-        // then we want to preserve our insets so that there will not
-        // be a jump in the area covered by system decorations. We rely
-        // on the pinned animation to later unset this value.
-        if (stack.inPinnedWindowingMode()) {
-            mPreserveNonFloatingState = true;
-        } else {
-            mPreserveNonFloatingState = false;
+        final ActivityStack prevStack = getTaskStack().mActivityStack;
+        final boolean wasTopFocusedStack =
+                mAtmService.mRootActivityContainer.isTopDisplayFocusedStack(prevStack);
+        final ActivityDisplay prevStackDisplay = prevStack.getDisplay();
+
+        reparent(stack, position);
+
+        if (!moveParents) {
+            // Only move home stack forward if we are not going to move the new parent forward.
+            prevStack.moveHomeStackToFrontIfNeeded(wasTopFocusedStack, prevStackDisplay, reason);
         }
 
-        getParent().removeChild(this);
-        stack.addTask(this, position, showForAllUsers(), moveParents);
+        // TODO(task-merge): Remove cast.
+        stack.positionChildAt(position, (TaskRecord) this, moveParents);
 
-        // Relayout display(s).
-        final DisplayContent displayContent = stack.getDisplayContent();
-        displayContent.setLayoutNeeded();
-        if (prevDisplayContent != displayContent) {
-            onDisplayChanged(displayContent);
-            prevDisplayContent.setLayoutNeeded();
-        }
-        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+        // If we are moving from the fullscreen stack to the pinned stack then we want to preserve
+        // our insets so that there will not be a jump in the area covered by system decorations.
+        // We rely on the pinned animation to later unset this value.
+        mPreserveNonFloatingState = stack.inPinnedWindowingMode();
     }
 
     /** @see ActivityTaskManagerService#positionTaskInStack(int, int, int). */
     void positionAt(int position) {
-        mStack.positionChildAt(position, this, false /* includingParents */);
-    }
-
-    @Override
-    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        super.onParentChanged(newParent, oldParent);
-
-        // Update task bounds if needed.
-        adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
-
-        if (getWindowConfiguration().windowsAreScaleable()) {
-            // We force windows out of SCALING_MODE_FREEZE so that we can continue to animate them
-            // while a resize is pending.
-            forceWindowsScaleable(true /* force */);
-        } else {
-            forceWindowsScaleable(false /* force */);
-        }
-    }
-
-    @Override
-    void removeChild(ActivityRecord child) {
-        if (!mChildren.contains(child)) {
-            Slog.e(TAG, "removeChild: token=" + this + " not found.");
-            return;
-        }
-
-        super.removeChild(child);
-
-        // Inform the TaskRecord side of the child removal
-        // TODO(task-unify): Will be removed after task unification.
-        if (mTaskRecord != null) {
-            mTaskRecord.onChildRemoved(child);
-        }
-
-        // TODO(task-unify): Need to make this account for what we are doing in
-        // ActivityRecord.removeFromHistory so that the task isn't removed in some situations when
-        // we unify task level.
-        if (mChildren.isEmpty()) {
-            EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeActivity: last activity");
-            removeIfPossible();
-        }
+        // TODO(task-merge): Remove cast.
+        getTaskStack().positionChildAt(position, (TaskRecord) this, false /* includingParents */);
     }
 
     void setSendingToBottom(boolean toBottom) {
@@ -331,7 +274,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     @Override
     public int setBounds(Rect bounds) {
         int rotation = Surface.ROTATION_0;
-        final DisplayContent displayContent = mStack.getDisplayContent();
+        final DisplayContent displayContent = getTaskStack() != null
+                ? getTaskStack().getDisplayContent() : null;
         if (displayContent != null) {
             rotation = displayContent.getDisplayInfo().rotation;
         } else if (bounds == null) {
@@ -355,9 +299,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
         // No one in higher hierarchy handles this request, let's adjust our bounds to fulfill
         // it if possible.
-        // TODO: Move to TaskRecord after unification is done.
-        if (mTaskRecord != null && mTaskRecord.getParent() != null) {
-            mTaskRecord.onConfigurationChanged(mTaskRecord.getParent().getConfiguration());
+        if (getParent() != null) {
+            onConfigurationChanged(getParent().getConfiguration());
             return true;
         }
         return false;
@@ -379,8 +322,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     /**
-     * Sets bounds that override where the task is displayed. Used during transient operations
-     * like animation / interaction.
+     * Displayed bounds are used to set where the task is drawn at any given time. This is
+     * separate from its actual bounds so that the app doesn't see any meaningful configuration
+     * changes during transitionary periods.
      */
     void setOverrideDisplayedBounds(Rect overrideDisplayedBounds) {
         if (overrideDisplayedBounds != null) {
@@ -399,13 +343,13 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         return mOverrideDisplayedBounds;
     }
 
-    void setResizeable(int resizeMode) {
-        mResizeMode = resizeMode;
+    boolean isResizeable(boolean checkSupportsPip) {
+        return (mAtmService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
+                || (checkSupportsPip && mSupportsPictureInPicture));
     }
 
     boolean isResizeable() {
-        return ActivityInfo.isResizeableMode(mResizeMode) || mSupportsPictureInPicture
-                || mWmService.mAtmService.mForceResizableActivities;
+        return isResizeable(true /* checkSupportsPip */);
     }
 
     /**
@@ -462,6 +406,10 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         }
     }
 
+    /**
+     * Gets the current overridden displayed bounds. These will be empty if the task is not
+     * currently overriding where it is displayed.
+     */
     @Override
     public Rect getDisplayedBounds() {
         if (mOverrideDisplayedBounds.isEmpty()) {
@@ -518,7 +466,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     /** Bounds of the task to be used for dimming, as well as touch related tests. */
     public void getDimBounds(Rect out) {
-        final DisplayContent displayContent = mStack.getDisplayContent();
+        final DisplayContent displayContent = getTaskStack().getDisplayContent();
         // It doesn't matter if we in particular are part of the resize, since we couldn't have
         // a DimLayer anyway if we weren't visible.
         final boolean dockedResizing = displayContent != null
@@ -535,9 +483,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             // stack bounds and so we don't even want to use them. Even if the app should not be
             // resized the Dim should keep up with the divider.
             if (dockedResizing) {
-                mStack.getBounds(out);
+                getTaskStack().getBounds(out);
             } else {
-                mStack.getBounds(mTmpRect);
+                getTaskStack().getBounds(mTmpRect);
                 mTmpRect.intersect(getBounds());
                 out.set(mTmpRect);
             }
@@ -550,9 +498,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     void setDragResizing(boolean dragResizing, int dragResizeMode) {
         if (mDragResizing != dragResizing) {
             // No need to check if the mode is allowed if it's leaving dragResize
-            if (dragResizing && !DragResizeMode.isModeAllowedForStack(mStack, dragResizeMode)) {
+            if (dragResizing && !DragResizeMode.isModeAllowedForStack(getTaskStack(), dragResizeMode)) {
                 throw new IllegalArgumentException("Drag resize mode not allow for stack stackId="
-                        + mStack.mStackId + " dragResizeMode=" + dragResizeMode);
+                        + getTaskStack().mStackId + " dragResizeMode=" + dragResizeMode);
             }
             mDragResizing = dragResizing;
             mDragResizeMode = dragResizeMode;
@@ -577,7 +525,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         setDragResizing(resizing, DRAG_RESIZE_MODE_DOCKED_DIVIDER);
     }
 
-    private void adjustBoundsForDisplayChangeIfNeeded(final DisplayContent displayContent) {
+    void adjustBoundsForDisplayChangeIfNeeded(final DisplayContent displayContent) {
         if (displayContent == null) {
             return;
         }
@@ -618,9 +566,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
         displayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (setBounds(mTmpRect2) != BOUNDS_CHANGE_NONE) {
-            if (mTaskRecord != null) {
-                mTaskRecord.requestResize(getBounds(), RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
-            }
+            mAtmService.resizeTask(mTaskId, getBounds(), RESIZE_MODE_SYSTEM_SCREEN_ROTATION);
         }
     }
 
@@ -644,7 +590,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
      */
     boolean isFloating() {
         return getWindowConfiguration().tasksAreFloating()
-                && !mStack.isAnimatingBoundsToFullscreen() && !mPreserveNonFloatingState;
+                && !getTaskStack().isAnimatingBoundsToFullscreen() && !mPreserveNonFloatingState;
     }
 
     @Override
@@ -758,7 +704,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     void onSnapshotChanged(ActivityManager.TaskSnapshot snapshot) {
-        mTaskRecord.onSnapshotChanged(snapshot);
+        mAtmService.getTaskChangeNotificationController().notifyTaskSnapshotChanged(
+                mTaskId, snapshot);
     }
 
     TaskDescription getTaskDescription() {
@@ -773,6 +720,11 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     @Override
     void forAllTasks(Consumer<Task> callback) {
         callback.accept(this);
+    }
+
+    @Override
+    boolean forAllTasks(ToBooleanFunction<Task> callback) {
+        return callback.apply(this);
     }
 
     /**
@@ -792,11 +744,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     void dontAnimateDimExit() {
         mDimmer.dontAnimateExit();
-    }
-
-    @Override
-    public String toString() {
-        return "{taskId=" + mTaskId + " appTokens=" + mChildren + "}";
     }
 
     String getName() {
@@ -825,9 +772,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         }
     }
 
-    @CallSuper
-    @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    // TODO(proto-merge): Remove once protos for TaskRecord and Task are merged.
+    void writeToProtoInnerTaskOnly(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
             return;
@@ -843,8 +789,10 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         proto.write(FILLS_PARENT, matchParentBounds());
         getBounds().writeToProto(proto, BOUNDS);
         mOverrideDisplayedBounds.writeToProto(proto, DISPLAYED_BOUNDS);
-        proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
-        proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
+        if (mSurfaceControl != null) {
+            proto.write(SURFACE_WIDTH, mSurfaceControl.getWidth());
+            proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
+        }
         proto.end(token);
     }
 

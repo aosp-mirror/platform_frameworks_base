@@ -36,6 +36,7 @@ struct fields_t {
     jfieldID context;
     jmethodID frontendInitID;
     jmethodID filterInitID;
+    jmethodID onFrontendEventID;
 };
 
 static fields_t gFields;
@@ -52,7 +53,32 @@ Return<void> FilterCallback::onFilterStatus(const DemuxFilterStatus /*status*/) 
     return Void();
 }
 
+/////////////// FrontendCallback ///////////////////////
+
+FrontendCallback::FrontendCallback(jweak tunerObj, FrontendId id) : mObject(tunerObj), mId(id) {}
+
+Return<void> FrontendCallback::onEvent(FrontendEventType frontendEventType) {
+    ALOGD("FrontendCallback::onEvent, type=%d", frontendEventType);
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(
+            mObject,
+            gFields.onFrontendEventID,
+            (jint)frontendEventType);
+    return Void();
+}
+Return<void> FrontendCallback::onDiseqcMessage(const hidl_vec<uint8_t>& /*diseqcMessage*/) {
+    ALOGD("FrontendCallback::onDiseqcMessage");
+    return Void();
+}
+
+Return<void> FrontendCallback::onScanMessage(
+        FrontendScanMessageType type, const FrontendScanMessage& /*message*/) {
+    ALOGD("FrontendCallback::onScanMessage, type=%d", type);
+    return Void();
+}
+
 /////////////// Tuner ///////////////////////
+
 sp<ITuner> JTuner::mTuner;
 
 JTuner::JTuner(JNIEnv *env, jobject thiz)
@@ -89,11 +115,10 @@ sp<ITuner> JTuner::getTunerService() {
 
 jobject JTuner::getFrontendIds() {
     ALOGD("JTuner::getFrontendIds()");
-    hidl_vec<FrontendId> feIds;
     mTuner->getFrontendIds([&](Result, const hidl_vec<FrontendId>& frontendIds) {
-        feIds = frontendIds;
+        mFeIds = frontendIds;
     });
-    if (feIds.size() == 0) {
+    if (mFeIds.size() == 0) {
         ALOGW("Frontend isn't available");
         return NULL;
     }
@@ -106,21 +131,25 @@ jobject JTuner::getFrontendIds() {
     jclass integerClazz = env->FindClass("java/lang/Integer");
     jmethodID intInit = env->GetMethodID(integerClazz, "<init>", "(I)V");
 
-    for (int i=0; i < feIds.size(); i++) {
-       jobject idObj = env->NewObject(integerClazz, intInit, feIds[i]);
+    for (int i=0; i < mFeIds.size(); i++) {
+       jobject idObj = env->NewObject(integerClazz, intInit, mFeIds[i]);
        env->CallBooleanMethod(obj, arrayListAdd, idObj);
     }
     return obj;
 }
 
 jobject JTuner::openFrontendById(int id) {
+    sp<IFrontend> fe;
     mTuner->openFrontendById(id, [&](Result, const sp<IFrontend>& frontend) {
-        mFe = frontend;
+        fe = frontend;
     });
-    if (mFe == nullptr) {
+    if (fe == nullptr) {
         ALOGE("Failed to open frontend");
         return NULL;
     }
+    mFe = fe;
+    sp<FrontendCallback> feCb = new FrontendCallback(mObject, id);
+    fe->setCallback(feCb);
 
     jint jId = (jint) id;
     JNIEnv *env = AndroidRuntime::getJNIEnv();
@@ -128,6 +157,7 @@ jobject JTuner::openFrontendById(int id) {
     return env->NewObject(
             env->FindClass("android/media/tv/tuner/Tuner$Frontend"),
             gFields.frontendInitID,
+            mObject,
             (jint) jId);
 }
 
@@ -210,8 +240,11 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
     gFields.context = env->GetFieldID(clazz, "mNativeContext", "J");
     CHECK(gFields.context != NULL);
 
+    gFields.onFrontendEventID = env->GetMethodID(clazz, "onFrontendEvent", "(I)V");
+
     jclass frontendClazz = env->FindClass("android/media/tv/tuner/Tuner$Frontend");
-    gFields.frontendInitID = env->GetMethodID(frontendClazz, "<init>", "(I)V");
+    gFields.frontendInitID =
+            env->GetMethodID(frontendClazz, "<init>", "(Landroid/media/tv/tuner/Tuner;I)V");
 
     jclass filterClazz = env->FindClass("android/media/tv/tuner/Tuner$Filter");
     gFields.filterInitID =

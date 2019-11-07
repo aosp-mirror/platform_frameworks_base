@@ -84,7 +84,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskStack extends WindowContainer<Task> implements
+public class TaskStack extends WindowContainer<TaskRecord> implements
         BoundsAnimationTarget, ConfigurationContainerListener {
     /** Minimum size of an adjusted stack bounds relative to original stack bounds. Used to
      * restrict IME adjustment so that a min portion of top stack remains visible.*/
@@ -102,7 +102,6 @@ public class TaskStack extends WindowContainer<Task> implements
     private Rect mTmpRect3 = new Rect();
 
     /** For Pinned stack controlling. */
-    private Rect mTmpFromBounds = new Rect();
     private Rect mTmpToBounds = new Rect();
 
     /** Stack bounds adjusted to screen content area (taking into account IM windows, etc.) */
@@ -116,7 +115,6 @@ public class TaskStack extends WindowContainer<Task> implements
 
     /** ActivityRecords that are exiting, but still on screen for animations. */
     final ArrayList<ActivityRecord> mExitingActivities = new ArrayList<>();
-    final ArrayList<ActivityRecord> mTmpActivities = new ArrayList<>();
 
     /** Detach this stack from its display when animation completes. */
     // TODO: maybe tie this to WindowContainer#removeChild some how...
@@ -330,7 +328,7 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     /** Bounds of the stack with other system factors taken into consideration. */
-    public void getDimBounds(Rect out) {
+    void getDimBounds(Rect out) {
         getBounds(out);
     }
 
@@ -482,11 +480,6 @@ public class TaskStack extends WindowContainer<Task> implements
                 dividerSize);
     }
 
-    // TODO: Checkout the call points of this method and the ones below to see how they can fit in WC.
-    void addTask(Task task, int position) {
-        addTask(task, position, task.showForAllUsers(), true /* moveParents */);
-    }
-
     /**
      * Put a Task in this stack. Used for adding only.
      * When task is added to top of the stack, the entire branch of the hierarchy (including stack
@@ -495,22 +488,19 @@ public class TaskStack extends WindowContainer<Task> implements
      * @param position Target position to add the task to.
      * @param showForAllUsers Whether to show the task regardless of the current user.
      */
-    void addTask(Task task, int position, boolean showForAllUsers, boolean moveParents) {
-        final TaskStack currentStack = task.mStack;
-        // TODO: We pass stack to task's constructor, but we still need to call this method.
-        // This doesn't make sense, mStack will already be set equal to "this" at this point.
-        if (currentStack != null && currentStack.mStackId != mStackId) {
-            throw new IllegalStateException("Trying to add taskId=" + task.mTaskId
-                    + " to stackId=" + mStackId
-                    + ", but it is already attached to stackId=" + task.mStack.mStackId);
-        }
-
+    void addChild(TaskRecord task, int position, boolean showForAllUsers, boolean moveParents) {
         // Add child task.
-        task.mStack = this;
         addChild(task, null);
 
         // Move child to a proper position, as some restriction for position might apply.
-        positionChildAt(position, task, moveParents /* includingParents */, showForAllUsers);
+        position = positionChildAt(
+                position, task, moveParents /* includingParents */, showForAllUsers);
+        mActivityStack.onChildAdded(task, position);
+    }
+
+    @Override
+    void addChild(TaskRecord task, int position) {
+        addChild(task, position, task.showForAllUsers(), false /* includingParents */);
     }
 
     void positionChildAt(Task child, int position) {
@@ -527,7 +517,7 @@ public class TaskStack extends WindowContainer<Task> implements
         getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
-    void positionChildAtTop(Task child, boolean includingParents) {
+    void positionChildAtTop(TaskRecord child, boolean includingParents) {
         if (child == null) {
             // TODO: Fix the call-points that cause this to happen.
             return;
@@ -542,7 +532,7 @@ public class TaskStack extends WindowContainer<Task> implements
         displayContent.layoutAndAssignWindowLayersIfNeeded();
     }
 
-    void positionChildAtBottom(Task child, boolean includingParents) {
+    void positionChildAtBottom(TaskRecord child, boolean includingParents) {
         if (child == null) {
             // TODO: Fix the call-points that cause this to happen.
             return;
@@ -557,19 +547,18 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     @Override
-    void positionChildAt(int position, Task child, boolean includingParents) {
+    void positionChildAt(int position, TaskRecord child, boolean includingParents) {
         positionChildAt(position, child, includingParents, child.showForAllUsers());
     }
 
     /**
      * Overridden version of {@link TaskStack#positionChildAt(int, Task, boolean)}. Used in
-     * {@link TaskStack#addTask(Task, int, boolean showForAllUsers, boolean)}, as it can receive
-     * showForAllUsers param from {@link AppWindowToken} instead of {@link Task#showForAllUsers()}.
+     * {@link TaskStack#addChild(Task, int, boolean showForAllUsers, boolean)}, as it can receive
+     * showForAllUsers param from {@link ActivityRecord} instead of {@link Task#showForAllUsers()}.
      */
-    private void positionChildAt(int position, Task child, boolean includingParents,
+    int positionChildAt(int position, TaskRecord child, boolean includingParents,
             boolean showForAllUsers) {
-        final int targetPosition = findPositionForTask(child, position, showForAllUsers,
-                false /* addingNew */);
+        final int targetPosition = findPositionForTask(child, position, showForAllUsers);
         super.positionChildAt(targetPosition, child, includingParents);
 
         // Log positioning.
@@ -578,6 +567,14 @@ public class TaskStack extends WindowContainer<Task> implements
 
         final int toTop = targetPosition == mChildren.size() - 1 ? 1 : 0;
         EventLog.writeEvent(EventLogTags.WM_TASK_MOVED, child.mTaskId, toTop, targetPosition);
+
+        return targetPosition;
+    }
+
+    @Override
+    void onChildPositionChanged(WindowContainer child) {
+        // TODO(task-merge): Read comment on updateTaskMovement method.
+        //((TaskRecord) child).updateTaskMovement(true);
     }
 
     void reparent(int displayId, Rect outStackBounds, boolean onTop) {
@@ -597,14 +594,13 @@ public class TaskStack extends WindowContainer<Task> implements
 
     // TODO: We should really have users as a window container in the hierarchy so that we don't
     // have to do complicated things like we are doing in this method.
-    private int findPositionForTask(Task task, int targetPosition, boolean showForAllUsers,
-            boolean addingNew) {
+    private int findPositionForTask(Task task, int targetPosition, boolean showForAllUsers) {
         final boolean canShowTask =
                 showForAllUsers || mWmService.isCurrentProfileLocked(task.mUserId);
 
         final int stackSize = mChildren.size();
         int minPosition = 0;
-        int maxPosition = addingNew ? stackSize : stackSize - 1;
+        int maxPosition = stackSize - 1;
 
         if (canShowTask) {
             minPosition = computeMinPosition(minPosition, stackSize);
@@ -615,8 +611,7 @@ public class TaskStack extends WindowContainer<Task> implements
         // preserve POSITION_BOTTOM/POSITION_TOP positions if they are still valid.
         if (targetPosition == POSITION_BOTTOM && minPosition == 0) {
             return POSITION_BOTTOM;
-        } else if (targetPosition == POSITION_TOP
-                && maxPosition == (addingNew ? stackSize : stackSize - 1)) {
+        } else if (targetPosition == POSITION_TOP && maxPosition == (stackSize - 1)) {
             return POSITION_TOP;
         }
         // Reset position based on minimum/maximum possible positions.
@@ -668,25 +663,16 @@ public class TaskStack extends WindowContainer<Task> implements
      * @param task The Task to delete.
      */
     @Override
-    void removeChild(Task task) {
+    void removeChild(TaskRecord task) {
+        if (!mChildren.contains(task)) {
+            // Not really in this stack anymore...
+            return;
+        }
         if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeChild: task=" + task);
 
         super.removeChild(task);
-        task.mStack = null;
 
-        if (mDisplayContent != null) {
-            if (mChildren.isEmpty()) {
-                getParent().positionChildAt(POSITION_BOTTOM, this, false /* includingParents */);
-            }
-            mDisplayContent.setLayoutNeeded();
-        }
-        for (int appNdx = mExitingActivities.size() - 1; appNdx >= 0; --appNdx) {
-            final ActivityRecord activity = mExitingActivities.get(appNdx);
-            if (activity.getTask() == task) {
-                activity.mIsExiting = false;
-                mExitingActivities.remove(appNdx);
-            }
-        }
+        mActivityStack.onChildRemoved(task, mDisplayContent);
     }
 
     @Override
@@ -972,7 +958,7 @@ public class TaskStack extends WindowContainer<Task> implements
         super.switchUser();
         int top = mChildren.size();
         for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
-            Task task = mChildren.get(taskNdx);
+            TaskRecord task = mChildren.get(taskNdx);
             if (mWmService.isCurrentProfileLocked(task.mUserId) || task.showForAllUsers()) {
                 mChildren.remove(taskNdx);
                 mChildren.add(task);
@@ -1298,7 +1284,7 @@ public class TaskStack extends WindowContainer<Task> implements
         super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
         proto.write(ID, mStackId);
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
-            mChildren.get(taskNdx).writeToProto(proto, TASKS, logLevel);
+            mChildren.get(taskNdx).writeToProtoInnerTaskOnly(proto, TASKS, logLevel);
         }
         proto.write(FILLS_PARENT, matchParentBounds());
         getRawBounds().writeToProto(proto, BOUNDS);

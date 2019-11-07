@@ -31,19 +31,19 @@ interface IAppOpsService {
     // be kept in sync with frameworks/native/libs/binder/include/binder/IAppOpsService.h
     // and not be reordered
     int checkOperation(int code, int uid, String packageName);
-    int noteOperation(int code, int uid, String packageName, String featureId);
-    int startOperation(IBinder token, int code, int uid, String packageName, String featureId,
-            boolean startIfModeDefault);
+    int noteOperation(int code, int uid, String packageName, @nullable String featureId);
+    int startOperation(IBinder token, int code, int uid, String packageName,
+            @nullable String featureId, boolean startIfModeDefault);
     @UnsupportedAppUsage
     void finishOperation(IBinder token, int code, int uid, String packageName,
-            String featureId);
+            @nullable String featureId);
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
     IBinder getToken(IBinder clientToken);
     int permissionToOpCode(String permission);
     int checkAudioOperation(int code, int usage, int uid, String packageName);
-    void noteAsyncOp(String callingPackageName, int uid, String packageName, int opCode,
-            String featureId, String message);
+    void noteAsyncOp(@nullable String callingPackageName, int uid, @nullable String packageName,
+            int opCode, @nullable String featureId, String message);
     boolean shouldCollectNotes(int opCode);
     void setCameraAudioRestriction(int mode);
     // End of methods also called by native code.

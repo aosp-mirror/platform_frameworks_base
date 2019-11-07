@@ -144,13 +144,16 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
+import android.view.InsetsFlags;
 import android.view.InsetsState;
+import android.view.InsetsState.InternalInsetType;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
@@ -332,8 +335,6 @@ public class DisplayPolicy {
     private int mResettingSystemUiFlags = 0;
     // Bits that we are currently always keeping cleared.
     private int mForceClearedSystemUiFlags = 0;
-    private int mLastFullscreenStackSysUiFlags;
-    private int mLastDockedStackSysUiFlags;
     private int mLastAppearance;
     private int mLastFullscreenAppearance;
     private int mLastDockedAppearance;
@@ -3172,11 +3173,6 @@ public class DisplayPolicy {
                     &= ~PolicyControl.adjustClearableFlags(win, View.SYSTEM_UI_CLEARABLE_FLAGS);
         }
 
-        final int appearance = win.mAttrs.insetsFlags.appearance;
-        final int fullscreenVisibility = updateLightStatusBarLw(0 /* vis */,
-                mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState);
-        final int dockedVisibility = updateLightStatusBarLw(0 /* vis */,
-                mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState);
         final int fullscreenAppearance = updateLightStatusBarAppearanceLw(0 /* vis */,
                 mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState);
         final int dockedAppearance = updateLightStatusBarAppearanceLw(0 /* vis */,
@@ -3190,9 +3186,9 @@ public class DisplayPolicy {
         final Pair<Integer, Boolean> result =
                 updateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
         final int visibility = result.first;
+        final int appearance = win.mAttrs.insetsFlags.appearance
+                | InsetsFlags.getAppearance(visibility);
         final int diff = visibility ^ mLastSystemUiFlags;
-        final int fullscreenDiff = fullscreenVisibility ^ mLastFullscreenStackSysUiFlags;
-        final int dockedDiff = dockedVisibility ^ mLastDockedStackSysUiFlags;
         final InsetsPolicy insetsPolicy = getInsetsPolicy();
         final boolean isFullscreen = (visibility & (View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)) != 0
@@ -3205,7 +3201,7 @@ public class DisplayPolicy {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)) != 0
                 || behavior == BEHAVIOR_SHOW_BARS_BY_SWIPE
                 || behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-        if (diff == 0 && fullscreenDiff == 0 && dockedDiff == 0
+        if (diff == 0
                 && mLastAppearance == appearance
                 && mLastFullscreenAppearance == fullscreenAppearance
                 && mLastDockedAppearance == dockedAppearance
@@ -3216,9 +3212,12 @@ public class DisplayPolicy {
                 && mLastDockedStackBounds.equals(mDockedStackBounds)) {
             return 0;
         }
+
+        // Obtains which types should show transient and which types should abort transient.
+        // If there is no transient state change, this pair will contain two empty arrays.
+        final Pair<int[], int[]> transientState = getTransientState(visibility, mLastSystemUiFlags);
+
         mLastSystemUiFlags = visibility;
-        mLastFullscreenStackSysUiFlags = fullscreenVisibility;
-        mLastDockedStackSysUiFlags = dockedVisibility;
         mLastAppearance = appearance;
         mLastFullscreenAppearance = fullscreenAppearance;
         mLastDockedAppearance = dockedAppearance;
@@ -3240,14 +3239,16 @@ public class DisplayPolicy {
             StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
             if (statusBar != null) {
                 final int displayId = getDisplayId();
-                // TODO(b/118118435): disabled flags only
-                statusBar.setSystemUiVisibility(displayId, visibility, fullscreenVisibility,
-                        dockedVisibility, 0xffffffff, fullscreenStackBounds,
-                        dockedStackBounds, isNavbarColorManagedByIme, win.toString());
-                if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                    statusBar.onSystemBarAppearanceChanged(displayId, appearance,
-                            appearanceRegions, isNavbarColorManagedByIme);
+                statusBar.setDisableFlags(displayId, visibility & StatusBarManager.DISABLE_MASK,
+                        win.toString());
+                if (transientState.first.length > 0) {
+                    statusBar.showTransient(displayId, transientState.first);
                 }
+                if (transientState.second.length > 0) {
+                    statusBar.abortTransient(displayId, transientState.second);
+                }
+                statusBar.onSystemBarAppearanceChanged(displayId, appearance,
+                        appearanceRegions, isNavbarColorManagedByIme);
                 statusBar.topAppWindowChanged(displayId, isFullscreen, isImmersive);
 
                 // TODO(b/118118435): Remove this after removing system UI visibilities.
@@ -3258,23 +3259,28 @@ public class DisplayPolicy {
         return diff;
     }
 
-    private int updateLightStatusBarLw(int vis, WindowState opaque, WindowState opaqueOrDimming) {
-        final boolean onKeyguard = isStatusBarKeyguard() && !isKeyguardOccluded();
-        final WindowState statusColorWin = onKeyguard ? mStatusBar : opaqueOrDimming;
-        if (statusColorWin != null && (statusColorWin == opaque || onKeyguard)) {
-            // If the top fullscreen-or-dimming window is also the top fullscreen, respect
-            // its light flag.
-            vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            vis |= PolicyControl.getSystemUiVisibility(statusColorWin, null)
-                    & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        } else if (statusColorWin != null && statusColorWin.isDimming()) {
-            // Otherwise if it's dimming, clear the light flag.
-            vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-        }
-        return vis;
+    private static Pair<int[], int[]> getTransientState(int vis, int oldVis) {
+        final IntArray typesToShow = new IntArray(0);
+        final IntArray typesToAbort = new IntArray(0);
+        updateTransientState(vis, oldVis, View.STATUS_BAR_TRANSIENT, TYPE_TOP_BAR, typesToShow,
+                typesToAbort);
+        updateTransientState(vis, oldVis, View.NAVIGATION_BAR_TRANSIENT,
+                InsetsState.TYPE_NAVIGATION_BAR, typesToShow, typesToAbort);
+        return Pair.create(typesToShow.toArray(), typesToAbort.toArray());
     }
 
-    private int updateLightStatusBarAppearanceLw(int appearance, WindowState opaque,
+    private static void updateTransientState(int vis, int oldVis, int transientFlag,
+            @InternalInsetType int type, IntArray typesToShow, IntArray typesToAbort) {
+        final boolean wasTransient = (oldVis & transientFlag) != 0;
+        final boolean isTransient = (vis & transientFlag) != 0;
+        if (!wasTransient && isTransient) {
+            typesToShow.add(type);
+        } else if (wasTransient && !isTransient) {
+            typesToAbort.add(type);
+        }
+    }
+
+    private int updateLightStatusBarAppearanceLw(@Appearance int appearance, WindowState opaque,
             WindowState opaqueOrDimming) {
         final boolean onKeyguard = isStatusBarKeyguard() && !isKeyguardOccluded();
         final WindowState statusColorWin = onKeyguard ? mStatusBar : opaqueOrDimming;
@@ -3282,7 +3288,10 @@ public class DisplayPolicy {
             // If the top fullscreen-or-dimming window is also the top fullscreen, respect
             // its light flag.
             appearance &= ~APPEARANCE_LIGHT_TOP_BAR;
-            appearance |= statusColorWin.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_TOP_BAR;
+            final int legacyAppearance = InsetsFlags.getAppearance(
+                    PolicyControl.getSystemUiVisibility(statusColorWin, null));
+            appearance |= (statusColorWin.mAttrs.insetsFlags.appearance | legacyAppearance)
+                    & APPEARANCE_LIGHT_TOP_BAR;
         } else if (statusColorWin != null && statusColorWin.isDimming()) {
             // Otherwise if it's dimming, clear the light flag.
             appearance &= ~APPEARANCE_LIGHT_TOP_BAR;

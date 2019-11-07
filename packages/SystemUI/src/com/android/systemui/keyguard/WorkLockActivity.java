@@ -175,7 +175,12 @@ public class WorkLockActivity extends Activity {
             credential.putExtra(EXTRA_FROM_WORK_LOCK_ACTIVITY, true);
         }
 
-        startActivityForResult(credential, REQUEST_CODE_CONFIRM_CREDENTIALS);
+        final ActivityOptions launchOptions = ActivityOptions.makeBasic();
+        launchOptions.setLaunchTaskId(getTaskId());
+        launchOptions.setTaskOverlay(true /* taskOverlay */, true /* canResume */);
+
+        startActivityForResult(credential, REQUEST_CODE_CONFIRM_CREDENTIALS,
+                launchOptions.toBundle());
     }
 
     @Override

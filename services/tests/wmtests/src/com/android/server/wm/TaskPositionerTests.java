@@ -66,7 +66,6 @@ public class TaskPositionerTests extends WindowTestsBase {
     private int mMinVisibleWidth;
     private int mMinVisibleHeight;
     private TaskPositioner mPositioner;
-    private WindowState mWindow;
 
     @Before
     public void setUp() {
@@ -79,18 +78,18 @@ public class TaskPositionerTests extends WindowTestsBase {
         // This should be the same calculation as the TaskPositioner uses.
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, dm);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, dm);
+        removeGlobalMinSizeRestriction();
 
-        mPositioner = new TaskPositioner(mWm, mock(IActivityTaskManager.class));
-        mPositioner.register(mDisplayContent);
+        WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "window");
+        mPositioner = new TaskPositioner(mWm, mWm.mAtmService);
 
-        mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
-        mPositioner.mTask = mWindow.getTask();
-        mWindow.getStack().setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mPositioner.register(mDisplayContent, win);
+
+        win.getStack().setWindowingMode(WINDOWING_MODE_FREEFORM);
     }
 
     @After
     public void tearDown() {
-        mWindow = null;
         mPositioner = null;
     }
 
@@ -121,8 +120,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         mPositioner.mTask.setBounds(r, true);
 
         // Start a drag resize starting upper left.
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */, r.left - MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */,
+                r.left - MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
         assertBoundsEquals(r, mPositioner.getWindowDragBounds());
 
         // Drag to a good landscape size.
@@ -148,8 +147,8 @@ public class TaskPositionerTests extends WindowTestsBase {
                 mPositioner.getWindowDragBounds());
 
         // Start a drag resize left and see that only the left coord changes..
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */, r.left - MOUSE_DELTA_X, midY);
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */,
+                r.left - MOUSE_DELTA_X, midY);
 
         // Drag to the left.
         mPositioner.resizeDrag(0.0f, midY);
@@ -183,8 +182,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         mPositioner.mTask.setBounds(r, true);
 
         // Drag upper left.
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */, r.left - MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */,
+                r.left - MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
         mPositioner.resizeDrag(0.0f, 0.0f);
         assertNotEquals(r.left, mPositioner.getWindowDragBounds().left);
         assertEquals(r.right, mPositioner.getWindowDragBounds().right);
@@ -192,8 +191,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         assertEquals(r.bottom, mPositioner.getWindowDragBounds().bottom);
 
         // Drag upper.
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */, midX, r.top - MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */, midX,
+                r.top - MOUSE_DELTA_Y);
         mPositioner.resizeDrag(0.0f, 0.0f);
         assertEquals(r.left, mPositioner.getWindowDragBounds().left);
         assertEquals(r.right, mPositioner.getWindowDragBounds().right);
@@ -201,8 +200,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         assertEquals(r.bottom, mPositioner.getWindowDragBounds().bottom);
 
         // Drag upper right.
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */, r.right + MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */,
+                r.right + MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
         mPositioner.resizeDrag(r.right + 100, 0.0f);
         assertEquals(r.left, mPositioner.getWindowDragBounds().left);
         assertNotEquals(r.right, mPositioner.getWindowDragBounds().right);
@@ -210,8 +209,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         assertEquals(r.bottom, mPositioner.getWindowDragBounds().bottom);
 
         // Drag right.
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */, r.right + MOUSE_DELTA_X, midY);
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */,
+                r.right + MOUSE_DELTA_X, midY);
         mPositioner.resizeDrag(r.right + 100, 0.0f);
         assertEquals(r.left, mPositioner.getWindowDragBounds().left);
         assertNotEquals(r.right, mPositioner.getWindowDragBounds().right);
@@ -219,8 +218,7 @@ public class TaskPositionerTests extends WindowTestsBase {
         assertEquals(r.bottom, mPositioner.getWindowDragBounds().bottom);
 
         // Drag bottom right.
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */,
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */,
                 r.right + MOUSE_DELTA_X, r.bottom + MOUSE_DELTA_Y);
         mPositioner.resizeDrag(r.right + 100, r.bottom + 100);
         assertEquals(r.left, mPositioner.getWindowDragBounds().left);
@@ -229,8 +227,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         assertNotEquals(r.bottom, mPositioner.getWindowDragBounds().bottom);
 
         // Drag bottom.
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */, midX, r.bottom + MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */, midX,
+                r.bottom + MOUSE_DELTA_Y);
         mPositioner.resizeDrag(r.right + 100, r.bottom + 100);
         assertEquals(r.left, mPositioner.getWindowDragBounds().left);
         assertEquals(r.right, mPositioner.getWindowDragBounds().right);
@@ -238,8 +236,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         assertNotEquals(r.bottom, mPositioner.getWindowDragBounds().bottom);
 
         // Drag bottom left.
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */, r.left - MOUSE_DELTA_X, r.bottom + MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */,
+                r.left - MOUSE_DELTA_X, r.bottom + MOUSE_DELTA_Y);
         mPositioner.resizeDrag(0.0f, r.bottom + 100);
         assertNotEquals(r.left, mPositioner.getWindowDragBounds().left);
         assertEquals(r.right, mPositioner.getWindowDragBounds().right);
@@ -247,8 +245,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         assertNotEquals(r.bottom, mPositioner.getWindowDragBounds().bottom);
 
         // Drag left.
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                false /* preserveOrientation */, r.left - MOUSE_DELTA_X, midY);
+        mPositioner.startDrag(true /* resizing */, false /* preserveOrientation */,
+                r.left - MOUSE_DELTA_X, midY);
         mPositioner.resizeDrag(0.0f, r.bottom + 100);
         assertNotEquals(r.left, mPositioner.getWindowDragBounds().left);
         assertEquals(r.right, mPositioner.getWindowDragBounds().right);
@@ -265,8 +263,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         final Rect r = new Rect(100, 220, 700, 520);
         mPositioner.mTask.setBounds(r, true);
 
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                true /* preserveOrientation */, r.left - MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /* resizing */, true /* preserveOrientation */,
+                r.left - MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
         assertBoundsEquals(r, mPositioner.getWindowDragBounds());
 
         // Drag to a good landscape size.
@@ -304,8 +302,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         final int midY = (r.top + r.bottom) / 2;
         mPositioner.mTask.setBounds(r, true);
 
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                true /* preserveOrientation */, r.left - MOUSE_DELTA_X, midY);
+        mPositioner.startDrag(true /* resizing */, true /* preserveOrientation */,
+                r.left - MOUSE_DELTA_X, midY);
 
         // Drag to the left.
         mPositioner.resizeDrag(0.0f, midY);
@@ -345,8 +343,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         final int midX = (r.left + r.right) / 2;
         mPositioner.mTask.setBounds(r, true);
 
-        mPositioner.startDrag(mWindow, true /*resizing*/,
-                true /*preserveOrientation*/, midX, r.top - MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /*resizing*/, true /*preserveOrientation*/, midX,
+                r.top - MOUSE_DELTA_Y);
 
         // Drag to the left (no change).
         mPositioner.resizeDrag(0.0f, r.top);
@@ -381,8 +379,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         final Rect r = new Rect(330, 100, 630, 600);
         mPositioner.mTask.setBounds(r, true);
 
-        mPositioner.startDrag(mWindow, true /*resizing*/,
-                true /*preserveOrientation*/, r.left - MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /*resizing*/, true /*preserveOrientation*/,
+                r.left - MOUSE_DELTA_X, r.top - MOUSE_DELTA_Y);
         assertBoundsEquals(r, mPositioner.getWindowDragBounds());
 
         // Drag to a good landscape size.
@@ -415,8 +413,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         final int midY = (r.top + r.bottom) / 2;
         mPositioner.mTask.setBounds(r, true);
 
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                true /* preserveOrientation */, r.left - MOUSE_DELTA_X, midY);
+        mPositioner.startDrag(true /* resizing */, true /* preserveOrientation */,
+                r.left - MOUSE_DELTA_X, midY);
 
         // Drag to the left.
         mPositioner.resizeDrag(0.0f, midY);
@@ -458,8 +456,8 @@ public class TaskPositionerTests extends WindowTestsBase {
         final int midX = (r.left + r.right) / 2;
         mPositioner.mTask.setBounds(r, true);
 
-        mPositioner.startDrag(mWindow, true /* resizing */,
-                true /* preserveOrientation */, midX, r.top - MOUSE_DELTA_Y);
+        mPositioner.startDrag(true /* resizing */, true /* preserveOrientation */, midX,
+                r.top - MOUSE_DELTA_Y);
 
         // Drag to the left (no change).
         mPositioner.resizeDrag(0.0f, r.top);
@@ -493,10 +491,7 @@ public class TaskPositionerTests extends WindowTestsBase {
                         + ") " + Log.getStackTraceString(new Throwable()));
             }
         }
-        assertEquals("left", expected.left, actual.left);
-        assertEquals("right", expected.right, actual.right);
-        assertEquals("top", expected.top, actual.top);
-        assertEquals("bottom", expected.bottom, actual.bottom);
+        assertEquals(expected, actual);
     }
 
     @FlakyTest(bugId = 129492888)
@@ -504,7 +499,7 @@ public class TaskPositionerTests extends WindowTestsBase {
     public void testFinishingMovingWhenBinderDied() {
         spyOn(mWm.mTaskPositioningController);
 
-        mPositioner.startDrag(mWindow, false, false, 0 /* startX */, 0 /* startY */);
+        mPositioner.startDrag(false, false, 0 /* startX */, 0 /* startY */);
         verify(mWm.mTaskPositioningController, never()).finishTaskPositioning();
         mPositioner.binderDied();
         verify(mWm.mTaskPositioningController).finishTaskPositioning();

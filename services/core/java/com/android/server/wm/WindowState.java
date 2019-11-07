@@ -638,7 +638,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mIsDimming = false;
 
     private @Nullable InsetsSourceProvider mControllableInsetProvider;
-    private InsetsState mClientInsetsState = new InsetsState();
+    private InsetsState mClientInsetsState;
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
     private KeyInterceptionInfo mKeyInterceptionInfo;
@@ -767,6 +767,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSeq = seq;
         mPowerManagerWrapper = powerManagerWrapper;
         mForceSeamlesslyRotate = token.mRoundedCornerOverlay;
+        mClientInsetsState =
+                getDisplayContent().getInsetsStateController().getInsetsForDispatch(this);
         if (DEBUG) {
             Slog.v(TAG, "Window " + this + " client=" + c.asBinder()
                             + " token=" + token + " (" + mAttrs.token + ")" + " params=" + a);
@@ -1281,7 +1283,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // notify the client of frame changes in this case. Not only is it a lot of churn, but
         // the frame may not correspond to the surface size or the onscreen area at various
         // phases in the animation, and the client will become sad and confused.
-        if (task != null && task.mStack.isAnimatingBounds()) {
+        if (task != null && task.getTaskStack().isAnimatingBounds()) {
             return;
         }
 
@@ -1421,8 +1423,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     TaskStack getStack() {
         Task task = getTask();
         if (task != null) {
-            if (task.mStack != null) {
-                return task.mStack;
+            if (task.getTaskStack() != null) {
+                return task.getTaskStack();
             }
         }
         // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
@@ -1441,7 +1443,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         bounds.setEmpty();
         mTmpRect.setEmpty();
         if (intersectWithStackBounds) {
-            final TaskStack stack = task.mStack;
+            final TaskStack stack = task.getTaskStack();
             if (stack != null) {
                 stack.getDimBounds(mTmpRect);
             } else {
@@ -1843,8 +1845,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int top = mWindowFrames.mFrame.top;
         final Task task = getTask();
         final boolean adjustedForMinimizedDockOrIme = task != null
-                && (task.mStack.isAdjustedForMinimizedDockedStack()
-                || task.mStack.isAdjustedForIme());
+                && (task.getTaskStack().isAdjustedForMinimizedDockedStack()
+                || task.getTaskStack().isAdjustedForIme());
         if (mToken.okToAnimate()
                 && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                 && !isDragResizing() && !adjustedForMinimizedDockOrIme
@@ -1880,7 +1882,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isObscuringDisplay() {
         Task task = getTask();
-        if (task != null && task.mStack != null && !task.mStack.fillsParent()) {
+        if (task != null && task.getTaskStack() != null && !task.getTaskStack().fillsParent()) {
             return false;
         }
         return isOpaqueDrawn() && fillsDisplay();
@@ -2299,8 +2301,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void applyAdjustForImeIfNeeded() {
         final Task task = getTask();
-        if (task != null && task.mStack != null && task.mStack.isAdjustedForIme()) {
-            task.mStack.applyAdjustForImeIfNeeded(task);
+        if (task != null && task.getTaskStack() != null && task.getTaskStack().isAdjustedForIme()) {
+            task.getTaskStack().applyAdjustForImeIfNeeded(task);
         }
     }
 
@@ -2631,7 +2633,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        return mActivityRecord.getTask().mStack.shouldIgnoreInput()
+        return mActivityRecord.getTask().getTaskStack().shouldIgnoreInput()
                 || mActivityRecord.hiddenRequested
                 || isAnimatingToRecents();
     }
@@ -3151,7 +3153,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final TaskStack stack = task.mStack;
+        final TaskStack stack = task.getTaskStack();
         if (stack == null) {
             return;
         }
@@ -3165,7 +3167,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final TaskStack stack = task.mStack;
+        final TaskStack stack = task.getTaskStack();
         if (stack == null) {
             return;
         }

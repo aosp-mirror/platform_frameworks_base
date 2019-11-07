@@ -33,6 +33,7 @@ import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -122,6 +123,15 @@ public class SystemUIFactory {
     public StatusBarKeyguardViewManager createStatusBarKeyguardViewManager(Context context,
             ViewMediatorCallback viewMediatorCallback, LockPatternUtils lockPatternUtils) {
         return new StatusBarKeyguardViewManager(context, viewMediatorCallback, lockPatternUtils);
+    }
+
+    /**
+     * Creates an instance of ScreenshotNotificationSmartActionsProvider.
+     * This method is overridden in vendor specific implementation of Sys UI.
+     */
+    public ScreenshotNotificationSmartActionsProvider
+            createScreenshotNotificationSmartActionsProvider() {
+        return new ScreenshotNotificationSmartActionsProvider();
     }
 
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,

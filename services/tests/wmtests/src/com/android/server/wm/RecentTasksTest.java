@@ -885,7 +885,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         final int taskId = task.mTaskId;
         mRecentTasks.add(task);
         // Only keep the task in RecentTasks.
-        task.removeWindowContainer();
+        task.removeIfPossible();
         mStack.remove();
 
         // The following APIs should not restore task from recents to the active list.

@@ -1148,53 +1148,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    // TODO(task-unify): Remove once TaskRecord and Task are unified.
     TaskRecord getTaskRecord() {
         return task;
-    }
-
-    /**
-     * Sets reference to the {@link TaskRecord} the {@link ActivityRecord} will treat as its parent.
-     * Note that this does not actually add the {@link ActivityRecord} as a {@link TaskRecord}
-     * children. However, this method will clean up references to this {@link ActivityRecord} in
-     * {@link ActivityStack}.
-     * @param task The new parent {@link TaskRecord}.
-     */
-    // TODO(task-unify): Can be remove after task level unification. Callers can just use addChild
-    void setTask(TaskRecord task) {
-        // Do nothing if the {@link TaskRecord} is the same as the current {@link getTaskRecord}.
-        if (task != null && task == getTaskRecord()) {
-            return;
-        }
-
-        final ActivityStack oldStack = getActivityStack();
-        final ActivityStack newStack = task != null ? task.getStack() : null;
-
-        // Inform old stack (if present) of activity removal and new stack (if set) of activity
-        // addition.
-        if (oldStack != newStack) {
-            if (oldStack != null) {
-                oldStack.onActivityRemovedFromStack(this);
-            }
-
-            if (newStack != null) {
-                newStack.onActivityAddedToStack(this);
-            }
-        }
-
-        final TaskRecord oldTask = this.task;
-        this.task = task;
-
-        // This is attaching the activity to the task which we only want to do once.
-        // TODO(task-unify): Need to re-work after unifying the task level since it will already
-        // have a parent then. Just need to restructure the re-parent case not to do this. NOTE that
-        // the reparenting flag passed in can't be used directly for this as it isn't set in
-        // ActivityRecord#reparent() case that ends up calling this method.
-        if (task != null && getParent() == null) {
-            task.addChild(this);
-        } else {
-            onParentChanged(task, oldTask);
-        }
     }
 
     /**
@@ -1212,7 +1167,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     TaskStack getStack() {
         final Task task = getTask();
         if (task != null) {
-            return task.mStack;
+            return task.getTaskStack();
         } else {
             return null;
         }
@@ -1220,8 +1175,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        final TaskRecord oldTask = (oldParent != null) ? ((Task) oldParent).mTaskRecord : null;
-        final TaskRecord newTask = (newParent != null) ? ((Task) newParent).mTaskRecord : null;
+        final TaskRecord oldTask = oldParent != null ? (TaskRecord) oldParent : null;
+        final TaskRecord newTask = newParent != null ? (TaskRecord) newParent : null;
         this.task = newTask;
 
         super.onParentChanged(newParent, oldParent);
@@ -1230,14 +1185,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (oldParent == null && newParent != null) {
             // First time we are adding the activity to the system.
-            // TODO(task-unify): See if mVoiceInteraction variable is really needed after task level
-            // unification.
-            mVoiceInteraction = task.mTaskRecord != null && task.mTaskRecord.voiceSession != null;
+            mVoiceInteraction = newTask.voiceSession != null;
             mInputDispatchingTimeoutNanos = getInputDispatchingTimeoutLocked(this) * 1000000L;
             onDisplayChanged(task.getDisplayContent());
-            if (task.mTaskRecord != null) {
-                task.mTaskRecord.updateOverrideConfigurationFromLaunchBounds();
-            }
+            // TODO(b/36505427): Maybe this call should be moved inside
+            // updateOverrideConfiguration()
+            newTask.updateOverrideConfigurationFromLaunchBounds();
             // Make sure override configuration is up-to-date before using to create window
             // controller.
             updateSizeCompatMode();
@@ -1257,8 +1210,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (getDisplayContent() != null) {
                 getDisplayContent().mClosingApps.remove(this);
             }
-        } else if (mLastParent != null && mLastParent.mStack != null) {
-            task.mStack.mExitingActivities.remove(this);
+        } else if (mLastParent != null && mLastParent.getTaskStack() != null) {
+            task.getTaskStack().mExitingActivities.remove(this);
         }
         final TaskStack stack = getStack();
 
@@ -1279,8 +1232,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Inform old stack (if present) of activity removal and new stack (if set) of activity
         // addition.
         if (oldStack != newStack) {
-            // TODO(task-unify): Might be better to use onChildAdded and onChildRemoved signal for
-            // this once task level is unified.
             if (oldStack !=  null) {
                 oldStack.onActivityRemovedFromStack(this);
             }
@@ -1964,15 +1915,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.i(WM_DEBUG_ADD_REMOVE, "reparent: moving activity=%s"
                 + " to task=%d at %d", this, task.mTaskId, position);
-
-        reparent(newTask.getTask(), position);
-    }
-
-    // TODO(task-unify): Remove once Task level is unified.
-    void onParentChanged(TaskRecord newParent, TaskRecord oldParent) {
-        onParentChanged(
-                newParent != null ? newParent.mTask : null,
-                oldParent != null ? oldParent.mTask : null);
+        reparent(newTask, position);
     }
 
     private boolean isHomeIntent(Intent intent) {
@@ -2051,7 +1994,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * @return Stack value from current task, null if there is no task.
      */
-    // TODO: Remove once ActivityStack and TaskStack are unified.
+    // TODO(stack-unify): Remove once ActivityStack and TaskStack are unified.
     <T extends ActivityStack> T getActivityStack() {
         return task != null ? (T) task.getStack() : null;
     }
@@ -2339,7 +2282,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /** Finish all activities in the task with the same affinity as this one. */
     void finishActivityAffinity() {
-        final ArrayList<ActivityRecord> activities = getTaskRecord().mActivities;
+        final ArrayList<ActivityRecord> activities = getTaskRecord().mChildren;
         for (int index = activities.indexOf(this); index >= 0; --index) {
             final ActivityRecord cur = activities.get(index);
             if (!Objects.equals(cur.taskAffinity, taskAffinity)) {
@@ -2451,7 +2394,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                     mUserId, System.identityHashCode(this),
                     task.mTaskId, shortComponentName, reason);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
+            final ArrayList<ActivityRecord> activities = task.mChildren;
             final int index = activities.indexOf(this);
             if (index < (task.getChildCount() - 1)) {
                 if ((intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
@@ -2505,7 +2448,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // When finishing the activity preemptively take the snapshot before the app window
                 // is marked as hidden and any configuration changes take place
                 if (mAtmService.mWindowManager.mTaskSnapshotController != null) {
-                    final ArraySet<Task> tasks = Sets.newArraySet(task.mTask);
+                    final ArraySet<Task> tasks = Sets.newArraySet(task);
                     mAtmService.mWindowManager.mTaskSnapshotController.snapshotTasks(tasks);
                     mAtmService.mWindowManager.mTaskSnapshotController
                             .addSkipClosingAppSnapshotTasks(tasks);
@@ -2547,7 +2490,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // In this case, we can set the visibility of all the task overlay activities when
                 // we detect the last one is finishing to keep them in sync.
                 if (task.onlyHasTaskOverlayActivities(true /* excludeFinishing */)) {
-                    for (ActivityRecord taskOverlay : task.mActivities) {
+                    for (int i = task.getChildCount() - 1; i >= 0 ; --i) {
+                        final ActivityRecord taskOverlay = task.getChildAt(i);
                         if (!taskOverlay.mTaskOverlay) {
                             continue;
                         }
@@ -2819,8 +2763,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /** Note: call {@link #cleanUp(boolean, boolean)} before this method. */
-    // TODO(task-unify): Look into consolidating this with TaskRecord.removeChild once we unify
-    // task level.
     void removeFromHistory(String reason) {
         finishActivityResults(Activity.RESULT_CANCELED, null /* resultData */);
         makeFinishingLocked();
@@ -4668,7 +4610,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Check if position in task allows to become paused
-        final int positionInTask = task.mActivities.indexOf(this);
+        final int positionInTask = task.mChildren.indexOf(this);
         if (positionInTask == -1) {
             throw new IllegalStateException("Activity not found in its task");
         }
@@ -5396,7 +5338,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return INVALID_TASK_ID;
         }
         final TaskRecord task = r.task;
-        final int activityNdx = task.mActivities.indexOf(r);
+        final int activityNdx = task.mChildren.indexOf(r);
         if (activityNdx < 0
                 || (onlyRoot && activityNdx > task.findRootIndex(true /* effectiveRoot */))) {
             return INVALID_TASK_ID;
@@ -5760,7 +5702,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     boolean isWaitingForTransitionStart() {
         final DisplayContent dc = getDisplayContent();
-        // TODO: Test for null can be removed once unification is done.
+        // TODO(display-unify): Test for null can be removed once unification is done.
         if (dc == null) return false;
         return dc.mAppTransition.isTransitionSet()
                 && (dc.mOpeningApps.contains(this)
@@ -5815,7 +5757,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mWmService.mTaskSnapshotController.createTaskSnapshot(
                             task, 1 /* scaleFraction */);
             if (snapshot != null) {
-                mThumbnail = new AppWindowThumbnail(mWmService.mSurfaceFactory, t, this,
+                mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory, t, this,
                         snapshot.getGraphicBuffer(), true /* relative */);
             }
         }
@@ -5924,8 +5866,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         clearThumbnail();
-        mThumbnail = new AppWindowThumbnail(mWmService.mSurfaceFactory, getPendingTransaction(),
-                this, thumbnailHeader);
+        mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory,
+                getPendingTransaction(), this, thumbnailHeader);
         mThumbnail.startAnimation(getPendingTransaction(), loadThumbnailAnimation(thumbnailHeader));
     }
 
@@ -5953,7 +5895,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (thumbnail == null) {
             return;
         }
-        mThumbnail = new AppWindowThumbnail(mWmService.mSurfaceFactory,
+        mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory,
                 getPendingTransaction(), this, thumbnail);
         final Animation animation =
                 getDisplayContent().mAppTransition.createCrossProfileAppsThumbnailAnimationLocked(
@@ -6101,7 +6043,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @VisibleForTesting
-    AppWindowThumbnail getThumbnail() {
+    WindowContainerThumbnail getThumbnail() {
         return mThumbnail;
     }
 
@@ -6568,8 +6510,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // If the changes come from change-listener, the incoming parent configuration is
                 // still the old one. Make sure their orientations are the same to reduce computing
                 // the compatibility bounds for the intermediate state.
-                && (task.mTaskRecord == null || task.mTaskRecord
-                .getConfiguration().orientation == newParentConfig.orientation)) {
+                && (task.getConfiguration().orientation == newParentConfig.orientation)) {
             final Rect taskBounds = task.getBounds();
             // Since we only center the activity horizontally, if only the fixed height is smaller
             // than its container, the override bounds don't need to take effect.
@@ -6887,8 +6828,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             preserveWindow &= isResizeOnlyChange(changes);
             final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());
             if (hasResizeChange) {
-                final boolean isDragResizing =
-                        getTaskRecord().getTask().isDragResizing();
+                final boolean isDragResizing = getTaskRecord().isDragResizing();
                 mRelaunchReason = isDragResizing ? RELAUNCH_REASON_FREE_RESIZE
                         : RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
             } else {

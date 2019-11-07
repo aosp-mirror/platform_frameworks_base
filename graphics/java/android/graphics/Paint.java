@@ -1114,7 +1114,7 @@ public class Paint {
      * Return the width for stroking.
      * <p />
      * A value of 0 strokes in hairline mode.
-     * Hairlines always draws a single pixel independent of the canva's matrix.
+     * Hairlines always draws a single pixel independent of the canvas's matrix.
      *
      * @return the paint's stroke width, used whenever the paint's style is
      *         Stroke or StrokeAndFill.
@@ -1126,7 +1126,7 @@ public class Paint {
     /**
      * Set the width for stroking.
      * Pass 0 to stroke in hairline mode.
-     * Hairlines always draws a single pixel independent of the canva's matrix.
+     * Hairlines always draws a single pixel independent of the canvas's matrix.
      *
      * @param width set the paint's stroke width, used whenever the paint's
      *              style is Stroke or StrokeAndFill.
@@ -1958,8 +1958,8 @@ public class Paint {
      * <code>
      *   Paint paint = new Paint();
      *   paint.setStartHyphenEdit(Paint.START_HYPHEN_EDIT_INSERT_HYPHEN);
-     *   paint.measureText("abc", 0, 3);  // Returns the width of "‐abc"
-     *   Canvas.drawText("abc", 0, 3, 0f, 0f, paint);  // Draws "‐abc"
+     *   paint.measureText("abc", 0, 3);  // Returns the width of "-abc"
+     *   Canvas.drawText("abc", 0, 3, 0f, 0f, paint);  // Draws "-abc"
      * </code>
      * </pre>
      *
@@ -1985,8 +1985,8 @@ public class Paint {
      * <code>
      *   Paint paint = new Paint();
      *   paint.setEndHyphenEdit(Paint.END_HYPHEN_EDIT_INSERT_HYPHEN);
-     *   paint.measureText("abc", 0, 3);  // Returns the width of "abc‐"
-     *   Canvas.drawText("abc", 0, 3, 0f, 0f, paint);  // Draws "abc‐"
+     *   paint.measureText("abc", 0, 3);  // Returns the width of "abc-"
+     *   Canvas.drawText("abc", 0, 3, 0f, 0f, paint);  // Draws "abc-"
      * </code>
      * </pre>
      *

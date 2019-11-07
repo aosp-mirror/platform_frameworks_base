@@ -85,7 +85,6 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.Scr
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYING;
-import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -1996,7 +1995,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return false;
                 }
                 final TaskRecord task = r.getTaskRecord();
-                int index = task.mActivities.lastIndexOf(r);
+                int index = task.mChildren.lastIndexOf(r);
                 if (index > 0) {
                     ActivityRecord under = task.getChildAt(index - 1);
                     under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
@@ -2221,18 +2220,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "getTaskBounds: taskId=" + taskId + " not found");
                     return rect;
                 }
-                if (task.getStack() != null) {
-                    // Return the bounds from window manager since it will be adjusted for various
-                    // things like the presense of a docked stack for tasks that aren't resizeable.
-                    task.getWindowContainerBounds(rect);
-                } else {
-                    // Task isn't in window manager yet since it isn't associated with a stack.
-                    // Return the persist value from activity manager
-                    if (!task.matchParentBounds()) {
-                        rect.set(task.getBounds());
-                    } else if (task.mLastNonFullscreenBounds != null) {
-                        rect.set(task.mLastNonFullscreenBounds);
-                    }
+                if (task.getParent() != null) {
+                    rect.set(task.getBounds());
+                } else if (task.mLastNonFullscreenBounds != null) {
+                    rect.set(task.mLastNonFullscreenBounds);
                 }
             }
         } finally {
@@ -2249,7 +2240,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final TaskRecord tr = mRootActivityContainer.anyTaskForId(id,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
             if (tr != null) {
-                return tr.mTaskDescription;
+                return tr.getTaskDescription();
             }
         }
         return null;
@@ -3168,10 +3159,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         null /* voiceSession */, null /* voiceInteractor */, !ON_TOP);
                 if (!mRecentTasks.addToBottom(task)) {
                     // The app has too many tasks already and we can't add any more
-                    stack.removeTask(task, "addAppTask", REMOVE_TASK_MODE_DESTROYING);
+                    stack.removeChild(task, "addAppTask");
                     return INVALID_TASK_ID;
                 }
-                task.mTaskDescription.copyFrom(description);
+                task.getTaskDescription().copyFrom(description);
 
                 // TODO: Send the thumbnail to WM to store it.
 
@@ -4489,7 +4480,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "cancelTaskWindowTransition: taskId=" + taskId + " not found");
                     return;
                 }
-                task.cancelWindowTransition();
+                task.cancelTaskWindowTransition();
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

@@ -27,14 +27,13 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
-#include <binder/IServiceManager.h>
 #include <binder/Parcel.h>
 #include <binder/PersistableBundle.h>
 #include <cutils/properties.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaErrors.h>
+#include <mediadrm/DrmUtils.h>
 #include <mediadrm/IDrm.h>
-#include <mediadrm/IMediaDrmService.h>
 
 using ::android::os::PersistableBundle;
 
@@ -486,20 +485,7 @@ JDrm::~JDrm() {
 
 // static
 sp<IDrm> JDrm::MakeDrm() {
-    sp<IServiceManager> sm = defaultServiceManager();
-
-    sp<IBinder> binder = sm->getService(String16("media.drm"));
-    sp<IMediaDrmService> service = interface_cast<IMediaDrmService>(binder);
-    if (service == NULL) {
-        return NULL;
-    }
-
-    sp<IDrm> drm = service->makeDrm();
-    if (drm == NULL || (drm->initCheck() != OK && drm->initCheck() != NO_INIT)) {
-        return NULL;
-    }
-
-    return drm;
+    return DrmUtils::MakeDrm();
 }
 
 // static
@@ -535,6 +521,40 @@ void JDrm::notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj) 
         Mutex::Autolock lock(mNotifyLock);
         listener->notify(eventType, extra, obj);
     }
+}
+
+void JDrm::sendEvent(
+        DrmPlugin::EventType eventType,
+        const hardware::hidl_vec<uint8_t> &sessionId,
+        const hardware::hidl_vec<uint8_t> &data) {
+    Parcel obj;
+    DrmUtils::WriteByteArray(obj, sessionId);
+    DrmUtils::WriteByteArray(obj, data);
+    notify(eventType, 0, &obj);
+}
+
+void JDrm::sendExpirationUpdate(
+        const hardware::hidl_vec<uint8_t> &sessionId,
+        int64_t expiryTimeInMS) {
+    Parcel obj;
+    DrmUtils::WriteExpirationUpdateToParcel(obj, sessionId, expiryTimeInMS);
+    notify(DrmPlugin::kDrmPluginEventExpirationUpdate, 0, &obj);
+}
+
+void JDrm::sendKeysChange(
+        const hardware::hidl_vec<uint8_t> &sessionId,
+        const std::vector<DrmKeyStatus> &keyStatusList,
+        bool hasNewUsableKey) {
+    Parcel obj;
+    DrmUtils::WriteKeysChange(obj, sessionId, keyStatusList, hasNewUsableKey);
+    notify(DrmPlugin::kDrmPluginEventKeysChange, 0, &obj);
+}
+
+void JDrm::sendSessionLostState(
+        const hardware::hidl_vec<uint8_t> &sessionId) {
+    Parcel obj;
+    DrmUtils::WriteByteArray(obj, sessionId);
+    notify(DrmPlugin::kDrmPluginEventSessionLostState, 0, &obj);
 }
 
 void JDrm::disconnect() {
