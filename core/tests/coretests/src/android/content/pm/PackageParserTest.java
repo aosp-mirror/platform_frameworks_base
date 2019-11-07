@@ -508,7 +508,12 @@ public class PackageParserTest {
         apexInfo.modulePath = apexFile.getPath();
         apexInfo.versionCode = 191000070;
         int flags = PackageManager.GET_META_DATA | PackageManager.GET_SIGNING_CERTIFICATES;
-        PackageInfo pi = PackageParser.generatePackageInfoFromApex(apexInfo, flags);
+
+        PackageParser pp = new PackageParser();
+        Package p = pp.parsePackage(apexFile, flags, false);
+        PackageParser.collectCertificates(p, false);
+        PackageInfo pi = PackageParser.generatePackageInfo(p, apexInfo, flags);
+
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
         assertTrue(pi.applicationInfo.enabled);
         assertEquals(28, pi.applicationInfo.targetSdkVersion);
