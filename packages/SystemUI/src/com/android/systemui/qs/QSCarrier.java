@@ -65,6 +65,8 @@ public class QSCarrier extends LinearLayout {
         mMobileRoaming = findViewById(R.id.mobile_roaming);
         mCarrierText = findViewById(R.id.qs_carrier_text);
 
+        mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
+
         int colorForeground = Utils.getColorAttrDefaultColor(mContext,
                 android.R.attr.colorForeground);
         mColorForegroundStateList = ColorStateList.valueOf(colorForeground);
@@ -78,7 +80,6 @@ public class QSCarrier extends LinearLayout {
             ColorStateList colorStateList = ColorStateList.valueOf(
                     mDualToneHandler.getSingleColor(mColorForegroundIntensity));
             mMobileRoaming.setImageTintList(colorStateList);
-            mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
             mMobileSignal.setImageTintList(colorStateList);
             mMobileSignal.setImageLevel(state.mobileSignalIconId);
 
