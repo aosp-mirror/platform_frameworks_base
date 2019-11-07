@@ -358,7 +358,8 @@ class RootActivityContainer extends ConfigurationContainer
             boolean fromHomeKey) {
         // Fallback to top focused display if the displayId is invalid.
         if (displayId == INVALID_DISPLAY) {
-            displayId = getTopDisplayFocusedStack().mDisplayId;
+            final ActivityStack stack = getTopDisplayFocusedStack();
+            displayId = stack != null ? stack.mDisplayId : DEFAULT_DISPLAY;
         }
 
         Intent homeIntent = null;
