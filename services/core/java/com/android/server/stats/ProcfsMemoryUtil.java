@@ -15,28 +15,22 @@
  */
 package com.android.server.stats;
 
+import static android.os.Process.PROC_OUT_STRING;
+
 import android.annotation.Nullable;
-import android.os.FileUtils;
-import android.util.Slog;
+import android.os.Process;
 
-import com.android.internal.annotations.VisibleForTesting;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.BiConsumer;
 
 final class ProcfsMemoryUtil {
-    private static final String TAG = "ProcfsMemoryUtil";
-
-    private static final Pattern STATUS_MEMORY_STATS =
-            Pattern.compile(String.join(
-                    ".*",
-                    "Uid:\\s*(\\d+)\\s*",
-                    "VmHWM:\\s*(\\d+)\\s*kB",
-                    "VmRSS:\\s*(\\d+)\\s*kB",
-                    "RssAnon:\\s*(\\d+)\\s*kB",
-                    "VmSwap:\\s*(\\d+)\\s*kB"), Pattern.DOTALL);
+    private static final int[] CMDLINE_OUT = new int[] { PROC_OUT_STRING };
+    private static final String[] STATUS_KEYS = new String[] {
+            "Uid:",
+            "VmHWM:",
+            "VmRSS:",
+            "RssAnon:",
+            "VmSwap:"
+    };
 
     private ProcfsMemoryUtil() {}
 
@@ -46,30 +40,21 @@ final class ProcfsMemoryUtil {
      */
     @Nullable
     static MemorySnapshot readMemorySnapshotFromProcfs(int pid) {
-        return parseMemorySnapshotFromStatus(readFile("/proc/" + pid + "/status"));
-    }
-
-    @VisibleForTesting
-    @Nullable
-    static MemorySnapshot parseMemorySnapshotFromStatus(String contents) {
-        if (contents.isEmpty()) {
+        long[] output = new long[STATUS_KEYS.length];
+        output[0] = -1;
+        Process.readProcLines("/proc/" + pid + "/status", STATUS_KEYS, output);
+        if (output[0] == -1 || (output[3] == 0 && output[4] == 0)) {
+            // Could not open file or anon rss / swap are 0 indicating the process is in a zombie
+            // state.
             return null;
         }
-        try {
-            final Matcher matcher = STATUS_MEMORY_STATS.matcher(contents);
-            if (matcher.find()) {
-                final MemorySnapshot snapshot = new MemorySnapshot();
-                snapshot.uid = Integer.parseInt(matcher.group(1));
-                snapshot.rssHighWaterMarkInKilobytes = Integer.parseInt(matcher.group(2));
-                snapshot.rssInKilobytes = Integer.parseInt(matcher.group(3));
-                snapshot.anonRssInKilobytes = Integer.parseInt(matcher.group(4));
-                snapshot.swapInKilobytes = Integer.parseInt(matcher.group(5));
-                return snapshot;
-            }
-        } catch (NumberFormatException e) {
-            Slog.e(TAG, "Failed to parse value", e);
-        }
-        return null;
+        final MemorySnapshot snapshot = new MemorySnapshot();
+        snapshot.uid = (int) output[0];
+        snapshot.rssHighWaterMarkInKilobytes = (int) output[1];
+        snapshot.rssInKilobytes = (int) output[2];
+        snapshot.anonRssInKilobytes = (int) output[3];
+        snapshot.swapInKilobytes = (int) output[4];
+        return snapshot;
     }
 
     /**
@@ -78,30 +63,26 @@ final class ProcfsMemoryUtil {
      * Returns content of /proc/pid/cmdline (e.g. /system/bin/statsd) or an empty string
      * if the file is not available.
      */
-    public static String readCmdlineFromProcfs(int pid) {
-        return parseCmdline(readFile("/proc/" + pid + "/cmdline"));
-    }
-
-    /**
-     * Parses cmdline out of the contents of the /proc/pid/cmdline file in procfs.
-     *
-     * Parsing is required to strip anything after the first null byte.
-     */
-    @VisibleForTesting
-    static String parseCmdline(String contents) {
-        int firstNullByte = contents.indexOf("\0");
-        if (firstNullByte == -1) {
-            return contents;
-        }
-        return contents.substring(0, firstNullByte);
-    }
-
-    private static String readFile(String path) {
-        try {
-            final File file = new File(path);
-            return FileUtils.readTextFile(file, 0 /* max */, null /* ellipsis */);
-        } catch (IOException e) {
+    static String readCmdlineFromProcfs(int pid) {
+        String[] cmdline = new String[1];
+        if (!Process.readProcFile("/proc/" + pid + "/cmdline", CMDLINE_OUT, cmdline, null, null)) {
             return "";
+        }
+        return cmdline[0];
+    }
+
+    static void forEachPid(BiConsumer<Integer, String> func) {
+        int[] pids = new int[1024];
+        pids = Process.getPids("/proc", pids);
+        for (int pid : pids) {
+            if (pid < 0) {
+                return;
+            }
+            String cmdline = readCmdlineFromProcfs(pid);
+            if (cmdline.isEmpty()) {
+                continue;
+            }
+            func.accept(pid, cmdline);
         }
     }
 
