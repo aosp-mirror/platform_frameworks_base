@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 
+import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -178,6 +179,13 @@ public class ActivityStartController {
             options.setLaunchActivityType(ACTIVITY_TYPE_HOME);
         }
         options.setLaunchDisplayId(displayId);
+
+        final ActivityDisplay display =
+                mService.mRootActivityContainer.getActivityDisplay(displayId);
+        // Make sure home stack exist on display.
+        final ActivityStack homeStack =
+                display.getOrCreateStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+
         mLastHomeActivityStartResult = obtainStarter(intent, "startHomeActivity: " + reason)
                 .setOutActivity(tmpOutRecord)
                 .setCallingUid(0)
@@ -185,10 +193,7 @@ public class ActivityStartController {
                 .setActivityOptions(options.toBundle())
                 .execute();
         mLastHomeActivityStartRecord = tmpOutRecord[0];
-        final ActivityDisplay display =
-                mService.mRootActivityContainer.getActivityDisplay(displayId);
-        final ActivityStack homeStack = display != null ? display.getHomeStack() : null;
-        if (homeStack != null && homeStack.mInResumeTopActivity) {
+        if (homeStack.mInResumeTopActivity) {
             // If we are in resume section already, home activity will be initialized, but not
             // resumed (to avoid recursive resume) and will stay that way until something pokes it
             // again. We need to schedule another resume.
