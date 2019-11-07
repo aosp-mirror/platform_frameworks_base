@@ -1881,7 +1881,10 @@ class Task extends WindowContainer<WindowContainer> {
 
         if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED
                 || inOutConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
-            if (insideParentBounds && mStack != null) {
+            if (insideParentBounds && WindowConfiguration.isFloating(windowingMode)) {
+                mTmpNonDecorBounds.set(mTmpFullBounds);
+                mTmpStableBounds.set(mTmpFullBounds);
+            } else if (insideParentBounds && mStack != null) {
                 final DisplayInfo di = new DisplayInfo();
                 mStack.getDisplay().mDisplay.getDisplayInfo(di);
 
