@@ -252,6 +252,9 @@ public final class Settings {
     /** @hide */
     public static final String EXTRA_NETWORK_TEMPLATE = "network_template";
 
+    /** @hide */
+    public static final String KEY_CONFIG_SET_RETURN = "config_set_return";
+
     /**
      * An int extra specifying a subscription ID.
      *
@@ -2435,13 +2438,14 @@ public final class Settings {
                 args.putString(CALL_METHOD_PREFIX_KEY, prefix);
                 args.putSerializable(CALL_METHOD_FLAGS_KEY, keyValues);
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                cp.call(cr.getPackageName(), cr.getFeatureId(), mProviderHolder.mUri.getAuthority(),
+                Bundle bundle = cp.call(cr.getPackageName(), cr.getFeatureId(),
+                        mProviderHolder.mUri.getAuthority(),
                         mCallSetAllCommand, null, args);
+                return bundle.getBoolean(KEY_CONFIG_SET_RETURN);
             } catch (RemoteException e) {
                 // Not supported by the remote side
                 return false;
             }
-            return true;
         }
 
         @UnsupportedAppUsage
@@ -13893,14 +13897,18 @@ public final class Settings {
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static boolean setStrings(@NonNull ContentResolver resolver, @NonNull String namespace,
-                @NonNull Map<String, String> keyValues) {
+                @NonNull Map<String, String> keyValues) throws DeviceConfig.BadConfigException {
             HashMap<String, String> compositeKeyValueMap = new HashMap<>(keyValues.keySet().size());
             for (Map.Entry<String, String> entry : keyValues.entrySet()) {
                 compositeKeyValueMap.put(
                         createCompositeName(namespace, entry.getKey()), entry.getValue());
             }
-            return sNameValueCache.setStringsForPrefix(resolver, createPrefix(namespace),
-                    compositeKeyValueMap);
+            // If can't set given configuration that means it's bad
+            if (!sNameValueCache.setStringsForPrefix(resolver, createPrefix(namespace),
+                    compositeKeyValueMap)) {
+                throw new DeviceConfig.BadConfigException();
+            }
+            return true;
         }
 
         /**
