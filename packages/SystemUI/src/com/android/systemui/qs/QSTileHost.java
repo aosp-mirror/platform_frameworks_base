@@ -33,7 +33,6 @@ import android.util.Log;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.dagger.qualifiers.MainHandler;
@@ -60,6 +59,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
@@ -88,7 +88,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final StatusBarIconController mIconController;
     private final ArrayList<QSFactory> mQsFactories = new ArrayList<>();
     private int mCurrentUser;
-    private StatusBar mStatusBar;
+    private final Optional<StatusBar> mStatusBarOptional;
 
     private QSColorController mQSColorController = QSColorController.Companion.getInstance();
 
@@ -102,7 +102,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             TunerService tunerService,
             Provider<AutoTileManager> autoTiles,
             DumpController dumpController,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            Optional<StatusBar> statusBarOptional) {
         mIconController = iconController;
         mContext = context;
         mTunerService = tunerService;
@@ -111,6 +112,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mBroadcastDispatcher = broadcastDispatcher;
 
         mServices = new TileServices(this, bgLooper, mBroadcastDispatcher);
+        mStatusBarOptional = statusBarOptional;
 
         defaultFactory.setHost(this);
         mQsFactories.add(defaultFactory);
@@ -185,26 +187,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
 
     @Override
     public void collapsePanels() {
-        if (mStatusBar == null) {
-            mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
-        }
-        mStatusBar.postAnimateCollapsePanels();
+        mStatusBarOptional.ifPresent(StatusBar::postAnimateCollapsePanels);
     }
 
     @Override
     public void forceCollapsePanels() {
-        if (mStatusBar == null) {
-            mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
-        }
-        mStatusBar.postAnimateForceCollapsePanels();
+        mStatusBarOptional.ifPresent(StatusBar::postAnimateForceCollapsePanels);
     }
 
     @Override
     public void openPanels() {
-        if (mStatusBar == null) {
-            mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
-        }
-        mStatusBar.postAnimateOpenPanels();
+        mStatusBarOptional.ifPresent(StatusBar::postAnimateOpenPanels);
     }
 
     @Override

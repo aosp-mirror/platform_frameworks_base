@@ -45,6 +45,7 @@ import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoTileManager;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -57,6 +58,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Optional;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -100,7 +103,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(QSFactoryImpl.class), new Handler(), Looper.myLooper(),
                 mock(PluginManager.class), mock(TunerService.class),
                 () -> mock(AutoTileManager.class), mock(DumpController.class),
-                mock(BroadcastDispatcher.class));
+                mock(BroadcastDispatcher.class), Optional.of(mock(StatusBar.class)));
         qs.setHost(host);
 
         qs.setListening(true);

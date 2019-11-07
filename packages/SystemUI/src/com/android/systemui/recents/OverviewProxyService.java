@@ -56,7 +56,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Dumpable;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipUI;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
@@ -85,6 +84,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
+
 /**
  * Class to send information from overview to launcher with a binder.
  */
@@ -103,6 +104,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private final Context mContext;
     private final PipUI mPipUI;
+    private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
     private final Optional<Divider> mDividerOptional;
     private SysUiState mSysUiState;
     private final Handler mHandler;
@@ -139,11 +141,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> {
-                    StatusBar statusBar = SysUiServiceProvider.getComponent(mContext,
-                            StatusBar.class);
-                    if (statusBar != null) {
-                        statusBar.showScreenPinningRequest(taskId, false /* allowCancel */);
-                    }
+                    mStatusBarOptionalLazy.ifPresent(
+                            statusBarLazy -> statusBarLazy.get().showScreenPinningRequest(taskId,
+                                    false /* allowCancel */));
                 });
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -178,25 +178,25 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             long token = Binder.clearCallingIdentity();
             try {
                 // TODO move this logic to message queue
-                mHandler.post(()->{
-                    StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
-                    if (bar != null) {
-
+                mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
+                    mHandler.post(()-> {
+                        StatusBar statusBar = statusBarLazy.get();
                         int action = event.getActionMasked();
                         if (action == ACTION_DOWN) {
                             mInputFocusTransferStarted = true;
                             mInputFocusTransferStartY = event.getY();
                             mInputFocusTransferStartMillis = event.getEventTime();
-                            bar.onInputFocusTransfer(mInputFocusTransferStarted, 0 /* velocity */);
+                            statusBar.onInputFocusTransfer(
+                                    mInputFocusTransferStarted, 0 /* velocity */);
                         }
                         if (action == ACTION_UP || action == ACTION_CANCEL) {
                             mInputFocusTransferStarted = false;
-                            bar.onInputFocusTransfer(mInputFocusTransferStarted,
+                            statusBar.onInputFocusTransfer(mInputFocusTransferStarted,
                                     (event.getY() - mInputFocusTransferStartY)
                                     / (event.getEventTime() - mInputFocusTransferStartMillis));
                         }
                         event.recycle();
-                    }
+                    });
                 });
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -477,9 +477,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public OverviewProxyService(Context context, DeviceProvisionedController provisionController,
             NavigationBarController navBarController, NavigationModeController navModeController,
             StatusBarWindowController statusBarWinController, SysUiState sysUiState, PipUI pipUI,
-            Optional<Divider> dividerOptional) {
+            Optional<Divider> dividerOptional, Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
         mContext = context;
         mPipUI = pipUI;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mHandler = new Handler();
         mNavBarController = navBarController;
         mStatusBarWinController = statusBarWinController;
@@ -594,11 +595,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void cleanupAfterDeath() {
         if (mInputFocusTransferStarted) {
             mHandler.post(()-> {
-                StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
-                if (bar != null) {
+                mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
                     mInputFocusTransferStarted = false;
-                    bar.onInputFocusTransfer(false, 0 /* velocity */);
-                }
+                    statusBarLazy.get().onInputFocusTransfer(false, 0 /* velocity */);
+                });
             });
         }
         startConnectionToCurrentUser();

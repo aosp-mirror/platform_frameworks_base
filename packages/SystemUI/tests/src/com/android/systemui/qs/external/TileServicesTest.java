@@ -37,6 +37,7 @@ import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.tuner.TunerService;
@@ -51,6 +52,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -74,6 +76,8 @@ public class TileServicesTest extends SysuiTestCase {
     private AutoTileManager mAutoTileManager;
     @Mock
     private DumpController mDumpController;
+    @Mock
+    private StatusBar mStatusBar;
 
     @Before
     public void setUp() throws Exception {
@@ -89,7 +93,8 @@ public class TileServicesTest extends SysuiTestCase {
                 mTunerService,
                 () -> mAutoTileManager,
                 mDumpController,
-                mBroadcastDispatcher);
+                mBroadcastDispatcher,
+                Optional.of(mStatusBar));
         mTileService = new TestTileServices(host, Looper.getMainLooper(), mBroadcastDispatcher);
     }
 

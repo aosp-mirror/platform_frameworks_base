@@ -440,7 +440,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         ? new GestureRecorder("/sdcard/statusbar_gestures.dat")
         : null;
 
-    private ScreenPinningRequest mScreenPinningRequest;
+    private final ScreenPinningRequest mScreenPinningRequest;
 
     private final MetricsLogger mMetricsLogger;
 
@@ -658,7 +658,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
-            AssistManager assistManager,
+            Lazy<AssistManager> assistManagerLazy,
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
@@ -670,6 +670,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
+            ScreenPinningRequest screenPinningRequest,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
             PluginManager pluginManager,
@@ -725,7 +726,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mVisualStabilityManager = visualStabilityManager;
         mDeviceProvisionedController = deviceProvisionedController;
         mNavigationBarController = navigationBarController;
-        mAssistManager = assistManager;
+        mAssistManagerLazy = assistManagerLazy;
         mNotificationListener = notificationListener;
         mConfigurationController = configurationController;
         mStatusBarWindowController = statusBarWindowController;
@@ -736,6 +737,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScrimController = scrimController;
         mKeyguardLiftController = keyguardLiftController;
         mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
+        mScreenPinningRequest = screenPinningRequest;
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
         mCommandQueue = commandQueue;
@@ -894,8 +896,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarWindowViewController, mStatusBarWindow, mStatusBarKeyguardViewManager,
                 mNotificationPanel, mAmbientIndicationContainer);
         putComponent(DozeHost.class, mDozeServiceHost);
-
-        mScreenPinningRequest = new ScreenPinningRequest(mContext);
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
@@ -1251,8 +1251,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         final ActivityStarter activityStarter = Dependency.get(ActivityStarter.class);
 
         mNotificationActivityStarter = new StatusBarNotificationActivityStarter(mContext,
-                mCommandQueue, mAssistManager, mNotificationPanel, mPresenter, mEntryManager,
-                mHeadsUpManager, activityStarter, mActivityLaunchAnimator,
+                mCommandQueue, mAssistManagerLazy.get(), mNotificationPanel, mPresenter,
+                mEntryManager, mHeadsUpManager, activityStarter, mActivityLaunchAnimator,
                 mBarService, mStatusBarStateController, mKeyguardManager, mDreamManager,
                 mRemoteInputManager, mStatusBarRemoteInputCallback, mGroupManager,
                 mLockscreenUserManager, this, mKeyguardStateController,
@@ -2600,7 +2600,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
                 intent, mLockscreenUserManager.getCurrentUserId());
         Runnable runnable = () -> {
-            mAssistManager.hideAssist();
+            mAssistManagerLazy.get().hideAssist();
             intent.setFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.addFlags(flags);
@@ -3082,7 +3082,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarStateController.setLeaveOpenOnKeyguardHide(false);
         mPendingRemoteInputView = null;
         updateIsKeyguard();
-        mAssistManager.onLockscreenShown();
+        mAssistManagerLazy.get().onLockscreenShown();
     }
 
     public boolean hideKeyguard() {
@@ -3477,7 +3477,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mCommandQueue.animateCollapsePanels(
                     CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
             visibilityChanged(false);
-            mAssistManager.hideAssist();
+            mAssistManagerLazy.get().hideAssist();
         }
         return false;
     }
@@ -4073,7 +4073,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationShelf mNotificationShelf;
     protected EmptyShadeView mEmptyShadeView;
 
-    private final AssistManager mAssistManager;
+    private final Lazy<AssistManager> mAssistManagerLazy;
 
     public boolean isDeviceInteractive() {
         return mDeviceInteractive;
@@ -4277,7 +4277,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 // TODO: Dismiss Keyguard.
             }
             if (intent.isActivity()) {
-                mAssistManager.hideAssist();
+                mAssistManagerLazy.get().hideAssist();
             }
             if (intentSentUiThreadCallback != null) {
                 postOnUiThread(intentSentUiThreadCallback);
@@ -4395,9 +4395,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void showAssistDisclosure() {
-        if (mAssistManager != null) {
-            mAssistManager.showDisclosure();
-        }
+        mAssistManagerLazy.get().showDisclosure();
     }
 
     public NotificationPanelView getPanel() {
@@ -4406,9 +4404,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void startAssist(Bundle args) {
-        if (mAssistManager != null) {
-            mAssistManager.startAssist(args);
-        }
+        mAssistManagerLazy.get().startAssist(args);
     }
     // End Extra BaseStatusBarMethods.
 

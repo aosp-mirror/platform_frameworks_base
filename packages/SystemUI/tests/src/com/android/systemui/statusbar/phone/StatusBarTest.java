@@ -89,6 +89,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -235,6 +236,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private LightsOutNotifController mLightsOutNotifController;
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
+    @Mock private ScreenPinningRequest mScreenPinningRequest;
 
     @Before
     public void setup() throws Exception {
@@ -352,7 +354,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mVisualStabilityManager,
                 mDeviceProvisionedController,
                 mNavigationBarController,
-                mAssistManager,
+                () -> mAssistManager,
                 mNotificationListener,
                 configurationController,
                 mStatusBarWindowController,
@@ -363,7 +365,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mLockscreenWallpaperLazy,
                 mBiometricUnlockControllerLazy,
                 mDozeServiceHost,
-                mPowerManager,
+                mPowerManager, mScreenPinningRequest,
                 mDozeScrimController,
                 mCommandQueue,
                 mPluginManager,

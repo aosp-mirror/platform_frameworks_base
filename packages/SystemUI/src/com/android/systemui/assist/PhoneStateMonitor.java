@@ -28,7 +28,6 @@ import android.content.pm.ResolveInfo;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -39,9 +38,16 @@ import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /** Class to monitor and report the state of the phone. */
-final class PhoneStateMonitor {
+@Singleton
+public final class PhoneStateMonitor {
 
     private static final int PHONE_STATE_AOD1 = 1;
     private static final int PHONE_STATE_AOD2 = 2;
@@ -63,13 +69,17 @@ final class PhoneStateMonitor {
     };
 
     private final Context mContext;
+    private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
     private final StatusBarStateController mStatusBarStateController;
 
     private boolean mLauncherShowing;
     @Nullable private ComponentName mDefaultHome;
 
-    PhoneStateMonitor(Context context, BroadcastDispatcher broadcastDispatcher) {
+    @Inject
+    PhoneStateMonitor(Context context, BroadcastDispatcher broadcastDispatcher,
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
         mContext = context;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
         ActivityManagerWrapper activityManagerWrapper = ActivityManagerWrapper.getInstance();
@@ -178,16 +188,16 @@ final class PhoneStateMonitor {
     }
 
     private boolean isAppImmersive() {
-        return SysUiServiceProvider.getComponent(mContext, StatusBar.class).inImmersiveMode();
+        return mStatusBarOptionalLazy.get().get().inImmersiveMode();
     }
 
     private boolean isAppFullscreen() {
-        return SysUiServiceProvider.getComponent(mContext, StatusBar.class).inFullscreenMode();
+        return mStatusBarOptionalLazy.get().get().inFullscreenMode();
     }
 
     private boolean isBouncerShowing() {
-        StatusBar statusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
-        return statusBar != null && statusBar.isBouncerShowing();
+        return mStatusBarOptionalLazy.map(
+                statusBarLazy -> statusBarLazy.get().isBouncerShowing()).orElse(false);
     }
 
     private boolean isKeyguardLocked() {

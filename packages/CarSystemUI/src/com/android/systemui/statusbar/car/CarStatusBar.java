@@ -79,6 +79,7 @@ import com.android.systemui.navigationbar.car.CarNavigationBarView;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
+import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -283,7 +284,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
-            AssistManager assistManager,
+            Lazy<AssistManager> assistManagerLazy,
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
@@ -294,6 +295,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
+            ScreenPinningRequest screenPinningRequest,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
             PluginManager pluginManager,
@@ -352,7 +354,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 visualStabilityManager,
                 deviceProvisionedController,
                 navigationBarController,
-                assistManager,
+                assistManagerLazy,
                 notificationListener,
                 configurationController,
                 statusBarWindowController,
@@ -364,6 +366,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 biometricUnlockControllerLazy,
                 dozeServiceHost,
                 powerManager,
+                screenPinningRequest,
                 dozeScrimController,
                 commandQueue,
                 pluginManager,

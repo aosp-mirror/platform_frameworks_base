@@ -101,11 +101,8 @@ abstract class CarSystemUIModule {
     abstract NotificationData.KeyguardEnvironment bindKeyguardEnvironment(
             KeyguardEnvironmentImpl keyguardEnvironment);
 
-    @Singleton
-    @Provides
-    static ShadeController provideShadeController(Context context) {
-        return SysUiServiceProvider.getComponent(context, StatusBar.class);
-    }
+    @Binds
+    abstract ShadeController provideShadeController(CarStatusBar statusBar);
 
     @Provides
     @Singleton

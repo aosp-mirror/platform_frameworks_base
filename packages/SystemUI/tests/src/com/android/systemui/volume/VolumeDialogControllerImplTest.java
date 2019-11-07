@@ -44,6 +44,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class VolumeDialogControllerImplTest extends SysuiTestCase {
@@ -125,9 +127,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     static class TestableVolumeDialogControllerImpl extends VolumeDialogControllerImpl {
         TestableVolumeDialogControllerImpl(Context context, C callback, StatusBar s,
                 BroadcastDispatcher broadcastDispatcher) {
-            super(context, broadcastDispatcher);
+            super(context, broadcastDispatcher, s == null ? Optional.empty() : Optional.of(s));
             mCallbacks = callback;
-            mStatusBar = s;
         }
     }
 
