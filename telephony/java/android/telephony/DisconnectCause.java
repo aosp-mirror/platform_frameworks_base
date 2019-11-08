@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 
@@ -369,7 +370,7 @@ public final class DisconnectCause {
      * @hide
      */
     @UnsupportedAppUsage
-    public static String toString(int cause) {
+    public static @NonNull String toString(int cause) {
         switch (cause) {
         case NOT_DISCONNECTED:
             return "NOT_DISCONNECTED";
