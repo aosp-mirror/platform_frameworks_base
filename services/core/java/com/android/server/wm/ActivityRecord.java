@@ -547,7 +547,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private final WindowState.UpdateReportedVisibilityResults mReportedVisibilityResults =
             new WindowState.UpdateReportedVisibilityResults();
 
-    private boolean mUseTransferredAnimation;
+    boolean mUseTransferredAnimation;
 
     /**
      * @see #currentLaunchCanTurnScreenOn()
@@ -2190,7 +2190,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Sets if this AWT is in the process of closing or entering PIP.
+     * Sets if this {@link ActivityRecord} is in the process of closing or entering PIP.
      * {@link #mWillCloseOrEnterPip}}
      */
     void setWillCloseOrEnterPip(boolean willCloseOrEnterPip) {
@@ -2198,7 +2198,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * Returns whether this AWT is considered closing. Conditions are either
+     * Returns whether this {@link ActivityRecord} is considered closing. Conditions are either
      * 1. Is this app animating and was requested to be hidden
      * 2. App is delayed closing since it might enter PIP.
      */
@@ -3000,7 +3000,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Removing app token: %s", this);
 
-        boolean delayed = commitVisibility(null, false, TRANSIT_UNSET, true, mVoiceInteraction);
+        commitVisibility(false /* visible */, true /* performLayout */);
 
         getDisplayContent().mOpeningApps.remove(this);
         getDisplayContent().mChangingApps.remove(this);
@@ -3008,6 +3008,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mWmService.mTaskSnapshotController.onAppRemoved(this);
         mStackSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         waitingToShow = false;
+
+        boolean delayed = isAnimating(TRANSITION | CHILDREN);
         if (getDisplayContent().mClosingApps.contains(this)) {
             delayed = true;
         } else if (getDisplayContent().mAppTransition.isTransitionSet()) {
@@ -3150,16 +3152,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         super.removeChild(child);
         checkKeyguardFlagsChanged();
         updateLetterboxSurface(child);
-    }
-
-    private boolean waitingForReplacement() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState candidate = mChildren.get(i);
-            if (candidate.waitingForReplacement()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     void onWindowReplacementTimeout() {
@@ -3417,7 +3409,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // before the non-exiting app tokens. So, we skip the exiting app tokens here.
         // TODO: Investigate if we need to continue to do this or if we can just process them
         // in-order.
-        if (mIsExiting && !waitingForReplacement()) {
+        if (mIsExiting && !forAllWindowsUnchecked(WindowState::waitingForReplacement, true)) {
             return false;
         }
         return forAllWindowsUnchecked(callback, traverseTopToBottom);
@@ -3861,6 +3853,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    /**
+     * Set visibility on this {@link ActivityRecord}
+     *
+     * <p class="note"><strong>Note: </strong>This function might not update the visibility of
+     * this {@link ActivityRecord} immediately. In case we are preparing an app transition, we
+     * delay changing the visibility of this {@link ActivityRecord} until we execute that
+     * transition.</p>
+     *
+     * @param visible {@code true} if the {@link ActivityRecord} should become visible, otherwise
+     *                this should become invisible.
+     */
     void setVisibility(boolean visible) {
         if (getParent() == null) {
             Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: "
@@ -3997,153 +4000,169 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        commitVisibility(null, visible, TRANSIT_UNSET, true, mVoiceInteraction);
+        commitVisibility(visible, true /* performLayout */);
         updateReportedVisibilityLocked();
     }
 
-    boolean commitVisibility(WindowManager.LayoutParams lp,
-            boolean visible, int transit, boolean performLayout, boolean isVoiceInteraction) {
+    @Override
+    boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
+            boolean isVoiceInteraction) {
+        if (mUseTransferredAnimation) {
+            return false;
+        }
+        return super.applyAnimation(lp, transit, enter, isVoiceInteraction);
+    }
 
-        boolean delayed = false;
-        // Reset the state of mVisibleSetFromTransferredStartingWindow since visibility is actually
+    /**
+     * Update visibility to this {@link ActivityRecord}.
+     *
+     * <p class="note"><strong>Note: </strong> Unlike {@link #setVisibility}, this immediately
+     * updates the visibility without starting an app transition. Since this function may start
+     * animation on {@link WindowState} depending on app transition animation status, an app
+     * transition animation must be started before calling this function if necessary.</p>
+     *
+     * @param visible {@code true} if this {@link ActivityRecord} should become visible, otherwise
+     *                this should become invisible.
+     * @param performLayout if {@code true}, perform surface placement after committing visibility.
+     */
+    void commitVisibility(boolean visible, boolean performLayout) {
+        // Reset the state of mHiddenSetFromTransferredStartingWindow since visibility is actually
         // been set by the app now.
         mVisibleSetFromTransferredStartingWindow = false;
-
-        // Allow for state changes and animation to be applied if:
-        // * token is transitioning visibility state
-        // * or the token was marked as hidden and is exiting before we had a chance to play the
-        // transition animation
-        // * or this is an opening app and windows are being replaced
-        // * or the token is the opening app and visible while opening task behind existing one.
-        final DisplayContent displayContent = getDisplayContent();
-        boolean visibilityChanged = false;
-        if (isVisible() != visible || (!isVisible() && mIsExiting)
-                || (visible && waitingForReplacement())
-                || (visible && displayContent.mOpeningApps.contains(this)
-                && displayContent.mAppTransition.getAppTransition() == TRANSIT_TASK_OPEN_BEHIND)) {
-            final AccessibilityController accessibilityController =
-                    mWmService.mAccessibilityController;
-            boolean changed = false;
-            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                    "Changing app %s visible=%b performLayout=%b", this, isVisible(),
-                    performLayout);
-
-            boolean runningAppAnimation = false;
-
-            if (transit != WindowManager.TRANSIT_UNSET) {
-                if (mUseTransferredAnimation) {
-                    runningAppAnimation = isAnimating();
-                } else if (applyAnimation(lp, transit, visible, isVoiceInteraction)) {
-                    runningAppAnimation = true;
-                }
-                delayed = runningAppAnimation;
-                final WindowState window = findMainWindow();
-                if (window != null && accessibilityController != null) {
-                    accessibilityController.onAppWindowTransitionLocked(window, transit);
-                }
-                changed = true;
-            }
-
-            final int windowsCount = mChildren.size();
-            for (int i = 0; i < windowsCount; i++) {
-                final WindowState win = mChildren.get(i);
-                changed |= win.onAppVisibilityChanged(visible, runningAppAnimation);
-            }
-
-            setVisible(visible);
-            mVisibleRequested = visible;
-            visibilityChanged = true;
-            if (!visible) {
-                stopFreezingScreen(true, true);
-            } else {
-                // If we are being set visible, and the starting window is not yet displayed,
-                // then make sure it doesn't get displayed.
-                if (startingWindow != null && !startingWindow.isDrawnLw()) {
-                    startingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
-                    startingWindow.mLegacyPolicyVisibilityAfterAnim = false;
-                }
-
-                // We are becoming visible, so better freeze the screen with the windows that are
-                // getting visible so we also wait for them.
-                forAllWindows(mWmService::makeWindowFreezingScreenIfNeededLocked, true);
-            }
-
-            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                    "commitVisibility: %s: visible=%b visibleRequested=%b", this,
-                    isVisible(), mVisibleRequested);
-
-            if (changed) {
-                displayContent.getInputMonitor().setUpdateInputWindowsNeededLw();
-                if (performLayout) {
-                    mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
-                            false /*updateInputWindows*/);
-                    mWmService.mWindowPlacerLocked.performSurfacePlacement();
-                }
-                displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
-            }
+        if (visible == isVisible()) {
+            return;
         }
+
+        final int windowsCount = mChildren.size();
+        for (int i = 0; i < windowsCount; i++) {
+            mChildren.get(i).onAppVisibilityChanged(visible, isAnimating(PARENTS));
+        }
+        setVisible(visible);
+        mVisibleRequested = visible;
+        if (!visible) {
+            stopFreezingScreen(true, true);
+        } else {
+            // If we are being set visible, and the starting window is not yet displayed,
+            // then make sure it doesn't get displayed.
+            if (startingWindow != null && !startingWindow.isDrawnLw()) {
+                startingWindow.clearPolicyVisibilityFlag(LEGACY_POLICY_VISIBILITY);
+                startingWindow.mLegacyPolicyVisibilityAfterAnim = false;
+            }
+            // We are becoming visible, so better freeze the screen with the windows that are
+            // getting visible so we also wait for them.
+            forAllWindows(mWmService::makeWindowFreezingScreenIfNeededLocked, true);
+        }
+        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                "commitVisibility: %s: visible=%b mVisibleRequested=%b", this,
+                isVisible(), mVisibleRequested);
+        final DisplayContent displayContent = getDisplayContent();
+        displayContent.getInputMonitor().setUpdateInputWindowsNeededLw();
+        if (performLayout) {
+            mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                    false /*updateInputWindows*/);
+            mWmService.mWindowPlacerLocked.performSurfacePlacement();
+        }
+        displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
         mUseTransferredAnimation = false;
 
-        delayed = isAnimating(CHILDREN);
+        postApplyAnimation(visible);
+    }
+
+    /**
+     * Post process after applying an app transition animation.
+     *
+     * <p class="note"><strong>Note: </strong> This function must be called after the animations
+     * have been applied and {@link #commitVisibility}.</p>
+     *
+     * @param visible {@code true} if this {@link ActivityRecord} has become visible, otherwise
+     *                this has become invisible.
+     */
+    private void postApplyAnimation(boolean visible) {
+        final boolean delayed = isAnimating(PARENTS | CHILDREN);
         if (!delayed) {
-            // We aren't animating anything, but exiting windows rely on the animation finished
-            // callback being called in case the ActivityRecord was pretending to be animating,
+            // We aren't delayed anything, but exiting windows rely on the animation finished
+            // callback being called in case the ActivityRecord was pretending to be delayed,
             // which we might have done because we were in closing/opening apps list.
             onAnimationFinished();
-        }
-
-        if (visibilityChanged) {
-            if (visible && !delayed) {
+            if (visible) {
                 // The token was made immediately visible, there will be no entrance animation.
                 // We need to inform the client the enter animation was finished.
                 mEnteringAnimation = true;
                 mWmService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(
                         token);
             }
+        }
 
-            // If we're becoming visible, immediately change client visibility as well. there seem
-            // to be some edge cases where we change our visibility but client visibility never gets
-            // updated.
-            // If we're becoming invisible, update the client visibility if we are not running an
-            // animation. Otherwise, we'll update client visibility in onAnimationFinished.
-            if (visible || !isAnimating()) {
-                setClientVisible(visible);
-            }
+        // If we're becoming visible, immediately change client visibility as well. there seem
+        // to be some edge cases where we change our visibility but client visibility never gets
+        // updated.
+        // If we're becoming invisible, update the client visibility if we are not running an
+        // animation. Otherwise, we'll update client visibility in onAnimationFinished.
+        if (visible || !isAnimating(PARENTS)) {
+            setClientVisible(visible);
+        }
 
-            if (!displayContent.mClosingApps.contains(this)
-                    && !displayContent.mOpeningApps.contains(this)) {
-                // The token is not closing nor opening, so even if there is an animation set, that
-                // doesn't mean that it goes through the normal app transition cycle so we have
-                // to inform the docked controller about visibility change.
-                // TODO(multi-display): notify docked divider on all displays where visibility was
-                // affected.
-                displayContent.getDockedDividerController().notifyAppVisibilityChanged();
+        final DisplayContent displayContent = getDisplayContent();
+        if (!displayContent.mClosingApps.contains(this)
+                && !displayContent.mOpeningApps.contains(this)) {
+            // The token is not closing nor opening, so even if there is an animation set, that
+            // doesn't mean that it goes through the normal app transition cycle so we have
+            // to inform the docked controller about visibility change.
+            // TODO(multi-display): notify docked divider on all displays where visibility was
+            // affected.
+            displayContent.getDockedDividerController().notifyAppVisibilityChanged();
 
-                // Take the screenshot before possibly hiding the WSA, otherwise the screenshot
-                // will not be taken.
-                mWmService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
-            }
+            // Take the screenshot before possibly hiding the WSA, otherwise the screenshot
+            // will not be taken.
+            mWmService.mTaskSnapshotController.notifyAppVisibilityChanged(this, visible);
+        }
 
-            // If we are hidden but there is no delay needed we immediately
-            // apply the Surface transaction so that the ActivityManager
-            // can have some guarantee on the Surface state following
-            // setting the visibility. This captures cases like dismissing
-            // the docked or pinned stack where there is no app transition.
-            //
-            // In the case of a "Null" animation, there will be
-            // no animation but there will still be a transition set.
-            // We still need to delay hiding the surface such that it
-            // can be synchronized with showing the next surface in the transition.
-            if (!isVisible() && !delayed && !displayContent.mAppTransition.isTransitionSet()) {
-                SurfaceControl.openTransaction();
-                for (int i = mChildren.size() - 1; i >= 0; i--) {
-                    mChildren.get(i).mWinAnimator.hide("immediately hidden");
-                }
+        // If we are hidden but there is no delay needed we immediately
+        // apply the Surface transaction so that the ActivityManager
+        // can have some guarantee on the Surface state following
+        // setting the visibility. This captures cases like dismissing
+        // the docked or pinned stack where there is no app transition.
+        //
+        // In the case of a "Null" animation, there will be
+        // no animation but there will still be a transition set.
+        // We still need to delay hiding the surface such that it
+        // can be synchronized with showing the next surface in the transition.
+        if (!isVisible() && !delayed && !displayContent.mAppTransition.isTransitionSet()) {
+            SurfaceControl.openTransaction();
+            try {
+                forAllWindows(win -> {
+                    win.mWinAnimator.hide("immediately hidden"); }, true);
+            } finally {
                 SurfaceControl.closeTransaction();
             }
         }
+    }
 
-        return delayed;
+    /**
+     * Check if visibility of this {@link ActivityRecord} should be updated as part of an app
+     * transition.
+     *
+     * <p class="note><strong>Note:</strong> If the visibility of this {@link ActivityRecord} is
+     * already set to {@link #visible}, we don't need to update the visibility. So {@code false} is
+     * returned.</p>
+     *
+     * @param visible {@code true} if this {@link ActivityRecord} should become visible,
+     *                {@code false} if this should become invisible.
+     * @return {@code true} if visibility of this {@link ActivityRecord} should be updated, and
+     *         an app transition animation should be run.
+     */
+    boolean shouldApplyAnimation(boolean visible) {
+        // Allow for state update and animation to be applied if:
+        // * token is transitioning visibility state
+        // * or the token was marked as hidden and is exiting before we had a chance to play the
+        // transition animation
+        // * or this is an opening app and windows are being replaced
+        // * or the token is the opening app and visible while opening task behind existing one.
+        final DisplayContent displayContent = getDisplayContent();
+        return isVisible() != visible || (!isVisible() && mIsExiting)
+                || (visible && forAllWindows(WindowState::waitingForReplacement, true))
+                || (visible && displayContent.mOpeningApps.contains(this)
+                && displayContent.mAppTransition.getAppTransition() == TRANSIT_TASK_OPEN_BEHIND);
     }
 
     /**
@@ -5634,19 +5653,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return task != null ? task.isChangingAppTransition() : super.isChangingAppTransition();
     }
 
-    @Override
-    boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            boolean isVoiceInteraction) {
-        if (mWmService.mDisableTransitionAnimation || !shouldAnimate(transit)) {
-            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
-                    "applyAnimation: transition animation is disabled or skipped. "
-                            + "container=%s", this);
-            cancelAnimation();
-            return false;
-        }
-        return super.applyAnimation(lp, transit, enter, isVoiceInteraction);
-    }
-
     /**
      * Creates a layer to apply crop to an animation.
      */
@@ -5913,14 +5919,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     protected void onAnimationFinished() {
         super.onAnimationFinished();
 
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AWT#onAnimationFinished");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AR#onAnimationFinished");
         mTransit = TRANSIT_UNSET;
         mTransitFlags = 0;
         mNeedsZBoost = false;
         mNeedsAnimationBoundsLayer = false;
 
         setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM | FINISH_LAYOUT_REDO_WALLPAPER,
-                "AppWindowToken");
+                "ActivityRecord");
 
         clearThumbnail();
         setClientVisible(isVisible() || mVisibleRequested);

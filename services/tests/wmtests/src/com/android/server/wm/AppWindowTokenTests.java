@@ -31,7 +31,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.TRANSIT_UNSET;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -303,8 +302,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
                 "closingWindow");
         closingWindow.mAnimatingExit = true;
         closingWindow.mRemoveOnExit = true;
-        closingWindow.mActivityRecord.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
-                true /* performLayout */, false /* isVoiceInteraction */);
+        closingWindow.mActivityRecord.commitVisibility(
+                false /* visible */, true /* performLayout */);
 
         // We pretended that we were running an exit animation, but that should have been cleared up
         // by changing visibility of ActivityRecord
