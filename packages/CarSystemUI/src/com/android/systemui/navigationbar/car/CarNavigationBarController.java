@@ -24,8 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.car.hvac.HvacController;
-import com.android.systemui.statusbar.car.hvac.TemperatureView;
+import com.android.systemui.navigationbar.car.hvac.HvacController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -38,6 +37,7 @@ public class CarNavigationBarController {
 
     private final Context mContext;
     private final NavigationBarViewFactory mNavigationBarViewFactory;
+    private final Lazy<CarFacetButtonController> mCarFacetButtonControllerLazy;
     private final Lazy<HvacController> mHvacControllerLazy;
 
     private boolean mShowBottom;
@@ -58,9 +58,11 @@ public class CarNavigationBarController {
     @Inject
     public CarNavigationBarController(Context context,
             NavigationBarViewFactory navigationBarViewFactory,
+            Lazy<CarFacetButtonController> carFacetButtonControllerLazy,
             Lazy<HvacController> hvacControllerLazy) {
         mContext = context;
         mNavigationBarViewFactory = navigationBarViewFactory;
+        mCarFacetButtonControllerLazy = carFacetButtonControllerLazy;
         mHvacControllerLazy = hvacControllerLazy;
 
         // Read configuration.
@@ -129,9 +131,7 @@ public class CarNavigationBarController {
     @NonNull
     public CarNavigationBarView getTopBar(boolean isSetUp) {
         mTopView = mNavigationBarViewFactory.getTopBar(isSetUp);
-        mTopView.setStatusBarWindowTouchListener(mTopBarTouchListener);
-        mTopView.setNotificationsPanelController(mNotificationsShadeController);
-        addTemperatureViewToController(mTopView);
+        setupBar(mTopView, mTopBarTouchListener, mNotificationsShadeController);
         return mTopView;
     }
 
@@ -143,9 +143,7 @@ public class CarNavigationBarController {
         }
 
         mBottomView = mNavigationBarViewFactory.getBottomBar(isSetUp);
-        mBottomView.setStatusBarWindowTouchListener(mBottomBarTouchListener);
-        mBottomView.setNotificationsPanelController(mNotificationsShadeController);
-        addTemperatureViewToController(mBottomView);
+        setupBar(mBottomView, mBottomBarTouchListener, mNotificationsShadeController);
         return mBottomView;
     }
 
@@ -157,9 +155,7 @@ public class CarNavigationBarController {
         }
 
         mLeftView = mNavigationBarViewFactory.getLeftBar(isSetUp);
-        mLeftView.setStatusBarWindowTouchListener(mLeftBarTouchListener);
-        mLeftView.setNotificationsPanelController(mNotificationsShadeController);
-        addTemperatureViewToController(mLeftView);
+        setupBar(mLeftView, mLeftBarTouchListener, mNotificationsShadeController);
         return mLeftView;
     }
 
@@ -171,10 +167,16 @@ public class CarNavigationBarController {
         }
 
         mRightView = mNavigationBarViewFactory.getRightBar(isSetUp);
-        mRightView.setStatusBarWindowTouchListener(mRightBarTouchListener);
-        mRightView.setNotificationsPanelController(mNotificationsShadeController);
-        addTemperatureViewToController(mRightView);
+        setupBar(mRightView, mRightBarTouchListener, mNotificationsShadeController);
         return mRightView;
+    }
+
+    private void setupBar(CarNavigationBarView view, View.OnTouchListener statusBarTouchListener,
+            NotificationsShadeController notifShadeController) {
+        view.setStatusBarWindowTouchListener(statusBarTouchListener);
+        view.setNotificationsPanelController(notifShadeController);
+        mCarFacetButtonControllerLazy.get().addAllFacetButtons(view);
+        mHvacControllerLazy.get().addTemperatureViewToController(view);
     }
 
     /** Sets a touch listener for the top navigation bar. */
@@ -288,17 +290,6 @@ public class CarNavigationBarController {
     public interface NotificationsShadeController {
         /** Toggles the visibility of the notifications shade. */
         void togglePanel();
-    }
-
-    private void addTemperatureViewToController(View v) {
-        if (v instanceof TemperatureView) {
-            mHvacControllerLazy.get().addHvacTextView((TemperatureView) v);
-        } else if (v instanceof ViewGroup) {
-            ViewGroup viewGroup = (ViewGroup) v;
-            for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                addTemperatureViewToController(viewGroup.getChildAt(i));
-            }
-        }
     }
 
     private void checkAllBars(boolean isSetUp) {

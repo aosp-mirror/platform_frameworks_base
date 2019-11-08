@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.car.hvac;
+package com.android.systemui.navigationbar.car.hvac;
 
 import static android.car.VehicleAreaType.VEHICLE_AREA_TYPE_GLOBAL;
 import static android.car.VehiclePropertyIds.HVAC_TEMPERATURE_DISPLAY_UNITS;
@@ -25,6 +25,8 @@ import android.car.hardware.CarPropertyValue;
 import android.car.hardware.hvac.CarHvacManager;
 import android.car.hardware.hvac.CarHvacManager.CarHvacEventCallback;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.systemui.car.CarServiceProvider;
 
@@ -163,6 +165,21 @@ public class HvacController {
      */
     public void removeAllComponents() {
         mTempComponents.clear();
+    }
+
+    /**
+     * Iterate through a view, looking for {@link TemperatureView} instances and add them to the
+     * controller if found.
+     */
+    public void addTemperatureViewToController(View v) {
+        if (v instanceof TemperatureView) {
+            addHvacTextView((TemperatureView) v);
+        } else if (v instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) v;
+            for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                addTemperatureViewToController(viewGroup.getChildAt(i));
+            }
+        }
     }
 
     /**
