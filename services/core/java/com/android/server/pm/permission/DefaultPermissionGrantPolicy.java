@@ -150,6 +150,12 @@ public final class DefaultPermissionGrantPolicy {
         ALWAYS_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
     }
 
+    private static final Set<String> COARSE_BACKGROUND_LOCATION_PERMISSIONS = new ArraySet<>();
+    static {
+        COARSE_BACKGROUND_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        COARSE_BACKGROUND_LOCATION_PERMISSIONS.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+    }
+
     private static final Set<String> ACTIVITY_RECOGNITION_PERMISSIONS = new ArraySet<>();
     static {
         ACTIVITY_RECOGNITION_PERMISSIONS.add(Manifest.permission.ACTIVITY_RECOGNITION);
@@ -724,8 +730,16 @@ public final class DefaultPermissionGrantPolicy {
                 mContext.getPackageManager().getSystemTextClassifierPackageName();
         if (!TextUtils.isEmpty(textClassifierPackageName)) {
             grantPermissionsToSystemPackage(textClassifierPackageName, userId,
-                    PHONE_PERMISSIONS, SMS_PERMISSIONS, CALENDAR_PERMISSIONS,
-                    ALWAYS_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
+                    COARSE_BACKGROUND_LOCATION_PERMISSIONS, CONTACTS_PERMISSIONS);
+        }
+
+        // Content capture
+        String contentCapturePackageName =
+                mContext.getPackageManager().getContentCaptureServicePackageName();
+        if (!TextUtils.isEmpty(contentCapturePackageName)) {
+            grantPermissionsToSystemPackage(contentCapturePackageName, userId,
+                    PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
+                    CONTACTS_PERMISSIONS);
         }
 
         // Atthention Service

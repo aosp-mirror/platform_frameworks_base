@@ -692,6 +692,8 @@ interface IPackageManager {
 
     String getIncidentReportApproverPackageName();
 
+    String getContentCaptureServicePackageName();
+
     boolean isPackageStateProtected(String packageName, int userId);
 
     void sendDeviceCustomizationReadyBroadcast();

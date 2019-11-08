@@ -7458,6 +7458,18 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return the system defined content capture package name, or null if there's none.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public String getContentCaptureServicePackageName() {
+        throw new UnsupportedOperationException(
+                "getContentCaptureServicePackageName not implemented in subclass");
+    }
+
+    /**
      * @return the incident report approver app package name, or null if it's not defined
      * by the OEM.
      *
