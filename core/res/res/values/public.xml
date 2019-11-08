@@ -3025,6 +3025,17 @@
     <public-group type="color" first-id="0x0106001d">
     </public-group>
 
+    <public-group type="id" first-id="0x0102004b">
+      <public name="accessibilitySystemActionBack" />
+      <public name="accessibilitySystemActionHome" />
+      <public name="accessibilitySystemActionRecents" />
+      <public name="accessibilitySystemActionNotifications" />
+      <public name="accessibilitySystemActionQuickSettings" />
+      <public name="accessibilitySystemActionPowerDialog" />
+      <public name="accessibilitySystemActionToggleSplitScreen" />
+      <public name="accessibilitySystemActionLockScreen" />
+      <public name="accessibilitySystemActionTakeScreenshot" />
+    </public-group>
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
 

@@ -5442,4 +5442,24 @@
 
     <!-- Prompt for the USB device resolver dialog with warning text for USB device dialogs.  [CHAR LIMIT=200] -->
     <string name="usb_device_resolve_prompt_warn">This app has not been granted record permission but could capture audio through this USB device.</string>
+
+    <!-- Accessibility system actions -->
+    <!-- Label for Home action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_home_label">Home</string>
+    <!-- Label for Back action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_back_label">Back</string>
+    <!-- Label for showing recent apps action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_recents_label">Recent Apps</string>
+    <!-- Label for opening notifications action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_notifications_label">Notifications</string>
+    <!-- Label for opening quick settings action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_quick_settings_label">Quick Settings</string>
+    <!-- Label for opening power dialog action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_power_dialog_label">Power Dialog</string>
+    <!-- Label for toggle split screen action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_toggle_split_screen_label">Toggle Split Screen</string>
+    <!-- Label for lock screen action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_lock_screen_label">Lock Screen</string>
+    <!-- Label for taking screenshot action [CHAR LIMIT=NONE] -->
+    <string name="accessibility_system_action_screenshot_label">Screenshot</string>
 </resources>

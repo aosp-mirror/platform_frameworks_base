@@ -3878,4 +3878,14 @@
 
   <java-symbol type="string" name="usb_device_resolve_prompt_warn" />
 
+  <!-- For Accessibility system actions -->
+  <java-symbol type="string" name="accessibility_system_action_back_label" />
+  <java-symbol type="string" name="accessibility_system_action_home_label" />
+  <java-symbol type="string" name="accessibility_system_action_lock_screen_label" />
+  <java-symbol type="string" name="accessibility_system_action_notifications_label" />
+  <java-symbol type="string" name="accessibility_system_action_power_dialog_label" />
+  <java-symbol type="string" name="accessibility_system_action_quick_settings_label" />
+  <java-symbol type="string" name="accessibility_system_action_recents_label" />
+  <java-symbol type="string" name="accessibility_system_action_screenshot_label" />
+  <java-symbol type="string" name="accessibility_system_action_toggle_split_screen_label" />
 </resources>
