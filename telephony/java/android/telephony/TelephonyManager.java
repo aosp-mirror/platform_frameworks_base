@@ -2584,6 +2584,8 @@ public class TelephonyManager {
      *
      * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
      *
+     * @throws IllegalArgumentException when the slotIndex is invalid.
+     *
      * {@hide}
      */
     @SystemApi
@@ -2592,6 +2594,10 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getNetworkCountryIso(int slotIndex) {
         try {
+            if (!SubscriptionManager.isValidSlotIndex(slotIndex)) {
+                throw new IllegalArgumentException("invalid slot index " + slotIndex);
+            }
+
             ITelephony telephony = getITelephony();
             if (telephony == null) return "";
             return telephony.getNetworkCountryIsoForPhone(slotIndex, getOpPackageName());
