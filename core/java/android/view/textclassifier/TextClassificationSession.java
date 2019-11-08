@@ -70,6 +70,24 @@ final class TextClassificationSession implements TextClassifier {
     }
 
     @Override
+    public ConversationActions suggestConversationActions(ConversationActions.Request request) {
+        checkDestroyed();
+        return mDelegate.suggestConversationActions(request);
+    }
+
+    @Override
+    public TextLanguage detectLanguage(TextLanguage.Request request) {
+        checkDestroyed();
+        return mDelegate.detectLanguage(request);
+    }
+
+    @Override
+    public int getMaxGenerateLinksTextLength() {
+        checkDestroyed();
+        return mDelegate.getMaxGenerateLinksTextLength();
+    }
+
+    @Override
     public void onSelectionEvent(SelectionEvent event) {
         try {
             if (mEventHelper.sanitizeEvent(event)) {
