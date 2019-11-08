@@ -821,7 +821,7 @@ interface ITelephony {
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    boolean getTetherApnRequiredForSubscriber(int subId);
+    boolean isTetherApnRequiredForSubscriber(int subId);
 
     /**
     * Enables framework IMS and triggers IMS Registration.
