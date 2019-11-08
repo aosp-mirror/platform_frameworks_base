@@ -873,28 +873,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.i(TAG, "Migrated lockscreen disabled flag");
         }
 
-        final List<UserInfo> users = mUserManager.getUsers();
-        for (int i = 0; i < users.size(); i++) {
-            final UserInfo userInfo = users.get(i);
-            try {
-                final String alias = LockPatternUtils.PROFILE_KEY_NAME_ENCRYPT + userInfo.id;
-                java.security.KeyStore keyStore =
-                        java.security.KeyStore.getInstance("AndroidKeyStore");
-                keyStore.load(null);
-                if (keyStore.containsAlias(alias)) {
-                    keyStore.deleteEntry(alias);
-                }
-            } catch (KeyStoreException | NoSuchAlgorithmException |
-                    CertificateException | IOException e) {
-                Slog.e(TAG, "Unable to remove tied profile key", e);
-            }
-        }
-
         boolean isWatch = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WATCH);
         // Wear used to set DISABLE_LOCKSCREEN to 'true', but because Wear now allows accounts
         // and device management the lockscreen must be re-enabled now for users that upgrade.
         if (isWatch && getString("migrated_wear_lockscreen_disabled", null, 0) == null) {
+            final List<UserInfo> users = mUserManager.getUsers();
             final int userCount = users.size();
             for (int i = 0; i < userCount; i++) {
                 int id = users.get(i).id;
@@ -2202,7 +2186,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void removeKeystoreProfileKey(int targetUserId) {
-        if (DEBUG) Slog.v(TAG, "Remove keystore profile key for user: " + targetUserId);
+        Slog.i(TAG, "Remove keystore profile key for user: " + targetUserId);
         try {
             java.security.KeyStore keyStore = java.security.KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
