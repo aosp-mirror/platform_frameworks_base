@@ -120,7 +120,7 @@ class WallpaperController {
         }
 
         mFindResults.resetTopWallpaper = true;
-        if (w.mActivityRecord != null && w.mActivityRecord.isHidden()
+        if (w.mActivityRecord != null && !w.mActivityRecord.isVisible()
                 && !w.mActivityRecord.isAnimating(TRANSITION)) {
 
             // If this window's app token is hidden and not animating, it is of no interest to us.
@@ -278,9 +278,11 @@ class WallpaperController {
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
             token.hideWallpaperToken(wasDeferred, "hideWallpapers");
-            if (DEBUG_WALLPAPER_LIGHT && !token.isHidden()) Slog.d(TAG, "Hiding wallpaper " + token
-                    + " from " + winGoingAway + " target=" + mWallpaperTarget + " prev="
-                    + mPrevWallpaperTarget + "\n" + Debug.getCallers(5, "  "));
+            if (DEBUG_WALLPAPER_LIGHT && token.isVisible()) {
+                Slog.d(TAG, "Hiding wallpaper " + token
+                        + " from " + winGoingAway + " target=" + mWallpaperTarget + " prev="
+                        + mPrevWallpaperTarget + "\n" + Debug.getCallers(5, "  "));
+            }
         }
     }
 
