@@ -47,7 +47,9 @@ import android.widget.TextView;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
+import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.media.MediaOutputSliceConstants;
+import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -61,10 +63,13 @@ public class QSMediaPlayer {
 
     private Context mContext;
     private LinearLayout mMediaNotifView;
+    private View mSeamless;
     private MediaSession.Token mToken;
     private MediaController mController;
     private int mWidth;
     private int mHeight;
+    private int mForegroundColor;
+    private int mBackgroundColor;
 
     /**
      *
@@ -93,15 +98,17 @@ public class QSMediaPlayer {
      * @param iconColor foreground color (for text, icons)
      * @param bgColor background color
      * @param actionsContainer a LinearLayout containing the media action buttons
-     * @param notif
+     * @param notif reference to original notification
+     * @param device current playback device
      */
     public void setMediaSession(MediaSession.Token token, Icon icon, int iconColor, int bgColor,
-            View actionsContainer, Notification notif) {
+            View actionsContainer, Notification notif, MediaDevice device) {
         Log.d(TAG, "got media session: " + token);
         mToken = token;
+        mForegroundColor = iconColor;
+        mBackgroundColor = bgColor;
         mController = new MediaController(mContext, token);
         MediaMetadata mMediaMetadata = mController.getMetadata();
-
         if (mMediaMetadata == null) {
             Log.e(TAG, "Media metadata was null");
             return;
@@ -122,9 +129,6 @@ public class QSMediaPlayer {
         result.setLayoutParams(lp);
         headerView.removeAllViews();
         headerView.addView(result);
-
-        View seamless = headerView.findViewById(com.android.internal.R.id.media_seamless);
-        seamless.setVisibility(View.VISIBLE);
 
         // App icon
         ImageView appIcon = headerView.findViewById(com.android.internal.R.id.icon);
@@ -168,23 +172,11 @@ public class QSMediaPlayer {
         }
 
         // Transfer chip
-        View transferBackgroundView = headerView.findViewById(
-                com.android.internal.R.id.media_seamless);
-        LinearLayout viewLayout = (LinearLayout) transferBackgroundView;
-        RippleDrawable bkgDrawable = (RippleDrawable) viewLayout.getBackground();
-        GradientDrawable rect = (GradientDrawable) bkgDrawable.getDrawable(0);
-        rect.setStroke(2, iconColor);
-        rect.setColor(bgColor);
-        ImageView transferIcon = headerView.findViewById(
-                com.android.internal.R.id.media_seamless_image);
-        transferIcon.setBackgroundColor(bgColor);
-        transferIcon.setImageTintList(ColorStateList.valueOf(iconColor));
-        TextView transferText = headerView.findViewById(
-                com.android.internal.R.id.media_seamless_text);
-        transferText.setTextColor(iconColor);
-
+        mSeamless = headerView.findViewById(com.android.internal.R.id.media_seamless);
+        mSeamless.setVisibility(View.VISIBLE);
+        updateChip(device);
         ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
-        transferBackgroundView.setOnClickListener(v -> {
+        mSeamless.setOnClickListener(v -> {
             final Intent intent = new Intent()
                     .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT);
             mActivityStarter.startActivity(intent, false, true /* dismissShade */,
@@ -219,10 +211,13 @@ public class QSMediaPlayer {
                 com.android.internal.R.id.action3,
                 com.android.internal.R.id.action4
         };
-        for (int i = 0; i < parentActionsLayout.getChildCount() && i < actionIds.length; i++) {
+
+        int i = 0;
+        for (; i < parentActionsLayout.getChildCount() && i < actionIds.length; i++) {
             ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
             ImageButton thatBtn = parentActionsLayout.findViewById(notifActionIds[i]);
-            if (thatBtn == null || thatBtn.getDrawable() == null) {
+            if (thatBtn == null || thatBtn.getDrawable() == null
+                    || thatBtn.getVisibility() != View.VISIBLE) {
                 thisBtn.setVisibility(View.GONE);
                 continue;
             }
@@ -234,6 +229,13 @@ public class QSMediaPlayer {
                 Log.d(TAG, "clicking on other button");
                 thatBtn.performClick();
             });
+        }
+
+        // Hide any unused buttons
+        for (; i < actionIds.length; i++) {
+            ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
+            thisBtn.setVisibility(View.GONE);
+            Log.d(TAG, "hid a button");
         }
     }
 
@@ -284,6 +286,7 @@ public class QSMediaPlayer {
             mMediaNotifView.setBackground(roundedDrawable);
         } else {
             Log.e(TAG, "No album art available");
+            mMediaNotifView.setBackground(null);
         }
     }
 
@@ -302,5 +305,42 @@ public class QSMediaPlayer {
         canvas.drawBitmap(original, transformation, paint);
 
         return cropped;
+    }
+
+    protected void updateChip(MediaDevice device) {
+        if (mSeamless == null) {
+            return;
+        }
+        ColorStateList fgTintList = ColorStateList.valueOf(mForegroundColor);
+
+        // Update the outline color
+        LinearLayout viewLayout = (LinearLayout) mSeamless;
+        RippleDrawable bkgDrawable = (RippleDrawable) viewLayout.getBackground();
+        GradientDrawable rect = (GradientDrawable) bkgDrawable.getDrawable(0);
+        rect.setStroke(2, mForegroundColor);
+        rect.setColor(mBackgroundColor);
+
+        ImageView iconView = mSeamless.findViewById(com.android.internal.R.id.media_seamless_image);
+        TextView deviceName = mSeamless.findViewById(com.android.internal.R.id.media_seamless_text);
+        deviceName.setTextColor(fgTintList);
+
+        if (device != null) {
+            Drawable icon = device.getIcon();
+            iconView.setVisibility(View.VISIBLE);
+            iconView.setImageTintList(fgTintList);
+
+            if (icon instanceof AdaptiveIcon) {
+                AdaptiveIcon aIcon = (AdaptiveIcon) icon;
+                aIcon.setBackgroundColor(mBackgroundColor);
+                iconView.setImageDrawable(aIcon);
+            } else {
+                iconView.setImageDrawable(icon);
+            }
+            deviceName.setText(device.getName());
+        } else {
+            // Reset to default
+            iconView.setVisibility(View.GONE);
+            deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
+        }
     }
 }
