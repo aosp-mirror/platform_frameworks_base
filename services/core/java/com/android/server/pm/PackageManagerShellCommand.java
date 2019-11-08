@@ -115,7 +115,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -439,14 +438,8 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private void setParamsSize(InstallParams params, List<String> inPaths) {
-        if (params.sessionParams.sizeBytes != -1 || STDIN_PATH.equals(inPaths.get(0))) {
-            return;
-        }
-
-        long sessionSize = 0;
-
-        for (String inPath : inPaths) {
+    private void setParamsSize(InstallParams params, String inPath) {
+        if (params.sessionParams.sizeBytes == -1 && !STDIN_PATH.equals(inPath)) {
             final ParcelFileDescriptor fd = openFileForSystem(inPath, "r");
             if (fd == null) {
                 getErrPrintWriter().println("Error: Can't open file: " + inPath);
@@ -456,8 +449,8 @@ class PackageManagerShellCommand extends ShellCommand {
                 ApkLite baseApk = PackageParser.parseApkLite(fd.getFileDescriptor(), inPath, 0);
                 PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
                         null, null);
-                sessionSize += PackageHelper.calculateInstalledSize(pkgLite,
-                        params.sessionParams.abiOverride, fd.getFileDescriptor());
+                params.sessionParams.setSize(PackageHelper.calculateInstalledSize(
+                        pkgLite, params.sessionParams.abiOverride, fd.getFileDescriptor()));
             } catch (PackageParserException | IOException e) {
                 getErrPrintWriter().println("Error: Failed to parse APK file: " + inPath);
                 throw new IllegalArgumentException(
@@ -469,7 +462,6 @@ class PackageManagerShellCommand extends ShellCommand {
                 }
             }
         }
-        params.sessionParams.setSize(sessionSize);
     }
     /**
      * Displays the package file for a package.
@@ -1156,45 +1148,23 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runInstall() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         final InstallParams params = makeInstallParams();
+        final String inPath = getNextArg();
 
-        ArrayList<String> inPaths = getRemainingArgs();
-        if (inPaths.isEmpty()) {
-            pw.println("Error: must either specify APK files or '-' to read from stdin");
-            return 1;
-        }
-
-        final boolean hasSplits = inPaths.size() > 1;
-
-        if (STDIN_PATH.equals(inPaths.get(0))) {
-            if (hasSplits) {
-                pw.println("Error: can't specify SPLIT(s) along with '-'");
-                return 1;
-            }
-            if (params.sessionParams.sizeBytes == -1) {
-                pw.println("Error: must either specify a package size or an APK file");
-                return 1;
-            }
-        }
-
-        final boolean isApex =
-                (params.sessionParams.installFlags & PackageManager.INSTALL_APEX) != 0;
-        if (isApex && hasSplits) {
-            pw.println("Error: can't specify SPLIT(s) for APEX");
-            return 1;
-        }
-
-        setParamsSize(params, inPaths);
+        setParamsSize(params, inPath);
         final int sessionId = doCreateSession(params.sessionParams,
                 params.installerPackageName, params.userId);
         boolean abandonSession = true;
         try {
-            for (String inPath : inPaths) {
-                String splitName = hasSplits ? (new File(inPath)).getName()
-                        : "base." + (isApex ? "apex" : "apk");
-                if (doWriteSplit(sessionId, inPath, params.sessionParams.sizeBytes, splitName,
-                        false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
-                    return 1;
-                }
+            if (inPath == null && params.sessionParams.sizeBytes == -1) {
+                pw.println("Error: must either specify a package size or an APK file");
+                return 1;
+            }
+            final boolean isApex =
+                    (params.sessionParams.installFlags & PackageManager.INSTALL_APEX) != 0;
+            String splitName = "base." + (isApex ? "apex" : "apk");
+            if (doWriteSplit(sessionId, inPath, params.sessionParams.sizeBytes, splitName,
+                    false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
+                return 1;
             }
             if (doCommitSession(sessionId, false /*logSuccess*/)
                     != PackageInstaller.STATUS_SUCCESS) {
@@ -1313,12 +1283,12 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final int sessionId = Integer.parseInt(getNextArg());
 
-        ArrayList<String> splitNames = getRemainingArgs();
-        if (splitNames.isEmpty()) {
+        final String splitName = getNextArg();
+        if (splitName == null) {
             pw.println("Error: split name not specified");
             return 1;
         }
-        return doRemoveSplits(sessionId, splitNames, true /*logSuccess*/);
+        return doRemoveSplit(sessionId, splitName, true /*logSuccess*/);
     }
 
     private int runInstallExisting() throws RemoteException {
@@ -1761,15 +1731,6 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private ArrayList<String> getRemainingArgs() {
-        ArrayList<String> args = new ArrayList<>();
-        String arg;
-        while ((arg = getNextArg()) != null) {
-            args.add(arg);
-        }
-        return args;
-    }
-
     private static class SnapshotRuntimeProfileCallback
             extends ISnapshotRuntimeProfileCallback.Stub {
         private boolean mSuccess = false;
@@ -1841,9 +1802,9 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         // if a split is specified, just remove it and not the whole package
-        ArrayList<String> splitNames = getRemainingArgs();
-        if (!splitNames.isEmpty()) {
-            return runRemoveSplits(packageName, splitNames);
+        final String splitName = getNextArg();
+        if (splitName != null) {
+            return runRemoveSplit(packageName, splitName);
         }
 
         userId = translateUserId(userId, true /*allowAll*/, "runUninstall");
@@ -1891,8 +1852,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int runRemoveSplits(String packageName, Collection<String> splitNames)
-            throws RemoteException {
+    private int runRemoveSplit(String packageName, String splitName) throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         final SessionParams sessionParams = new SessionParams(SessionParams.MODE_INHERIT_EXISTING);
         sessionParams.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
@@ -1901,7 +1861,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 doCreateSession(sessionParams, null /*installerPackageName*/, UserHandle.USER_ALL);
         boolean abandonSession = true;
         try {
-            if (doRemoveSplits(sessionId, splitNames, false /*logSuccess*/)
+            if (doRemoveSplit(sessionId, splitName, false /*logSuccess*/)
                     != PackageInstaller.STATUS_SUCCESS) {
                 return 1;
             }
@@ -2985,17 +2945,14 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
-    private int doRemoveSplits(int sessionId, Collection<String> splitNames, boolean logSuccess)
+    private int doRemoveSplit(int sessionId, String splitName, boolean logSuccess)
             throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         PackageInstaller.Session session = null;
         try {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
-
-            for (String splitName : splitNames) {
-                session.removeSplit(splitName);
-            }
+            session.removeSplit(splitName);
 
             if (logSuccess) {
                 pw.println("Success");
@@ -3280,9 +3237,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("       [--enable-rollback]");
         pw.println("       [--force-uuid internal|UUID] [--pkg PACKAGE] [-S BYTES]");
         pw.println("       [--apex] [--wait TIMEOUT]");
-        pw.println("       [PATH [SPLIT...]|-]");
-        pw.println("    Install an application.  Must provide the apk data to install, either as");
-        pw.println("    file path(s) or '-' to read from stdin.  Options are:");
+        pw.println("       [PATH|-]");
+        pw.println("    Install an application.  Must provide the apk data to install, either as a");
+        pw.println("    file path or '-' to read from stdin.  Options are:");
         pw.println("      -R: disallow replacement of existing application");
         pw.println("      -t: allow test packages");
         pw.println("      -i: specify package name of installer owning the app");
@@ -3336,9 +3293,6 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    will be read from stdin.  Options are:");
         pw.println("      -S: size in bytes of package, required for stdin");
         pw.println("");
-        pw.println("  install-remove SESSION_ID SPLIT...");
-        pw.println("    Mark SPLIT(s) as removed in the given install session.");
-        pw.println("");
         pw.println("  install-add-session MULTI_PACKAGE_SESSION_ID CHILD_SESSION_IDs");
         pw.println("    Add one or more session IDs to a multi-package session.");
         pw.println("");
@@ -3363,10 +3317,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  move-primary-storage [internal|UUID]");
         pw.println("");
-        pw.println("  uninstall [-k] [--user USER_ID] [--versionCode VERSION_CODE]");
-        pw.println("       PACKAGE [SPLIT...]");
+        pw.println("  pm uninstall [-k] [--user USER_ID] [--versionCode VERSION_CODE] PACKAGE [SPLIT]");
         pw.println("    Remove the given package name from the system.  May remove an entire app");
-        pw.println("    if no SPLIT names specified, otherwise will remove only the splits of the");
+        pw.println("    if no SPLIT name is specified, otherwise will remove only the split of the");
         pw.println("    given app.  Options are:");
         pw.println("      -k: keep the data and cache directories around after package removal.");
         pw.println("      --user: remove the app from the given user.");
