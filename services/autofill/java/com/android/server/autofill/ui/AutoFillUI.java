@@ -74,6 +74,9 @@ public final class AutoFillUI {
     private final @NonNull OverlayControl mOverlayControl;
     private final @NonNull UiModeManagerInternal mUiModeMgr;
 
+    private @Nullable Runnable mCreateFillUiRunnable;
+    private @Nullable AutoFillUiCallback mSaveUiCallback;
+
     public interface AutoFillUiCallback {
         void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
                 @Nullable Bundle extras);
@@ -98,9 +101,13 @@ public final class AutoFillUI {
         mHandler.post(() -> {
             if (mCallback != callback) {
                 if (mCallback != null) {
-                    hideAllUiThread(mCallback);
+                    if (isSaveUiShowing()) {
+                        // keeps showing the save UI
+                        hideFillUiUiThread(callback, true);
+                    } else {
+                        hideAllUiThread(mCallback);
+                    }
                 }
-
                 mCallback = callback;
             }
         });
@@ -193,7 +200,7 @@ public final class AutoFillUI {
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
                         response.getDatasets() == null ? 0 : response.getDatasets().size());
 
-        mHandler.post(() -> {
+        final Runnable createFillUiRunnable = () -> {
             if (callback != mCallback) {
                 return;
             }
@@ -266,7 +273,15 @@ public final class AutoFillUI {
                     }
                 }
             });
-        });
+        };
+
+        if (isSaveUiShowing()) {
+            // postpone creating the fill UI for showing the save UI
+            if (sDebug) Slog.d(TAG, "postpone fill UI request..");
+            mCreateFillUiRunnable = createFillUiRunnable;
+        } else {
+            mHandler.post(createFillUiRunnable);
+        }
     }
 
     /**
@@ -298,23 +313,22 @@ public final class AutoFillUI {
                 return;
             }
             hideAllUiThread(callback);
+            mSaveUiCallback = callback;
             mSaveUi = new SaveUi(mContext, pendingSaveUi, serviceLabel, serviceIcon,
                     servicePackageName, componentName, info, valueFinder, mOverlayControl,
                     new SaveUi.OnSaveListener() {
                 @Override
                 public void onSave() {
                     log.setType(MetricsEvent.TYPE_ACTION);
-                    hideSaveUiUiThread(mCallback);
-                    if (mCallback != null) {
-                        mCallback.save();
-                    }
+                    hideSaveUiUiThread(callback);
+                    callback.save();
                     destroySaveUiUiThread(pendingSaveUi, true);
                 }
 
                 @Override
                 public void onCancel(IntentSender listener) {
                     log.setType(MetricsEvent.TYPE_DISMISS);
-                    hideSaveUiUiThread(mCallback);
+                    hideSaveUiUiThread(callback);
                     if (listener != null) {
                         try {
                             listener.sendIntent(mContext, 0, null, null, null);
@@ -323,9 +337,7 @@ public final class AutoFillUI {
                                     + listener, e);
                         }
                     }
-                    if (mCallback != null) {
-                        mCallback.cancelSave();
-                    }
+                    callback.cancelSave();
                     destroySaveUiUiThread(pendingSaveUi, true);
                 }
 
@@ -334,18 +346,14 @@ public final class AutoFillUI {
                     if (log.getType() == MetricsEvent.TYPE_UNKNOWN) {
                         log.setType(MetricsEvent.TYPE_CLOSE);
 
-                        if (mCallback != null) {
-                            mCallback.cancelSave();
-                        }
+                        callback.cancelSave();
                     }
                     mMetricsLogger.write(log);
                 }
 
                 @Override
                 public void startIntentSender(IntentSender intentSender, Intent intent) {
-                    if (mCallback != null) {
-                        mCallback.startIntentSender(intentSender, intent);
-                    }
+                    callback.startIntentSender(intentSender, intent);
                 }
             }, mUiModeMgr.isNightMode(), isUpdate, compatMode);
         });
@@ -377,6 +385,10 @@ public final class AutoFillUI {
     public void destroyAll(@Nullable PendingUi pendingSaveUi,
             @Nullable AutoFillUiCallback callback, boolean notifyClient) {
         mHandler.post(() -> destroyAllUiThread(pendingSaveUi, callback, notifyClient));
+    }
+
+    public boolean isSaveUiShowing() {
+        return mSaveUi == null ? false : mSaveUi.isShowing();
     }
 
     public void dump(PrintWriter pw) {
@@ -413,7 +425,8 @@ public final class AutoFillUI {
             Slog.v(TAG, "hideSaveUiUiThread(): mSaveUi=" + mSaveUi + ", callback=" + callback
                     + ", mCallback=" + mCallback);
         }
-        if (mSaveUi != null && (callback == null || callback == mCallback)) {
+
+        if (mSaveUi != null && mSaveUiCallback == callback) {
             return mSaveUi.hide();
         }
         return null;
@@ -432,6 +445,7 @@ public final class AutoFillUI {
         if (sDebug) Slog.d(TAG, "destroySaveUiUiThread(): " + pendingSaveUi);
         mSaveUi.destroy();
         mSaveUi = null;
+        mSaveUiCallback = null;
         if (pendingSaveUi != null && notifyClient) {
             try {
                 if (sDebug) Slog.d(TAG, "destroySaveUiUiThread(): notifying client");
@@ -439,6 +453,12 @@ public final class AutoFillUI {
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client to set save UI state to hidden: " + e);
             }
+        }
+
+        if (mCreateFillUiRunnable != null) {
+            if (sDebug) Slog.d(TAG, "start the pending fill UI request..");
+            mCreateFillUiRunnable.run();
+            mCreateFillUiRunnable = null;
         }
     }
 
