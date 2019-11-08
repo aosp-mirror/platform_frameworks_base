@@ -250,7 +250,7 @@ public final class TextClassificationManager {
 
     private boolean isSystemTextClassifierEnabled() {
         return getSettings().isSystemTextClassifierEnabled()
-                && TextClassifierService.getServiceComponentName(mContext) != null;
+                && TextClassifierService.getServiceComponentName(mContext, getSettings()) != null;
     }
 
     /** @hide */

@@ -19673,6 +19673,12 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public String[] getSystemTextClassifierPackages() {
+        return mContext.getResources().getStringArray(
+                R.array.config_defaultTextClassifierPackages);
+    }
+
+    @Override
     public @Nullable String getAttentionServicePackageName() {
         final String flattenedComponentName =
                 mContext.getString(R.string.config_defaultAttentionService);

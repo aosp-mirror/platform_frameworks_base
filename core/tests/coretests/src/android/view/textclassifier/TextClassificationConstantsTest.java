@@ -107,6 +107,7 @@ public class TextClassificationConstantsTest {
 
     @Test
     public void testLoadFromString_differentValues() {
+        final String testTextClassifier = "com.example.textclassifier";
         final String s = "local_textclassifier_enabled=false,"
                 + "system_textclassifier_enabled=false,"
                 + "model_dark_launch_enabled=false,"
@@ -127,6 +128,7 @@ public class TextClassificationConstantsTest {
                 + "lang_id_context_settings=30:0.5:0.3,"
                 + "detect_language_from_text_enabled=false,"
                 + "template_intent_factory_enabled=false,"
+                + "textclassifier_service_package_override=" + testTextClassifier + ","
                 + "translate_in_classification_enabled=false";
         final TextClassificationConstants constants = new TextClassificationConstants(() -> s);
 
@@ -177,6 +179,9 @@ public class TextClassificationConstantsTest {
                 .that(constants.isLocalTextClassifierEnabled()).isFalse();
         assertWithMessage("translate_in_classification_enabled")
                 .that(constants.isLocalTextClassifierEnabled()).isFalse();
+        assertWithMessage("textclassifier_service_package_override")
+                .that(constants.getTextClassifierServiceName()).isEqualTo(
+                testTextClassifier);
     }
 
     @Test
@@ -234,5 +239,7 @@ public class TextClassificationConstantsTest {
                 .that(constants.isLocalTextClassifierEnabled()).isTrue();
         assertWithMessage("translate_in_classification_enabled")
                 .that(constants.isLocalTextClassifierEnabled()).isTrue();
+        assertWithMessage("textclassifier_service_package_override")
+                .that(constants.getTextClassifierServiceName()).isNull();
     }
 }

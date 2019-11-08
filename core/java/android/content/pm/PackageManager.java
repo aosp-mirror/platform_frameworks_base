@@ -7391,6 +7391,17 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return the system defined text classifier package names, or null if there's none.
+     *
+     * @hide
+     */
+    @NonNull
+    public String[] getSystemTextClassifierPackages() {
+        throw new UnsupportedOperationException(
+                "getSystemTextClassifierPackages not implemented in subclass");
+    }
+
+    /**
      * @return  attention service package name, or null if there's none.
      *
      * @hide
