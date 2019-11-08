@@ -125,22 +125,21 @@ public class ActivityLaunchAnimator {
         return mAnimationRunning;
     }
 
-    class AnimationRunner extends IRemoteAnimationRunner.Stub {
+    private class AnimationRunner extends IRemoteAnimationRunner.Stub {
 
-        private final ExpandableNotificationRow mSourceNotification;
-        private final ExpandAnimationParameters mParams;
+        private ExpandableNotificationRow mSourceNotification;
+        private final ExpandAnimationParameters mParams = new ExpandAnimationParameters();
         private final Rect mWindowCrop = new Rect();
         private final float mNotificationCornerRadius;
         private float mCornerRadius;
         private boolean mIsFullScreenLaunch = true;
         private final SyncRtSurfaceTransactionApplier mSyncRtTransactionApplier;
 
-        public AnimationRunner(ExpandableNotificationRow sourceNofitication) {
-            mSourceNotification = sourceNofitication;
-            mParams = new ExpandAnimationParameters();
-            mSyncRtTransactionApplier = new SyncRtSurfaceTransactionApplier(mSourceNotification);
-            mNotificationCornerRadius = Math.max(mSourceNotification.getCurrentTopRoundness(),
-                    mSourceNotification.getCurrentBottomRoundness());
+        AnimationRunner(ExpandableNotificationRow sourceNotification) {
+            mSourceNotification = sourceNotification;
+            mSyncRtTransactionApplier = new SyncRtSurfaceTransactionApplier(sourceNotification);
+            mNotificationCornerRadius = Math.max(sourceNotification.getCurrentTopRoundness(),
+                    sourceNotification.getCurrentBottomRoundness());
         }
 
         @Override
@@ -155,6 +154,7 @@ public class ActivityLaunchAnimator {
                     setAnimationPending(false);
                     invokeCallback(iRemoteAnimationFinishedCallback);
                     mNotificationPanel.collapse(false /* delayed */, 1.0f /* speedUpFactor */);
+                    mSourceNotification = null;
                     return;
                 }
 
@@ -254,6 +254,7 @@ public class ActivityLaunchAnimator {
                 mCallback.onExpandAnimationFinished(mIsFullScreenLaunch);
                 applyParamsToNotification(null);
                 applyParamsToNotificationList(null);
+                mSourceNotification = null;
             }
 
         }
@@ -281,6 +282,7 @@ public class ActivityLaunchAnimator {
             mSourceNotification.post(() -> {
                 setAnimationPending(false);
                 mCallback.onLaunchAnimationCancelled();
+                mSourceNotification = null;
             });
         }
     };
