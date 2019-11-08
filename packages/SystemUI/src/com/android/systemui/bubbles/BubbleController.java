@@ -316,10 +316,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (mStackView == null) {
             mStackView = new BubbleStackView(mContext, mBubbleData, mSurfaceSynchronizer);
             ViewGroup sbv = mStatusBarWindowController.getStatusBarView();
-            // TODO(b/130237686): When you expand the shade on top of expanded bubble, there is no
-            //  scrim between bubble and the shade
-            int bubblePosition = sbv.indexOfChild(sbv.findViewById(R.id.scrim_behind)) + 1;
-            sbv.addView(mStackView, bubblePosition,
+            int bubbleScrimIndex = sbv.indexOfChild(sbv.findViewById(R.id.scrim_for_bubble));
+            int stackIndex = bubbleScrimIndex + 1;  // Show stack above bubble scrim.
+            sbv.addView(mStackView, stackIndex,
                     new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
