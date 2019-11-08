@@ -21,17 +21,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.os.SystemProperties;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.quicksettings.Tile;
+import android.sysprop.TelephonyProperties;
 import android.widget.Switch;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.TelephonyProperties;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.ActivityStarter;
@@ -75,8 +74,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
     public void handleClick() {
         boolean airplaneModeEnabled = mState.value;
         MetricsLogger.action(mContext, getMetricsCategory(), !airplaneModeEnabled);
-        if (!airplaneModeEnabled && Boolean.parseBoolean(
-                SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE))) {
+        if (!airplaneModeEnabled && TelephonyProperties.in_ecm_mode().orElse(false)) {
             mActivityStarter.postStartActivityDismissingKeyguard(
                     new Intent(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS), 0);
             return;
