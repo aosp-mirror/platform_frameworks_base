@@ -2595,7 +2595,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * interacts with it.
      */
     private boolean shouldKeepVisibleDeadAppWindow() {
-        if (!isWinVisibleLw() || mActivityRecord == null || mActivityRecord.isClientHidden()) {
+        if (!isWinVisibleLw() || mActivityRecord == null || !mActivityRecord.isClientVisible()) {
             // Not a visible app window or the app isn't dead.
             return false;
         }
@@ -2907,13 +2907,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void sendAppVisibilityToClients() {
         super.sendAppVisibilityToClients();
 
-        final boolean clientHidden = mActivityRecord.isClientHidden();
-        if (mAttrs.type == TYPE_APPLICATION_STARTING && clientHidden) {
+        final boolean clientVisible = mActivityRecord.isClientVisible();
+        if (mAttrs.type == TYPE_APPLICATION_STARTING && !clientVisible) {
             // Don't hide the starting window.
             return;
         }
 
-        if (clientHidden) {
+        if (!clientVisible) {
             // Once we are notifying the client that it's visibility has changed, we need to prevent
             // it from destroying child surfaces until the animation has finished. We do this by
             // detaching any surface control the client added from the client.
@@ -2927,8 +2927,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             if (DEBUG_VISIBILITY) Slog.v(TAG,
-                    "Setting visibility of " + this + ": " + (!clientHidden));
-            mClient.dispatchAppVisibility(!clientHidden);
+                    "Setting visibility of " + this + ": " + clientVisible);
+            mClient.dispatchAppVisibility(clientVisible);
         } catch (RemoteException e) {
         }
     }

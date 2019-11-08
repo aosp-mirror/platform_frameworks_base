@@ -55,6 +55,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-2006946193": {
+      "message": "setClientVisible: %s clientVisible=%b Callers=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-2002500255": {
       "message": "Defer removing snapshot surface in %dms",
       "level": "VERBOSE",
@@ -299,12 +305,6 @@
       "message": "Marking app token %s with replacing child windows.",
       "level": "DEBUG",
       "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-1456549051": {
-      "message": "setClientHidden: %s clientHidden=%b Callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-1455600136": {
