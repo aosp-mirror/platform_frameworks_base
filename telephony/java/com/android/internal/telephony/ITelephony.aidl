@@ -319,6 +319,7 @@ interface ITelephony {
     /**
      * Replaced by getDataActivityForSubId.
      */
+    @UnsupportedAppUsage(maxTargetSdk = 28)
     int getDataActivity();
 
     /**
@@ -336,6 +337,7 @@ interface ITelephony {
     /**
      * Replaced by getDataStateForSubId.
      */
+    @UnsupportedAppUsage(maxTargetSdk = 28)
     int getDataState();
 
     /**
