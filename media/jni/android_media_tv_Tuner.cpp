@@ -34,9 +34,11 @@ using ::android::hardware::tv::tuner::V1_0::Result;
 
 struct fields_t {
     jfieldID context;
+    jfieldID filterContext;
     jmethodID frontendInitID;
     jmethodID filterInitID;
     jmethodID onFrontendEventID;
+    jmethodID onFilterStatusID;
 };
 
 static fields_t gFields;
@@ -44,13 +46,25 @@ static fields_t gFields;
 namespace android {
 /////////////// FilterCallback ///////////////////////
 //TODO: implement filter callback
-Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& /* filterEvent */) {
+Return<void> FilterCallback::onFilterEvent(const DemuxFilterEvent& /*filterEvent*/) {
     ALOGD("FilterCallback::onFilterEvent");
     return Void();
 }
-Return<void> FilterCallback::onFilterStatus(const DemuxFilterStatus /*status*/) {
-    ALOGD("FilterCallback::onFilterStatu");
+
+Return<void> FilterCallback::onFilterStatus(const DemuxFilterStatus status) {
+    ALOGD("FilterCallback::onFilterStatus");
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(
+            mFilter,
+            gFields.onFilterStatusID,
+            (jint)status);
     return Void();
+}
+
+void FilterCallback::setFilter(const jobject filter) {
+    ALOGD("FilterCallback::setFilter");
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    mFilter = env->NewWeakGlobalRef(filter);
 }
 
 /////////////// FrontendCallback ///////////////////////
@@ -186,27 +200,35 @@ jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
         }
     }
 
-    sp<IFilter> f;
-    mDemux->openFilter(type, bufferSize, new FilterCallback,
+    sp<IFilter> filterSp;
+    sp<FilterCallback> callback = new FilterCallback();
+    mDemux->openFilter(type, bufferSize, callback,
             [&](Result, const sp<IFilter>& filter) {
-                f = filter;
+                filterSp = filter;
             });
-    if (f == NULL) {
+    if (filterSp == NULL) {
         ALOGD("Failed to open filter, type = %d", type.mainType);
         return NULL;
     }
     int fId;
-    f->getId([&](Result, uint32_t filterId) {
+    filterSp->getId([&](Result, uint32_t filterId) {
         fId = filterId;
     });
-    mFilters[fId] = f;
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    return env->NewObject(
-            env->FindClass("android/media/tv/tuner/Tuner$Filter"),
-            gFields.filterInitID,
-            mObject,
-            (jint) fId);
+    jobject filterObj =
+            env->NewObject(
+                    env->FindClass("android/media/tv/tuner/Tuner$Filter"),
+                    gFields.filterInitID,
+                    mObject,
+                    (jint) fId);
+
+    filterSp->incStrong(filterObj);
+    env->SetLongField(filterObj, gFields.filterContext, (jlong)filterSp.get());
+
+    callback->setFilter(filterObj);
+
+    return filterObj;
 }
 
 }  // namespace android
@@ -233,6 +255,10 @@ static sp<JTuner> getTuner(JNIEnv *env, jobject thiz) {
     return (JTuner *)env->GetLongField(thiz, gFields.context);
 }
 
+static sp<IFilter> getFilter(JNIEnv *env, jobject filter) {
+    return (IFilter *)env->GetLongField(filter, gFields.filterContext);
+}
+
 static void android_media_tv_Tuner_native_init(JNIEnv *env) {
     jclass clazz = env->FindClass("android/media/tv/tuner/Tuner");
     CHECK(clazz != NULL);
@@ -247,8 +273,11 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
             env->GetMethodID(frontendClazz, "<init>", "(Landroid/media/tv/tuner/Tuner;I)V");
 
     jclass filterClazz = env->FindClass("android/media/tv/tuner/Tuner$Filter");
+    gFields.filterContext = env->GetFieldID(filterClazz, "mNativeContext", "J");
     gFields.filterInitID =
             env->GetMethodID(filterClazz, "<init>", "(Landroid/media/tv/tuner/Tuner;I)V");
+    gFields.onFilterStatusID =
+            env->GetMethodID(filterClazz, "onFilterStatus", "(I)V");
 }
 
 static void android_media_tv_Tuner_native_setup(JNIEnv *env, jobject thiz) {
