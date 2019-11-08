@@ -424,6 +424,7 @@ class TaskRecord extends Task {
         mResizeMode = resizeMode;
         mAtmService.mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         mAtmService.mRootActivityContainer.resumeFocusedStacksTopActivities();
+        updateTaskDescription();
     }
 
     boolean resize(Rect bounds, int resizeMode, boolean preserveWindow, boolean deferResume) {
@@ -791,7 +792,10 @@ class TaskRecord extends Task {
         } else {
             autoRemoveRecents = false;
         }
-        mResizeMode = info.resizeMode;
+        if (mResizeMode != info.resizeMode) {
+            mResizeMode = info.resizeMode;
+            updateTaskDescription();
+        }
         mSupportsPictureInPicture = info.supportsPictureInPicture();
     }
 
@@ -1550,12 +1554,15 @@ class TaskRecord extends Task {
             }
             final TaskDescription taskDescription = new TaskDescription(label, null, iconResource,
                     iconFilename, colorPrimary, colorBackground, statusBarColor, navigationBarColor,
-                    statusBarContrastWhenTransparent, navigationBarContrastWhenTransparent);
+                    statusBarContrastWhenTransparent, navigationBarContrastWhenTransparent,
+                    mResizeMode, mMinWidth, mMinHeight);
             setTaskDescription(taskDescription);
             // Update the task affiliation color if we are the parent of the group
             if (mTaskId == mAffiliatedTaskId) {
                 mAffiliatedTaskColor = taskDescription.getPrimaryColor();
             }
+            mAtmService.getTaskChangeNotificationController().notifyTaskDescriptionChanged(
+                    getTaskInfo());
         }
     }
 

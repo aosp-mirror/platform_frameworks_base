@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 
 import android.Manifest;
 import android.annotation.DrawableRes;
@@ -31,6 +32,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
@@ -981,6 +983,9 @@ public class ActivityManager {
         private int mNavigationBarColor;
         private boolean mEnsureStatusBarContrastWhenTransparent;
         private boolean mEnsureNavigationBarContrastWhenTransparent;
+        private int mResizeMode;
+        private int mMinWidth;
+        private int mMinHeight;
 
         /**
          * Creates the TaskDescription to the specified values.
@@ -993,7 +998,8 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
-            this(label, icon, 0, null, colorPrimary, 0, 0, 0, false, false);
+            this(label, icon, 0, null, colorPrimary, 0, 0, 0, false, false,
+                    RESIZE_MODE_RESIZEABLE, -1, -1);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1009,7 +1015,8 @@ public class ActivityManager {
          *                     opaque.
          */
         public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
-            this(label, null, iconRes, null, colorPrimary, 0, 0, 0, false, false);
+            this(label, null, iconRes, null, colorPrimary, 0, 0, 0, false, false,
+                    RESIZE_MODE_RESIZEABLE, -1, -1);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1024,7 +1031,7 @@ public class ActivityManager {
          */
         @Deprecated
         public TaskDescription(String label, Bitmap icon) {
-            this(label, icon, 0, null, 0, 0, 0, 0, false, false);
+            this(label, icon, 0, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
         }
 
         /**
@@ -1035,7 +1042,8 @@ public class ActivityManager {
          *                activity.
          */
         public TaskDescription(String label, @DrawableRes int iconRes) {
-            this(label, null, iconRes, null, 0, 0, 0, 0, false, false);
+            this(label, null, iconRes, null, 0, 0, 0, 0, false, false,
+                    RESIZE_MODE_RESIZEABLE, -1, -1);
         }
 
         /**
@@ -1044,21 +1052,22 @@ public class ActivityManager {
          * @param label A label and description of the current state of this activity.
          */
         public TaskDescription(String label) {
-            this(label, null, 0, null, 0, 0, 0, 0, false, false);
+            this(label, null, 0, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
         }
 
         /**
          * Creates an empty TaskDescription.
          */
         public TaskDescription() {
-            this(null, null, 0, null, 0, 0, 0, 0, false, false);
+            this(null, null, 0, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
         }
 
         /** @hide */
         public TaskDescription(String label, Bitmap bitmap, int iconRes, String iconFilename,
                 int colorPrimary, int colorBackground, int statusBarColor, int navigationBarColor,
                 boolean ensureStatusBarContrastWhenTransparent,
-                boolean ensureNavigationBarContrastWhenTransparent) {
+                boolean ensureNavigationBarContrastWhenTransparent, int resizeMode, int minWidth,
+                int minHeight) {
             mLabel = label;
             mIcon = bitmap;
             mIconRes = iconRes;
@@ -1070,6 +1079,9 @@ public class ActivityManager {
             mEnsureStatusBarContrastWhenTransparent = ensureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     ensureNavigationBarContrastWhenTransparent;
+            mResizeMode = resizeMode;
+            mMinWidth = minWidth;
+            mMinHeight = minHeight;
         }
 
         /**
@@ -1095,6 +1107,9 @@ public class ActivityManager {
             mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     other.mEnsureNavigationBarContrastWhenTransparent;
+            mResizeMode = other.mResizeMode;
+            mMinWidth = other.mMinWidth;
+            mMinHeight = other.mMinHeight;
         }
 
         /**
@@ -1120,6 +1135,9 @@ public class ActivityManager {
             mEnsureStatusBarContrastWhenTransparent = other.mEnsureStatusBarContrastWhenTransparent;
             mEnsureNavigationBarContrastWhenTransparent =
                     other.mEnsureNavigationBarContrastWhenTransparent;
+            mResizeMode = other.mResizeMode;
+            mMinWidth = other.mMinWidth;
+            mMinHeight = other.mMinHeight;
         }
 
         private TaskDescription(Parcel source) {
@@ -1197,6 +1215,33 @@ public class ActivityManager {
         public void setIconFilename(String iconFilename) {
             mIconFilename = iconFilename;
             mIcon = null;
+        }
+
+        /**
+         * Sets the resize mode for this task description. Resize mode as in
+         * {@link android.content.pm.ActivityInfo}.
+         * @hide
+         */
+        public void setResizeMode(int resizeMode) {
+            mResizeMode = resizeMode;
+        }
+
+        /**
+         * The minimal width size to show the app content in freeform mode.
+         * @param minWidth minimal width, -1 for system default.
+         * @hide
+         */
+        public void setMinWidth(int minWidth) {
+            mMinWidth = minWidth;
+        }
+
+        /**
+         * The minimal height size to show the app content in freeform mode.
+         * @param minHeight minimal height, -1 for system default.
+         * @hide
+         */
+        public void setMinHeight(int minHeight) {
+            mMinHeight = minHeight;
         }
 
         /**
@@ -1309,6 +1354,27 @@ public class ActivityManager {
                     ensureNavigationBarContrastWhenTransparent;
         }
 
+        /**
+         * @hide
+         */
+        public int getResizeMode() {
+            return mResizeMode;
+        }
+
+        /**
+         * @hide
+         */
+        public int getMinWidth() {
+            return mMinWidth;
+        }
+
+        /**
+         * @hide
+         */
+        public int getMinHeight() {
+            return mMinHeight;
+        }
+
         /** @hide */
         public void saveToXml(XmlSerializer out) throws IOException {
             if (mLabel != null) {
@@ -1371,6 +1437,9 @@ public class ActivityManager {
             dest.writeInt(mNavigationBarColor);
             dest.writeBoolean(mEnsureStatusBarContrastWhenTransparent);
             dest.writeBoolean(mEnsureNavigationBarContrastWhenTransparent);
+            dest.writeInt(mResizeMode);
+            dest.writeInt(mMinWidth);
+            dest.writeInt(mMinHeight);
             if (mIconFilename == null) {
                 dest.writeInt(0);
             } else {
@@ -1389,6 +1458,9 @@ public class ActivityManager {
             mNavigationBarColor = source.readInt();
             mEnsureStatusBarContrastWhenTransparent = source.readBoolean();
             mEnsureNavigationBarContrastWhenTransparent = source.readBoolean();
+            mResizeMode = source.readInt();
+            mMinWidth = source.readInt();
+            mMinHeight = source.readInt();
             mIconFilename = source.readInt() > 0 ? source.readString() : null;
         }
 
@@ -1404,14 +1476,16 @@ public class ActivityManager {
 
         @Override
         public String toString() {
-            return "TaskDescription Label: " + mLabel + " Icon: " + mIcon +
-                    " IconRes: " + mIconRes + " IconFilename: " + mIconFilename +
-                    " colorPrimary: " + mColorPrimary + " colorBackground: " + mColorBackground +
-                    " statusBarColor: " + mStatusBarColor + (
-                    mEnsureStatusBarContrastWhenTransparent ? " (contrast when transparent)"
-                            : "") + " navigationBarColor: " + mNavigationBarColor + (
-                    mEnsureNavigationBarContrastWhenTransparent
-                            ? " (contrast when transparent)" : "");
+            return "TaskDescription Label: " + mLabel + " Icon: " + mIcon
+                    + " IconRes: " + mIconRes + " IconFilename: " + mIconFilename
+                    + " colorPrimary: " + mColorPrimary + " colorBackground: " + mColorBackground
+                    + " statusBarColor: " + mStatusBarColor
+                    + (mEnsureStatusBarContrastWhenTransparent ? " (contrast when transparent)"
+                            : "") + " navigationBarColor: " + mNavigationBarColor
+                    + (mEnsureNavigationBarContrastWhenTransparent
+                            ? " (contrast when transparent)" : "")
+                    + " resizeMode: " + ActivityInfo.resizeModeToString(mResizeMode)
+                    + " minWidth: " + mMinWidth + " minHeight: " + mMinHeight;
         }
     }
 
@@ -1523,6 +1597,9 @@ public class ActivityManager {
                 pw.print(" iconRes=" + (td.getIconResource() != 0));
                 pw.print(" iconBitmap=" + (td.getIconFilename() != null
                         || td.getInMemoryIcon() != null));
+                pw.print(" resizeMode=" + ActivityInfo.resizeModeToString(td.getResizeMode()));
+                pw.print(" minWidth=" + td.getMinWidth());
+                pw.print(" minHeight=" + td.getMinHeight());
                 pw.println(" }");
             }
         }
