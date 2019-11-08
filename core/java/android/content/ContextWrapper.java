@@ -590,6 +590,16 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
+            @Nullable String receiverPermission, @Nullable String receiverAppOp,
+            @Nullable Bundle options, @Nullable BroadcastReceiver resultReceiver,
+            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
+            @Nullable Bundle initialExtras) {
+        mBase.sendOrderedBroadcast(intent, receiverPermission, receiverAppOp, options,
+                resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
     @Deprecated
     public void sendStickyBroadcast(Intent intent) {
         mBase.sendStickyBroadcast(intent);
