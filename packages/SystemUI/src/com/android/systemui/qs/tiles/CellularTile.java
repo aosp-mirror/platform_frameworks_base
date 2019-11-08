@@ -134,6 +134,13 @@ public class CellularTile extends QSTileImpl<SignalState> {
     @Override
     protected void handleSecondaryClick() {
         if (mDataController.isMobileDataSupported()) {
+            if (mKeyguardMonitor.isSecure()) {
+                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                    showDetail(true);
+                });
+                return;
+            }
+
             showDetail(true);
         } else {
             mActivityStarter
