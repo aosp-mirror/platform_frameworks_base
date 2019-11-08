@@ -16,17 +16,17 @@
 
 package com.android.server.integrity.serializer;
 
-import com.android.server.integrity.model.Rule;
+import android.annotation.NonNull;
 
-import java.io.OutputStream;
-import java.util.List;
+/**
+ * Thrown when rule serialization fails.
+ */
+public class RuleSerializeException extends Exception {
+    public RuleSerializeException(@NonNull String message) {
+        super(message);
+    }
 
-/** A helper class to serialize rules from the {@link Rule} model. */
-public interface RuleSerializer {
-
-    /** Serialize rules to an output stream */
-    void serialize(List<Rule> rules, OutputStream outputStream) throws RuleSerializeException;
-
-    /** Serialize rules to a string. */
-    String serialize(List<Rule> rule) throws RuleSerializeException;
+    public RuleSerializeException(@NonNull String message, @NonNull Throwable cause) {
+        super(message, cause);
+    }
 }
