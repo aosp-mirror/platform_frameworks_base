@@ -59,6 +59,7 @@ import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
+import android.sysprop.TelephonyProperties;
 import android.telecom.CallScreeningService;
 import android.telecom.InCallService;
 import android.telecom.PhoneAccount;
@@ -98,7 +99,6 @@ import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.SmsApplication;
-import com.android.internal.telephony.TelephonyProperties;
 
 import dalvik.system.VMRuntime;
 
@@ -392,7 +392,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public MultiSimVariants getMultiSimConfiguration() {
         String mSimConfig =
-            SystemProperties.get(TelephonyProperties.PROPERTY_MULTI_SIM_CONFIG);
+                TelephonyProperties.multi_sim_config().orElse("");
         if (mSimConfig.equals("dsds")) {
             return MultiSimVariants.DSDS;
         } else if (mSimConfig.equals("dsda")) {
@@ -458,8 +458,7 @@ public class TelephonyManager {
      * {@link #getActiveModemCount} returns 1 while this API returns 2.
      */
     public @ModemCount int getSupportedModemCount() {
-        return SystemProperties.getInt(TelephonyProperties.PROPERTY_MAX_ACTIVE_MODEMS,
-                getActiveModemCount());
+        return TelephonyProperties.max_active_modems().orElse(getActiveModemCount());
     }
 
     /**
@@ -2255,12 +2254,10 @@ public class TelephonyManager {
     /** {@hide} */
     @UnsupportedAppUsage
     private int getPhoneTypeFromProperty(int phoneId) {
-        String type = getTelephonyProperty(phoneId,
-                TelephonyProperties.CURRENT_ACTIVE_PHONE, null);
-        if (type == null || type.isEmpty()) {
-            return getPhoneTypeFromNetworkType(phoneId);
-        }
-        return Integer.parseInt(type);
+        Integer type = getTelephonyProperty(
+                phoneId, TelephonyProperties.current_active_phone(), null);
+        if (type != null) return type;
+        return getPhoneTypeFromNetworkType(phoneId);
     }
 
     private int getPhoneTypeFromNetworkType() {
@@ -2272,9 +2269,9 @@ public class TelephonyManager {
         // When the system property CURRENT_ACTIVE_PHONE, has not been set,
         // use the system property for default network type.
         // This is a fail safe, and can only happen at first boot.
-        String mode = getTelephonyProperty(phoneId, "ro.telephony.default_network", null);
-        if (mode != null && !mode.isEmpty()) {
-            return TelephonyManager.getPhoneType(Integer.parseInt(mode));
+        Integer mode = getTelephonyProperty(phoneId, TelephonyProperties.default_network(), null);
+        if (mode != null) {
+            return TelephonyManager.getPhoneType(mode);
         }
         return TelephonyManager.PHONE_TYPE_NONE;
     }
@@ -2378,7 +2375,7 @@ public class TelephonyManager {
 
     /** The ProductType used for LTE on CDMA devices */
     private static final String sLteOnCdmaProductType =
-        SystemProperties.get(TelephonyProperties.PROPERTY_LTE_ON_CDMA_PRODUCT_TYPE, "");
+            TelephonyProperties.lte_on_cdma_product_type().orElse("");
 
     /**
      * Return if the current radio is LTE on CDMA. This
@@ -2396,8 +2393,8 @@ public class TelephonyManager {
         int curVal;
         String productType = "";
 
-        curVal = SystemProperties.getInt(TelephonyProperties.PROPERTY_LTE_ON_CDMA_DEVICE,
-                    PhoneConstants.LTE_ON_CDMA_UNKNOWN);
+        curVal = TelephonyProperties.lte_on_cdma_device().orElse(
+            PhoneConstants.LTE_ON_CDMA_UNKNOWN);
         retVal = curVal;
         if (retVal == PhoneConstants.LTE_ON_CDMA_UNKNOWN) {
             Matcher matcher = sProductTypePattern.matcher(sKernelCmdLine);
@@ -2449,7 +2446,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getNetworkOperatorName(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
-        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ALPHA, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.operator_alpha(), "");
     }
 
     /**
@@ -2493,7 +2490,7 @@ public class TelephonyManager {
      **/
     @UnsupportedAppUsage
     public String getNetworkOperatorForPhone(int phoneId) {
-        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.operator_numeric(), "");
     }
 
 
@@ -2557,8 +2554,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public boolean isNetworkRoaming(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
-        return Boolean.parseBoolean(getTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_OPERATOR_ISROAMING, null));
+        return getTelephonyProperty(subId, TelephonyProperties.operator_is_roaming(), false);
     }
 
     /**
@@ -3512,8 +3508,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSimOperatorNumericForPhone(int phoneId) {
-        return getTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.icc_operator_numeric(), "");
     }
 
     /**
@@ -3550,8 +3545,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage
     public String getSimOperatorNameForPhone(int phoneId) {
-         return getTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.icc_operator_alpha(), "");
     }
 
     /**
@@ -3583,8 +3577,7 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage
     public String getSimCountryIsoForPhone(int phoneId) {
-        return getTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.icc_operator_iso_country(), "");
     }
 
     /**
@@ -6645,6 +6638,15 @@ public class TelephonyManager {
     }
 
     /**
+     * Inserts or updates a list property. Expands the list if its length is not enough.
+     */
+    private static <T> List<T> updateTelephonyProperty(List<T> prop, int phoneId, T value) {
+        List<T> ret = new ArrayList<>(prop);
+        while (ret.size() <= phoneId) ret.add(null);
+        ret.set(phoneId, value);
+        return ret;
+    }
+    /**
      * Convenience function for retrieving a value from the secure settings
      * value list as an integer.  Note that internally setting values are
      * always stored as strings; this function converts the string to an
@@ -6735,7 +6737,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets a per-phone telephony property.
+     * Gets a per-phone telephony property from a property name.
      *
      * @hide
      */
@@ -6750,6 +6752,15 @@ public class TelephonyManager {
             }
         }
         return propVal == null ? defaultVal : propVal;
+    }
+
+    /**
+     * Gets a typed per-phone telephony property from a schematized list property.
+     */
+    private static <T> T getTelephonyProperty(int phoneId, List<T> prop, T defaultValue) {
+        T ret = null;
+        if (phoneId >= 0 && phoneId < prop.size()) ret = prop.get(phoneId);
+        return ret != null ? ret : defaultValue;
     }
 
     /**
@@ -9076,7 +9087,7 @@ public class TelephonyManager {
     }
 
    /**
-    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the default phone.
+    * Set TelephonyProperties.icc_operator_numeric for the default phone.
     *
     * @hide
     */
@@ -9086,18 +9097,21 @@ public class TelephonyManager {
     }
 
    /**
-    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the given phone.
+    * Set TelephonyProperties.icc_operator_numeric for the given phone.
     *
     * @hide
     */
     @UnsupportedAppUsage
     public void setSimOperatorNumericForPhone(int phoneId, String numeric) {
-        setTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, numeric);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.icc_operator_numeric(), phoneId, numeric);
+            TelephonyProperties.icc_operator_numeric(newList);
+        }
     }
 
     /**
-     * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the default phone.
+     * Set TelephonyProperties.icc_operator_alpha for the default phone.
      *
      * @hide
      */
@@ -9107,18 +9121,21 @@ public class TelephonyManager {
     }
 
     /**
-     * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the given phone.
+     * Set TelephonyProperties.icc_operator_alpha for the given phone.
      *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setSimOperatorNameForPhone(int phoneId, String name) {
-        setTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA, name);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.icc_operator_alpha(), phoneId, name);
+            TelephonyProperties.icc_operator_alpha(newList);
+        }
     }
 
    /**
-    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY for the default phone.
+    * Set TelephonyProperties.icc_operator_iso_country for the default phone.
     *
     * @hide
     */
@@ -9128,18 +9145,21 @@ public class TelephonyManager {
     }
 
    /**
-    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY for the given phone.
+    * Set TelephonyProperties.icc_operator_iso_country for the given phone.
     *
     * @hide
     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setSimCountryIsoForPhone(int phoneId, String iso) {
-        setTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, iso);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.icc_operator_iso_country(), phoneId, iso);
+            TelephonyProperties.icc_operator_iso_country(newList);
+        }
     }
 
     /**
-     * Set TelephonyProperties.PROPERTY_SIM_STATE for the default phone.
+     * Set TelephonyProperties.sim_state for the default phone.
      *
      * @hide
      */
@@ -9149,14 +9169,17 @@ public class TelephonyManager {
     }
 
     /**
-     * Set TelephonyProperties.PROPERTY_SIM_STATE for the given phone.
+     * Set TelephonyProperties.sim_state for the given phone.
      *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setSimStateForPhone(int phoneId, String state) {
-        setTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_SIM_STATE, state);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.sim_state(), phoneId, state);
+            TelephonyProperties.sim_state(newList);
+        }
     }
 
     /**
@@ -9261,7 +9284,11 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setBasebandVersionForPhone(int phoneId, String version) {
-        setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_BASEBAND_VERSION, version);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.baseband_version(), phoneId, version);
+            TelephonyProperties.baseband_version(newList);
+        }
     }
 
     /**
@@ -9284,8 +9311,8 @@ public class TelephonyManager {
      */
     private String getBasebandVersionLegacy(int phoneId) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            String prop = TelephonyProperties.PROPERTY_BASEBAND_VERSION +
-                    ((phoneId == 0) ? "" : Integer.toString(phoneId));
+            String prop = "gsm.version.baseband"
+                    + ((phoneId == 0) ? "" : Integer.toString(phoneId));
             return SystemProperties.get(prop);
         }
         return null;
@@ -9302,7 +9329,7 @@ public class TelephonyManager {
         if (version != null && !version.isEmpty()) {
             setBasebandVersionForPhone(phoneId, version);
         }
-        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_BASEBAND_VERSION, "");
+        return getTelephonyProperty(phoneId, TelephonyProperties.baseband_version(), "");
     }
 
     /**
@@ -9328,8 +9355,9 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setPhoneType(int phoneId, int type) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            TelephonyManager.setTelephonyProperty(phoneId,
-                    TelephonyProperties.CURRENT_ACTIVE_PHONE, String.valueOf(type));
+            List<Integer> newList = updateTelephonyProperty(
+                    TelephonyProperties.current_active_phone(), phoneId, type);
+            TelephonyProperties.current_active_phone(newList);
         }
     }
 
@@ -9358,8 +9386,8 @@ public class TelephonyManager {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public String getOtaSpNumberSchemaForPhone(int phoneId, String defaultValue) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            return TelephonyManager.getTelephonyProperty(phoneId,
-                    TelephonyProperties.PROPERTY_OTASP_NUM_SCHEMA, defaultValue);
+            return getTelephonyProperty(
+                    phoneId, TelephonyProperties.otasp_num_schema(), defaultValue);
         }
 
         return defaultValue;
@@ -9389,8 +9417,7 @@ public class TelephonyManager {
      */
     public boolean getSmsReceiveCapableForPhone(int phoneId, boolean defaultValue) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            return Boolean.parseBoolean(TelephonyManager.getTelephonyProperty(phoneId,
-                    TelephonyProperties.PROPERTY_SMS_RECEIVE, String.valueOf(defaultValue)));
+            return getTelephonyProperty(phoneId, TelephonyProperties.sms_receive(), defaultValue);
         }
 
         return defaultValue;
@@ -9420,8 +9447,7 @@ public class TelephonyManager {
      */
     public boolean getSmsSendCapableForPhone(int phoneId, boolean defaultValue) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            return Boolean.parseBoolean(TelephonyManager.getTelephonyProperty(phoneId,
-                    TelephonyProperties.PROPERTY_SMS_SEND, String.valueOf(defaultValue)));
+            return getTelephonyProperty(phoneId, TelephonyProperties.sms_send(), defaultValue);
         }
 
         return defaultValue;
@@ -9461,7 +9487,9 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public void setNetworkOperatorNameForPhone(int phoneId, String name) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ALPHA, name);
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.operator_alpha(), phoneId, name);
+            TelephonyProperties.operator_alpha(newList);
         }
     }
 
@@ -9483,7 +9511,11 @@ public class TelephonyManager {
      */
     @UnsupportedAppUsage
     public void setNetworkOperatorNumericForPhone(int phoneId, String numeric) {
-        setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, numeric);
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.operator_numeric(), phoneId, numeric);
+            TelephonyProperties.operator_numeric(newList);
+        }
     }
 
     /**
@@ -9505,8 +9537,9 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public void setNetworkRoamingForPhone(int phoneId, boolean isRoaming) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ISROAMING,
-                    isRoaming ? "true" : "false");
+            List<Boolean> newList = updateTelephonyProperty(
+                    TelephonyProperties.operator_is_roaming(), phoneId, isRoaming);
+            TelephonyProperties.operator_is_roaming(newList);
         }
     }
 
@@ -9533,9 +9566,10 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public void setDataNetworkTypeForPhone(int phoneId, int type) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            setTelephonyProperty(phoneId,
-                    TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
+            List<String> newList = updateTelephonyProperty(
+                    TelephonyProperties.data_network_type(), phoneId,
                     ServiceState.rilRadioTechnologyToString(type));
+            TelephonyProperties.data_network_type(newList);
         }
     }
 

@@ -16,9 +16,11 @@
 
 package com.android.internal.telephony;
 
-import android.telephony.TelephonyManager;
+import android.sysprop.TelephonyProperties;
 
 import dalvik.annotation.compat.UnsupportedAppUsage;
+
+import java.util.Optional;
 
 /**
  * {@hide}
@@ -233,8 +235,10 @@ public interface RILConstants {
     int NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 33;
 
     @UnsupportedAppUsage
-    int PREFERRED_NETWORK_MODE = Integer.parseInt(TelephonyManager.getTelephonyProperty(0,
-            "ro.telephony.default_network", Integer.toString(NETWORK_MODE_WCDMA_PREF)));
+    int PREFERRED_NETWORK_MODE = Optional.of(TelephonyProperties.default_network())
+            .filter(list -> !list.isEmpty())
+            .map(list -> list.get(0))
+            .orElse(NETWORK_MODE_WCDMA_PREF);
 
     int BAND_MODE_UNSPECIFIED = 0;      //"unspecified" (selected by baseband automatically)
     int BAND_MODE_EURO = 1;             //"EURO band" (GSM-900 / DCS-1800 / WCDMA-IMT-2000)
