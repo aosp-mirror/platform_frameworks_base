@@ -678,7 +678,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             // actual reparent.
             if (inPinnedWindowingMode()
                     && !(toStackWindowingMode == WINDOWING_MODE_UNDEFINED)
-                    && !r.isHidden()) {
+                    && r.isVisible()) {
                 r.savePinnedStackBounds();
             }
             final boolean wasFocused = r != null && root.isTopDisplayFocusedStack(sourceStack)

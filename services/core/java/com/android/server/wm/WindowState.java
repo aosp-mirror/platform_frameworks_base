@@ -1563,7 +1563,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * not the pending requested hidden state.
      */
     boolean isVisibleNow() {
-        return (!mToken.isHidden() || mAttrs.type == TYPE_APPLICATION_STARTING)
+        return (mToken.isVisible() || mAttrs.type == TYPE_APPLICATION_STARTING)
                 && isVisible();
     }
 
@@ -1636,7 +1636,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         final boolean parentAndClientVisible = !isParentWindowHidden()
-                && mViewVisibility == View.VISIBLE && !mToken.isHidden();
+                && mViewVisibility == View.VISIBLE && mToken.isVisible();
         return mHasSurface && isVisibleByPolicy() && !mDestroying
                 && (parentAndClientVisible || isAnimating(TRANSITION | PARENTS));
     }
@@ -1655,7 +1655,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             final Task task = getTask();
             final boolean canFromTask = task != null && task.canAffectSystemUiFlags();
-            return canFromTask && !mActivityRecord.isHidden();
+            return canFromTask && mActivityRecord.isVisible();
         }
     }
 
@@ -1684,7 +1684,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final ActivityRecord atoken = mActivityRecord;
         return mViewVisibility == View.GONE
                 || !mRelayoutCalled
-                || (atoken == null && mToken.isHidden())
+                || (atoken == null && !mToken.isVisible())
                 || (atoken != null && !atoken.mVisibleRequested)
                 || isParentWindowGoneForLayout()
                 || (mAnimatingExit && !isAnimatingLw())
@@ -4166,7 +4166,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " parentHidden=" + isParentWindowHidden()
                     + " tok.visibleRequested="
                     + (mActivityRecord != null && mActivityRecord.mVisibleRequested)
-                    + " tok.hidden=" + (mActivityRecord != null && mActivityRecord.isHidden())
+                    + " tok.visible=" + (mActivityRecord != null && mActivityRecord.isVisible())
                     + " animating=" + isAnimating(TRANSITION | PARENTS)
                     + " tok animating="
                     + (mActivityRecord != null && mActivityRecord.isAnimating(TRANSITION))

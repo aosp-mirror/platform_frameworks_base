@@ -74,7 +74,7 @@ class WindowTestUtils {
     private static void postCreateActivitySetup(ActivityRecord activity, DisplayContent dc) {
         activity.onDisplayChanged(dc);
         activity.setOccludesParent(true);
-        activity.setHidden(false);
+        activity.setVisible(true);
         activity.mVisibleRequested = true;
     }
 
