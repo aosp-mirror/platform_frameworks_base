@@ -307,7 +307,7 @@ public final class PermissionPolicyService extends SystemService {
                 /* ignore */
             }
 
-            packageManagerInternal.setRuntimePermissionsFingerPrint(Build.CUSTOM_FINGERPRINT, userId);
+            packageManagerInternal.setRuntimePermissionsFingerPrint(Build.FINGERPRINT, userId);
         }
     }
 
