@@ -61,6 +61,7 @@ import android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback;
 import android.net.wifi.WifiManager.OnWifiUsabilityStatsListener;
 import android.net.wifi.WifiManager.ScanResultsListener;
 import android.net.wifi.WifiManager.SoftApCallback;
+import android.net.wifi.WifiManager.SuggestionConnectionStatusListener;
 import android.net.wifi.WifiManager.TrafficStateCallback;
 import android.os.Binder;
 import android.os.Build;
@@ -109,12 +110,14 @@ public class WifiManagerTest {
     @Mock NetworkRequestMatchCallback mNetworkRequestMatchCallback;
     @Mock OnWifiUsabilityStatsListener mOnWifiUsabilityStatsListener;
     @Mock ScanResultsListener mScanResultListener;
+    @Mock SuggestionConnectionStatusListener mListener;
     @Mock Executor mCallbackExecutor;
     @Mock Executor mExecutor;
 
     private Handler mHandler;
     private TestLooper mLooper;
     private WifiManager mWifiManager;
+    private WifiNetworkSuggestion mWifiNetworkSuggestion;
 
     @Before
     public void setUp() throws Exception {
@@ -126,6 +129,7 @@ public class WifiManagerTest {
         when(mContext.getOpPackageName()).thenReturn(TEST_PACKAGE_NAME);
         mWifiManager = new WifiManager(mContext, mWifiService, mLooper.getLooper());
         verify(mWifiService).getVerboseLoggingLevel();
+        mWifiNetworkSuggestion = new WifiNetworkSuggestion();
     }
 
     /**
@@ -1802,5 +1806,70 @@ public class WifiManagerTest {
     @Test(expected = IllegalArgumentException.class)
     public void testRemoveScanResultsListenerWithNullListener() throws Exception {
         mWifiManager.removeScanResultsListener(null);
+    }
+
+    /**
+     * Verify an IllegalArgumentException is thrown if executor not provided.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddSuggestionConnectionStatusListenerWithNullExecutor() {
+        mWifiManager.addSuggestionConnectionStatusListener(null, mListener);
+    }
+
+    /**
+     * Verify an IllegalArgumentException is thrown if listener is not provided.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddSuggestionConnectionStatusListenerWithNullListener() {
+        mWifiManager.addSuggestionConnectionStatusListener(mExecutor, null);
+    }
+
+    /**
+     * Verify client provided listener is being called to the right listener.
+     */
+    @Test
+    public void testAddSuggestionConnectionStatusListenerAndReceiveEvent() throws Exception {
+        int errorCode = WifiManager.STATUS_SUGGESTION_CONNECTION_FAILURE_AUTHENTICATION;
+        ArgumentCaptor<ISuggestionConnectionStatusListener.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(ISuggestionConnectionStatusListener.Stub.class);
+        Executor executor = new SynchronousExecutor();
+        mWifiManager.addSuggestionConnectionStatusListener(executor, mListener);
+        verify(mWifiService).registerSuggestionConnectionStatusListener(any(IBinder.class),
+                callbackCaptor.capture(), anyInt(), anyString());
+        callbackCaptor.getValue().onConnectionStatus(mWifiNetworkSuggestion, errorCode);
+        verify(mListener).onConnectionStatus(any(WifiNetworkSuggestion.class), eq(errorCode));
+    }
+
+    /**
+     * Verify client provided listener is being called to the right executor.
+     */
+    @Test
+    public void testAddSuggestionConnectionStatusListenerWithTheTargetExecutor() throws Exception {
+        int errorCode = WifiManager.STATUS_SUGGESTION_CONNECTION_FAILURE_AUTHENTICATION;
+        ArgumentCaptor<ISuggestionConnectionStatusListener.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(ISuggestionConnectionStatusListener.Stub.class);
+        mWifiManager.addSuggestionConnectionStatusListener(mExecutor, mListener);
+        verify(mWifiService).registerSuggestionConnectionStatusListener(any(IBinder.class),
+                callbackCaptor.capture(), anyInt(), anyString());
+        callbackCaptor.getValue().onConnectionStatus(any(WifiNetworkSuggestion.class), errorCode);
+        verify(mExecutor).execute(any(Runnable.class));
+    }
+
+    /**
+     * Verify an IllegalArgumentException is thrown if listener is not provided.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testRemoveSuggestionConnectionListenerWithNullListener() {
+        mWifiManager.removeSuggestionConnectionStatusListener(null);
+    }
+
+    /**
+     * Verify removeSuggestionConnectionListener.
+     */
+    @Test
+    public void testRemoveSuggestionConnectionListener() throws Exception {
+
+        mWifiManager.removeSuggestionConnectionStatusListener(mListener);
+        verify(mWifiService).unregisterSuggestionConnectionStatusListener(anyInt(), anyString());
     }
 }

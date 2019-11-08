@@ -30,6 +30,7 @@ import android.net.wifi.ILocalOnlyHotspotCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.IScanResultsListener;
 import android.net.wifi.ISoftApCallback;
+import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.ITxPacketCountListener;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
@@ -236,4 +237,8 @@ interface IWifiManager
     void registerScanResultsListener(in IBinder binder, in IScanResultsListener Listener, int listenerIdentifier);
 
     void unregisterScanResultsListener(int listenerIdentifier);
+
+    void registerSuggestionConnectionStatusListener(in IBinder binder, in ISuggestionConnectionStatusListener listener, int listenerIdentifier, String packageName);
+
+    void unregisterSuggestionConnectionStatusListener(int listenerIdentifier, String packageName);
 }

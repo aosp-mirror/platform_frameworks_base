@@ -28,6 +28,7 @@ import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.IScanResultsListener;
 import android.net.wifi.ISoftApCallback;
+import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.ITxPacketCountListener;
 import android.net.wifi.IWifiManager;
@@ -538,6 +539,19 @@ public class BaseWifiService extends IWifiManager.Stub {
 
     @Override
     public void unregisterScanResultsListener(int listenerIdentifier) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void registerSuggestionConnectionStatusListener(IBinder binder,
+            ISuggestionConnectionStatusListener listener,
+            int listenerIdentifier, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void unregisterSuggestionConnectionStatusListener(int listenerIdentifier,
+            String packageName) {
         throw new UnsupportedOperationException();
     }
 }
