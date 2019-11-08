@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "Bitmap"
+#include <log/log.h>
+
 #include "android/graphics/bitmap.h"
-#include "Bitmap.h"
 #include "TypeCast.h"
 #include "GraphicsJNI.h"
 
+#include <GraphicsJNI.h>
 #include <hwui/Bitmap.h>
 
 using namespace android;
 
 ABitmap* ABitmap_acquireBitmapFromJava(JNIEnv* env, jobject bitmapObj) {
-    Bitmap& bitmap = android::bitmap::toBitmap(env, bitmapObj);
-    bitmap.ref();
-    return TypeCast::toABitmap(&bitmap);
+    Bitmap* bitmap = GraphicsJNI::getNativeBitmap(env, bitmapObj);
+    if (bitmap) {
+        bitmap->ref();
+        return TypeCast::toABitmap(bitmap);
+    }
+    return nullptr;
 }
 
 void ABitmap_acquireRef(ABitmap* bitmap) {
@@ -37,8 +43,8 @@ void ABitmap_releaseRef(ABitmap* bitmap) {
     SkSafeUnref(TypeCast::toBitmap(bitmap));
 }
 
-static AndroidBitmapFormat getFormat(Bitmap* bitmap) {
-    switch (bitmap->colorType()) {
+static AndroidBitmapFormat getFormat(const SkImageInfo& info) {
+    switch (info.colorType()) {
         case kN32_SkColorType:
             return ANDROID_BITMAP_FORMAT_RGBA_8888;
         case kRGB_565_SkColorType:
@@ -71,6 +77,20 @@ static SkColorType getColorType(AndroidBitmapFormat format) {
     }
 }
 
+static uint32_t getInfoFlags(const SkImageInfo& info) {
+    switch (info.alphaType()) {
+        case kUnknown_SkAlphaType:
+            LOG_ALWAYS_FATAL("Bitmap has no alpha type");
+            break;
+        case kOpaque_SkAlphaType:
+            return ANDROID_BITMAP_FLAGS_ALPHA_OPAQUE;
+        case kPremul_SkAlphaType:
+            return ANDROID_BITMAP_FLAGS_ALPHA_PREMUL;
+        case kUnpremul_SkAlphaType:
+            return ANDROID_BITMAP_FLAGS_ALPHA_UNPREMUL;
+    }
+}
+
 ABitmap* ABitmap_copy(ABitmap* srcBitmapHandle, AndroidBitmapFormat dstFormat) {
     SkColorType dstColorType = getColorType(dstFormat);
     if (srcBitmapHandle && dstColorType != kUnknown_SkColorType) {
@@ -87,15 +107,25 @@ ABitmap* ABitmap_copy(ABitmap* srcBitmapHandle, AndroidBitmapFormat dstFormat) {
     return nullptr;
 }
 
+static AndroidBitmapInfo getInfo(const SkImageInfo& imageInfo, uint32_t rowBytes) {
+    AndroidBitmapInfo info;
+    info.width = imageInfo.width();
+    info.height = imageInfo.height();
+    info.stride = rowBytes;
+    info.format = getFormat(imageInfo);
+    info.flags = getInfoFlags(imageInfo);
+    return info;
+}
+
 AndroidBitmapInfo ABitmap_getInfo(ABitmap* bitmapHandle) {
     Bitmap* bitmap = TypeCast::toBitmap(bitmapHandle);
+    return getInfo(bitmap->info(), bitmap->rowBytes());
+}
 
-    AndroidBitmapInfo info;
-    info.width = bitmap->width();
-    info.height = bitmap->height();
-    info.stride = bitmap->rowBytes();
-    info.format = getFormat(bitmap);
-    return info;
+AndroidBitmapInfo ABitmap_getInfoFromJava(JNIEnv* env, jobject bitmapObj) {
+    uint32_t rowBytes = 0;
+    SkImageInfo imageInfo = GraphicsJNI::getBitmapInfo(env, bitmapObj, &rowBytes);
+    return getInfo(imageInfo, rowBytes);
 }
 
 void* ABitmap_getPixels(ABitmap* bitmapHandle) {
@@ -107,9 +137,17 @@ void* ABitmap_getPixels(ABitmap* bitmapHandle) {
 }
 
 AndroidBitmapFormat ABitmapConfig_getFormatFromConfig(JNIEnv* env, jobject bitmapConfigObj) {
-  return GraphicsJNI::getFormatFromConfig(env, bitmapConfigObj);
+    return GraphicsJNI::getFormatFromConfig(env, bitmapConfigObj);
 }
 
 jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format) {
-  return GraphicsJNI::getConfigFromFormat(env, format);
+    return GraphicsJNI::getConfigFromFormat(env, format);
+}
+
+void ABitmap_notifyPixelsChanged(ABitmap* bitmapHandle) {
+    Bitmap* bitmap = TypeCast::toBitmap(bitmapHandle);
+    if (bitmap->isImmutable()) {
+        ALOGE("Attempting to modify an immutable Bitmap!");
+    }
+    return bitmap->notifyPixelsChanged();
 }

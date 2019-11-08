@@ -342,10 +342,6 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
     return static_cast<SkColorType>(gConfig2ColorType[legacyConfig]);
 }
 
-void GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap, SkBitmap* outBitmap) {
-    bitmap::toBitmap(env, bitmap).getSkBitmap(outBitmap);
-}
-
 AndroidBitmapFormat GraphicsJNI::getFormatFromConfig(JNIEnv* env, jobject jconfig) {
     ALOG_ASSERT(env);
     if (NULL == jconfig) {

@@ -15,7 +15,7 @@
  */
 
 #include <android/bitmap.h>
-#include <android/graphics/Bitmap.h>
+#include <android/graphics/bitmap.h>
 
 int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
                           AndroidBitmapInfo* info) {
@@ -24,7 +24,7 @@ int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
     }
 
     if (info) {
-        android::bitmap::imageInfo(env, jbitmap, info);
+        *info = ABitmap_getInfoFromJava(env, jbitmap);
     }
     return ANDROID_BITMAP_RESULT_SUCCESS;
 }
@@ -34,10 +34,14 @@ int AndroidBitmap_lockPixels(JNIEnv* env, jobject jbitmap, void** addrPtr) {
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    void* addr = android::bitmap::lockPixels(env, jbitmap);
+    android::graphics::Bitmap bitmap(env, jbitmap);
+    void* addr = bitmap.isValid() ? bitmap.getPixels() : nullptr;
+
     if (!addr) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
+
+    ABitmap_acquireRef(bitmap.get());
 
     if (addrPtr) {
         *addrPtr = addr;
@@ -50,9 +54,13 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
         return ANDROID_BITMAP_RESULT_BAD_PARAMETER;
     }
 
-    bool unlocked = android::bitmap::unlockPixels(env, jbitmap);
-    if (!unlocked) {
+    android::graphics::Bitmap bitmap(env, jbitmap);
+
+    if (!bitmap.isValid()) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
+
+    bitmap.notifyPixelsChanged();
+    ABitmap_releaseRef(bitmap.get());
     return ANDROID_BITMAP_RESULT_SUCCESS;
 }
