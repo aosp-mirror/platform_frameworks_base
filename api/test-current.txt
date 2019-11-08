@@ -4451,6 +4451,10 @@ package android.view {
     method public abstract String asyncImpl() default "";
   }
 
+  public class SurfaceView extends android.view.View {
+    method @Nullable public android.os.IBinder getInputToken();
+  }
+
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method public android.view.View getTooltipView();
     method public boolean isAutofilled();
@@ -4498,8 +4502,9 @@ package android.view {
   }
 
   public class WindowlessViewRoot {
-    ctor public WindowlessViewRoot(android.content.Context, android.view.Display, android.view.SurfaceControl);
+    ctor public WindowlessViewRoot(@NonNull android.content.Context, @NonNull android.view.Display, @NonNull android.view.SurfaceControl, @Nullable android.os.IBinder);
     method public void addView(android.view.View, android.view.WindowManager.LayoutParams);
+    method public void dispose();
     method public void relayout(android.view.WindowManager.LayoutParams);
   }
 

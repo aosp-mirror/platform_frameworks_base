@@ -17,17 +17,16 @@
 package com.android.test.viewembed;
 
 import android.app.Activity;
-import android.os.Bundle;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.os.Bundle;
 import android.view.Gravity;
-import android.view.WindowlessViewRoot;
 import android.view.SurfaceHolder;
-import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowlessViewRoot;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
@@ -50,8 +49,8 @@ public class WindowlessWmTest extends Activity implements SurfaceHolder.Callback
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        mVr = new WindowlessViewRoot(this, this.getDisplay(),
-                mView.getSurfaceControl());
+        mVr = new WindowlessViewRoot(this, this.getDisplay(), mView.getSurfaceControl(),
+                mView.getInputToken());
         Button v = new Button(this);
         v.setBackgroundColor(Color.BLUE);
         v.setOnClickListener(new View.OnClickListener() {

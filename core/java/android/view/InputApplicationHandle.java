@@ -36,12 +36,18 @@ public final class InputApplicationHandle {
     // Dispatching timeout.
     public long dispatchingTimeoutNanos;
 
-    public IBinder token;
+    public final IBinder token;
 
     private native void nativeDispose();
 
     public InputApplicationHandle(IBinder token) {
         this.token = token;
+    }
+
+    public InputApplicationHandle(InputApplicationHandle handle) {
+        this.token = handle.token;
+        this.dispatchingTimeoutNanos = handle.dispatchingTimeoutNanos;
+        this.name = handle.name;
     }
 
     @Override

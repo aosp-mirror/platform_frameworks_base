@@ -69,6 +69,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -1661,7 +1662,7 @@ public final class ViewRootImpl implements ViewParent,
 
         return mBlastBufferQueue.getSurface();
     }
-    
+
     private void setBoundsLayerCrop() {
         // mWinFrame is already adjusted for surface insets. So offset it and use it as
         // the cropping bounds.
@@ -7179,7 +7180,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mSurfaceControl.isValid()) {
             if (USE_BLAST_BUFFERQUEUE == false) {
                 mSurface.copyFrom(mSurfaceControl);
-            } else { 
+            } else {
                 mSurface.transferFrom(getOrCreateBLASTSurface(
                     (int) (mView.getMeasuredWidth() * appScale + 0.5f),
                     (int) (mView.getMeasuredHeight() * appScale + 0.5f)));
@@ -8929,6 +8930,16 @@ public final class ViewRootImpl implements ViewParent,
 
     public SurfaceControl getSurfaceControl() {
         return mSurfaceControl;
+    }
+
+    /**
+     * @return Returns a token used to identify the windows input channel.
+     */
+    public IBinder getInputToken() {
+        if (mInputEventReceiver == null) {
+            return null;
+        }
+        return mInputEventReceiver.getToken();
     }
 
     /**
