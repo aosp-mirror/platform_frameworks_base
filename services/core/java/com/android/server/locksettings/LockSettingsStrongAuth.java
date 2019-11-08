@@ -16,10 +16,8 @@
 
 package com.android.server.locksettings;
 
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
-        .STRONG_AUTH_NOT_REQUIRED;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
-        .STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
@@ -50,6 +48,7 @@ public class LockSettingsStrongAuth {
     private static final int MSG_UNREGISTER_TRACKER = 3;
     private static final int MSG_REMOVE_USER = 4;
     private static final int MSG_SCHEDULE_STRONG_AUTH_TIMEOUT = 5;
+    private static final int MSG_NO_LONGER_REQUIRE_STRONG_AUTH = 6;
 
     private static final String STRONG_AUTH_TIMEOUT_ALARM_TAG =
             "LockSettingsStrongAuth.timeoutForUser";
@@ -103,6 +102,26 @@ public class LockSettingsStrongAuth {
         int newValue = strongAuthReason == STRONG_AUTH_NOT_REQUIRED
                 ? STRONG_AUTH_NOT_REQUIRED
                 : (oldValue | strongAuthReason);
+        if (oldValue != newValue) {
+            mStrongAuthForUser.put(userId, newValue);
+            notifyStrongAuthTrackers(newValue, userId);
+        }
+    }
+
+    private void handleNoLongerRequireStrongAuth(int strongAuthReason, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            for (int i = 0; i < mStrongAuthForUser.size(); i++) {
+                int key = mStrongAuthForUser.keyAt(i);
+                handleNoLongerRequireStrongAuthOneUser(strongAuthReason, key);
+            }
+        } else {
+            handleNoLongerRequireStrongAuthOneUser(strongAuthReason, userId);
+        }
+    }
+
+    private void handleNoLongerRequireStrongAuthOneUser(int strongAuthReason, int userId) {
+        int oldValue = mStrongAuthForUser.get(userId, mDefaultStrongAuthFlags);
+        int newValue = oldValue & ~strongAuthReason;
         if (oldValue != newValue) {
             mStrongAuthForUser.put(userId, newValue);
             notifyStrongAuthTrackers(newValue, userId);
@@ -174,6 +193,16 @@ public class LockSettingsStrongAuth {
         }
     }
 
+    void noLongerRequireStrongAuth(int strongAuthReason, int userId) {
+        if (userId == UserHandle.USER_ALL || userId >= UserHandle.USER_SYSTEM) {
+            mHandler.obtainMessage(MSG_NO_LONGER_REQUIRE_STRONG_AUTH, strongAuthReason,
+                    userId).sendToTarget();
+        } else {
+            throw new IllegalArgumentException(
+                    "userId must be an explicit user id or USER_ALL");
+        }
+    }
+
     public void reportUnlock(int userId) {
         requireStrongAuth(STRONG_AUTH_NOT_REQUIRED, userId);
     }
@@ -215,6 +244,9 @@ public class LockSettingsStrongAuth {
                     break;
                 case MSG_SCHEDULE_STRONG_AUTH_TIMEOUT:
                     handleScheduleStrongAuthTimeout(msg.arg1);
+                    break;
+                case MSG_NO_LONGER_REQUIRE_STRONG_AUTH:
+                    handleNoLongerRequireStrongAuth(msg.arg1, msg.arg2);
                     break;
             }
         }

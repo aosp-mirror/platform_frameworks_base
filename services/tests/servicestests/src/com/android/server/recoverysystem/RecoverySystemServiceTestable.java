@@ -19,6 +19,8 @@ package com.android.server.recoverysystem;
 import android.content.Context;
 import android.os.PowerManager;
 
+import com.android.internal.widget.LockSettingsInternal;
+
 import java.io.FileWriter;
 
 public class RecoverySystemServiceTestable extends RecoverySystemService {
@@ -27,15 +29,17 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
         private final PowerManager mPowerManager;
         private final FileWriter mUncryptPackageFileWriter;
         private final UncryptSocket mUncryptSocket;
+        private final LockSettingsInternal mLockSettingsInternal;
 
         MockInjector(Context context, FakeSystemProperties systemProperties,
                 PowerManager powerManager, FileWriter uncryptPackageFileWriter,
-                UncryptSocket uncryptSocket) {
+                UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal) {
             super(context);
             mSystemProperties = systemProperties;
             mPowerManager = powerManager;
             mUncryptPackageFileWriter = uncryptPackageFileWriter;
             mUncryptSocket = uncryptSocket;
+            mLockSettingsInternal = lockSettingsInternal;
         }
 
         @Override
@@ -76,13 +80,18 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
         @Override
         public void threadSleep(long millis) {
         }
+
+        @Override
+        public LockSettingsInternal getLockSettingsService() {
+            return mLockSettingsInternal;
+        }
     }
 
     RecoverySystemServiceTestable(Context context, FakeSystemProperties systemProperties,
             PowerManager powerManager, FileWriter uncryptPackageFileWriter,
-            UncryptSocket uncryptSocket) {
+            UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal) {
         super(new MockInjector(context, systemProperties, powerManager, uncryptPackageFileWriter,
-                uncryptSocket));
+                uncryptSocket, lockSettingsInternal));
     }
 
     public static class FakeSystemProperties {

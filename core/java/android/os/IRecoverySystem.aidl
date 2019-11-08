@@ -17,6 +17,7 @@
 
 package android.os;
 
+import android.content.IntentSender;
 import android.os.IRecoverySystemProgressListener;
 
 /** @hide */
@@ -26,4 +27,7 @@ interface IRecoverySystem {
     boolean setupBcb(in String command);
     boolean clearBcb();
     void rebootRecoveryWithCommand(in String command);
+    boolean requestLskf(in String updateToken, in IntentSender sender);
+    boolean clearLskf();
+    boolean rebootWithLskf(in String updateToken, in String reason);
 }

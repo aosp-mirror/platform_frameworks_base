@@ -2117,6 +2117,7 @@ package android.content.pm {
     field public static final String EXTRA_REQUEST_PERMISSIONS_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
+    field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
@@ -6905,9 +6906,12 @@ package android.os {
 
   public class RecoverySystem {
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void cancelScheduledUpdate(android.content.Context) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static boolean clearPrepareForUnattendedUpdate(@NonNull android.content.Context) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void installPackage(android.content.Context, java.io.File, boolean) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void prepareForUnattendedUpdate(@NonNull android.content.Context, @NonNull String, @Nullable android.content.IntentSender) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void processPackage(android.content.Context, java.io.File, android.os.RecoverySystem.ProgressListener, android.os.Handler) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void processPackage(android.content.Context, java.io.File, android.os.RecoverySystem.ProgressListener) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.RECOVERY) public static boolean rebootAndApply(@NonNull android.content.Context, @NonNull String, @NonNull String) throws java.io.IOException;
     method @RequiresPermission(allOf={android.Manifest.permission.RECOVERY, android.Manifest.permission.REBOOT}) public static void rebootWipeAb(android.content.Context, java.io.File, String) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void scheduleUpdateOnBoot(android.content.Context, java.io.File) throws java.io.IOException;
     method public static boolean verifyPackageCompatibility(java.io.File) throws java.io.IOException;
