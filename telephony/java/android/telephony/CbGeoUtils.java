@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.os.Build;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -257,6 +258,15 @@ public class CbGeoUtils {
                 return new Point(x - p.x, y - p.y);
             }
         }
+
+        @Override
+        public String toString() {
+            String str = "Polygon: ";
+            if (Build.IS_DEBUGGABLE) {
+                str += mVertices;
+            }
+            return str;
+        }
     }
 
     /**
@@ -283,6 +293,16 @@ public class CbGeoUtils {
         @Override
         public boolean contains(LatLng p) {
             return mCenter.distance(p) <= mRadiusMeter;
+        }
+
+        @Override
+        public String toString() {
+            String str = "Circle: ";
+            if (Build.IS_DEBUGGABLE) {
+                str += mCenter + ", radius = " + mRadiusMeter;
+            }
+
+            return str;
         }
     }
 
