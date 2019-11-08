@@ -42,8 +42,6 @@ import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
-import android.hardware.face.IFaceService;
-import android.hardware.fingerprint.IFingerprintService;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -67,8 +65,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.SystemService;
-import com.android.server.biometrics.face.FaceAuthenticator;
-import com.android.server.biometrics.fingerprint.FingerprintAuthenticator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -215,9 +211,6 @@ public class BiometricService extends SystemService {
     private final Injector mInjector;
     @VisibleForTesting
     final IBiometricService.Stub mImpl;
-    private final boolean mHasFeatureFace;
-    private final boolean mHasFeatureFingerprint;
-    private final boolean mHasFeatureIris;
     @VisibleForTesting
     final SettingObserver mSettingObserver;
     private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
@@ -702,6 +695,8 @@ public class BiometricService extends SystemService {
         @Override
         public void registerAuthenticator(int id, int strength, int modality,
                 IBiometricAuthenticator authenticator) {
+            checkInternalPermission();
+
             mAuthenticators.add(new AuthenticatorWrapper(id, strength, modality, authenticator));
         }
 
@@ -782,24 +777,6 @@ public class BiometricService extends SystemService {
         }
 
         /**
-         * Allows to mock FaceAuthenticator for testing.
-         */
-        @VisibleForTesting
-        public IBiometricAuthenticator getFingerprintAuthenticator() {
-            return new FingerprintAuthenticator(IFingerprintService.Stub.asInterface(
-                    ServiceManager.getService(Context.FINGERPRINT_SERVICE)));
-        }
-
-        /**
-         * Allows to mock FaceAuthenticator for testing.
-         */
-        @VisibleForTesting
-        public IBiometricAuthenticator getFaceAuthenticator() {
-            return new FaceAuthenticator(
-                    IFaceService.Stub.asInterface(ServiceManager.getService(Context.FACE_SERVICE)));
-        }
-
-        /**
          * Allows to mock SettingObserver for testing.
          */
         @VisibleForTesting
@@ -853,11 +830,6 @@ public class BiometricService extends SystemService {
         mSettingObserver = mInjector.getSettingObserver(context, mHandler,
                 mEnabledOnKeyguardCallbacks);
 
-        final PackageManager pm = context.getPackageManager();
-        mHasFeatureFace = pm.hasSystemFeature(PackageManager.FEATURE_FACE);
-        mHasFeatureFingerprint = pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
-        mHasFeatureIris = pm.hasSystemFeature(PackageManager.FEATURE_IRIS);
-
         try {
             injector.getActivityManagerService().registerUserSwitchObserver(
                     new UserSwitchObserver() {
@@ -875,28 +847,6 @@ public class BiometricService extends SystemService {
 
     @Override
     public void onStart() {
-        // TODO(b/141025588): remove this code block once AuthService is integrated.
-        {
-            if (mHasFeatureFace) {
-                try {
-                    mImpl.registerAuthenticator(0, 0, TYPE_FACE, mInjector.getFaceAuthenticator());
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception", e);
-                }
-            }
-            if (mHasFeatureFingerprint) {
-                try {
-                    mImpl.registerAuthenticator(0, 0, TYPE_FINGERPRINT,
-                            mInjector.getFingerprintAuthenticator());
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote exception", e);
-                }
-            }
-            if (mHasFeatureIris) {
-                Slog.e(TAG, "Iris is not supported");
-            }
-        }
-
         mKeyStore = mInjector.getKeyStore();
         mStatusBarService = mInjector.getStatusBarService();
         mInjector.publishBinderService(this, mImpl);

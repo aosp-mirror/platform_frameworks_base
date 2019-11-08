@@ -36,7 +36,6 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -82,6 +81,8 @@ public class BiometricServiceTest {
 
     private static final String FINGERPRINT_ACQUIRED_SENSOR_DIRTY = "sensor_dirty";
 
+    private static final int STRENGTH_STRONG = 1;
+
     private BiometricService mBiometricService;
 
     @Mock
@@ -90,8 +91,6 @@ public class BiometricServiceTest {
     private ContentResolver mContentResolver;
     @Mock
     private Resources mResources;
-    @Mock
-    private PackageManager mPackageManager;
     @Mock
     IBiometricServiceReceiver mReceiver1;
     @Mock
@@ -107,14 +106,11 @@ public class BiometricServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mContext.getResources()).thenReturn(mResources);
 
         when(mInjector.getActivityManagerService()).thenReturn(mock(IActivityManager.class));
         when(mInjector.getStatusBarService()).thenReturn(mock(IStatusBarService.class));
-        when(mInjector.getFingerprintAuthenticator()).thenReturn(mFingerprintAuthenticator);
-        when(mInjector.getFaceAuthenticator()).thenReturn(mFaceAuthenticator);
         when(mInjector.getSettingObserver(any(), any(), any())).thenReturn(
                 mock(BiometricService.SettingObserver.class));
         when(mInjector.getKeyStore()).thenReturn(mock(KeyStore.class));
@@ -131,11 +127,6 @@ public class BiometricServiceTest {
     @Test
     public void testAuthenticate_withoutHardware_returnsErrorHardwareNotPresent() throws
             Exception {
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT))
-                .thenReturn(false);
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_IRIS)).thenReturn(false);
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(false);
-
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
 
@@ -150,11 +141,13 @@ public class BiometricServiceTest {
 
     @Test
     public void testAuthenticate_withoutEnrolled_returnsErrorNoBiometrics() throws Exception {
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)).thenReturn(true);
         when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
 
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
+        mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG,
+                BiometricAuthenticator.TYPE_FINGERPRINT, mFingerprintAuthenticator);
+
 
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 false /* allowDeviceCredential */);
@@ -168,12 +161,13 @@ public class BiometricServiceTest {
     @Test
     public void testAuthenticate_whenHalIsDead_returnsErrorHardwareUnavailable() throws
             Exception {
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)).thenReturn(true);
         when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
         when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(false);
 
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
+        mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG,
+                BiometricAuthenticator.TYPE_FINGERPRINT, mFingerprintAuthenticator);
 
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 false /* allowDeviceCredential */);
@@ -187,12 +181,13 @@ public class BiometricServiceTest {
     @Test
     public void testAuthenticateFace_respectsUserSetting()
             throws Exception {
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(true);
         when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
         when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
 
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
+        mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG,
+                BiometricAuthenticator.TYPE_FACE, mFaceAuthenticator);
 
         // Disabled in user settings receives onError
         when(mBiometricService.mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(false);
@@ -248,8 +243,6 @@ public class BiometricServiceTest {
     @Test
     public void testAuthenticate_happyPathWithoutConfirmation() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
-        mBiometricService = new BiometricService(mContext, mInjector);
-        mBiometricService.onStart();
 
         // Start testing the happy path
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
@@ -861,27 +854,24 @@ public class BiometricServiceTest {
     // Helper methods
 
     private void setupAuthForOnly(int modality) throws RemoteException {
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT))
-                .thenReturn(false);
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(false);
-
-        if (modality == BiometricAuthenticator.TYPE_FINGERPRINT) {
-            when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT))
-                    .thenReturn(true);
-            when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-            when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
-        } else if (modality == BiometricAuthenticator.TYPE_FACE) {
-            when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(true);
-            when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-            when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
-        } else {
-            fail("Unknown modality: " + modality);
-        }
-
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
 
         when(mBiometricService.mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(true);
+
+        if (modality == BiometricAuthenticator.TYPE_FINGERPRINT) {
+            when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
+            when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
+            mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG, modality,
+                    mFingerprintAuthenticator);
+        } else if (modality == BiometricAuthenticator.TYPE_FACE) {
+            when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
+            when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
+            mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG, modality,
+                    mFaceAuthenticator);
+        } else {
+            fail("Unknown modality: " + modality);
+        }
     }
 
     private void resetReceiver() {
