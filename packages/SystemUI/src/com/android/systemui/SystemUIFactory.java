@@ -45,6 +45,8 @@ import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import java.util.concurrent.Executor;
+
 import dagger.Module;
 import dagger.Provides;
 
@@ -124,7 +126,9 @@ public class SystemUIFactory {
      * This method is overridden in vendor specific implementation of Sys UI.
      */
     public ScreenshotNotificationSmartActionsProvider
-            createScreenshotNotificationSmartActionsProvider() {
+            createScreenshotNotificationSmartActionsProvider(Context context,
+            Executor executor,
+            Handler uiHandler) {
         return new ScreenshotNotificationSmartActionsProvider();
     }
 

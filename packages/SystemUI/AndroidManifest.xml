@@ -372,6 +372,10 @@
         <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
             android:exported="false" />
 
+        <!-- Callback for invoking a smart action from the screenshot notification. -->
+        <receiver android:name=".screenshot.GlobalScreenshot$SmartActionsReceiver"
+                  android:exported="false"/>
+
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"
             android:exported="true"
