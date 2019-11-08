@@ -4653,7 +4653,7 @@
         of this permission are REQUIRED to themselves check that the caller has
         PACKAGE_USAGE_STATS and OP_GET_USAGE_STATS. -->
     <permission android:name="android.permission.PEEK_DROPBOX_DATA"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature" />
 
     <application android:process="system"
                  android:persistent="true"
