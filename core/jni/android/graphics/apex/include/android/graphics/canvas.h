@@ -42,7 +42,7 @@ ACanvas* ACanvas_getNativeHandleFromJava(JNIEnv* env, jobject canvas);
 /**
  * Creates a canvas that wraps the buffer
  *
- * @param buffer required
+ * @param buffer is a required param.  If no buffer is provided a nullptr will be returned.
  */
 ACanvas* ACanvas_createCanvas(const ANativeWindow_Buffer* buffer,
                               int32_t /*android_dataspace_t*/ dataspace);
@@ -56,8 +56,11 @@ void ACanvas_destroyCanvas(ACanvas* canvas);
  *               remain valid until the this method is called again with either another active
  *               buffer or nullptr.  If nullptr is given the canvas will release the previous buffer
  *               and set an empty backing store.
+ * @return A boolean value indicating whether or not the buffer was successfully set. If false the
+ *         method will behave as if nullptr were passed as the input buffer and the previous buffer
+ *         will still be released.
  */
-void ACanvas_setBuffer(ACanvas* canvas, const ANativeWindow_Buffer* buffer,
+bool ACanvas_setBuffer(ACanvas* canvas, const ANativeWindow_Buffer* buffer,
                        int32_t /*android_dataspace_t*/ dataspace);
 
 /**
@@ -110,9 +113,9 @@ namespace graphics {
             }
         }
 
-        void setBuffer(const ANativeWindow_Buffer* buffer,
+        bool setBuffer(const ANativeWindow_Buffer* buffer,
                        int32_t /*android_dataspace_t*/ dataspace) {
-            ACanvas_setBuffer(mCanvas, buffer, dataspace);
+            return ACanvas_setBuffer(mCanvas, buffer, dataspace);
         }
 
         void clipRect(const ARect& clipRect, bool doAntiAlias = false) {
