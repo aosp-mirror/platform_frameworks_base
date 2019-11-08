@@ -30,6 +30,7 @@ interface IUiModeManager {
     /**
      * Disables the car mode.
      */
+    @UnsupportedAppUsage(maxTargetSdk = 28)
     void disableCarMode(int flags);
 
     /**
