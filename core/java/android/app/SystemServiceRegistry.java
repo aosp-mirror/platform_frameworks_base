@@ -21,6 +21,7 @@ import android.accounts.IAccountManager;
 import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
+import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
@@ -1311,6 +1312,8 @@ public final class SystemServiceRegistry {
 
         JobSchedulerFrameworkInitializer.initialize();
         DeviceIdleFrameworkInitializer.initialize();
+
+        BlobStoreManagerFrameworkInitializer.initialize();
     }
 
     /**

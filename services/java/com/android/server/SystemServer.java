@@ -277,6 +277,8 @@ public final class SystemServer {
             "com.android.server.contentsuggestions.ContentSuggestionsManagerService";
     private static final String DEVICE_IDLE_CONTROLLER_CLASS =
             "com.android.server.DeviceIdleController";
+    private static final String BLOB_STORE_MANAGER_SERVICE_CLASS =
+            "com.android.server.blob.BlobStoreManagerService";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -1900,6 +1902,10 @@ public final class SystemServer {
         // NOTE: ClipboardService depends on ContentCapture and Autofill
         t.traceBegin("StartClipboardService");
         mSystemServiceManager.startService(ClipboardService.class);
+        t.traceEnd();
+
+        t.traceBegin("StartBlobStoreManagerService");
+        mSystemServiceManager.startService(BLOB_STORE_MANAGER_SERVICE_CLASS);
         t.traceEnd();
 
         t.traceBegin("AppServiceManager");
