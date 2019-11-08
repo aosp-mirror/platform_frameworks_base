@@ -28,6 +28,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkMisc;
 import android.net.NetworkMonitorManager;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
 import android.net.NetworkState;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -227,8 +228,10 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // validated).
     private boolean mLingering;
 
-    // This represents the last score received from the NetworkAgent.
-    private int currentScore;
+    // This represents the characteristics of a network that affects how good the network is
+    // considered for a particular use.
+    @NonNull
+    private NetworkScore mNetworkScore;
 
     // The list of NetworkRequests being satisfied by this Network.
     private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
@@ -257,8 +260,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private final Handler mHandler;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
-            LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
-            NetworkMisc misc, ConnectivityService connService, INetd netd,
+            LinkProperties lp, NetworkCapabilities nc, @NonNull NetworkScore ns, Context context,
+            Handler handler, NetworkMisc misc, ConnectivityService connService, INetd netd,
             IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber) {
         this.messenger = messenger;
         asyncChannel = ac;
@@ -266,7 +269,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         networkInfo = info;
         linkProperties = lp;
         networkCapabilities = nc;
-        currentScore = score;
+        mNetworkScore = ns;
         clatd = new Nat464Xlat(this, netd, dnsResolver, nms);
         mConnService = connService;
         mContext = context;
@@ -483,7 +486,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             return ConnectivityConstants.EXPLICITLY_SELECTED_NETWORK_SCORE;
         }
 
-        int score = currentScore;
+        int score = mNetworkScore.getIntExtension(NetworkScore.LEGACY_SCORE);
         if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty() && !isVPN()) {
             score -= ConnectivityConstants.UNVALIDATED_SCORE_PENALTY;
         }
@@ -512,8 +515,13 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return getCurrentScore(true);
     }
 
-    public void setCurrentScore(int newScore) {
-        currentScore = newScore;
+    public void setNetworkScore(@NonNull NetworkScore ns) {
+        mNetworkScore = ns;
+    }
+
+    @NonNull
+    public NetworkScore getNetworkScore() {
+        return mNetworkScore;
     }
 
     public NetworkState getNetworkState() {
