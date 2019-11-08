@@ -128,7 +128,9 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
 
         @Override
-        public void selectRoute(String packageName, String id) {
+        public void requestSelectRoute(String packageName, String id, int seq) {
+            // TODO: When introducing MediaRoute2ProviderService#sendConnectionHints(),
+            // use the sequence number here properly.
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSelectRoute,
                     MediaRoute2ProviderService.this, packageName, id));
         }
