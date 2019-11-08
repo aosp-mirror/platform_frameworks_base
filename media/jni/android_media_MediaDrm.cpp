@@ -179,6 +179,10 @@ struct OfflineLicenseState {
     jint kOfflineLicenseStateUnknown;
 } gOfflineLicenseStates;
 
+struct KeyStatusFields {
+    jmethodID init;
+    jclass classId;
+};
 
 struct fields_t {
     jfieldID context;
@@ -200,6 +204,7 @@ struct fields_t {
     jobject bundleCreator;
     jmethodID createFromParcelId;
     jclass parcelCreatorClassId;
+    KeyStatusFields keyStatus;
 };
 
 static fields_t gFields;
@@ -247,6 +252,17 @@ jobject nativeToJavaPersistableBundle(JNIEnv *env, jobject thiz,
     return newBundle;
 }
 
+
+jbyteArray hidlVectorToJByteArray(const hardware::hidl_vec<uint8_t> &vector) {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    size_t length = vector.size();
+    jbyteArray result = env->NewByteArray(length);
+    if (result != NULL) {
+        env->SetByteArrayRegion(result, 0, length, reinterpret_cast<const jbyte *>(vector.data()));
+    }
+    return result;
+}
+
 }  // namespace anonymous
 
 // ----------------------------------------------------------------------------
@@ -256,7 +272,7 @@ class JNIDrmListener: public DrmListener
 public:
     JNIDrmListener(JNIEnv* env, jobject thiz, jobject weak_thiz);
     ~JNIDrmListener();
-    virtual void notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj = NULL);
+    virtual void notify(DrmPlugin::EventType eventType, int extra, const ListenerArgs *arg = NULL);
 private:
     JNIDrmListener();
     jclass      mClass;     // Reference to MediaDrm class
@@ -290,7 +306,7 @@ JNIDrmListener::~JNIDrmListener()
 }
 
 void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
-                            const Parcel *obj)
+                            const ListenerArgs *args)
 {
     jint jwhat;
     jint jeventType = 0;
@@ -332,15 +348,11 @@ void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
     }
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    if (obj && obj->dataSize() > 0) {
-        jobject jParcel = createJavaParcelObject(env);
-        if (jParcel != NULL) {
-            Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
-            nativeParcel->setData(obj->data(), obj->dataSize());
-            env->CallStaticVoidMethod(mClass, gFields.post_event, mObject,
-                    jwhat, jeventType, extra, jParcel);
-            env->DeleteLocalRef(jParcel);
-        }
+    if (args) {
+        env->CallStaticVoidMethod(mClass, gFields.post_event, mObject,
+                jwhat, jeventType, extra,
+                args->jSessionId, args->jData, args->jExpirationTime,
+                args->jKeyStatusList, args->jHasNewUsableKey);
     }
 
     if (env->ExceptionCheck()) {
@@ -511,7 +523,7 @@ status_t JDrm::setListener(const sp<DrmListener>& listener) {
     return OK;
 }
 
-void JDrm::notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj) {
+void JDrm::notify(DrmPlugin::EventType eventType, int extra, const ListenerArgs *args) {
     sp<DrmListener> listener;
     mLock.lock();
     listener = mListener;
@@ -519,7 +531,7 @@ void JDrm::notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj) 
 
     if (listener != NULL) {
         Mutex::Autolock lock(mNotifyLock);
-        listener->notify(eventType, extra, obj);
+        listener->notify(eventType, extra, args);
     }
 }
 
@@ -527,34 +539,51 @@ void JDrm::sendEvent(
         DrmPlugin::EventType eventType,
         const hardware::hidl_vec<uint8_t> &sessionId,
         const hardware::hidl_vec<uint8_t> &data) {
-    Parcel obj;
-    DrmUtils::WriteByteArray(obj, sessionId);
-    DrmUtils::WriteByteArray(obj, data);
-    notify(eventType, 0, &obj);
+    ListenerArgs args{
+        .jSessionId = hidlVectorToJByteArray(sessionId),
+        .jData = hidlVectorToJByteArray(data),
+    };
+    notify(eventType, 0, &args);
 }
 
 void JDrm::sendExpirationUpdate(
         const hardware::hidl_vec<uint8_t> &sessionId,
         int64_t expiryTimeInMS) {
-    Parcel obj;
-    DrmUtils::WriteExpirationUpdateToParcel(obj, sessionId, expiryTimeInMS);
-    notify(DrmPlugin::kDrmPluginEventExpirationUpdate, 0, &obj);
+    ListenerArgs args{
+        .jSessionId = hidlVectorToJByteArray(sessionId),
+        .jExpirationTime = expiryTimeInMS,
+    };
+    notify(DrmPlugin::kDrmPluginEventExpirationUpdate, 0, &args);
 }
 
 void JDrm::sendKeysChange(
         const hardware::hidl_vec<uint8_t> &sessionId,
         const std::vector<DrmKeyStatus> &keyStatusList,
         bool hasNewUsableKey) {
-    Parcel obj;
-    DrmUtils::WriteKeysChange(obj, sessionId, keyStatusList, hasNewUsableKey);
-    notify(DrmPlugin::kDrmPluginEventKeysChange, 0, &obj);
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass clazz = gFields.arraylistClassId;
+    jobject arrayList = env->NewObject(clazz, gFields.arraylist.init);
+    clazz = gFields.keyStatus.classId;
+    for (const auto &keyStatus : keyStatusList) {
+        jbyteArray jKeyId(hidlVectorToJByteArray(keyStatus.keyId));
+        jint jStatusCode(keyStatus.type);
+        jobject jKeyStatus = env->NewObject(clazz, gFields.keyStatus.init, jKeyId, jStatusCode);
+        env->CallBooleanMethod(arrayList, gFields.arraylist.add, jKeyStatus);
+    }
+    ListenerArgs args{
+        .jSessionId = hidlVectorToJByteArray(sessionId),
+        .jKeyStatusList = arrayList,
+        .jHasNewUsableKey = hasNewUsableKey,
+    };
+    notify(DrmPlugin::kDrmPluginEventKeysChange, 0, &args);
 }
 
 void JDrm::sendSessionLostState(
         const hardware::hidl_vec<uint8_t> &sessionId) {
-    Parcel obj;
-    DrmUtils::WriteByteArray(obj, sessionId);
-    notify(DrmPlugin::kDrmPluginEventSessionLostState, 0, &obj);
+    ListenerArgs args{
+        .jSessionId = hidlVectorToJByteArray(sessionId),
+    };
+    notify(DrmPlugin::kDrmPluginEventSessionLostState, 0, &args);
 }
 
 void JDrm::disconnect() {
@@ -753,7 +782,7 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     FIND_CLASS(clazz, "android/media/MediaDrm");
     GET_FIELD_ID(gFields.context, clazz, "mNativeContext", "J");
     GET_STATIC_METHOD_ID(gFields.post_event, clazz, "postEventFromNative",
-                         "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+                         "(Ljava/lang/Object;III[B[BJLjava/util/List;Z)V");
 
     jfieldID field;
     GET_STATIC_FIELD_ID(field, clazz, "EVENT_PROVISION_REQUIRED", "I");
@@ -913,6 +942,10 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     gSessionExceptionErrorCodes.kErrorUnknown = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "ERROR_RESOURCE_CONTENTION", "I");
     gSessionExceptionErrorCodes.kResourceContention = env->GetStaticIntField(clazz, field);
+
+    FIND_CLASS(clazz, "android/media/MediaDrm$KeyStatus");
+    gFields.keyStatus.classId = static_cast<jclass>(env->NewGlobalRef(clazz));
+    GET_METHOD_ID(gFields.keyStatus.init, clazz, "<init>", "([BI)V");
 }
 
 static void android_media_MediaDrm_native_setup(
