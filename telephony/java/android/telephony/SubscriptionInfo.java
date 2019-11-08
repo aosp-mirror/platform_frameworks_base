@@ -653,6 +653,7 @@ public class SubscriptionInfo implements Parcelable {
      * Return whether the subscription's group is disabled.
      * @hide
      */
+    @SystemApi
     public boolean isGroupDisabled() {
         return mIsGroupDisabled;
     }
