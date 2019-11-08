@@ -33,6 +33,7 @@ import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.widget.RemoteViews;
@@ -64,11 +65,12 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     private NotificationEntryListener mEntryListener;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private AppOpsController mAppOpsController;
+    @Mock private Handler mMainHandler;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mFsc = new ForegroundServiceController(mEntryManager, mAppOpsController);
+        mFsc = new ForegroundServiceController(mEntryManager, mAppOpsController, mMainHandler);
         mListener = new ForegroundServiceNotificationListener(
                 mContext, mFsc, mEntryManager);
         ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
