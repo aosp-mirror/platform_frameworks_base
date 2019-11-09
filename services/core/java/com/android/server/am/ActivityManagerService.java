@@ -8649,7 +8649,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mBatteryStatsService.noteWakupAlarm(sourcePkg, sourceUid, workSource, tag);
         if (workSource != null) {
-            String workSourcePackage = workSource.getName(0);
+            String workSourcePackage = workSource.getPackageName(0);
             int workSourceUid = workSource.getAttributionUid();
             if (workSourcePackage == null) {
                 workSourcePackage = sourcePkg;

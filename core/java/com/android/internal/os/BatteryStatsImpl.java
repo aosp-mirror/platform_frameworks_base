@@ -4086,7 +4086,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (workSource != null) {
             for (int i = 0; i < workSource.size(); ++i) {
-                uid = mapUid(workSource.get(i));
+                uid = mapUid(workSource.getUid(i));
                 if (mActiveEvents.updateState(historyItem, name, uid, 0)) {
                     addHistoryEventLocked(elapsedRealtime, uptime, historyItem, name, uid);
                 }
@@ -4114,8 +4114,8 @@ public class BatteryStatsImpl extends BatteryStats {
             String tag) {
         if (workSource != null) {
             for (int i = 0; i < workSource.size(); ++i) {
-                uid = workSource.get(i);
-                final String workSourceName = workSource.getName(i);
+                uid = workSource.getUid(i);
+                final String workSourceName = workSource.getPackageName(i);
 
                 if (isOnBattery()) {
                     BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid,
@@ -4124,7 +4124,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
 
-            ArrayList<WorkChain> workChains = workSource.getWorkChains();
+            List<WorkChain> workChains = workSource.getWorkChains();
             if (workChains != null) {
                 for (int i = 0; i < workChains.size(); ++i) {
                     final WorkChain wc = workChains.get(i);
@@ -4350,7 +4350,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final long uptime = mClocks.uptimeMillis();
         final int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteStartWakeLocked(ws.get(i), pid, null, name, historyName, type,
+            noteStartWakeLocked(ws.getUid(i), pid, null, name, historyName, type,
                     unimportantForLogging, elapsedRealtime, uptime);
         }
 
@@ -4379,7 +4379,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // First the starts :
         final int NN = newWs.size();
         for (int i=0; i<NN; i++) {
-            noteStartWakeLocked(newWs.get(i), newPid, null, newName, newHistoryName, newType,
+            noteStartWakeLocked(newWs.getUid(i), newPid, null, newName, newHistoryName, newType,
                     newUnimportantForLogging, elapsedRealtime, uptime);
         }
         if (wcs != null) {
@@ -4397,7 +4397,7 @@ public class BatteryStatsImpl extends BatteryStats {
         // Then the stops :
         final int NO = ws.size();
         for (int i=0; i<NO; i++) {
-            noteStopWakeLocked(ws.get(i), pid, null, name, historyName, type, elapsedRealtime,
+            noteStopWakeLocked(ws.getUid(i), pid, null, name, historyName, type, elapsedRealtime,
                     uptime);
         }
         if (wcs != null) {
@@ -4418,7 +4418,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final long uptime = mClocks.uptimeMillis();
         final int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteStopWakeLocked(ws.get(i), pid, null, name, historyName, type, elapsedRealtime,
+            noteStopWakeLocked(ws.getUid(i), pid, null, name, historyName, type, elapsedRealtime,
                     uptime);
         }
 
@@ -4441,11 +4441,11 @@ public class BatteryStatsImpl extends BatteryStats {
             WorkSource workSource) {
         final int N = workSource.size();
         for (int i = 0; i < N; ++i) {
-            final int uid = mapUid(workSource.get(i));
+            final int uid = mapUid(workSource.getUid(i));
             noteLongPartialWakeLockStartInternal(name, historyName, uid);
         }
 
-        final ArrayList<WorkChain> workChains = workSource.getWorkChains();
+        final List<WorkChain> workChains = workSource.getWorkChains();
         if (workChains != null) {
             for (int i = 0; i < workChains.size(); ++i) {
                 final WorkChain workChain = workChains.get(i);
@@ -4478,11 +4478,11 @@ public class BatteryStatsImpl extends BatteryStats {
             WorkSource workSource) {
         final int N = workSource.size();
         for (int i = 0; i < N; ++i) {
-            final int uid = mapUid(workSource.get(i));
+            final int uid = mapUid(workSource.getUid(i));
             noteLongPartialWakeLockFinishInternal(name, historyName, uid);
         }
 
-        final ArrayList<WorkChain> workChains = workSource.getWorkChains();
+        final List<WorkChain> workChains = workSource.getWorkChains();
         if (workChains != null) {
             for (int i = 0; i < workChains.size(); ++i) {
                 final WorkChain workChain = workChains.get(i);
@@ -4615,11 +4615,11 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void noteGpsChangedLocked(WorkSource oldWs, WorkSource newWs) {
         for (int i = 0; i < newWs.size(); ++i) {
-            noteStartGpsLocked(newWs.get(i), null);
+            noteStartGpsLocked(newWs.getUid(i), null);
         }
 
         for (int i = 0; i < oldWs.size(); ++i) {
-            noteStopGpsLocked((oldWs.get(i)), null);
+            noteStopGpsLocked((oldWs.getUid(i)), null);
         }
 
         List<WorkChain>[] wcs = WorkSource.diffChains(oldWs, newWs);
@@ -5564,7 +5564,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteBluetoothScanStartedFromSourceLocked(WorkSource ws, boolean isUnoptimized) {
         final int N = ws.size();
         for (int i = 0; i < N; i++) {
-            noteBluetoothScanStartedLocked(null, ws.get(i), isUnoptimized);
+            noteBluetoothScanStartedLocked(null, ws.getUid(i), isUnoptimized);
         }
 
         final List<WorkChain> workChains = ws.getWorkChains();
@@ -5602,7 +5602,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteBluetoothScanStoppedFromSourceLocked(WorkSource ws, boolean isUnoptimized) {
         final int N = ws.size();
         for (int i = 0; i < N; i++) {
-            noteBluetoothScanStoppedLocked(null, ws.get(i), isUnoptimized);
+            noteBluetoothScanStoppedLocked(null, ws.getUid(i), isUnoptimized);
         }
 
         final List<WorkChain> workChains = ws.getWorkChains();
@@ -5633,7 +5633,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteBluetoothScanResultsFromSourceLocked(WorkSource ws, int numNewResults) {
         final int N = ws.size();
         for (int i = 0; i < N; i++) {
-            int uid = mapUid(ws.get(i));
+            int uid = mapUid(ws.getUid(i));
             getUidStatsLocked(uid).noteBluetoothScanResultsLocked(numNewResults);
         }
 
@@ -5692,7 +5692,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mGlobalWifiRunningTimer.startRunningLocked(elapsedRealtime);
             int N = ws.size();
             for (int i=0; i<N; i++) {
-                int uid = mapUid(ws.get(i));
+                int uid = mapUid(ws.getUid(i));
                 getUidStatsLocked(uid).noteWifiRunningLocked(elapsedRealtime);
             }
 
@@ -5715,7 +5715,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final long elapsedRealtime = mClocks.elapsedRealtime();
             int N = oldWs.size();
             for (int i=0; i<N; i++) {
-                int uid = mapUid(oldWs.get(i));
+                int uid = mapUid(oldWs.getUid(i));
                 getUidStatsLocked(uid).noteWifiStoppedLocked(elapsedRealtime);
             }
 
@@ -5729,7 +5729,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
             N = newWs.size();
             for (int i=0; i<N; i++) {
-                int uid = mapUid(newWs.get(i));
+                int uid = mapUid(newWs.getUid(i));
                 getUidStatsLocked(uid).noteWifiRunningLocked(elapsedRealtime);
             }
 
@@ -5757,7 +5757,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mGlobalWifiRunningTimer.stopRunningLocked(elapsedRealtime);
             int N = ws.size();
             for (int i=0; i<N; i++) {
-                int uid = mapUid(ws.get(i));
+                int uid = mapUid(ws.getUid(i));
                 getUidStatsLocked(uid).noteWifiStoppedLocked(elapsedRealtime);
             }
 
@@ -5963,7 +5963,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteFullWifiLockAcquiredFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            final int uid = mapUid(ws.get(i));
+            final int uid = mapUid(ws.getUid(i));
             noteFullWifiLockAcquiredLocked(uid);
         }
 
@@ -5980,7 +5980,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteFullWifiLockReleasedFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            final int uid = mapUid(ws.get(i));
+            final int uid = mapUid(ws.getUid(i));
             noteFullWifiLockReleasedLocked(uid);
         }
 
@@ -5997,7 +5997,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteWifiScanStartedFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            final int uid = mapUid(ws.get(i));
+            final int uid = mapUid(ws.getUid(i));
             noteWifiScanStartedLocked(uid);
         }
 
@@ -6014,7 +6014,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteWifiScanStoppedFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            final int uid = mapUid(ws.get(i));
+            final int uid = mapUid(ws.getUid(i));
             noteWifiScanStoppedLocked(uid);
         }
 
@@ -6031,7 +6031,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteWifiBatchedScanStartedFromSourceLocked(WorkSource ws, int csph) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteWifiBatchedScanStartedLocked(ws.get(i), csph);
+            noteWifiBatchedScanStartedLocked(ws.getUid(i), csph);
         }
 
         final List<WorkChain> workChains = ws.getWorkChains();
@@ -6045,7 +6045,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteWifiBatchedScanStoppedFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteWifiBatchedScanStoppedLocked(ws.get(i));
+            noteWifiBatchedScanStoppedLocked(ws.getUid(i));
         }
 
         final List<WorkChain> workChains = ws.getWorkChains();

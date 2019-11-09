@@ -1173,14 +1173,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             if (newWork != null) {
                 for (int i = 0; i < newWork.size(); i++) {
                     mAppOps.startOpNoThrow(AppOpsManager.OP_GPS,
-                            newWork.get(i), newWork.getName(i));
+                            newWork.getUid(i), newWork.getPackageName(i));
                 }
             }
 
             // Update sources that are no longer tracked.
             if (goneWork != null) {
                 for (int i = 0; i < goneWork.size(); i++) {
-                    mAppOps.finishOp(AppOpsManager.OP_GPS, goneWork.get(i), goneWork.getName(i));
+                    mAppOps.finishOp(AppOpsManager.OP_GPS, goneWork.getUid(i),
+                            goneWork.getPackageName(i));
                 }
             }
         }

@@ -5780,7 +5780,15 @@ package android.os {
   }
 
   public class WorkSource implements android.os.Parcelable {
+    ctor public WorkSource(int);
+    ctor public WorkSource(int, @NonNull String);
     method public android.os.WorkSource.WorkChain createWorkChain();
+    method @Nullable public String getPackageName(int);
+    method public int getUid(int);
+    method @Nullable public java.util.List<android.os.WorkSource.WorkChain> getWorkChains();
+    method public boolean isEmpty();
+    method public int size();
+    method @NonNull public android.os.WorkSource withoutNames();
   }
 
   public static final class WorkSource.WorkChain implements android.os.Parcelable {

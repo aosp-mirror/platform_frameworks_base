@@ -2182,10 +2182,12 @@ package android.os {
     method public boolean add(int);
     method public boolean add(int, String);
     method @Deprecated public android.os.WorkSource addReturningNewbs(android.os.WorkSource);
-    method public int get(int);
-    method public String getName(int);
+    method @Nullable public String getPackageName(int);
+    method public int getUid(int);
+    method public boolean isEmpty();
     method @Deprecated public android.os.WorkSource[] setReturningDiffs(android.os.WorkSource);
     method public int size();
+    method @NonNull public android.os.WorkSource withoutNames();
   }
 
 }
