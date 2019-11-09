@@ -168,7 +168,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect + success
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(binder.capture(), any(),
+        inOrder.verify(mockAwareService).connect(binder.capture(), any(), any(),
                 clientProxyCallback.capture(), isNull(), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -178,7 +178,8 @@ public class WifiAwareManagerTest {
         // (2) publish - should succeed
         PublishConfig publishConfig = new PublishConfig.Builder().build();
         session.publish(publishConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).publish(any(), eq(clientId), eq(publishConfig), any());
+        inOrder.verify(mockAwareService).publish(any(), any(), eq(clientId), eq(publishConfig),
+                any());
 
         // (3) disconnect
         session.close();
@@ -190,7 +191,7 @@ public class WifiAwareManagerTest {
 
         // (5) connect
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(binder.capture(), any(), any(), isNull(),
+        inOrder.verify(mockAwareService).connect(binder.capture(), any(), any(), any(), isNull(),
                 eq(false));
 
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService);
@@ -212,7 +213,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect + failure
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 isNull(), eq(false));
         clientProxyCallback.getValue().onConnectFail(reason);
         mMockLooper.dispatchAll();
@@ -220,7 +221,7 @@ public class WifiAwareManagerTest {
 
         // (2) connect + success
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 isNull(), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -230,7 +231,8 @@ public class WifiAwareManagerTest {
         // (4) subscribe: should succeed
         SubscribeConfig subscribeConfig = new SubscribeConfig.Builder().build();
         session.subscribe(subscribeConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).subscribe(any(), eq(clientId), eq(subscribeConfig), any());
+        inOrder.verify(mockAwareService).subscribe(any(), any(), eq(clientId), eq(subscribeConfig),
+                any());
 
         verifyNoMoreInteractions(mockCallback, mockSessionCallback, mockAwareService);
     }
@@ -249,7 +251,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect + success
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 isNull(), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -257,7 +259,7 @@ public class WifiAwareManagerTest {
 
         // (2) connect + success
         mDut.attach(mockCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 isNull(), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId + 1);
         mMockLooper.dispatchAll();
@@ -304,7 +306,7 @@ public class WifiAwareManagerTest {
 
         // (0) connect + success
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -313,7 +315,7 @@ public class WifiAwareManagerTest {
 
         // (1) publish
         session.publish(publishConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).publish(any(), eq(clientId), eq(publishConfig),
+        inOrder.verify(mockAwareService).publish(any(), any(), eq(clientId), eq(publishConfig),
                 sessionProxyCallback.capture());
 
         // (2) publish session created
@@ -396,7 +398,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -405,7 +407,7 @@ public class WifiAwareManagerTest {
 
         // (2) publish: successfully - then terminated
         session.publish(publishConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).publish(any(), eq(clientId), eq(publishConfig),
+        inOrder.verify(mockAwareService).publish(any(), any(), eq(clientId), eq(publishConfig),
                 sessionProxyCallback.capture());
         sessionProxyCallback.getValue().onSessionStarted(sessionId);
         sessionProxyCallback.getValue().onSessionTerminated(0);
@@ -453,7 +455,7 @@ public class WifiAwareManagerTest {
 
         // (0) connect + success
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -462,7 +464,7 @@ public class WifiAwareManagerTest {
 
         // (1) subscribe
         session.subscribe(subscribeConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).subscribe(any(), eq(clientId), eq(subscribeConfig),
+        inOrder.verify(mockAwareService).subscribe(any(), any(), eq(clientId), eq(subscribeConfig),
                 sessionProxyCallback.capture());
 
         // (2) subscribe session created
@@ -538,7 +540,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -547,7 +549,7 @@ public class WifiAwareManagerTest {
 
         // (2) subscribe: successfully - then terminated
         session.subscribe(subscribeConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).subscribe(any(), eq(clientId), eq(subscribeConfig),
+        inOrder.verify(mockAwareService).subscribe(any(), any(), eq(clientId), eq(subscribeConfig),
                 sessionProxyCallback.capture());
         sessionProxyCallback.getValue().onSessionStarted(sessionId);
         sessionProxyCallback.getValue().onSessionTerminated(0);
@@ -942,7 +944,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -951,7 +953,7 @@ public class WifiAwareManagerTest {
 
         // (2) publish successfully
         session.publish(publishConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).publish(any(), eq(clientId), eq(publishConfig),
+        inOrder.verify(mockAwareService).publish(any(), any(), eq(clientId), eq(publishConfig),
                 sessionProxyCallback.capture());
         sessionProxyCallback.getValue().onSessionStarted(sessionId);
         mMockLooper.dispatchAll();
@@ -1055,7 +1057,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -1239,7 +1241,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -1248,7 +1250,7 @@ public class WifiAwareManagerTest {
 
         // (2) publish successfully
         session.publish(publishConfig, mockSessionCallback, mMockLooperHandler);
-        inOrder.verify(mockAwareService).publish(any(), eq(clientId), eq(publishConfig),
+        inOrder.verify(mockAwareService).publish(any(), any(), eq(clientId), eq(publishConfig),
                 sessionProxyCallback.capture());
         sessionProxyCallback.getValue().onSessionStarted(sessionId);
         mMockLooper.dispatchAll();
@@ -1474,7 +1476,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -1514,7 +1516,7 @@ public class WifiAwareManagerTest {
 
         // (1) connect successfully
         mDut.attach(mMockLooperHandler, configRequest, mockCallback, null);
-        inOrder.verify(mockAwareService).connect(any(), any(), clientProxyCallback.capture(),
+        inOrder.verify(mockAwareService).connect(any(), any(), any(), clientProxyCallback.capture(),
                 eq(configRequest), eq(false));
         clientProxyCallback.getValue().onConnectSuccess(clientId);
         mMockLooper.dispatchAll();
@@ -1524,7 +1526,7 @@ public class WifiAwareManagerTest {
         if (isPublish) {
             // (2) publish successfully
             session.publish(publishConfig, mockSessionCallback, mMockLooperHandler);
-            inOrder.verify(mockAwareService).publish(any(), eq(clientId), eq(publishConfig),
+            inOrder.verify(mockAwareService).publish(any(), any(), eq(clientId), eq(publishConfig),
                     sessionProxyCallback.capture());
             sessionProxyCallback.getValue().onSessionStarted(sessionId);
             mMockLooper.dispatchAll();
@@ -1533,8 +1535,8 @@ public class WifiAwareManagerTest {
         } else {
             // (2) subscribe successfully
             session.subscribe(subscribeConfig, mockSessionCallback, mMockLooperHandler);
-            inOrder.verify(mockAwareService).subscribe(any(), eq(clientId), eq(subscribeConfig),
-                    sessionProxyCallback.capture());
+            inOrder.verify(mockAwareService).subscribe(any(), any(), eq(clientId),
+                    eq(subscribeConfig), sessionProxyCallback.capture());
             sessionProxyCallback.getValue().onSessionStarted(sessionId);
             mMockLooper.dispatchAll();
             inOrder.verify(mockSessionCallback).onSubscribeStarted(subscribeSession.capture());

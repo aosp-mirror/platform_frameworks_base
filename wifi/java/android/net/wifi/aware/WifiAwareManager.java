@@ -268,7 +268,7 @@ public class WifiAwareManager {
 
             try {
                 Binder binder = new Binder();
-                mService.connect(binder, mContext.getOpPackageName(),
+                mService.connect(binder, mContext.getOpPackageName(), mContext.getFeatureId(),
                         new WifiAwareEventCallbackProxy(this, looper, binder, attachCallback,
                                 identityChangedListener), configRequest,
                         identityChangedListener != null);
@@ -299,7 +299,8 @@ public class WifiAwareManager {
         }
 
         try {
-            mService.publish(mContext.getOpPackageName(), clientId, publishConfig,
+            mService.publish(mContext.getOpPackageName(), mContext.getFeatureId(), clientId,
+                    publishConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, true, callback,
                             clientId));
         } catch (RemoteException e) {
@@ -336,7 +337,8 @@ public class WifiAwareManager {
         }
 
         try {
-            mService.subscribe(mContext.getOpPackageName(), clientId, subscribeConfig,
+            mService.subscribe(mContext.getOpPackageName(), mContext.getFeatureId(), clientId,
+                    subscribeConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, false, callback,
                             clientId));
         } catch (RemoteException e) {
