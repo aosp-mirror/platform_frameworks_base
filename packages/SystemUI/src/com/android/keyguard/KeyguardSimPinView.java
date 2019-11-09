@@ -38,8 +38,6 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -66,10 +64,10 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
     KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
         @Override
-        public void onSimStateChanged(int subId, int slotId, State simState) {
+        public void onSimStateChanged(int subId, int slotId, int simState) {
             if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
             switch(simState) {
-                case READY: {
+                case TelephonyManager.SIM_STATE_READY: {
                     mRemainingAttempts = -1;
                     resetState();
                     break;
@@ -157,7 +155,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
     private void handleSubInfoChangeIfNeeded() {
         KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
-        int subId = monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED);
+        int subId = monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PIN_REQUIRED);
         if (subId != mSubId && SubscriptionManager.isValidSubscriptionId(subId)) {
             mSubId = subId;
             mShowDefaultMessage = true;
