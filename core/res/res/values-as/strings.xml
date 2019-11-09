@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"আপোনাৰ প্ৰশাসকে আপেডট কৰিছে"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"আপোনাৰ প্ৰশাসকে মচিছে"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ঠিক আছে"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"বেটাৰি সঞ্চয়কাৰীয়ে বেটাৰিৰ জীৱনকাল বৃদ্ধি কৰিবলৈ নেপথ্যৰ কাৰ্যকলাপ, ভিজুৱেল এফেক্ট আৰু অন্য অধিক বেটাৰি ব্যয় হোৱা সুবিধাবোৰ বন্ধ কৰে বা বাধা দিয়ে। "<annotation id="url">"অধিক জানক"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"বেটাৰি সঞ্চয়কাৰীয়ে বেটাৰিৰ জীৱনকাল বৃদ্ধি কৰিবলৈ নেপথ্যৰ কাৰ্যকলাপ, ভিজুৱেল এফেক্ট আৰু অন্য অধিক বেটাৰি ব্যয় হোৱা সুবিধাবোৰ বন্ধ কৰে বা বাধা দিয়ে।"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ডেটা ব্য়ৱহাৰ মাত্ৰা কম কৰিবৰ বাবে ডেটা সঞ্চয়কাৰীয়ে কিছুমান এপক নেপথ্য়ত ডেটা প্ৰেৰণ বা সংগ্ৰহ কৰাত বাধা প্ৰদান কৰে। আপুনি বৰ্তমান ব্য়ৱহাৰ কৰি থকা এটা এপে ডেটা ব্য়ৱহাৰ কৰিব পাৰে, কিন্তু সঘনাই এই কার্য কৰিব নোৱাৰিব পাৰে। ইয়াৰ অৰ্থ এইয়ে হ\'ব পাৰে যে, উদাহৰণস্বৰূপে, আপুনি নিটিপা পর্যন্ত প্ৰতিচ্ছবিসমূহ দেখুওৱা নহ’ব।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"অন কৰক"</string>

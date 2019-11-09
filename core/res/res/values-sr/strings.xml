@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="3850018445187475377">"Откуцајте PIN који има од 4 до 8 бројева."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Унесите PUK који се састоји од 8 цифара или више."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM картица је закључана PUK кодом. Унесите PUK кôд да бисте је откључали."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Унесите PUK2 да бисте деблокирали SIM картицу."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Унесите PUK2 да бисте одблокирали SIM картицу."</string>
     <string name="enablePin" msgid="209412020907207950">"Није успело. Омогућите закључавање SIM/RUIM картице."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="one">Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушај пре него што се SIM картица закључа.</item>
@@ -1600,8 +1600,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Истиче:"</string>
     <string name="serial_number" msgid="758814067660862493">"Серијски број:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Дигитални отисци:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 дигитални отисак:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 дигитални отисак:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 отисак прста:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 отисак прста:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Прикажи све"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Избор активности"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Дели са"</string>
@@ -1833,8 +1833,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избрисао је администратор"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Потврди"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Уштеда батерије искључује или ограничава активност у позадини, неке визуелне ефекте и друге функције са високом потрошњом да би продужила трајање батерије. "<annotation id="url">"Сазнајте више"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Уштеда батерије искључује или ограничава активност у позадини, неке визуелне ефекте и друге функције са високом потрошњом да би продужила трајање батерије."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Укључити Уштеду података?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Укључи"</string>

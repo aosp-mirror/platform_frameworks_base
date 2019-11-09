@@ -527,7 +527,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Non reconnu"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Authentification annulée"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Aucun code, schéma ni mot de passe n\'est défini"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte numérique partiellement détectée. Veuillez réessayer."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partiellement détectée. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le lecteur d\'empreinte digitale est sale. Veuillez le nettoyer, puis réessayer."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Vous avez déplacé votre doigt trop rapidement. Veuillez réessayer."</string>
@@ -537,10 +537,10 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Visage authentifié, veuillez appuyer sur \"Confirmer\""</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte numérique indisponible."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Impossible d\'enregistrer l\'empreinte numérique. Veuillez supprimer une empreinte."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Délai de détection de l\'empreinte numérique expiré. Veuillez réessayer."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Opération d\'empreinte numérique annulée."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte digitale indisponible."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Impossible d\'enregistrer l\'empreinte digitale. Veuillez en supprimer une autre."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Délai de détection de l\'empreinte digitale expiré. Veuillez réessayer."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Opération d\'empreinte digitale annulée."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Opération d\'authentification par empreinte digitale annulée par l\'utilisateur."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Trop de tentatives. Veuillez réessayer plus tard."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Trop de tentatives. Lecteur d\'empreinte digitale désactivé."</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"L\'économiseur de batterie désactive ou restreint les activités en arrière-plan, certains effet visuels et d\'autres fonctionnalités qui consomment beaucoup d\'énergie afin de prolonger l\'autonomie de la batterie. "<annotation id="url">"En savoir plus"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"L\'économiseur de batterie désactive ou restreint les activités en arrière-plan, certains effet visuels et d\'autres fonctionnalités qui consomment beaucoup d\'énergie afin de prolonger l\'autonomie de la batterie."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Pour réduire la consommation de données, l\'économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Ainsi, les applications que vous utilisez peuvent toujours accéder aux données, mais pas en permanence. Par exemple, il se peut que les images ne s\'affichent pas tant que vous n\'appuyez pas dessus."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activer l\'économiseur de données ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activer"</string>

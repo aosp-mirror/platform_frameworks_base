@@ -1809,8 +1809,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ٹھیک ہے"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"بیٹری سیور بیٹری لائف کو بڑھانے کے لیے پس منظر کی سرگرمی، کچھ بصری اثرات اور دیگر اعلی قوت والی خصوصیات کو آف یا محدود کرتی ہے۔ "<annotation id="url">"مزید جانیں"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"بیٹری سیور بیٹری لائف کو بڑھانے کے لیے پس منظر کی سرگرمی، کچھ بصری اثرات اور دیگر اعلی قوت والی خصوصیات کو آف یا محدود کرتی ہے۔"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتا ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا پر رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا زیادہ نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ڈیٹا سیور آن کریں؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"آن کریں"</string>

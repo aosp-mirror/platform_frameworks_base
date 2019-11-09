@@ -234,7 +234,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Zgłoszenie błędu"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Zakończ sesję"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Zrzut ekranu"</string>
-    <string name="bugreport_title" msgid="5981047024855257269">"Zgłoszenie błędu"</string>
+    <string name="bugreport_title" msgid="5981047024855257269">"Zgłoś błąd"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Informacje o bieżącym stanie urządzenia zostaną zebrane i wysłane e-mailem. Przygotowanie zgłoszenia błędu do wysłania chwilę potrwa, więc zachowaj cierpliwość."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktywny"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Używaj tej opcji w większości przypadków. Umożliwia śledzenie postępów raportu, podanie dodatkowych szczegółów problemu i wykonanie zrzutów ekranu. Raport może pomijać niektóre rzadko używane sekcje, których utworzenie zajmuje dużo czasu."</string>
@@ -306,7 +306,7 @@
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na nagrywanie dźwięku?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Aktywność fizyczna"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"dostęp do aktywności fizycznej"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Zezwolić aplikacji „<xliff:g id="APP_NAME">%1$s</xliff:g>” na dostęp do aktywności fizycznej?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na dostęp do aktywności fizycznej?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Aparat"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"robienie zdjęć i nagrywanie filmów"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na robienie zdjęć i nagrywanie filmów?"</string>
@@ -545,7 +545,7 @@
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Twarz rozpoznana, kliknij Potwierdź"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Czytnik linii papilarnych nie jest dostępny."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Nie można zapisać odcisku palca. Usuń istniejący odcisk palca."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu linii papilarnych. Spróbuj ponownie."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu odcisków palców. Spróbuj ponownie."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Odczyt odcisku palca został anulowany przez użytkownika."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Zbyt wiele prób. Spróbuj ponownie później."</string>
@@ -1858,8 +1858,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje intensywnie zużywające energię. "<annotation id="url">"Więcej informacji"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje intensywnie zużywające energię."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>
