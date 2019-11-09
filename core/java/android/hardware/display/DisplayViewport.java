@@ -134,7 +134,9 @@ public final class DisplayViewport {
         result += prime * result + deviceWidth;
         result += prime * result + deviceHeight;
         result += prime * result + uniqueId.hashCode();
-        result += prime * result + physicalPort;
+        if (physicalPort != null) {
+            result += prime * result + physicalPort.hashCode();
+        }
         result += prime * result + type;
         return result;
     }
@@ -142,11 +144,12 @@ public final class DisplayViewport {
     // For debugging purposes.
     @Override
     public String toString() {
+        final Integer port = physicalPort == null ? null : Byte.toUnsignedInt(physicalPort);
         return "DisplayViewport{type=" + typeToString(type)
                 + ", valid=" + valid
                 + ", displayId=" + displayId
                 + ", uniqueId='" + uniqueId + "'"
-                + ", physicalPort=" + physicalPort
+                + ", physicalPort=" + port
                 + ", orientation=" + orientation
                 + ", logicalFrame=" + logicalFrame
                 + ", physicalFrame=" + physicalFrame
