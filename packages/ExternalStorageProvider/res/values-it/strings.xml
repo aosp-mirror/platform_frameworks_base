@@ -16,8 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7123375275748530234">"Archivio esterno"</string>
-    <string name="storage_description" msgid="8541974407321172792">"Archiviazione locale"</string>
-    <string name="root_internal_storage" msgid="827844243068584127">"Memoria interna"</string>
-    <string name="root_documents" msgid="4051252304075469250">"Documenti"</string>
+    <string name="app_label" msgid="748293919008814871">"Archivio esterno"</string>
+    <string name="storage_description" msgid="9176081505553938524">"Archiviazione locale"</string>
+    <string name="root_internal_storage" msgid="4980477711224234931">"Memoria interna"</string>
+    <string name="root_documents" msgid="5695037589229175941">"Documenti"</string>
 </resources>
