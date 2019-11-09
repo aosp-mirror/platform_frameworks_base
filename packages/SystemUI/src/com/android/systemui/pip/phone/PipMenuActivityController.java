@@ -138,7 +138,8 @@ public class PipMenuActivityController {
             switch (msg.what) {
                 case MESSAGE_MENU_STATE_CHANGED: {
                     int menuState = msg.arg1;
-                    onMenuStateChanged(menuState, true /* resize */);
+                    boolean resize = msg.arg2 != 0;
+                    onMenuStateChanged(menuState, resize);
                     break;
                 }
                 case MESSAGE_EXPAND_PIP: {
@@ -166,7 +167,8 @@ public class PipMenuActivityController {
                     }
                     // Mark the menu as invisible once the activity finishes as well
                     if (mToActivityMessenger == null) {
-                        onMenuStateChanged(MENU_STATE_NONE, true /* resize */);
+                        final boolean resize = msg.arg1 != 0;
+                        onMenuStateChanged(MENU_STATE_NONE, resize);
                     }
                     break;
                 }
