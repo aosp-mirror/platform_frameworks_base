@@ -18,33 +18,33 @@ package com.android.systemui.statusbar.car;
 
 import android.annotation.NonNull;
 import android.car.Car;
-import android.car.Car.CarServiceLifecycleListener;
 import android.car.hardware.power.CarPowerManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
-import android.content.Context;
 import android.util.Log;
+
+import com.android.systemui.car.CarServiceProvider;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Helper class for connecting to the {@link CarPowerManager} and listening for power state changes.
  */
+@Singleton
 public class PowerManagerHelper {
     public static final String TAG = "PowerManagerHelper";
 
-    private final Context mContext;
-    private final CarPowerStateListener mCarPowerStateListener;
+    private final CarServiceProvider mCarServiceProvider;
 
-    private Car mCar;
     private CarPowerManager mCarPowerManager;
+    private CarPowerStateListener mCarPowerStateListener;
 
-    private final CarServiceLifecycleListener mCarServiceLifecycleListener;
+    private final CarServiceProvider.CarServiceOnConnectedListener mCarServiceLifecycleListener;
 
-    PowerManagerHelper(Context context, @NonNull CarPowerStateListener listener) {
-        mContext = context;
-        mCarPowerStateListener = listener;
-        mCarServiceLifecycleListener = (car, ready) -> {
-            if (!ready) {
-                return;
-            }
+    @Inject
+    PowerManagerHelper(CarServiceProvider carServiceProvider) {
+        mCarServiceProvider = carServiceProvider;
+        mCarServiceLifecycleListener = car -> {
             Log.d(TAG, "Car Service connected");
             mCarPowerManager = (CarPowerManager) car.getCarManager(Car.POWER_SERVICE);
             if (mCarPowerManager != null) {
@@ -56,10 +56,16 @@ public class PowerManagerHelper {
     }
 
     /**
+     * Sets a {@link CarPowerStateListener}. Should be set before {@link #connectToCarService()}.
+     */
+    void setCarPowerStateListener(@NonNull CarPowerStateListener listener) {
+        mCarPowerStateListener = listener;
+    }
+
+    /**
      * Connect to Car service.
      */
     void connectToCarService() {
-        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                mCarServiceLifecycleListener);
+        mCarServiceProvider.addListener(mCarServiceLifecycleListener);
     }
 }

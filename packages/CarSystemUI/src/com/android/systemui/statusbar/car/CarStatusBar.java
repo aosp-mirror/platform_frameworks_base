@@ -66,6 +66,7 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -164,6 +165,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private float mBackgroundAlphaDiff;
     private float mInitialBackgroundAlpha;
 
+    private final Lazy<FullscreenUserSwitcher> mFullscreenUserSwitcherLazy;
     private FullscreenUserSwitcher mFullscreenUserSwitcher;
 
     private CarBatteryController mCarBatteryController;
@@ -175,6 +177,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     private final Object mQueueLock = new Object();
     private final CarNavigationBarController mCarNavigationBarController;
+    private final Lazy<DrivingStateHelper> mDrivingStateHelperLazy;
+    private final Lazy<PowerManagerHelper> mPowerManagerHelperLazy;
+    private final CarServiceProvider mCarServiceProvider;
     private CarFacetButtonController mCarFacetButtonController;
     private DeviceProvisionedController mDeviceProvisionedController;
     private boolean mDeviceIsSetUpForUser = true;
@@ -311,6 +316,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             ViewMediatorCallback viewMediatorCallback,
             DismissCallbackRegistry dismissCallbackRegistry,
             /* Car Settings injected components. */
+            CarServiceProvider carServiceProvider,
+            Lazy<DrivingStateHelper> drivingStateHelperLazy,
+            Lazy<PowerManagerHelper> powerManagerHelperLazy,
+            Lazy<FullscreenUserSwitcher> fullscreenUserSwitcherLazy,
             CarNavigationBarController carNavigationBarController) {
         super(
                 context,
@@ -384,6 +393,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 viewMediatorCallback,
                 dismissCallbackRegistry);
         mScrimController = scrimController;
+        mCarServiceProvider = carServiceProvider;
+        mDrivingStateHelperLazy = drivingStateHelperLazy;
+        mPowerManagerHelperLazy = powerManagerHelperLazy;
+        mFullscreenUserSwitcherLazy = fullscreenUserSwitcherLazy;
         mCarNavigationBarController = carNavigationBarController;
     }
 
@@ -449,10 +462,12 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
 
         // Register a listener for driving state changes.
-        mDrivingStateHelper = new DrivingStateHelper(mContext, this::onDrivingStateChanged);
+        mDrivingStateHelper = mDrivingStateHelperLazy.get();
+        mDrivingStateHelper.setCarDrivingStateEventListener(this::onDrivingStateChanged);
         mDrivingStateHelper.connectToCarService();
 
-        mPowerManagerHelper = new PowerManagerHelper(mContext, mCarPowerStateListener);
+        mPowerManagerHelper = mPowerManagerHelperLazy.get();
+        mPowerManagerHelper.setCarPowerStateListener(mCarPowerStateListener);
         mPowerManagerHelper.connectToCarService();
     }
 
@@ -592,20 +607,13 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         });
         CarNotificationListener carNotificationListener = new CarNotificationListener();
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
-        // This can take time if car service is not ready up to this time.
-        // TODO(b/142808072) Refactor CarUxRestrictionManagerWrapper to allow setting
-        // CarUxRestrictionsManager later and switch to Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT.
-        Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_WAIT_FOREVER,
-                (car, ready) -> {
-                    if (!ready) {
-                        return;
-                    }
-                    CarUxRestrictionsManager carUxRestrictionsManager =
-                            (CarUxRestrictionsManager)
-                                    car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
-                    mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
-                            carUxRestrictionsManager);
-                });
+        mCarServiceProvider.addListener(car -> {
+            CarUxRestrictionsManager carUxRestrictionsManager =
+                    (CarUxRestrictionsManager)
+                            car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
+            mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
+                    carUxRestrictionsManager);
+        });
 
         mNotificationDataManager = new NotificationDataManager();
         mNotificationDataManager.setOnUnseenCountUpdateListener(
@@ -974,8 +982,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         UserSwitcherController userSwitcherController =
                 Dependency.get(UserSwitcherController.class);
         if (userSwitcherController.useFullscreenUserSwitcher()) {
-            mFullscreenUserSwitcher = new FullscreenUserSwitcher(this,
-                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub), mContext);
+            mFullscreenUserSwitcher = mFullscreenUserSwitcherLazy.get();
+            mFullscreenUserSwitcher.setStatusBar(this);
+            mFullscreenUserSwitcher.setContainer(
+                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub));
         } else {
             super.createUserSwitcher();
         }

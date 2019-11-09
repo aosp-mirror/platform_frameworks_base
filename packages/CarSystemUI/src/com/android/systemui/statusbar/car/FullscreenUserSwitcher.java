@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -35,24 +36,34 @@ import android.view.ViewStub;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.android.systemui.R;
+import com.android.systemui.car.CarServiceProvider;
+import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.statusbar.car.CarTrustAgentUnlockDialogHelper.OnHideListener;
 import com.android.systemui.statusbar.car.UserGridRecyclerView.UserRecord;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Manages the fullscreen user switcher.
  */
+@Singleton
 public class FullscreenUserSwitcher {
     private static final String TAG = FullscreenUserSwitcher.class.getSimpleName();
     // Because user 0 is headless, user count for single user is 2
     private static final int NUMBER_OF_BACKGROUND_USERS = 1;
-    private final UserGridRecyclerView mUserGridView;
-    private final View mParent;
-    private final int mShortAnimDuration;
-    private final CarStatusBar mStatusBar;
+
     private final Context mContext;
+    private final Resources mResources;
     private final UserManager mUserManager;
+    private final CarServiceProvider mCarServiceProvider;
+    private final CarTrustAgentUnlockDialogHelper mUnlockDialogHelper;
+    private final int mShortAnimDuration;
+
+    private CarStatusBar mStatusBar;
+    private View mParent;
+    private UserGridRecyclerView mUserGridView;
     private CarTrustAgentEnrollmentManager mEnrollmentManager;
-    private CarTrustAgentUnlockDialogHelper mUnlockDialogHelper;
     private UserGridRecyclerView.UserRecord mSelectedUser;
     private CarUserManagerHelper mCarUserManagerHelper;
     private final BroadcastReceiver mUserUnlockReceiver = new BroadcastReceiver() {
@@ -65,37 +76,46 @@ public class FullscreenUserSwitcher {
             mContext.unregisterReceiver(mUserUnlockReceiver);
         }
     };
-    private final Car mCar;
 
-    public FullscreenUserSwitcher(CarStatusBar statusBar, ViewStub containerStub, Context context) {
-        mStatusBar = statusBar;
-        mParent = containerStub.inflate();
+    @Inject
+    public FullscreenUserSwitcher(
+            Context context,
+            @MainResources Resources resources,
+            UserManager userManager,
+            CarServiceProvider carServiceProvider,
+            CarTrustAgentUnlockDialogHelper carTrustAgentUnlockDialogHelper) {
         mContext = context;
+        mResources = resources;
+        mUserManager = userManager;
+        mCarServiceProvider = carServiceProvider;
+        mUnlockDialogHelper = carTrustAgentUnlockDialogHelper;
+
+        mShortAnimDuration = mResources.getInteger(android.R.integer.config_shortAnimTime);
+    }
+
+    /** Sets the status bar which controls the keyguard. */
+    public void setStatusBar(CarStatusBar statusBar) {
+        mStatusBar = statusBar;
+    }
+
+    /** Sets the {@link ViewStub} to show the user switcher. */
+    public void setContainer(ViewStub containerStub) {
+        mParent = containerStub.inflate();
 
         View container = mParent.findViewById(R.id.container);
 
         // Initialize user grid.
         mUserGridView = container.findViewById(R.id.user_grid);
-        GridLayoutManager layoutManager = new GridLayoutManager(context,
-                context.getResources().getInteger(R.integer.user_fullscreen_switcher_num_col));
+        GridLayoutManager layoutManager = new GridLayoutManager(mContext,
+                mResources.getInteger(R.integer.user_fullscreen_switcher_num_col));
         mUserGridView.setLayoutManager(layoutManager);
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(this::onUserSelected);
-        mCarUserManagerHelper = new CarUserManagerHelper(context);
-        mUnlockDialogHelper = new CarTrustAgentUnlockDialogHelper(mContext);
-        mUserManager = mContext.getSystemService(UserManager.class);
+        mCarUserManagerHelper = new CarUserManagerHelper(mContext);
+        mCarServiceProvider.addListener(
+                car -> mEnrollmentManager = (CarTrustAgentEnrollmentManager) car.getCarManager(
+                        Car.CAR_TRUST_AGENT_ENROLLMENT_SERVICE));
 
-        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                (car, ready) -> {
-                    if (!ready) {
-                        return;
-                    }
-                    mEnrollmentManager = (CarTrustAgentEnrollmentManager) car
-                            .getCarManager(Car.CAR_TRUST_AGENT_ENROLLMENT_SERVICE);
-                });
-
-        mShortAnimDuration = container.getResources()
-                .getInteger(android.R.integer.config_shortAnimTime);
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
         if (mUserManager.isUserUnlocked(UserHandle.USER_SYSTEM)) {
             // User0 is unlocked, switched to the initial user

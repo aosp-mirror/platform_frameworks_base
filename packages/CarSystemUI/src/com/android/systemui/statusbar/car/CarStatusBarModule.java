@@ -29,6 +29,7 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -179,6 +180,10 @@ public class CarStatusBarModule {
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
             DismissCallbackRegistry dismissCallbackRegistry,
+            CarServiceProvider carServiceProvider,
+            Lazy<DrivingStateHelper> drivingStateHelperLazy,
+            Lazy<PowerManagerHelper> powerManagerHelperLazy,
+            Lazy<FullscreenUserSwitcher> fullscreenUserSwitcherLazy,
             CarNavigationBarController carNavigationBarController) {
         return new CarStatusBar(
                 context,
@@ -250,6 +255,10 @@ public class CarStatusBarModule {
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,
                 dismissCallbackRegistry,
+                carServiceProvider,
+                drivingStateHelperLazy,
+                powerManagerHelperLazy,
+                fullscreenUserSwitcherLazy,
                 carNavigationBarController);
     }
 }
