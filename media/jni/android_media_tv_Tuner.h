@@ -29,12 +29,15 @@ using ::android::hardware::tv::tuner::V1_0::DemuxFilterEvent;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterStatus;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
 using ::android::hardware::tv::tuner::V1_0::DemuxPid;
+using ::android::hardware::tv::tuner::V1_0::DvrType;
 using ::android::hardware::tv::tuner::V1_0::FrontendEventType;
 using ::android::hardware::tv::tuner::V1_0::FrontendId;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
 using ::android::hardware::tv::tuner::V1_0::IDemux;
 using ::android::hardware::tv::tuner::V1_0::IDescrambler;
+using ::android::hardware::tv::tuner::V1_0::IDvr;
+using ::android::hardware::tv::tuner::V1_0::IDvrCallback;
 using ::android::hardware::tv::tuner::V1_0::IFilter;
 using ::android::hardware::tv::tuner::V1_0::IFilterCallback;
 using ::android::hardware::tv::tuner::V1_0::IFrontend;
@@ -44,6 +47,8 @@ using ::android::hardware::tv::tuner::V1_0::ILnbCallback;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
 using ::android::hardware::tv::tuner::V1_0::LnbEventType;
 using ::android::hardware::tv::tuner::V1_0::LnbId;
+using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
+using ::android::hardware::tv::tuner::V1_0::RecordStatus;
 
 namespace android {
 
@@ -53,6 +58,15 @@ struct LnbCallback : public ILnbCallback {
     virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
     jweak mObject;
     LnbId mId;
+};
+
+struct DvrCallback : public IDvrCallback {
+    virtual Return<void> onRecordStatus(RecordStatus status);
+    virtual Return<void> onPlaybackStatus(PlaybackStatus status);
+
+    void setDvr(const jobject dvr);
+private:
+    jweak mDvr;
 };
 
 struct FilterCallback : public IFilterCallback {
@@ -85,6 +99,7 @@ struct JTuner : public RefBase {
     jobject openLnbById(int id);
     jobject openFilter(DemuxFilterType type, int bufferSize);
     jobject openDescrambler();
+    jobject openDvr(DvrType type, int bufferSize);
 
 protected:
     bool openDemux();
