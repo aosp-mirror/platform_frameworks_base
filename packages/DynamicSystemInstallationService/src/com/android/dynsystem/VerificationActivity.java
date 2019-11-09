@@ -28,11 +28,9 @@ import android.os.image.DynamicSystemClient;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 
-
 /**
- * This Activity starts KeyguardManager and ask the user to confirm
- * before any installation request. If the device is not protected by
- * a password, it approves the request by default.
+ * This Activity starts KeyguardManager and ask the user to confirm before any installation request.
+ * If the device is not protected by a password, it approves the request by default.
  */
 public class VerificationActivity extends Activity {
 
@@ -88,11 +86,15 @@ public class VerificationActivity extends Activity {
         Uri url = callingIntent.getData();
         Bundle extras = callingIntent.getExtras();
 
-        sVerifiedUrl = url.toString();
+        if (url != null) {
+            sVerifiedUrl = url.toString();
+        }
 
         // start service
         Intent intent = new Intent(this, DynamicSystemInstallationService.class);
-        intent.setData(url);
+        if (url != null) {
+            intent.setData(url);
+        }
         intent.setAction(DynamicSystemClient.ACTION_START_INSTALL);
         intent.putExtras(extras);
 
@@ -106,6 +108,7 @@ public class VerificationActivity extends Activity {
     }
 
     static boolean isVerified(String url) {
+        if (url == null) return true;
         return sVerifiedUrl != null && sVerifiedUrl.equals(url);
     }
 }
