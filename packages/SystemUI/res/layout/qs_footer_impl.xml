@@ -21,8 +21,6 @@
     android:id="@+id/qs_footer"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_footer_height"
-    android:layout_marginStart="@dimen/qs_footer_margin"
-    android:layout_marginEnd="@dimen/qs_footer_margin"
     android:elevation="4dp"
     android:background="@android:color/transparent"
     android:baselineAligned="false"
@@ -34,6 +32,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
+        android:layout_marginStart="@dimen/qs_footer_margin"
+        android:layout_marginEnd="@dimen/qs_footer_margin"
         android:gravity="end" >
 
         <com.android.keyguard.AlphaOptimizedLinearLayout
