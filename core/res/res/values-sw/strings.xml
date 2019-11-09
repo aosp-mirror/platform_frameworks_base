@@ -509,9 +509,9 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Huruhusu programu kupata maelezo kuhusu kiwango cha uchangamano wa kufunga skrini (juu, wastani, chini au hakuna), ambacho huashiria urefu unaowezekana na aina ya kufunga skrini. Programu pia inaweza kumpendekezea mtumiaji asasishe mbinu ya kufunga skrini iwe ya kiwango fulani lakini mtumiaji anaweza kuamua kupuuza na kuendelea. Kumbuka kuwa maelezo ya kufunga skrini hayahifadhiwi kama maandishi, hivyo programu haitambui nenosiri mahususi."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"tumia maunzi ya kibiolojia"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Huruhusu programu itumie maunzi ya kibiolojia katika uthibitishaji"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"dhibiti maunzi ya kitambulisho"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Huruhusu programu kuomba njia za kuongeza na kufuta violezo vya kitambulisho kwa matumizi."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"tumia maunzi ya kitambulisho"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"dhibiti maunzi ya alama ya kidole"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Huruhusu programu kuomba njia za kuongeza na kufuta violezo vya alama ya kidole kwa matumizi."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"tumia maunzi ya alama ya kidole"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Huruhusu programu kutumia maunzi ya kitambulisho kwa uthibitisho"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"kubadilisha mkusanyiko wako wa muziki"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Inaruhusu programu kubadilisha mkusanyiko wako wa muziki."</string>
@@ -527,7 +527,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Hayatambuliki"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Imeghairi uthibitishaji"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Hujaweka pin, mchoro au nenosiri"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Kitambuzi kimegundua sehemu ya kitambulisho. Tafadhali jaribu tena."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Kitambuzi kimegundua sehemu ya alama ya kidole. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Imeshindwa kuchakata alama ya kidole. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Kitambuzi alama ya kidole ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Ulisogeza kidole kwa kasi mno. Tafadhali jaribu tena."</string>
@@ -537,10 +537,10 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Imethibitisha alama ya kidole"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Uso umethibitishwa"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Uso umethibitishwa, tafadhali bonyeza thibitisha"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Maunzi ya kitambulisho hayapatikani."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Kitambulisho hakiwezi kuhifadhiwa. Tafadhali ondoa kitambulisho kilichopo."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Muda wa kitambulisho umekwisha. Jaribu tena."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Utendaji wa kitambulisho imeghairiwa."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Maunzi ya alama ya kidole hayapatikani."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Alama ya kidole haiwezi kuhifadhiwa. Tafadhali ondoa alama ya kidole iliyopo."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Muda wa kuweka alama ya kidole umekwisha. Jaribu tena."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Mchakato wa alama ya kidole umeghairiwa."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Mtumiaji ameghairi uthibitishaji wa alama ya kidole."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Majaribio mengi mno. Jaribu tena baadaye."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Majaribio mengi mno. Kitambua alama ya kidole kimezimwa."</string>
@@ -550,7 +550,7 @@
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Kidole cha <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Aikoni ya kitambulisho"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Aikoni ya alama ya kidole"</string>
     <string name="permlab_manageFace" msgid="7262837876352591553">"dhibiti maunzi ya kufungua kwa uso"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Huruhusu programu iombe njia za kuongeza na kufuta violezo vya uso vitakavyotumiwa."</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"tumia maunzi ya kufungua kwa uso"</string>
@@ -1345,7 +1345,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"Sawa"</string>
     <string name="usb_charging_notification_title" msgid="1595122345358177163">"Unachaji kifaa hiki kupitia USB"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Inachaji kifaa kilichounganishwa kupitia USB"</string>
-    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Umewasha hali ya uhamishaji wa faili kupitia USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Umewasha uhamishaji wa faili kupitia USB"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Umewasha hali ya PTP kupitia USB"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"Umewasha hali ya kusambaza mtandao ukitumia USB"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"Umewasha hali ya MIDI kupitia USB"</string>
@@ -1545,7 +1545,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Chaguo zaidi"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Hifadhi ya ndani inayoshirikiwa"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Hifadhi ya ndani ya pamoja"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Kadi ya SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"Kadi ya SD iliyotengenezwa na <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Hifadhi ya USB"</string>
@@ -1577,8 +1577,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Inaisha muda mnamo:"</string>
     <string name="serial_number" msgid="758814067660862493">"Nambari ya ufuatiliaji:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Alazama za Vidole:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Alama ya  kidole ya SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Alama ya kidole ya  SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Kitambulisho dijitali cha SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Kitambulisho dijitali cha  SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Angalia zote"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Chagua shughuli"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Shiriki na"</string>
@@ -1660,14 +1660,14 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ondoa"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Ungependa kupandisha sauti zaidi ya kiwango kinachopendekezwa?\n\nKusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Ungependa Kutumia Njia ya Mkato ya Zana za walio na matatizo ya kuona au kusikia?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Unapowasha kipengele cha njia ya mkato, hatua ya kubonyeza vitufe vyote viwili vya sauti kwa dakika 3 itafungua kipengele cha zana za walio na matatizo ya kuona au kusikia.\n\n Kipengele kilichopo cha zana za walio na matatizo ya kuona au kusikia:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Unaweza kubadilisha kipengele hiki katika Mipangilio &gt; Zana za walio na matatizo ya kuona au kusikia."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Ungependa kutumia njia ya mkato ya ufikivu?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Unapowasha kipengele cha njia ya mkato, hatua ya kubonyeza vitufe vyote viwili vya sauti kwa dakika 3 itafungua kipengele cha ufikivu.\n\n Kipengele cha ufikivu kilichopo kwa sasa:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Unaweza kubadilisha kipengele hiki katika Mipangilio &gt; Zana za ufikivu."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Zima kipengele cha Njia ya Mkato"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Tumia Njia ya Mkato"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Ugeuzaji rangi"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Usahihishaji wa rangi"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Njia ya mkato ya zana za walio na matatizo ya kuona au kusikia imezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Njia ya mkato ya ufikivu imewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Njia ya mkato ya ufikivu imezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Bonyeza na ushikilie vitufe vyote viwili vya sauti kwa sekunde tatu ili utumie <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Chagua huduma ya kutumia unapogusa kitufe cha ufikivu:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Chagua huduma ya kutumia pamoja na ishara ya ufikivu (telezesha vidole viwili kutoka chini kwenda juu kwenye skrini):"</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Imesasishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Imefutwa na msimamizi wako"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Sawa"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Kiokoa betri huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vinavyotumia nishati nyingi ili kuongeza muda wa matumizi ya betri. "<annotation id="url">"Pata maelezo zaidi"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Kiokoa betri huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vinavyotumia nishati nyingi ili kuongeza muda wa matumizi ya betri."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Washa"</string>

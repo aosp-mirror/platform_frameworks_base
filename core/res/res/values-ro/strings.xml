@@ -300,13 +300,13 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze fotografiile, conținutul media și fișierele de pe dispozitiv?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze sunet"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Pemiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să înregistreze conținut audio?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Pemiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să înregistreze audio?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Activitate fizică"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"accesați activitatea fizică"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Permiteți aplicației &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze activitatea fizică?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze videoclipuri"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să facă fotografii și să înregistreze videoclipuri?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să fotografieze și să înregistreze video?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Jurnale de apeluri"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"să citească și să scrie jurnalul de apeluri telefonice"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze jurnalele de apeluri?"</string>
@@ -1833,8 +1833,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizat de administratorul dvs."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Șters de administratorul dvs."</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Economisirea bateriei dezactivează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții care implică un consum ridicat de energie pentru a prelungi autonomia bateriei. "<annotation id="url">"Aflați mai multe"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Economisirea bateriei dezactivează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții care implică un consum ridicat de energie pentru a prelungi autonomia bateriei."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activați Economizorul de date?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activați"</string>
