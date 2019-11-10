@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Alarmgeluiden"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Meldingsgeluiden"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Onbekend"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wifi-netwerken beschikbaar</item>
-      <item quantity="one">Wifi-netwerk beschikbaar</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Open wifi-netwerken beschikbaar</item>
-      <item quantity="one">Open wifi-netwerk beschikbaar</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Verbinding maken met een open wifi-netwerk"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Verbinden met wifi-netwerk"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Verbonden met een wifi-netwerk"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Kan geen verbinding maken met het wifi-netwerk"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tik om alle netwerken te bekijken"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinding maken"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle netwerken"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Voorgestelde wifi-netwerken toestaan?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> heeft netwerken voorgesteld. Apparaat kan automatisch verbinding maken."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Toestaan"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nee, bedankt"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wifi wordt automatisch ingeschakeld"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Wanneer je in de buurt van een opgeslagen netwerk van hoge kwaliteit bent"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Niet weer inschakelen"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wifi automatisch ingeschakeld"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Je bent in de buurt van een opgeslagen netwerk: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Inloggen bij wifi-netwerk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Inloggen bij netwerk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Verbonden"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> heeft beperkte connectiviteit"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Tik om toch verbinding te maken"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Wijzigingen in je hotspot-instellingen"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Je hotspot-band is gewijzigd."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dit apparaat biedt geen ondersteuning voor je voorkeur voor alleen 5 GHz. In plaats daarvan gebruikt dit apparaat de 5-GHz-band wanneer deze beschikbaar is."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Overgeschakeld naar <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Apparaat gebruikt <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wanneer <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> geen internetverbinding heeft. Er kunnen kosten in rekening worden gebracht."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Overgeschakeld van <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> naar <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"een onbekend netwerktype"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan geen verbinding maken met wifi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" heeft een slechte internetverbinding."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Verbinding toestaan?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"App %1$s wil verbinding maken met wifi-netwerk %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Een app"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wifi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wifi Direct starten. Hierdoor wordt de wifi-client/hotspot uitgeschakeld."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Kan Wifi Direct niet starten."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wifi Direct is actief"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Tik voor instellingen"</string>
     <string name="accept" msgid="1645267259272829559">"Accepteren"</string>
     <string name="decline" msgid="2112225451706137894">"Weigeren"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Uitnodiging verzonden"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Uitnodiging om te koppelen"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Van:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Naar:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Voer de gewenste pincode in:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Pincode"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"De verbinding met het wifi-netwerk wordt tijdelijk uitgeschakeld terwijl de telefoon is verbonden met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"De verbinding met het wifi-netwerk wordt tijdelijk uitgeschakeld terwijl het Android TV-apparaat is verbonden met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"De verbinding met het wifi-netwerk wordt tijdelijk uitgeschakeld terwijl de telefoon verbonden is met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Teken invoegen"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-berichten verzenden"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; verzendt moment een groot aantal sms-berichten. Wil je toestaan ​​dat deze app berichten blijft verzenden?"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Geüpdatet door je beheerder"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Verwijderd door je beheerder"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Batterijbesparing beperkt de achtergrondactiviteit, bepaalde visuele effecten en andere functies die veel stroom kosten om de batterijduur te verlengen. "<annotation id="url">"Meer informatie"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Batterijbesparing beperkt de achtergrondactiviteit, bepaalde visuele effecten en andere functies die veel stroom kosten om de batterijduur te verlengen."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens verzenden of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet weergegeven totdat je erop tikt."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Databesparing inschakelen?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Inschakelen"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Rechtstreeks delen is niet beschikbaar"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Lijst met apps"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Deze app heeft geen opnamerechten gekregen, maar zou audio kunnen vastleggen via dit USB-apparaat."</string>
 </resources>

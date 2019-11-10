@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Sauti za kengele"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Sauti za arifa"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Haijulikani"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Mitandao ya Wi-Fi inapatikana</item>
-      <item quantity="one">Mtandao wa Wi-Fi unapatikana</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Fungua mitandao ya Wi-Fi inayopatikana</item>
-      <item quantity="one">Fungua mtandao wa Wi-Fi unaopatikana</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Unganisha kwenye mtandao wa Wi‑Fi unaotumiwa na mtu yeyote"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Inaunganisha kwenye mtandao wa Wi‑Fi"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Imeunganisha kwenye mtandao wa Wi-Fi"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Imeshindwa kuunganisha kwenye mtandao wa Wi‑Fi"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Gusa ili uone mitandao yote"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Unganisha"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Mitandao yote"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Ungependa kuruhusu mitandao inayopendekezwa ya Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Mitandao inayopendekezwa kwa ajili ya <xliff:g id="NAME">%s</xliff:g>. Huenda kifaa kikaunganisha kiotomatiki."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Ruhusu"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Hapana, asante"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi itawashwa kiotomatiki"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Unapokuwa karibu na mtandao uliohifadhiwa wenye ubora wa juu"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Usiwashe tena"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi imewashwa kiotomatiki"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Uko karibu na mtandao uliohifadhiwa: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Ingia kwa mtandao wa Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Ingia katika mtandao"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Imeunganisha"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ina muunganisho unaofikia huduma chache."</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Gusa ili uunganishe tu"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mabadiliko kwenye mipangilio ya mtandao pepe"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Bendi ya mtandao pepe wako imebadilika."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Kifaa hiki hakitumii mapendeleo yako ya GHz 5 pekee. Badala yake, kifaa hiki kitatumia bendi ya GHz 5 itakapopatikana."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Sasa inatumia <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Kifaa hutumia <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wakati <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> haina intaneti. Huenda ukalipishwa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Imebadilisha mtandao kutoka <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na sasa inatumia <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"aina ya mtandao isiyojulikana"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Imeshindwa kuunganisha Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" inao muunganisho duni wa wavuti."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Ungepenga kuruhusu muunganisho?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Programu ya %1$s ingependa kuunganisha kwenye Mtandao wa Wifi wa %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Programu"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Moja kwa Moja"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Anzisha Wi-Fi Moja kwa Moja. Hii itazima kiteja cha Wi-Fi/mtandaopepe."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Haikuweza kuanzisha Wi-Fi Moja kwa Moja."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Moja kwa Moja imewashwa"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Gusa ili uweke mipangilio"</string>
     <string name="accept" msgid="1645267259272829559">"Kubali"</string>
     <string name="decline" msgid="2112225451706137894">"Kataa"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Mwaliko umetumwa"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Mwaliko wa kuunganisha"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Kutoka:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kwa:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Charaza PIN inayohitajika:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Kompyuta ndogo itaukata muunganisho kwa muda kutoka kwenye Wi-Fi inapokuwa imeunganishwa kwenye <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Kifaa chako cha Android TV kitatenganishwa na Wi-Fi kwa muda wakati kimeunganishwa kwenye <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Simu itaukata muunganisho kwa muda kutoka kwenye Wi-Fi inapokuwa imeunganishwa kwenye <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Ingiza kibambo"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Inatuma ujumbe wa SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; inatuma idadi kubwa ya SMS. Je, unataka kuruhusu programu hii kuendelea kutuma SMS?"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Imesasishwa na msimamizi wako"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Imefutwa na msimamizi wako"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Sawa"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Kiokoa betri huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vinavyotumia nishati nyingi ili kuongeza muda wa matumizi ya betri. "<annotation id="url">"Pata maelezo zaidi"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Kiokoa betri huzima au kuzuia shughuli za chinichini, baadhi ya madoido yanayoonekana na vipengele vinavyotumia nishati nyingi ili kuongeza muda wa matumizi ya betri."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Washa"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Huwezi kushiriki moja kwa moja"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Orodha ya programu"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Programu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB."</string>
 </resources>

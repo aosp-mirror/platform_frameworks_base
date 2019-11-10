@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Zəngli saat səsləri"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Bildiriş səsləri"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Naməlum"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Əlçatan Wi-Fi şəbəkələri</item>
-      <item quantity="one">Əlçatan Wi-Fi şəbəkəsi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Əlçatan açıq Wi-Fi şəbəkələri</item>
-      <item quantity="one">Əlçatan açıq Wi-Fi şəbəkəsi</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Açıq Wi‑Fi şəbəkəsinə qoşulun"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi‑Fi şəbəkəsinə qoşulur"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi şəbəkəsinə qoşuldu"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi şəbəkəsinə qoşulmaq mümkün deyil"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Bütün şəbəkələri görmək üçün klikləyin"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Qoşulun"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Bütün şəbəkələr"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Təklif edilən Wi‑Fi şəbəkələrinə icazə verilsin?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> təklif edilən şəbəkə. Cihaz avtomatik qoşula bilər."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"İcazə verin"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Xeyr, təşəkkürlər"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi avtomatik olaraq aktiv ediləcək"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Yadda saxlanmış yüksək keyfiyyətli şəbəkələr yaxınlıqda olduqda"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Yenidən aktiv etməyin"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi avtomatik aktiv edildi"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Yadda saxlanmış şəbəkəyə yaxınsınız: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi şəbəkəsinə daxil ol"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Şəbəkəyə daxil olun"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Qoşuldu"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> bağlantını məhdudlaşdırdı"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"İstənilən halda klikləyin"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Hotspot ayarlarınızda dəyişiklik"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Hotspot qrupu dəyişdi."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Bu cihaz yalnız 5GHz üçün tərcihinizi dəstəkləmir. Əvəzinə əlçatan olduqda bu cihaz 5GHz qrupundan istifadə edəcək."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> şəbəkə növünə keçirildi"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> şəbəkəsinin internetə girişi olmadıqda, cihaz <xliff:g id="NEW_NETWORK">%1$s</xliff:g> şəbəkəsini istifadə edir. Xidmət haqqı tutula bilər."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> şəbəkəsindən <xliff:g id="NEW_NETWORK">%2$s</xliff:g> şəbəkəsinə keçirildi"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"naməlum şəbəkə növü"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi\'a qoşulmaq alınmadı"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" zəif internet əlaqəsi var"</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Bağlantıya icazə verilsin?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Proqram %1$s Wifi Şəbəkəsinə qoşulmaq istəyir %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Tətbiq"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Direct əməliyyatını başlat. Bu Wi-Fi müştəri/hotspotu bağlayacaq."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct başladıla bilmədi."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct aktivdir"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Ayarlar üçün tıklayın"</string>
     <string name="accept" msgid="1645267259272829559">"Qəbul edin"</string>
     <string name="decline" msgid="2112225451706137894">"İmtina edin"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Dəvətnamə göndərildi"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Qoşulmaq üçün dəvət"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Kimdən:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kimə:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Tələb olunan PİN kodu daxil edin:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PİN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Bu planşet <xliff:g id="DEVICE_NAME">%1$s</xliff:g> cihazına qoşulan zaman Wi-Fi şəbəkəsindən müvəqqəti ayrılmış olacaq"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV <xliff:g id="DEVICE_NAME">%1$s</xliff:g> cihazına qoşularkən Wi-Fi bağlantısı müvəqqəti olaraq kəsiləcək."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Bu telefon <xliff:g id="DEVICE_NAME">%1$s</xliff:g> cihazına qoşulan zaman Wi-Fi şəbəkəsindən müvəqqəti ayrılmış olacaq"</string>
     <string name="select_character" msgid="3365550120617701745">"Simvol daxil edin"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS mesaj göndərilir"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; çox sayda SMS mesaj göndərir. Bu tətbiqin mesaj göndərməyə davam etməsinə icazə verirsiniz?"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Admin tərəfindən yeniləndi"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Admin tərəfindən silindi"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Enerjiyə qənaət batareya istifadəsini artırmaq üçün arxa fon fəaliyyətini, bəzi vizual effektləri və batareyadan çox istifadə edən digər funksiyalarını deaktiv edir və ya məhdudlaşdırır. "<annotation id="url">"Ətraflı məlumat"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Enerjiyə qənaət batareya istifadəsini artırmaq üçün arxa fon fəaliyyətini, bəzi vizual effektləri və batareyadan çox istifadə edən digər funksiyalarını deaktiv edir və ya məhdudlaşdırır."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Qənaəti aktiv edilsin?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivləşdirin"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Birbaşa paylaşım əlçatan deyil"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Tətbiq siyahısı"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Bu tətbiqə yazmaq icazəsi verilməyib, lakin, bu USB vasitəsilə səs yaza bilər."</string>
 </resources>

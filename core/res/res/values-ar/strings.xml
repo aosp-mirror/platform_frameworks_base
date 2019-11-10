@@ -1324,38 +1324,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"أصوات التنبيه"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"أصوات الإشعار"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"غير معروف"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="zero">‏لا تتوفر أي شبكات Wi-Fi</item>
-      <item quantity="two">‏تتوفر شبكتا Wi-Fi</item>
-      <item quantity="few">‏تتوفر شبكات Wi-Fi</item>
-      <item quantity="many">‏تتوفر شبكات Wi-Fi</item>
-      <item quantity="other">‏تتوفر شبكات Wi-Fi</item>
-      <item quantity="one">‏تتوفر شبكة Wi-Fi واحدة</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="zero">‏لا تتوفر أي شبكات Wi-Fi مفتوحة</item>
-      <item quantity="two">‏تتوفر شبكتا Wi-Fi مفتوحتان</item>
-      <item quantity="few">‏تتوفر شبكات Wi-Fi مفتوحة</item>
-      <item quantity="many">‏تتوفر شبكات Wi-Fi مفتوحة</item>
-      <item quantity="other">‏تتوفر شبكات Wi-Fi مفتوحة</item>
-      <item quantity="one">‏تتوفر شبكة Wi-Fi واحدة مفتوحة</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"‏الاتصال بشبكة Wi-Fi المفتوحة"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"‏جارٍ الاتصال بشبكة Wi-Fi"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"‏تم الاتصال بشبكة Wi-Fi"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"‏تعذَّر الاتصال بشبكة Wi‑Fi"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"انقر للاطلاع على جميع الشبكات"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"جميع الشبكات"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"‏هل تريد السماح لشبكات Wi‑Fi المقترحة؟"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"شبكات <xliff:g id="NAME">%s</xliff:g> المقترحة - قد يتم توصيل الجهاز تلقائيًا."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"سماح"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"لا، شكرًا"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏سيتم تشغيل شبكة Wi-Fi تلقائيًا."</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"عندما تكون بالقرب من شبكة محفوظة عالية الجودة"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"عدم إعادة التشغيل"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"‏تم تفعيل شبكة Wi-Fi تلقائيًا."</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"أنت قريب من شبكة محفوظة: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>."</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏تسجيل الدخول إلى شبكة Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"تسجيل الدخول إلى الشبكة"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1368,9 +1336,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"تمّ الاتصال."</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"إمكانية اتصال <xliff:g id="NETWORK_SSID">%1$s</xliff:g> محدودة."</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"يمكنك النقر للاتصال على أي حال."</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"التغييرات التي طرأت على إعدادات نقطة الاتصال"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"تمّ تغيير نطاق نقطة الاتصال الخاصة بك."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"لا يتوافق هذا الجهاز مع إعدادك المفضّل الخاص باستخدام النطاق 5 غيغاهرتز فقط. وسيستخدم الجهاز بدلاً من ذلك النطاق 5 غيغاهرتز عندما يكون متاحًا."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"تم التبديل إلى <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"يستخدم الجهاز <xliff:g id="NEW_NETWORK">%1$s</xliff:g> عندما لا يتوفر اتصال بالإنترنت في شبكة <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>، ويمكن أن يتم فرض رسوم مقابل ذلك."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"تم التبديل من <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> إلى <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1382,27 +1347,8 @@
     <item msgid="8257233890381651999">"‏شبكة افتراضية خاصة (VPN)"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"نوع شبكة غير معروف"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏تعذر الاتصال بـ Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" تحتوي على اتصال إنترنت ضعيف."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"هل تريد السماح بالاتصال؟"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"‏يريد تطبيق %1$s الاتصال بشبكة Wifi ‏%2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"تطبيق"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"‏اتصال Wi-Fi مباشر"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"‏ابدأ Wi-Fi Direct. يؤدي هذا إلى إيقاف عميل/نقطة اتصال Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"‏تعذر بدء Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"‏تم تشغيل اتصال Wi-Fi المباشر"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"انقر للحصول على الإعدادات."</string>
     <string name="accept" msgid="1645267259272829559">"قبول"</string>
     <string name="decline" msgid="2112225451706137894">"رفض"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"تم إرسال الدعوة"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"دعوة للاتصال"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"من:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"إلى:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"‏اكتب رمز PIN المطلوب:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"رقم التعريف الشخصي:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"‏سيتم قطع اتصال الجهاز اللوحي مؤقتًا بشبكة Wi-Fi في الوقت الذي يكون فيه متصلاً بـ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"‏سيتم قطع اتصال جهاز Android TV بشبكة Wi-Fi مؤقتًا أثناء اتصاله بجهاز<xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"‏سيتم قطع اتصال الهاتف مؤقتًا بشبكة Wi-Fi في الوقت الذي يكون فيه متصلاً بـ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"إدراج حرف"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"‏إرسال رسائل قصيرة SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; يرسل عددًا كبيرًا من الرسائل القصيرة SMS. هل تريد السماح لهذا التطبيق بالاستمرار في إرسال الرسائل؟"</string>
@@ -1917,8 +1863,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"موافق"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد نشاط الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية. "<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد النشاط في الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"هل تريد تشغيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"تشغيل"</string>
@@ -2195,4 +2143,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"لا تتوفّر إمكانية المشاركة المباشرة."</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"قائمة التطبيقات"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"‏لم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
 </resources>

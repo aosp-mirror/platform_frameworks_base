@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Sonidos de la alarma"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Sonidos de notificaciones"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Desconocido"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">redes de Wi-Fi disponibles</item>
-      <item quantity="one">red de Wi-Fi disponible</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Abrir redes de Wi-Fi disponibles</item>
-      <item quantity="one">Abrir red de Wi-Fi disponible</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Conectarse a una red Wi-Fi abierta"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Estableciendo conexión con la red Wi-Fi"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Se conectó a la red Wi-Fi"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"No fue posible conectarse a la red Wi‑Fi"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Presiona para ver todas las redes"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectar"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Todas las redes"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"¿Quieres permitir las redes Wi‑Fi sugeridas?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> sugirió redes. Es posible que el dispositivo se conecte automáticamente."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Permitir"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"No, gracias"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Se activará la conexión Wi-Fi automáticamente"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Cuando estés cerca de una red guardada de alta calidad"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"No volver a activar"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Se activó el Wi-Fi automáticamente"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Estás cerca de una red guardada: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Accede a una red Wi-Fi."</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Acceder a la red"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Se estableció conexión"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> tiene conectividad limitada"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Presiona para conectarte de todas formas"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Cambios en la configuración de tu hotspot"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Cambió la banda de tu hotspot."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Si bien este dispositivo no admite la opción para conectarse exclusivamente a bandas de 5 GHz, las usará cuando estén disponibles."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Se cambió a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"El dispositivo usa <xliff:g id="NEW_NETWORK">%1$s</xliff:g> cuando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tiene acceso a Internet. Es posible que se apliquen cargos."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Se cambió de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"un tipo de red desconocido"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No se pudo conectar a la red Wi-Fi."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" tiene una mala conexión a Internet."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"¿Permitir la conexión?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"La aplicación %1$s quiere conectarse a la red Wi-Fi %2$s."</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Una aplicación"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi directo"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Iniciar Wi-Fi directo. Se desactivará el funcionamiento del hotspot o del cliente Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"No se pudo iniciar Wi-Fi directo."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Se activó Wi-Fi directo."</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Presiona para ver la configuración"</string>
     <string name="accept" msgid="1645267259272829559">"Aceptar"</string>
     <string name="decline" msgid="2112225451706137894">"Rechazar"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Se envió la invitación."</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Invitación para conectarse"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"De:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Para:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Escribe el PIN solicitado:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"La tablet se desconectará temporalmente de la red Wi-Fi mientras esté conectada a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Se desconectará temporalmente el dispositivo Android TV de la red Wi-Fi mientras esté conectado a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"El dispositivo se desconectará temporalmente de la red Wi-Fi mientras esté conectado a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="select_character" msgid="3365550120617701745">"Insertar caracteres"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Enviando mensajes SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; está enviando una gran cantidad de mensajes SMS. ¿Quieres permitir que está aplicación siga enviando mensajes?"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Tu administrador actualizó este paquete"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Tu administrador borró este paquete"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"El Ahorro de batería desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones que consumen mucha energía a fin de extender la duración de batería. "<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"El Ahorro de batería desactiva o restringe la actividad en segundo plano, algunos efectos visuales y otras funciones que consumen mucha energía para extender la duración de la batería."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Para reducir el uso de datos, Ahorro de datos evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"No está disponible el uso compartido directo"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Lista de apps"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Aunque no se le otorgó permiso de grabación a esta app, puede capturar audio con este dispositivo USB."</string>
 </resources>
