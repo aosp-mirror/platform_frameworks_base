@@ -588,6 +588,13 @@ class TaskRecord extends Task {
         boolean kept = true;
         try {
             final ActivityRecord r = topRunningActivityLocked();
+            // give pinned stack a chance to save current bounds, this needs to be before the
+            // actual reparent.
+            if (inPinnedWindowingMode()
+                    && !(toStackWindowingMode == WINDOWING_MODE_UNDEFINED)
+                    && !r.isHidden()) {
+                r.savePinnedStackBounds();
+            }
             final boolean wasFocused = r != null && root.isTopDisplayFocusedStack(sourceStack)
                     && (topRunningActivityLocked() == r);
             final boolean wasResumed = r != null && sourceStack.getResumedActivity() == r;
