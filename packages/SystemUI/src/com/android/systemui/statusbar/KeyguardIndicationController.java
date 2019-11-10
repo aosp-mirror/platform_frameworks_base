@@ -108,6 +108,7 @@ public class KeyguardIndicationController implements StateListener,
     private ColorStateList mTransientTextColorState;
     private ColorStateList mInitialTextColorState;
     private boolean mVisible;
+    private boolean mHideTransientMessageOnScreenOff;
 
     private boolean mPowerPluggedIn;
     private boolean mPowerPluggedInWired;
@@ -317,15 +318,17 @@ public class KeyguardIndicationController implements StateListener,
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
     public void showTransientIndication(CharSequence transientIndication) {
-        showTransientIndication(transientIndication, mInitialTextColorState);
+        showTransientIndication(transientIndication, mInitialTextColorState,
+                false /* hideOnScreenOff */);
     }
 
     /**
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
-    public void showTransientIndication(CharSequence transientIndication,
-            ColorStateList textColorState) {
+    private void showTransientIndication(CharSequence transientIndication,
+            ColorStateList textColorState, boolean hideOnScreenOff) {
         mTransientIndication = transientIndication;
+        mHideTransientMessageOnScreenOff = hideOnScreenOff && transientIndication != null;
         mTransientTextColorState = textColorState;
         mHandler.removeMessages(MSG_HIDE_TRANSIENT);
         mHandler.removeMessages(MSG_SWIPE_UP_TO_UNLOCK);
@@ -344,6 +347,7 @@ public class KeyguardIndicationController implements StateListener,
     public void hideTransientIndication() {
         if (mTransientIndication != null) {
             mTransientIndication = null;
+            mHideTransientMessageOnScreenOff = false;
             mHandler.removeMessages(MSG_HIDE_TRANSIENT);
             updateIndication(false);
         }
@@ -566,7 +570,8 @@ public class KeyguardIndicationController implements StateListener,
             String message = mContext.getString(R.string.keyguard_retry);
             mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
         } else if (mKeyguardUpdateMonitor.isScreenOn()) {
-            showTransientIndication(mContext.getString(R.string.keyguard_unlock));
+            showTransientIndication(mContext.getString(R.string.keyguard_unlock),
+                    mInitialTextColorState, true /* hideOnScreenOff */);
             hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
         }
     }
@@ -576,7 +581,11 @@ public class KeyguardIndicationController implements StateListener,
             return;
         }
         mDozing = dozing;
-        updateIndication(false);
+        if (mHideTransientMessageOnScreenOff && mDozing) {
+            hideTransientIndication();
+        } else {
+            updateIndication(false);
+        }
         updateDisclosure();
     }
 
@@ -646,8 +655,7 @@ public class KeyguardIndicationController implements StateListener,
         @Override
         public void onBiometricHelp(int msgId, String helpString,
                 BiometricSourceType biometricSourceType) {
-            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-            if (!updateMonitor.isUnlockingWithBiometricAllowed()) {
+            if (!mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed()) {
                 return;
             }
             boolean showSwipeToUnlock =
@@ -655,8 +663,8 @@ public class KeyguardIndicationController implements StateListener,
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
                         mInitialTextColorState);
-            } else if (updateMonitor.isScreenOn()) {
-                showTransientIndication(helpString);
+            } else if (mKeyguardUpdateMonitor.isScreenOn()) {
+                showTransientIndication(helpString, mInitialTextColorState, showSwipeToUnlock);
                 if (!showSwipeToUnlock) {
                     hideTransientIndicationDelayed(TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
                 }
@@ -670,8 +678,7 @@ public class KeyguardIndicationController implements StateListener,
         @Override
         public void onBiometricError(int msgId, String errString,
                 BiometricSourceType biometricSourceType) {
-            KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-            if (shouldSuppressBiometricError(msgId, biometricSourceType, updateMonitor)) {
+            if (shouldSuppressBiometricError(msgId, biometricSourceType, mKeyguardUpdateMonitor)) {
                 return;
             }
             animatePadlockError();
@@ -681,7 +688,7 @@ public class KeyguardIndicationController implements StateListener,
                 showSwipeUpToUnlock();
             } else if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(errString, mInitialTextColorState);
-            } else if (updateMonitor.isScreenOn()) {
+            } else if (mKeyguardUpdateMonitor.isScreenOn()) {
                 showTransientIndication(errString);
                 // We want to keep this message around in case the screen was off
                 hideTransientIndicationDelayed(HIDE_DELAY_MS);
@@ -721,13 +728,15 @@ public class KeyguardIndicationController implements StateListener,
 
         @Override
         public void onTrustAgentErrorMessage(CharSequence message) {
-            showTransientIndication(message, Utils.getColorError(mContext));
+            showTransientIndication(message, Utils.getColorError(mContext),
+                    false /* hideOnScreenOff */);
         }
 
         @Override
         public void onScreenTurnedOn() {
             if (mMessageToShowOnScreenOn != null) {
-                showTransientIndication(mMessageToShowOnScreenOn, Utils.getColorError(mContext));
+                showTransientIndication(mMessageToShowOnScreenOn, Utils.getColorError(mContext),
+                        false /* hideOnScreenOff */);
                 // We want to keep this message around in case the screen was off
                 hideTransientIndicationDelayed(HIDE_DELAY_MS);
                 mMessageToShowOnScreenOn = null;
