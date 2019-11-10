@@ -261,6 +261,7 @@ public class NotificationEntryManager implements
             boolean isNew = mNotificationData.get(entry.getKey()) == null;
             if (isNew) {
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                    mNotifLog.log(NotifEvent.INFLATED, entry);
                     listener.onEntryInflated(entry, inflatedFlags);
                 }
                 mNotificationData.add(entry);
@@ -270,6 +271,7 @@ public class NotificationEntryManager implements
                 }
             } else {
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
+                    mNotifLog.log(NotifEvent.INFLATED, entry);
                     listener.onEntryReinflated(entry);
                 }
             }

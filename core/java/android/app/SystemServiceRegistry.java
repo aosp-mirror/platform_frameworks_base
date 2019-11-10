@@ -21,6 +21,7 @@ import android.accounts.IAccountManager;
 import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
+import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
@@ -170,6 +171,7 @@ import android.telephony.TelephonyManager;
 import android.telephony.TelephonyRegistryManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
+import android.telephony.ims.ImsManager;
 import android.telephony.ims.RcsMessageManager;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -628,6 +630,14 @@ public final class SystemServiceRegistry {
                     @Override
                     public RcsMessageManager createService(ContextImpl ctx) {
                         return new RcsMessageManager(ctx.getOuterContext());
+                    }
+                });
+
+        registerService(Context.TELEPHONY_IMS_SERVICE, ImsManager.class,
+                new CachedServiceFetcher<ImsManager>() {
+                    @Override
+                    public ImsManager createService(ContextImpl ctx) {
+                        return new ImsManager(ctx.getOuterContext());
                     }
                 });
 
@@ -1302,6 +1312,8 @@ public final class SystemServiceRegistry {
 
         JobSchedulerFrameworkInitializer.initialize();
         DeviceIdleFrameworkInitializer.initialize();
+
+        BlobStoreManagerFrameworkInitializer.initialize();
     }
 
     /**

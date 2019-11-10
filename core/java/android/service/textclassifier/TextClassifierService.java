@@ -22,6 +22,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,11 +37,13 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextClassificationConstants;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassificationSessionId;
@@ -88,6 +91,7 @@ import java.util.concurrent.Executors;
  * @hide
  */
 @SystemApi
+@TestApi
 public abstract class TextClassifierService extends Service {
 
     private static final String LOG_TAG = "TextClassifierService";
@@ -220,7 +224,7 @@ public abstract class TextClassifierService extends Service {
 
     @Nullable
     @Override
-    public final IBinder onBind(Intent intent) {
+    public final IBinder onBind(@NonNull Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mBinder;
         }
@@ -427,7 +431,7 @@ public abstract class TextClassifierService extends Service {
         /**
          * Signals a failure.
          */
-        void onFailure(CharSequence error);
+        void onFailure(@NonNull CharSequence error);
     }
 
     /**
@@ -435,24 +439,61 @@ public abstract class TextClassifierService extends Service {
      * on the system. Otherwise, returns null.
      * @hide
      */
+    public static ComponentName getServiceComponentName(@NonNull Context context) {
+        return getServiceComponentName(context, new TextClassificationConstants(
+                () -> Settings.Global.getString(
+                        context.getContentResolver(),
+                        Settings.Global.TEXT_CLASSIFIER_CONSTANTS)));
+    }
+
+    /**
+     * Returns the component name of the system default textclassifier service if it can be found
+     * on the system. Otherwise, returns null.
+     * @param context the text classification context
+     * @param settings TextClassifier specific settings.
+     *
+     * @hide
+     */
     @Nullable
-    public static ComponentName getServiceComponentName(Context context) {
-        final String packageName = context.getPackageManager().getSystemTextClassifierPackageName();
-        if (TextUtils.isEmpty(packageName)) {
+    public static ComponentName getServiceComponentName(@NonNull Context context,
+            @NonNull TextClassificationConstants settings) {
+        // get override TextClassifierService package name
+        String packageName = settings.getTextClassifierServiceName();
+        ComponentName serviceComponent = null;
+        final boolean isOverrideService = !TextUtils.isEmpty(packageName);
+        if (isOverrideService) {
+            serviceComponent = getServiceComponentNameByPackage(context, packageName,
+                    isOverrideService);
+        }
+        if (serviceComponent != null) {
+            return serviceComponent;
+        }
+        // If no TextClassifierService overrode or invalid override package name, read the first
+        // package defined in the config
+        final String[] packages = context.getPackageManager().getSystemTextClassifierPackages();
+        if (packages.length == 0 || TextUtils.isEmpty(packages[0])) {
             Slog.d(LOG_TAG, "No configured system TextClassifierService");
             return null;
         }
+        packageName = packages[0];
+        serviceComponent = getServiceComponentNameByPackage(context, packageName,
+                isOverrideService);
+        return serviceComponent;
+    }
 
+    private static ComponentName getServiceComponentNameByPackage(Context context,
+            String packageName, boolean isOverrideService) {
         final Intent intent = new Intent(SERVICE_INTERFACE).setPackage(packageName);
 
-        final ResolveInfo ri = context.getPackageManager().resolveService(intent,
-                PackageManager.MATCH_SYSTEM_ONLY);
+        final int flags = isOverrideService ? 0 : PackageManager.MATCH_SYSTEM_ONLY;
+        final ResolveInfo ri = context.getPackageManager().resolveService(intent, flags);
 
         if ((ri == null) || (ri.serviceInfo == null)) {
             Slog.w(LOG_TAG, String.format("Package or service not found in package %s for user %d",
                     packageName, context.getUserId()));
             return null;
         }
+
         final ServiceInfo si = ri.serviceInfo;
 
         final String permission = si.permission;

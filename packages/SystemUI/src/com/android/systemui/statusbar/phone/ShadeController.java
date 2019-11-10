@@ -142,12 +142,6 @@ public interface ShadeController {
     void onLaunchAnimationCancelled();
 
     /**
-     * When notifications update, give the shade controller a chance to do thing in response to
-     * the new data set
-     */
-    void updateAreThereNotifications();
-
-    /**
      * Callback to notify the shade controller that a {@link ActivatableNotificationView} has become
      * inactive
      */

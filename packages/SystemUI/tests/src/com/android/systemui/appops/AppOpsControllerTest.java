@@ -39,6 +39,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.DumpController;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -66,6 +67,8 @@ public class AppOpsControllerTest extends SysuiTestCase {
     private AppOpsControllerImpl.H mMockHandler;
     @Mock
     private PermissionFlagsCache mFlagsCache;
+    @Mock
+    private DumpController mDumpController;
 
     private AppOpsControllerImpl mController;
     private TestableLooper mTestableLooper;
@@ -89,7 +92,8 @@ public class AppOpsControllerTest extends SysuiTestCase {
         when(mFlagsCache.getPermissionFlags(anyString(), anyString(),
                 eq(UserHandle.getUserHandleForUid(TEST_UID_NON_USER_SENSITIVE)))).thenReturn(0);
 
-        mController = new AppOpsControllerImpl(mContext, mTestableLooper.getLooper(), mFlagsCache);
+        mController = new AppOpsControllerImpl(mContext, mTestableLooper.getLooper(), mFlagsCache,
+                mDumpController);
     }
 
     @Test

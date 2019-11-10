@@ -7391,6 +7391,17 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return the system defined text classifier package names, or null if there's none.
+     *
+     * @hide
+     */
+    @NonNull
+    public String[] getSystemTextClassifierPackages() {
+        throw new UnsupportedOperationException(
+                "getSystemTextClassifierPackages not implemented in subclass");
+    }
+
+    /**
      * @return  attention service package name, or null if there's none.
      *
      * @hide
@@ -7455,6 +7466,18 @@ public abstract class PackageManager {
     public String getSetupWizardPackageName() {
         throw new UnsupportedOperationException(
                 "getSetupWizardPackageName not implemented in subclass");
+    }
+
+    /**
+     * @return the system defined content capture package name, or null if there's none.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public String getContentCaptureServicePackageName() {
+        throw new UnsupportedOperationException(
+                "getContentCaptureServicePackageName not implemented in subclass");
     }
 
     /**

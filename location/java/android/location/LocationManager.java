@@ -1890,7 +1890,7 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean registerGnssStatusCallback(@NonNull GnssStatus.Callback callback) {
-        return registerGnssStatusCallback(callback, null);
+        return registerGnssStatusCallback(Runnable::run, callback);
     }
 
     /**
@@ -1985,7 +1985,7 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addNmeaListener(@NonNull OnNmeaMessageListener listener) {
-        return addNmeaListener(listener, null);
+        return addNmeaListener(Runnable::run, listener);
     }
 
     /**

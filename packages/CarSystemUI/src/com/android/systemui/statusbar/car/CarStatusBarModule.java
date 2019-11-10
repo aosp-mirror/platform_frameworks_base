@@ -24,14 +24,13 @@ import android.util.DisplayMetrics;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.ForegroundServiceController;
+import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.doze.DozeLog;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -60,7 +59,6 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -71,11 +69,13 @@ import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -86,7 +86,6 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.util.Optional;
 
@@ -114,7 +113,6 @@ public class CarStatusBarModule {
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarIconController statusBarIconController,
-            DozeLog dozeLog,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
@@ -132,10 +130,7 @@ public class CarStatusBarModule {
             NotificationEntryManager notificationEntryManager,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
-            ForegroundServiceController foregroundServiceController,
-            AppOpsController appOpsController,
             KeyguardViewMediator keyguardViewMediator,
-            ZenModeController zenModeController,
             NotificationAlertingManager notificationAlertingManager,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
@@ -162,7 +157,6 @@ public class CarStatusBarModule {
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
-            NotifLog notifLog,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
@@ -175,6 +169,10 @@ public class CarStatusBarModule {
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
             SuperStatusBarViewFactory superStatusBarViewFactory,
+            LightsOutNotifController lightsOutNotifController,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            ViewMediatorCallback viewMediatorCallback,
+            DismissCallbackRegistry dismissCallbackRegistry,
             CarNavigationBarController carNavigationBarController) {
         return new CarStatusBar(
                 context,
@@ -183,7 +181,6 @@ public class CarStatusBarModule {
                 autoHideController,
                 keyguardUpdateMonitor,
                 statusBarIconController,
-                dozeLog,
                 pulseExpansionHandler,
                 notificationWakeUpCoordinator,
                 keyguardBypassController,
@@ -201,10 +198,7 @@ public class CarStatusBarModule {
                 notificationEntryManager,
                 notificationInterruptionStateProvider,
                 notificationViewHierarchyManager,
-                foregroundServiceController,
-                appOpsController,
                 keyguardViewMediator,
-                zenModeController,
                 notificationAlertingManager,
                 displayMetrics,
                 metricsLogger,
@@ -231,7 +225,6 @@ public class CarStatusBarModule {
                 configurationController,
                 statusBarWindowController,
                 statusBarWindowViewControllerBuilder,
-                notifLog,
                 dozeParameters,
                 scrimController,
                 lockscreenWallpaperLazy,
@@ -244,6 +237,10 @@ public class CarStatusBarModule {
                 remoteInputUriController,
                 dividerOptional,
                 superStatusBarViewFactory,
+                lightsOutNotifController,
+                statusBarKeyguardViewManager,
+                viewMediatorCallback,
+                dismissCallbackRegistry,
                 carNavigationBarController);
     }
 }

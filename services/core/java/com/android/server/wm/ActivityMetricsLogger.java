@@ -189,6 +189,8 @@ class ActivityMetricsLogger {
         private int reason = APP_TRANSITION_TIMEOUT;
         // TODO(b/132736359) The number may need to consider the visibility change.
         private int numUndrawnActivities = 1;
+        /** Non-null if the application has reported drawn but its window hasn't. */
+        private Runnable pendingFullyDrawn;
         private boolean loggedStartingWindowDrawn;
         private boolean launchTraceActive;
 
@@ -716,6 +718,9 @@ class ActivityMetricsLogger {
             BackgroundThread.getHandler().post(() -> logAppTransition(
                     currentTransitionDeviceUptime, currentTransitionDelayMs, infoSnapshot));
             BackgroundThread.getHandler().post(() -> logAppDisplayed(infoSnapshot));
+            if (info.pendingFullyDrawn != null) {
+                info.pendingFullyDrawn.run();
+            }
 
             info.launchedActivity.info.launchToken = null;
         }
@@ -839,6 +844,15 @@ class ActivityMetricsLogger {
         if (info == null) {
             return null;
         }
+        if (info.numUndrawnActivities > 0 && info.pendingFullyDrawn == null) {
+            // There are still undrawn activities, postpone reporting fully drawn until all of its
+            // windows are drawn. So that is closer to an usable state.
+            info.pendingFullyDrawn = () -> {
+                logAppTransitionReportedDrawn(r, restoredFromBundle);
+                info.pendingFullyDrawn = null;
+            };
+            return null;
+        }
 
         // Record the handling of the reportFullyDrawn callback in the trace system. This is not
         // actually used to trace this function, but instead the logical task that this function
@@ -849,9 +863,10 @@ class ActivityMetricsLogger {
         final LogMaker builder = new LogMaker(APP_TRANSITION_REPORTED_DRAWN);
         builder.setPackageName(r.packageName);
         builder.addTaggedData(FIELD_CLASS_NAME, r.info.name);
-        long currentTimestampNs = SystemClock.elapsedRealtimeNanos();
-        long startupTimeMs =
-            TimeUnit.NANOSECONDS.toMillis(currentTimestampNs - mLastTransitionStartTimeNs);
+        final long currentTimestampNs = SystemClock.elapsedRealtimeNanos();
+        final long startupTimeMs = info.pendingFullyDrawn != null
+                ? info.windowsDrawnDelayMs
+                : TimeUnit.NANOSECONDS.toMillis(currentTimestampNs - mLastTransitionStartTimeNs);
         builder.addTaggedData(APP_TRANSITION_REPORTED_DRAWN_MS, startupTimeMs);
         builder.setType(restoredFromBundle
                 ? TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE

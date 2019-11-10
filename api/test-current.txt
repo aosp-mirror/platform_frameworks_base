@@ -643,6 +643,14 @@ package android.bluetooth {
 
 }
 
+package android.companion {
+
+  public final class CompanionDeviceManager {
+    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociated(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
+  }
+
+}
+
 package android.content {
 
   public final class AutofillOptions implements android.os.Parcelable {
@@ -693,6 +701,7 @@ package android.content {
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
+    field public static final String BLOB_STORE_SERVICE = "blob_store";
     field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
@@ -747,6 +756,7 @@ package android.content.pm {
   public abstract class PackageManager {
     method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void addOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract boolean arePermissionsIndividuallyControlled();
+    method @Nullable public String getContentCaptureServicePackageName();
     method @Nullable @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract String getDefaultBrowserPackageNameAsUser(int);
     method @Nullable public String getIncidentReportApproverPackageName();
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
@@ -2856,6 +2866,34 @@ package android.service.quicksettings {
 
 }
 
+package android.service.textclassifier {
+
+  public abstract class TextClassifierService extends android.app.Service {
+    ctor public TextClassifierService();
+    method @NonNull public static android.view.textclassifier.TextClassifier getDefaultTextClassifierImplementation(@NonNull android.content.Context);
+    method @Deprecated public final android.view.textclassifier.TextClassifier getLocalTextClassifier();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @MainThread public abstract void onClassifyText(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassification.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
+    method public void onConnected();
+    method @MainThread public void onCreateTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationContext, @NonNull android.view.textclassifier.TextClassificationSessionId);
+    method @MainThread public void onDestroyTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationSessionId);
+    method @MainThread public void onDetectLanguage(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextLanguage.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLanguage>);
+    method public void onDisconnected();
+    method @MainThread public abstract void onGenerateLinks(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextLinks.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
+    method @Deprecated @MainThread public void onSelectionEvent(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.SelectionEvent);
+    method @MainThread public void onSuggestConversationActions(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.ConversationActions.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.ConversationActions>);
+    method @MainThread public abstract void onSuggestSelection(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextSelection.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextSelection>);
+    method @MainThread public void onTextClassifierEvent(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassifierEvent);
+    field public static final String SERVICE_INTERFACE = "android.service.textclassifier.TextClassifierService";
+  }
+
+  public static interface TextClassifierService.Callback<T> {
+    method public void onFailure(@NonNull CharSequence);
+    method public void onSuccess(T);
+  }
+
+}
+
 package android.telecom {
 
   public final class Call {
@@ -3012,6 +3050,9 @@ package android.telephony {
 
   public class PhoneNumberUtils {
     method public static int getMinMatchForTest();
+    method @NonNull public static String getUsernameFromUriNumber(@NonNull String);
+    method public static boolean isUriNumber(@Nullable String);
+    method public static boolean isVoiceMailNumber(@NonNull android.content.Context, int, @Nullable String);
     method public static void setMinMatchForTest(int);
   }
 
@@ -3035,6 +3076,7 @@ package android.telephony {
 
   public final class SmsManager {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int checkSmsShortCodeDestination(String, String);
+    method public void sendMultipartTextMessage(@NonNull String, @NonNull String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String);
     field public static final int SMS_CATEGORY_FREE_SHORT_CODE = 1; // 0x1
     field public static final int SMS_CATEGORY_NOT_SHORT_CODE = 0; // 0x0
     field public static final int SMS_CATEGORY_POSSIBLE_PREMIUM_SHORT_CODE = 3; // 0x3
@@ -3043,6 +3085,7 @@ package android.telephony {
   }
 
   public class SubscriptionManager {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultVoiceSubscriptionId(int);
     field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field @NonNull public static final android.net.Uri VT_ENABLED_CONTENT_URI;
     field @NonNull public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
@@ -3055,6 +3098,7 @@ package android.telephony {
     method public int checkCarrierPrivilegesForPackage(String);
     method public int getCarrierIdListVersion();
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
+    method @Nullable public static android.content.ComponentName getDefaultRespondViaMessageApplication(@NonNull android.content.Context, boolean);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getNetworkCountryIso(int);
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
@@ -4407,6 +4451,10 @@ package android.view {
     method public abstract String asyncImpl() default "";
   }
 
+  public class SurfaceView extends android.view.View {
+    method @Nullable public android.os.IBinder getInputToken();
+  }
+
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method public android.view.View getTooltipView();
     method public boolean isAutofilled();
@@ -4454,8 +4502,9 @@ package android.view {
   }
 
   public class WindowlessViewRoot {
-    ctor public WindowlessViewRoot(android.content.Context, android.view.Display, android.view.SurfaceControl);
+    ctor public WindowlessViewRoot(@NonNull android.content.Context, @NonNull android.view.Display, @NonNull android.view.SurfaceControl, @Nullable android.os.IBinder);
     method public void addView(android.view.View, android.view.WindowManager.LayoutParams);
+    method public void dispose();
     method public void relayout(android.view.WindowManager.LayoutParams);
   }
 

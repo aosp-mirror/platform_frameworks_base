@@ -33,6 +33,8 @@ public final class Tuner implements AutoCloseable  {
     private static final boolean DEBUG = false;
 
     private static final int MSG_ON_FRONTEND_EVENT = 1;
+    private static final int MSG_ON_FILTER_EVENT = 2;
+    private static final int MSG_ON_FILTER_STATUS = 3;
 
     static {
         System.loadLibrary("media_tv_tuner");
@@ -86,6 +88,16 @@ public final class Tuner implements AutoCloseable  {
         void onEvent(int frontendEventType);
     }
 
+    /**
+     * Frontend Callback.
+     */
+    public interface FilterCallback {
+        /**
+         * Invoked when filter status changed.
+         */
+        void onFilterStatus(int status);
+    }
+
     @Nullable
     private EventHandler createEventHandler() {
         Looper looper;
@@ -110,6 +122,13 @@ public final class Tuner implements AutoCloseable  {
                         mFrontend.mCallback.onEvent(msg.arg1);
                     }
                     break;
+                case MSG_ON_FILTER_STATUS: {
+                    Filter filter = (Filter) msg.obj;
+                    if (filter.mCallback != null) {
+                        filter.mCallback.onFilterStatus(msg.arg1);
+                    }
+                    break;
+                }
                 default:
                     // fall through
             }
@@ -171,13 +190,29 @@ public final class Tuner implements AutoCloseable  {
     }
 
     protected class Filter {
+        private long mNativeContext;
+        private FilterCallback mCallback;
         int mId;
         private Filter(int id) {
             mId = id;
         }
+
+        private void onFilterStatus(int status) {
+            if (mHandler != null) {
+                mHandler.sendMessage(
+                        mHandler.obtainMessage(MSG_ON_FILTER_STATUS, status, 0, this));
+            }
+        }
     }
 
-    private Filter openFilter(int type, int subType, int bufferSize) {
-        return nativeOpenFilter(type, subType, bufferSize);
+    private Filter openFilter(int type, int subType, int bufferSize, FilterCallback cb) {
+        Filter filter = nativeOpenFilter(type, subType, bufferSize);
+        if (filter != null) {
+            filter.mCallback = cb;
+            if (mHandler == null) {
+                mHandler = createEventHandler();
+            }
+        }
+        return filter;
     }
 }

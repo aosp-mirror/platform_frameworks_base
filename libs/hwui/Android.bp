@@ -90,6 +90,7 @@ cc_defaults {
                 "libvulkan",
                 "libui",
                 "libgui",
+                "libnativedisplay",
                 "libnativewindow",
                 "libprotobuf-cpp-lite",
                 "libft2",

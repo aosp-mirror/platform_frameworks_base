@@ -212,6 +212,7 @@ filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
+        ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
         ":framework-graphics-sources",
@@ -958,8 +959,7 @@ framework_docs_only_libs = [
 
 metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
     "--ignore-classes-on-classpath " +
-    "--hide-package com.android.okhttp " +
-    "--hide-package com.android.org.conscrypt --hide-package com.android.server " +
+    "--hide-package com.android.server " +
     "--error UnhiddenSystemApi " +
     "--hide RequiresPermission " +
     "--hide CallbackInterface " +

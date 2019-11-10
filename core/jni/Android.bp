@@ -259,6 +259,7 @@ cc_library_shared {
                 "libmemunreachable",
                 "libhidlbase",
                 "libvintf",
+                "libnativedisplay",
                 "libnativewindow",
                 "libdl",
                 "libdl_android",
@@ -438,6 +439,7 @@ cc_library_static {
             ],
             shared_libs: [
                 "libandroidfw",
+                "libnativedisplay",
                 "libnativewindow",
                 "libgui",
                 "libpdfium",

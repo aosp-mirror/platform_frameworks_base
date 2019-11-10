@@ -64,4 +64,9 @@ public class PhenotypeHelper {
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI, executor, listener);
     }
+
+    public void removeOnPropertiesChangedListener(
+            DeviceConfig.OnPropertiesChangedListener listener) {
+        DeviceConfig.removeOnPropertiesChangedListener(listener);
+    }
 }

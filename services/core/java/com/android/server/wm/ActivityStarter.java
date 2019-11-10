@@ -1477,10 +1477,8 @@ class ActivityStarter {
 
         mIntent.setFlags(mLaunchFlags);
 
-        ActivityRecord reusedActivity = getReusableIntentActivity();
-
-        mSupervisor.getLaunchParamsController().calculate(
-                reusedActivity != null ? reusedActivity.getTaskRecord() : mInTask,
+        final TaskRecord reusedTask = getReusableTask();
+        mSupervisor.getLaunchParamsController().calculate(reusedTask != null ? reusedTask : mInTask,
                 r.info.windowLayout, r, sourceRecord, options, PHASE_BOUNDS, mLaunchParams);
         mPreferredDisplayId =
                 mLaunchParams.hasPreferredDisplay() ? mLaunchParams.mPreferredDisplayId
@@ -1495,7 +1493,7 @@ class ActivityStarter {
         }
 
         // Compute if there is an existing task that should be used for.
-        final TaskRecord targetTask = computeTargetTask(reusedActivity);
+        final TaskRecord targetTask = reusedTask != null ? reusedTask : computeTargetTask();
         final boolean newTask = targetTask == null;
 
         // Check if starting activity on given task or on a new task is allowed.
@@ -1507,10 +1505,12 @@ class ActivityStarter {
         final ActivityRecord targetTaskTop = newTask ? null : targetTask.getTopActivity();
         if (targetTaskTop != null) {
             // Recycle the target task for this launch.
-            startResult = recycleTask(targetTask, targetTaskTop, reusedActivity);
+            startResult = recycleTask(targetTask, targetTaskTop, reusedTask);
             if (startResult != START_SUCCESS) {
                 return startResult;
             }
+        } else {
+            mAddingToTask = true;
         }
 
         // If the activity being launched is the same as the one currently at the top, then
@@ -1601,10 +1601,8 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
-    private TaskRecord computeTargetTask(ActivityRecord reusedActivity) {
-        if (reusedActivity != null) {
-            return reusedActivity.getTaskRecord();
-        } else if (mStartActivity.resultTo == null && mInTask == null && !mAddingToTask
+    private TaskRecord computeTargetTask() {
+        if (mStartActivity.resultTo == null && mInTask == null && !mAddingToTask
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
             // A new task should be created instead of using existing one.
             return null;
@@ -1669,7 +1667,7 @@ class ActivityStarter {
      * - Determine whether need to add a new activity on top or just brought the task to front.
      */
     private int recycleTask(TaskRecord targetTask, ActivityRecord targetTaskTop,
-            ActivityRecord reusedActivity) {
+            TaskRecord reusedTask) {
         // True if we are clearing top and resetting of a standard (default) launch mode
         // ({@code LAUNCH_MULTIPLE}) activity. The existing activity will be finished.
         final boolean clearTopAndResetStandardLaunchMode =
@@ -1678,12 +1676,12 @@ class ActivityStarter {
                         && mLaunchMode == LAUNCH_MULTIPLE;
 
         boolean clearTaskForReuse = false;
-        if (reusedActivity != null) {
+        if (reusedTask != null) {
             // If mStartActivity does not have a task associated with it, associate it with the
             // reused activity's task. Do not do so if we're clearing top and resetting for a
             // standard launchMode activity.
             if (mStartActivity.getTaskRecord() == null && !clearTopAndResetStandardLaunchMode) {
-                mStartActivity.setTaskForReuse(reusedActivity.getTaskRecord());
+                mStartActivity.setTaskForReuse(reusedTask);
                 clearTaskForReuse = true;
             }
 
@@ -1730,7 +1728,7 @@ class ActivityStarter {
             return START_RETURN_INTENT_TO_CALLER;
         }
 
-        complyActivityFlags(targetTask, reusedActivity);
+        complyActivityFlags(targetTask, reusedTask != null ? reusedTask.getTopActivity() : null);
 
         if (clearTaskForReuse) {
             // Clear task for re-use so later code to methods
@@ -2223,7 +2221,7 @@ class ActivityStarter {
      * Decide whether the new activity should be inserted into an existing task. Returns null
      * if not or an ActivityRecord with the task into which the new activity should be added.
      */
-    private ActivityRecord getReusableIntentActivity() {
+    private TaskRecord getReusableTask() {
         // We may want to try to place the new activity in to an existing task.  We always
         // do this if the target activity is singleTask or singleInstance; we will also do
         // this if NEW_TASK has been requested, and there is not an additional qualifier telling
@@ -2238,8 +2236,10 @@ class ActivityStarter {
         putIntoExistingTask &= mInTask == null && mStartActivity.resultTo == null;
         ActivityRecord intentActivity = null;
         if (mOptions != null && mOptions.getLaunchTaskId() != -1) {
-            final TaskRecord task = mRootActivityContainer.anyTaskForId(mOptions.getLaunchTaskId());
-            intentActivity = task != null ? task.getTopActivity() : null;
+            TaskRecord launchTask = mRootActivityContainer.anyTaskForId(mOptions.getLaunchTaskId());
+            if (launchTask != null) {
+                return launchTask;
+            }
         } else if (putIntoExistingTask) {
             if (LAUNCH_SINGLE_INSTANCE == mLaunchMode) {
                 // There can be one and only one instance of single instance activity in the
@@ -2265,7 +2265,7 @@ class ActivityStarter {
             intentActivity = null;
         }
 
-        return intentActivity;
+        return intentActivity != null ? intentActivity.getTaskRecord() : null;
     }
 
     /**

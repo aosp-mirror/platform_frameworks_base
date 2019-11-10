@@ -5694,11 +5694,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     PackageSetting ps = it.next();
                     if (ps.getInstalled(userId)) {
                         res[i++] = ps.name;
-                    } else {
-                        res = ArrayUtils.removeElement(String.class, res, res[i]);
                     }
                 }
-                return res;
+                return ArrayUtils.trimToSize(res, i);
             } else if (obj instanceof PackageSetting) {
                 final PackageSetting ps = (PackageSetting) obj;
                 if (ps.getInstalled(userId)
@@ -19675,6 +19673,12 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
+    public String[] getSystemTextClassifierPackages() {
+        return mContext.getResources().getStringArray(
+                R.array.config_defaultTextClassifierPackages);
+    }
+
+    @Override
     public @Nullable String getAttentionServicePackageName() {
         final String flattenedComponentName =
                 mContext.getString(R.string.config_defaultAttentionService);
@@ -19763,6 +19767,23 @@ public class PackageManagerService extends IPackageManager.Stub
             telephonyPackageNames = names.trim().split(",");
         }
         return telephonyPackageNames;
+    }
+
+    @Override
+    public String getContentCaptureServicePackageName() {
+        final String flattenedContentCaptureService =
+                mContext.getString(R.string.config_defaultContentCaptureService);
+
+        if (TextUtils.isEmpty(flattenedContentCaptureService)) {
+            return null;
+        }
+
+        final ComponentName contentCaptureServiceComponentName =
+                ComponentName.unflattenFromString(flattenedContentCaptureService);
+        if (contentCaptureServiceComponentName == null) {
+            return null;
+        }
+        return contentCaptureServiceComponentName.getPackageName();
     }
 
     @Override

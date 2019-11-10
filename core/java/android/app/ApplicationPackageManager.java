@@ -3133,6 +3133,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String[] getSystemTextClassifierPackages() {
+        try {
+            return mPM.getSystemTextClassifierPackages();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public String getAttentionServicePackageName() {
         try {
             return mPM.getAttentionServicePackageName();
@@ -3190,6 +3199,15 @@ public class ApplicationPackageManager extends PackageManager {
     public String getIncidentReportApproverPackageName() {
         try {
             return mPM.getIncidentReportApproverPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public String getContentCaptureServicePackageName() {
+        try {
+            return mPM.getContentCaptureServicePackageName();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

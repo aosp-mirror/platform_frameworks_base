@@ -41,5 +41,5 @@
     <bool name="config_useDefaultFocusHighlight">false</bool>
 
     <!-- Allow SystemUI to show the shutdown dialog -->
-    <bool name="config_showSysuiShutdown">false</bool>
+    <bool name="config_showSysuiShutdown">true</bool>
 </resources>

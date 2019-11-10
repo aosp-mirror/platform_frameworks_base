@@ -177,7 +177,7 @@ final class SaveUi {
            boolean nightMode, boolean isUpdate, boolean compatMode) {
         if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
-        mPendingUi= pendingUi;
+        mPendingUi = pendingUi;
         mListener = new OneActionThenDestroyListener(listener);
         mOverlayControl = overlayControl;
         mServicePackageName = servicePackageName;
@@ -622,6 +622,10 @@ final class SaveUi {
             mOverlayControl.showOverlays();
         }
         return mPendingUi;
+    }
+
+    boolean isShowing() {
+        return mDialog.isShowing();
     }
 
     void destroy() {

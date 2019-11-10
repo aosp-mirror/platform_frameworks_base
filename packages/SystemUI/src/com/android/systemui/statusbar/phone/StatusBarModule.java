@@ -26,14 +26,13 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.ForegroundServiceController;
+import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.doze.DozeLog;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -61,7 +60,6 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -72,7 +70,6 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.util.Optional;
 
@@ -100,7 +97,6 @@ public class StatusBarModule {
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarIconController statusBarIconController,
-            DozeLog dozeLog,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
@@ -118,10 +114,7 @@ public class StatusBarModule {
             NotificationEntryManager notificationEntryManager,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
-            ForegroundServiceController foregroundServiceController,
-            AppOpsController appOpsController,
             KeyguardViewMediator keyguardViewMediator,
-            ZenModeController zenModeController,
             NotificationAlertingManager notificationAlertingManager,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
@@ -148,7 +141,6 @@ public class StatusBarModule {
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
-            NotifLog notifLog,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             @Nullable KeyguardLiftController keyguardLiftController,
@@ -161,7 +153,11 @@ public class StatusBarModule {
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
-            SuperStatusBarViewFactory superStatusBarViewFactory) {
+            LightsOutNotifController lightsOutNotifController,
+            SuperStatusBarViewFactory superStatusBarViewFactory,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            ViewMediatorCallback viewMediatorCallback,
+            DismissCallbackRegistry dismissCallbackRegistry) {
         return new StatusBar(
                 context,
                 featureFlags,
@@ -169,7 +165,6 @@ public class StatusBarModule {
                 autoHideController,
                 keyguardUpdateMonitor,
                 statusBarIconController,
-                dozeLog,
                 pulseExpansionHandler,
                 notificationWakeUpCoordinator,
                 keyguardBypassController,
@@ -187,10 +182,7 @@ public class StatusBarModule {
                 notificationEntryManager,
                 notificationInterruptionStateProvider,
                 notificationViewHierarchyManager,
-                foregroundServiceController,
-                appOpsController,
                 keyguardViewMediator,
-                zenModeController,
                 notificationAlertingManager,
                 displayMetrics,
                 metricsLogger,
@@ -217,7 +209,6 @@ public class StatusBarModule {
                 configurationController,
                 statusBarWindowController,
                 statusBarWindowViewControllerBuilder,
-                notifLog,
                 dozeParameters,
                 scrimController,
                 keyguardLiftController,
@@ -230,6 +221,10 @@ public class StatusBarModule {
                 pluginManager,
                 remoteInputUriController,
                 dividerOptional,
-                superStatusBarViewFactory);
+                lightsOutNotifController,
+                superStatusBarViewFactory,
+                statusBarKeyguardViewManager,
+                viewMediatorCallback,
+                dismissCallbackRegistry);
     }
 }

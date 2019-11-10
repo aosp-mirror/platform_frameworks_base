@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import com.android.internal.statusbar.NotificationVisibility;
-import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -34,17 +33,14 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 public class NotificationListController {
     private final NotificationEntryManager mEntryManager;
     private final NotificationListContainer mListContainer;
-    private final ForegroundServiceController mForegroundServiceController;
     private final DeviceProvisionedController mDeviceProvisionedController;
 
     public NotificationListController(
             NotificationEntryManager entryManager,
             NotificationListContainer listContainer,
-            ForegroundServiceController foregroundServiceController,
             DeviceProvisionedController deviceProvisionedController) {
         mEntryManager = checkNotNull(entryManager);
         mListContainer = checkNotNull(listContainer);
-        mForegroundServiceController = checkNotNull(foregroundServiceController);
         mDeviceProvisionedController = checkNotNull(deviceProvisionedController);
     }
 

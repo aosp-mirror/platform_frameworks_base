@@ -102,13 +102,13 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         , mGenerationID(0)
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
-        , mJankTracker(&thread.globalProfileData(), DeviceInfo::get()->displayInfo())
+        , mJankTracker(&thread.globalProfileData())
         , mProfiler(mJankTracker.frames(), thread.timeLord().frameIntervalNanos())
         , mContentDrawBounds(0, 0, 0, 0)
         , mRenderPipeline(std::move(renderPipeline)) {
     rootRenderNode->makeRoot();
     mRenderNodes.emplace_back(rootRenderNode);
-    mProfiler.setDensity(DeviceInfo::get()->displayInfo().density);
+    mProfiler.setDensity(DeviceInfo::getDensity());
     setRenderAheadDepth(Properties::defaultRenderAhead);
 }
 

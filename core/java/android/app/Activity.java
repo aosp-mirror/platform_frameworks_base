@@ -2572,6 +2572,9 @@ public class Activity extends ContextThemeWrapper
      * entirely drawn your UI and populated with all of the significant data.  You
      * can safely call this method any time after first launch as well, in which case
      * it will simply be ignored.
+     * <p>If this method is called before the activity's window is <em>first</em> drawn
+     * and displayed as measured by the system, the reported time here will be shifted
+     * to the system measured time.
      */
     public void reportFullyDrawn() {
         if (mDoReportFullyDrawn) {
@@ -3925,6 +3928,26 @@ public class Activity extends ContextThemeWrapper
     @Override
     public void toggleFreeformWindowingMode() throws RemoteException {
         ActivityTaskManager.getService().toggleFreeformWindowingMode(mToken);
+    }
+
+    /**
+     * Update the forced status bar color.
+     * @hide
+     */
+    @Override
+    public void updateStatusBarColor(int color) {
+        mTaskDescription.setStatusBarColor(color);
+        setTaskDescription(mTaskDescription);
+    }
+
+    /**
+     * Update the forced navigation bar color.
+     * @hide
+     */
+    @Override
+    public void updateNavigationBarColor(int color) {
+        mTaskDescription.setNavigationBarColor(color);
+        setTaskDescription(mTaskDescription);
     }
 
     /**

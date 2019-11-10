@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.util.Log;
@@ -182,6 +183,16 @@ public abstract class InputEventReceiver {
             return nativeConsumeBatchedInputEvents(mReceiverPtr, frameTimeNanos);
         }
         return false;
+    }
+
+    /**
+     * @return Returns a token to identify the input channel.
+     */
+    public IBinder getToken() {
+        if (mInputChannel == null) {
+            return null;
+        }
+        return mInputChannel.getToken();
     }
 
     // Called from native code.

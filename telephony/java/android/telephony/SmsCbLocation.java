@@ -65,9 +65,12 @@ public final class SmsCbLocation implements Parcelable {
     /**
      * Construct a location object for the PLMN, LAC, and Cell ID. This class is immutable, so
      * the same object can be reused for multiple broadcasts.
-     * @hide
+     *
+     * @param plmn the MCC/MNC of the network
+     * @param lac the GSM location area code, or UMTS service area code
+     * @param cid the GSM or UMTS cell ID
      */
-    public SmsCbLocation(String plmn, int lac, int cid) {
+    public SmsCbLocation(@NonNull String plmn, int lac, int cid) {
         mPlmn = plmn;
         mLac = lac;
         mCid = cid;

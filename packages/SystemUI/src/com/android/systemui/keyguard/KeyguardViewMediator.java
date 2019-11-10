@@ -68,7 +68,6 @@ import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -103,6 +102,8 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -236,7 +237,7 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private PowerManager.WakeLock mShowKeyguardWakeLock;
 
-    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final Lazy<StatusBarKeyguardViewManager> mStatusBarKeyguardViewManagerLazy;
 
     // these are protected by synchronized (this)
 
@@ -282,7 +283,7 @@ public class KeyguardViewMediator extends SystemUI {
      * var being non-null as an indicator that there is an in progress request.
      */
     private IKeyguardExitCallback mExitSecureCallback;
-    private final DismissCallbackRegistry mDismissCallbackRegistry = new DismissCallbackRegistry();
+    private final DismissCallbackRegistry mDismissCallbackRegistry;
 
     // the properties of the keyguard
 
@@ -587,7 +588,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         @Override
         public void setNeedsInput(boolean needsInput) {
-            mStatusBarKeyguardViewManager.setNeedsInput(needsInput);
+            mStatusBarKeyguardViewManagerLazy.get().setNeedsInput(needsInput);
         }
 
         @Override
@@ -601,7 +602,8 @@ public class KeyguardViewMediator extends SystemUI {
             mKeyguardDonePending = true;
             mHideAnimationRun = true;
             mHideAnimationRunning = true;
-            mStatusBarKeyguardViewManager.startPreHideAnimation(mHideAnimationFinishedRunnable);
+            mStatusBarKeyguardViewManagerLazy.get()
+                    .startPreHideAnimation(mHideAnimationFinishedRunnable);
             mHandler.sendEmptyMessageDelayed(KEYGUARD_DONE_PENDING_TIMEOUT,
                     KEYGUARD_DONE_PENDING_TIMEOUT_MS);
             Trace.endSection();
@@ -631,7 +633,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         @Override
         public void onCancelClicked() {
-            mStatusBarKeyguardViewManager.onCancelClicked();
+            mStatusBarKeyguardViewManagerLazy.get().onCancelClicked();
         }
 
         @Override
@@ -688,26 +690,15 @@ public class KeyguardViewMediator extends SystemUI {
             Context context,
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils,
-            BroadcastDispatcher broadcastDispatcher) {
-        this(context, falsingManager, lockPatternUtils, broadcastDispatcher,
-                SystemUIFactory.getInstance());
-    }
-
-    @VisibleForTesting
-    KeyguardViewMediator(
-            Context context,
-            FalsingManager falsingManager,
-            LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
-            SystemUIFactory systemUIFactory) {
+            Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy,
+            DismissCallbackRegistry dismissCallbackRegistry) {
         super(context);
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
         mBroadcastDispatcher = broadcastDispatcher;
-        mStatusBarKeyguardViewManager = systemUIFactory.createStatusBarKeyguardViewManager(
-                mContext,
-                mViewMediatorCallback,
-                mLockPatternUtils);
+        mStatusBarKeyguardViewManagerLazy = statusBarKeyguardViewManagerLazy;
+        mDismissCallbackRegistry = dismissCallbackRegistry;
     }
 
     public void userActivity() {
@@ -1259,7 +1250,7 @@ public class KeyguardViewMediator extends SystemUI {
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
                 mUpdateMonitor.setKeyguardOccluded(isOccluded);
-                mStatusBarKeyguardViewManager.setOccluded(isOccluded, animate
+                mStatusBarKeyguardViewManagerLazy.get().setOccluded(isOccluded, animate
                         && mDeviceInteractive);
                 adjustStatusBarLocked();
             }
@@ -1330,7 +1321,7 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         // if the keyguard is already showing, don't bother
-        if (mStatusBarKeyguardViewManager.isShowing()) {
+        if (mStatusBarKeyguardViewManagerLazy.get().isShowing()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
             resetStateLocked();
             return;
@@ -1394,7 +1385,7 @@ public class KeyguardViewMediator extends SystemUI {
                 mDismissCallbackRegistry.addCallback(callback);
             }
             mCustomMessage = message;
-            mStatusBarKeyguardViewManager.dismissAndCollapse();
+            mStatusBarKeyguardViewManagerLazy.get().dismissAndCollapse();
         } else if (callback != null) {
             new DismissCallbackWrapper(callback).notifyDismissError();
         }
@@ -1661,7 +1652,8 @@ public class KeyguardViewMediator extends SystemUI {
         } else if (!mHideAnimationRun) {
             mHideAnimationRun = true;
             mHideAnimationRunning = true;
-            mStatusBarKeyguardViewManager.startPreHideAnimation(mHideAnimationFinishedRunnable);
+            mStatusBarKeyguardViewManagerLazy.get()
+                    .startPreHideAnimation(mHideAnimationFinishedRunnable);
         }
     }
 
@@ -1817,7 +1809,7 @@ public class KeyguardViewMediator extends SystemUI {
             mHiding = false;
             mWakeAndUnlocking = false;
             setShowingLocked(true);
-            mStatusBarKeyguardViewManager.show(options);
+            mStatusBarKeyguardViewManagerLazy.get().show(options);
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
             adjustStatusBarLocked();
@@ -1835,22 +1827,22 @@ public class KeyguardViewMediator extends SystemUI {
         public void run() {
             Trace.beginSection("KeyguardViewMediator.mKeyGuardGoingAwayRunnable");
             if (DEBUG) Log.d(TAG, "keyguardGoingAway");
-            mStatusBarKeyguardViewManager.keyguardGoingAway();
+            mStatusBarKeyguardViewManagerLazy.get().keyguardGoingAway();
 
             int flags = 0;
-            if (mStatusBarKeyguardViewManager.shouldDisableWindowAnimationsForUnlock()
+            if (mStatusBarKeyguardViewManagerLazy.get().shouldDisableWindowAnimationsForUnlock()
                     || (mWakeAndUnlocking && !mPulsing)) {
                 flags |= WindowManagerPolicyConstants
                         .KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
             }
-            if (mStatusBarKeyguardViewManager.isGoingToNotificationShade()
+            if (mStatusBarKeyguardViewManagerLazy.get().isGoingToNotificationShade()
                     || (mWakeAndUnlocking && mPulsing)) {
                 flags |= WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
             }
-            if (mStatusBarKeyguardViewManager.isUnlockWithWallpaper()) {
+            if (mStatusBarKeyguardViewManagerLazy.get().isUnlockWithWallpaper()) {
                 flags |= WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
             }
-            if (mStatusBarKeyguardViewManager.shouldSubtleWindowAnimationsForUnlock()) {
+            if (mStatusBarKeyguardViewManagerLazy.get().shouldSubtleWindowAnimationsForUnlock()) {
                 flags |= WindowManagerPolicyConstants
                         .KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS;
             }
@@ -1936,7 +1928,7 @@ public class KeyguardViewMediator extends SystemUI {
                 // Hack level over 9000: To speed up wake-and-unlock sequence, force it to report
                 // the next draw from here so we don't have to wait for window manager to signal
                 // this to our ViewRootImpl.
-                mStatusBarKeyguardViewManager.getViewRootImpl().setReportNextDraw();
+                mStatusBarKeyguardViewManagerLazy.get().getViewRootImpl().setReportNextDraw();
                 notifyDrawn(mDrawnCallback);
                 mDrawnCallback = null;
             }
@@ -1950,7 +1942,7 @@ public class KeyguardViewMediator extends SystemUI {
             setShowingLocked(false);
             mWakeAndUnlocking = false;
             mDismissCallbackRegistry.notifyDismissSucceeded();
-            mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
+            mStatusBarKeyguardViewManagerLazy.get().hide(startTime, fadeoutDuration);
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
             adjustStatusBarLocked();
@@ -1996,7 +1988,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleReset() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleReset");
-            mStatusBarKeyguardViewManager.reset(true /* hideBouncerWhenShowing */);
+            mStatusBarKeyguardViewManagerLazy.get().reset(true /* hideBouncerWhenShowing */);
         }
     }
 
@@ -2009,7 +2001,7 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleVerifyUnlock");
             setShowingLocked(true);
-            mStatusBarKeyguardViewManager.dismissAndCollapse();
+            mStatusBarKeyguardViewManagerLazy.get().dismissAndCollapse();
         }
         Trace.endSection();
     }
@@ -2017,7 +2009,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleNotifyStartedGoingToSleep() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyStartedGoingToSleep");
-            mStatusBarKeyguardViewManager.onStartedGoingToSleep();
+            mStatusBarKeyguardViewManagerLazy.get().onStartedGoingToSleep();
         }
     }
 
@@ -2028,7 +2020,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleNotifyFinishedGoingToSleep() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyFinishedGoingToSleep");
-            mStatusBarKeyguardViewManager.onFinishedGoingToSleep();
+            mStatusBarKeyguardViewManagerLazy.get().onFinishedGoingToSleep();
         }
     }
 
@@ -2036,7 +2028,7 @@ public class KeyguardViewMediator extends SystemUI {
         Trace.beginSection("KeyguardViewMediator#handleMotifyStartedWakingUp");
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyWakingUp");
-            mStatusBarKeyguardViewManager.onStartedWakingUp();
+            mStatusBarKeyguardViewManagerLazy.get().onStartedWakingUp();
         }
         Trace.endSection();
     }
@@ -2045,7 +2037,7 @@ public class KeyguardViewMediator extends SystemUI {
         Trace.beginSection("KeyguardViewMediator#handleNotifyScreenTurningOn");
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurningOn");
-            mStatusBarKeyguardViewManager.onScreenTurningOn();
+            mStatusBarKeyguardViewManagerLazy.get().onScreenTurningOn();
             if (callback != null) {
                 if (mWakeAndUnlocking) {
                     mDrawnCallback = callback;
@@ -2064,7 +2056,7 @@ public class KeyguardViewMediator extends SystemUI {
         }
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOn");
-            mStatusBarKeyguardViewManager.onScreenTurnedOn();
+            mStatusBarKeyguardViewManagerLazy.get().onScreenTurnedOn();
         }
         Trace.endSection();
     }
@@ -2113,10 +2105,10 @@ public class KeyguardViewMediator extends SystemUI {
             ViewGroup container, NotificationPanelView panelView,
             BiometricUnlockController biometricUnlockController, ViewGroup lockIconContainer,
             View notificationContainer, KeyguardBypassController bypassController) {
-        mStatusBarKeyguardViewManager.registerStatusBar(statusBar, container, panelView,
+        mStatusBarKeyguardViewManagerLazy.get().registerStatusBar(statusBar, container, panelView,
                 biometricUnlockController, mDismissCallbackRegistry, lockIconContainer,
                 notificationContainer, bypassController, mFalsingManager);
-        return mStatusBarKeyguardViewManager;
+        return mStatusBarKeyguardViewManagerLazy.get();
     }
 
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {

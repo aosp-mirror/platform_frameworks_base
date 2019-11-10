@@ -15,12 +15,14 @@
 package com.android.systemui;
 
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -33,14 +35,21 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class ForegroundServiceController {
+    private static final int[] APP_OPS = new int[] {AppOpsManager.OP_CAMERA,
+            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+            AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_COARSE_LOCATION,
+            AppOpsManager.OP_FINE_LOCATION};
 
     private final SparseArray<ForegroundServicesUserState> mUserServices = new SparseArray<>();
     private final Object mMutex = new Object();
     private final NotificationEntryManager mEntryManager;
 
     @Inject
-    public ForegroundServiceController(NotificationEntryManager entryManager) {
+    public ForegroundServiceController(NotificationEntryManager entryManager,
+            AppOpsController appOpsController) {
         mEntryManager = entryManager;
+        appOpsController.addCallback(APP_OPS, this::onAppOpChanged);
     }
 
     /**

@@ -35,12 +35,14 @@ import android.view.LayoutInflater;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.BgHandler;
 import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.dagger.qualifiers.MainLooper;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
@@ -248,5 +250,11 @@ public class DependencyProvider {
     @Provides
     public UserManager providesUserManager(Context context) {
         return context.getSystemService(UserManager.class);
+    }
+
+    /** */
+    @Provides
+    public ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
+        return viewMediator.getViewMediatorCallback();
     }
 }

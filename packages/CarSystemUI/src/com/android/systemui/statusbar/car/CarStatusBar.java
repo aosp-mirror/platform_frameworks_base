@@ -55,22 +55,21 @@ import com.android.car.notification.PreprocessingManager;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.CarSystemUIFactory;
 import com.android.systemui.Dependency;
-import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -104,7 +103,6 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -116,12 +114,14 @@ import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.LightsOutNotifController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -132,7 +132,6 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
-import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -245,7 +244,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarIconController statusBarIconController,
-            DozeLog dozeLog,
             PulseExpansionHandler pulseExpansionHandler,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             KeyguardBypassController keyguardBypassController,
@@ -263,10 +261,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             NotificationEntryManager notificationEntryManager,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             NotificationViewHierarchyManager notificationViewHierarchyManager,
-            ForegroundServiceController foregroundServiceController,
-            AppOpsController appOpsController,
             KeyguardViewMediator keyguardViewMediator,
-            ZenModeController zenModeController,
             NotificationAlertingManager notificationAlertingManager,
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
@@ -293,7 +288,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuild,
-            NotifLog notifLog,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
@@ -306,6 +300,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
             SuperStatusBarViewFactory superStatusBarViewFactory,
+            LightsOutNotifController lightsOutNotifController,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            ViewMediatorCallback viewMediatorCallback,
+            DismissCallbackRegistry dismissCallbackRegistry,
             /* Car Settings injected components. */
             CarNavigationBarController carNavigationBarController) {
         super(
@@ -315,7 +313,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 autoHideController,
                 keyguardUpdateMonitor,
                 statusBarIconController,
-                dozeLog,
                 pulseExpansionHandler,
                 notificationWakeUpCoordinator,
                 keyguardBypassController,
@@ -333,10 +330,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notificationEntryManager,
                 notificationInterruptionStateProvider,
                 notificationViewHierarchyManager,
-                foregroundServiceController,
-                appOpsController,
                 keyguardViewMediator,
-                zenModeController,
                 notificationAlertingManager,
                 displayMetrics,
                 metricsLogger,
@@ -363,7 +357,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 configurationController,
                 statusBarWindowController,
                 statusBarWindowViewControllerBuild,
-                notifLog,
                 dozeParameters,
                 scrimController,
                 null /* keyguardLiftController */,
@@ -376,7 +369,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 pluginManager,
                 remoteInputUriController,
                 dividerOptional,
-                superStatusBarViewFactory);
+                lightsOutNotifController,
+                superStatusBarViewFactory,
+                statusBarKeyguardViewManager,
+                viewMediatorCallback,
+                dismissCallbackRegistry);
         mScrimController = scrimController;
         mCarNavigationBarController = carNavigationBarController;
     }

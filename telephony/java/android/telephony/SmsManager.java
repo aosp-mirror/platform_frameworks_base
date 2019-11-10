@@ -903,10 +903,12 @@ public final class SmsManager {
      * {@link ActivityThread#currentPackageName()} is null.
      * @hide
      */
-    public void sendMultipartTextMessageExternal(
-            String destinationAddress, String scAddress, ArrayList<String> parts,
-            ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents,
-            String packageName) {
+    @SystemApi
+    @TestApi
+    public void sendMultipartTextMessage(
+            @NonNull String destinationAddress, @NonNull String scAddress,
+            @NonNull List<String> parts, @Nullable List<PendingIntent> sentIntents,
+            @Nullable List<PendingIntent> deliveryIntents, @NonNull String packageName) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
                 deliveryIntents, true /* persistMessage*/,
                 ActivityThread.currentPackageName() == null

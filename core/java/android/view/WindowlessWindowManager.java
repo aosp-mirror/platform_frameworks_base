@@ -24,8 +24,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.IWindowSession;
-import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 
 import java.util.HashMap;
 
@@ -60,18 +58,20 @@ class WindowlessWindowManager implements IWindowSession {
     final HashMap<IBinder, ResizeCompleteCallback> mResizeCompletionForWindow =
         new HashMap<IBinder, ResizeCompleteCallback>();
 
-    final SurfaceSession mSurfaceSession = new SurfaceSession();
-    final SurfaceControl mRootSurface;
-    final Configuration mConfiguration;
-    IWindowSession mRealWm;
+    private final SurfaceSession mSurfaceSession = new SurfaceSession();
+    private final SurfaceControl mRootSurface;
+    private final Configuration mConfiguration;
+    private final IWindowSession mRealWm;
+    private final IBinder mHostInputToken;
 
     private int mForceHeight = -1;
     private int mForceWidth = -1;
 
-    WindowlessWindowManager(Configuration c, SurfaceControl rootSurface) {
+    WindowlessWindowManager(Configuration c, SurfaceControl rootSurface, IBinder hostInputToken) {
         mRootSurface = rootSurface;
         mConfiguration = new Configuration(c);
         mRealWm = WindowManagerGlobal.getWindowSession();
+        mHostInputToken = hostInputToken;
     }
 
     /**
@@ -87,6 +87,7 @@ class WindowlessWindowManager implements IWindowSession {
     /**
      * IWindowSession implementation.
      */
+    @Override
     public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
             Rect outStableInsets, Rect outOutsets,
@@ -101,10 +102,11 @@ class WindowlessWindowManager implements IWindowSession {
             mStateForWindow.put(window.asBinder(), new State(sc, attrs));
         }
 
-        if ((attrs.inputFeatures &
-                WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) {
+        if (((attrs.inputFeatures &
+                WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) &&
+                (mHostInputToken != null)) {
             try {
-                mRealWm.blessInputSurface(displayId, sc, outInputChannel);
+                mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, outInputChannel);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to bless surface: " + e);
             }
@@ -122,10 +124,12 @@ class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void remove(android.view.IWindow window) {}
+    public void remove(android.view.IWindow window) throws RemoteException {
+        mRealWm.remove(window);
+    }
 
     private boolean isOpaque(WindowManager.LayoutParams attrs) {
-        if (attrs.surfaceInsets != null && attrs.surfaceInsets.left != 0 || 
+        if (attrs.surfaceInsets != null && attrs.surfaceInsets.left != 0 ||
                 attrs.surfaceInsets.top != 0 || attrs.surfaceInsets.right != 0 ||
                 attrs.surfaceInsets.bottom != 0) {
             return false;
@@ -326,8 +330,8 @@ class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void blessInputSurface(int displayId, SurfaceControl surface,
-            InputChannel outInputChannel) {
+    public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
+            IBinder hostInputToken, InputChannel outInputChannel) {
     }
 
     @Override

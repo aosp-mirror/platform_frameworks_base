@@ -678,6 +678,8 @@ interface IPackageManager {
 
     String getSystemTextClassifierPackageName();
 
+    String[] getSystemTextClassifierPackages();
+
     String getAttentionServicePackageName();
 
     String getWellbeingPackageName();
@@ -691,6 +693,8 @@ interface IPackageManager {
     String getSetupWizardPackageName();
 
     String getIncidentReportApproverPackageName();
+
+    String getContentCaptureServicePackageName();
 
     boolean isPackageStateProtected(String packageName, int userId);
 

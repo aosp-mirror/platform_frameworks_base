@@ -3829,6 +3829,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
         }
+        final WindowControllerCallback callback = getWindowControllerCallback();
+        if (callback != null) {
+            getWindowControllerCallback().updateStatusBarColor(color);
+        }
     }
 
     @Override
@@ -3842,6 +3846,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mForcedNavigationBarColor = true;
         if (mDecor != null) {
             mDecor.updateColorViews(null, false /* animate */);
+        }
+        final WindowControllerCallback callback = getWindowControllerCallback();
+        if (callback != null) {
+            getWindowControllerCallback().updateNavigationBarColor(color);
         }
     }
 

@@ -549,6 +549,7 @@ public class ScanResult implements Parcelable {
         /**
          * Extension IDs
          */
+        public static final int EID_EXT_HE_CAPABILITIES = 35;
         public static final int EID_EXT_HE_OPERATION = 36;
 
         @UnsupportedAppUsage

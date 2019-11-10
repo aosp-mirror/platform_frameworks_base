@@ -38,6 +38,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -96,6 +97,7 @@ import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.SmsApplication;
 import com.android.internal.telephony.TelephonyProperties;
 
 import dalvik.system.VMRuntime;
@@ -458,6 +460,25 @@ public class TelephonyManager {
     public @ModemCount int getSupportedModemCount() {
         return SystemProperties.getInt(TelephonyProperties.PROPERTY_MAX_ACTIVE_MODEMS,
                 getActiveModemCount());
+    }
+
+    /**
+     * Gets the maximum number of SIMs that can be active, based on the device's multisim
+     * configuration.
+     * @return 1 for single-SIM, DSDS, and TSTS devices. 2 for DSDA devices.
+     * @hide
+     */
+    @SystemApi
+    public int getMaxNumberOfSimultaneouslyActiveSims() {
+        switch (getMultiSimConfiguration()) {
+            case UNKNOWN:
+            case DSDS:
+            case TSTS:
+                return 1;
+            case DSDA:
+                return 2;
+        }
+        return 1;
     }
 
     /** {@hide} */
@@ -1683,8 +1704,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1724,8 +1745,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1784,7 +1805,8 @@ public class TelephonyManager {
      *     <li>The caller holds the READ_PRIVILEGED_PHONE_STATE permission.</li>
      *     <li>If the caller is the device or profile owner, the caller holds the
      *     {@link Manifest.permission#READ_PHONE_STATE} permission.</li>
-     *     <li>The caller has carrier privileges (see {@link #hasCarrierPrivileges()}.</li>
+     *     <li>The caller has carrier privileges (see {@link #hasCarrierPrivileges()} on any
+     *     active subscription.</li>
      *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
@@ -1853,8 +1875,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1880,8 +1902,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -7756,12 +7778,16 @@ public class TelephonyManager {
 
     /**
      * Check whether DUN APN is required for tethering.
+     * <p>
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
      *
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    public boolean getTetherApnRequired() {
-        return getTetherApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public boolean isTetherApnRequired() {
+        return isTetherApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -7771,11 +7797,11 @@ public class TelephonyManager {
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    public boolean getTetherApnRequired(int subId) {
+    public boolean isTetherApnRequired(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getTetherApnRequiredForSubscriber(subId);
+                return telephony.isTetherApnRequiredForSubscriber(subId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "hasMatchedTetherApnSetting RemoteException", ex);
         } catch (NullPointerException ex) {
@@ -9407,6 +9433,21 @@ public class TelephonyManager {
     }
 
     /**
+     * Gets the default Respond Via Message application
+     * @param context context from the calling app
+     * @param updateIfNeeded update the default app if there is no valid default app configured.
+     * @return component name of the app and class to direct Respond Via Message intent to, or
+     * {@code null} if the functionality is not supported.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static @Nullable ComponentName getDefaultRespondViaMessageApplication(
+            @NonNull Context context, boolean updateIfNeeded) {
+        return SmsApplication.getDefaultRespondViaMessageApplication(context, updateIfNeeded);
+    }
+
+    /**
      * Set the alphabetic name of current registered operator.
      * @param name the alphabetic name of current registered operator.
      * @hide
@@ -9508,7 +9549,7 @@ public class TelephonyManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public int getSubIdForPhoneAccount(PhoneAccount phoneAccount) {
+    public int getSubIdForPhoneAccount(@Nullable PhoneAccount phoneAccount) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
             ITelephony service = getITelephony();

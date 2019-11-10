@@ -286,7 +286,7 @@ abstract class ApexManager {
                                 new File(
                                 Environment.getApexDirectory() + File.separator
                                         + apexInfo.moduleName),
-                                new File(apexInfo.modulePath))).collect(
+                                new File(apexInfo.preinstalledModulePath))).collect(
                                 Collectors.toList());
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to retrieve packages from apexservice", e);

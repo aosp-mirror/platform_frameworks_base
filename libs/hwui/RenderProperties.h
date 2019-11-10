@@ -16,7 +16,10 @@
 
 #pragma once
 
+#ifdef __ANDROID__ // Layoutlib does not support device info
 #include "DeviceInfo.h"
+#endif // __ANDROID__
+
 #include "Outline.h"
 #include "Rect.h"
 #include "RevealClip.h"

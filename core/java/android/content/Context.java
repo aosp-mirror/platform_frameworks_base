@@ -2818,6 +2818,37 @@ public abstract class Context {
             @Nullable Handler scheduler, @RegisterReceiverFlags int flags);
 
     /**
+     * Same as {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)}
+     * but this receiver will receive broadcasts that are sent to all users. The receiver can
+     * use {@link BroadcastReceiver#getSendingUser} to determine on which user the broadcast
+     * was sent.
+     *
+     * @param receiver The BroadcastReceiver to handle the broadcast.
+     * @param filter Selects the Intent broadcasts to be received.
+     * @param broadcastPermission String naming a permissions that a
+     *      broadcaster must hold in order to send an Intent to you. If {@code null},
+     *      no permission is required.
+     * @param scheduler Handler identifying the thread that will receive
+     *      the Intent. If {@code null}, the main thread of the process will be used.
+     *
+     * @return The first sticky intent found that matches <var>filter</var>,
+     *         or {@code null} if there are none.
+     *
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
+     * @see #sendBroadcast
+     * @see #unregisterReceiver
+     * @hide
+     */
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    @SystemApi
+    public Intent registerReceiverForAllUsers(@Nullable BroadcastReceiver receiver,
+            @NonNull IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * @hide
      * Same as {@link #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
      * but for a specific user.  This receiver will receiver broadcasts that
@@ -4762,6 +4793,13 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.telephony.ims.ImsManager}.
+     * @hide
+     */
+    public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.telephony.ims.RcsMessageManager}.
      * @hide
      */
@@ -4773,6 +4811,20 @@ public abstract class Context {
      * @hide
      */
     public static final String DYNAMIC_SYSTEM_SERVICE = "dynamic_system";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.app.blob.BlobStoreManager} for contributing and accessing data blobs
+     * from the blob store maintained by the system.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.blob.BlobStoreManager
+     *
+     * TODO: make this public once BlobStoreManager is ready.
+     * @hide
+     */
+    @TestApi
+    public static final String BLOB_STORE_SERVICE = "blob_store";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an

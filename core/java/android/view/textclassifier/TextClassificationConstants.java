@@ -158,6 +158,18 @@ public final class TextClassificationConstants {
      */
     private static final String LANG_ID_CONTEXT_SETTINGS = "lang_id_context_settings";
 
+    /**
+     * The TextClassifierService which would like to use. Example of setting the package:
+     * <pre>
+     * adb shell cmd device_config put textclassifier textclassifier_service_package_override \
+     *      com.android.textclassifier
+     * </pre>
+     *
+     */
+    private static final String TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE =
+            "textclassifier_service_package_override";
+
+    private static final String DEFAULT_TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE = null;
     private static final boolean LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
     private static final boolean SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
     private static final boolean MODEL_DARK_LAUNCH_ENABLED_DEFAULT = false;
@@ -205,6 +217,12 @@ public final class TextClassificationConstants {
 
     public TextClassificationConstants(Supplier<String> legacySettingsSupplier) {
         mConfigParser = new ConfigParser(legacySettingsSupplier);
+    }
+
+    public String getTextClassifierServiceName() {
+        return mConfigParser.getString(
+                TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE,
+                DEFAULT_TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE);
     }
 
     public boolean isLocalTextClassifierEnabled() {
@@ -377,6 +395,8 @@ public final class TextClassificationConstants {
         pw.printPair("template_intent_factory_enabled", isTemplateIntentFactoryEnabled())
                 .println();
         pw.printPair("translate_in_classification_enabled", isTranslateInClassificationEnabled())
+                .println();
+        pw.printPair("textclassifier_service_package_override", getTextClassifierServiceName())
                 .println();
         pw.decreaseIndent();
     }

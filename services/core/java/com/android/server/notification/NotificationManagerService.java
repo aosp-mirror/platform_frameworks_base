@@ -8960,6 +8960,7 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     void resetAssistantUserSet(int userId) {
+        checkCallerIsSystemOrShell();
         mAssistants.setUserSet(userId, false);
         handleSavePolicyFile();
     }
@@ -8967,12 +8968,14 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     @Nullable
     ComponentName getApprovedAssistant(int userId) {
+        checkCallerIsSystemOrShell();
         List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
         return CollectionUtils.firstOrNull(allowedComponents);
     }
 
     @VisibleForTesting
     protected void simulatePackageSuspendBroadcast(boolean suspend, String pkg) {
+        checkCallerIsSystemOrShell();
         // only use for testing: mimic receive broadcast that package is (un)suspended
         // but does not actually (un)suspend the package
         final Bundle extras = new Bundle();
@@ -8989,6 +8992,7 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void simulatePackageDistractionBroadcast(int flag, String[] pkgs) {
+        checkCallerIsSystemOrShell();
         // only use for testing: mimic receive broadcast that package is (un)distracting
         // but does not actually register that info with packagemanager
         final Bundle extras = new Bundle();

@@ -24,6 +24,8 @@ import com.android.systemui.pip.PipUI;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
+import com.android.systemui.shortcut.ShortcutKeyDispatcher;
+import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.car.CarStatusBar;
 import com.android.systemui.statusbar.car.CarStatusBarModule;
 import com.android.systemui.statusbar.notification.InstantAppNotifier;
@@ -45,7 +47,13 @@ public abstract class CarSystemUIBinder {
     @Binds
     @IntoMap
     @ClassKey(AuthController.class)
-    public abstract SystemUI bindAuthController(AuthController service);
+    public abstract SystemUI bindAuthController(AuthController sysui);
+
+    /** Inject into Divider. */
+    @Binds
+    @IntoMap
+    @ClassKey(Divider.class)
+    public abstract SystemUI bindDivider(Divider sysui);
 
     /** */
     @Binds
@@ -57,7 +65,7 @@ public abstract class CarSystemUIBinder {
     @Binds
     @IntoMap
     @ClassKey(GarbageMonitor.Service.class)
-    public abstract SystemUI bindGarbageMonitorService(GarbageMonitor.Service service);
+    public abstract SystemUI bindGarbageMonitorService(GarbageMonitor.Service sysui);
 
     /** Inject into GlobalActionsComponent. */
     @Binds
@@ -106,6 +114,12 @@ public abstract class CarSystemUIBinder {
     @IntoMap
     @ClassKey(ScreenDecorations.class)
     public abstract SystemUI bindScreenDecorations(ScreenDecorations sysui);
+
+    /** Inject into ShortcutKeyDispatcher. */
+    @Binds
+    @IntoMap
+    @ClassKey(ShortcutKeyDispatcher.class)
+    public abstract SystemUI bindsShortcutKeyDispatcher(ShortcutKeyDispatcher sysui);
 
     /** Inject into SizeCompatModeActivityController. */
     @Binds

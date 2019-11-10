@@ -20,18 +20,43 @@ import android.content.Context;
 import android.view.View;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.R;
+import com.android.systemui.dock.DockManager;
+import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/** Car implementation of the {@link StatusBarKeyguardViewManager}. */
+@Singleton
 public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManager {
 
     protected boolean mShouldHideNavBar;
 
+    @Inject
     public CarStatusBarKeyguardViewManager(Context context,
             ViewMediatorCallback callback,
-            LockPatternUtils lockPatternUtils) {
-        super(context, callback, lockPatternUtils);
+            LockPatternUtils lockPatternUtils,
+            SysuiStatusBarStateController sysuiStatusBarStateController,
+            ConfigurationController configurationController,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            NavigationModeController navigationModeController,
+            DockManager dockManager,
+            StatusBarWindowController statusBarWindowController,
+            KeyguardStateController keyguardStateController,
+            NotificationMediaManager notificationMediaManager) {
+        super(context, callback, lockPatternUtils, sysuiStatusBarStateController,
+                configurationController, keyguardUpdateMonitor, navigationModeController,
+                dockManager, statusBarWindowController, keyguardStateController,
+                notificationMediaManager);
         mShouldHideNavBar = context.getResources()
                 .getBoolean(R.bool.config_hideNavWhenKeyguardBouncerShown);
     }

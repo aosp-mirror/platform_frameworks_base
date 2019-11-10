@@ -208,6 +208,33 @@ public class WifiManager {
     public @interface NetworkSuggestionsStatusCode {}
 
     /**
+     * Reason code if suggested network connection attempt failed with an unknown failure.
+     */
+    public static final int STATUS_SUGGESTION_CONNECTION_FAILURE_UNKNOWN = 0;
+    /**
+     * Reason code if suggested network connection attempt failed with association failure.
+     */
+    public static final int STATUS_SUGGESTION_CONNECTION_FAILURE_ASSOCIATION = 1;
+    /**
+     * Reason code if suggested network connection attempt failed with an authentication failure.
+     */
+    public static final int STATUS_SUGGESTION_CONNECTION_FAILURE_AUTHENTICATION = 2;
+    /**
+     * Reason code if suggested network connection attempt failed with an IP provision failure.
+     */
+    public static final int STATUS_SUGGESTION_CONNECTION_FAILURE_IP_PROVISIONING = 3;
+
+    /** @hide */
+    @IntDef(prefix = {"STATUS_SUGGESTION_CONNECTION_FAILURE_"},
+            value = {STATUS_SUGGESTION_CONNECTION_FAILURE_UNKNOWN,
+                    STATUS_SUGGESTION_CONNECTION_FAILURE_ASSOCIATION,
+                    STATUS_SUGGESTION_CONNECTION_FAILURE_AUTHENTICATION,
+                    STATUS_SUGGESTION_CONNECTION_FAILURE_IP_PROVISIONING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SuggestionConnectionStatusCode {}
+
+    /**
      * Broadcast intent action indicating whether Wi-Fi scanning is allowed currently
      * @hide
      */
@@ -1227,7 +1254,8 @@ public class WifiManager {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return Collections.emptyList();
             ParceledListSlice<WifiConfiguration> parceledList =
-                    iWifiManager.getConfiguredNetworks(mContext.getOpPackageName());
+                    iWifiManager.getConfiguredNetworks(mContext.getOpPackageName(),
+                            mContext.getFeatureId());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1245,7 +1273,8 @@ public class WifiManager {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return Collections.emptyList();
             ParceledListSlice<WifiConfiguration> parceledList =
-                    iWifiManager.getPrivilegedConfiguredNetworks(mContext.getOpPackageName());
+                    iWifiManager.getPrivilegedConfiguredNetworks(mContext.getOpPackageName(),
+                            mContext.getFeatureId());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1737,7 +1766,7 @@ public class WifiManager {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return STATUS_NETWORK_SUGGESTIONS_ERROR_INTERNAL;
             return iWifiManager.addNetworkSuggestions(
-                    networkSuggestions, mContext.getOpPackageName());
+                    networkSuggestions, mContext.getOpPackageName(), mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2219,7 +2248,15 @@ public class WifiManager {
     /** @hide */
     public static final long WIFI_FEATURE_DPP              = 0x80000000L; // DPP (Easy-Connect)
     /** @hide */
-    public static final long WIFI_FEATURE_P2P_RAND_MAC    = 0x100000000L; // Random P2P MAC
+    public static final long WIFI_FEATURE_P2P_RAND_MAC     = 0x100000000L; // Random P2P MAC
+    /** @hide */
+    public static final long WIFI_FEATURE_CONNECTED_RAND_MAC    = 0x200000000L; // Random STA MAC
+    /** @hide */
+    public static final long WIFI_FEATURE_AP_RAND_MAC      = 0x400000000L; // Random AP MAC
+    /** @hide */
+    public static final long WIFI_FEATURE_MBO              = 0x800000000L; // MBO Support
+    /** @hide */
+    public static final long WIFI_FEATURE_OCE              = 0x1000000000L; // OCE Support
 
     private long getSupportedFeatures() {
         try {
@@ -2345,6 +2382,24 @@ public class WifiManager {
     }
 
     /**
+     * @return true if this device supports connected MAC randomization.
+     * @hide
+     */
+    @SystemApi
+    public boolean isConnectedMacRandomizationSupported() {
+        return isFeatureSupported(WIFI_FEATURE_CONNECTED_RAND_MAC);
+    }
+
+    /**
+     * @return true if this device supports connected MAC randomization.
+     * @hide
+     */
+    @SystemApi
+    public boolean isApMacRandomizationSupported() {
+        return isFeatureSupported(WIFI_FEATURE_AP_RAND_MAC);
+    }
+
+    /**
      * Return the record of {@link WifiActivityEnergyInfo} object that
      * has the activity and energy info. This can be used to ascertain what
      * the controller has been up to, since the last sample.
@@ -2400,7 +2455,8 @@ public class WifiManager {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return false;
             String packageName = mContext.getOpPackageName();
-            return iWifiManager.startScan(packageName);
+            String featureId = mContext.getFeatureId();
+            return iWifiManager.startScan(packageName, featureId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2431,7 +2487,8 @@ public class WifiManager {
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return null;
-            return iWifiManager.getConnectionInfo(mContext.getOpPackageName());
+            return iWifiManager.getConnectionInfo(mContext.getOpPackageName(),
+                    mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2447,7 +2504,8 @@ public class WifiManager {
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return Collections.emptyList();
-            return iWifiManager.getScanResults(mContext.getOpPackageName());
+            return iWifiManager.getScanResults(mContext.getOpPackageName(),
+                    mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2865,7 +2923,9 @@ public class WifiManager {
                     throw new RemoteException("Wifi service is not running");
                 }
                 String packageName = mContext.getOpPackageName();
-                int returnCode = iWifiManager.startLocalOnlyHotspot(proxy, packageName, config);
+                String featureId = mContext.getFeatureId();
+                int returnCode = iWifiManager.startLocalOnlyHotspot(proxy, packageName, featureId,
+                        config);
                 if (returnCode != LocalOnlyHotspotCallback.REQUEST_REGISTERED) {
                     // Send message to the proxy to make sure we call back on the correct thread
                     proxy.onHotspotFailed(returnCode);
@@ -3295,6 +3355,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     public interface SoftApCallback {
         /**
          * Called when soft AP state changes.
@@ -3332,11 +3393,11 @@ public class WifiManager {
      * @hide
      */
     private class SoftApCallbackProxy extends ISoftApCallback.Stub {
-        private final Handler mHandler;
+        private final Executor mExecutor;
         private final SoftApCallback mCallback;
 
-        SoftApCallbackProxy(Looper looper, SoftApCallback callback) {
-            mHandler = new Handler(looper);
+        SoftApCallbackProxy(Executor executor, SoftApCallback callback) {
+            mExecutor = executor;
             mCallback = callback;
         }
 
@@ -3347,7 +3408,8 @@ public class WifiManager {
                         + ", failureReason=" + failureReason);
             }
 
-            mHandler.post(() -> {
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onStateChanged(state, failureReason);
             });
         }
@@ -3359,7 +3421,8 @@ public class WifiManager {
                         + clients.size() + " clients");
             }
 
-            mHandler.post(() -> {
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onConnectedClientsChanged(clients);
             });
         }
@@ -3369,7 +3432,9 @@ public class WifiManager {
             if (mVerboseLoggingEnabled) {
                 Log.v(TAG, "SoftApCallbackProxy: onInfoChange: softApInfo=" + softApInfo);
             }
-            mHandler.post(() -> {
+
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onInfoChanged(softApInfo);
             });
         }
@@ -3388,18 +3453,19 @@ public class WifiManager {
      * <p>
      *
      * @param callback Callback for soft AP events
-     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
-     *                 object. If null, then the application's main thread will be used.
+     * @param executor The executor to execute the callbacks of the {@code executor}
+     *                 object. If null, then the application's main executor will be used.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void registerSoftApCallback(@NonNull SoftApCallback callback,
-                                       @Nullable Handler handler) {
+                                       @Nullable @CallbackExecutor Executor executor) {
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
-        Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", handler=" + handler);
+        Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", executor=" + executor);
 
-        Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
+        executor = (executor == null) ? mContext.getMainExecutor() : executor;
         Binder binder = new Binder();
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -3407,7 +3473,7 @@ public class WifiManager {
                 throw new RemoteException("Wifi service is not running");
             }
             iWifiManager.registerSoftApCallback(
-                    binder, new SoftApCallbackProxy(looper, callback), callback.hashCode());
+                    binder, new SoftApCallbackProxy(executor, callback), callback.hashCode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5229,7 +5295,7 @@ public class WifiManager {
     }
 
     /**
-     * Base class for scan results listener. Should be implemented by applications and set when
+     * Interface for scan results listener. Should be implemented by applications and set when
      * calling {@link WifiManager#addScanResultsListener(Executor, ScanResultsListener)}.
      */
     public interface ScanResultsListener {
@@ -5311,6 +5377,110 @@ public class WifiManager {
                 throw new RemoteException("Wifi service is not running");
             }
             iWifiManager.unregisterScanResultsListener(listener.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Interface for suggestion connection status listener.
+     * Should be implemented by applications and set when calling
+     * {@link WifiManager#addSuggestionConnectionStatusListener(
+     * Executor, SuggestionConnectionStatusListener)}.
+     */
+    public interface SuggestionConnectionStatusListener {
+
+        /**
+         * Called when the framework attempted to connect to a suggestion provided by the
+         * registering app, but the connection to the suggestion failed.
+         * @param wifiNetworkSuggestion The suggestion which failed to connect.
+         * @param failureReason the connection failure reason code. One of
+         * {@link #STATUS_SUGGESTION_CONNECTION_FAILURE_ASSOCIATION},
+         * {@link #STATUS_SUGGESTION_CONNECTION_FAILURE_AUTHENTICATION},
+         * {@link #STATUS_SUGGESTION_CONNECTION_FAILURE_IP_PROVISIONING}
+         * {@link #STATUS_SUGGESTION_CONNECTION_FAILURE_UNKNOWN}
+         */
+        void onConnectionStatus(
+                @NonNull WifiNetworkSuggestion wifiNetworkSuggestion,
+                @SuggestionConnectionStatusCode int failureReason);
+    }
+
+    private class SuggestionConnectionStatusListenerProxy extends
+            ISuggestionConnectionStatusListener.Stub {
+        private final Executor mExecutor;
+        private final SuggestionConnectionStatusListener mListener;
+
+        SuggestionConnectionStatusListenerProxy(@NonNull Executor executor,
+                @NonNull SuggestionConnectionStatusListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onConnectionStatus(@NonNull WifiNetworkSuggestion wifiNetworkSuggestion,
+                int failureReason) {
+            mExecutor.execute(() ->
+                    mListener.onConnectionStatus(wifiNetworkSuggestion, failureReason));
+        }
+
+    }
+
+    /**
+     * Add a listener for suggestion networks. See {@link SuggestionConnectionStatusListener}.
+     * Caller will receive the event when suggested network have connection failure.
+     * Caller can remove a previously registered listener using
+     * {@link WifiManager#removeSuggestionConnectionStatusListener(
+     * SuggestionConnectionStatusListener)}
+     * Same caller can add multiple listeners to monitor the event.
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
+     * {@link android.Manifest.permission#ACCESS_WIFI_STATE} permissions.
+     * Callers without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
+     *
+     * @param executor The executor to execute the listener of the {@code listener} object.
+     * @param listener listener for suggestion network connection failure.
+     */
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE})
+    public void addSuggestionConnectionStatusListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull SuggestionConnectionStatusListener listener) {
+        if (listener == null) throw new IllegalArgumentException("Listener cannot be null");
+        if (executor == null) throw new IllegalArgumentException("Executor cannot be null");
+        Log.v(TAG, "addSuggestionConnectionStatusListener listener=" + listener
+                + ", executor=" + executor);
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            iWifiManager.registerSuggestionConnectionStatusListener(new Binder(),
+                    new SuggestionConnectionStatusListenerProxy(executor, listener),
+                    listener.hashCode(), mContext.getOpPackageName(), mContext.getFeatureId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+    }
+
+    /**
+     * Allow callers to remove a previously registered listener. After calling this method,
+     * applications will no longer receive suggestion connection events through that listener.
+     *
+     * @param listener listener to remove.
+     */
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public void removeSuggestionConnectionStatusListener(
+            @NonNull SuggestionConnectionStatusListener listener) {
+        if (listener == null) throw new IllegalArgumentException("Listener cannot be null");
+        Log.v(TAG, "removeSuggestionConnectionStatusListener: listener=" + listener);
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            iWifiManager.unregisterSuggestionConnectionStatusListener(listener.hashCode(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

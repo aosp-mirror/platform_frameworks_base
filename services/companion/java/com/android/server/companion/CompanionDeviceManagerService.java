@@ -335,6 +335,16 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             return new ComponentNameSet(setting).contains(component);
         }
 
+        @Override
+        public boolean isDeviceAssociated(String packageName, String macAddress, int userId) {
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_COMPANION_DEVICES, "isDeviceAssociated");
+
+            return CollectionUtils.any(
+                    readAllAssociations(userId, packageName),
+                    a -> Objects.equals(a.deviceAddress, macAddress));
+        }
+
         private void checkCanCallNotificationApi(String callingPackage) throws RemoteException {
             checkCallerIsSystemOr(callingPackage);
             int userId = getCallingUserId();
