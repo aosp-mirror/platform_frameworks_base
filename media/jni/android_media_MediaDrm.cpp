@@ -211,48 +211,6 @@ static fields_t gFields;
 
 namespace {
 
-// Helper function to convert a native PersistableBundle to a Java
-// PersistableBundle.
-jobject nativeToJavaPersistableBundle(JNIEnv *env, jobject thiz,
-                                      PersistableBundle* nativeBundle) {
-    if (env == NULL || thiz == NULL || nativeBundle == NULL) {
-        ALOGE("Unexpected NULL parmeter");
-        return NULL;
-    }
-
-    // Create a Java parcel with the native parcel data.
-    // Then create a new PersistableBundle with that parcel as a parameter.
-    jobject jParcel = android::createJavaParcelObject(env);
-    if (jParcel == NULL) {
-      ALOGE("Failed to create a Java Parcel.");
-      return NULL;
-    }
-
-    android::Parcel* nativeParcel = android::parcelForJavaObject(env, jParcel);
-    if (nativeParcel == NULL) {
-      ALOGE("Failed to get the native Parcel.");
-      return NULL;
-    }
-
-    android::status_t result = nativeBundle->writeToParcel(nativeParcel);
-    nativeParcel->setDataPosition(0);
-    if (result != android::OK) {
-      ALOGE("Failed to write nativeBundle to Parcel: %d.", result);
-      return NULL;
-    }
-
-    jobject newBundle = env->CallObjectMethod(gFields.bundleCreator,
-                                              gFields.createFromParcelId,
-                                              jParcel);
-    if (newBundle == NULL) {
-        ALOGE("Failed to create a new PersistableBundle "
-              "from the createFromParcel call.");
-    }
-
-    return newBundle;
-}
-
-
 jbyteArray hidlVectorToJByteArray(const hardware::hidl_vec<uint8_t> &vector) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     size_t length = vector.size();
@@ -1937,7 +1895,7 @@ android_media_MediaDrm_native_getMetrics(JNIEnv *env, jobject thiz)
         return (jobject) NULL;
     }
 
-    return nativeToJavaPersistableBundle(env, thiz, &metrics);
+    return MediaMetricsJNI::nativeToJavaPersistableBundle(env, &metrics);
 }
 
 static jbyteArray android_media_MediaDrm_signRSANative(
