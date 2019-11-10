@@ -19,7 +19,11 @@ package com.android.server.integrity.model;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * The app install metadata.
@@ -28,7 +32,11 @@ import android.annotation.Nullable;
  * to the rule evaluation engine to evaluate the metadata against the rules.
  *
  * <p>Instances of this class are immutable.
+ *
+ * @hide
  */
+@SystemApi
+@VisibleForTesting
 public final class AppInstallMetadata {
     private final String mPackageName;
     // Raw string encoding for the SHA-256 hash of the certificate of the app.
@@ -48,10 +56,12 @@ public final class AppInstallMetadata {
         this.mIsPreInstalled = builder.mIsPreInstalled;
     }
 
+    @NonNull
     public String getPackageName() {
         return mPackageName;
     }
 
+    @NonNull
     public String getAppCertificate() {
         return mAppCertificate;
     }
@@ -66,23 +76,17 @@ public final class AppInstallMetadata {
         return mInstallerCertificate;
     }
 
-    /**
-     * @see AppInstallMetadata.Builder#setVersionCode(int)
-     */
+    /** @see AppInstallMetadata.Builder#setVersionCode(int) */
     public int getVersionCode() {
         return mVersionCode;
     }
 
-    /**
-     * @see AppInstallMetadata.Builder#setIsPreInstalled(boolean)
-     */
+    /** @see AppInstallMetadata.Builder#setIsPreInstalled(boolean) */
     public boolean isPreInstalled() {
         return mIsPreInstalled;
     }
 
-    /**
-     * Builder class for constructing {@link AppInstallMetadata} objects.
-     */
+    /** Builder class for constructing {@link AppInstallMetadata} objects. */
     public static final class Builder {
         private String mPackageName;
         private String mAppCertificate;
@@ -96,7 +100,8 @@ public final class AppInstallMetadata {
          *
          * @see AppInstallMetadata#getPackageName()
          */
-        public Builder setPackageName(String packageName) {
+        @NonNull
+        public Builder setPackageName(@NonNull String packageName) {
             this.mPackageName = checkNotNull(packageName);
             return this;
         }
@@ -109,7 +114,8 @@ public final class AppInstallMetadata {
          *
          * @see AppInstallMetadata#getAppCertificate()
          */
-        public Builder setAppCertificate(String appCertificate) {
+        @NonNull
+        public Builder setAppCertificate(@NonNull String appCertificate) {
             this.mAppCertificate = checkNotNull(appCertificate);
             return this;
         }
@@ -119,7 +125,8 @@ public final class AppInstallMetadata {
          *
          * @see AppInstallMetadata#getInstallerName()
          */
-        public Builder setInstallerName(String installerName) {
+        @NonNull
+        public Builder setInstallerName(@NonNull String installerName) {
             this.mInstallerName = checkNotNull(installerName);
             return this;
         }
@@ -132,7 +139,8 @@ public final class AppInstallMetadata {
          *
          * @see AppInstallMetadata#getInstallerCertificate()
          */
-        public Builder setInstallerCertificate(String installerCertificate) {
+        @NonNull
+        public Builder setInstallerCertificate(@NonNull String installerCertificate) {
             this.mInstallerCertificate = checkNotNull(installerCertificate);
             return this;
         }
@@ -142,6 +150,7 @@ public final class AppInstallMetadata {
          *
          * @see AppInstallMetadata#getVersionCode()
          */
+        @NonNull
         public Builder setVersionCode(int versionCode) {
             this.mVersionCode = versionCode;
             return this;
@@ -152,6 +161,7 @@ public final class AppInstallMetadata {
          *
          * @see AppInstallMetadata#isPreInstalled()
          */
+        @NonNull
         public Builder setIsPreInstalled(boolean isPreInstalled) {
             this.mIsPreInstalled = isPreInstalled;
             return this;
@@ -159,7 +169,10 @@ public final class AppInstallMetadata {
 
         /**
          * Build {@link AppInstallMetadata}.
+         *
+         * @throws IllegalArgumentException if package name or app certificate is null
          */
+        @NonNull
         public AppInstallMetadata build() {
             checkArgument(mPackageName != null);
             checkArgument(mAppCertificate != null);
