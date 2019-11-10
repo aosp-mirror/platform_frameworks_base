@@ -17,6 +17,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="enabled_by_admin" msgid="7797093432952898000">"စီမံခန့်ခွဲသူက ဖွင့်ထားသည်"</string>
-    <string name="disabled_by_admin" msgid="1910810467107358241">"စီမံခန့်ခွဲသူက ပိတ်ထားသည်"</string>
+    <string name="enabled_by_admin" msgid="6630472777476410137">"စီမံခန့်ခွဲသူက ဖွင့်ထားသည်"</string>
+    <string name="disabled_by_admin" msgid="4023569940620832713">"စီမံခန့်ခွဲသူက ပိတ်ထားသည်"</string>
 </resources>
