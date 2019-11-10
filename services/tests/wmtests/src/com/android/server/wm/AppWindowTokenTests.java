@@ -75,7 +75,7 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class AppWindowTokenTests extends WindowTestsBase {
 
-    TaskStack mStack;
+    ActivityStack mStack;
     Task mTask;
     ActivityRecord mActivity;
 
@@ -411,7 +411,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     private ActivityRecord createIsolatedTestActivityRecord() {
-        final TaskStack taskStack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack taskStack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(taskStack, 0 /* userId */);
         return createTestActivityRecordForGivenTask(task);
     }

@@ -1713,8 +1713,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // another AM call that is holding the AMS lock. In such a case, the pinnedBounds may be
         // incorrect if AMS.resizeStackWithBoundsFromWindowManager() is already called while waiting
         // for the AMS lock to be freed. So check and make sure these bounds are still good.
-        final TaskStack stackController = stack.getTaskStack();
-        if (stackController.pinnedStackResizeDisallowed()) {
+        // TODO(stack-merge): Is this still relevant?
+        if (stack.pinnedStackResizeDisallowed()) {
             return;
         }
 
@@ -1893,8 +1893,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         if (currentStack != null) {
             // Task has already been restored once. Just re-parent it to the new stack.
-            task.reparent(stack.mTaskStack,
-                    POSITION_TOP, true /*moveParents*/, "restoreRecentTaskLocked");
+            task.reparent(stack, POSITION_TOP, true /*moveParents*/, "restoreRecentTaskLocked");
             return true;
         }
 
@@ -2470,7 +2469,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     private void handleForcedResizableTaskIfNeeded(TaskRecord task, int reason) {
         final ActivityRecord topActivity = task.getTopActivity();
         if (topActivity == null || topActivity.noDisplay
-                || !topActivity.isNonResizableOrForcedResizable()) {
+                || !topActivity.isNonResizableOrForcedResizable(task.getWindowingMode())) {
             return;
         }
         mService.getTaskChangeNotificationController().notifyActivityForcedResizable(

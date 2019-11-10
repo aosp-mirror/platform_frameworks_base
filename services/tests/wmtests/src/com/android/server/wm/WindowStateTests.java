@@ -510,12 +510,12 @@ public class WindowStateTests extends WindowTestsBase {
         window.setShowToOwnerOnlyLocked(true);
 
         mWm.mCurrentUserId = 1;
-        window.switchUser();
+        window.switchUser(mWm.mCurrentUserId);
         assertFalse(window.isVisible());
         assertFalse(window.isVisibleByPolicy());
 
         mWm.mCurrentUserId = 0;
-        window.switchUser();
+        window.switchUser(mWm.mCurrentUserId);
         assertTrue(window.isVisible());
         assertTrue(window.isVisibleByPolicy());
     }

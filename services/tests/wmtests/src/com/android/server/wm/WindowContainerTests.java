@@ -314,32 +314,6 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPositionChildAtInvalid() {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
-        final TestWindowContainer root = builder.setLayer(0).build();
-
-        final TestWindowContainer child1 = root.addChildWindow();
-
-        boolean gotException = false;
-        try {
-            // Check response to negative position.
-            root.positionChildAt(-1, child1, false /* includingParents */);
-        } catch (IllegalArgumentException e) {
-            gotException = true;
-        }
-        assertTrue(gotException);
-
-        gotException = false;
-        try {
-            // Check response to position that's bigger than child number.
-            root.positionChildAt(3, child1, false /* includingParents */);
-        } catch (IllegalArgumentException e) {
-            gotException = true;
-        }
-        assertTrue(gotException);
-    }
-
-    @Test
     public void testIsAnimating_TransitionFlag() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();

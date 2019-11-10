@@ -293,7 +293,6 @@ public class SystemServicesTestRule implements TestRule {
         final ActivityStack homeStack = display.getStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
         spyOn(homeStack);
-        spyOn(homeStack.mTaskStack);
     }
 
     private void tearDown() {

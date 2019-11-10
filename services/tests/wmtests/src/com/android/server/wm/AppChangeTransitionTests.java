@@ -148,7 +148,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
         // Reparenting to a display with different windowing mode may trigger
         // a change transition internally, but it should be cleaned-up once
         // the display change is complete.
-        mStack.reparent(mDisplayContent.getDisplayId(), new Rect(), true);
+        mStack.reparent(mDisplayContent, true);
 
         assertEquals(WINDOWING_MODE_FULLSCREEN, mTask.getWindowingMode());
 

@@ -2307,8 +2307,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    void switchUser() {
-        super.switchUser();
+    void switchUser(int userId) {
+        super.switchUser(userId);
         if (isHiddenFromUserLocked()) {
             if (DEBUG_VISIBILITY) Slog.w(TAG_WM, "user changing, hiding " + this
                     + ", attrs=" + mAttrs.type + ", belonging to " + mOwnerUid);
@@ -3356,7 +3356,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mClient.insetsChanged(
                     getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this));
         } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to deliver inset state change", e);
+            Slog.w(TAG, "Failed to deliver inset state change w=" + this, e);
         }
     }
 

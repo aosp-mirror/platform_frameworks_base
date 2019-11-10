@@ -88,13 +88,15 @@ message ActivityDisplayProto {
 message ActivityStackProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    // To be removed soon.
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1 [deprecated=true];
     optional int32 id = 2;
     repeated TaskRecordProto tasks = 3;
     optional .com.android.server.wm.IdentifierProto resumed_activity = 4;
     optional int32 display_id = 5;
     optional bool fullscreen = 6;
     optional .android.graphics.RectProto bounds = 7;
+    optional .com.android.server.wm.StackProto stack = 8;
 }
 
 message TaskRecordProto {

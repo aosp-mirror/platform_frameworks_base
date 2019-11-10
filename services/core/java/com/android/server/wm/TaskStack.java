@@ -118,7 +118,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
 
     /** Detach this stack from its display when animation completes. */
     // TODO: maybe tie this to WindowContainer#removeChild some how...
-    boolean mDeferRemoval;
+    private boolean mDeferRemoval;
 
     private final Rect mTmpAdjustedBounds = new Rect();
     private boolean mAdjustedForIme;
@@ -146,23 +146,18 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
 
     private Dimmer mDimmer = new Dimmer(this);
 
-    // TODO: remove after unification.
-    ActivityStack mActivityStack;
-
     /**
      * For {@link #prepareSurfaces}.
      */
-    final Rect mTmpDimBoundsRect = new Rect();
+    private final Rect mTmpDimBoundsRect = new Rect();
     private final Point mLastSurfaceSize = new Point();
 
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
 
-    TaskStack(WindowManagerService service, int stackId, ActivityStack activityStack) {
+    TaskStack(WindowManagerService service, int stackId) {
         super(service);
         mStackId = stackId;
-        mActivityStack = activityStack;
-        activityStack.registerConfigurationChangeListener(this);
         mDockedStackMinimizeThickness = service.mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_minimize_thickness);
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId);
@@ -235,7 +230,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
             return BOUNDS_CHANGE_NONE;
         }
 
-        final int result = super.setBounds(bounds);
+        final int result = super.setBounds(!inMultiWindowMode() ? null : bounds);
 
         updateAdjustedBounds();
 
@@ -251,7 +246,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
         out.set(getRawBounds());
     }
 
-    Rect getRawBounds() {
+    private Rect getRawBounds() {
         return super.getBounds();
     }
 
@@ -495,7 +490,9 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
         // Move child to a proper position, as some restriction for position might apply.
         position = positionChildAt(
                 position, task, moveParents /* includingParents */, showForAllUsers);
-        mActivityStack.onChildAdded(task, position);
+        // TODO: Feels like this should go in TaskRecord#onParentChanged
+        final boolean toTop = position >= getChildCount();
+        task.updateTaskMovement(toTop);
     }
 
     @Override
@@ -503,7 +500,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
         addChild(task, position, task.showForAllUsers(), false /* includingParents */);
     }
 
-    void positionChildAt(Task child, int position) {
+    void positionChildAt(TaskRecord child, int position) {
         if (DEBUG_STACK) {
             Slog.i(TAG_WM, "positionChildAt: positioning task=" + child + " at " + position);
         }
@@ -513,7 +510,8 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
             }
             return;
         }
-        child.positionAt(position);
+        positionChildAt(position, child, false /* includingParents */);
+        child.updateTaskMovement(true);
         getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
@@ -524,6 +522,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
         }
 
         positionChildAt(POSITION_TOP, child, includingParents);
+        child.updateTaskMovement(true);
 
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent.mAppTransition.isTransitionSet()) {
@@ -556,7 +555,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
      * {@link TaskStack#addChild(Task, int, boolean showForAllUsers, boolean)}, as it can receive
      * showForAllUsers param from {@link ActivityRecord} instead of {@link Task#showForAllUsers()}.
      */
-    int positionChildAt(int position, TaskRecord child, boolean includingParents,
+    private int positionChildAt(int position, TaskRecord child, boolean includingParents,
             boolean showForAllUsers) {
         final int targetPosition = findPositionForTask(child, position, showForAllUsers);
         super.positionChildAt(targetPosition, child, includingParents);
@@ -577,24 +576,14 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
         //((TaskRecord) child).updateTaskMovement(true);
     }
 
-    void reparent(int displayId, Rect outStackBounds, boolean onTop) {
-        final DisplayContent targetDc = mWmService.mRoot.getDisplayContent(displayId);
-        if (targetDc == null) {
-            throw new IllegalArgumentException("Trying to move stackId=" + mStackId
-                    + " to unknown displayId=" + displayId);
-        }
-
-        targetDc.moveStackToDisplay(this, onTop);
-        if (matchParentBounds()) {
-            outStackBounds.setEmpty();
-        } else {
-            getRawBounds(outStackBounds);
-        }
+    void reparent(DisplayContent newParent, boolean onTop) {
+        // Real parent of stack is within display object, so we have to delegate re-parenting there.
+        newParent.moveStackToDisplay(this, onTop);
     }
 
     // TODO: We should really have users as a window container in the hierarchy so that we don't
     // have to do complicated things like we are doing in this method.
-    private int findPositionForTask(Task task, int targetPosition, boolean showForAllUsers) {
+    int findPositionForTask(Task task, int targetPosition, boolean showForAllUsers) {
         final boolean canShowTask =
                 showForAllUsers || mWmService.isCurrentProfileLocked(task.mUserId);
 
@@ -655,24 +644,6 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
             maxPosition--;
         }
         return maxPosition;
-    }
-
-    /**
-     * Delete a Task from this stack. If it is the last Task in the stack, move this stack to the
-     * back.
-     * @param task The Task to delete.
-     */
-    @Override
-    void removeChild(TaskRecord task) {
-        if (!mChildren.contains(task)) {
-            // Not really in this stack anymore...
-            return;
-        }
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG_WM, "removeChild: task=" + task);
-
-        super.removeChild(task);
-
-        mActivityStack.onChildRemoved(task, mDisplayContent);
     }
 
     @Override
@@ -760,12 +731,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        if (mDisplayContent != null && mDisplayContent != dc) {
-            throw new IllegalStateException("onDisplayChanged: Already attached");
-        }
-
         super.onDisplayChanged(dc);
-
         updateSurfaceBounds();
     }
 
@@ -781,8 +747,9 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
      * @param outStackBounds the calculated stack bounds of the other stack
      * @param outTempTaskBounds the calculated task bounds of the other stack
      */
-    void getStackDockedModeBoundsLocked(Configuration parentConfig, Rect dockedBounds,
+    void getStackDockedModeBounds(Rect dockedBounds,
             Rect currentTempTaskBounds, Rect outStackBounds, Rect outTempTaskBounds) {
+        final Configuration parentConfig = getParent().getConfiguration();
         outTempTaskBounds.setEmpty();
 
         if (dockedBounds == null || dockedBounds.isEmpty()) {
@@ -913,9 +880,11 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
 
         final Rect bounds = new Rect();
         final Rect tempBounds = new Rect();
-        getStackDockedModeBoundsLocked(mDisplayContent.getConfiguration(), null /* dockedBounds */,
-                null /* currentTempTaskBounds */, bounds, tempBounds);
-        mActivityStack.mStackSupervisor.resizeDockedStackLocked(bounds, null /* tempTaskBounds */,
+        getStackDockedModeBounds(null /* dockedBounds */, null /* currentTempTaskBounds */,
+                bounds, tempBounds);
+        // TODO(stack-merge): remove cast.
+        ((ActivityStack) this).mStackSupervisor.resizeDockedStackLocked(bounds,
+                null /* tempTaskBounds */,
                 null /* tempTaskInsetBounds */, null /* tempOtherTaskBounds */,
                 null /* tempOtherTaskInsetBounds */, false /* preserveWindows */,
                 false /* deferResume */);
@@ -931,14 +900,8 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
     }
 
     @Override
-    void removeImmediately() {
-        if (mActivityStack != null) {
-            mActivityStack.unregisterConfigurationChangeListener(this);
-        }
-        super.removeImmediately();
-    }
-
-    @Override
+    // TODO(stack-merge): This is mostly taking care of the case where the stask is removing from
+    // the display, so we should probably consolidate it there instead.
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
         super.onParentChanged(newParent, oldParent);
 
@@ -950,21 +913,6 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
 
         mDisplayContent = null;
         mWmService.mWindowPlacerLocked.requestTraversal();
-    }
-
-    // TODO: Should each user have there own stacks?
-    @Override
-    void switchUser() {
-        super.switchUser();
-        int top = mChildren.size();
-        for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
-            TaskRecord task = mChildren.get(taskNdx);
-            if (mWmService.isCurrentProfileLocked(task.mUserId) || task.showForAllUsers()) {
-                mChildren.remove(taskNdx);
-                mChildren.add(task);
-                --top;
-            }
-        }
     }
 
     /**
@@ -1272,9 +1220,8 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
         return false;
     }
 
-    @CallSuper
-    @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    // TODO(proto-merge): Remove once protos for ActivityStack and TaskStack are merged.
+    void writeToProtoInnerStackOnly(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
             return;
@@ -1334,11 +1281,6 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
     @Override
     boolean fillsParent() {
         return matchParentBounds();
-    }
-
-    @Override
-    public String toString() {
-        return "{stackId=" + mStackId + " tasks=" + mChildren + "}";
     }
 
     String getName() {
@@ -1528,13 +1470,13 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
                 // I don't believe you...
             }
 
-            if ((schedulePipModeChangedCallback || animationType == FADE_IN)
-                    && mActivityStack != null) {
+            if ((schedulePipModeChangedCallback || animationType == FADE_IN)) {
                 // We need to schedule the PiP mode change before the animation up. It is possible
                 // in this case for the animation down to not have been completed, so always
                 // force-schedule and update to the client to ensure that it is notified that it
                 // is no longer in picture-in-picture mode
-                mActivityStack.updatePictureInPictureModeForPinnedStackAnimation(null,
+                // TODO(stack-merge): Remove cast.
+                ((ActivityStack) this).updatePictureInPictureModeForPinnedStackAnimation(null,
                         forceUpdate);
             }
         }
@@ -1544,38 +1486,41 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
     @Override  // AnimatesBounds
     public void onAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackSize,
             boolean moveToFullscreen) {
-        if (inPinnedWindowingMode()) {
-            // Update to the final bounds if requested. This is done here instead of in the bounds
-            // animator to allow us to coordinate this after we notify the PiP mode changed
+        synchronized (mWmService.mGlobalLock) {
+            if (inPinnedWindowingMode()) {
+                // Update to the final bounds if requested. This is done here instead of in the
+                // bounds animator to allow us to coordinate this after we notify the PiP mode changed
 
-            if (schedulePipModeChangedCallback) {
-                // We need to schedule the PiP mode change after the animation down, so use the
-                // final bounds
-                mActivityStack.updatePictureInPictureModeForPinnedStackAnimation(
-                        mBoundsAnimationTarget, false /* forceUpdate */);
-            }
+                if (schedulePipModeChangedCallback) {
+                    // We need to schedule the PiP mode change after the animation down, so use the
+                    // final bounds
+                    // TODO(stack-merge): Remove cast.
+                    ((ActivityStack) this).updatePictureInPictureModeForPinnedStackAnimation(
+                            mBoundsAnimationTarget, false /* forceUpdate */);
+                }
 
-            if (mAnimationType == BoundsAnimationController.FADE_IN) {
-                setPinnedStackAlpha(1f);
-                mActivityStack.mService.notifyPinnedStackAnimationEnded();
-                return;
-            }
+                if (mAnimationType == BoundsAnimationController.FADE_IN) {
+                    setPinnedStackAlpha(1f);
+                    mWmService.mAtmService.notifyPinnedStackAnimationEnded();
+                    return;
+                }
 
-            if (finalStackSize != null && !mCancelCurrentBoundsAnimation) {
-                setPinnedStackSize(finalStackSize, null);
+                if (finalStackSize != null && !mCancelCurrentBoundsAnimation) {
+                    setPinnedStackSize(finalStackSize, null);
+                } else {
+                    // We have been canceled, so the final stack size is null, still run the
+                    // animation-end logic
+                    onPipAnimationEndResize();
+                }
+
+                mWmService.mAtmService.notifyPinnedStackAnimationEnded();
+                if (moveToFullscreen) {
+                    ((ActivityStack) this).dismissPip();
+                }
             } else {
-                // We have been canceled, so the final stack size is null, still run the
-                // animation-end logic
+                // No PiP animation, just run the normal animation-end logic
                 onPipAnimationEndResize();
             }
-
-            mActivityStack.mService.notifyPinnedStackAnimationEnded();
-            if (moveToFullscreen) {
-                mActivityStack.dismissPip();
-            }
-        } else {
-            // No PiP animation, just run the normal animation-end logic
-            onPipAnimationEndResize();
         }
     }
 
@@ -1695,25 +1640,14 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
         getDisplayContent().getPinnedStackController().setActions(actions);
     }
 
-    @Override
-    public boolean isAttached() {
-        synchronized (mWmService.mGlobalLock) {
-            return mDisplayContent != null;
+    /** Called immediately prior to resizing the tasks at the end of the pinned stack animation. */
+    void onPipAnimationEndResize() {
+        mBoundsAnimating = false;
+        for (int i = 0; i < mChildren.size(); i++) {
+            final Task t = mChildren.get(i);
+            t.clearPreserveNonFloatingState();
         }
-    }
-
-    /**
-     * Called immediately prior to resizing the tasks at the end of the pinned stack animation.
-     */
-    public void onPipAnimationEndResize() {
-        synchronized (mWmService.mGlobalLock) {
-            mBoundsAnimating = false;
-            for (int i = 0; i < mChildren.size(); i++) {
-                final Task t = mChildren.get(i);
-                t.clearPreserveNonFloatingState();
-            }
-            mWmService.requestTraversal();
-        }
+        mWmService.requestTraversal();
     }
 
     @Override
@@ -1751,6 +1685,12 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
      */
     public boolean deferScheduleMultiWindowModeChanged() {
         if (inPinnedWindowingMode()) {
+            // For the pinned stack, the deferring of the multi-window mode changed is tied to the
+            // transition animation into picture-in-picture, and is called once the animation
+            // completes, or is interrupted in a way that would leave the stack in a non-fullscreen
+            // state.
+            // @see BoundsAnimationController
+            // @see BoundsAnimationControllerTests
             return (mBoundsAnimatingRequested || mBoundsAnimating);
         }
         return false;
