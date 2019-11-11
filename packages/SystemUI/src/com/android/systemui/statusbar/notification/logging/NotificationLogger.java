@@ -220,8 +220,8 @@ public class NotificationLogger implements StateListener {
             }
 
             @Override
-            public void onEntryReinflated(NotificationEntry entry) {
-                mExpansionStateLogger.onEntryReinflated(entry.getKey());
+            public void onPreEntryUpdated(NotificationEntry entry) {
+                mExpansionStateLogger.onEntryUpdated(entry.getKey());
             }
 
             @Override
@@ -480,7 +480,7 @@ public class NotificationLogger implements StateListener {
         }
 
         @VisibleForTesting
-        void onEntryReinflated(String key) {
+        void onEntryUpdated(String key) {
             // When the notification is updated, we should consider the notification as not
             // yet logged.
             mLoggedExpansionState.remove(key);
