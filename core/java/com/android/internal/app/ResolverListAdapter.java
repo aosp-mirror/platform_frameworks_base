@@ -491,7 +491,7 @@ public class ResolverListAdapter extends BaseAdapter {
         return view;
     }
 
-    public View onCreateView(ViewGroup parent) {
+    View onCreateView(ViewGroup parent) {
         return mInflater.inflate(
                 com.android.internal.R.layout.resolve_list_item, parent, false);
     }

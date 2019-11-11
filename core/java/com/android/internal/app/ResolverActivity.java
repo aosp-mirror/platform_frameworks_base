@@ -97,7 +97,7 @@ public class ResolverActivity extends Activity implements
     @UnsupportedAppUsage
     protected ResolverListAdapter mAdapter;
     private boolean mSafeForwardingMode;
-    protected AbsListView mAdapterView;
+    private AbsListView mAdapterView;
     private Button mAlwaysButton;
     private Button mOnceButton;
     protected View mProfileView;
@@ -1075,7 +1075,6 @@ public class ResolverActivity extends Activity implements
             mLayoutId = getLayoutResource();
         }
         setContentView(mLayoutId);
-        mAdapterView = findViewById(R.id.resolver_list);
         return postRebuildList(rebuildCompleted);
     }
 
@@ -1114,26 +1113,37 @@ public class ResolverActivity extends Activity implements
             }
         }
 
+        boolean isAdapterViewVisible = true;
         if (count == 0 && mAdapter.getPlaceholderCount() == 0) {
             final TextView emptyView = findViewById(R.id.empty);
             emptyView.setVisibility(View.VISIBLE);
-            mAdapterView.setVisibility(View.GONE);
-        } else {
-            mAdapterView.setVisibility(View.VISIBLE);
-            onPrepareAdapterView(mAdapterView, mAdapter);
+            isAdapterViewVisible = false;
         }
+
+        onPrepareAdapterView(mAdapter, isAdapterViewVisible);
         return false;
     }
 
-    public void onPrepareAdapterView(AbsListView adapterView, ResolverListAdapter adapter) {
+    /**
+     * Prepare the scrollable view which consumes data in the list adapter.
+     * @param adapter The adapter used to provide data to item views.
+     * @param isVisible True if the scrollable view should be visible; false, otherwise.
+     */
+    public void onPrepareAdapterView(ResolverListAdapter adapter, boolean isVisible) {
+        mAdapterView = findViewById(R.id.resolver_list);
+        if (!isVisible) {
+            mAdapterView.setVisibility(View.GONE);
+            return;
+        }
+        mAdapterView.setVisibility(View.VISIBLE);
         final boolean useHeader = adapter.hasFilteredItem();
-        final ListView listView = adapterView instanceof ListView ? (ListView) adapterView : null;
+        final ListView listView = mAdapterView instanceof ListView ? (ListView) mAdapterView : null;
 
-        adapterView.setAdapter(mAdapter);
+        mAdapterView.setAdapter(mAdapter);
 
         final ItemClickListener listener = new ItemClickListener();
-        adapterView.setOnItemClickListener(listener);
-        adapterView.setOnItemLongClickListener(listener);
+        mAdapterView.setOnItemClickListener(listener);
+        mAdapterView.setOnItemLongClickListener(listener);
 
         if (mSupportsAlwaysUseOption || mUseLayoutForBrowsables) {
             listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);

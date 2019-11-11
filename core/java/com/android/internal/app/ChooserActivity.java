@@ -96,10 +96,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.AbsListView;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -118,6 +115,8 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ImageUtils;
+import com.android.internal.widget.GridLayoutManager;
+import com.android.internal.widget.RecyclerView;
 import com.android.internal.widget.ResolverDrawerLayout;
 
 import com.google.android.collect.Lists;
@@ -167,6 +166,7 @@ public class ChooserActivity extends ResolverActivity implements
 
     @VisibleForTesting
     public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
+    private static final int SINGLE_CELL_SPAN_SIZE = 1;
 
     private boolean mIsAppPredictorComponentAvailable;
     private AppPredictor mAppPredictor;
@@ -222,8 +222,9 @@ public class ChooserActivity extends ResolverActivity implements
     private long mQueriedTargetServicesTimeMs;
     private long mQueriedSharingShortcutsTimeMs;
 
+    private RecyclerView mRecyclerView;
     private ChooserListAdapter mChooserListAdapter;
-    private ChooserRowAdapter mChooserRowAdapter;
+    private ChooserGridAdapter mChooserGridAdapter;
     private int mChooserRowServiceSpacing;
 
     private int mCurrAvailableWidth = 0;
@@ -351,8 +352,8 @@ public class ChooserActivity extends ResolverActivity implements
                 Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
                         + " within " + mImageLoadTimeoutMillis + "ms.");
                 collapseParentView();
-                if (mChooserRowAdapter != null) {
-                    mChooserRowAdapter.hideContentPreview();
+                if (mChooserGridAdapter != null) {
+                    mChooserGridAdapter.hideContentPreview();
                 }
                 mHideParentOnFail = false;
             }
@@ -671,14 +672,14 @@ public class ChooserActivity extends ResolverActivity implements
             final float chooserHeaderScrollElevation =
                     getResources().getDimensionPixelSize(R.dimen.chooser_header_scroll_elevation);
 
-            mAdapterView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                public void onScrollStateChanged(RecyclerView view, int scrollState) {
                 }
 
-                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-                        int totalItemCount) {
+                public void onScrolled(RecyclerView view, int dx, int dy) {
                     if (view.getChildCount() > 0) {
-                        if (firstVisibleItem > 0 || view.getChildAt(0).getTop() < 0) {
+                        View child = view.getLayoutManager().findViewByPosition(0);
+                        if (child == null || child.getTop() < 0) {
                             chooserHeader.setElevation(chooserHeaderScrollElevation);
                             return;
                         }
@@ -847,10 +848,7 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private ViewGroup displayContentPreview(@ContentPreviewType int previewType,
-            Intent targetIntent, LayoutInflater layoutInflater, ViewGroup convertView,
-            ViewGroup parent) {
-        if (convertView != null) return convertView;
-
+            Intent targetIntent, LayoutInflater layoutInflater, ViewGroup parent) {
         ViewGroup layout = null;
 
         switch (previewType) {
@@ -1213,16 +1211,30 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override
-    public void onPrepareAdapterView(AbsListView adapterView, ResolverListAdapter adapter) {
-        final ListView listView = adapterView instanceof ListView ? (ListView) adapterView : null;
+    public void onPrepareAdapterView(ResolverListAdapter adapter, boolean isVisible) {
+        mRecyclerView = findViewById(R.id.resolver_list);
+        if (!isVisible) {
+            mRecyclerView.setVisibility(View.GONE);
+            return;
+        }
+        mRecyclerView.setVisibility(View.VISIBLE);
         if (mCallerChooserTargets != null && mCallerChooserTargets.length > 0) {
             mChooserListAdapter.addServiceResults(null, Lists.newArrayList(mCallerChooserTargets),
                     TARGET_TYPE_DEFAULT);
         }
-        mChooserRowAdapter = new ChooserRowAdapter(mChooserListAdapter);
-        if (listView != null) {
-            listView.setItemsCanFocus(true);
-        }
+        mChooserGridAdapter = new ChooserGridAdapter(mChooserListAdapter);
+        GridLayoutManager glm = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        glm.setSpanCount(mChooserGridAdapter.getMaxTargetsPerRow());
+        glm.setSpanSizeLookup(
+                new GridLayoutManager.SpanSizeLookup() {
+                    @Override
+                    public int getSpanSize(int position) {
+                        return mChooserGridAdapter.getItemViewType(position)
+                                == ChooserGridAdapter.VIEW_TYPE_NORMAL
+                                ? SINGLE_CELL_SPAN_SIZE
+                                : glm.getSpanCount();
+                    }
+                });
     }
 
     @Override
@@ -1996,8 +2008,8 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private void handleScroll(View view, int x, int y, int oldx, int oldy) {
-        if (mChooserRowAdapter != null) {
-            mChooserRowAdapter.handleScroll(view, y, oldy);
+        if (mChooserGridAdapter != null) {
+            mChooserGridAdapter.handleScroll(view, y, oldy);
         }
     }
 
@@ -2008,35 +2020,37 @@ public class ChooserActivity extends ResolverActivity implements
      */
     private void handleLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
             int oldTop, int oldRight, int oldBottom) {
-        if (mChooserRowAdapter == null || mAdapterView == null) {
+        if (mChooserGridAdapter == null || mRecyclerView == null) {
             return;
         }
 
         final int availableWidth = right - left - v.getPaddingLeft() - v.getPaddingRight();
-        if (mChooserRowAdapter.consumeLayoutRequest()
-                || mChooserRowAdapter.calculateChooserTargetWidth(availableWidth)
-                || mAdapterView.getAdapter() == null
+        if (mChooserGridAdapter.consumeLayoutRequest()
+                || mChooserGridAdapter.calculateChooserTargetWidth(availableWidth)
+                || mRecyclerView.getAdapter() == null
                 || availableWidth != mCurrAvailableWidth) {
             mCurrAvailableWidth = availableWidth;
-            mAdapterView.setAdapter(mChooserRowAdapter);
+            mRecyclerView.setAdapter(mChooserGridAdapter);
+            ((GridLayoutManager) mRecyclerView.getLayoutManager())
+                    .setSpanCount(mChooserGridAdapter.getMaxTargetsPerRow());
 
             getMainThreadHandler().post(() -> {
-                if (mResolverDrawerLayout == null || mChooserRowAdapter == null) {
+                if (mResolverDrawerLayout == null || mChooserGridAdapter == null) {
                     return;
                 }
 
                 final int bottomInset = mSystemWindowInsets != null
                                             ? mSystemWindowInsets.bottom : 0;
                 int offset = bottomInset;
-                int rowsToShow = mChooserRowAdapter.getContentPreviewRowCount()
-                        + mChooserRowAdapter.getProfileRowCount()
-                        + mChooserRowAdapter.getServiceTargetRowCount()
-                        + mChooserRowAdapter.getCallerAndRankedTargetRowCount();
+                int rowsToShow = mChooserGridAdapter.getContentPreviewRowCount()
+                        + mChooserGridAdapter.getProfileRowCount()
+                        + mChooserGridAdapter.getServiceTargetRowCount()
+                        + mChooserGridAdapter.getCallerAndRankedTargetRowCount();
 
                 // then this is most likely not a SEND_* action, so check
                 // the app target count
                 if (rowsToShow == 0) {
-                    rowsToShow = mChooserRowAdapter.getCount();
+                    rowsToShow = mChooserGridAdapter.getRowCount();
                 }
 
                 // still zero? then use a default height and leave, which
@@ -2050,15 +2064,22 @@ public class ChooserActivity extends ResolverActivity implements
 
                 int directShareHeight = 0;
                 rowsToShow = Math.min(4, rowsToShow);
-                for (int i = 0; i < Math.min(rowsToShow, mAdapterView.getChildCount()); i++) {
-                    View child = mAdapterView.getChildAt(i);
+                for (int i = 0, childCount = mRecyclerView.getChildCount();
+                        i < childCount && rowsToShow > 0; i++) {
+                    View child = mRecyclerView.getChildAt(i);
+                    if (((GridLayoutManager.LayoutParams)
+                            child.getLayoutParams()).getSpanIndex() != 0) {
+                        continue;
+                    }
                     int height = child.getHeight();
                     offset += height;
 
-                    if (child.getTag() != null
-                            && (child.getTag() instanceof DirectShareViewHolder)) {
+                    if (mChooserGridAdapter.getTargetType(
+                            mRecyclerView.getChildAdapterPosition(child))
+                            == mChooserListAdapter.TARGET_SERVICE) {
                         directShareHeight = height;
                     }
+                    rowsToShow--;
                 }
 
                 boolean isExpandable = getResources().getConfiguration().orientation
@@ -2107,7 +2128,9 @@ public class ChooserActivity extends ResolverActivity implements
 
     @Override // ChooserListCommunicator
     public int getMaxRankedTargets() {
-        return mChooserRowAdapter == null ? 4 : mChooserRowAdapter.getMaxTargetsPerRow();
+        return mChooserGridAdapter == null
+                ? ChooserGridAdapter.MAX_TARGETS_PER_ROW_PORTRAIT
+                : mChooserGridAdapter.getMaxTargetsPerRow();
     }
 
     @Override // ChooserListCommunicator
@@ -2175,7 +2198,40 @@ public class ChooserActivity extends ResolverActivity implements
         return false;
     }
 
-    class ChooserRowAdapter extends BaseAdapter {
+    /**
+     * Used to bind types of individual item including
+     * {@link ChooserGridAdapter#VIEW_TYPE_NORMAL},
+     * {@link ChooserGridAdapter#VIEW_TYPE_CONTENT_PREVIEW},
+     * {@link ChooserGridAdapter#VIEW_TYPE_PROFILE},
+     * and {@link ChooserGridAdapter#VIEW_TYPE_AZ_LABEL}.
+     */
+    final class ItemViewHolder extends RecyclerView.ViewHolder {
+        ResolverListAdapter.ViewHolder mWrappedViewHolder;
+        int mListPosition = ChooserListAdapter.NO_POSITION;
+
+        ItemViewHolder(View itemView, boolean isClickable) {
+            super(itemView);
+            mWrappedViewHolder = new ResolverListAdapter.ViewHolder(itemView);
+            if (isClickable) {
+                itemView.setOnClickListener(v -> startSelected(mListPosition,
+                        false/* always */, true/* filterd */));
+                itemView.setOnLongClickListener(v -> {
+                    showTargetDetails(
+                            mChooserListAdapter.resolveInfoForPosition(
+                                    mListPosition, true/* filtered */));
+                    return true;
+                });
+            }
+        }
+    }
+
+    /**
+     * Adapter for all types of items and targets in ShareSheet.
+     * Note that ranked sections like Direct Share - while appearing grid-like - are handled on the
+     * row level by this adapter but not on the item level. Individual targets within the row are
+     * handled by {@link ChooserListAdapter}
+     */
+    final class ChooserGridAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private ChooserListAdapter mChooserListAdapter;
         private final LayoutInflater mLayoutInflater;
 
@@ -2191,13 +2247,15 @@ public class ChooserActivity extends ResolverActivity implements
         private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
         private static final int VIEW_TYPE_PROFILE = 3;
         private static final int VIEW_TYPE_AZ_LABEL = 4;
+        private static final int VIEW_TYPE_CALLER_AND_RANK = 5;
 
         private static final int MAX_TARGETS_PER_ROW_PORTRAIT = 4;
         private static final int MAX_TARGETS_PER_ROW_LANDSCAPE = 8;
 
         private static final int NUM_EXPANSIONS_TO_HIDE_AZ_LABEL = 20;
 
-        public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
+        ChooserGridAdapter(ChooserListAdapter wrappedAdapter) {
+            super();
             mChooserListAdapter = wrappedAdapter;
             mLayoutInflater = LayoutInflater.from(ChooserActivity.this);
 
@@ -2213,7 +2271,7 @@ public class ChooserActivity extends ResolverActivity implements
                 @Override
                 public void onInvalidated() {
                     super.onInvalidated();
-                    notifyDataSetInvalidated();
+                    notifyDataSetChanged();
                 }
             });
         }
@@ -2229,7 +2287,7 @@ public class ChooserActivity extends ResolverActivity implements
                 return false;
             }
 
-            int newWidth =  width / getMaxTargetsPerRow();
+            int newWidth = width / getMaxTargetsPerRow();
             if (newWidth != mChooserTargetWidth) {
                 mChooserTargetWidth = newWidth;
                 return true;
@@ -2259,22 +2317,7 @@ public class ChooserActivity extends ResolverActivity implements
             return oldValue;
         }
 
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            int viewType = getItemViewType(position);
-            if (viewType == VIEW_TYPE_CONTENT_PREVIEW || viewType == VIEW_TYPE_AZ_LABEL) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public int getCount() {
+        public int getRowCount() {
             return (int) (
                     getContentPreviewRowCount()
                             + getProfileRowCount()
@@ -2326,42 +2369,50 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         @Override
-        public Object getItem(int position) {
-            // We have nothing useful to return here.
-            return position;
+        public int getItemCount() {
+            return (int) (
+                    getContentPreviewRowCount()
+                            + getProfileRowCount()
+                            + getServiceTargetRowCount()
+                            + getCallerAndRankedTargetRowCount()
+                            + getAzLabelRowCount()
+                            + mChooserListAdapter.getAlphaTargetCount()
+            );
         }
 
         @Override
-        public long getItemId(int position) {
-            return position;
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            switch (viewType) {
+                case VIEW_TYPE_CONTENT_PREVIEW:
+                    return new ItemViewHolder(createContentPreviewView(parent), false);
+                case VIEW_TYPE_PROFILE:
+                    return new ItemViewHolder(createProfileView(parent), false);
+                case VIEW_TYPE_AZ_LABEL:
+                    return new ItemViewHolder(createAzLabelView(parent), false);
+                case VIEW_TYPE_NORMAL:
+                    return new ItemViewHolder(mChooserListAdapter.createView(parent), true);
+                case VIEW_TYPE_DIRECT_SHARE:
+                case VIEW_TYPE_CALLER_AND_RANK:
+                    return createItemGroupViewHolder(viewType, parent);
+                default:
+                    // Since we catch all possible viewTypes above, no chance this is being called.
+                    return null;
+            }
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final RowViewHolder holder;
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             int viewType = getItemViewType(position);
-
-            if (viewType == VIEW_TYPE_CONTENT_PREVIEW) {
-                return createContentPreviewView(convertView, parent);
+            switch (viewType) {
+                case VIEW_TYPE_DIRECT_SHARE:
+                case VIEW_TYPE_CALLER_AND_RANK:
+                    bindItemGroupViewHolder(position, (ItemGroupViewHolder) holder);
+                    break;
+                case VIEW_TYPE_NORMAL:
+                    bindItemViewHolder(position, (ItemViewHolder) holder);
+                    break;
+                default:
             }
-
-            if (viewType == VIEW_TYPE_PROFILE) {
-                return createProfileView(convertView, parent);
-            }
-
-            if (viewType == VIEW_TYPE_AZ_LABEL) {
-                return createAzLabelView(parent);
-            }
-
-            if (convertView == null) {
-                holder = createViewHolder(viewType, parent);
-            } else {
-                holder = (RowViewHolder) convertView.getTag();
-            }
-
-            bindViewHolder(position, holder);
-
-            return holder.getViewGroup();
         }
 
         @Override
@@ -2378,7 +2429,7 @@ public class ChooserActivity extends ResolverActivity implements
             if (count > 0 && position < countSum) return VIEW_TYPE_DIRECT_SHARE;
 
             countSum += (count = getCallerAndRankedTargetRowCount());
-            if (count > 0 && position < countSum) return VIEW_TYPE_NORMAL;
+            if (count > 0 && position < countSum) return VIEW_TYPE_CALLER_AND_RANK;
 
             countSum += (count = getAzLabelRowCount());
             if (count > 0 && position < countSum) return VIEW_TYPE_AZ_LABEL;
@@ -2386,27 +2437,22 @@ public class ChooserActivity extends ResolverActivity implements
             return VIEW_TYPE_NORMAL;
         }
 
-        @Override
-        public int getViewTypeCount() {
-            return 5;
+        public int getTargetType(int position) {
+            return mChooserListAdapter.getPositionTargetType(getListPosition(position));
         }
 
-        private ViewGroup createContentPreviewView(View convertView, ViewGroup parent) {
+        private ViewGroup createContentPreviewView(ViewGroup parent) {
             Intent targetIntent = getTargetIntent();
             int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
 
-            if (convertView == null) {
-                getMetricsLogger().write(new LogMaker(MetricsEvent.ACTION_SHARE_WITH_PREVIEW)
+            getMetricsLogger().write(new LogMaker(MetricsEvent.ACTION_SHARE_WITH_PREVIEW)
                         .setSubtype(previewType));
-            }
 
-            return displayContentPreview(previewType, targetIntent, mLayoutInflater,
-                    (ViewGroup) convertView, parent);
+            return displayContentPreview(previewType, targetIntent, mLayoutInflater, parent);
         }
 
-        private View createProfileView(View convertView, ViewGroup parent) {
-            View profileRow = convertView != null ? convertView : mLayoutInflater.inflate(
-                    R.layout.chooser_profile_row, parent, false);
+        private View createProfileView(ViewGroup parent) {
+            View profileRow = mLayoutInflater.inflate(R.layout.chooser_profile_row, parent, false);
             profileRow.setBackground(
                     getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
             mProfileView = profileRow.findViewById(R.id.profile_button);
@@ -2419,7 +2465,7 @@ public class ChooserActivity extends ResolverActivity implements
             return mLayoutInflater.inflate(R.layout.chooser_az_label_row, parent, false);
         }
 
-        private RowViewHolder loadViewsIntoRow(RowViewHolder holder) {
+        private ItemGroupViewHolder loadViewsIntoGroup(ItemGroupViewHolder holder) {
             final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
             final int exactSpec = MeasureSpec.makeMeasureSpec(mChooserTargetWidth,
                     MeasureSpec.EXACTLY);
@@ -2445,7 +2491,7 @@ public class ChooserActivity extends ResolverActivity implements
                         return true;
                     }
                 });
-                ViewGroup row = holder.addView(i, v);
+                holder.addView(i, v);
 
                 // Force Direct Share to be 2 lines and auto-wrap to second line via hoz scroll =
                 // false. TextView#setHorizontallyScrolling must be reset after #setLines. Must be
@@ -2490,7 +2536,7 @@ public class ChooserActivity extends ResolverActivity implements
             }
         }
 
-        RowViewHolder createViewHolder(int viewType, ViewGroup parent) {
+        ItemGroupViewHolder createItemGroupViewHolder(int viewType, ViewGroup parent) {
             if (viewType == VIEW_TYPE_DIRECT_SHARE) {
                 ViewGroup parentGroup = (ViewGroup) mLayoutInflater.inflate(
                         R.layout.chooser_row_direct_share, parent, false);
@@ -2503,14 +2549,14 @@ public class ChooserActivity extends ResolverActivity implements
 
                 mDirectShareViewHolder = new DirectShareViewHolder(parentGroup,
                         Lists.newArrayList(row1, row2), getMaxTargetsPerRow());
-                loadViewsIntoRow(mDirectShareViewHolder);
+                loadViewsIntoGroup(mDirectShareViewHolder);
 
                 return mDirectShareViewHolder;
             } else {
                 ViewGroup row = (ViewGroup) mLayoutInflater.inflate(R.layout.chooser_row, parent,
                         false);
-                RowViewHolder holder = new SingleRowViewHolder(row, getMaxTargetsPerRow());
-                loadViewsIntoRow(holder);
+                ItemGroupViewHolder holder = new SingleRowViewHolder(row, getMaxTargetsPerRow());
+                loadViewsIntoGroup(holder);
 
                 return holder;
             }
@@ -2538,19 +2584,20 @@ public class ChooserActivity extends ResolverActivity implements
             return positionType;
         }
 
-        void bindViewHolder(int rowPosition, RowViewHolder holder) {
-            final int start = getFirstRowPosition(rowPosition);
-            final int startType = getRowType(start);
-            final int lastStartType = getRowType(getFirstRowPosition(rowPosition - 1));
+        void bindItemViewHolder(int position, ItemViewHolder holder) {
+            View v = holder.itemView;
+            int listPosition = getListPosition(position);
+            holder.mListPosition = listPosition;
+            mChooserListAdapter.bindView(listPosition, v);
+        }
 
-            final ViewGroup row = holder.getViewGroup();
-
-            if (startType != lastStartType
-                    || rowPosition == getContentPreviewRowCount() + getProfileRowCount()) {
-                row.setForeground(
+        void bindItemGroupViewHolder(int position, ItemGroupViewHolder holder) {
+            final ViewGroup viewGroup = (ViewGroup) holder.itemView;
+            int start = getListPosition(position);
+            int startType = getRowType(start);
+            if (viewGroup.getForeground() == null) {
+                viewGroup.setForeground(
                         getResources().getDrawable(R.drawable.chooser_row_layer_list, null));
-            } else {
-                row.setForeground(null);
             }
 
             int columnCount = holder.getColumnCount();
@@ -2560,7 +2607,7 @@ public class ChooserActivity extends ResolverActivity implements
             }
 
             if (end == start && mChooserListAdapter.getItem(start) instanceof EmptyTargetInfo) {
-                final TextView textView = row.findViewById(R.id.chooser_row_text_option);
+                final TextView textView = viewGroup.findViewById(R.id.chooser_row_text_option);
 
                 if (textView.getVisibility() != View.VISIBLE) {
                     textView.setAlpha(0.0f);
@@ -2597,27 +2644,28 @@ public class ChooserActivity extends ResolverActivity implements
             }
         }
 
-        int getFirstRowPosition(int row) {
-            row -= getContentPreviewRowCount() + getProfileRowCount();
+        int getListPosition(int position) {
+            position -= getContentPreviewRowCount() + getProfileRowCount();
 
             final int serviceCount = mChooserListAdapter.getServiceTargetCount();
             final int serviceRows = (int) Math.ceil((float) serviceCount
                     / ChooserListAdapter.MAX_SERVICE_TARGETS);
-            if (row < serviceRows) {
-                return row * getMaxTargetsPerRow();
+            if (position < serviceRows) {
+                return position * getMaxTargetsPerRow();
             }
+
+            position -= serviceRows;
 
             final int callerAndRankedCount = mChooserListAdapter.getCallerTargetCount()
                                                  + mChooserListAdapter.getRankedTargetCount();
             final int callerAndRankedRows = getCallerAndRankedTargetRowCount();
-            if (row < callerAndRankedRows + serviceRows) {
-                return serviceCount + (row - serviceRows) * getMaxTargetsPerRow();
+            if (position < callerAndRankedRows) {
+                return serviceCount + position * getMaxTargetsPerRow();
             }
 
-            row -= getAzLabelRowCount();
+            position -= getAzLabelRowCount() + callerAndRankedRows;
 
-            return callerAndRankedCount + serviceCount
-                    + (row - callerAndRankedRows - serviceRows) * getMaxTargetsPerRow();
+            return callerAndRankedCount + serviceCount + position;
         }
 
         public void handleScroll(View v, int y, int oldy) {
@@ -2631,18 +2679,24 @@ public class ChooserActivity extends ResolverActivity implements
                     && !isInMultiWindowMode();
 
             if (mDirectShareViewHolder != null && canExpandDirectShare) {
-                mDirectShareViewHolder.handleScroll(mAdapterView, y, oldy, getMaxTargetsPerRow());
+                mDirectShareViewHolder.handleScroll(mRecyclerView, y, oldy, getMaxTargetsPerRow());
             }
         }
     }
 
-    abstract class RowViewHolder {
+    /**
+     * Used to bind types for group of items including:
+     * {@link ChooserGridAdapter#VIEW_TYPE_DIRECT_SHARE},
+     * and {@link ChooserGridAdapter#VIEW_TYPE_CALLER_AND_RANK}.
+     */
+    abstract class ItemGroupViewHolder extends RecyclerView.ViewHolder {
         protected int mMeasuredRowHeight;
         private int[] mItemIndices;
         protected final View[] mCells;
         private final int mColumnCount;
 
-        RowViewHolder(int cellCount) {
+        ItemGroupViewHolder(int cellCount, View itemView) {
+            super(itemView);
             this.mCells = new View[cellCount];
             this.mItemIndices = new int[cellCount];
             this.mColumnCount = cellCount;
@@ -2685,11 +2739,11 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    class SingleRowViewHolder extends RowViewHolder {
+    class SingleRowViewHolder extends ItemGroupViewHolder {
         private final ViewGroup mRow;
 
         SingleRowViewHolder(ViewGroup row, int cellCount) {
-            super(cellCount);
+            super(cellCount, row);
 
             this.mRow = row;
         }
@@ -2719,7 +2773,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    class DirectShareViewHolder extends RowViewHolder {
+    class DirectShareViewHolder extends ItemGroupViewHolder {
         private final ViewGroup mParent;
         private final List<ViewGroup> mRows;
         private int mCellCountPerRow;
@@ -2732,7 +2786,7 @@ public class ChooserActivity extends ResolverActivity implements
         private final boolean[] mCellVisibility;
 
         DirectShareViewHolder(ViewGroup parent, List<ViewGroup> rows, int cellCountPerRow) {
-            super(rows.size() * cellCountPerRow);
+            super(rows.size() * cellCountPerRow, parent);
 
             this.mParent = parent;
             this.mRows = rows;
@@ -2767,7 +2821,7 @@ public class ChooserActivity extends ResolverActivity implements
 
             mDirectShareMinHeight = getRow(0).getMeasuredHeight();
             mDirectShareCurrHeight = mDirectShareCurrHeight > 0
-                                         ? mDirectShareCurrHeight : mDirectShareMinHeight;
+                    ? mDirectShareCurrHeight : mDirectShareMinHeight;
             mDirectShareMaxHeight = 2 * mDirectShareMinHeight;
         }
 
@@ -2800,7 +2854,7 @@ public class ChooserActivity extends ResolverActivity implements
             }
         }
 
-        public void handleScroll(AbsListView view, int y, int oldy, int maxTargetsPerRow) {
+        public void handleScroll(RecyclerView view, int y, int oldy, int maxTargetsPerRow) {
             // only exit early if fully collapsed, otherwise onListRebuilt() with shifting
             // targets can lock us into an expanded mode
             boolean notExpanded = mDirectShareCurrHeight == mDirectShareMinHeight;
