@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
@@ -418,7 +419,16 @@ public abstract class NetworkAgent extends Handler {
         if (score < 0) {
             throw new IllegalArgumentException("Score must be >= 0");
         }
-        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED,  score, 0);
+        final NetworkScore ns = new NetworkScore();
+        ns.putIntExtension(NetworkScore.LEGACY_SCORE, score);
+        updateScore(ns);
+    }
+
+    /**
+     * Called by the bearer code when it has a new NetworkScore for this network.
+     */
+    public void updateScore(@NonNull NetworkScore ns) {
+        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, new NetworkScore(ns));
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package com.android.server.compat;
 
+import android.compat.Compatibility.ChangeConfig;
 import android.content.pm.ApplicationInfo;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -26,6 +27,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.CompatibilityChangeConfig;
+import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.server.compat.config.Change;
 import com.android.server.compat.config.XmlParser;
 
@@ -37,6 +39,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 /**
@@ -240,6 +244,49 @@ public final class CompatConfig {
                 CompatChange c = mChanges.valueAt(i);
                 pw.println(c.toString());
             }
+        }
+    }
+
+    /**
+     * Get the config for a given app.
+     *
+     * @param applicationInfo the {@link ApplicationInfo} for which the info should be dumped.
+     * @return A {@link CompatibilityChangeConfig} which contains the compat config info for the
+     *         given app.
+     */
+
+    public CompatibilityChangeConfig getAppConfig(ApplicationInfo applicationInfo) {
+        Set<Long> enabled = new HashSet<>();
+        Set<Long> disabled = new HashSet<>();
+        synchronized (mChanges) {
+            for (int i = 0; i < mChanges.size(); ++i) {
+                CompatChange c = mChanges.valueAt(i);
+                if (c.isEnabled(applicationInfo)) {
+                    enabled.add(c.getId());
+                } else {
+                    disabled.add(c.getId());
+                }
+            }
+        }
+        return new CompatibilityChangeConfig(new ChangeConfig(enabled, disabled));
+    }
+
+    /**
+     * Dumps all the compatibility change information.
+     *
+     * @return An array of {@link CompatibilityChangeInfo} with the current changes.
+     */
+    public CompatibilityChangeInfo[] dumpChanges() {
+        synchronized (mChanges) {
+            CompatibilityChangeInfo[] changeInfos = new CompatibilityChangeInfo[mChanges.size()];
+            for (int i = 0; i < mChanges.size(); ++i) {
+                CompatChange change = mChanges.valueAt(i);
+                changeInfos[i] = new CompatibilityChangeInfo(change.getId(),
+                                                      change.getName(),
+                                                      change.getEnableAfterTargetSdk(),
+                                                      change.getDisabled());
+            }
+            return changeInfos;
         }
     }
 

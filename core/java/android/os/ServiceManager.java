@@ -102,6 +102,10 @@ public final class ServiceManager {
     });
 
     @UnsupportedAppUsage
+    public ServiceManager() {
+    }
+
+    @UnsupportedAppUsage
     private static IServiceManager getIServiceManager() {
         if (sServiceManager != null) {
             return sServiceManager;

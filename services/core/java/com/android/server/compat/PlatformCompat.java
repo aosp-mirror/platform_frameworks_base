@@ -25,6 +25,7 @@ import android.util.StatsLog;
 
 import com.android.internal.compat.ChangeReporter;
 import com.android.internal.compat.CompatibilityChangeConfig;
+import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.util.DumpUtils;
 
@@ -111,6 +112,16 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     public void clearOverrides(String packageName) {
         CompatConfig config = CompatConfig.get();
         config.removePackageOverrides(packageName);
+    }
+
+    @Override
+    public CompatibilityChangeConfig getAppConfig(ApplicationInfo appInfo) {
+        return CompatConfig.get().getAppConfig(appInfo);
+    }
+
+    @Override
+    public CompatibilityChangeInfo[] listAllChanges() {
+        return CompatConfig.get().dumpChanges();
     }
 
     @Override

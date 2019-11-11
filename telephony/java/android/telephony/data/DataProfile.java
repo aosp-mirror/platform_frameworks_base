@@ -25,8 +25,8 @@ import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Annotation.ApnType;
 import android.telephony.TelephonyManager.NetworkTypeBitMask;
-import android.telephony.data.ApnSetting.ApnType;
 import android.telephony.data.ApnSetting.AuthType;
 import android.text.TextUtils;
 

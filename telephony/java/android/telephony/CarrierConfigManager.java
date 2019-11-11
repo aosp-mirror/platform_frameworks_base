@@ -1448,6 +1448,15 @@ public class CarrierConfigManager {
             "stk_disable_launch_browser_bool";
 
     /**
+      * Boolean indicating if the helper text for STK GET INKEY/INPUT commands with the digit only
+      * mode is displayed on the input screen.
+      * The helper text is dispayed regardless of the input mode, if {@code false}.
+      * @hide
+      */
+    public static final String KEY_HIDE_DIGITS_HELPER_TEXT_ON_STK_INPUT_SCREEN_BOOL =
+            "hide_digits_helper_text_on_stk_input_screen_bool";
+
+    /**
      * Boolean indicating if show data RAT icon on status bar even when data is disabled
      * @hide
      */
@@ -1827,6 +1836,13 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL =
             "support_direct_fdn_dialing_bool";
+
+    /**
+     * Int indicating the max number length for FDN
+     * @hide
+     */
+    public static final String KEY_FDN_NUMBER_LENGTH_LIMIT_INT =
+            "fdn_number_length_limit_int";
 
     /**
      * Report IMEI as device id even if it's a CDMA/LTE phone.
@@ -2826,6 +2842,28 @@ public class CarrierConfigManager {
             "ping_test_before_data_switch_bool";
 
     /**
+     * Controls whether to switch data to primary from opportunistic subscription
+     * if primary is out of service. This control only affects system or 1st party app
+     * initiated data switch, but will not override data switch initiated by privileged carrier apps
+     * This carrier config is used to disable this feature.
+     * @hide
+     */
+    public static final String KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL =
+            "switch_data_to_primary_if_primary_is_oos_bool";
+
+    /**
+     * Controls back off time in milli seconds for switching back to
+     * opportunistic subscription. This time will be added to
+     * {@link CarrierConfigManager#KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG} to
+     * determine hysteresis time if there is frequent switching
+     * (determined by system app or 1st party app) between primary and opportunistic
+     * subscription.
+     * @hide
+     */
+    public static final String KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG =
+            "opportunistic_network_backoff_time_long";
+
+    /**
      * Indicates zero or more emergency number prefix(es), because some carrier requires
      * if users dial an emergency number address with a specific prefix, the combination of the
      * prefix and the address is also a valid emergency number to dial. For example, an emergency
@@ -2863,6 +2901,16 @@ public class CarrierConfigManager {
      */
     public static final String KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN =
             "always_show_primary_signal_bar_in_opportunistic_network_boolean";
+
+    /**
+     * Upon data switching between subscriptions within a carrier group, if switch depends on
+     * validation result, this value defines customized value of how long we wait for validation
+     * success before we fail and revoke the switch.
+     * Time out is in milliseconds.
+     * @hide
+     */
+    public static final String KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG =
+            "data_switch_validation_timeout_long";
 
     /**
      * GPS configs. See android.hardware.gnss@1.0 IGnssConfiguration.
@@ -3209,6 +3257,14 @@ public class CarrierConfigManager {
     public static final String KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY =
             "disconnect_cause_play_busytone_int_array";
 
+    /**
+     * Flag specifying whether to prevent sending CLIR activation("*31#") and deactivation("#31#")
+     * code only without dialing number.
+     * When {@code true}, these are prevented, {@code false} otherwise.
+     */
+    public static final String KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL =
+            "prevent_clir_activation_and_deactivation_code_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -3411,6 +3467,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
+        sDefaults.putInt(KEY_FDN_NUMBER_LENGTH_LIMIT_INT, 20);
         sDefaults.putBoolean(KEY_CARRIER_DEFAULT_DATA_ROAMING_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_SKIP_CF_FAIL_TO_DISABLE_DIALOG_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_ENHANCED_CALL_BLOCKING_BOOL, true);
@@ -3519,6 +3576,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_METERED_NETWORK_FOR_CERT_DOWNLOAD_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_DIGITS_HELPER_TEXT_ON_STK_INPUT_SCREEN_BOOL, true);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putInt(KEY_EMERGENCY_NOTIFICATION_DELAY_INT, -1);
@@ -3612,6 +3670,9 @@ public class CarrierConfigManager {
         /* Default value is 3 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 3000);
         sDefaults.putBoolean(KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL, true);
+        sDefaults.putBoolean(KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL, true);
+        /* Default value is 10 seconds. */
+        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG, 10000);
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
@@ -3639,6 +3700,8 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, null);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
+        sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
+        sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
     }
 
     /**

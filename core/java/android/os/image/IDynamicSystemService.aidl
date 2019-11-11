@@ -24,11 +24,12 @@ interface IDynamicSystemService
      * Start DynamicSystem installation. This call may take 60~90 seconds. The caller
      * may use another thread to call the getStartProgress() to get the progress.
      *
-     * @param systemSize system size in bytes
-     * @param userdataSize userdata size in bytes
+     * @param name The DSU partition name
+     * @param size Size of the DSU image in bytes
+     * @param readOnly True if this partition is readOnly
      * @return true if the call succeeds
      */
-    boolean startInstallation(long systemSize, long userdataSize);
+    boolean startInstallation(@utf8InCpp String name, long size, boolean readOnly);
 
     /**
      * Query the progress of the current installation operation. This can be called while

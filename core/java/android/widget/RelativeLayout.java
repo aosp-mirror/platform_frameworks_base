@@ -36,7 +36,6 @@ import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inspector.InspectableProperty;
-import android.view.inspector.InspectionCompanion;
 import android.view.inspector.PropertyMapper;
 import android.view.inspector.PropertyReader;
 import android.widget.RemoteViews.RemoteView;
@@ -73,7 +72,7 @@ import java.util.TreeSet;
  *
  * <p>This behavior has been preserved for apps that set <code>android:targetSdkVersion="17"</code>
  * or older in their manifest's <code>uses-sdk</code> tag for compatibility. Apps targeting SDK
- * version 18 or newer will receive the correct behavior</p>
+ * version 18 or newer will receive the correct behavior.</p>
  *
  * <p>See the <a href="{@docRoot}guide/topics/ui/layout/relative.html">Relative
  * Layout</a> guide.</p>
@@ -2026,6 +2025,11 @@ public class RelativeLayout extends ViewGroup {
          * A node with no dependent is considered a root of the graph.
          */
         static class Node {
+
+            @UnsupportedAppUsage
+            Node() {
+            }
+
             /**
              * The view representing this node in the layout.
              */

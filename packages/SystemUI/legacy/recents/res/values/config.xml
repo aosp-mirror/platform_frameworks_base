@@ -26,6 +26,14 @@
      (package/class)  -->
     <string name="config_recentsComponent" translatable="false">com.android.systemui.recents.LegacyRecentsImpl</string>
 
+    <!-- SystemUI Services (per user): The classes of the stuff to start for each user. This is a subset of the config_systemUIServiceComponents -->
+    <string-array name="config_systemUIServiceComponentsPerUser" translatable="false">
+        <item>com.android.systemui.Dependency$DependencyCreator</item>
+        <item>com.android.systemui.util.NotificationChannels</item>
+        <item>com.android.systemui.statusbar.CommandQueue$CommandQueueStart</item>
+        <item>com.android.systemui.recents.Recents</item>
+    </string-array>
+
     <!-- Whether recents should use hardware layers for its taskviews. This flag can be enabled
     for devices where the java drawing of round rects may be slow -->
     <bool name="config_recents_use_hardware_layers">false</bool>

@@ -57,7 +57,6 @@ public class NotificationData {
 
     private final ArrayMap<String, NotificationEntry> mEntries = new ArrayMap<>();
     private final ArrayList<NotificationEntry> mSortedAndFiltered = new ArrayList<>();
-    private final ArrayList<NotificationEntry> mFilteredForUser = new ArrayList<>();
 
     private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
@@ -166,20 +165,20 @@ public class NotificationData {
     }
 
     public ArrayList<NotificationEntry> getNotificationsForCurrentUser() {
-        mFilteredForUser.clear();
-
         synchronized (mEntries) {
             final int len = mEntries.size();
+            ArrayList<NotificationEntry> filteredForUser = new ArrayList<>(len);
+
             for (int i = 0; i < len; i++) {
                 NotificationEntry entry = mEntries.valueAt(i);
                 final StatusBarNotification sbn = entry.notification;
                 if (!getEnvironment().isNotificationForCurrentProfiles(sbn)) {
                     continue;
                 }
-                mFilteredForUser.add(entry);
+                filteredForUser.add(entry);
             }
+            return filteredForUser;
         }
-        return mFilteredForUser;
     }
 
     public NotificationEntry get(String key) {

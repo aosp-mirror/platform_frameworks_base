@@ -29,6 +29,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.hardware.vibrator.V1_0.EffectStrength;
+import android.hardware.vibrator.V1_4.Capabilities;
 import android.icu.text.DateFormat;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -108,6 +109,9 @@ public class VibratorService extends IVibratorService.Stub
     // If a vibration is playing for longer than 5s, it's probably not haptic feedback.
     private static final long MAX_HAPTIC_FEEDBACK_DURATION = 5000;
 
+    // If HAL supports callbacks set the timeout to ASYNC_TIMEOUT_MULTIPLIER * duration.
+    private static final long ASYNC_TIMEOUT_MULTIPLIER = 2;
+
 
     // A mapping from the intensity adjustment to the scaling to apply, where the intensity
     // adjustment is defined as the delta between the default intensity level and the user selected
@@ -123,6 +127,7 @@ public class VibratorService extends IVibratorService.Stub
     private final boolean mAllowPriorityVibrationsInLowPowerMode;
     private final boolean mSupportsAmplitudeControl;
     private final boolean mSupportsExternalControl;
+    private final long mCapabilities;
     private final int mDefaultVibrationAmplitude;
     private final SparseArray<VibrationEffect> mFallbackEffects;
     private final SparseArray<Integer> mProcStatesCache = new SparseArray();
@@ -163,9 +168,10 @@ public class VibratorService extends IVibratorService.Stub
     static native void vibratorOff();
     static native boolean vibratorSupportsAmplitudeControl();
     static native void vibratorSetAmplitude(int amplitude);
-    static native long vibratorPerformEffect(long effect, long strength);
+    static native long vibratorPerformEffect(long effect, long strength, Vibration vibration);
     static native boolean vibratorSupportsExternalControl();
     static native void vibratorSetExternalControl(boolean enabled);
+    static native long vibratorGetCapabilities();
 
     private final IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
@@ -219,6 +225,14 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         public void binderDied() {
+            synchronized (mLock) {
+                if (this == mCurrentVibration) {
+                    doCancelVibrateLocked();
+                }
+            }
+        }
+
+        private void onComplete() {
             synchronized (mLock) {
                 if (this == mCurrentVibration) {
                     doCancelVibrateLocked();
@@ -347,6 +361,7 @@ public class VibratorService extends IVibratorService.Stub
 
         mSupportsAmplitudeControl = vibratorSupportsAmplitudeControl();
         mSupportsExternalControl = vibratorSupportsExternalControl();
+        mCapabilities = vibratorGetCapabilities();
 
         mContext = context;
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -1135,10 +1150,14 @@ public class VibratorService extends IVibratorService.Stub
             }
             // Input devices don't support prebaked effect, so skip trying it with them.
             if (!usingInputDeviceVibrators) {
-                long timeout = vibratorPerformEffect(prebaked.getId(),
-                        prebaked.getEffectStrength());
+                long duration = vibratorPerformEffect(prebaked.getId(),
+                        prebaked.getEffectStrength(), vib);
+                long timeout = duration;
+                if ((mCapabilities & Capabilities.PERFORM_COMPLETION_CALLBACK) != 0) {
+                    timeout *= ASYNC_TIMEOUT_MULTIPLIER;
+                }
                 if (timeout > 0) {
-                    noteVibratorOnLocked(vib.uid, timeout);
+                    noteVibratorOnLocked(vib.uid, duration);
                     return timeout;
                 }
             }

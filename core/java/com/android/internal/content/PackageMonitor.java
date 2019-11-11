@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.util.Slog;
+
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 
@@ -70,6 +71,10 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     String[] mModifiedComponents;
 
     String[] mTempArray = new String[1];
+
+    @UnsupportedAppUsage
+    public PackageMonitor() {
+    }
 
     @UnsupportedAppUsage
     public void register(Context context, Looper thread, boolean externalStorage) {

@@ -23,6 +23,10 @@ import android.annotation.UnsupportedAppUsage;
 import android.net.LinkProperties;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Annotation.ApnType;
+import android.telephony.Annotation.DataFailureCause;
+import android.telephony.Annotation.DataState;
+import android.telephony.Annotation.NetworkType;
 import android.telephony.data.ApnSetting;
 
 import java.util.Objects;
@@ -47,10 +51,10 @@ import java.util.Objects;
 @SystemApi
 public final class PreciseDataConnectionState implements Parcelable {
 
-    private @TelephonyManager.DataState int mState = TelephonyManager.DATA_UNKNOWN;
-    private @TelephonyManager.NetworkType int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-    private @DataFailCause.FailCause int mFailCause = DataFailCause.NONE;
-    private @ApnSetting.ApnType int mAPNTypes = ApnSetting.TYPE_NONE;
+    private @DataState int mState = TelephonyManager.DATA_UNKNOWN;
+    private @NetworkType int mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    private @DataFailureCause int mFailCause = DataFailCause.NONE;
+    private @ApnType int mAPNTypes = ApnSetting.TYPE_NONE;
     private String mAPN = "";
     private LinkProperties mLinkProperties = null;
 
@@ -60,11 +64,11 @@ public final class PreciseDataConnectionState implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
-    public PreciseDataConnectionState(@TelephonyManager.DataState int state,
-                                      @TelephonyManager.NetworkType int networkType,
-                                      @ApnSetting.ApnType int apnTypes, String apn,
+    public PreciseDataConnectionState(@DataState int state,
+                                      @NetworkType int networkType,
+                                      @ApnType int apnTypes, String apn,
                                       LinkProperties linkProperties,
-                                      @DataFailCause.FailCause int failCause) {
+                                      @DataFailureCause int failCause) {
         mState = state;
         mNetworkType = networkType;
         mAPNTypes = apnTypes;
@@ -99,7 +103,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      * Returns the state of data connection that supported the apn types returned by
      * {@link #getDataConnectionApnTypeBitMask()}
      */
-    public @TelephonyManager.DataState int getDataConnectionState() {
+    public @DataState int getDataConnectionState() {
         return mState;
     }
 
@@ -107,7 +111,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      * Returns the network type associated with this data connection.
      * @hide
      */
-    public @TelephonyManager.NetworkType int getDataConnectionNetworkType() {
+    public @NetworkType int getDataConnectionNetworkType() {
         return mNetworkType;
     }
 
@@ -115,7 +119,7 @@ public final class PreciseDataConnectionState implements Parcelable {
      * Returns the data connection APN types supported by this connection and triggers
      * {@link PreciseDataConnectionState} change.
      */
-    public @ApnSetting.ApnType int getDataConnectionApnTypeBitMask() {
+    public @ApnType int getDataConnectionApnTypeBitMask() {
         return mAPNTypes;
     }
 
@@ -139,7 +143,7 @@ public final class PreciseDataConnectionState implements Parcelable {
     /**
      * Returns data connection fail cause, in case there was a failure.
      */
-    public @DataFailCause.FailCause int getDataConnectionFailCause() {
+    public @Annotation.DataFailureCause int getDataConnectionFailCause() {
         return mFailCause;
     }
 

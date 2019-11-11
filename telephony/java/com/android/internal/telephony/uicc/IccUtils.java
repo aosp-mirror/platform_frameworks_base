@@ -25,6 +25,8 @@ import android.telephony.Rlog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.GsmAlphabet;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -53,6 +55,7 @@ public class IccUtils {
      *
      * Stops on invalid BCD value, returning string so far
      */
+    @UnsupportedAppUsage
     public static String
     bcdToString(byte[] data, int offset, int length) {
         StringBuilder ret = new StringBuilder(length*2);
@@ -180,6 +183,7 @@ public class IccUtils {
     /**
      * Decode cdma byte into String.
      */
+    @UnsupportedAppUsage
     public static String
     cdmaBcdToString(byte[] data, int offset, int length) {
         StringBuilder ret = new StringBuilder(length);
@@ -215,6 +219,7 @@ public class IccUtils {
      * assume the digit is set to 0 but shall store the entire field
      * exactly as received"
      */
+    @UnsupportedAppUsage
     public static int
     gsmBcdByteToInt(byte b) {
         int ret = 0;
@@ -237,6 +242,7 @@ public class IccUtils {
      * is in the least significant nibble and the most significant
      * is in the most significant nibble.
      */
+    @UnsupportedAppUsage
     public static int
     cdmaBcdByteToInt(byte b) {
         int ret = 0;
@@ -288,6 +294,7 @@ public class IccUtils {
      *          contain a 16 bit number which defines the complete 16 bit
      *          base pointer to a "half page" in the UCS2 code space...
      */
+    @UnsupportedAppUsage
     public static String
     adnStringFieldToString(byte[] data, int offset, int length) {
         if (length == 0) {
@@ -379,6 +386,7 @@ public class IccUtils {
         return GsmAlphabet.gsm8BitUnpackedToString(data, offset, length, defaultCharset.trim());
     }
 
+    @UnsupportedAppUsage
     public static int
     hexCharToInt(char c) {
         if (c >= '0' && c <= '9') return (c - '0');
@@ -398,6 +406,7 @@ public class IccUtils {
      *
      * @throws RuntimeException on invalid format
      */
+    @UnsupportedAppUsage
     public static byte[]
     hexStringToBytes(String s) {
         byte[] ret;
@@ -424,6 +433,7 @@ public class IccUtils {
      *
      * @return hex string representation of bytes array
      */
+    @UnsupportedAppUsage
     public static String
     bytesToHexString(byte[] bytes) {
         if (bytes == null) return null;
@@ -451,6 +461,7 @@ public class IccUtils {
      * "offset" points to "octet 3", the coding scheme byte
      * empty string returned on decode error
      */
+    @UnsupportedAppUsage
     public static String
     networkNameToString(byte[] data, int offset, int length) {
         String ret;
@@ -501,6 +512,7 @@ public class IccUtils {
      * @param length The length of image body
      * @return The bitmap
      */
+    @UnsupportedAppUsage
     public static Bitmap parseToBnW(byte[] data, int length){
         int valueIndex = 0;
         int width = data[valueIndex++] & 0xFF;
@@ -543,6 +555,7 @@ public class IccUtils {
      * @param transparency with or without transparency
      * @return The color bitmap
      */
+    @UnsupportedAppUsage
     public static Bitmap parseToRGB(byte[] data, int length,
             boolean transparency) {
         int valueIndex = 0;

@@ -16,27 +16,28 @@
 
 package com.android.internal.telephony;
 
-import android.telephony.Rlog;
-import android.os.Build;
-import android.util.SparseIntArray;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.telephony.SmsManager;
-import android.telephony.TelephonyManager;
+import android.os.Build;
+import android.telephony.Rlog;
+import android.util.SparseIntArray;
 
-import com.android.internal.util.XmlUtils;
 import com.android.internal.telephony.cdma.sms.UserData;
+import com.android.internal.util.XmlUtils;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 public class Sms7BitEncodingTranslator {
     private static final String TAG = "Sms7BitEncodingTranslator";
+    @UnsupportedAppUsage
     private static final boolean DBG = Build.IS_DEBUGGABLE ;
     private static boolean mIs7BitTranslationTableLoaded = false;
     private static SparseIntArray mTranslationTable = null;
+    @UnsupportedAppUsage
     private static SparseIntArray mTranslationTableCommon = null;
+    @UnsupportedAppUsage
     private static SparseIntArray mTranslationTableGSM = null;
+    @UnsupportedAppUsage
     private static SparseIntArray mTranslationTableCDMA = null;
 
     // Parser variables

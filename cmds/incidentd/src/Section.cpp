@@ -546,16 +546,16 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
             ;
             android_log_list_element elem;
 
-            lastTimestamp.tv_sec = msg.entry_v1.sec;
-            lastTimestamp.tv_nsec = msg.entry_v1.nsec;
+            lastTimestamp.tv_sec = msg.entry.sec;
+            lastTimestamp.tv_nsec = msg.entry.nsec;
 
             // format a BinaryLogEntry
             uint64_t token = proto.start(LogProto::BINARY_LOGS);
-            proto.write(BinaryLogEntry::SEC, msg.entry_v1.sec);
-            proto.write(BinaryLogEntry::NANOSEC, msg.entry_v1.nsec);
-            proto.write(BinaryLogEntry::UID, (int)msg.entry_v4.uid);
-            proto.write(BinaryLogEntry::PID, msg.entry_v1.pid);
-            proto.write(BinaryLogEntry::TID, msg.entry_v1.tid);
+            proto.write(BinaryLogEntry::SEC, (int32_t)msg.entry.sec);
+            proto.write(BinaryLogEntry::NANOSEC, (int32_t)msg.entry.nsec);
+            proto.write(BinaryLogEntry::UID, (int)msg.entry.uid);
+            proto.write(BinaryLogEntry::PID, msg.entry.pid);
+            proto.write(BinaryLogEntry::TID, (int32_t)msg.entry.tid);
             proto.write(BinaryLogEntry::TAG_INDEX,
                         get4LE(reinterpret_cast<uint8_t const*>(msg.msg())));
             do {
@@ -603,7 +603,7 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
             }
         } else {
             AndroidLogEntry entry;
-            err = android_log_processLogBuffer(&msg.entry_v1, &entry);
+            err = android_log_processLogBuffer(&msg.entry, &entry);
             if (err != NO_ERROR) {
                 ALOGW("[%s] fails to process to an entry.\n", this->name.string());
                 break;

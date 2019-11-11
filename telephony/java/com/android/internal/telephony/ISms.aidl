@@ -586,4 +586,23 @@ interface ISms {
      * @param destAddress the destination address to test for possible short code
      */
     int checkSmsShortCodeDestination(int subId, String callingApk, String destAddress, String countryIso);
+
+    /**
+     * Gets the SMSC address from (U)SIM.
+     *
+     * @param subId the subscription Id.
+     * @param callingPackage the package name of the calling app.
+     * @return the SMSC address string, null if failed.
+     */
+    String getSmscAddressFromIccEfForSubscriber(int subId, String callingPackage);
+
+    /**
+     * Sets the SMSC address on (U)SIM.
+     *
+     * @param smsc the SMSC address string.
+     * @param subId the subscription Id.
+     * @param callingPackage the package name of the calling app.
+     * @return true for success, false otherwise.
+     */
+    boolean setSmscAddressOnIccEfForSubscriber(String smsc, int subId, String callingPackage);
 }

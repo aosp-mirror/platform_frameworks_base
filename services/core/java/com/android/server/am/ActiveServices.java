@@ -192,33 +192,37 @@ public final class ActiveServices {
         @Override
         public void stopForegroundServicesForUidPackage(final int uid, final String packageName) {
             synchronized (mAm) {
-                final ServiceMap smap = getServiceMapLocked(UserHandle.getUserId(uid));
-                final int N = smap.mServicesByInstanceName.size();
-                final ArrayList<ServiceRecord> toStop = new ArrayList<>(N);
-                for (int i = 0; i < N; i++) {
-                    final ServiceRecord r = smap.mServicesByInstanceName.valueAt(i);
-                    if (uid == r.serviceInfo.applicationInfo.uid
-                            || packageName.equals(r.serviceInfo.packageName)) {
-                        if (r.isForeground) {
-                            toStop.add(r);
-                        }
-                    }
-                }
+                stopAllForegroundServicesLocked(uid, packageName);
+            }
+        }
+    }
 
-                // Now stop them all
-                final int numToStop = toStop.size();
-                if (numToStop > 0 && DEBUG_FOREGROUND_SERVICE) {
-                    Slog.i(TAG, "Package " + packageName + "/" + uid
-                            + " entering FAS with foreground services");
-                }
-                for (int i = 0; i < numToStop; i++) {
-                    final ServiceRecord r = toStop.get(i);
-                    if (DEBUG_FOREGROUND_SERVICE) {
-                        Slog.i(TAG, "  Stopping fg for service " + r);
-                    }
-                    setServiceForegroundInnerLocked(r, 0, null, 0, 0);
+    void stopAllForegroundServicesLocked(final int uid, final String packageName) {
+        final ServiceMap smap = getServiceMapLocked(UserHandle.getUserId(uid));
+        final int N = smap.mServicesByInstanceName.size();
+        final ArrayList<ServiceRecord> toStop = new ArrayList<>(N);
+        for (int i = 0; i < N; i++) {
+            final ServiceRecord r = smap.mServicesByInstanceName.valueAt(i);
+            if (uid == r.serviceInfo.applicationInfo.uid
+                    || packageName.equals(r.serviceInfo.packageName)) {
+                if (r.isForeground) {
+                    toStop.add(r);
                 }
             }
+        }
+
+        // Now stop them all
+        final int numToStop = toStop.size();
+        if (numToStop > 0 && DEBUG_FOREGROUND_SERVICE) {
+            Slog.i(TAG, "Package " + packageName + "/" + uid
+                    + " in FAS with foreground services");
+        }
+        for (int i = 0; i < numToStop; i++) {
+            final ServiceRecord r = toStop.get(i);
+            if (DEBUG_FOREGROUND_SERVICE) {
+                Slog.i(TAG, "  Stopping fg for service " + r);
+            }
+            setServiceForegroundInnerLocked(r, 0, null, 0, 0);
         }
     }
 
@@ -1010,12 +1014,23 @@ public final class ActiveServices {
                         }
                     }
                     if (!aa.mAppOnTop) {
-                        if (active == null) {
-                            active = new ArrayList<>();
+                        // Transitioning a fg-service host app out of top: if it's bg restricted,
+                        // it loses the fg service state now.
+                        if (!appRestrictedAnyInBackground(aa.mUid, aa.mPackageName)) {
+                            if (active == null) {
+                                active = new ArrayList<>();
+                            }
+                            if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Adding active: pkg="
+                                    + aa.mPackageName + ", uid=" + aa.mUid);
+                            active.add(aa);
+                        } else {
+                            if (DEBUG_FOREGROUND_SERVICE) {
+                                Slog.d(TAG, "bg-restricted app "
+                                        + aa.mPackageName + "/" + aa.mUid
+                                        + " exiting top; demoting fg services ");
+                            }
+                            stopAllForegroundServicesLocked(aa.mUid, aa.mPackageName);
                         }
-                        if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Adding active: pkg="
-                                + aa.mPackageName + ", uid=" + aa.mUid);
-                        active.add(aa);
                     }
                 }
                 smap.removeMessages(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);

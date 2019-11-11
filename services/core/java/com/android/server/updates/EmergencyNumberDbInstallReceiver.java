@@ -18,6 +18,7 @@ package com.android.server.updates;
 
 import android.content.Context;
 import android.content.Intent;
+import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 /**
@@ -34,6 +35,11 @@ public class EmergencyNumberDbInstallReceiver extends ConfigUpdateInstallReceive
     @Override
     protected void postInstall(Context context, Intent intent) {
         Slog.i(TAG, "Emergency number database is updated in file partition");
-        // TODO Send a notification to EmergencyNumberTracker for updating of emergency number db.
+
+        // Notify EmergencyNumberTracker for emergency number installation complete.
+        Intent notifyInstallComplete = new Intent(
+                TelephonyManager.ACTION_OTA_EMERGENCY_NUMBER_DB_INSTALLED);
+        context.sendBroadcast(
+                notifyInstallComplete, android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE);
     }
 }
