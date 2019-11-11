@@ -17,6 +17,8 @@
 #ifndef _ANDROID_GRAPHICS_SURFACETEXTURE_H
 #define _ANDROID_GRAPHICS_SURFACETEXTURE_H
 
+#include <utils/StrongPointer.h>
+
 #include "jni.h"
 
 namespace android {

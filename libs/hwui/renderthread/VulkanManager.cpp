@@ -16,22 +16,21 @@
 
 #include "VulkanManager.h"
 
-#include <android/sync.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <GrBackendSemaphore.h>
+#include <GrBackendSurface.h>
+#include <GrContext.h>
+#include <GrTypes.h>
+#include <android/sync.h>
+#include <vk/GrVkExtensions.h>
+#include <vk/GrVkTypes.h>
 
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
 #include "utils/TraceUtils.h"
-
-#include <GrBackendSemaphore.h>
-#include <GrBackendSurface.h>
-#include <GrContext.h>
-#include <GrTypes.h>
-#include <vk/GrVkExtensions.h>
-#include <vk/GrVkTypes.h>
 
 namespace android {
 namespace uirenderer {
@@ -482,7 +481,7 @@ struct DestroySemaphoreInfo {
     int mRefs = 2;
 
     DestroySemaphoreInfo(PFN_vkDestroySemaphore destroyFunction, VkDevice device,
-            VkSemaphore semaphore)
+                         VkSemaphore semaphore)
             : mDestroyFunction(destroyFunction), mDevice(device), mSemaphore(semaphore) {}
 };
 
@@ -524,12 +523,11 @@ void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect)
     backendSemaphore.initVulkan(semaphore);
 
     int fenceFd = -1;
-    DestroySemaphoreInfo* destroyInfo = new DestroySemaphoreInfo(mDestroySemaphore, mDevice,
-                                                                 semaphore);
-    GrSemaphoresSubmitted submitted =
-            bufferInfo->skSurface->flush(SkSurface::BackendSurfaceAccess::kPresent,
-                                         kNone_GrFlushFlags, 1, &backendSemaphore,
-                                         destroy_semaphore, destroyInfo);
+    DestroySemaphoreInfo* destroyInfo =
+            new DestroySemaphoreInfo(mDestroySemaphore, mDevice, semaphore);
+    GrSemaphoresSubmitted submitted = bufferInfo->skSurface->flush(
+            SkSurface::BackendSurfaceAccess::kPresent, kNone_GrFlushFlags, 1, &backendSemaphore,
+            destroy_semaphore, destroyInfo);
     if (submitted == GrSemaphoresSubmitted::kYes) {
         VkSemaphoreGetFdInfoKHR getFdInfo;
         getFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
@@ -571,14 +569,14 @@ VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode col
                                  *this, extraBuffers);
 }
 
-status_t VulkanManager::fenceWait(sp<Fence>& fence, GrContext* grContext) {
+status_t VulkanManager::fenceWait(int fence, GrContext* grContext) {
     if (!hasVkContext()) {
         ALOGE("VulkanManager::fenceWait: VkDevice not initialized");
         return INVALID_OPERATION;
     }
 
     // Block GPU on the fence.
-    int fenceFd = fence->dup();
+    int fenceFd = ::dup(fence);
     if (fenceFd == -1) {
         ALOGE("VulkanManager::fenceWait: error dup'ing fence fd: %d", errno);
         return -errno;
@@ -619,7 +617,8 @@ status_t VulkanManager::fenceWait(sp<Fence>& fence, GrContext* grContext) {
     return OK;
 }
 
-status_t VulkanManager::createReleaseFence(sp<Fence>& nativeFence, GrContext* grContext) {
+status_t VulkanManager::createReleaseFence(int* nativeFence, GrContext* grContext) {
+    *nativeFence = -1;
     if (!hasVkContext()) {
         ALOGE("VulkanManager::createReleaseFence: VkDevice not initialized");
         return INVALID_OPERATION;
@@ -644,14 +643,13 @@ status_t VulkanManager::createReleaseFence(sp<Fence>& nativeFence, GrContext* gr
     GrBackendSemaphore backendSemaphore;
     backendSemaphore.initVulkan(semaphore);
 
-    DestroySemaphoreInfo* destroyInfo = new DestroySemaphoreInfo(mDestroySemaphore, mDevice,
-                                                                 semaphore);
+    DestroySemaphoreInfo* destroyInfo =
+            new DestroySemaphoreInfo(mDestroySemaphore, mDevice, semaphore);
     // Even if Skia fails to submit the semaphore, it will still call the destroy_semaphore callback
     // which will remove its ref to the semaphore. The VulkanManager must still release its ref,
     // when it is done with the semaphore.
-    GrSemaphoresSubmitted submitted =
-            grContext->flush(kNone_GrFlushFlags, 1, &backendSemaphore,
-                             destroy_semaphore, destroyInfo);
+    GrSemaphoresSubmitted submitted = grContext->flush(kNone_GrFlushFlags, 1, &backendSemaphore,
+                                                       destroy_semaphore, destroyInfo);
 
     if (submitted == GrSemaphoresSubmitted::kNo) {
         ALOGE("VulkanManager::createReleaseFence: Failed to submit semaphore");
@@ -673,7 +671,7 @@ status_t VulkanManager::createReleaseFence(sp<Fence>& nativeFence, GrContext* gr
         ALOGE("VulkanManager::createReleaseFence: Failed to get semaphore Fd");
         return INVALID_OPERATION;
     }
-    nativeFence = new Fence(fenceFd);
+    *nativeFence = fenceFd;
 
     return OK;
 }
