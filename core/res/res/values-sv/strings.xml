@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Ljud för alarm"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Aviseringsljud"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Okänt"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wi-Fi-nätverk är tillgängliga</item>
-      <item quantity="one">Wi-Fi-nätverk är tillgängligt</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Öppna Wi-Fi-nätverk är tillgängliga</item>
-      <item quantity="one">Öppet Wi-Fi-nätverk är tillgängligt</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Anslut till ett öppet Wi-Fi-nätverk"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Ansluter till Wi-Fi-nätverk"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Ansluten till Wi-Fi-nätverket"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Det gick inte att ansluta till Wi‑Fi-nätverket"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tryck för att visa alla nätverk"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Anslut"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alla nätverk"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vill du tillåta föreslagna Wi-Fi-nätverk?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Nätverk som föreslagits av <xliff:g id="NAME">%s</xliff:g>. Enheten kan anslutas automatiskt."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Tillåt"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nej tack"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi aktiveras automatiskt"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"När du är i närheten av ett sparat nätverk av hög kvalitet"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Återaktivera inte"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi-Fi aktiverades automatiskt"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Du är i närheten av ett sparat nätverk: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Logga in på ett Wi-Fi-nätverk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Logga in på nätverket"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Ansluten"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> har begränsad anslutning"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Tryck för att ansluta ändå"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ändringar i inställningarna för surfzon"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Frekvensbandet för surfzonen har ändrats."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Den här enheten har inte stöd för inställningen för att endast använda 5 GHz. I stället används 5 GHz när det är möjligt."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Byte av nätverk till <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="NEW_NETWORK">%1$s</xliff:g> används på enheten när det inte finns internetåtkomst via <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Avgifter kan tillkomma."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Byte av nätverk från <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> till <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"en okänd nätverkstyp"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Det gick inte att ansluta till Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dålig Internetanslutning."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Tillåt anslutning?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Appen %1$s vill ansluta till Wi-Fi-nätverket %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"En app"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi direkt"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Starta direkt Wi-Fi-användning. Detta inaktiverar Wi-Fi-användning med klient/surfzon."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Det gick inte att starta Wi-Fi direkt."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct är aktiverat"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Tryck för inställningar"</string>
     <string name="accept" msgid="1645267259272829559">"Godkänn"</string>
     <string name="decline" msgid="2112225451706137894">"Avvisa"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Inbjudan har skickats"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Inbjudan om att ansluta"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Från:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Till:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Ange den obligatoriska PIN-koden:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kod:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Surfplattans Wi-Fi-anslutning kommer tillfälligt att avbrytas när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV-enheten kopplas tillfälligt från Wi-Fi medan den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Mobilen kommer tillfälligt att kopplas från Wi-Fi när den är ansluten till <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Infoga tecken"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Skickar SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; skickar ett stort antal SMS. Vill du tillåta att appen fortsätter att skicka meddelanden?"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratören raderade paketet"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"I batterisparläget inaktiveras eller begränsas aktivitet i bakgrunden, vissa visuella effekter och andra funktioner som drar mycket ström i syfte att förlänga batteritiden. "<annotation id="url">"Läs mer"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"I batterisparläget inaktiveras eller begränsas aktivitet i bakgrunden, vissa visuella effekter och andra funktioner som drar mycket ström i syfte att förlänga batteritiden."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivera"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Dela direkt är inte tillgängligt"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Applista"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Appen har inte fått inspelningsbehörighet men kan spela in ljud via denna USB-enhet."</string>
 </resources>

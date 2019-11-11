@@ -1284,34 +1284,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Гукі будзільніка"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Гукі апавяшчэнняў"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Невядома"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">сетка Wi-Fi даступная</item>
-      <item quantity="few">сеткі Wi-Fi даступныя</item>
-      <item quantity="many">сетак Wi-Fi даступна</item>
-      <item quantity="other">сеткі Wi-Fi даступна</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">адкрытая сетка Wi-Fi даступная</item>
-      <item quantity="few">адкрытыя сеткі Wi-Fi даступныя</item>
-      <item quantity="many">адкрытых сетак Wi-Fi даступна</item>
-      <item quantity="other">адкрытай сеткі Wi-Fi даступна</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Падключыцеся да адкрытай сеткі Wi-Fi"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Падключэнне да сеткі Wi‑Fi"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Выканана падключэнне да адкрытай сеткі Wi‑Fi"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не атрымалася падключыцца да адкрытай сеткі Wi‑Fi"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Дакраніцеся, каб убачыць усе сеткі"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Падключыцца"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Усе сеткі"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Дазволіць падключэнне да прапанаваных сетак Wi‑Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Праграма \"<xliff:g id="NAME">%s</xliff:g>\" прапанавала сеткі. Прылада можа падключыцца да ніх аўтаматычна."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Дазволіць"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Не, дзякуй"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi уключыцца аўтаматычна"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Побач з захаванай сеткай з высакаякасным сігналам"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не ўключаць зноў"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi уключыўся аўтаматычна"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Вы знаходзіцеся побач з захаванай сеткай: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Уваход у сетку Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Увайдзіце ў сетку"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1324,9 +1296,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Падключана"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> мае абмежаваную магчымасць падключэння"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Націсніце, каб падключыцца"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Змяненні ў наладах хот-спота"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Частата хот-спота змянілася."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Прылада не можа працаваць толькі на частаце 5 ГГц. Гэта частата будзе выкарыстоўвацца, калі гэта магчыма."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Выкананы пераход да <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Прылада выкарыстоўвае сетку <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў сетцы <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Выкананы пераход з <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> да <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1338,27 +1307,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"невядомы тып сеткі"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Немагчыма падключыцца да Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" дрэннае падключэнне да Інтэрнэту."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Дазволіць падключэнне?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Праграма %1$s хоча падключыцца да сеткі Wifi %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Праграма"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Пачаць работу Wi-Fi Direct. Гэта адключыць кліента або хот-спот Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Немагчыма запусціць Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct уключаны"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Дакраніцеся, каб убачыць налады"</string>
     <string name="accept" msgid="1645267259272829559">"Прыняць"</string>
     <string name="decline" msgid="2112225451706137894">"Адхіліць"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Запрашэнне адпраўлена"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Запрашэнне далучыцца"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Ад:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Каму:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Увядзіце патрэбны PIN-код:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-код"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Тэлефон будзе часова адключаны ад сеткі Wi-Fi, пакуль ён падлучаны да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Прылада Android TV будзе часова адключана ад сеткі Wi-Fi, пакуль яна падключана да прылады \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\""</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Тэлефон будзе часова адключаны ад Wi-Fi, пакуль ён падлучаны да прылады <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Уставіць сімвал"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Адпраўка SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Прыкладанне &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; дасылае вялікую колькасць SMS-паведамленняў. Дазволіць гэтаму прыкладанню працягваць адпраўляць паведамленні?"</string>
@@ -1867,8 +1817,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Абноўлены вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Выдалены вашым адміністратарам"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі з высокімі энергавыдаткамі. "<annotation id="url">"Даведацца больш"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі з высокімі энергавыдаткамі."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"У рэжыме Эканомія трафіка фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Уключыць"</string>
@@ -2123,4 +2075,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Непасрэднае абагульванне недаступнае"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Спіс праграм"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"У гэтай праграмы няма дазволу на запіс, аднак яна зможа запісваць аўдыя праз гэту USB-прыладу."</string>
 </resources>

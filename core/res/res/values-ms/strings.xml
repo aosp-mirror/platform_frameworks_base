@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Bunyi penggera"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Bunyi pemberitahuan"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Tidak diketahui"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Rangkaian Wi-Fi tersedia</item>
-      <item quantity="one">Rangkaian Wi-Fi tersedia</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Rangkaian Wi-Fi terbuka tersedia</item>
-      <item quantity="one">Rangkaian Wi-Fi terbuka tersedia</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Sambung ke rangkaian Wi-Fi terbuka"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Menyambung ke rangkaian Wi-Fi"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Disambungkan ke rangkaian Wi-Fi"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Tidak dapat menyambung ke rangkaian Wi-Fi"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Ketik untuk melihat semua rangkaian"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Sambung"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Semua rangkaian"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Benarkan rangkaian Wi-Fi yang dicadangkan?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Rangkaian yang dicadangkan oleh <xliff:g id="NAME">%s</xliff:g>. Peranti mungkin disambungkan secara automatik."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Benarkan"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Tidak perlu"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi akan dihidupkan secara automatik"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Apabila anda berada berdekatan dengan rangkaian disimpan yang berkualiti tinggi"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Jangan hidupkan kembali"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi dihidupkan secara automatik"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Anda berada berdekatan rangkaian yang disimpan: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Log masuk ke rangkaian Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Log masuk ke rangkaian"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Disambungkan"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> mempunyai kesambungan terhad"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Ketik untuk menyambung juga"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Perubahan kepada tetapan tempat liputan anda"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Jalur tempat liputan anda telah berubah."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Peranti ini tidak menyokong pilihan anda untuk 5GHz sahaja. Sebaliknya, peranti ini akan menggunakan jalur 5GHz apabila tersedia."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Beralih kepada <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Peranti menggunakan <xliff:g id="NEW_NETWORK">%1$s</xliff:g> apabila <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tiada akses Internet. Bayaran mungkin dikenakan."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Beralih daripada <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> kepada <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"jenis rangkaian tidak diketahui"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Tidak boleh menyambung kepada Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" mempunyai sambungan internet yang kurang baik."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Benarkan sambungan?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikasi %1$s ingin menyambung ke Rangkaian Wifi %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Satu aplikasi"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Langsung"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Mulakan Wi-Fi Langsung. Hal ini akan mematikan pengendalian klien/liputan Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Tidak dapat memulakan Wi-Fi Langsung."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct dihidupkan"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Ketik untuk mendapatkan tetapan"</string>
     <string name="accept" msgid="1645267259272829559">"Terima"</string>
     <string name="decline" msgid="2112225451706137894">"Tolak"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Jemputan dihantar"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Jemputan untuk menyambung"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Daripada:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kepada:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Taipkan PIN yang diperlukan:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Sambungan tablet ke Wi-Fi akan diputuskan buat sementara waktu semasa tablet bersambung ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Peranti Android TV anda akan diputuskan sambungan daripada Wi-Fi untuk sementara waktu semasa peranti ini disambungkan ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Sambungan telefon ke Wi-Fi akan diputuskan buat sementara waktu semasa telefon bersambung ke <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Masukkan aksara"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Menghantar mesej SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sedang menghantar banyak mesej SMS. Adakah anda mahu membenarkan apl ini terus menghantar mesej?"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Dikemas kini oleh pentadbir anda"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dipadamkan oleh pentadbir anda"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Penjimat Bateri mematikan atau mengehadkan aktiviti latar belakang, sesetengah kesan visual &amp; ciri kuasa tinggi yang lain untuk memanjangkan hayat bateri. "<annotation id="url">"Ketahui Lebih Lanjut"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Penjimat Bateri mematikan atau mengehadkan aktiviti latar belakang, sesetengah kesan visual &amp; ciri kuasa tinggi yang lain untuk memanjangkan hayat bateri."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangkan penggunaan data, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Hidupkan Penjimat Data?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Hidupkan"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Perkongsian langsung tidak tersedia"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Senarai apl"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Apl ini belum diberikan kebenaran merakam tetapi dapat merakam audio melalui peranti USB ini."</string>
 </resources>

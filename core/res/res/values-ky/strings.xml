@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Ойготкучтун добуштары"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Эскертменин добуштары"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Белгисиз"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wi-Fi тармагы жеткиликтүү</item>
-      <item quantity="one">Wi-Fi тармагы жеткиликтүү</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Ачык Wi-Fi тармагы жеткиликтүү</item>
-      <item quantity="one">Ачык Wi-Fi тармагы жеткиликтүү</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Ачык Wi‑Fi тармагына туташуу"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi‑Fi тармагына туташууда"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Ачык Wi‑Fi тармагына туташты"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi-Fi тармагына туташпай калды"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Бардык тармактарды көрүү үчүн басыңыз"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Туташуу"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Бардык тармактар"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Сунушталган Wi‑Fi тармактарына туташасызбы?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> сунуштаган тармактар. Түзмөк автоматтык түрдө туташышы мүмкүн."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Уруксат берүү"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Жок, рахмат"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматтык түрдө күйөт"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Байланыш сигналы күчтүү тармактарга жакындаганда"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Өзү кайра күйбөйт"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi автоматтык түрдө күйгүзүлдү"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Сакталган тармактын жанындасыз: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi түйүнүнө кирүү"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Тармакка кирүү"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Туташты"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> байланышы чектелген"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Баары бир туташуу үчүн таптаңыз"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Байланыш түйүнүңүздүн жөндөөлөрү өзгөрүлдү"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Байланыш түйүнүңүздүн жыштыгы өзгөрдү."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Бул түзмөк 5ГГцти гана колдонуу жөндөөсүн колдоого албайт. Анын ордуна, бул түзмөк 5ГГц жыштыгын ал жеткиликтүү болгондо колдонот."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> тармагына которуштурулду"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> тармагы Интернетке туташпай турганда, түзмөгүңүз <xliff:g id="NEW_NETWORK">%1$s</xliff:g> тармагын колдонот. Акы алынышы мүмкүн."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> дегенден <xliff:g id="NEW_NETWORK">%2$s</xliff:g> тармагына которуштурулду"</string>
@@ -1294,28 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"белгисиз тармак түрү"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi менен туташуу түзүлбөдү"</string>
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4917472096696322767) -->
-    <skip />
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Туташууга уруксатпы?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%1$s колдонмосу %2$s Wifi тармагына туташкысы келет"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Колдонмо"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Дайректи иштетүү. Бул Wi-Fi клиентти/хотспотту өчүрөт."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct иштетилген жок."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct иштөөдө"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Жөндөөлөрдү ачуу үчүн таптап коюңуз"</string>
     <string name="accept" msgid="1645267259272829559">"Кабыл алуу"</string>
     <string name="decline" msgid="2112225451706137894">"Баш тартуу"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Чакыруу жөнөтүлдү"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Туташууга чакыруу"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Жөнөтүүчү:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Алуучу:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Талап кылынган PIN\'ди териңиз:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Планшет <xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен байланышып турганда, Wi-Fi\'дан убактылуу ажыратылат"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV <xliff:g id="DEVICE_NAME">%1$s</xliff:g> түзмөгүнө туташып турганда убактылуу Wi-Fi\'дан ажыратылат"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Телефон <xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен байланышып турганда, Wi-Fi\'дан убактылуу ажыратылат"</string>
     <string name="select_character" msgid="3365550120617701745">"Символ киргизүү"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS билдирүүлөр жөнөтүлүүдө"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; көп SMS билдирүүлөрдү жөнөтүп жатат. Бул колдонмо билдирүүлөрдү жөнөтө берсинби?"</string>
@@ -1819,8 +1772,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Администраторуңуз жаңыртып койгон"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Администраторуңуз жок кылып салган"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ЖАРАЙТ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Батареяны үнөмдөгүч функциясы фондогу аракеттерди, айрым визуалдык эффекттерди жана башка батареяны көп сарптаган функцияларды өчүрүп же чектеп, батареянын кубатынын мөөнөтүн узартат. "<annotation id="url">"Кеңири маалымат"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Батареяны үнөмдөгүч функциясы фондогу аракеттерди, айрым визуалдык эффекттерди жана башка батареяны көп сарптаган функцияларды өчүрүп же чектеп, батареянын кубатынын мөөнөтүн узартат."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Трафикти үнөмдөө режиминде айрым колдонмолор дайындарды фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайындарды жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Трафикти үнөмдөө режимин иштетесизби?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Күйгүзүү"</string>
@@ -2053,4 +2008,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Түздөн-түз бөлүшүүгө болбойт"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Колдонмолордун тизмеси"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Бул колдонмонун жаздырууга уруксаты жок, бирок бул USB түзмөгү аркылуу аудиону жаздыра алат."</string>
 </resources>

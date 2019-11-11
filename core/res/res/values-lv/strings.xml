@@ -1264,32 +1264,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Modinātāja signāla skaņas"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Paziņojumu skaņas"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Nezināms"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="zero">Pieejami Wi-Fi tīkli</item>
-      <item quantity="one">Pieejami Wi-Fi tīkli</item>
-      <item quantity="other">Pieejami Wi-Fi tīkli</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="zero">Ir pieejami atvērti Wi-Fi tīkli</item>
-      <item quantity="one">Ir pieejami atvērti Wi-Fi tīkli</item>
-      <item quantity="other">Ir pieejami atvērti Wi-Fi tīkli</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Savienojuma izveide ar atvērtu Wi-Fi tīklu"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Savienojuma izveide ar Wi-Fi tīklu"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Ir izveidots savienojums ar Wi-Fi tīklu"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Nevarēja izveidot savienojumu ar Wi‑Fi tīklu"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Pieskarieties, lai skatītu visus tīklus"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Izveidot savienojumu"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Visi tīkli"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vai atļaut ieteiktos Wi‑Fi tīklus?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Lietotnes <xliff:g id="NAME">%s</xliff:g> ieteiktie tīkli. Ierīcē var tikt automātiski izveidots savienojums."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Atļaut"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nē, paldies"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi tiks automātiski ieslēgts"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kad atrodaties saglabāta augstas kvalitātes tīkla tuvumā"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Neieslēgt atkārtoti"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi-Fi tika ieslēgts automātiski"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Jūs atrodaties saglabāta tīkla tuvumā: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>."</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Pierakstieties Wi-Fi tīklā"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Pierakstīšanās tīklā"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1302,9 +1276,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Izveidots savienojums"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"Tīklā <xliff:g id="NETWORK_SSID">%1$s</xliff:g> ir ierobežota savienojamība"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Lai tik un tā izveidotu savienojumu, pieskarieties"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Izmaiņas tīklāja iestatījumos"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ir mainīts tīklāja joslas platums."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Šajā ierīcē netiek atbalstīta jūsu preference par tikai 5 GHz joslu. 5 GHz josla ierīcē tiks izmantota, kad tā būs pieejama."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Pārslēdzās uz tīklu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Kad vienā tīklā (<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>) nav piekļuves internetam, ierīcē tiek izmantots cits tīkls (<xliff:g id="NEW_NETWORK">%1$s</xliff:g>). Var tikt piemērota maksa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Pārslēdzās no tīkla <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> uz tīklu <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1316,27 +1287,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nezināms tīkla veids"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nevarēja izveidot savienojumu ar Wi-Fi."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ir slikts interneta savienojums."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vai atļaut savienojumu?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Lietotne %1$s vēlas izveidot savienojumu ar Wi-Fi tīklu %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Lietojumprogramma"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Palaist programmu Wi-Fi Direct. Tādējādi tiks izslēgta Wi-Fi klienta/tīklāja darbība."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Nevarēja palaist programmu Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct ir ieslēgts"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Pieskarieties, lai skatītu iestatījumus."</string>
     <string name="accept" msgid="1645267259272829559">"Piekrist"</string>
     <string name="decline" msgid="2112225451706137894">"Noraidīt"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Ielūgums ir nosūtīts."</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Ielūgums izveidot savienojumu"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"No:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kam:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Ierakstiet pieprasīto PIN:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Planšetdators tiks īslaicīgi atvienots no Wi-Fi tīkla, kamēr būs izveidots savienojums ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV ierīce tiks īslaicīgi atvienota no Wi-Fi tīkla, kamēr ir izveidots savienojums ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Tālrunis tiks īslaicīgi atvienots no Wi-Fi tīkla, kamēr būs izveidots savienojums ar ierīci <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="select_character" msgid="3365550120617701745">"Ievietojiet rakstzīmi"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Īsziņu sūtīšana"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Lietotne &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sūta daudz īsziņu. Vai vēlaties, lai šī lietotne turpinātu sūtīt ziņojumus?"</string>
@@ -1842,8 +1794,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dzēsa administrators"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Labi"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Akumulatora jaudas taupīšanas režīmā tiek izslēgtas vai ierobežotas fona darbības, daži vizuālie efekti un citas lieljaudas funkcijas, lai palielinātu akumulatora darbības ilgumu. "<annotation id="url">"Uzzināt vairāk"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Akumulatora jaudas taupīšanas režīmā tiek izslēgtas vai ierobežotas fona darbības, daži vizuālie efekti un citas lieljaudas funkcijas, lai palielinātu akumulatora darbības ilgumu."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Lai samazinātu datu lietojumu, datu lietojuma samazinātājs neļauj dažām lietotnēm fonā nosūtīt vai saņemt datus. Lietotne, kuru pašlaik izmantojat, var piekļūt datiem, bet, iespējams, piekļūs tiem retāk (piemēram, attēli tiks parādīti tikai tad, kad tiem pieskarsieties)."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vai ieslēgt datu lietojuma samazinātāju?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ieslēgt"</string>
@@ -2087,4 +2041,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Tiešā kopīgošana nav pieejama"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Lietotņu saraksts"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Šai lietotnei nav piešķirta ierakstīšanas atļauja, taču tā varētu tvert audio, izmantojot šo USB ierīci."</string>
 </resources>

@@ -231,7 +231,7 @@
     <string name="global_action_logout" msgid="935179188218826050">"پایان جلسه"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"عکس صفحه‌نمایش"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"گزارش اشکال"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به صورت یک پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً شکیبا باشید."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"این گزارش اطلاعات مربوط به وضعیت دستگاه کنونی شما را جمع‌آوری می‌کند تا به‌صورت پیام ایمیل ارسال شود. از زمان شروع گزارش اشکال تا آماده شدن برای ارسال اندکی زمان می‌برد؛ لطفاً کمی صبر کنید."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"گزارش تعاملی"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"در بیشتر شرایط از این گزینه استفاده کنید. به شما امکان ردیابی پیشرفت گزارش و وارد کردن جزئیات بیشتری درباره مشکل را می‌دهد. ممکن است برخی از بخش‌هایی را که کمتر استفاده شده و باعث افزایش طول زمان گزارش می‌شود حذف کند."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"گزارش کامل"</string>
@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"صداهای زنگ"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"صداهای اعلان"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"نامشخص"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">‏شبکه Wi-Fi در دسترس</item>
-      <item quantity="other">‏شبکه‌ Wi-Fi در دسترس</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">‏شبکه Wi-Fi باز در دسترس</item>
-      <item quantity="other">‏شبکه‌ Wi-Fi باز در دسترس</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"‏اتصال به شبکه Wi‑Fi باز"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"‏درحال اتصال به شبکه Wi‑Fi..."</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"‏به شبکه Wi‑Fi متصل شد"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"‏به شبکه Wi-Fi متصل نشد"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"برای دیدن همه شبکه‌ها ضربه بزنید"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"همه شبکه‌ها"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"‏شبکه‌های Wi‑Fi پیشنهادی مجاز شود؟"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"شبکه‌های پیشنهادی <xliff:g id="NAME">%s</xliff:g>. ممکن است دستگاه به‌طور خودکار متصل شود."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"مجاز"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"نه متشکرم"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏Wi‑Fi به‌طور خودکار روشن خواهد شد"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"وقتی نزدیک شبکه ذخیره‌شده با کیفیت بالا هستید"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"دوباره روشن نشود"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"‏Wi‑Fi به‌صورت خودکار روشن شد"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"نزدیک شبکه ذخیره‌شده‌ای هستید: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏ورود به شبکه Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ورود به سیستم شبکه"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"متصل"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> اتصال محدودی دارد"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"به‌هرصورت، برای اتصال ضربه بزنید"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"تغییرات در تنظیمات نقطه اتصال"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"نوار نقطه اتصال شما تغییر کرد."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"این دستگاه از اولویت فقط ۵ گیگاهرتز شما پشتیبانی نمی‌کند. هرزمان نوار ۵ گیگاهرتزی دردسترس باشد این دستگاه از آن استفاده خواهد کرد."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"به <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> تغییر کرد"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"وقتی <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> به اینترنت دسترسی نداشته باشد، دستگاه از <xliff:g id="NEW_NETWORK">%1$s</xliff:g> استفاده می‌کند. ممکن است هزینه‌هایی اعمال شود."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"از <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> به <xliff:g id="NEW_NETWORK">%2$s</xliff:g> تغییر کرد"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"نوع شبکه نامشخص"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏اتصال به Wi-Fi ممکن نیست"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" اتصال اینترنتی ضعیفی دارد."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"اتصال مجاز است؟"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"‏برنامه %1$s می‌خواهد به شبکه Wifi ‏%2$s وصل شود"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"برنامه"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"‏Wi-Fi Direct را شروع کنید. این کار نقطه اتصال/سرویس گیرنده Wi-Fi را غیرفعال خواهد کرد."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"‏Wi-Fi Direct شروع نشد."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"‏Wi-Fi Direct روشن است"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"برای تنظیمات ضربه بزنید"</string>
     <string name="accept" msgid="1645267259272829559">"پذیرفتن"</string>
     <string name="decline" msgid="2112225451706137894">"نپذیرفتن"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"دعوت‌نامه ارسال شد"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"دعوت‌نامه برای اتصال"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"از:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"به:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"پین لازم را تایپ کنید:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"پین:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"‏در حین اتصال به <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ارتباط این رایانه لوحی با Wi-Fi موقتاً قطع خواهد شد."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"‏وقتی دستگاه Android TV به <xliff:g id="DEVICE_NAME">%1$s</xliff:g> متصل است، اتصال آن به Wi-Fi موقتاً قطع می‌شود"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"‏این گوشی به‌طور موقت از Wi-Fi قطع خواهد شد، در حالی که به <xliff:g id="DEVICE_NAME">%1$s</xliff:g> وصل است"</string>
     <string name="select_character" msgid="3365550120617701745">"درج نویسه"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"درحال ارسال پیامک‌ها"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; درحال ارسال تعداد زیادی پیامک است. آیا اجازه می‌دهید این برنامه همچنان پیامک ارسال کند؟"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"تأیید"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"«بهینه‌سازی باتری» فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های پرمصرف نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد. "<annotation id="url">"بیشتر بدانید"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"«بهینه‌سازی باتری» فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های پرمصرف نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"اشتراک‌گذاری مستقیم دردسترس نیست"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"فهرست برنامه‌ها"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"‏مجوز ضبط به این برنامه داده نشده است اما می‌تواند صدا را ازطریق این دستگاه USB ضبط کند."</string>
 </resources>

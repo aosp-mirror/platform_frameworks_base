@@ -1284,34 +1284,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Dźwięki alarmu"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Dźwięki powiadomień"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Nieznany"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="few">Dostępne są sieci Wi-Fi</item>
-      <item quantity="many">Dostępne są sieci Wi-Fi</item>
-      <item quantity="other">Dostępne są sieci Wi-Fi</item>
-      <item quantity="one">Dostępna jest sieć Wi-Fi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="few">Dostępne są otwarte sieci Wi-Fi</item>
-      <item quantity="many">Dostępne są otwarte sieci Wi-Fi</item>
-      <item quantity="other">Dostępne są otwarte sieci Wi-Fi</item>
-      <item quantity="one">Dostępna jest otwarta sieć Wi-Fi</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Połącz się z otwartą siecią Wi-Fi"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Łączę z siecią Wi-Fi"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Połączono z siecią Wi-Fi"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Nie udało się połączyć z siecią Wi‑Fi"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Kliknij, by zobaczyć wszystkie sieci"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Połącz"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Wszystkie sieci"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Zezwalać na sugerowane sieci Wi‑Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Sugerowane sieci: <xliff:g id="NAME">%s</xliff:g>. Urządzenie może łączyć się automatycznie."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Zezwól"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nie, dziękuję"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi włączy się automatycznie"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Gdy znajdziesz się w pobliżu zapisanej sieci o mocnym sygnale"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nie włączaj ponownie"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi włączone automatycznie"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Jesteś w pobliżu zapisanej sieci: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Zaloguj się w sieci Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Zaloguj się do sieci"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1324,9 +1296,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Połączono"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ma ograniczoną łączność"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Kliknij, by mimo to nawiązać połączenie"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Zmieniono ustawienia hotspotu"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Zmieniono pasmo hotspotu."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"To urządzenie nie może korzystać tylko z częstotliwości 5 GHz. Będzie korzystać z tego pasma, jeśli będzie ono dostępne."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Zmieniono na połączenie typu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Urządzenie korzysta z połączenia typu <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, gdy <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nie dostępu do internetu. Mogą zostać naliczone opłaty."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Przełączono z połączenia typu <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na <xliff:g id="NEW_NETWORK">%2$s</xliff:g>."</string>
@@ -1338,27 +1307,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nieznany typ sieci"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nie można połączyć się z siecią Wi-Fi."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ma powolne połączenie internetowe."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Zezwolić na połączenie?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikacja %1$s chce połączyć się z siecią Wi-Fi %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikacja"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Uruchom Wi-Fi Direct. Spowoduje to wyłączenie klienta lub punktu dostępu Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Nie można uruchomić Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct włączone"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Kliknij, by wyświetlić ustawienia"</string>
     <string name="accept" msgid="1645267259272829559">"Akceptuj"</string>
     <string name="decline" msgid="2112225451706137894">"Odrzuć"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Wysłano zaproszenie"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Zaproszenie do połączenia"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Od:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Do:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Wpisz wymagany kod PIN:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Kod PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Na czas połączenia z <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tablet zostanie tymczasowo odłączony od Wi-Fi"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Urządzenie z Androidem TV zostanie odłączone od sieci Wi-Fi na czas połączenia z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Na czas połączenia z <xliff:g id="DEVICE_NAME">%1$s</xliff:g> telefon zostanie tymczasowo odłączony od Wi-Fi"</string>
     <string name="select_character" msgid="3365550120617701745">"Wstaw znak"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Wysyłanie wiadomości SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Aplikacja &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wysyła wiele SMS-ów. Chcesz pozwolić tej aplikacji dalej wysyłać SMS-y?"</string>
@@ -1867,8 +1817,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje intensywnie zużywające energię. "<annotation id="url">"Więcej informacji"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje intensywnie zużywające energię."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>
@@ -2123,4 +2075,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Udostępnianie bezpośrednie jest niedostępne"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Lista aplikacji"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Ta aplikacja nie ma uprawnień do nagrywania, ale może rejestrować dźwięk za pomocą tego urządzenia USB."</string>
 </resources>

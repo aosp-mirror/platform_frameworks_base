@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Ήχοι ξυπνητηριού"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Ήχοι ειδοποίησης"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Άγνωστο"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Υπάρχουν διαθέσιμα δίκτυα Wi-Fi</item>
-      <item quantity="one">Υπάρχει διαθέσιμο δίκτυο Wi-Fi</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Υπάρχουν διαθέσιμα ανοικτά δίκτυα Wi-Fi</item>
-      <item quantity="one">Υπάρχει διαθέσιμο ανοικτό δίκτυο Wi-Fi</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Σύνδεση σε ανοιχτό δίκτυο Wi‑Fi"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Σύνδεση σε δίκτυο Wi-Fi"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Ολοκληρώθηκε η σύνδεση στο δίκτυο Wi-Fi"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Δεν ήταν δυνατή η σύνδεση σε δίκτυο Wi‑Fi"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Πατήστε για να δείτε όλα τα δίκτυα"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Σύνδεση"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Όλα τα δίκτυα"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Να επιτρέπονται προτεινόμενα δίκτυα Wi‑Fi;"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Προτεινόμενα δίκτυα <xliff:g id="NAME">%s</xliff:g>. Η συσκευή μπορεί να συνδεθεί αυτόματα."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Αποδοχή"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Όχι, ευχαριστώ"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Το Wi‑Fi θα ενεργοποιηθεί αυτόματα"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Όταν βρίσκεστε κοντά σε αποθηκευμένο δίκτυο υψηλής ποιότητας"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Να μην ενεργοποιηθεί ξανά"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Το Wi‑Fi ενεργοποιήθηκε αυτόματα"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Βρίσκεστε κοντά σε αποθηκευμένο δίκτυο: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Συνδεθείτε στο δίκτυο Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Σύνδεση στο δίκτυο"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Συνδέθηκε"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"Το δίκτυο <xliff:g id="NETWORK_SSID">%1$s</xliff:g> έχει περιορισμένη συνδεσιμότητα"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Πατήστε για σύνδεση ούτως ή άλλως"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Αλλαγές στις ρυθμίσεις σημείου πρόσβασης Wi-Fi"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Το εύρος σημείου πρόσβασης Wi-Fi άλλαξε."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Αυτή η συσκευή δεν υποστηρίζει την προτίμησή σας για τη ζώνη 5 GHz μόνο. Αντ\' αυτού, αυτή η συσκευή θα χρησιμοποιεί τη ζώνη 5 GHz όταν είναι διαθέσιμη."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Μετάβαση σε δίκτυο <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Η συσκευή χρησιμοποιεί το δίκτυο <xliff:g id="NEW_NETWORK">%1$s</xliff:g> όταν το δίκτυο <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> δεν έχει πρόσβαση στο διαδίκτυο. Μπορεί να ισχύουν χρεώσεις."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Μετάβαση από το δίκτυο <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> στο δίκτυο <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"άγνωστος τύπος δικτύου"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Δεν είναι δυνατή η σύνδεση στο Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" έχει κακή σύνδεση Διαδικτύου."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Να επιτρέπεται η σύνδεση;"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Η εφαρμογή %1$s θα ήθελε να συνδεθεί με το δίκτυο WiFi %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Μια εφαρμογή"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Ξεκινήστε τη λειτουργία Wi-Fi Direct. Θα απενεργοποιηθεί η λειτουργία πελάτη/φορητού σημείου πρόσβασης Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Δεν ήταν δυνατή η εκκίνηση του Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Το Wi-Fi Direct έχει ενεργοποιηθεί"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Πατήστε για να μεταβείτε στις ρυθμίσεις"</string>
     <string name="accept" msgid="1645267259272829559">"Αποδοχή"</string>
     <string name="decline" msgid="2112225451706137894">"Απόρριψη"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Η πρόσκληση στάλθηκε"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Πρόσκληση για σύνδεση"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Από:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Προς:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Πληκτρολογήστε τον απαιτούμενο κωδικό PIN:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Το tablet θα αποσυνδεθεί προσωρινά από το δίκτυο Wi-Fi ενώ συνδέεται στη συσκευή <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Η συσκευή σας Android TV θα αποσυνδεθεί προσωρινά από το δίκτυο Wi-Fi, ενόσω είναι συνδεδεμένη στη συσκευή <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Το τηλέφωνο θα αποσυνδεθεί προσωρινά από το δίκτυο Wi-Fi ενώ συνδέεται στη συσκευή <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Εισαγωγή χαρακτήρα"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Αποστολή μηνυμάτων SMS"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"Η εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; στέλνει έναν μεγάλο αριθμό μηνυμάτων SMS. Θέλετε να επιτρέψετε σε αυτήν την εφαρμογή να συνεχίσει να στέλνει μηνύματα;"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ενημερώθηκε από τον διαχειριστή σας"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Διαγράφηκε από τον διαχειριστή σας"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Η Εξοικονόμηση μπαταρίας απενεργοποιεί ή περιορίζει τη δραστηριότητα παρασκηνίου, ορισμένα οπτικά εφέ και άλλες λειτουργίες υψηλής κατανάλωσης ενέργειας για την επέκταση της διάρκειας ζωής μπαταρίας. "<annotation id="url">"Μάθετε περισσότερα"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Η Εξοικονόμηση μπαταρίας απενεργοποιεί ή περιορίζει τη δραστηριότητα παρασκηνίου, ορισμένα οπτικά εφέ και άλλες λειτουργίες υψηλής κατανάλωσης ενέργειας για την επέκταση της διάρκειας ζωής μπαταρίας."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ενεργ.Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ενεργοποίηση"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Η άμεση κοινοποίηση δεν είναι διαθέσιμη"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Λίστα εφαρμογών"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Δεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
 </resources>
