@@ -44,6 +44,7 @@ import android.app.ActivityThread;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.servertransaction.ConfigurationChangeItem;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -67,6 +68,7 @@ import com.android.server.wm.ActivityTaskManagerService.HotPath;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Activity Manager (AM) package manages the lifecycle of processes in the system through
@@ -764,6 +766,30 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 r.destroyImmediately(true /*removeFromApp*/, reason);
                 --maxRelease;
             } while (maxRelease > 0);
+        }
+    }
+
+    /**
+     * Returns display UI context list which there is any app window shows or starting activities
+     * int this process.
+     */
+    public void getDisplayContextsWithErrorDialogs(List<Context> displayContexts) {
+        if (displayContexts == null) {
+            return;
+        }
+        synchronized (mAtm.mGlobalLock) {
+            final RootWindowContainer root = mAtm.mWindowManager.mRoot;
+            root.getDisplayContextsWithNonToastVisibleWindows(mPid, displayContexts);
+
+            for (int i = mActivities.size() - 1; i >= 0; --i) {
+                final ActivityRecord r = mActivities.get(i);
+                final int displayId = r.getDisplayId();
+                final Context c = root.getDisplayUiContext(displayId);
+
+                if (r.mVisibleRequested && !displayContexts.contains(c)) {
+                    displayContexts.add(c);
+                }
+            }
         }
     }
 

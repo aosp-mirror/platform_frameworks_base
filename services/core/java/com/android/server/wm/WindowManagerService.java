@@ -7363,6 +7363,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public Context getTopFocusedDisplayUiContext() {
+            synchronized (mGlobalLock) {
+                return mRoot.getTopFocusedDisplayContent().getDisplayUiContext();
+            }
+        }
+
+        @Override
         public boolean shouldShowSystemDecorOnDisplay(int displayId) {
             synchronized (mGlobalLock) {
                 return WindowManagerService.this.shouldShowSystemDecors(displayId);

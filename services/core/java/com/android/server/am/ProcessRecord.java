@@ -62,6 +62,8 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.Zygote;
+import com.android.server.LocalServices;
+import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
@@ -70,6 +72,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Full information about a particular process that
@@ -246,6 +249,8 @@ class ProcessRecord implements WindowProcessListener {
     Debug.MemoryInfo lastMemInfo;
     long lastMemInfoTime;
 
+    // Controller for error dialogs
+    private final ErrorDialogController mDialogController = new ErrorDialogController();
     // Controller for driving the process state on the window manager side.
     final private WindowProcessController mWindowProcessController;
     // all ServiceRecord running in this process
@@ -272,16 +277,13 @@ class ProcessRecord implements WindowProcessListener {
     boolean execServicesFg;     // do we need to be executing services in the foreground?
     private boolean mPersistent;// always keep this application running?
     private boolean mCrashing;  // are we in the process of crashing?
-    Dialog crashDialog;         // dialog being displayed due to crash.
     boolean forceCrashReport;   // suppress normal auto-dismiss of crash dialog & report UI?
     private boolean mNotResponding; // does the app have a not responding dialog?
-    Dialog anrDialog;           // dialog being displayed due to app not resp.
     volatile boolean removed;   // Whether this process should be killed and removed from process
                                 // list. It is set when the package is force-stopped or the process
                                 // has crashed too many times.
     private boolean mDebugging; // was app launched for debugging?
     boolean waitedForDebugger;  // has process show wait for debugger dialog?
-    Dialog waitDialog;          // current wait for debugger dialog
 
     String shortStringName;     // caching of toShortString() result.
     String stringName;          // caching of toString() result.
@@ -518,21 +520,21 @@ class ProcessRecord implements WindowProcessListener {
                     pw.print(" killedByAm="); pw.print(killedByAm);
                     pw.print(" waitingToKill="); pw.println(waitingToKill);
         }
-        if (mDebugging || mCrashing || crashDialog != null || mNotResponding
-                || anrDialog != null || bad) {
+        if (mDebugging || mCrashing || mDialogController.hasCrashDialogs() || mNotResponding
+                || mDialogController.hasAnrDialogs() || bad) {
             pw.print(prefix); pw.print("mDebugging="); pw.print(mDebugging);
-                    pw.print(" mCrashing="); pw.print(mCrashing);
-                    pw.print(" "); pw.print(crashDialog);
-                    pw.print(" mNotResponding="); pw.print(mNotResponding);
-                    pw.print(" " ); pw.print(anrDialog);
-                    pw.print(" bad="); pw.print(bad);
+            pw.print(" mCrashing=" + mCrashing);
+            pw.print(" " + mDialogController.mCrashDialogs);
+            pw.print(" mNotResponding=" + mNotResponding);
+            pw.print(" " + mDialogController.mAnrDialogs);
+            pw.print(" bad=" + bad);
 
-                    // mCrashing or mNotResponding is always set before errorReportReceiver
-                    if (errorReportReceiver != null) {
-                        pw.print(" errorReportReceiver=");
-                        pw.print(errorReportReceiver.flattenToShortString());
-                    }
-                    pw.println();
+            // mCrashing or mNotResponding is always set before errorReportReceiver
+            if (errorReportReceiver != null) {
+                pw.print(" errorReportReceiver=");
+                pw.print(errorReportReceiver.flattenToShortString());
+            }
+            pw.println();
         }
         if (whitelistManager) {
             pw.print(prefix); pw.print("whitelistManager="); pw.println(whitelistManager);
@@ -1773,6 +1775,155 @@ class ProcessRecord implements WindowProcessListener {
 
         if (mCachedAdj == ProcessList.VISIBLE_APP_ADJ) {
             mCachedAdj += minLayer;
+        }
+    }
+
+    ErrorDialogController getDialogController() {
+        return mDialogController;
+    }
+
+    /** A controller to generate error dialogs in {@link ProcessRecord} */
+    class ErrorDialogController {
+        /** dialogs being displayed due to crash */
+        private List<AppErrorDialog> mCrashDialogs;
+        /** dialogs being displayed due to app not responding */
+        private List<AppNotRespondingDialog> mAnrDialogs;
+        /** dialogs displayed due to strict mode violation */
+        private List<StrictModeViolationDialog> mViolationDialogs;
+        /** current wait for debugger dialog */
+        private AppWaitingForDebuggerDialog mWaitDialog;
+
+        private final WindowManagerInternal mWmInternal =
+                LocalServices.getService(WindowManagerInternal.class);
+
+        boolean hasCrashDialogs() {
+            return mCrashDialogs != null;
+        }
+
+        boolean hasAnrDialogs() {
+            return mAnrDialogs != null;
+        }
+
+        boolean hasViolationDialogs() {
+            return mViolationDialogs != null;
+        }
+
+        boolean hasDebugWaitingDialog() {
+            return mWaitDialog != null;
+        }
+
+        void clearAllErrorDialogs() {
+            clearCrashDialogs();
+            clearAnrDialogs();
+            clearViolationDialogs();
+            clearWaitingDialog();
+        }
+
+        void clearCrashDialogs() {
+            clearCrashDialogs(true /* needDismiss */);
+        }
+
+        void clearCrashDialogs(boolean needDismiss) {
+            if (mCrashDialogs == null) {
+                return;
+            }
+            if (needDismiss) {
+                forAllDialogs(mCrashDialogs, Dialog::dismiss);
+            }
+            mCrashDialogs = null;
+        }
+
+        void clearAnrDialogs() {
+            if (mAnrDialogs == null) {
+                return;
+            }
+            forAllDialogs(mAnrDialogs, Dialog::dismiss);
+            mAnrDialogs = null;
+        }
+
+        void clearViolationDialogs() {
+            if (mViolationDialogs == null) {
+                return;
+            }
+            forAllDialogs(mViolationDialogs, Dialog::dismiss);
+            mViolationDialogs = null;
+        }
+
+        void clearWaitingDialog() {
+            if (mWaitDialog == null) {
+                return;
+            }
+            mWaitDialog.dismiss();
+            mWaitDialog = null;
+        }
+
+        void forAllDialogs(List<? extends BaseErrorDialog> dialogs,
+                Consumer<BaseErrorDialog> c) {
+            for (int i = dialogs.size() - 1; i >= 0; i--) {
+                c.accept(dialogs.get(i));
+            }
+        }
+
+        void showCrashDialogs(AppErrorDialog.Data data) {
+            List<Context> contexts = getDisplayContexts(false /* lastUsedOnly */);
+            mCrashDialogs = new ArrayList<>();
+
+            for (int i = contexts.size() - 1; i >= 0; i--) {
+                final Context c = contexts.get(i);
+                mCrashDialogs.add(new AppErrorDialog(c, mService, data));
+            }
+            mService.mUiHandler.post(() -> mCrashDialogs.forEach(Dialog::show));
+        }
+
+        void showAnrDialogs(AppNotRespondingDialog.Data data) {
+            List<Context> contexts = getDisplayContexts(isSilentAnr() /* lastUsedOnly */);
+            mAnrDialogs = new ArrayList<>();
+
+            for (int i = contexts.size() - 1; i >= 0; i--) {
+                final Context c = contexts.get(i);
+                mAnrDialogs.add(new AppNotRespondingDialog(mService, c, data));
+            }
+            mService.mUiHandler.post(() -> mAnrDialogs.forEach(Dialog::show));
+        }
+
+        void showViolationDialogs(AppErrorResult res) {
+            List<Context> contexts = getDisplayContexts(false /* lastUsedOnly */);
+            mViolationDialogs = new ArrayList<>();
+
+            for (int i = contexts.size() - 1; i >= 0; i--) {
+                final Context c = contexts.get(i);
+                mViolationDialogs.add(
+                        new StrictModeViolationDialog(c, mService, res, ProcessRecord.this));
+            }
+            mService.mUiHandler.post(() -> mViolationDialogs.forEach(Dialog::show));
+        }
+
+        void showDebugWaitingDialogs() {
+            List<Context> contexts = getDisplayContexts(true /* lastUsedOnly */);
+            final Context c = contexts.get(0);
+            mWaitDialog = new AppWaitingForDebuggerDialog(mService, c, ProcessRecord.this);
+            mService.mUiHandler.post(() -> mWaitDialog.show());
+        }
+
+        /**
+         * Helper function to collect contexts from crashed app located displays
+         *
+         * @param lastUsedOnly Sets to {@code true} to indicate to only get last used context.
+         *                     Sets to {@code false} to collect contexts from crashed app located
+         *                     displays.
+         *
+         * @return display context list
+         */
+        private List<Context> getDisplayContexts(boolean lastUsedOnly) {
+            List<Context> displayContexts = new ArrayList<>();
+            if (!lastUsedOnly) {
+                mWindowProcessController.getDisplayContextsWithErrorDialogs(displayContexts);
+            }
+            // If there is no foreground window display, fallback to last used display.
+            if (displayContexts.isEmpty() || lastUsedOnly) {
+                displayContexts.add(mWmInternal.getTopFocusedDisplayUiContext());
+            }
+            return displayContexts;
         }
     }
 }

@@ -158,7 +158,6 @@ import android.app.ApplicationErrorReport;
 import android.app.ApplicationThreadConstants;
 import android.app.BroadcastOptions;
 import android.app.ContentProviderHolder;
-import android.app.Dialog;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -1619,82 +1618,72 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-            case SHOW_ERROR_UI_MSG: {
-                mAppErrors.handleShowAppErrorUi(msg);
-                ensureBootCompleted();
-            } break;
-            case SHOW_NOT_RESPONDING_UI_MSG: {
-                mAppErrors.handleShowAnrUi(msg);
-                ensureBootCompleted();
-            } break;
-            case SHOW_STRICT_MODE_VIOLATION_UI_MSG: {
-                HashMap<String, Object> data = (HashMap<String, Object>) msg.obj;
-                synchronized (ActivityManagerService.this) {
-                    ProcessRecord proc = (ProcessRecord) data.get("app");
-                    if (proc == null) {
-                        Slog.e(TAG, "App not found when showing strict mode dialog.");
-                        break;
-                    }
-                    if (proc.crashDialog != null) {
-                        Slog.e(TAG, "App already has strict mode dialog: " + proc);
-                        return;
-                    }
-                    AppErrorResult res = (AppErrorResult) data.get("result");
-                    if (mAtmInternal.showStrictModeViolationDialog()) {
-                        Dialog d = new StrictModeViolationDialog(mUiContext,
-                                ActivityManagerService.this, res, proc);
-                        d.show();
-                        proc.crashDialog = d;
-                    } else {
-                        // The device is asleep, so just pretend that the user
-                        // saw a crash dialog and hit "force quit".
-                        res.set(0);
-                    }
-                }
-                ensureBootCompleted();
-            } break;
-            case WAIT_FOR_DEBUGGER_UI_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    ProcessRecord app = (ProcessRecord)msg.obj;
-                    if (msg.arg1 != 0) {
-                        if (!app.waitedForDebugger) {
-                            Dialog d = new AppWaitingForDebuggerDialog(
-                                    ActivityManagerService.this,
-                                    mUiContext, app);
-                            app.waitDialog = d;
-                            app.waitedForDebugger = true;
-                            d.show();
+                case SHOW_ERROR_UI_MSG: {
+                    mAppErrors.handleShowAppErrorUi(msg);
+                    ensureBootCompleted();
+                } break;
+                case SHOW_NOT_RESPONDING_UI_MSG: {
+                    mAppErrors.handleShowAnrUi(msg);
+                    ensureBootCompleted();
+                } break;
+                case SHOW_STRICT_MODE_VIOLATION_UI_MSG: {
+                    HashMap<String, Object> data = (HashMap<String, Object>) msg.obj;
+                    synchronized (ActivityManagerService.this) {
+                        ProcessRecord proc = (ProcessRecord) data.get("app");
+                        if (proc == null) {
+                            Slog.e(TAG, "App not found when showing strict mode dialog.");
+                            break;
                         }
-                    } else {
-                        if (app.waitDialog != null) {
-                            app.waitDialog.dismiss();
-                            app.waitDialog = null;
+                        if (proc.getDialogController().hasViolationDialogs()) {
+                            Slog.e(TAG, "App already has strict mode dialog: " + proc);
+                            return;
+                        }
+                        AppErrorResult res = (AppErrorResult) data.get("result");
+                        if (mAtmInternal.showStrictModeViolationDialog()) {
+                            proc.getDialogController().showViolationDialogs(res);
+                        } else {
+                            // The device is asleep, so just pretend that the user
+                            // saw a crash dialog and hit "force quit".
+                            res.set(0);
                         }
                     }
+                    ensureBootCompleted();
+                } break;
+                case WAIT_FOR_DEBUGGER_UI_MSG: {
+                    synchronized (ActivityManagerService.this) {
+                        ProcessRecord app = (ProcessRecord) msg.obj;
+                        if (msg.arg1 != 0) {
+                            if (!app.waitedForDebugger) {
+                                app.getDialogController().showDebugWaitingDialogs();
+                                app.waitedForDebugger = true;
+                            }
+                        } else {
+                            app.getDialogController().clearWaitingDialog();
+                        }
+                    }
+                } break;
+                case DISPATCH_PROCESSES_CHANGED_UI_MSG: {
+                    dispatchProcessesChanged();
+                    break;
                 }
-            } break;
-            case DISPATCH_PROCESSES_CHANGED_UI_MSG: {
-                dispatchProcessesChanged();
-                break;
-            }
-            case DISPATCH_PROCESS_DIED_UI_MSG: {
-                final int pid = msg.arg1;
-                final int uid = msg.arg2;
-                dispatchProcessDied(pid, uid);
-                break;
-            }
-            case DISPATCH_UIDS_CHANGED_UI_MSG: {
-                if (false) { // DO NOT SUBMIT WITH TRUE
-                    maybeTriggerWatchdog();
+                case DISPATCH_PROCESS_DIED_UI_MSG: {
+                    final int pid = msg.arg1;
+                    final int uid = msg.arg2;
+                    dispatchProcessDied(pid, uid);
+                    break;
                 }
-                dispatchUidsChanged();
-            } break;
-            case DISPATCH_OOM_ADJ_OBSERVER_MSG: {
-                dispatchOomAdjObserver((String)msg.obj);
-            } break;
-            case PUSH_TEMP_WHITELIST_UI_MSG: {
-                pushTempWhitelist();
-            } break;
+                case DISPATCH_UIDS_CHANGED_UI_MSG: {
+                    if (false) { // DO NOT SUBMIT WITH TRUE
+                        maybeTriggerWatchdog();
+                    }
+                    dispatchUidsChanged();
+                } break;
+                case DISPATCH_OOM_ADJ_OBSERVER_MSG: {
+                    dispatchOomAdjObserver((String) msg.obj);
+                } break;
+                case PUSH_TEMP_WHITELIST_UI_MSG: {
+                    pushTempWhitelist();
+                } break;
             }
         }
     }
@@ -9367,9 +9356,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void killAppAtUsersRequest(ProcessRecord app, Dialog fromDialog) {
+    void killAppAtUsersRequest(ProcessRecord app) {
         synchronized (this) {
-            mAppErrors.killAppAtUserRequestLocked(app, fromDialog);
+            mAppErrors.killAppAtUserRequestLocked(app);
         }
     }
 
@@ -13991,18 +13980,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         ProcessList.abortNextPssTime(app.procStateMemTracker);
 
         // Dismiss any open dialogs.
-        if (app.crashDialog != null && !app.forceCrashReport) {
-            app.crashDialog.dismiss();
-            app.crashDialog = null;
-        }
-        if (app.anrDialog != null) {
-            app.anrDialog.dismiss();
-            app.anrDialog = null;
-        }
-        if (app.waitDialog != null) {
-            app.waitDialog.dismiss();
-            app.waitDialog = null;
-        }
+        app.getDialogController().clearAllErrorDialogs();
 
         app.setCrashing(false);
         app.setNotResponding(false);

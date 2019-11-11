@@ -49,7 +49,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_ATTACHED_IN_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -227,6 +226,7 @@ public class DisplayPolicy {
 
     private final WindowManagerService mService;
     private final Context mContext;
+    private final Context mUiContext;
     private final DisplayContent mDisplayContent;
     private final Object mLock;
     private final Handler mHandler;
@@ -442,6 +442,9 @@ public class DisplayPolicy {
         mService = service;
         mContext = displayContent.isDefaultDisplay ? service.mContext
                 : service.mContext.createDisplayContext(displayContent.getDisplay());
+        mUiContext = displayContent.isDefaultDisplay ? service.mAtmService.mUiContext
+                : service.mAtmService.mSystemThread
+                        .createSystemUiContext(displayContent.getDisplayId());
         mDisplayContent = displayContent;
         mLock = service.getWindowManagerLock();
 
@@ -2683,10 +2686,8 @@ public class DisplayPolicy {
         return mContext;
     }
 
-    private Context getSystemUiContext() {
-        final Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
-        return mDisplayContent.isDefaultDisplay
-                ? uiContext : uiContext.createDisplayContext(mDisplayContent.getDisplay());
+    Context getSystemUiContext() {
+        return mUiContext;
     }
 
     private int getNavigationBarWidth(int rotation, int uiMode) {
