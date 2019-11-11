@@ -674,6 +674,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             DozeScrimController dozeScrimController,
             VolumeComponent volumeComponent,
             CommandQueue commandQueue,
+            Optional<Recents> recentsOptional,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
@@ -743,6 +744,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
+        mRecentsOptional = recentsOptional;
         mPluginManager = pluginManager;
         mRemoteInputUriController = remoteInputUriController;
         mDividerOptional = dividerOptional;
@@ -806,8 +808,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-
-        mRecents = getComponent(Recents.class);
 
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
 
@@ -1432,7 +1432,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected boolean toggleSplitScreenMode(int metricsDockAction, int metricsUndockAction) {
-        if (mRecents == null) {
+        if (!mRecentsOptional.isPresent()) {
             return false;
         }
         int dockSide = WindowManagerProxy.getInstance().getDockSide();
@@ -1444,7 +1444,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             int createMode = navbarPos == NAV_BAR_POS_LEFT
                     ? SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT
                     : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-            return mRecents.splitPrimaryTask(createMode, null, metricsDockAction);
+            return mRecentsOptional.get().splitPrimaryTask(createMode, null, metricsDockAction);
         } else {
             if (mDividerOptional.isPresent()) {
                 Divider divider = mDividerOptional.get();
@@ -4067,7 +4067,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected Display mDisplay;
     private int mDisplayId;
 
-    protected Recents mRecents;
+    private final Optional<Recents> mRecentsOptional;
 
     protected NotificationShelf mNotificationShelf;
     protected EmptyShadeView mEmptyShadeView;
