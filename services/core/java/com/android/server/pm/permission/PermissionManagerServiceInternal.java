@@ -162,12 +162,14 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
         }
         public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
                 int uid) {
+            onPermissionUpdated(updatedUserIds, sync);
         }
         public void onPermissionRemoved() {
         }
         public void onInstallPermissionUpdated() {
         }
         public void onInstallPermissionUpdatedNotifyListener(int uid) {
+            onInstallPermissionUpdated();
         }
     }
 
