@@ -22,6 +22,9 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
+    },
+    {
+      "name": "PackageManagerShellCommandTest"
     }
   ],
   "postsubmit": [
