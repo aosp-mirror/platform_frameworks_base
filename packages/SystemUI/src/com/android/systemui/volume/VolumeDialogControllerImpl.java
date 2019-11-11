@@ -74,6 +74,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
+
 /**
  *  Source of truth for all state / events related to the volume dialog.  No presentation.
  *
@@ -115,7 +117,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final Context mContext;
     private AudioManager mAudio;
     private IAudioService mAudioService;
-    private final Optional<StatusBar> mStatusBarOptional;
+    private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
     private final NotificationManager mNoMan;
     private final SettingObserver mObserver;
     private final Receiver mReceiver = new Receiver();
@@ -142,9 +144,9 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     @Inject
     public VolumeDialogControllerImpl(Context context, BroadcastDispatcher broadcastDispatcher,
-            Optional<StatusBar> statusBarOptional) {
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
         mContext = context.getApplicationContext();
-        mStatusBarOptional = statusBarOptional;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mNotificationManager = (NotificationManager) mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         Events.writeEvent(mContext, Events.EVENT_COLLECTION_STARTED);
@@ -448,12 +450,14 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean shouldShowUI(int flags) {
         // if status bar isn't null, check if phone is in AOD, else check flags
         // since we could be using a different status bar
-        return mStatusBarOptional.map(statusBar ->
-                statusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
-                        && statusBar.getWakefulnessState()
-                        != WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
-                        && statusBar.isDeviceInteractive()
-                        && (flags & AudioManager.FLAG_SHOW_UI) != 0 && mShowVolumeDialog).orElse(
+        return mStatusBarOptionalLazy.map(statusBarLazy -> {
+            StatusBar statusBar = statusBarLazy.get();
+            return statusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
+                    && statusBar.getWakefulnessState()
+                    != WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
+                    && statusBar.isDeviceInteractive() && (flags & AudioManager.FLAG_SHOW_UI) != 0
+                    && mShowVolumeDialog;
+        }).orElse(
                 mShowVolumeDialog && (flags & AudioManager.FLAG_SHOW_UI) != 0);
     }
 
