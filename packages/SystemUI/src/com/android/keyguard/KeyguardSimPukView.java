@@ -37,8 +37,6 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -69,12 +67,12 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
 
     KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
         @Override
-        public void onSimStateChanged(int subId, int slotId, State simState) {
+        public void onSimStateChanged(int subId, int slotId, int simState) {
             if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
             switch(simState) {
                 // If the SIM is unlocked via a key sequence through the emergency dialer, it will
                 // move into the READY state and the PUK lock keyguard should be removed.
-                case READY: {
+                case TelephonyManager.SIM_STATE_READY: {
                     mRemainingAttempts = -1;
                     mShowDefaultMessage = true;
                     // mCallback can be null if onSimStateChanged callback is called when keyguard
@@ -210,7 +208,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
 
     private void handleSubInfoChangeIfNeeded() {
         KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
-        int subId = monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED);
+        int subId = monitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PUK_REQUIRED);
         if (subId != mSubId && SubscriptionManager.isValidSubscriptionId(subId)) {
             mSubId = subId;
             mShowDefaultMessage = true;

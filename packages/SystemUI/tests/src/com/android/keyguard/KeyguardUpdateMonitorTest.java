@@ -546,8 +546,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         }
 
         @Override
-        protected void handleSimStateChange(int subId, int slotId,
-                IccCardConstants.State state) {
+        protected void handleSimStateChange(int subId, int slotId, int state) {
             mSimStateChanged.set(true);
             super.handleSimStateChange(subId, slotId, state);
         }
