@@ -67,7 +67,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -82,6 +81,7 @@ import com.android.systemui.statusbar.notification.NotificationInterruptionState
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -95,6 +95,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Bubbles are a special type of content that can "float" on top of other apps or System UI.
@@ -132,6 +134,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private BubbleExpandListener mExpandListener;
     @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
     private final NotificationGroupManager mNotificationGroupManager;
+    private final Lazy<ShadeController> mShadeController;
 
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
@@ -206,24 +209,34 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     @Inject
-    public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
-            BubbleData data, ConfigurationController configurationController,
-            NotificationInterruptionStateProvider interruptionStateProvider,
-            ZenModeController zenModeController,
-            NotificationLockscreenUserManager notifUserManager,
-            NotificationGroupManager groupManager) {
-        this(context, statusBarWindowController, data, null /* synchronizer */,
-                configurationController, interruptionStateProvider, zenModeController,
-                notifUserManager, groupManager);
-    }
-
-    public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
-            BubbleData data, @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
+    public BubbleController(Context context,
+            StatusBarWindowController statusBarWindowController,
+            StatusBarStateController statusBarStateController,
+            Lazy<ShadeController> shadeController,
+            BubbleData data,
             ConfigurationController configurationController,
             NotificationInterruptionStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
-            NotificationGroupManager groupManager) {
+            NotificationGroupManager groupManager,
+            NotificationEntryManager entryManager) {
+        this(context, statusBarWindowController, statusBarStateController, shadeController,
+                data, null /* synchronizer */, configurationController, interruptionStateProvider,
+                zenModeController, notifUserManager, groupManager, entryManager);
+    }
+
+    public BubbleController(Context context,
+            StatusBarWindowController statusBarWindowController,
+            StatusBarStateController statusBarStateController,
+            Lazy<ShadeController> shadeController,
+            BubbleData data,
+            @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
+            ConfigurationController configurationController,
+            NotificationInterruptionStateProvider interruptionStateProvider,
+            ZenModeController zenModeController,
+            NotificationLockscreenUserManager notifUserManager,
+            NotificationGroupManager groupManager,
+            NotificationEntryManager entryManager) {
         mContext = context;
         mNotificationInterruptionStateProvider = interruptionStateProvider;
         mNotifUserManager = notifUserManager;
@@ -249,7 +262,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mBubbleData = data;
         mBubbleData.setListener(mBubbleDataListener);
 
-        mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
+        mNotificationEntryManager = entryManager;
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
         mNotificationEntryManager.setNotificationRemoveInterceptor(mRemoveInterceptor);
         mNotificationGroupManager = groupManager;
@@ -271,9 +284,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     }
                 });
 
+        mShadeController = shadeController;
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarStateListener = new StatusBarStateListener();
-        Dependency.get(StatusBarStateController.class).addCallback(mStatusBarStateListener);
+        statusBarStateController.addCallback(mStatusBarStateListener);
 
         mTaskStackListener = new BubbleTaskStackListener();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
@@ -497,15 +511,45 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param notif the notification associated with this bubble.
      */
     void updateBubble(NotificationEntry notif) {
-        updateBubble(notif, /* supressFlyout */ false);
+        updateBubble(notif, false /* suppressFlyout */);
     }
 
     void updateBubble(NotificationEntry notif, boolean suppressFlyout) {
+        updateBubble(notif, suppressFlyout, true /* showInShade */);
+    }
+
+    void updateBubble(NotificationEntry notif, boolean suppressFlyout, boolean showInShade) {
         // If this is an interruptive notif, mark that it's interrupted
         if (notif.getImportance() >= NotificationManager.IMPORTANCE_HIGH) {
             notif.setInterruption();
         }
-        mBubbleData.notificationEntryUpdated(notif, suppressFlyout);
+        mBubbleData.notificationEntryUpdated(notif, suppressFlyout, showInShade);
+    }
+
+    /**
+     * Called when a user has indicated that an active notification should be shown as a bubble.
+     * <p>
+     * This method will collapse the shade, create the bubble without a flyout or dot, and suppress
+     * the notification from appearing in the shade.
+     *
+     * @param entry the notification to show as a bubble.
+     */
+    public void onUserCreatedBubbleFromNotification(NotificationEntry entry) {
+        mShadeController.get().collapsePanel(true);
+        entry.setFlagBubble(true);
+        updateBubble(entry, true /* suppressFlyout */, false /* showInShade */);
+        mBubbleData.getBubbleWithKey(entry.getKey()).setUserCreated(true);
+    }
+
+    /**
+     * Called when a user has indicated that an active notification appearing as a bubble should
+     * no longer be shown as a bubble.
+     *
+     * @param entry the notification to no longer show as a bubble.
+     */
+    public void onUserDemotedBubbleFromNotification(NotificationEntry entry) {
+        entry.setFlagBubble(false);
+        removeBubble(entry.getKey(), DISMISS_BLOCKED);
     }
 
     /**
@@ -571,7 +615,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     mNotificationEntryManager.updateNotifications(
                             "BubbleController.onNotificationRemoveRequested");
                     return true;
-                } else if (!userRemovedNotif && entry != null) {
+                } else if (!userRemovedNotif && entry != null && !bubble.isUserCreated()) {
                     // This wasn't a user removal so we should remove the bubble as well
                     mBubbleData.notificationEntryRemoved(entry, DISMISS_NOTIF_CANCEL);
                     return false;
@@ -631,6 +675,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
         @Override
         public void onPendingEntryAdded(NotificationEntry entry) {
+            Bubble b = mBubbleData.getBubbleWithKey(entry.getKey());
+            BubbleExperimentConfig.adjustForExperiments(mContext, entry, b);
+
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && canLaunchInActivityView(mContext, entry)) {
                 updateBubble(entry);
@@ -639,13 +686,15 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void onPreEntryUpdated(NotificationEntry entry) {
+            Bubble b = mBubbleData.getBubbleWithKey(entry.getKey());
+            BubbleExperimentConfig.adjustForExperiments(mContext, entry, b);
+
             boolean shouldBubble = mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && canLaunchInActivityView(mContext, entry);
             if (!shouldBubble && mBubbleData.hasBubbleWithKey(entry.getKey())) {
                 // It was previously a bubble but no longer a bubble -- lets remove it
                 removeBubble(entry.getKey(), DISMISS_NO_LONGER_BUBBLE);
             } else if (shouldBubble) {
-                Bubble b = mBubbleData.getBubbleWithKey(entry.getKey());
                 updateBubble(entry);
             }
         }
@@ -949,19 +998,26 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         PendingIntent intent = entry.getBubbleMetadata() != null
                 ? entry.getBubbleMetadata().getIntent()
                 : null;
+        return canLaunchIntentInActivityView(context, entry, intent);
+    }
+
+    static boolean canLaunchIntentInActivityView(Context context, NotificationEntry entry,
+            PendingIntent intent) {
         if (intent == null) {
-            Log.w(TAG, "Unable to create bubble -- no intent");
+            Log.w(TAG, "Unable to create bubble -- no intent: " + entry.getKey());
             return false;
         }
         ActivityInfo info =
                 intent.getIntent().resolveActivityInfo(context.getPackageManager(), 0);
         if (info == null) {
-            Log.w(TAG, "Unable to send as bubble -- couldn't find activity info for intent: "
+            Log.w(TAG, "Unable to send as bubble, "
+                    + entry.getKey() + " couldn't find activity info for intent: "
                     + intent);
             return false;
         }
         if (!ActivityInfo.isResizeableMode(info.resizeMode)) {
-            Log.w(TAG, "Unable to send as bubble -- activity is not resizable for intent: "
+            Log.w(TAG, "Unable to send as bubble, "
+                    + entry.getKey() + " activity is not resizable for intent: "
                     + intent);
             return false;
         }
