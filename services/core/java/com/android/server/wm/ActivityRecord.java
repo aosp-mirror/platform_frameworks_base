@@ -42,9 +42,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_HOME;
@@ -1994,9 +1994,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * @return Stack value from current task, null if there is no task.
      */
-    // TODO(stack-unify): Remove once ActivityStack and TaskStack are unified.
-    <T extends ActivityStack> T getActivityStack() {
-        return task != null ? (T) task.getStack() : null;
+    ActivityStack getActivityStack() {
+        return task != null ? task.getStack() : null;
     }
 
     int getStackId() {
@@ -2082,10 +2081,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return ActivityInfo.isResizeableMode(info.resizeMode) || info.supportsPictureInPicture();
     }
 
-    /**
-     * @return whether this activity is non-resizeable or forced to be resizeable
-     */
-    boolean isNonResizableOrForcedResizable() {
+    /** @return whether this activity is non-resizeable or forced to be resizeable */
+    boolean isNonResizableOrForcedResizable(int windowingMode) {
+        if (windowingMode == WINDOWING_MODE_PINNED && info.supportsPictureInPicture()) {
+            return false;
+        }
         return info.resizeMode != RESIZE_MODE_RESIZEABLE
                 && info.resizeMode != RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
     }
@@ -6529,7 +6529,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             updateSurfacePosition();
         }
 
-        adjustPinnedStackAndInitChangeTransitionIfNeeded(prevWinMode, getWindowingMode());
+        final int newWinMode = getWindowingMode();
+        if ((prevWinMode != newWinMode) && (mDisplayContent != null)
+                && shouldStartChangeTransition(prevWinMode, newWinMode)) {
+            initializeChangeTransition(mTmpPrevBounds);
+        }
 
         // Configuration's equality doesn't consider seq so if only seq number changes in resolved
         // override configuration. Therefore ConfigurationContainer doesn't change merged override
@@ -6563,35 +6567,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    private void adjustPinnedStackAndInitChangeTransitionIfNeeded(int prevWinMode, int winMode) {
-        if (prevWinMode == winMode || mDisplayContent == null) {
-            return;
+    void savePinnedStackBounds() {
+        // Leaving PiP to fullscreen, save the snap fraction based on the pre-animation bounds
+        // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
+        final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
+        if (pinnedStack == null) return;
+        final Rect stackBounds;
+        if (pinnedStack.lastAnimatingBoundsWasToFullscreen()) {
+            // We are animating the bounds, use the pre-animation bounds to save the snap
+            // fraction
+            stackBounds = pinnedStack.mPreAnimationBounds;
+        } else {
+            // We skip the animation if the fullscreen configuration is not compatible, so
+            // use the current bounds to calculate the saved snap fraction instead
+            // (see PinnedActivityStack.skipResizeAnimation())
+            stackBounds = mTmpRect;
+            pinnedStack.getBounds(stackBounds);
         }
-
-        if (prevWinMode == WINDOWING_MODE_PINNED && winMode != WINDOWING_MODE_UNDEFINED
-                && !isHidden()) {
-            // Leaving PiP to fullscreen, save the snap fraction based on the pre-animation bounds
-            // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
-            final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
-            if (pinnedStack != null) {
-                final Rect stackBounds;
-                if (pinnedStack.lastAnimatingBoundsWasToFullscreen()) {
-                    // We are animating the bounds, use the pre-animation bounds to save the snap
-                    // fraction
-                    stackBounds = pinnedStack.mPreAnimationBounds;
-                } else {
-                    // We skip the animation if the fullscreen configuration is not compatible, so
-                    // use the current bounds to calculate the saved snap fraction instead
-                    // (see PinnedActivityStack.skipResizeAnimation())
-                    stackBounds = mTmpRect;
-                    pinnedStack.getBounds(stackBounds);
-                }
-                mDisplayContent.mPinnedStackControllerLocked.saveReentrySnapFraction(
-                        mActivityComponent, stackBounds);
-            }
-        } else if (shouldStartChangeTransition(prevWinMode, winMode)) {
-            initializeChangeTransition(mTmpPrevBounds);
-        }
+        mDisplayContent.mPinnedStackControllerLocked.saveReentrySnapFraction(
+                mActivityComponent, stackBounds);
     }
 
     /** Returns true if the configuration is compatible with this activity. */

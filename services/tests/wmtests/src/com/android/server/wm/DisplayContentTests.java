@@ -235,7 +235,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
 
         // Add stack with activity.
-        final TaskStack stack = createTaskStackOnDisplay(dc);
+        final ActivityStack stack = createTaskStackOnDisplay(dc);
         assertEquals(dc.getDisplayId(), stack.getDisplayContent().getDisplayId());
         assertEquals(dc, stack.getParent().getParent());
         assertEquals(dc, stack.getDisplayContent());
@@ -311,7 +311,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc1 = createNewDisplay();
 
         // Add stack with activity.
-        final TaskStack stack0 = createTaskStackOnDisplay(dc0);
+        final ActivityStack stack0 = createTaskStackOnDisplay(dc0);
         final Task task0 = createTaskInStack(stack0, 0 /* userId */);
         final ActivityRecord activity =
                 WindowTestUtils.createTestActivityRecord(dc0);
@@ -319,7 +319,7 @@ public class DisplayContentTests extends WindowTestsBase {
         dc0.configureDisplayPolicy();
         assertNotNull(dc0.mTapDetector);
 
-        final TaskStack stack1 = createTaskStackOnDisplay(dc1);
+        final ActivityStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
         final ActivityRecord activity1 =
                 WindowTestUtils.createTestActivityRecord(dc0);

@@ -226,10 +226,13 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
                 + " from stack=" + getTaskStack());
         EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "reParentTask");
 
-        final ActivityStack prevStack = getTaskStack().mActivityStack;
+        // TODO(stack-merge): Remove cast.
+        final ActivityStack prevStack = (ActivityStack) getTaskStack();
         final boolean wasTopFocusedStack =
                 mAtmService.mRootActivityContainer.isTopDisplayFocusedStack(prevStack);
         final ActivityDisplay prevStackDisplay = prevStack.getDisplay();
+
+        position = stack.findPositionForTask(this, position, showForAllUsers());
 
         reparent(stack, position);
 
@@ -245,12 +248,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         // our insets so that there will not be a jump in the area covered by system decorations.
         // We rely on the pinned animation to later unset this value.
         mPreserveNonFloatingState = stack.inPinnedWindowingMode();
-    }
-
-    /** @see ActivityTaskManagerService#positionTaskInStack(int, int, int). */
-    void positionAt(int position) {
-        // TODO(task-merge): Remove cast.
-        getTaskStack().positionChildAt(position, (TaskRecord) this, false /* includingParents */);
     }
 
     void setSendingToBottom(boolean toBottom) {

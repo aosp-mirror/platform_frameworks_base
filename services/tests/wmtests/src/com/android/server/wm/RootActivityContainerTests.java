@@ -171,8 +171,11 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     public void testApplySleepTokens() {
         final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
         final KeyguardController keyguard = mSupervisor.getKeyguardController();
-        final ActivityStack stack = mock(ActivityStack.class);
-        display.addChild(stack, 0 /* position */);
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+                .setCreateActivity(false)
+                .setDisplay(display)
+                .setOnTop(false)
+                .build();
 
         // Make sure we wake and resume in the case the display is turning on and the keyguard is
         // not showing.
@@ -414,8 +417,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
      */
     @Test
     public void testResumeFocusedStacksStartsHomeActivity_NoActivities() {
-        mFullscreenStack.remove();
-        mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY).getHomeStack().remove();
+        mFullscreenStack.removeIfPossible();
+        mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY).getHomeStack().removeIfPossible();
         mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY)
                 .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
 
@@ -436,8 +439,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
      */
     @Test
     public void testResumeFocusedStacksStartsHomeActivity_ActivityOnSecondaryScreen() {
-        mFullscreenStack.remove();
-        mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY).getHomeStack().remove();
+        mFullscreenStack.removeIfPossible();
+        mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY).getHomeStack().removeIfPossible();
         mService.mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY)
                 .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
 

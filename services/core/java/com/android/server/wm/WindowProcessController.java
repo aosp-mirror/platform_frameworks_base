@@ -601,8 +601,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
         // Compare the z-order of ActivityStacks if both activities landed on same display.
         if (display == topDisplay
-                && mPreQTopResumedActivity.getActivityStack().mTaskStack.compareTo(
-                activity.getActivityStack().mTaskStack) <= 0) {
+                && mPreQTopResumedActivity.getActivityStack().compareTo(
+                        activity.getActivityStack()) <= 0) {
             canUpdate = true;
         }
 

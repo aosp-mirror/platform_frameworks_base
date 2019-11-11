@@ -325,7 +325,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         // Start the recents animation
         startRecentsActivity();
 
-        fullscreenStack.remove();
+        fullscreenStack.removeIfPossible();
 
         // Ensure that the recents animation was NOT canceled
         verify(mService.mWindowManager, times(0)).cancelRecentsAnimation(

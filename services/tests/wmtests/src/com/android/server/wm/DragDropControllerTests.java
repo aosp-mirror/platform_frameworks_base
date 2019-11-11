@@ -98,7 +98,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     private WindowState createDropTargetWindow(String name, int ownerId) {
         final ActivityRecord activity = WindowTestUtils.createTestActivityRecord(
                 mDisplayContent);
-        final TaskStack stack = createTaskStackOnDisplay(
+        final ActivityStack stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         final Task task = createTaskInStack(stack, ownerId);
         task.addChild(activity, 0);

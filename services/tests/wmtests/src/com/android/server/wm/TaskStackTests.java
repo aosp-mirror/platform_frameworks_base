@@ -53,7 +53,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testStackPositionChildAt() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
 
@@ -70,7 +70,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testClosingAppDifferentStackOrientation() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         ActivityRecord activity1 =
                 WindowTestUtils.createTestActivityRecord(mDisplayContent);
@@ -90,7 +90,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testMoveTaskToBackDifferentStackOrientation() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         ActivityRecord activity1 =
                 WindowTestUtils.createTestActivityRecord(mDisplayContent);
@@ -110,7 +110,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testStackRemoveImmediately() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         assertEquals(stack, task.getTaskStack());
 
@@ -122,7 +122,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
 
         assertNotNull(stack);
@@ -138,7 +138,7 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testRemoveContainer_deferRemoval() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
 
         // Stack removal is deferred if one of its child is animating.
@@ -160,15 +160,15 @@ public class TaskStackTests extends WindowTestsBase {
     @Test
     public void testReparent() {
         // Create first stack on primary display.
-        final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack1 = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
 
         // Create second display and put second stack on it.
         final DisplayContent dc = createNewDisplay();
-        final TaskStack stack2 = createTaskStackOnDisplay(dc);
+        final ActivityStack stack2 = createTaskStackOnDisplay(dc);
 
         // Reparent
-        stack1.reparent(dc.getDisplayId(), new Rect(), true /* onTop */);
+        stack1.reparent(dc, true /* onTop */);
         assertEquals(dc, stack1.getDisplayContent());
         final int stack1PositionInParent = stack1.getParent().mChildren.indexOf(stack1);
         final int stack2PositionInParent = stack1.getParent().mChildren.indexOf(stack2);
@@ -178,10 +178,11 @@ public class TaskStackTests extends WindowTestsBase {
 
     @Test
     public void testStackOutset() {
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final int stackOutset = 10;
         spyOn(stack);
         doReturn(stackOutset).when(stack).getStackOutset();
+        doReturn(true).when(stack).inMultiWindowMode();
 
         final Rect stackBounds = new Rect(200, 200, 800, 1000);
         // Update surface position and size by the given bounds.

@@ -210,8 +210,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     ActivityRecord createTestActivityRecord(DisplayContent dc, int
             windowingMode, int activityType) {
-        final TaskStack stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
-        return WindowTestUtils.createTestActivityRecord(stack.mActivityStack);
+        final ActivityStack stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
+        return WindowTestUtils.createTestActivityRecord(stack);
     }
 
     WindowState createWindow(WindowState parent, int type, String name) {
@@ -315,27 +315,24 @@ class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     /** Creates a {@link TaskStack} and adds it to the specified {@link DisplayContent}. */
-    TaskStack createTaskStackOnDisplay(DisplayContent dc) {
-        synchronized (mWm.mGlobalLock) {
-            return createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, dc);
-        }
+    ActivityStack createTaskStackOnDisplay(DisplayContent dc) {
+        return createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, dc);
     }
 
-    TaskStack createTaskStackOnDisplay(int windowingMode, int activityType, DisplayContent dc) {
+    ActivityStack createTaskStackOnDisplay(int windowingMode, int activityType, DisplayContent dc) {
         synchronized (mWm.mGlobalLock) {
-            final ActivityStack stack = new ActivityTestsBase.StackBuilder(
+            return new ActivityTestsBase.StackBuilder(
                     dc.mWmService.mAtmService.mRootActivityContainer)
                     .setDisplay(dc.mActivityDisplay)
                     .setWindowingMode(windowingMode)
                     .setActivityType(activityType)
                     .setCreateActivity(false)
                     .build();
-            return stack.mTaskStack;
         }
     }
 
-    /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
-    Task createTaskInStack(TaskStack stack, int userId) {
+    /** Creates a {@link Task} and adds it to the specified {@link ActivityStack}. */
+    Task createTaskInStack(ActivityStack stack, int userId) {
         return WindowTestUtils.createTaskInStack(mWm, stack, userId);
     }
 

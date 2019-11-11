@@ -287,14 +287,12 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Do not move display to back because there is still another stack.
         stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.topTask());
-        verify(stack2.getTaskStack()).positionChildAtBottom(any(),
-                eq(false) /* includingParents */);
+        verify(stack2).positionChildAtBottom(any(), eq(false) /* includingParents */);
 
         // Also move display to back because there is only one stack left.
         display.removeChild(stack1);
         stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.topTask());
-        verify(stack2.getTaskStack()).positionChildAtBottom(any(),
-                eq(true) /* includingParents */);
+        verify(stack2).positionChildAtBottom(any(), eq(true) /* includingParents */);
     }
 
     @Test

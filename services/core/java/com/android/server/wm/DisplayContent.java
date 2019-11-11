@@ -937,6 +937,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         super.addChild(mTaskStackContainers, null);
         super.addChild(mAboveAppWindowsContainers, null);
         super.addChild(mImeWindowsContainers, null);
+        // Sets the display content for the children.
+        onDisplayChanged(this);
 
         // Add itself as a child to the root container.
         mWmService.mRoot.addChild(this, null);
@@ -2202,27 +2204,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         out.set(mDisplayFrames.mStable);
     }
 
-    void setStackOnDisplay(int stackId, boolean onTop, TaskStack stack) {
-        if (DEBUG_STACK) {
-            Slog.d(TAG_WM, "Create new stackId=" + stackId + " on displayId=" + mDisplayId);
-        }
-
-        mTaskStackContainers.addStackToDisplay(stack, onTop);
+    void setStackOnDisplay(TaskStack stack, int position) {
+        if (DEBUG_STACK) Slog.d(TAG_WM, "Set stack=" + stack + " on displayId=" + mDisplayId);
+        mTaskStackContainers.addChild(stack, position);
     }
 
     void moveStackToDisplay(TaskStack stack, boolean onTop) {
-        final DisplayContent prevDc = stack.getDisplayContent();
-        if (prevDc == null) {
-            throw new IllegalStateException("Trying to move stackId=" + stack.mStackId
-                    + " which is not currently attached to any display");
-        }
-        if (prevDc.getDisplayId() == mDisplayId) {
-            throw new IllegalArgumentException("Trying to move stackId=" + stack.mStackId
-                    + " to its current displayId=" + mDisplayId);
-        }
+        stack.reparent(mTaskStackContainers, onTop ? POSITION_TOP: POSITION_BOTTOM);
+    }
 
-        prevDc.mTaskStackContainers.removeChild(stack);
-        mTaskStackContainers.addStackToDisplay(stack, onTop);
+    // TODO(display-unify): No longer needed then.
+    void removeStackFromDisplay(TaskStack stack) {
+        mTaskStackContainers.removeChild(stack);
     }
 
     @Override
@@ -2357,8 +2350,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
-    void switchUser() {
-        super.switchUser();
+    void switchUser(int userId) {
+        super.switchUser(userId);
         mWmService.mWindowsChanged = true;
         mDisplayPolicy.switchUser();
     }
@@ -2624,7 +2617,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         proto.write(ID, mDisplayId);
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
-            stack.writeToProto(proto, STACKS, logLevel);
+            stack.writeToProtoInnerStackOnly(proto, STACKS, logLevel);
         }
         mDividerControllerLocked.writeToProto(proto, DOCKED_STACK_DIVIDER_CONTROLLER);
         mPinnedStackControllerLocked.writeToProto(proto, PINNED_STACK_CONTROLLER);
@@ -3947,6 +3940,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             super(service);
         }
 
+        @Override
+        public void onConfigurationChanged(Configuration newParentConfig) {
+            // TODO(display-unify): Remove after unification.
+            onConfigurationChanged(newParentConfig, mActivityDisplay == null /*forwardToChildren*/);
+        }
+
         /**
          * Returns the topmost stack on the display that is compatible with the input windowing mode
          * and activity type. Null is no compatible stack on the display.
@@ -4006,15 +4005,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return visibleTasks;
         }
 
-        /**
-         * Adds the stack to this container.
-         */
-        void addStackToDisplay(TaskStack stack, boolean onTop) {
-            addStackReferenceIfNeeded(stack);
-            addChild(stack, onTop);
-            stack.onDisplayChanged(DisplayContent.this);
-        }
-
         void onStackWindowingModeChanged(TaskStack stack) {
             removeStackReferenceIfNeeded(stack);
             addStackReferenceIfNeeded(stack);
@@ -4066,16 +4056,31 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        private void addChild(TaskStack stack, boolean toTop) {
-            final int addIndex = findPositionForStack(toTop ? mChildren.size() : 0, stack,
-                    true /* adding */);
-            addChild(stack, addIndex);
-            setLayoutNeeded();
+        @Override
+        void addChild(TaskStack stack, int position) {
+            addStackReferenceIfNeeded(stack);
+            position = findPositionForStack(position, stack, true /* adding */);
+
+            super.addChild(stack, position);
+            if (mActivityDisplay != null) {
+                // TODO(stack-merge): Remove cast.
+                mActivityDisplay.addChild((ActivityStack) stack, position, true /*fromDc*/);
+            }
+
+            // The reparenting case is handled in WindowContainer.
+            if (!stack.mReparenting) {
+                setLayoutNeeded();
+                stack.onDisplayChanged(DisplayContent.this);
+            }
         }
 
         @Override
         protected void removeChild(TaskStack stack) {
             super.removeChild(stack);
+            if (mActivityDisplay != null) {
+                // TODO(stack-merge): Remove cast.
+                mActivityDisplay.onChildRemoved((ActivityStack) stack);
+            }
             removeStackReferenceIfNeeded(stack);
         }
 
@@ -4161,6 +4166,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             int targetPosition = requestedPosition;
             targetPosition = Math.min(targetPosition, maxPosition);
             targetPosition = Math.max(targetPosition, minPosition);
+
+            // Cap the requested position to something reasonable for the previous position check
+            // below.
+            if (requestedPosition == POSITION_TOP) {
+                requestedPosition = mChildren.size();
+            } else if (requestedPosition == POSITION_BOTTOM) {
+                requestedPosition = 0;
+            }
 
             int prevPosition = getStacks().indexOf(stack);
             // The positions we calculated above (maxPosition, minPosition) do not take into

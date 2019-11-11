@@ -123,6 +123,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
     private boolean mSleeping;
 
+    /** We started the process of removing the display from the system. */
+    private boolean mRemoving;
+
     /**
      * The display is removed from the system and we are just waiting for all activities on it to be
      * finished before removing this object.
@@ -200,23 +203,37 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         }
     }
 
+    // TODO(display-unify): Merge with addChild below.
     void addChild(ActivityStack stack, int position) {
+        addChild(stack, position, false /*fromDc*/);
+    }
+
+    void addChild(ActivityStack stack, int position, boolean fromDc) {
+        boolean toTop = position == POSITION_TOP;
         if (position == POSITION_BOTTOM) {
             position = 0;
-        } else if (position == POSITION_TOP) {
+        } else if (toTop) {
             position = mStacks.size();
         }
         if (DEBUG_STACK) Slog.v(TAG_STACK, "addChild: attaching " + stack
                 + " to displayId=" + mDisplayId + " position=" + position);
         addStackReferenceIfNeeded(stack);
+        if (!fromDc) {
+            mDisplayContent.setStackOnDisplay(stack, position);
+        }
         positionChildAt(stack, position);
         mService.updateSleepIfNeededLocked();
     }
 
-    void removeChild(ActivityStack stack) {
+    // TODO(display-unify): Merge with removeChild below.
+    void onChildRemoved(ActivityStack stack) {
+        if (!mStacks.remove(stack)) {
+            // Stack no longer here!
+            return;
+        }
+
         if (DEBUG_STACK) Slog.v(TAG_STACK, "removeChild: detaching " + stack
                 + " from displayId=" + mDisplayId);
-        mStacks.remove(stack);
         if (mPreferredTopFocusableStack == stack) {
             mPreferredTopFocusableStack = null;
         }
@@ -224,6 +241,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         releaseSelfIfNeeded();
         mService.updateSleepIfNeededLocked();
         onStackOrderChanged(stack);
+    }
+
+    void removeChild(ActivityStack stack) {
+        mDisplayContent.removeStackFromDisplay(stack);
     }
 
     void positionChildAtTop(ActivityStack stack, boolean includingParents) {
@@ -286,12 +307,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
         // Since positionChildAt() is called during the creation process of pinned stacks,
         // ActivityStack#getStack() can be null.
-        if (stack.getTaskStack() != null && mDisplayContent != null) {
-            mDisplayContent.positionStackAt(insertPosition,
-                    stack.getTaskStack(), includingParents);
-        }
-        if (!wasContained) {
-            stack.setParent(this);
+        if (mDisplayContent != null) {
+            mDisplayContent.positionStackAt(insertPosition, stack, includingParents);
         }
         onStackOrderChanged(stack);
     }
@@ -1186,7 +1203,15 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         return mRemoved;
     }
 
+    /**
+     * @see #mRemoving
+     */
+    boolean isRemoving() {
+        return mRemoving;
+    }
+
     void remove() {
+        mRemoving = true;
         final boolean destroyContentOnRemoval = shouldDestroyContentOnRemove();
         ActivityStack lastReparentedStack = null;
         mPreferredTopFocusableStack = null;
@@ -1213,7 +1238,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                     final int windowingMode = toDisplay.hasSplitScreenPrimaryStack()
                             ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                             : WINDOWING_MODE_UNDEFINED;
-                    stack.reparent(toDisplay, true /* onTop */, true /* displayRemoved */);
+                    stack.reparent(toDisplay.mDisplayContent, true /* onTop */);
                     stack.setWindowingMode(windowingMode);
                     lastReparentedStack = stack;
                 }
@@ -1251,7 +1276,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             // Release this display if an empty home stack is the only thing left.
             // Since it is the last stack, this display will be released along with the stack
             // removal.
-            stack.remove();
+            stack.removeIfPossible();
         } else if (mStacks.isEmpty()) {
             mDisplayContent.removeIfPossible();
             mDisplayContent = null;

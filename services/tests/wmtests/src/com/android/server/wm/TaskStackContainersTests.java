@@ -45,7 +45,7 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class TaskStackContainersTests extends WindowTestsBase {
 
-    private TaskStack mPinnedStack;
+    private ActivityStack mPinnedStack;
 
     @Before
     public void setUp() throws Exception {
@@ -113,7 +113,7 @@ public class TaskStackContainersTests extends WindowTestsBase {
     @Test
     public void testDisplayPositionWithPinnedStack() {
         // The display contains pinned stack that was added in {@link #setUp}.
-        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
 
         // Add another display at top.

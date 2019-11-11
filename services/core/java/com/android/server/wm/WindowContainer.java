@@ -124,7 +124,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     // Set to true when we are performing a reparenting operation so we only send one
     // onParentChanged() notification.
-    private boolean mReparenting;
+    boolean mReparenting;
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
@@ -287,13 +287,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final DisplayContent dc = newParent.getDisplayContent();
 
         mReparenting = true;
-        oldParent.removeChild(this);
+        // Oddly enough we add to the new parent before removing from the old parent to avoid
+        // issues...
         newParent.addChild(this, position);
+        oldParent.removeChild(this);
         mReparenting = false;
-
-        // Send onParentChanged notification here is we disabled sending it in setParent for
-        // reparenting case.
-        onParentChanged(newParent, oldParent);
 
         // Relayout display(s)
         dc.setLayoutNeeded();
@@ -302,6 +300,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             prevDc.setLayoutNeeded();
         }
         getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+
+        // Send onParentChanged notification here is we disabled sending it in setParent for
+        // reparenting case.
+        onParentChanged(newParent, oldParent);
     }
 
     final protected void setParent(WindowContainer<WindowContainer> parent) {
@@ -364,7 +366,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @CallSuper
     protected void addChild(E child, Comparator<E> comparator) {
-        if (child.getParent() != null) {
+        if (!child.mReparenting && child.getParent() != null) {
             throw new IllegalArgumentException("addChild: container=" + child.getName()
                     + " is already a child of container=" + child.getParent().getName()
                     + " can't add to container=" + getName());
@@ -395,7 +397,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /** Adds the input window container has a child of this container at the input index. */
     @CallSuper
     void addChild(E child, int index) {
-        if (child.getParent() != null) {
+        if (!child.mReparenting && child.getParent() != null) {
             throw new IllegalArgumentException("addChild: container=" + child.getName()
                     + " is already a child of container=" + child.getParent().getName()
                     + " can't add to container=" + getName()
@@ -440,7 +442,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void removeChild(E child) {
         if (mChildren.remove(child)) {
             onChildRemoved(child);
-            child.setParent(null);
+            if (!child.mReparenting) {
+                child.setParent(null);
+            }
         } else {
             throw new IllegalArgumentException("removeChild: container=" + child.getName()
                     + " is not a child of container=" + getName());
@@ -566,15 +570,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     + " current parent=" + child.getParent());
         }
 
-        if ((position < 0 && position != POSITION_BOTTOM)
-                || (position > mChildren.size() && position != POSITION_TOP)) {
-            throw new IllegalArgumentException("positionAt: invalid position=" + position
-                    + ", children number=" + mChildren.size());
-        }
-
         if (position >= mChildren.size() - 1) {
             position = POSITION_TOP;
-        } else if (position == 0) {
+        } else if (position <= 0) {
             position = POSITION_BOTTOM;
         }
 
@@ -1056,9 +1054,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     // TODO: Users would have their own window containers under the display container?
-    void switchUser() {
+    void switchUser(int userId) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).switchUser();
+            mChildren.get(i).switchUser(userId);
         }
     }
 
