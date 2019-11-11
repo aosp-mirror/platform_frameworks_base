@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import javax.inject.Singleton;
@@ -78,6 +79,9 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract Divider optionalDivider();
+
+    @BindsOptionalOf
+    abstract HeadsUpManager optionalHeadsUpManager();
 
     @BindsOptionalOf
     abstract Recents optionalRecents();
