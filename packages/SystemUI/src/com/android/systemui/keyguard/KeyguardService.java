@@ -36,9 +36,7 @@ import com.android.internal.policy.IKeyguardStateCallback;
 import com.android.systemui.SystemUIApplication;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
 public class KeyguardService extends Service {
     static final String TAG = "KeyguardService";
     static final String PERMISSION = android.Manifest.permission.CONTROL_KEYGUARD;

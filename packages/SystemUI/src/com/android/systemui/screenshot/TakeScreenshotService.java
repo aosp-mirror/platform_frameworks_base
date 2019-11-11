@@ -28,9 +28,7 @@ import android.util.Log;
 import android.view.WindowManager;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
-@Singleton
 public class TakeScreenshotService extends Service {
     private static final String TAG = "TakeScreenshotService";
 
