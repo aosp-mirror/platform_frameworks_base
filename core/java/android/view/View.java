@@ -4555,6 +4555,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     static class ListenerInfo {
+
+        @UnsupportedAppUsage
+        ListenerInfo() {
+        }
+
         /**
          * Listener used to dispatch focus change events.
          * This field should be made private, so it is hidden from the SDK.
@@ -27842,6 +27847,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         private int mClassification;
 
+        @UnsupportedAppUsage
+        private CheckForLongPress() {
+        }
+
         @Override
         public void run() {
             if ((mOriginalPressedState == isPressed()) && (mParent != null)
@@ -28327,6 +28336,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * whenever possible.
          */
         static class InvalidateInfo {
+
+            @UnsupportedAppUsage
+            InvalidateInfo() {
+            }
+
             private static final int POOL_LIMIT = 10;
 
             private static final SynchronizedPool<InvalidateInfo> sPool =

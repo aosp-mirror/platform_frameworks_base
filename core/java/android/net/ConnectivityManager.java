@@ -1763,6 +1763,10 @@ public class ConnectivityManager {
 
     /** @hide */
     public static class PacketKeepaliveCallback {
+        @UnsupportedAppUsage
+        public PacketKeepaliveCallback() {
+        }
+
         /** The requested keepalive was successfully started. */
         @UnsupportedAppUsage
         public void onStarted() {}
