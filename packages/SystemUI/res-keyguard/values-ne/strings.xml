@@ -102,10 +102,10 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"तपाईंले <xliff:g id="NUMBER">%d</xliff:g> पटक गलत तरिकाले फोन अनलक गर्ने प्रयास गर्नुभएको छ। कार्य प्रोफाइललाई यसका सबै डेटा मेटिने गरी हटाइने छ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक आफ्नो अनलक गर्ने ढाँचा गलत रूपमा कोर्नुभयो। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> असफल प्रयासहरूपछि, तपाईंलाई एउटा इमेल खाता प्रयोग गरेर आफ्नो ट्याब्लेट अनलक गर्न आग्रह गरिनेछ।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"तपाईंले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक आफ्नो अनलक गर्ने ढाँचा गलत रूपमा कोर्नुभयो। थप <xliff:g id="NUMBER_1">%2$d</xliff:g> असफल प्रयासहरूपछि, तपाईंलाई एउटा इमेल खाता प्रयोग गरेर आफ्नो फोन अनलक गर्न आग्रह गरिनेछ।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"SIM को PIN कोड गलत छ। तपाईंले अब अाफ्नो यन्त्र खोल्न आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नै पर्ने हुन्छ।"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"SIM को PIN कोड गलत छ। तपाईंले अब आफ्नो यन्त्र खोल्न आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नै पर्ने हुन्छ।"</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
       <item quantity="other">SIM को PIN कोड गलत छ, तपाईं अझै <xliff:g id="NUMBER_1">%d</xliff:g> पटक प्रयास गर्न सक्नुहुन्छ।</item>
-      <item quantity="one">SIM को PIN कोड गलत छ,तपाईंले अाफ्नो यन्त्र अनलक गर्न आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नैपर्ने अवस्था आउनु अघि तपाईं अझै <xliff:g id="NUMBER_0">%d</xliff:g> पटक प्रयास गर्न सक्नुहुन्छ।</item>
+      <item quantity="one">SIM को PIN कोड गलत छ,तपाईंले आफ्नो यन्त्र अनलक गर्न आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नैपर्ने अवस्था आउनु अघि तपाईं अझै <xliff:g id="NUMBER_0">%d</xliff:g> पटक प्रयास गर्न सक्नुहुन्छ।</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"SIM काम नलाग्ने भएको छ। आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।"</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
