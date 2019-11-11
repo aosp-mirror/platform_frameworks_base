@@ -2574,6 +2574,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final PooledConsumer c = PooledLambda.obtainConsumer(
                 ActivityRecord::updatePictureInPictureMode,
                 PooledLambda.__(ActivityRecord.class), targetStackBounds, forceUpdate);
+        task.getStack().setBounds(targetStackBounds);
         task.forAllActivities(c);
         c.recycle();
     }

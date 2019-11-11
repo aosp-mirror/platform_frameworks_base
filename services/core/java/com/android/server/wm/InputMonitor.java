@@ -279,6 +279,19 @@ final class InputMonitor {
         // we avoid reintroducing this concept by just choosing one of them here.
         inputWindowHandle.surfaceInset = child.getAttrs().surfaceInsets.left;
 
+        /**
+         * If the window is in a TaskManaged by a TaskOrganizer then most cropping
+         * will be applied using the SurfaceControl hierarchy from the Organizer.
+         * This means we need to make sure that these changes in crop are reflected
+         * in the input windows, and so ensure this flag is set so that
+         * the input crop always reflects the surface hierarchy.
+         * we may have some issues with modal-windows, but I guess we can
+         * cross that bridge when we come to implementing full-screen TaskOrg
+         */
+        if (child.getTask() != null && child.getTask().isControlledByTaskOrganizer()) {
+            inputWindowHandle.replaceTouchableRegionWithCrop(null /* Use this surfaces crop */);
+        }
+
         if (child.mGlobalScale != 1) {
             // If we are scaling the window, input coordinates need
             // to be inversely scaled to map from what is on screen
