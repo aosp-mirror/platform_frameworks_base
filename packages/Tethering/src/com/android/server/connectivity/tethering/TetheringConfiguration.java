@@ -251,7 +251,7 @@ public class TetheringConfiguration {
     /** Check whether dun is required. */
     public static boolean checkDunRequired(Context ctx, int id) {
         final TelephonyManager tm = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
-        return (tm != null) ? tm.getTetherApnRequired(id) : false;
+        return (tm != null) ? tm.isTetherApnRequired(id) : false;
     }
 
     private static Collection<Integer> getUpstreamIfaceTypes(Resources res, boolean dunRequired) {
