@@ -516,10 +516,6 @@ package android.provider {
     field public static final String VOLUME_VOICE = "volume_voice";
   }
 
-  public static final class Telephony.Sms.Intents {
-    field public static final String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
-  }
-
 }
 
 package android.speech.tts {
