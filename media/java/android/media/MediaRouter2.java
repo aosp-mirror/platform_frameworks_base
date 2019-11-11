@@ -57,7 +57,8 @@ public class MediaRouter2 {
     @IntDef(value = {
             SELECT_REASON_UNKNOWN,
             SELECT_REASON_USER_SELECTED,
-            SELECT_REASON_FALLBACK})
+            SELECT_REASON_FALLBACK,
+            SELECT_REASON_SYSTEM_SELECTED})
     public @interface SelectReason {}
 
     /**
@@ -79,6 +80,13 @@ public class MediaRouter2 {
      * may be selected as a fallback route.
      */
     public static final int SELECT_REASON_FALLBACK = 2;
+
+    /**
+     * This is passed from {@link com.android.server.media.MediaRouterService} when the route
+     * is selected in response to a request from other apps (e.g. System UI).
+     * @hide
+     */
+    public static final int SELECT_REASON_SYSTEM_SELECTED = 3;
 
     private static final String TAG = "MR2";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -484,6 +492,9 @@ public class MediaRouter2 {
                 }
             }
             mSelectingRoute = null;
+        }
+        if (reason == SELECT_REASON_SYSTEM_SELECTED) {
+            reason = SELECT_REASON_USER_SELECTED;
         }
         mSelectedRoute = route;
         notifyRouteSelected(route, reason, controlHints);

@@ -1318,6 +1318,7 @@ public class MediaRouter {
         sStatic.rebindAsUser(userId);
     }
 
+    //TODO: remove this and Client1Record in MediaRouter2ServiceImpl.
     /**
      * Sets the control categories of the application.
      * Routes that support at least one of the given control categories only exists and are handled
