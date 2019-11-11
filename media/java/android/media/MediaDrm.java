@@ -748,12 +748,12 @@ public final class MediaDrm implements AutoCloseable {
 
     private Consumer<ListenerArgs> createOnEventListener(OnEventListener listener) {
         return args -> {
-            byte[] sessionId = args.parcel.createByteArray();
+            byte[] sessionId = args.sessionId;
             if (sessionId.length == 0) {
                 sessionId = null;
             }
-            byte[] data = args.parcel.createByteArray();
-            if (data.length == 0) {
+            byte[] data = args.data;
+            if (data != null && data.length == 0) {
                 data = null;
             }
 
@@ -765,10 +765,10 @@ public final class MediaDrm implements AutoCloseable {
     private Consumer<ListenerArgs> createOnKeyStatusChangeListener(
             OnKeyStatusChangeListener listener) {
         return args -> {
-            byte[] sessionId = args.parcel.createByteArray();
+            byte[] sessionId = args.sessionId;
             if (sessionId.length > 0) {
-                List<KeyStatus> keyStatusList = keyStatusListFromParcel(args.parcel);
-                boolean hasNewUsableKey = (args.parcel.readInt() != 0);
+                List<KeyStatus> keyStatusList = args.keyStatusList;
+                boolean hasNewUsableKey = args.hasNewUsableKey;
 
                 Log.i(TAG, "Drm key status changed");
                 listener.onKeyStatusChange(this, sessionId, keyStatusList, hasNewUsableKey);
@@ -779,9 +779,9 @@ public final class MediaDrm implements AutoCloseable {
     private Consumer<ListenerArgs> createOnExpirationUpdateListener(
             OnExpirationUpdateListener listener) {
         return args -> {
-            byte[] sessionId = args.parcel.createByteArray();
+            byte[] sessionId = args.sessionId;
             if (sessionId.length > 0) {
-                long expirationTime = args.parcel.readLong();
+                long expirationTime = args.expirationTime;
 
                 Log.i(TAG, "Drm key expiration update: " + expirationTime);
                 listener.onExpirationUpdate(this, sessionId, expirationTime);
@@ -792,22 +792,38 @@ public final class MediaDrm implements AutoCloseable {
     private Consumer<ListenerArgs> createOnSessionLostStateListener(
             OnSessionLostStateListener listener) {
         return args -> {
-            byte[] sessionId = args.parcel.createByteArray();
+            byte[] sessionId = args.sessionId;
             Log.i(TAG, "Drm session lost state event: ");
             listener.onSessionLostState(this, sessionId);
         };
     }
 
     private static class ListenerArgs {
-        private final Parcel parcel;
         private final int arg1;
         private final int arg2;
+        private final byte[] sessionId;
+        private final byte[] data;
+        private final long expirationTime;
+        private final List<KeyStatus> keyStatusList;
+        private final boolean hasNewUsableKey;
 
-        public ListenerArgs(Parcel parcel, int arg1, int arg2) {
-            this.parcel = parcel;
+        public ListenerArgs(
+                int arg1,
+                int arg2,
+                byte[] sessionId,
+                byte[] data,
+                long expirationTime,
+                List<KeyStatus> keyStatusList,
+                boolean hasNewUsableKey) {
             this.arg1 = arg1;
             this.arg2 = arg2;
+            this.sessionId = sessionId;
+            this.data = data;
+            this.expirationTime = expirationTime;
+            this.keyStatusList = keyStatusList;
+            this.hasNewUsableKey = hasNewUsableKey;
         }
+
     }
 
     private static class ListenerWithExecutor {
@@ -843,7 +859,9 @@ public final class MediaDrm implements AutoCloseable {
      * the cookie passed to native_setup().)
      */
     private static void postEventFromNative(@NonNull Object mediadrm_ref,
-            int what, int eventType, int extra, @Nullable Object obj)
+            int what, int eventType, int extra,
+            byte[] sessionId, byte[] data, long expirationTime,
+            List<KeyStatus> keyStatusList, boolean hasNewUsableKey)
     {
         MediaDrm md = (MediaDrm)((WeakReference<MediaDrm>)mediadrm_ref).get();
         if (md == null) {
@@ -861,10 +879,10 @@ public final class MediaDrm implements AutoCloseable {
                             Log.w(TAG, "MediaDrm went away with unhandled events");
                             return;
                         }
-                        if (obj != null && obj instanceof Parcel) {
-                            Parcel p = (Parcel)obj;
-                            listener.mConsumer.accept(new ListenerArgs(p, eventType, extra));
-                        }
+                        ListenerArgs args = new ListenerArgs(eventType, extra,
+                                sessionId, data, expirationTime,
+                                keyStatusList, hasNewUsableKey);
+                        listener.mConsumer.accept(args);
                     };
                     listener.mExecutor.execute(command);
                 }
