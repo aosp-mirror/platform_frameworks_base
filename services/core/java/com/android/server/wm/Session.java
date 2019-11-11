@@ -263,11 +263,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public IBinder performDrag(IWindow window, int flags, SurfaceControl surface, int touchSource,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, ClipData data) {
-        final int callerPid = Binder.getCallingPid();
-        final int callerUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mDragDropController.performDrag(mSurfaceSession, callerPid, callerUid, window,
+            return mDragDropController.performDrag(mSurfaceSession, mPid, mUid, window,
                     flags, surface, touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -625,11 +623,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     public void grantInputChannel(int displayId, SurfaceControl surface,
             IWindow window, IBinder hostInputToken, InputChannel outInputChannel) {
-        final int callerUid = Binder.getCallingUid();
-        final int callerPid = Binder.getCallingPid();
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.grantInputChannel(callerUid, callerPid, displayId, surface, window,
+            mService.grantInputChannel(mUid, mPid, displayId, surface, window,
                     hostInputToken, outInputChannel);
         } finally {
             Binder.restoreCallingIdentity(identity);
