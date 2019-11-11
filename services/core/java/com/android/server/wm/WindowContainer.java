@@ -94,7 +94,8 @@ import java.util.function.Predicate;
  * changes are made to this class.
  */
 class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<E>
-        implements Comparable<WindowContainer>, Animatable {
+        implements Comparable<WindowContainer>, Animatable,
+                   BLASTSyncEngine.TransactionReadyListener {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowContainer" : TAG_WM;
 
@@ -259,6 +260,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * interface to other processes.
      */
     RemoteToken mRemoteToken = null;
+
+    BLASTSyncEngine mBLASTSyncEngine = new BLASTSyncEngine();
+    SurfaceControl.Transaction mBLASTSyncTransaction = new SurfaceControl.Transaction();
+    boolean mUsingBLASTSyncTransaction = false;
+    BLASTSyncEngine.TransactionReadyListener mWaitingListener;
+    int mWaitingSyncId;
 
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
@@ -1837,6 +1844,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     @Override
     public Transaction getPendingTransaction() {
+        if (mUsingBLASTSyncTransaction) {
+            return mBLASTSyncTransaction;
+        }
+
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent != null && displayContent != this) {
             return displayContent.getPendingTransaction();
@@ -2315,5 +2326,39 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             sb.append('}');
             return sb.toString();
         }
+    }
+
+    @Override
+    public void transactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
+        mergedTransaction.merge(mBLASTSyncTransaction);
+        mUsingBLASTSyncTransaction = false;
+
+        mWaitingListener.transactionReady(mWaitingSyncId, mergedTransaction);
+
+        mWaitingListener = null;
+        mWaitingSyncId = -1;
+    }
+
+    boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
+            int waitingId) {
+        boolean willSync = false;
+        if (!isVisible()) {
+            return willSync;
+        }
+        mUsingBLASTSyncTransaction = true;
+
+        int localId = mBLASTSyncEngine.startSyncSet(this);
+        for (int i = 0; i < mChildren.size(); i++) {
+            final WindowContainer child = mChildren.get(i);
+            willSync = mBLASTSyncEngine.addToSyncSet(localId, child) | willSync;
+        }
+
+        // Make sure to set these before we call setReady in case the sync was a no-op
+        mWaitingSyncId = waitingId;
+        mWaitingListener = waitingListener;
+
+        mBLASTSyncEngine.setReady(localId);
+
+        return willSync;
     }
 }

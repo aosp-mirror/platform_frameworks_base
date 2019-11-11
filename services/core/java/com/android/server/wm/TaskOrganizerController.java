@@ -38,6 +38,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.ITaskOrganizer;
 import android.view.IWindowContainer;
+import android.view.SurfaceControl;
 import android.view.WindowContainerTransaction;
 
 import com.android.internal.util.function.pooled.PooledConsumer;
@@ -53,7 +54,8 @@ import java.util.WeakHashMap;
  * Stores the TaskOrganizers associated with a given windowing mode and
  * their associated state.
  */
-class TaskOrganizerController extends ITaskOrganizerController.Stub {
+class TaskOrganizerController extends ITaskOrganizerController.Stub
+    implements BLASTSyncEngine.TransactionReadyListener {
     private static final String TAG = "TaskOrganizerController";
 
     /** Flag indicating that an applied transaction may have effected lifecycle */
@@ -164,6 +166,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private final WeakHashMap<Task, RunningTaskInfo> mLastSentTaskInfos = new WeakHashMap<>();
     private final ArrayList<Task> mPendingTaskInfoChanges = new ArrayList<>();
 
+    private final BLASTSyncEngine mBLASTSyncEngine = new BLASTSyncEngine();
+
     final ActivityTaskManagerService mService;
 
     RunningTaskInfo mTmpTaskInfo;
@@ -223,7 +227,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     void onTaskAppeared(ITaskOrganizer organizer, Task task) {
-        TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
+        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
         state.addTask(task);
     }
 
@@ -429,15 +433,35 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public void applyContainerTransaction(WindowContainerTransaction t) {
+    public int applyContainerTransaction(WindowContainerTransaction t, ITaskOrganizer organizer) {
         enforceStackPermission("applyContainerTransaction()");
+        int syncId = -1;
         if (t == null) {
-            return;
+            throw new IllegalArgumentException(
+                    "Null transaction passed to applyContainerTransaction");
         }
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 int effects = 0;
+
+                /**
+                 * If organizer is non-null we are looking to synchronize this transaction
+                 * by collecting all the results in to a SurfaceFlinger transaction and
+                 * then delivering that to the given organizers transaction ready callback.
+                 * See {@link BLASTSyncEngine} for the details of the operation. But at
+                 * a high level we create a sync operation with a given ID and an associated
+                 * organizer. Then we notify each WindowContainer in this WindowContainer
+                 * transaction that it is participating in a sync operation with that
+                 * ID. Once everything is notified we tell the BLASTSyncEngine
+                 * "setSyncReady" which means that we have added everything
+                 * to the set. At any point after this, all the WindowContainers
+                 * will eventually finish applying their changes and notify the
+                 * BLASTSyncEngine which will deliver the Transaction to the organizer.
+                 */
+                if (organizer != null) {
+                    syncId = startSyncWithOrganizer(organizer);
+                }
                 mService.deferWindowLayout();
                 try {
                     ArraySet<WindowContainer> haveConfigChanges = new ArraySet<>();
@@ -450,10 +474,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                                 entry.getKey()).getContainer();
                         int containerEffect = applyWindowContainerChange(wc, entry.getValue());
                         effects |= containerEffect;
+
                         // Lifecycle changes will trigger ensureConfig for everything.
                         if ((effects & TRANSACT_EFFECTS_LIFECYCLE) == 0
                                 && (containerEffect & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
                             haveConfigChanges.add(wc);
+                        }
+                        if (syncId >= 0) {
+                            mBLASTSyncEngine.addToSyncSet(syncId, wc);
                         }
                     }
                     if ((effects & TRANSACT_EFFECTS_LIFECYCLE) != 0) {
@@ -475,10 +503,38 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     }
                 } finally {
                     mService.continueWindowLayout();
+                    if (syncId >= 0) {
+                        setSyncReady(syncId);
+                    }
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+        return syncId;
+    }
+
+    @Override
+    public void transactionReady(int id, SurfaceControl.Transaction sc) {
+        final ITaskOrganizer organizer = mTaskOrganizersByPendingSyncId.get(id);
+        if (organizer == null) {
+            Slog.e(TAG, "Got transaction complete for unexpected ID");
+        }
+        try {
+            organizer.transactionReady(id, sc);
+        } catch (RemoteException e) {
+        }
+
+        mTaskOrganizersByPendingSyncId.remove(id);
+    }
+
+    int startSyncWithOrganizer(ITaskOrganizer organizer) {
+        int id = mBLASTSyncEngine.startSyncSet(this);
+        mTaskOrganizersByPendingSyncId.put(id, organizer);
+        return id;
+    }
+
+    void setSyncReady(int id) {
+        mBLASTSyncEngine.setReady(id);
     }
 }
