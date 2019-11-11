@@ -121,10 +121,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
-        mContext.putComponent(StatusBar.class, mStatusBar);
         mHelper = new NotificationTestHelper(mContext, mDependency);
 
-        mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager);
+        mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager,
+                () -> mStatusBar);
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
