@@ -69,8 +69,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
 
     @Test
     public void testRegisteredWithDispatcher() {
-        verify(mBroadcastDispatcher).registerReceiver(
-                any(BroadcastReceiver.class),
+        verify(mBroadcastDispatcher).registerReceiver(any(BroadcastReceiver.class),
                 any(IntentFilter.class),
                 any(Handler.class)); // VolumeDialogControllerImpl does not call with user
     }
@@ -97,7 +96,8 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         when(mStatusBar.getWakefulnessState()).thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
         mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
         when(mStatusBar.isDeviceInteractive()).thenReturn(false);
-        when(mStatusBar.getWakefulnessState()).thenReturn(WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP);
+        when(mStatusBar.getWakefulnessState()).thenReturn(
+                WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP);
         mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
         verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
     }
@@ -105,8 +105,10 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     @Test
     public void testVolumeChangeW_nullStatusBar() {
         VolumeDialogControllerImpl.C callback = mock(VolumeDialogControllerImpl.C.class);
-        TestableVolumeDialogControllerImpl nullStatusBarTestableDialog =  new
-                TestableVolumeDialogControllerImpl(mContext, callback, null, mBroadcastDispatcher);
+        TestableVolumeDialogControllerImpl
+                nullStatusBarTestableDialog =
+                new TestableVolumeDialogControllerImpl(
+                        mContext, callback, null, mBroadcastDispatcher);
         nullStatusBarTestableDialog.setEnableDialogs(true, true);
         nullStatusBarTestableDialog.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
         verify(callback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
@@ -127,7 +129,9 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     static class TestableVolumeDialogControllerImpl extends VolumeDialogControllerImpl {
         TestableVolumeDialogControllerImpl(Context context, C callback, StatusBar s,
                 BroadcastDispatcher broadcastDispatcher) {
-            super(context, broadcastDispatcher, s == null ? Optional.empty() : Optional.of(s));
+            super(
+                    context, broadcastDispatcher,
+                    s == null ? Optional.empty() : Optional.of(() -> s));
             mCallbacks = callback;
         }
     }

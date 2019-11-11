@@ -18,7 +18,6 @@ package com.android.systemui.volume;
 
 import android.content.Context;
 
-import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.VolumeDialog;
 
@@ -32,8 +31,9 @@ import javax.inject.Singleton;
 public class CarVolumeDialogComponent extends VolumeDialogComponent {
 
     @Inject
-    public CarVolumeDialogComponent(Context context, KeyguardViewMediator keyguardViewMediator) {
-        super(context, keyguardViewMediator);
+    public CarVolumeDialogComponent(Context context, KeyguardViewMediator keyguardViewMediator,
+            VolumeDialogControllerImpl volumeDialogController) {
+        super(context, keyguardViewMediator, volumeDialogController);
     }
 
     protected VolumeDialog createDefault() {
