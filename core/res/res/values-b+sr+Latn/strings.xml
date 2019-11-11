@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="3850018445187475377">"Otkucajte PIN koji ima od 4 do 8 brojeva."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Unesite PUK koji se sastoji od 8 cifara ili više."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM kartica je zaključana PUK kodom. Unesite PUK kôd da biste je otključali."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Unesite PUK2 da biste deblokirali SIM karticu."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Unesite PUK2 da biste odblokirali SIM karticu."</string>
     <string name="enablePin" msgid="209412020907207950">"Nije uspelo. Omogućite zaključavanje SIM/RUIM kartice."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="one">Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj pre nego što se SIM kartica zaključa.</item>
@@ -1600,8 +1600,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Ističe:"</string>
     <string name="serial_number" msgid="758814067660862493">"Serijski broj:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Digitalni otisci:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 digitalni otisak:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 digitalni otisak:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 otisak prsta:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 otisak prsta:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Prikaži sve"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Izbor aktivnosti"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Deli sa"</string>
@@ -1833,8 +1833,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao je administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao je administrator"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Potvrdi"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Ušteda baterije isključuje ili ograničava aktivnost u pozadini, neke vizuelne efekte i druge funkcije sa visokom potrošnjom da bi produžila trajanje baterije. "<annotation id="url">"Saznajte više"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Ušteda baterije isključuje ili ograničava aktivnost u pozadini, neke vizuelne efekte i druge funkcije sa visokom potrošnjom da bi produžila trajanje baterije."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>

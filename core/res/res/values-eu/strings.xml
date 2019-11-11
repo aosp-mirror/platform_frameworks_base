@@ -324,7 +324,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Egin keinuak"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Sakatu, lerratu, atximurkatu eta beste hainbat keinu egin ditzake."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Hatz-marken keinuak"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Gailuaren hatz-marken sentsorean egindako keinuak antzeman ditzake."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Gailuaren hatz-marken sentsorean egindako keinuak atzeman ditzake."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desgaitu edo aldatu egoera-barra"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Egoera-barra desgaitzea edo sistema-ikonoak gehitzea edo kentzea baimentzen die aplikazioei."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"bihurtu egoera-barra"</string>
@@ -509,10 +509,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Pantailaren blokeoaren konplexutasun-maila (handia, ertaina, txikia edo bat ere ez) jakiteko aukera ematen dio aplikazioari. Informazio horrekin, pantailaren blokeoaren luzera-barruti edo mota posiblea ondoriozta liteke. Halaber, pantailaren blokeoa maila jakin batera igotzeko iradoki diezaieke aplikazioak erabiltzaileei, baina horri ez ikusi egin eta aplikazioa erabiltzen jarraitzeko aukera dute erabiltzaileek. Kontuan izan pantailaren blokeoa ez dela gordetzen testu arrunt gisa; beraz, aplikazioak ez du jakingo pasahitz zehatza zein den."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Erabili hardware biometrikoa"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Autentifikatzeko hardware biometrikoa erabiltzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kudeatu erreferentzia-gako digitalen hardwarea"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kudeatu hatz-marken hardwarea"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Erreferentzia-gako digitalen txantiloiak gehitzeko eta ezabatzeko metodoei dei egitea baimentzen die aplikazioei."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"erabili erreferentzia-gako digitalen hardwarea"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Autentifikatzeko erreferentzia-gako digitalen hardwarea erabiltzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"erabili hatz-marken hardwarea"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Autentifikatzeko hatz-marken hardwarea erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"musika-bilduma aldatu"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Musika-bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"bideo-bilduma aldatu"</string>
@@ -537,7 +537,7 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Autentifikatu da hatz-marka"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Autentifikatu da aurpegia"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hatz-markaren hardwarea ez dago erabilgarri."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hatz-marken hardwarea ez dago erabilgarri."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Ezin da gorde hatz-marka digitala. Kendu lehendik gordeta duzunetako bat."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Hatz-markak prozesatzeko denbora-muga gainditu da. Saiatu berriro."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Hatz-markaren eragiketa bertan behera utzi da."</string>
@@ -856,7 +856,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Eredua ahaztu zaizu?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Kontua desblokeatzea"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Eredua marrazteko saiakera gehiegi egin dira"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Desblokeatzeko, hasi saioa Google kontuarekin."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Desblokeatzeko, hasi saioa Google-ko kontuarekin."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Erabiltzaile-izena (helbide elektronikoa)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Pasahitza"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Hasi saioa"</string>
@@ -931,7 +931,7 @@
     <string name="autofill_department" msgid="5343279462564453309">"Departamentua"</string>
     <string name="autofill_prefecture" msgid="2028499485065800419">"Prefektura"</string>
     <string name="autofill_parish" msgid="8202206105468820057">"Parrokia"</string>
-    <string name="autofill_area" msgid="3547409050889952423">"Zonaldea"</string>
+    <string name="autofill_area" msgid="3547409050889952423">"Eskualdea"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirerria"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"irakurri sareko laster-markak eta historia"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Arakatzailearen bidez bisitatutako URL guztien historia eta arakatzailearen  laster-marka guztiak irakurtzeko baimena ematen die aplikazioei. Oharra: agian baimen hori ez dute aplikatuko hirugarrenen arakatzaileek edo sarea arakatzeko gaitasuna duten bestelako aplikazioek."</string>
@@ -1128,7 +1128,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"Gauzatu ekintza hau erabilita:"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Osatu ekintza %1$s erabiliz"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Osatu ekintza"</string>
-    <string name="whichViewApplication" msgid="3272778576700572102">"Ireki honekin:"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Ireki honekin"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Irekin %1$s aplikazioarekin"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Ireki"</string>
     <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"Ireki <xliff:g id="HOST">%1$s</xliff:g> ostalariko estekak honekin:"</string>
@@ -1546,7 +1546,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Aukera gehiago"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Barneko biltegiratze partekatua"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Barneko memoria partekatua"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD txartela"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD txartela"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB bidezko unitatea"</string>
@@ -1639,7 +1639,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betiko desgaituko da SIMa."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodeak ez datoz bat"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Eredua marrazteko saiakera gehiegi egin dira"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Desblokeatzeko, hasi saioa Google kontuarekin."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Desblokeatzeko, hasi saioa Google-ko kontuarekin."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Erabiltzaile-izena (helbide elektronikoa)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Pasahitza"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Hasi saioa"</string>
@@ -1809,8 +1809,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Bateria-aurrezlea desaktibatzen da, edo atzeko planoko jarduerak, zenbait efektu bisual eta bateria asko darabilten bestelako eginbideak murrizten dira, bateriak gehiago iraun dezan. "<annotation id="url">"Lortu informazio gehiago"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Bateria-aurrezlea desaktibatzen da, edo atzeko planoko jarduerak, zenbait efektu bisual eta bateria asko darabilten bestelako eginbideak murrizten dira, bateriak gehiago iraun dezan."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>

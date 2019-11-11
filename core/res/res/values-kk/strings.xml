@@ -1546,7 +1546,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Басқа опциялар"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Ішкі ортақ қойма"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Ішкі ортақ жад"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD картасы"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD картасы"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB дискі"</string>
@@ -1809,8 +1809,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Әкімші жаңартқан"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Әкімші жойған"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Жарайды"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Battery Saver функциясы батарея қуатын үнемдеу үшін фондық әрекеттерді, кейбір көрнекі әсерлерді және басқа да қуатты көп пайдаланатын мүмкіндіктерді өшіреді немесе шектейді. "<annotation id="url">"Толығырақ"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Battery Saver функциясы батарея қуатын үнемдеу үшін фондық әрекеттерді, кейбір көрнекі әсерлерді және басқа да қуатты көп пайдаланатын мүмкіндіктерді өшіреді немесе шектейді."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Дерек шығынын азайту үшін Data Saver функциясы кейбір қолданбаларға деректерді фондық режимде жіберуге және алуға жол бермейді. Ашық тұрған қолданба деректерді пайдаланады, бірақ шектеулі шамада (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Saver функциясын қосу керек пе?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Қосу"</string>

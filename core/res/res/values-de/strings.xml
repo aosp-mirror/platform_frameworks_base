@@ -539,7 +539,7 @@
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Gesicht authentifiziert, bitte bestätigen"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Fingerabdruckhardware nicht verfügbar"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Fingerabdruck kann nicht gespeichert werden. Entferne einen vorhandenen Fingerabdruck."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Zeitüberschreitung für Fingerabdruck. Bitte versuche es noch einmal."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Zeitüberschreitung bei Fingerabdruck. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Fingerabdruckvorgang abgebrochen"</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Vorgang der Fingerabdruckauthentifizierung vom Nutzer abgebrochen."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
@@ -1586,7 +1586,7 @@
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
     <string name="SetupCallDefault" msgid="5834948469253758575">"Anruf annehmen?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Immer"</string>
-    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Auf \"Immer geöffnet\" festlegen"</string>
+    <string name="activity_resolver_set_always" msgid="1422574191056490585">"Auf \"Immer öffnen\" festlegen"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Nur diesmal"</string>
     <string name="activity_resolver_app_settings" msgid="8965806928986509855">"Einstellungen"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"Das Arbeitsprofil wird von %1$s nicht unterstützt."</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Ok"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Im Energiesparmodus werden Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen mit hohem Energiebedarf abgeschaltet oder eingeschränkt, um die Akkulaufzeit zu verlängern. "<annotation id="url">"Weitere Informationen"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Im Energiesparmodus werden Hintergrundaktivitäten, einige optische Effekte und weitere Funktionen mit hohem Energiebedarf abgeschaltet oder eingeschränkt, um die Akkulaufzeit zu verlängern."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Der Datensparmodus verhindert zum einen, dass Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Zum anderen werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivieren"</string>

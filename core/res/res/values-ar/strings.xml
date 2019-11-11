@@ -523,7 +523,7 @@
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"للسماح للتطبيق باستخدام الأجهزة البيومترية للمصادقة"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"لإدارة أجهزة بصمة الإصبع"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"للسماح للتطبيق باستدعاء طرق لإضافة نماذج من بصمات الأصابع وحذفها."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"لاستخدام أجهزة بصمة الإصبع"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"استخدام أجهزة بصمة الإصبع"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"للسماح للتطبيق باستخدام أجهزة بصمة الإصبع للمصادقة"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"تعديل مجموعتك الموسيقية"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"للسماح للتطبيق بتعديل مجموعتك الموسيقية."</string>
@@ -1669,8 +1669,8 @@
     <string name="expires_on" msgid="3676242949915959821">"تنتهي الصلاحية في:"</string>
     <string name="serial_number" msgid="758814067660862493">"الرقم المسلسل:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"بصمات الأصابع:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"‏بصمة أصبع SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"‏بصمة أصبع SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"‏بصمة إصبع SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"‏بصمة إصبع SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"عرض الكل"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"اختيار نشاط"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"مشاركة مع"</string>
@@ -1908,8 +1908,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"موافق"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد نشاط الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية. "<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد النشاط في الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"هل تريد تشغيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"تشغيل"</string>

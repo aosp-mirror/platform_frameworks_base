@@ -527,7 +527,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Tanınmır"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Doğrulama ləğv edildi"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Pin, nümunə və ya parol ayarlanmayıb"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmaq qismən müəyyən olundu. Lütfən, yenidən cəhd edin."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmaq izi yarımçıq müəyyən olundu. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Barmaq izi tanınmadı. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Barmaq izi sensoru çirklidir. Lütfən, təmizləyin və yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Barmağı çox tez tərpətdiniz. Yenidən edin."</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Admin tərəfindən yeniləndi"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Admin tərəfindən silindi"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Enerjiyə qənaət batareya istifadəsini artırmaq üçün arxa fon fəaliyyətini, bəzi vizual effektləri və batareyadan çox istifadə edən digər funksiyalarını deaktiv edir və ya məhdudlaşdırır. "<annotation id="url">"Ətraflı məlumat"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Enerjiyə qənaət batareya istifadəsini artırmaq üçün arxa fon fəaliyyətini, bəzi vizual effektləri və batareyadan çox istifadə edən digər funksiyalarını deaktiv edir və ya məhdudlaşdırır."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Data istifadəsini azalatmaq üçün, Data Qanaəti bəzi tətbiqlərin arxafonda data göndərməsini və qəbulunun qarşısını alır. Hazırda istifadə etdiyiniz tətbiq dataya daxil ola bilər, lakin bunu tez-tez edə bilməz. Bu o deməkdir ki, məsələn, Siz üzərinə tıklamadıqca o şəkillər göstərilməyəcək."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Data Qənaəti aktiv edilsin?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivləşdirin"</string>

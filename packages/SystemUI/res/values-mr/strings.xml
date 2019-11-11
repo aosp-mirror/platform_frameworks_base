@@ -512,8 +512,8 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"विश्वासू क्रेडेंशियल उघडा"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"आपल्या प्रशासकाने नेटवर्क लॉगिंग चालू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे निरीक्षण करते.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"तुम्ही VPN कनेक्शन सेट करण्यासाठी अ‍ॅपला परवानगी दिली.\n\nहा अ‍ॅप ईमेल, अ‍ॅप्स आणि वेबसाइटसह, तुमच्या डिव्हाइस आणि नेटवर्क अॅक्टिव्हिटीचे परीक्षण करू शकतो."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"तुमचे कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते.\n\nतुमचा प्रशासक ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा.\n\nतुम्ही VPN शी देखील कनेक्ट आहात, जे आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करू शकते."</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"तुम्ही VPN कनेक्शन सेट करण्यासाठी अ‍ॅपला परवानगी दिली.\n\nहा अ‍ॅप ईमेल, अ‍ॅप्स आणि वेबसाइटसह, तुमच्या डिव्हाइस आणि नेटवर्क ॲक्टिव्हिटीचे परीक्षण करू शकतो."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"तुमचे कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते.\n\nतुमचा प्रशासक ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्या नेटवर्क ॲक्टिव्हिटीचे निरीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा.\n\nतुम्ही VPN शी देखील कनेक्ट आहात, जे आपल्या नेटवर्क ॲक्टिव्हिटीचे निरीक्षण करू शकते."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"तुम्ही <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"तुम्ही <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
@@ -614,7 +614,7 @@
     <string name="tuner_toast" msgid="603429811084428439">"अभिनंदन! सिस्टम UI ट्युनर सेटिंग्जमध्‍ये जोडले गेले आहे"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"सेटिंग्ज मधून काढा"</string>
     <string name="remove_from_settings_prompt" msgid="6069085993355887748">"सेटिंग्ज मधून सिस्टम UI ट्युनर काढून त्याची सर्व वैशिष्ट्‍ये वापरणे थांबवायचे?"</string>
-    <string name="activity_not_found" msgid="348423244327799974">"अॅप्लिकेशन आपल्या डिव्हाइसवर इंस्टॉल केलेला नाही"</string>
+    <string name="activity_not_found" msgid="348423244327799974">"ॲप्लिकेशन आपल्या डिव्हाइसवर इंस्टॉल केलेला नाही"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"घड्याळाचे सेकंद दर्शवा"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"स्टेटस बारमध्‍ये घड्याळाचे सेकंद दर्शवा. कदाचित बॅटरी आयुष्‍य प्रभावित होऊ शकते."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"द्रुत सेटिंग्जची पुनर्रचना करा"</string>
@@ -727,7 +727,7 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"सूचना"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"कीबोर्ड शॉर्टकट"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"कीबोर्ड लेआउट स्विच करा"</string>
-    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"अॅप्लिकेशन"</string>
+    <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"ॲप्लिकेशन"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"सहाय्य"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"ब्राउझर"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"संपर्क"</string>
@@ -885,12 +885,12 @@
     <string name="bt_is_off" msgid="2640685272289706392">"ब्लूटूथ बंद आहे"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"व्यत्यय आणू नका बंद आहे"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"व्यत्यय आणू नका एका <xliff:g id="ID_1">%s</xliff:g> स्वयंचलित नियमाने चालू केले."</string>
-    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"व्यत्यय आणू नका (<xliff:g id="ID_1">%s</xliff:g>) अॅपने चालू केले."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"व्यत्यय आणू नका एका स्वयंचलित नियमाने किंवा अॅपने चालू केले."</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"व्यत्यय आणू नका (<xliff:g id="ID_1">%s</xliff:g>) ॲपने चालू केले."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"व्यत्यय आणू नका एका स्वयंचलित नियमाने किंवा ॲपने चालू केले."</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"<xliff:g id="ID_1">%s</xliff:g> पर्यंत"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"ठेवा"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"पुनर्स्थित करा"</string>
-    <string name="running_foreground_services_title" msgid="381024150898615683">"अॅप्‍स बॅकग्राउंडमध्‍ये चालू आहेत"</string>
+    <string name="running_foreground_services_title" msgid="381024150898615683">"ॲप्‍स बॅकग्राउंडमध्‍ये चालू आहेत"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"बॅटरी आणि डेटा वापराच्‍या तपशीलांसाठी टॅप करा"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"मोबाइल डेटा बंद करायचा?"</string>
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"तुम्हाला <xliff:g id="CARRIER">%s</xliff:g> मधून डेटा किंवा इंटरनेटचा अ‍ॅक्सेस नसेल. इंटरनेट फक्त वाय-फाय मार्फत उपलब्ध असेल."</string>
@@ -911,7 +911,7 @@
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"समजले"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI हीप डंप करा"</string>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> तुमचे <xliff:g id="TYPES_LIST">%2$s</xliff:g> वापरत आहे."</string>
-    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"अॅप्लिकेशन्स तुमचे <xliff:g id="TYPES_LIST">%s</xliff:g> वापरत आहे."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"ॲप्लिकेशन्स तुमचे <xliff:g id="TYPES_LIST">%s</xliff:g> वापरत आहे."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="2400503446627122483">" आणि "</string>
     <string name="privacy_type_camera" msgid="1676604631892420333">"कॅमेरा"</string>

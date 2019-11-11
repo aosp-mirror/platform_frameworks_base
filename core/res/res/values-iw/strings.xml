@@ -303,13 +303,13 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאת גישה לתמונות, למדיה ולקבצים במכשיר?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"מיקרופון"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"הקלטת אודיו"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאה להקליט אודיו?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏לאשר לאפליקציית &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; להקליט אודיו?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"פעילות גופנית"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"גישה לפעילות הגופנית שלך"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"‏האם לאפשר לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; גישה לפעילות הגופנית שלך?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"מצלמה"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"צילום תמונות והקלטת וידאו"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏לאשר לאפליקציה של &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; לצלם תמונות וסרטונים?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏לאשר לאפליקציית &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; לצלם תמונות וסרטונים?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"יומני שיחות"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"קריאה וכתיבה של יומן השיחות של הטלפון"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאת גישה ליומני השיחות של הטלפון?"</string>
@@ -329,7 +329,7 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"קבע את המרחק מהתצוגה ואת מיקום התצוגה."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ביצוע תנועות"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"יכול להקיש, להחליק, לעשות תנועת צביטה ולבצע תנועות אחרות."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"תנועות"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"תנועות של טביעות אצבעות"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"אפשרות לזהות תנועות בזמן נגיעה בחיישן טביעות האצבע של המכשיר."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"השבת או שנה את שורת המצב"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"מאפשר לאפליקציה להשבית את שורת המצב או להוסיף ולהסיר סמלי מערכת."</string>
@@ -533,9 +533,9 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"לא זוהתה"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"האימות בוטל"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"עוד לא הוגדרו קוד גישה, קו ביטול נעילה או סיסמה"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"זוהתה טביעת אצבע חלקית. נסה שוב."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"זוהתה טביעת אצבע חלקית. אפשר לנסות שוב."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"לא ניתן היה לעבד את טביעת האצבע. נסה שוב."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"החיישן של טביעות האצבעות מלוכלך. נקה אותו ונסה שוב."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"החיישן של טביעות האצבעות מלוכלך. צריך לנקות אותו ולנסות שוב."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"הזזת את האצבע מהר מדי. נסה שוב."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"הזזת את האצבע לאט מדי. נסה שוב."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -543,9 +543,9 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"טביעת האצבע אומתה"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"זיהוי הפנים בוצע"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"זיהוי הפנים בוצע. יש ללחוץ על אישור"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"החומרה בשביל טביעת אצבע אינה זמינה."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"לא ניתן לאחסן טביעת אצבע. הסר טביעת אצבע קיימת."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"חלף הזמן הקצוב לטביעת אצבע. נסה שוב."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"החומרה בשביל טביעות אצבעות אינה זמינה."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"לא ניתן לאחסן טביעת אצבע. יש להסיר טביעת אצבע קיימת."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"חלף הזמן הקצוב לטביעת אצבע. אפשר לנסות שוב."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"פעולת טביעת האצבע בוטלה."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"פעולת טביעת האצבע בוטלה בידי המשתמש."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"יותר מדי ניסיונות. נסה שוב מאוחר יותר."</string>
@@ -1858,8 +1858,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"נמחקה על ידי מנהל המערכת"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"אישור"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"\'חיסכון בסוללה\' מכבה או מגביל פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות שצורכות הרבה חשמל, כדי להאריך את חיי הסוללה. "<annotation id="url">"מידע נוסף"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"\'חיסכון בסוללה\' מכבה או מגביל פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות שצורכות הרבה חשמל, כדי להאריך את חיי הסוללה."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"הפעל"</string>

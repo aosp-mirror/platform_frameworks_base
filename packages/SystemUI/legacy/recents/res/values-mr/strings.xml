@@ -22,12 +22,12 @@
     <string name="accessibility_desc_recent_apps" msgid="2427210347871321373">"अवलोकन."</string>
     <string name="accessibility_recents_item_will_be_dismissed" msgid="2355882496933479534">"<xliff:g id="APP">%s</xliff:g> डिसमिस करा."</string>
     <string name="accessibility_recents_item_dismissed" msgid="4816790842084268400">"<xliff:g id="APP">%s</xliff:g> डिसमिस केले"</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="5693205751863608046">"अलीकडील सर्व अॅप्लिकेशन डिसमिस झाले."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="3406797323476801016">"<xliff:g id="APP">%s</xliff:g> अॅप्लिकेशन माहिती उघडा."</string>
+    <string name="accessibility_recents_all_items_dismissed" msgid="5693205751863608046">"अलीकडील सर्व ॲप्लिकेशन डिसमिस झाले."</string>
+    <string name="accessibility_recents_item_open_app_info" msgid="3406797323476801016">"<xliff:g id="APP">%s</xliff:g> ॲप्लिकेशन माहिती उघडा."</string>
     <string name="accessibility_recents_item_launched" msgid="4519918148638221791">"<xliff:g id="APP">%s</xliff:g> सुरू करत आहे."</string>
     <string name="recents_empty_message" msgid="7967713254531861311">"कोणतेही अलीकडील आयटम नाहीत"</string>
     <string name="recents_empty_message_dismissed_all" msgid="1850214584987361375">"तुम्ही सर्वकाही साफ केले"</string>
-    <string name="recents_app_info_button_label" msgid="8732926607391786762">"अॅप्लिकेशन माहिती"</string>
+    <string name="recents_app_info_button_label" msgid="8732926607391786762">"ॲप्लिकेशन माहिती"</string>
     <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"स्‍क्रीन पिन करणे"</string>
     <string name="recents_search_bar_label" msgid="638132045925945941">"शोधा"</string>
     <string name="recents_launch_error_message" msgid="9107963563503438012">"<xliff:g id="APP">%s</xliff:g> सुरू करता आले नाही."</string>
