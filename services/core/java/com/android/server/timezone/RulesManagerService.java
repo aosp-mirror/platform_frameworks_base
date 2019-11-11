@@ -32,6 +32,7 @@ import android.app.timezone.IRulesManager;
 import android.app.timezone.RulesManager;
 import android.app.timezone.RulesState;
 import android.content.Context;
+import android.icu.util.TimeZone;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -45,7 +46,6 @@ import com.android.timezone.distro.StagedDistroOperation;
 import com.android.timezone.distro.TimeZoneDistro;
 import com.android.timezone.distro.installer.TimeZoneDistroInstaller;
 
-import libcore.icu.ICU;
 import libcore.timezone.TimeZoneDataFiles;
 import libcore.timezone.TimeZoneFinder;
 import libcore.timezone.TzDataSetVersion;
@@ -519,7 +519,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
                             // Report the active rules version (i.e. the rules in use by the current
                             // process).
                             pw.println("Active rules version (ICU, ZoneInfoDB, TimeZoneFinder): "
-                                    + ICU.getTZDataVersion() + ","
+                                    + TimeZone.getTZDataVersion() + ","
                                     + ZoneInfoDB.getInstance().getVersion() + ","
                                     + TimeZoneFinder.getInstance().getIanaVersion());
                             break;
@@ -535,7 +535,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
 
         pw.println("RulesManagerService state: " + toString());
         pw.println("Active rules version (ICU, ZoneInfoDB, TimeZoneFinder): "
-                + ICU.getTZDataVersion() + ","
+                + TimeZone.getTZDataVersion() + ","
                 + ZoneInfoDB.getInstance().getVersion() + ","
                 + TimeZoneFinder.getInstance().getIanaVersion());
         pw.println("Distro state: " + rulesState.toString());
