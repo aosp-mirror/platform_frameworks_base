@@ -1908,8 +1908,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"موافق"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد نشاط الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية. "<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد النشاط في الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"هل تريد تشغيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"تشغيل"</string>

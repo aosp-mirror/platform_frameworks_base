@@ -100,7 +100,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Bumalik"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Home"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Pagiging Naa-access"</string>
+    <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Pagiging Accessible"</string>
     <string name="accessibility_rotate_button" msgid="7402949513740253006">"I-rotate ang screen"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Overview"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Hanapin"</string>
@@ -561,7 +561,7 @@
     <string name="stream_notification" msgid="2563720670905665031">"Notification"</string>
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Dual multi tone frequency"</string>
-    <string name="stream_accessibility" msgid="301136219144385106">"Pagiging Naa-access"</string>
+    <string name="stream_accessibility" msgid="301136219144385106">"Pagiging Accessible"</string>
     <string name="ring_toggle_title" msgid="3281244519428819576">"Mga Tawag"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Ipa-ring"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"I-vibrate"</string>

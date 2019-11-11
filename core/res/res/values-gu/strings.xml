@@ -1809,8 +1809,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ઓકે"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"બૅટરી આવરદા વધારવા માટે, બૅટરી સેવર બૅકગ્રાઉન્ડ પ્રવૃત્તિ, કેટલીક વિઝ્યુઅલ અસરો અને અન્ય હાઇ-પાવર સુવિધાઓ બંધ અથવા મર્યાદિત કરે છે. "<annotation id="url">"વધુ જાણો"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"બૅટરી આવરદા વધારવા માટે, બૅટરી સેવર બૅકગ્રાઉન્ડ પ્રવૃત્તિ, કેટલીક વિઝ્યુઅલ અસરો અને અન્ય હાઇ-પાવર સુવિધાઓ બંધ અથવા મર્યાદિત કરે છે."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપ્લિકેશનોને પૃષ્ઠભૂમિમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ્લિકેશન ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ચાલુ કરો"</string>

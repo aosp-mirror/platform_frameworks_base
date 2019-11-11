@@ -1809,8 +1809,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Fshirë nga administratori"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Në rregull"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"\"Kursyesi i baterisë\" çaktivizohet ose kufizon aktivitetin në sfond, disa efekte vizuale dhe funksione të tjera me nivel të lartë energjie për të rritur kohëzgjatjen e baterisë. "<annotation id="url">"Mëso më shumë"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"\"Kursyesi i baterisë\" çaktivizohet ose kufizon aktivitetin në sfond, disa efekte vizuale dhe funksione të tjera me nivel të lartë energjie për të rritur kohëzgjatjen e baterisë."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Për të ndihmuar në reduktimin e përdorimit të të dhënave, \"Kursyesi i të dhënave\" pengon që disa aplikacione të dërgojnë apo të marrin të dhëna në sfond. Një aplikacion që po përdor aktualisht mund të ketë qasje te të dhënat, por këtë mund ta bëjë më rrallë. Kjo mund të nënkuptojë, për shembull, se imazhet nuk shfaqen kur troket mbi to."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Të aktivizohet \"Kursyesi i të dhënave\"?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivizo"</string>

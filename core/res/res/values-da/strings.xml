@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Opdateret af din administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet af din administrator"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Batterisparefunktion deaktiverer eller begrænser baggrundsaktivitet, visse visuelle effekter og andre batterikrævende funktioner for at forlænge batteritiden. "<annotation id="url">"Få flere oplysninger"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Batterisparefunktion deaktiverer eller begrænser baggrundsaktivitet, visse visuelle effekter og andre batterikrævende funktioner for at forlænge batteritiden."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå Datasparefunktion til?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå til"</string>

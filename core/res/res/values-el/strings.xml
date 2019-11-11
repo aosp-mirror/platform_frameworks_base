@@ -298,13 +298,13 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Μικρόφωνο"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ηχογραφεί"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Να επιτρέπεται στην εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; η εγγραφή ήχου;"</string>
-    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Σωματική δραστηριότητα"</string>
+    <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Σωματική δραστ/τητα"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"πρόσβαση στη σωματική σας δραστηριότητα"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Να επιτρέπεται στην εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; να έχει πρόσβαση στη σωματική σας δραστηριότητα;"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Κάμερα"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"γίνεται λήψη φωτογραφιών και εγγραφή βίντεο"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Να επιτρέπεται στην εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; η λήψη φωτογραφιών και η εγγραφή βίντεο;"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Αρχεία καταγραφής κλήσεων"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Αρχεία καταγρ. κλήσ."</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ανάγνωση και εγγραφή αρχείου καταγραφής τηλεφωνικών κλήσεων"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Να επιτρέπεται στην εφαρμογή &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; να έχει πρόσβαση στα αρχεία καταγραφής τηλεφωνικών κλήσεών σας;"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Τηλέφωνο"</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ενημερώθηκε από τον διαχειριστή σας"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Διαγράφηκε από τον διαχειριστή σας"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Η Εξοικονόμηση μπαταρίας απενεργοποιεί ή περιορίζει τη δραστηριότητα παρασκηνίου, ορισμένα οπτικά εφέ και άλλες λειτουργίες υψηλής κατανάλωσης ενέργειας για την επέκταση της διάρκειας ζωής μπαταρίας. "<annotation id="url">"Μάθετε περισσότερα"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Η Εξοικονόμηση μπαταρίας απενεργοποιεί ή περιορίζει τη δραστηριότητα παρασκηνίου, ορισμένα οπτικά εφέ και άλλες λειτουργίες υψηλής κατανάλωσης ενέργειας για την επέκταση της διάρκειας ζωής μπαταρίας."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ενεργ.Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ενεργοποίηση"</string>

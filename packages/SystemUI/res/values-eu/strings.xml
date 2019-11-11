@@ -60,7 +60,7 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Eman beti ordenagailu honetatik arazteko baimena"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"Baimendu"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ez da onartzen USB arazketa"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Gailu honetan saioa hasita duen erabiltzaileak ezin du aktibatu USB arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Gailu honetan saioa hasita daukan erabiltzaileak ezin du aktibatu USB arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
     <string name="usb_contaminant_title" msgid="206854874263058490">"Desgaitu egin da USB ataka"</string>
     <string name="usb_contaminant_message" msgid="7379089091591609111">"USB ataka desgaitu egin da gailua likido edo zikinkeriengandik babesteko, eta ez du hautemango osagarririk.\n\nJakinarazpen bat jasoko duzu USB ataka berriz erabiltzeko moduan dagoenean."</string>
     <string name="usb_port_enabled" msgid="7906141351687694867">"USB ataka gaitu da kargagailuak eta osagarriak hautemateko"</string>
@@ -270,10 +270,10 @@
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"Aktibatu da sentsoreen pribatutasuna."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Bistaratu distira"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"Kargatzen"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G datuen erabilera eten da"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G datuen erabilera eten da"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G datuen erab. pausatu da"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G datuen erabilera pausatu da"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Datu-konexioa pausatu egin da"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Datuen erabilera eten da"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Datuen erabilera pausatu da"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Iritsi zara ezarri zenuen datu-mugara. Datu-konexioa erabiltzeari utzi diozu.\n\nDatu-konexioa erabiltzeari berrekiten badiozu, datuen erabileragatiko gastuak izango dituzu."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Jarraitu erabiltzen"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS seinalearen bila"</string>

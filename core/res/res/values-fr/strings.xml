@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"L\'économiseur de batterie désactive ou restreint les activités en arrière-plan, certains effet visuels et d\'autres fonctionnalités qui consomment beaucoup d\'énergie afin de prolonger l\'autonomie de la batterie. "<annotation id="url">"En savoir plus"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"L\'économiseur de batterie désactive ou restreint les activités en arrière-plan, certains effet visuels et d\'autres fonctionnalités qui consomment beaucoup d\'énergie afin de prolonger l\'autonomie de la batterie."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Pour réduire la consommation de données, l\'économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Ainsi, les applications que vous utilisez peuvent toujours accéder aux données, mais pas en permanence. Par exemple, il se peut que les images ne s\'affichent pas tant que vous n\'appuyez pas dessus."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activer l\'économiseur de données ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activer"</string>

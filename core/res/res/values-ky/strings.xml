@@ -304,7 +304,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"сүрөт жана видео тартууга"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна сүрөттөр менен видеолорду тартканга уруксат бересизби?"</string>
-    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Чалуулар тизмелери"</string>
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"Чалуулар тизмеси"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"телефондогу чалуулар тизмесин окуу жана жазуу"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна телефондогу чалуулар тизмесин пайдаланууга уруксат берилсинби?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
@@ -1662,7 +1662,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып салуу"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Атайын мүмкүнчүлүктөр функциясынын кыска жолу колдонулсунбу?"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Ыкчам иштетесизби?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн, ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең үч секунддай кое бербей басып туруңуз.\n\n Учурдагы атайын мүмкүнчүлүктөрдүн жөндөөлөрү:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\nЖөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнөн өзгөртө аласыз."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Кыска жолду өчүрүү"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Кыска жолду колдонуу"</string>
@@ -1810,8 +1810,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Администраторуңуз жаңыртып койгон"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Администраторуңуз жок кылып салган"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ЖАРАЙТ"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Батареяны үнөмдөгүч функциясы фондогу аракеттерди, айрым визуалдык эффекттерди жана башка батареяны көп сарптаган функцияларды өчүрүп же чектеп, батареянын кубатынын мөөнөтүн узартат. "<annotation id="url">"Кеңири маалымат"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Батареяны үнөмдөгүч функциясы фондогу аракеттерди, айрым визуалдык эффекттерди жана башка батареяны көп сарптаган функцияларды өчүрүп же чектеп, батареянын кубатынын мөөнөтүн узартат."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Трафикти үнөмдөө режиминде айрым колдонмолор дайындарды фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайындарды жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Трафикти үнөмдөө режимин иштетесизби?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Күйгүзүү"</string>

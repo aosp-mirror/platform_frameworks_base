@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Dikemas kini oleh pentadbir anda"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dipadamkan oleh pentadbir anda"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Penjimat Bateri mematikan atau mengehadkan aktiviti latar belakang, sesetengah kesan visual &amp; ciri kuasa tinggi yang lain untuk memanjangkan hayat bateri. "<annotation id="url">"Ketahui Lebih Lanjut"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Penjimat Bateri mematikan atau mengehadkan aktiviti latar belakang, sesetengah kesan visual &amp; ciri kuasa tinggi yang lain untuk memanjangkan hayat bateri."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangkan penggunaan data, Penjimat Data menghalang sesetengah apl daripada menghantar atau menerima data di latar. Apl yang sedang digunakan boleh mengakses data tetapi mungkin tidak secara kerap. Perkara ini mungkin bermaksud bahawa imej tidak dipaparkan sehingga anda mengetik pada imej itu, contohnya."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Hidupkan Penjimat Data?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Hidupkan"</string>

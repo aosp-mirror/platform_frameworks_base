@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"კარგი"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"ბატარეის მუშაობის გახანგრძლივების მიზნით, ბატარეის დამზოგი გამორთავს ან შეზღუდავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტს და სხვა ფუნქციებს, რომლებზეც დიდი ენერგია იხარჯება. "<annotation id="url">"შეიტყვეთ მეტი"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"ბატარეის მუშაობის გახანგრძლივების მიზნით, ბატარეის დამზოგი გამორთავს ან შეზღუდავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტს და სხვა ფუნქციებს, რომლებზეც დიდი ენერგია იხარჯება."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ჩართვა"</string>

@@ -123,12 +123,11 @@ public class SystemUIFactory {
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
-            ScrimView scrimForBubble,
             LockscreenWallpaper lockscreenWallpaper,
             TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
             AlarmManager alarmManager, KeyguardMonitor keyguardMonitor) {
-        return new ScrimController(scrimBehind, scrimInFront, scrimForBubble, scrimStateListener,
+        return new ScrimController(scrimBehind, scrimInFront, scrimStateListener,
                 scrimVisibleListener, dozeParameters, alarmManager, keyguardMonitor);
     }
 

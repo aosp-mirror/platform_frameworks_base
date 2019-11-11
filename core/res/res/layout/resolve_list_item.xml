@@ -22,8 +22,6 @@
               android:layout_height="wrap_content"
               android:layout_width="match_parent"
               android:minHeight="?attr/listPreferredItemHeightSmall"
-              android:paddingTop="4dp"
-              android:paddingBottom="4dp"
               android:background="?attr/activatedBackgroundIndicator">
 
     <!-- Activity icon when presenting dialog
@@ -32,7 +30,8 @@
                android:layout_width="@dimen/resolver_icon_size"
                android:layout_height="@dimen/resolver_icon_size"
                android:layout_gravity="start|center_vertical"
-               android:layout_marginStart="?attr/listPreferredItemPaddingStart"
+               android:layout_marginStart="@dimen/resolver_icon_margin"
+               android:layout_marginEnd="@dimen/resolver_icon_margin"
                android:layout_marginTop="12dp"
                android:layout_marginBottom="12dp"
                android:scaleType="fitCenter" />
@@ -40,8 +39,7 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:gravity="start|center_vertical"
               android:orientation="vertical"
-              android:paddingStart="?attr/listPreferredItemPaddingStart"
-              android:paddingEnd="?attr/listPreferredItemPaddingEnd"
+              android:paddingEnd="@dimen/resolver_edge_margin"
               android:layout_height="wrap_content"
               android:layout_width="wrap_content"
               android:layout_gravity="start|center_vertical">
@@ -49,14 +47,20 @@
         <TextView android:id="@android:id/text1"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:textAppearance="?attr/textAppearanceMedium"
-                  android:textColor="?attr/textColorPrimary"
+                  android:layout_gravity="start|center_vertical"
+                  android:textColor="?android:attr/textColorPrimary"
+                  android:fontFamily="@android:string/config_bodyFontFamily"
+                  android:textSize="16sp"
                   android:minLines="1"
                   android:maxLines="1"
                   android:ellipsize="marquee" />
         <!-- Extended activity info to distinguish between duplicate activity names -->
         <TextView android:id="@android:id/text2"
-                  android:textAppearance="?android:attr/textAppearanceSmall"
+                  android:textColor="?android:attr/textColorSecondary"
+                  android:fontFamily="@android:string/config_bodyFontFamily"
+                  android:layout_gravity="start|center_vertical"
+                  android:textSize="14sp"
+                  android:visibility="gone"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:minLines="1"

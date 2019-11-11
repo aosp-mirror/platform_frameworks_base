@@ -282,7 +282,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai tuoi contatti?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizz."</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione del dispositivo?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione del dispositivo?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"L\'app avrà accesso alla posizione soltanto quando la usi"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere &lt;b&gt;sempre&lt;/b&gt; alla posizione di questo dispositivo?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"L\'app al momento può accedere alla posizione soltanto mentre la usi"</string>
@@ -300,7 +300,7 @@
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di registrare audio?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Attività fisica"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"Consente di accedere all\'attività fisica"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Vuoi consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla tua attività fisica?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla tua attività fisica?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"scattare foto e registrare video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di scattare foto e registrare video?"</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Risparmio energetico disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità a consumo elevato per prolungare la durata della batteria. "<annotation id="url">"Ulteriori informazioni"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Risparmio energetico disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità a consumo elevato per prolungare la durata della batteria."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Attiva"</string>

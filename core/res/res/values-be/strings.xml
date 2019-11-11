@@ -1858,8 +1858,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Абноўлены вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Выдалены вашым адміністратарам"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі з высокімі энергавыдаткамі. "<annotation id="url">"Даведацца больш"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Каб павялічыць тэрмін службы акумулятара, рэжым эканоміі зараду выключае ці абмяжоўвае дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты і іншыя функцыі з высокімі энергавыдаткамі."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"У рэжыме Эканомія трафіка фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Уключыць"</string>

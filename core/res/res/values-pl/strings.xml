@@ -306,7 +306,7 @@
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na nagrywanie dźwięku?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Aktywność fizyczna"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"dostęp do aktywności fizycznej"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Zezwolić aplikacji „<xliff:g id="APP_NAME">%1$s</xliff:g>” na dostęp do aktywności fizycznej?"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na dostęp do aktywności fizycznej?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Aparat"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"robienie zdjęć i nagrywanie filmów"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na robienie zdjęć i nagrywanie filmów?"</string>
@@ -1858,8 +1858,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje intensywnie zużywające energię. "<annotation id="url">"Więcej informacji"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje intensywnie zużywające energię."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>

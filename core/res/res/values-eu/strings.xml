@@ -324,7 +324,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Egin keinuak"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Sakatu, lerratu, atximurkatu eta beste hainbat keinu egin ditzake."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Hatz-marken keinuak"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Gailuaren hatz-marken sentsorean egindako keinuak antzeman ditzake."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Gailuaren hatz-marken sentsorean egindako keinuak atzeman ditzake."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desgaitu edo aldatu egoera-barra"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Egoera-barra desgaitzea edo sistema-ikonoak gehitzea edo kentzea baimentzen die aplikazioei."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"bihurtu egoera-barra"</string>
@@ -856,7 +856,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Eredua ahaztu zaizu?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Kontua desblokeatzea"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Eredua marrazteko saiakera gehiegi egin dira"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Desblokeatzeko, hasi saioa Google kontuarekin."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Desblokeatzeko, hasi saioa Google-ko kontuarekin."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Erabiltzaile-izena (helbide elektronikoa)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Pasahitza"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Hasi saioa"</string>
@@ -931,7 +931,7 @@
     <string name="autofill_department" msgid="5343279462564453309">"Departamentua"</string>
     <string name="autofill_prefecture" msgid="2028499485065800419">"Prefektura"</string>
     <string name="autofill_parish" msgid="8202206105468820057">"Parrokia"</string>
-    <string name="autofill_area" msgid="3547409050889952423">"Zonaldea"</string>
+    <string name="autofill_area" msgid="3547409050889952423">"Eskualdea"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirerria"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"irakurri sareko laster-markak eta historia"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Arakatzailearen bidez bisitatutako URL guztien historia eta arakatzailearen  laster-marka guztiak irakurtzeko baimena ematen die aplikazioei. Oharra: agian baimen hori ez dute aplikatuko hirugarrenen arakatzaileek edo sarea arakatzeko gaitasuna duten bestelako aplikazioek."</string>
@@ -1128,7 +1128,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"Gauzatu ekintza hau erabilita:"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"Osatu ekintza %1$s erabiliz"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"Osatu ekintza"</string>
-    <string name="whichViewApplication" msgid="3272778576700572102">"Ireki honekin:"</string>
+    <string name="whichViewApplication" msgid="3272778576700572102">"Ireki honekin"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Irekin %1$s aplikazioarekin"</string>
     <string name="whichViewApplicationLabel" msgid="2666774233008808473">"Ireki"</string>
     <string name="whichOpenHostLinksWith" msgid="3788174881117226583">"Ireki <xliff:g id="HOST">%1$s</xliff:g> ostalariko estekak honekin:"</string>
@@ -1639,7 +1639,7 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betiko desgaituko da SIMa."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodeak ez datoz bat"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Eredua marrazteko saiakera gehiegi egin dira"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Desblokeatzeko, hasi saioa Google kontuarekin."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Desblokeatzeko, hasi saioa Google-ko kontuarekin."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Erabiltzaile-izena (helbide elektronikoa)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Pasahitza"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Hasi saioa"</string>
@@ -1809,8 +1809,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Bateria-aurrezlea desaktibatzen da, edo atzeko planoko jarduerak, zenbait efektu bisual eta bateria asko darabilten bestelako eginbideak murrizten dira, bateriak gehiago iraun dezan. "<annotation id="url">"Lortu informazio gehiago"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Bateria-aurrezlea desaktibatzen da, edo atzeko planoko jarduerak, zenbait efektu bisual eta bateria asko darabilten bestelako eginbideak murrizten dira, bateriak gehiago iraun dezan."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>

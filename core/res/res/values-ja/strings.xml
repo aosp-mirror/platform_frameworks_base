@@ -300,7 +300,7 @@
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"身体活動"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"身体活動にアクセス"</string>
-    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"身体活動へのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"身体活動データへのアクセスを「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真と動画の撮影"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"写真と動画の撮影を「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」に許可しますか？"</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"バッテリー セーバーを有効にすると、電池を長持ちさせるようバックグラウンド アクティビティ、一部の視覚効果など、電力消費量の多い機能が制限されます。"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"バッテリー セーバーを有効にすると、電池を長持ちさせるため、バックグラウンド アクティビティや一部の視覚効果など、電力消費量の多い機能が制限されます。"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ON にする"</string>

@@ -1811,8 +1811,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Штедачот на батерија ги исклучува или ограничува активноста во заднина, некои визуелни ефекти и други функции со голема потрошувачка на енергија за да се продолжи траењето на батеријата. "<annotation id="url">"Дознајте повеќе"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Штедачот на батерија ги исклучува или ограничува активноста во заднина, некои визуелни ефекти и други функции со голема потрошувачка на енергија за да се продолжи траењето на батеријата."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Вклучи"</string>

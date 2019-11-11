@@ -1858,8 +1858,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Smazáno administrátorem"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Spořič baterie vypíná nebo omezuje aktivitu na pozadí, některé vizuální efekty a další funkce náročné na energii, aby vám pomohl šetřit baterii. "<annotation id="url">"Další informace"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Spořič baterie vypíná nebo omezuje aktivitu na pozadí, některé vizuální efekty a další funkce náročné na energii, aby vám pomohl šetřit baterii."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Spořič dat z důvodu snížení využití dat některým aplikacím brání v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Chcete zapnout Spořič dat?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnout"</string>

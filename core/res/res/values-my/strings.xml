@@ -1809,8 +1809,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' က နောက်ခံလုပ်ဆောင်ချက်၊ အချို့ အမြင်အာရုံဆိုင်ရာ အထူးပြုလုပ်ချက်များနှင့် အခြား ပါဝါအလွန်သုံးသော ဝန်ဆောင်မှုများကို ပိတ်ခြင်း သို့မဟုတ် ကန့်သတ်ခြင်းတို့ ပြုလုပ်သည်။ "<annotation id="url">"ပိုမိုလေ့လာရန်"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' က နောက်ခံလုပ်ဆောင်ချက်၊ အချို့ အမြင်အာရုံဆိုင်ရာ အထူးပြုလုပ်ချက်များနှင့် အခြား ပါဝါအလွန်သုံးသော ဝန်ဆောင်မှုများကို ပိတ်ခြင်း သို့မဟုတ် ကန့်သတ်ခြင်းတို့ ပြုလုပ်သည်။"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ဒေတာအသုံးပြုမှု ချွေတာမှုစနစ်ကို ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ဖွင့်ပါ"</string>

@@ -1660,14 +1660,14 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwijderen"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls je langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Sneltoets voor toegankelijkheid gebruiken?"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Snelkoppeling toegankelijkheid gebruiken?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Wanneer de snelkoppeling is ingeschakeld, kun je drie seconden op beide volumeknoppen drukken om een toegankelijkheidsfunctie te starten.\n\n Huidige toegankelijkheidsfunctie:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Je kunt de functie wijzigen in Instellingen &gt; Toegankelijkheid."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Sneltoets uitschakelen"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Sneltoets gebruiken"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Kleurinversie"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Kleurcorrectie"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"\'Snelle link voor toegankelijkheid\' heeft <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ingeschakeld"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"\'Snelle link voor toegankelijkheid\' heeft <xliff:g id="SERVICE_NAME">%1$s</xliff:g> uitgeschakeld"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"\'Snelkoppeling toegankelijkheid\' heeft <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ingeschakeld"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"\'Snelkoppeling toegankelijkheid\' heeft <xliff:g id="SERVICE_NAME">%1$s</xliff:g> uitgeschakeld"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Houd beide volumetoetsen drie seconden ingedrukt om <xliff:g id="SERVICE_NAME">%1$s</xliff:g> te gebruiken"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Kies een service om te gebruiken wanneer je op de toegankelijkheidsknop tikt:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Kies een service om te gebruiken met het toegankelijkheidsgebaar (veeg met twee vingers omhoog vanaf de onderkant van het scherm):"</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Geüpdatet door je beheerder"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Verwijderd door je beheerder"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Batterijbesparing beperkt de achtergrondactiviteit, bepaalde visuele effecten en andere functies die veel stroom kosten om de batterijduur te verlengen. "<annotation id="url">"Meer informatie"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Batterijbesparing beperkt de achtergrondactiviteit, bepaalde visuele effecten en andere functies die veel stroom kosten om de batterijduur te verlengen."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens verzenden of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet weergegeven totdat je erop tikt."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Databesparing inschakelen?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Inschakelen"</string>

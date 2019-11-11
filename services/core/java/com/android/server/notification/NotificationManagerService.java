@@ -902,8 +902,22 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationError(int callingUid, int callingPid, String pkg, String tag,
                 int id, int uid, int initialPid, String message, int userId) {
+            final boolean fgService;
+            synchronized (mNotificationLock) {
+                NotificationRecord r = findNotificationLocked(pkg, tag, id, userId);
+                fgService = r != null && (r.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0;
+            }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0, 0, false, userId,
                     REASON_ERROR, null);
+            if (fgService) {
+                // Still crash for foreground services, preventing the not-crash behaviour abused
+                // by apps to give us a garbage notification and silently start a fg service.
+                Binder.withCleanCallingIdentity(
+                        () -> mAm.crashApplication(uid, initialPid, pkg, -1,
+                            "Bad notification(tag=" + tag + ", id=" + id + ") posted from package "
+                                + pkg + ", crashing app(uid=" + uid + ", pid=" + initialPid + "): "
+                                + message));
+            }
         }
 
         @Override
@@ -5529,7 +5543,9 @@ public class NotificationManagerService extends SystemService {
                         notification.flags |=
                                 old.getNotification().flags & FLAG_FOREGROUND_SERVICE;
                         r.isUpdate = true;
-                        r.setTextChanged(isVisuallyInterruptive(old, r));
+                        final boolean isInterruptive = isVisuallyInterruptive(old, r);
+                        r.setTextChanged(isInterruptive);
+                        r.setInterruptive(isInterruptive);
                     }
 
                     mNotificationsByKey.put(n.getKey(), r);
@@ -5628,7 +5644,6 @@ public class NotificationManagerService extends SystemService {
 
         Notification oldN = old.sbn.getNotification();
         Notification newN = r.sbn.getNotification();
-
         if (oldN.extras == null || newN.extras == null) {
             if (DEBUG_INTERRUPTIVENESS) {
                 Slog.v(TAG, "INTERRUPTIVENESS: "
@@ -5660,6 +5675,7 @@ public class NotificationManagerService extends SystemService {
             }
             return true;
         }
+
         // Do not compare Spannables (will always return false); compare unstyled Strings
         final String oldText = String.valueOf(oldN.extras.get(Notification.EXTRA_TEXT));
         final String newText = String.valueOf(newN.extras.get(Notification.EXTRA_TEXT));
@@ -5674,6 +5690,7 @@ public class NotificationManagerService extends SystemService {
             }
             return true;
         }
+
         if (oldN.hasCompletedProgress() != newN.hasCompletedProgress()) {
             if (DEBUG_INTERRUPTIVENESS) {
                 Slog.v(TAG, "INTERRUPTIVENESS: "
@@ -5681,6 +5698,16 @@ public class NotificationManagerService extends SystemService {
             }
             return true;
         }
+
+        // Fields below are invisible to bubbles.
+        if (r.canBubble()) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Slog.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is not interruptive: bubble");
+            }
+            return false;
+        }
+
         // Actions
         if (Notification.areActionsVisiblyDifferent(oldN, newN)) {
             if (DEBUG_INTERRUPTIVENESS) {
@@ -5714,7 +5741,6 @@ public class NotificationManagerService extends SystemService {
         } catch (Exception e) {
             Slog.w(TAG, "error recovering builder", e);
         }
-
         return false;
     }
 
@@ -5909,12 +5935,17 @@ public class NotificationManagerService extends SystemService {
                     Slog.v(TAG, "INTERRUPTIVENESS: "
                             + record.getKey() + " is not interruptive: summary");
                 }
+            } else if (record.canBubble()) {
+                if (DEBUG_INTERRUPTIVENESS) {
+                    Slog.v(TAG, "INTERRUPTIVENESS: "
+                            + record.getKey() + " is not interruptive: bubble");
+                }
             } else {
+                record.setInterruptive(true);
                 if (DEBUG_INTERRUPTIVENESS) {
                     Slog.v(TAG, "INTERRUPTIVENESS: "
                             + record.getKey() + " is interruptive: alerted");
                 }
-                record.setInterruptive(true);
             }
             MetricsLogger.action(record.getLogMaker()
                     .setCategory(MetricsEvent.NOTIFICATION_ALERT)
@@ -6273,15 +6304,21 @@ public class NotificationManagerService extends SystemService {
             int indexBefore = findNotificationRecordIndexLocked(record);
             boolean interceptBefore = record.isIntercepted();
             int visibilityBefore = record.getPackageVisibilityOverride();
+            boolean interruptiveBefore = record.isInterruptive();
+
             recon.applyChangesLocked(record);
             applyZenModeLocked(record);
             mRankingHelper.sort(mNotificationList);
-            int indexAfter = findNotificationRecordIndexLocked(record);
-            boolean interceptAfter = record.isIntercepted();
-            int visibilityAfter = record.getPackageVisibilityOverride();
-            changed = indexBefore != indexAfter || interceptBefore != interceptAfter
-                    || visibilityBefore != visibilityAfter;
-            if (interceptBefore && !interceptAfter
+            boolean indexChanged = indexBefore != findNotificationRecordIndexLocked(record);
+            boolean interceptChanged = interceptBefore != record.isIntercepted();
+            boolean visibilityChanged = visibilityBefore != record.getPackageVisibilityOverride();
+
+            // Broadcast isInterruptive changes for bubbles.
+            boolean interruptiveChanged =
+                    record.canBubble() && (interruptiveBefore != record.isInterruptive());
+
+            changed = indexChanged || interceptChanged || visibilityChanged || interruptiveChanged;
+            if (interceptBefore && !record.isIntercepted()
                     && record.isNewEnoughForAlerting(System.currentTimeMillis())) {
                 buzzBeepBlinkLocked(record);
             }
@@ -7412,7 +7449,8 @@ public class NotificationManagerService extends SystemService {
                     record.getSound() != null || record.getVibration() != null,
                     record.getSystemGeneratedSmartActions(),
                     record.getSmartReplies(),
-                    record.canBubble()
+                    record.canBubble(),
+                    record.isInterruptive()
             );
             rankings.add(ranking);
         }
@@ -8600,6 +8638,7 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     void resetAssistantUserSet(int userId) {
+        checkCallerIsSystemOrShell();
         mAssistants.setUserSet(userId, false);
         handleSavePolicyFile();
     }
@@ -8607,12 +8646,14 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     @Nullable
     ComponentName getApprovedAssistant(int userId) {
+        checkCallerIsSystemOrShell();
         List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
         return CollectionUtils.firstOrNull(allowedComponents);
     }
 
     @VisibleForTesting
     protected void simulatePackageSuspendBroadcast(boolean suspend, String pkg) {
+        checkCallerIsSystemOrShell();
         // only use for testing: mimic receive broadcast that package is (un)suspended
         // but does not actually (un)suspend the package
         final Bundle extras = new Bundle();
@@ -8629,6 +8670,7 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void simulatePackageDistractionBroadcast(int flag, String[] pkgs) {
+        checkCallerIsSystemOrShell();
         // only use for testing: mimic receive broadcast that package is (un)distracting
         // but does not actually register that info with packagemanager
         final Bundle extras = new Bundle();

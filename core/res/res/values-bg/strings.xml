@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Изтрито от администратора ви"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Режимът за запазване на батерията изключва или ограничава активността на заден план, някои визуални ефекти и други функции с висок разход на енергия, за да удължи живота на батерията. "<annotation id="url">"Научете повече"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Режимът за запазване на батерията изключва или ограничава активността на заден план, някои визуални ефекти и други функции с висок разход на енергия, за да удължи живота на батерията."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ще вкл. ли Икономия на данни?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Включване"</string>

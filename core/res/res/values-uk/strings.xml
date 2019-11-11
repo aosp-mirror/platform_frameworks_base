@@ -1708,14 +1708,14 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Вилучити"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Збільшити гучність понад рекомендований рівень?\n\nЯкщо слухати надто гучну музику тривалий час, можна пошкодити слух."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Використовувати ярлик спеціальних можливостей?"</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Використовувати швидке ввімкнення?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Коли ярлик увімкнено, після натискання обох клавіш гучності й утримування їх протягом 3 секунд увімкнеться функція спеціальних можливостей.\n\n Поточна функція спеціальних можливостей:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Цю функцію можна змінити в меню \"Налаштування\" &gt; \"Спеціальні можливості\"."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Вимкнути ярлик"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Використовувати ярлик"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Інверсія кольорів"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Корекція кольорів"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Ярлик спеціальних можливостей увімкнув <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Ярлик спеціальних можливостей вимкнув <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Сервіс <xliff:g id="SERVICE_NAME">%1$s</xliff:g> увімкнено"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Сервіс <xliff:g id="SERVICE_NAME">%1$s</xliff:g> вимкнено"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Щоб скористатися службою <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, утримуйте обидві клавіші гучності впродовж трьох секунд"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Виберіть сервіс для кнопки спеціальних можливостей:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Виберіть сервіс для жесту спеціальних можливостей (проведення двома пальцями знизу вгору):"</string>
@@ -1858,8 +1858,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Оновлено адміністратором"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Видалено адміністратором"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Режим енергозбереження припиняє або обмежує фонову активність і вимикає деякі візуальні ефекти й інші енергозатратні функції, щоб подовжити час роботи акумулятора. "<annotation id="url">"Докладніше"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Режим енергозбереження припиняє або обмежує фонову активність і вимикає деякі візуальні ефекти й інші енергозатратні функції, щоб подовжити час роботи акумулятора."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Щоб зменшити використання трафіку, функція \"Заощадження трафіку\" не дозволяє деяким додаткам надсилати чи отримувати дані у фоновому режимі. Поточний додаток зможе отримувати доступ до таких даних, але рідше. Наприклад, зображення не відображатиметься, доки ви не торкнетеся його."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Увімкнути Заощадження трафіку?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Увімкнути"</string>
