@@ -16,7 +16,7 @@
 
 #define LOG_TAG "VibratorService"
 
-#include <android/hardware/vibrator/1.4/IVibrator.h>
+#include <android/hardware/vibrator/1.3/IVibrator.h>
 #include <android/hardware/vibrator/BnVibratorCallback.h>
 #include <android/hardware/vibrator/IVibrator.h>
 #include <binder/IServiceManager.h>
@@ -43,7 +43,6 @@ namespace V1_0 = android::hardware::vibrator::V1_0;
 namespace V1_1 = android::hardware::vibrator::V1_1;
 namespace V1_2 = android::hardware::vibrator::V1_2;
 namespace V1_3 = android::hardware::vibrator::V1_3;
-namespace V1_4 = android::hardware::vibrator::V1_4;
 namespace aidl = android::hardware::vibrator;
 
 namespace android {
@@ -78,11 +77,6 @@ static_assert(static_cast<uint8_t>(V1_3::Effect::RINGTONE_15) ==
 static_assert(static_cast<uint8_t>(V1_3::Effect::TEXTURE_TICK) ==
                 static_cast<uint8_t>(aidl::Effect::TEXTURE_TICK));
 
-static_assert(static_cast<int32_t>(V1_4::Capabilities::ON_COMPLETION_CALLBACK) ==
-                static_cast<int32_t>(aidl::IVibrator::CAP_ON_CALLBACK));
-static_assert(static_cast<int32_t>(V1_4::Capabilities::PERFORM_COMPLETION_CALLBACK) ==
-                static_cast<int32_t>(aidl::IVibrator::CAP_PERFORM_CALLBACK));
-
 class VibratorCallback {
     public:
         VibratorCallback(JNIEnv *env, jobject vibration) :
@@ -100,20 +94,6 @@ class VibratorCallback {
 
     private:
         jobject mVibration;
-};
-
-class HidlVibratorCallback : public V1_4::IVibratorCallback {
-  public:
-    HidlVibratorCallback(JNIEnv *env, jobject vibration) :
-    mCb(env, vibration) {}
-
-    Return<void> onComplete() override {
-        mCb.onComplete();
-        return Void();
-    }
-
-  private:
-    VibratorCallback mCb;
 };
 
 class AidlVibratorCallback : public aidl::BnVibratorCallback {
@@ -380,11 +360,7 @@ static jlong vibratorPerformEffect(JNIEnv* env, jclass, jlong effect, jlong stre
         EffectStrength effectStrength(static_cast<EffectStrength>(strength));
 
         Return<void> ret;
-        if (auto hal = getHal<V1_4::IVibrator>(); hal && isValidEffect<V1_3::Effect>(effect)) {
-            sp<HidlVibratorCallback> effectCallback = new HidlVibratorCallback(env, vibration);
-            ret = hal->call(&V1_4::IVibrator::perform_1_4, static_cast<V1_3::Effect>(effect),
-                    effectStrength, effectCallback, callback);
-        } else if (isValidEffect<V1_0::Effect>(effect)) {
+        if (isValidEffect<V1_0::Effect>(effect)) {
             ret = halCall(&V1_0::IVibrator::perform, static_cast<V1_0::Effect>(effect),
                     effectStrength, callback);
         } else if (isValidEffect<Effect_1_1>(effect)) {
@@ -429,9 +405,9 @@ static jlong vibratorGetCapabilities(JNIEnv*, jclass) {
             return 0;
         }
         return cap;
-    } else {
-        return halCall(&V1_4::IVibrator::getCapabilities).withDefault(0);
     }
+
+    return 0;
 }
 
 static const JNINativeMethod method_table[] = {
