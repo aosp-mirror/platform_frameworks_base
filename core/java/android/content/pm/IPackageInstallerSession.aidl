@@ -39,6 +39,9 @@ interface IPackageInstallerSession {
     void transfer(in String packageName, in IntentSender statusReceiver);
     void abandon();
 
+    void addFile(String name, long lengthBytes, in byte[] metadata);
+    void removeFile(String name);
+
     boolean isMultiPackage();
     int[] getChildSessionIds();
     void addChildSessionId(in int sessionId);
@@ -46,5 +49,4 @@ interface IPackageInstallerSession {
     int getParentSessionId();
 
     boolean isStaged();
-    void addFile(in String name, long size, in byte[] metadata);
 }

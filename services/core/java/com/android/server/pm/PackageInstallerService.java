@@ -637,7 +637,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mInstallThread.getLooper(), mStagingManager, sessionId, userId, callingUid,
                 installSource, params, createdMillis,
-                stageDir, stageCid, false, false, false, null, SessionInfo.INVALID_ID,
+                stageDir, stageCid, null, false, false, false, null, SessionInfo.INVALID_ID,
                 false, false, false, SessionInfo.STAGED_SESSION_NO_ERROR, "");
 
         synchronized (mSessions) {
@@ -1014,12 +1014,28 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     }
 
+    static void sendPendingStreaming(Context context, IntentSender target, int sessionId,
+            Throwable cause) {
+        final Intent intent = new Intent();
+        intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+        intent.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_STREAMING);
+        if (cause != null && !TextUtils.isEmpty(cause.getMessage())) {
+            intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
+                    "Staging Image Not Ready [" + cause.getMessage() + "]");
+        } else {
+            intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, "Staging Image Not Ready");
+        }
+        try {
+            target.sendIntent(context, 0, intent, null, null);
+        } catch (SendIntentException ignored) {
+        }
+    }
+
     static void sendOnUserActionRequired(Context context, IntentSender target, int sessionId,
             Intent intent) {
         final Intent fillIn = new Intent();
         fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-        fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
-                PackageInstaller.STATUS_PENDING_USER_ACTION);
+        fillIn.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_USER_ACTION);
         fillIn.putExtra(Intent.EXTRA_INTENT, intent);
         try {
             target.sendIntent(context, 0, fillIn, null, null);
