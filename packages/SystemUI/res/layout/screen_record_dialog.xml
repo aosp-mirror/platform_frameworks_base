@@ -5,44 +5,67 @@
               android:clipChildren="false"
               android:clipToPadding="false"
               android:gravity="top"
+              android:minWidth="320dp"
               android:orientation="vertical"
-              android:padding="@dimen/global_actions_padding"
+              android:paddingTop="24dp"
+              android:paddingBottom="12dp"
+              android:paddingLeft="24dp"
+              android:paddingRight="12dp"
               android:background="@drawable/rounded_bg_full">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <CheckBox
+        <TextView
+            android:id="@+id/title"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:gravity="start|left"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:textSize="20sp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:text="@string/screenrecord_name"/>
+        <Switch
             android:id="@+id/checkbox_mic"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_height="48dp"
+            android:textSize="16sp"
             android:text="@string/screenrecord_mic_label"/>
-        <CheckBox
+        <Switch
             android:id="@+id/checkbox_taps"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_height="48dp"
+            android:textSize="16sp"
             android:text="@string/screenrecord_taps_label"/>
-        <CheckBox
+        <Switch
             android:id="@+id/checkbox_stopdot"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_height="48dp"
+            android:textSize="16sp"
             android:text="@string/screenrecord_stopdot_label"/>
-        <CheckBox
+        <Switch
             android:id="@+id/checkbox_low_quality"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_height="48dp"
+            android:textSize="16sp"
             android:text="@string/screenrecord_low_quality_label"/>
-        <Button
-            android:id="@+id/record_button"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="@string/screenrecord_start_label"
-        />
+            android:layout_height="match_parent"
+            android:gravity="end">
+            <Button
+                android:id="@+id/record_button"
+                android:gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/screenrecord_start_label"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+            />
+        </LinearLayout>
     </LinearLayout>
-
 </LinearLayout>
