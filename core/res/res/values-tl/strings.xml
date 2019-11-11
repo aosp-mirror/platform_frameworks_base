@@ -1343,7 +1343,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Walang mga kinakailangang pahintulot"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"maaari itong magdulot ng gastos sa iyo"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"China-charge ang device na ito sa pamamagitan ng USB"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"China-charge ang device sa USB"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"China-charge ang nakakonektang device sa pamamagitan ng USB"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Na-on ang paglipat ng USB file"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Na-on ang PTP sa pamamagitan ng USB"</string>
@@ -1660,8 +1660,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alisin"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
-    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Gagamitin ang Shortcut sa Pagiging Naa-access?"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume sa loob ng 3 segundo.\n\n Kasalukuyang feature ng pagiging naa-access:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Maaari mong baguhin ang feature sa Mga Setting &gt; Pagiging Naa-access."</string>
+    <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Gagamitin ang Shortcut sa Pagiging Accessible?"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume sa loob ng 3 segundo.\n\n Kasalukuyang feature ng pagiging naa-access:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Maaari mong baguhin ang feature sa Mga Setting &gt; Pagiging Accessible."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"I-off ang Shortcut"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Gamitin ang Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Pag-invert ng Kulay"</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Na-delete ng iyong admin"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Ino-off o pinaghihigpitan ng Pangtipid sa Baterya ang aktibidad sa background, ilang visual effect, at iba pang feature na malakas kumonsumo ng baterya para mapatagal ang baterya. "<annotation id="url">"Matuto Pa"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Ino-off o pinaghihigpitan ng Pangtipid sa Baterya ang aktibidad sa background, ilang visual effect, at iba pang feature na malakas kumonsumo ng baterya para mapatagal ang baterya."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"I-on"</string>

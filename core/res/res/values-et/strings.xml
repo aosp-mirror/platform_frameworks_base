@@ -1136,7 +1136,7 @@
     <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"Linkide avamine rakendusega <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"Ava teenuse <xliff:g id="HOST">%1$s</xliff:g> lingid rakendusega <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Juudep. andmine"</string>
-    <string name="whichEditApplication" msgid="144727838241402655">"Muutmine:"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Redigeeri rakendusega:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Muutmine rakendusega %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Muuda"</string>
     <string name="whichSendApplication" msgid="5803792421724377602">"Jagamine"</string>
@@ -1808,8 +1808,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administraator on seda värskendanud"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administraator on selle kustutanud"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Aku tööea pikendamiseks lülitab akusäästja taustategevused, mõningad visuaalsed efektid ja muud akut koormavad funktsioonid välja või piirab neid. "<annotation id="url">"Lisateave"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Aku tööea pikendamiseks lülitab akusäästja taustategevused, mõningad visuaalsed efektid ja muud akut koormavad funktsioonid välja või piirab neid."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmemahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks pildid kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Lülita sisse"</string>

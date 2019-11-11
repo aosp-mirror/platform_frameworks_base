@@ -1579,7 +1579,7 @@
     <string name="expires_on" msgid="3676242949915959821">"කල් ඉකුත් වන්නේ:"</string>
     <string name="serial_number" msgid="758814067660862493">"අනුක්‍රමාංකය:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"ඇඟිලි සලකුණු:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ඇඟිලිසලකුණ:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ඇඟිලි සලකුණ:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ඇඟිලි සලකුණ:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"සියල්ල බලන්න"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ක්‍රියාකාරකම තෝරන්න"</string>
@@ -1810,8 +1810,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ඔබගේ පරිපාලක මඟින් යාවත්කාලීන කර ඇත"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ඔබගේ පරිපාලක මඟින් මකා දමා ඇත"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"හරි"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"බැටරි සුරැකුම අක්‍රිය වෙයි, නැති නම් බැටරි ආයු කාලය දීර්ඝ කිරීමට පසුබිම් ක්‍රියාකාරකම, සමහර දෘශ්‍යමාන බලපෑම් සහ අනෙකුත් ඉහළ බල විශේෂාංග සීමා කරයි. "<annotation id="url">"තවත් දැන ගන්න"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"බැටරි සුරැකුම අක්‍රිය වෙයි, නැති නම් බැටරි ආයු කාලය දීර්ඝ කිරීමට පසුබිම් ක්‍රියාකාරකම, සමහර දෘශ්‍යමාන බලපෑම් සහ අනෙකුත් ඉහළ බල විශේෂාංග සීමා කරයි."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"දත්ත භාවිතය අඩු කිරීමට උදවු වීමට, දත්ත සුරැකුම සමහර යෙදුම් පසුබිමින් දත්ත යැවීම සහ ලබා ගැනීම වළක්වයි. ඔබ දැනට භාවිත කරන යෙදුමකට දත්ත වෙත පිවිසීමට හැකිය, නමුත් එසේ කරන්නේ කලාතුරකින් විය හැකිය. මෙයින් අදහස් වන්නේ, උදාහරණයක් ලෙස, එම රූප ඔබ ඒවාට තට්ටු කරන තෙක් සංදර්ශනය නොවන බවය."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"දත්ත සුරැකුම ක්‍රියාත්මක කරන්නද?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ක්‍රියාත්මක කරන්න"</string>
