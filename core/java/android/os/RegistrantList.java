@@ -17,7 +17,6 @@
 package android.os;
 
 import android.annotation.UnsupportedAppUsage;
-import android.os.Handler;         
 
 import java.util.ArrayList;
 
@@ -25,6 +24,10 @@ import java.util.ArrayList;
 public class RegistrantList
 {
     ArrayList   registrants = new ArrayList();      // of Registrant
+
+    @UnsupportedAppUsage
+    public RegistrantList() {
+    }
 
     @UnsupportedAppUsage
     public synchronized void

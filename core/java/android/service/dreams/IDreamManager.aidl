@@ -29,6 +29,7 @@ interface IDreamManager {
     void awaken();
     @UnsupportedAppUsage
     void setDreamComponents(in ComponentName[] componentNames);
+    @UnsupportedAppUsage
     ComponentName[] getDreamComponents();
     ComponentName getDefaultDreamComponent();
     void testDream(in ComponentName componentName);

@@ -16,6 +16,7 @@
 
 package android.telephony.ims.compat.stub;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.ims.ImsCallForwardInfo;
@@ -38,6 +39,10 @@ import com.android.ims.internal.IImsUtListener;
  */
 
 public class ImsUtListenerImplBase extends IImsUtListener.Stub {
+
+    @UnsupportedAppUsage
+    public ImsUtListenerImplBase() {
+    }
 
     /**
      * Notifies the result of the supplementary service configuration udpate.

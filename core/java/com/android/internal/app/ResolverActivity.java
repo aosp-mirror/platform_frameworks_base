@@ -101,6 +101,10 @@ import java.util.Set;
 @UiThread
 public class ResolverActivity extends Activity {
 
+    @UnsupportedAppUsage
+    public ResolverActivity() {
+    }
+
     // Temporary flag for new chooser delegate behavior.
     boolean mEnableChooserDelegate = true;
 
