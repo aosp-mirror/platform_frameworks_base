@@ -67,7 +67,11 @@ class VibratorShim : public V1_4::IVibrator {
     Return<bool> supportsAmplitudeControl() override {
         int32_t cap = 0;
         if (!mVib->getCapabilities(&cap).isOk()) return false;
-        return (cap & aidl::IVibrator::CAP_AMPLITUDE_CONTROL) > 0;
+        if (mUnderExternalControl) {
+           return (cap & aidl::IVibrator::CAP_EXTERNAL_AMPLITUDE_CONTROL) > 0;
+        } else {
+           return (cap & aidl::IVibrator::CAP_AMPLITUDE_CONTROL) > 0;
+        }
     }
 
     Return<V1_0::Status> setAmplitude(uint8_t amplitude) override {
@@ -96,7 +100,11 @@ class VibratorShim : public V1_4::IVibrator {
     }
 
     Return<V1_0::Status> setExternalControl(bool enabled) override {
-        return toHidlStatus(mVib->setExternalControl(enabled));
+        Return<V1_0::Status> status = toHidlStatus(mVib->setExternalControl(enabled));
+        if (status.isOk() && status == V1_0::Status::OK) {
+            mUnderExternalControl = enabled;
+        }
+        return status;
     }
 
     Return<void> perform_1_3(V1_3::Effect effect, V1_0::EffectStrength strength,
@@ -154,21 +162,30 @@ class VibratorShim : public V1_4::IVibrator {
 
         sp<aidl::IVibratorCallback> cb = callback ? new CallbackShim(callback) : nullptr;
         int timeoutMs = 0;
-        V1_0::Status status = toHidlStatus(
+        Return<V1_0::Status> status = toHidlStatus(
             mVib->perform(static_cast<aidl::Effect>(effect),
                           static_cast<aidl::EffectStrength>(strength), cb, &timeoutMs));
-        _hidl_cb(status, timeoutMs);
-        return android::hardware::Status::ok();
+
+        if (status.isOk()) {
+            _hidl_cb(status, timeoutMs);
+            return android::hardware::Status::ok();
+        } else {
+            return android::hardware::details::StatusOf<V1_0::Status, void>(status);
+        }
     }
   private:
     sp<aidl::IVibrator> mVib;
+    bool mUnderExternalControl = false;
 
-    V1_0::Status toHidlStatus(const android::binder::Status& status) {
+    Return<V1_0::Status> toHidlStatus(const android::binder::Status& status) {
         switch(status.exceptionCode()) {
             using android::hardware::Status;
             case Status::EX_NONE: return V1_0::Status::OK;
             case Status::EX_ILLEGAL_ARGUMENT: return V1_0::Status::BAD_VALUE;
             case Status::EX_UNSUPPORTED_OPERATION: return V1_0::Status::UNSUPPORTED_OPERATION;
+            case Status::EX_TRANSACTION_FAILED: {
+                return Status::fromStatusT(status.transactionError());
+            }
         }
         return V1_0::Status::UNKNOWN_ERROR;
     }
@@ -247,8 +264,14 @@ class HalWrapper {
             }
 
             ALOGE("Failed to issue command to vibrator HAL. Retrying.");
+
             // Restoring connection to the HAL.
-            mHal = I::tryGetService();
+            sp<aidl::IVibrator> aidlVib = checkVintfService<aidl::IVibrator>();
+            if (aidlVib) {
+                mHal = new VibratorShim(aidlVib);
+            } else {
+                mHal = I::tryGetService();
+            }
         }
         return ret;
     }

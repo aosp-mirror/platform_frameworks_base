@@ -26,10 +26,10 @@ import static android.provider.Settings.Global.TETHER_OFFLOAD_DISABLED;
 
 import static com.android.server.connectivity.tethering.OffloadHardwareInterface.ForwardedStats;
 import static com.android.testutils.MiscAssertsKt.assertContainsAll;
+import static com.android.testutils.MiscAssertsKt.assertThrows;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
@@ -148,10 +148,8 @@ public class OffloadControllerTest {
     public void testNoSettingsValueDefaultDisabledDoesNotStart() throws Exception {
         setupFunctioningHardwareInterface();
         when(mHardware.getDefaultTetherOffloadDisabled()).thenReturn(1);
-        try {
-            Settings.Global.getInt(mContentResolver, TETHER_OFFLOAD_DISABLED);
-            fail();
-        } catch (SettingNotFoundException expected) {}
+        assertThrows(SettingNotFoundException.class, () ->
+                Settings.Global.getInt(mContentResolver, TETHER_OFFLOAD_DISABLED));
 
         final OffloadController offload = makeOffloadController();
         offload.start();
@@ -168,10 +166,8 @@ public class OffloadControllerTest {
     public void testNoSettingsValueDefaultEnabledDoesStart() throws Exception {
         setupFunctioningHardwareInterface();
         when(mHardware.getDefaultTetherOffloadDisabled()).thenReturn(0);
-        try {
-            Settings.Global.getInt(mContentResolver, TETHER_OFFLOAD_DISABLED);
-            fail();
-        } catch (SettingNotFoundException expected) {}
+        assertThrows(SettingNotFoundException.class, () ->
+                Settings.Global.getInt(mContentResolver, TETHER_OFFLOAD_DISABLED));
 
         final OffloadController offload = makeOffloadController();
         offload.start();

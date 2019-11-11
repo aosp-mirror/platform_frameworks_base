@@ -38,6 +38,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -70,7 +71,6 @@ import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
-import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.ims.ImsMmTelManager;
@@ -98,6 +98,7 @@ import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.SmsApplication;
 import com.android.internal.telephony.TelephonyProperties;
 
 import dalvik.system.VMRuntime;
@@ -272,6 +273,8 @@ public class TelephonyManager {
      *  TSTS - Triple SIM Triple Standby
      **/
     /** @hide */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Landroid/telephony/TelephonyManager$MultiSimVariants;")
     public enum MultiSimVariants {
         @UnsupportedAppUsage
         DSDS,
@@ -428,6 +431,25 @@ public class TelephonyManager {
     public @ModemCount int getSupportedModemCount() {
         return SystemProperties.getInt(TelephonyProperties.PROPERTY_MAX_ACTIVE_MODEMS,
                 getActiveModemCount());
+    }
+
+    /**
+     * Gets the maximum number of SIMs that can be active, based on the device's multisim
+     * configuration.
+     * @return 1 for single-SIM, DSDS, and TSTS devices. 2 for DSDA devices.
+     * @hide
+     */
+    @SystemApi
+    public int getMaxNumberOfSimultaneouslyActiveSims() {
+        switch (getMultiSimConfiguration()) {
+            case UNKNOWN:
+            case DSDS:
+            case TSTS:
+                return 1;
+            case DSDA:
+                return 2;
+        }
+        return 1;
     }
 
     /** {@hide} */
@@ -1650,8 +1672,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1691,8 +1713,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1751,7 +1773,8 @@ public class TelephonyManager {
      *     <li>The caller holds the READ_PRIVILEGED_PHONE_STATE permission.</li>
      *     <li>If the caller is the device or profile owner, the caller holds the
      *     {@link Manifest.permission#READ_PHONE_STATE} permission.</li>
-     *     <li>The caller has carrier privileges (see {@link #hasCarrierPrivileges()}.</li>
+     *     <li>The caller has carrier privileges (see {@link #hasCarrierPrivileges()} on any
+     *     active subscription.</li>
      *     <li>The caller is the default SMS app for the device.</li>
      * </ul>
      * <p>The profile owner is an app that owns a managed profile on the device; for more details
@@ -1820,8 +1843,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -1847,8 +1870,8 @@ public class TelephonyManager {
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
      * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
-     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
-     * managed profile on the device; for more details see <a
+     * privileges (see {@link #hasCarrierPrivileges}) on any active subscription. The profile owner
+     * is an app that owns a managed profile on the device; for more details see <a
      * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
      * access is deprecated and will be removed in a future release.
      *
@@ -5494,19 +5517,20 @@ public class TelephonyManager {
             telephony.requestCellInfoUpdate(
                     getSubId(),
                     new ICellInfoCallback.Stub() {
+                        @Override
                         public void onCellInfo(List<CellInfo> cellInfo) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onCellInfo(cellInfo)));
                         }
 
-                        public void onError(int errorCode, android.os.ParcelableException detail) {
+                        @Override
+                        public void onError(int errorCode, String exceptionName, String message) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onError(
                                             errorCode,
-                                            detail == null ? null : detail.getCause())));
+                                            createThrowableByClassName(exceptionName, message))));
                         }
                     }, getOpPackageName());
-
         } catch (RemoteException ex) {
         }
     }
@@ -5535,20 +5559,34 @@ public class TelephonyManager {
             telephony.requestCellInfoUpdateWithWorkSource(
                     getSubId(),
                     new ICellInfoCallback.Stub() {
+                        @Override
                         public void onCellInfo(List<CellInfo> cellInfo) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onCellInfo(cellInfo)));
                         }
 
-                        public void onError(int errorCode, android.os.ParcelableException detail) {
+                        @Override
+                        public void onError(int errorCode, String exceptionName, String message) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onError(
                                             errorCode,
-                                            detail == null ? null : detail.getCause())));
+                                            createThrowableByClassName(exceptionName, message))));
                         }
                     }, getOpPackageName(), workSource);
         } catch (RemoteException ex) {
         }
+    }
+
+    private static Throwable createThrowableByClassName(String className, String message) {
+        if (className == null) {
+            return null;
+        }
+        try {
+            Class<?> c = Class.forName(className);
+            return (Throwable) c.getConstructor(String.class).newInstance(message);
+        } catch (ReflectiveOperationException | ClassCastException e) {
+        }
+        return new RuntimeException(className + ": " + message);
     }
 
     /**
@@ -9274,6 +9312,21 @@ public class TelephonyManager {
     }
 
     /**
+     * Gets the default Respond Via Message application
+     * @param context context from the calling app
+     * @param updateIfNeeded update the default app if there is no valid default app configured.
+     * @return component name of the app and class to direct Respond Via Message intent to, or
+     * {@code null} if the functionality is not supported.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static @Nullable ComponentName getDefaultRespondViaMessageApplication(
+            @NonNull Context context, boolean updateIfNeeded) {
+        return SmsApplication.getDefaultRespondViaMessageApplication(context, updateIfNeeded);
+    }
+
+    /**
      * Set the alphabetic name of current registered operator.
      * @param name the alphabetic name of current registered operator.
      * @hide
@@ -9375,7 +9428,7 @@ public class TelephonyManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public int getSubIdForPhoneAccount(PhoneAccount phoneAccount) {
+    public int getSubIdForPhoneAccount(@Nullable PhoneAccount phoneAccount) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
             ITelephony service = getITelephony();
@@ -9435,18 +9488,37 @@ public class TelephonyManager {
     }
 
     /**
-     * Resets Telephony and IMS settings back to factory defaults.
+     * Resets telephony manager settings back to factory defaults.
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.CONNECTIVITY_INTERNAL)
     public void factoryReset(int subId) {
         try {
             Log.d(TAG, "factoryReset: subId=" + subId);
             ITelephony telephony = getITelephony();
-            if (telephony != null)
+            if (telephony != null) {
                 telephony.factoryReset(subId);
+            }
+        } catch (RemoteException e) {
+        }
+    }
+
+
+    /**
+     * Resets Telephony and IMS settings back to factory defaults only for the subscription
+     * associated with this instance.
+     * @see #createForSubscriptionId(int)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONNECTIVITY_INTERNAL)
+    public void resetSettings() {
+        try {
+            Log.d(TAG, "resetSettings: subId=" + getSubId());
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.factoryReset(getSubId());
+            }
         } catch (RemoteException e) {
         }
     }

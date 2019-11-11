@@ -34,6 +34,10 @@ import android.view.accessibility.AccessibilityEvent;
  */
 public abstract class AlertActivity extends Activity implements DialogInterface {
 
+    @UnsupportedAppUsage
+    public AlertActivity() {
+    }
+
     /**
      * The model for the alert.
      * 

@@ -19,7 +19,7 @@ package com.android.internal.telephony.cdma.sms;
 
 import android.telephony.cdma.CdmaSmsCbProgramData;
 
-import com.android.internal.telephony.cdma.sms.CdmaSmsSubaddress;
+import dalvik.annotation.compat.UnsupportedAppUsage;
 
 public final class SmsEnvelope {
     /**
@@ -80,6 +80,7 @@ public final class SmsEnvelope {
      * or receiving the message.
      * (See 3GPP2 C.S0015-B, v2, 3.4.3.1)
      */
+    @UnsupportedAppUsage
     public int teleService = TELESERVICE_NOT_SET;
 
     /**
@@ -87,6 +88,7 @@ public final class SmsEnvelope {
      * by the SMS message.
      * (See 3GPP2 C.S0015-B, v2, 3.4.3.2)
      */
+    @UnsupportedAppUsage
     public int serviceCategory;
 
     /**
@@ -137,8 +139,10 @@ public final class SmsEnvelope {
      * encoded bearer data
      * (See 3GPP2 C.S0015-B, v2, 3.4.3.7)
      */
+    @UnsupportedAppUsage
     public byte[] bearerData;
 
+    @UnsupportedAppUsage
     public SmsEnvelope() {
         // nothing to see here
     }

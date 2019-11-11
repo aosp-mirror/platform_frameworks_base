@@ -25,6 +25,11 @@ import android.os.IBinder;
  */
 @Deprecated
 public abstract class ActivityManagerNative {
+
+    @UnsupportedAppUsage
+    public ActivityManagerNative() {
+    }
+
     /**
      * Cast a Binder object into an activity manager interface, generating
      * a proxy if needed.
