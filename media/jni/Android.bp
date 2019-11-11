@@ -100,13 +100,14 @@ cc_library_shared {
         "android_media_Utils.cpp",
     ],
 
+    header_libs: [
+        "libgui_headers",
+    ],
+
     shared_libs: [
         "liblog",
-        "libgui",
-        "libnativewindow",
         "libui",
         "libutils",
-        "android.hidl.token@1.0-utils",
     ],
 
     include_dirs: [

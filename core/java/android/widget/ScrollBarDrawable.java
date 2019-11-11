@@ -60,6 +60,10 @@ public class ScrollBarDrawable extends Drawable implements Drawable.Callback {
     private ColorFilter mColorFilter;
     private boolean mHasSetColorFilter;
 
+    @UnsupportedAppUsage
+    public ScrollBarDrawable() {
+    }
+
     /**
      * Indicate whether the horizontal scrollbar track should always be drawn
      * regardless of the extent. Defaults to false.

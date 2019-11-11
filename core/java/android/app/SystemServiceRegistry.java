@@ -157,6 +157,7 @@ import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
 import android.os.storage.StorageManager;
+import android.os.telephony.TelephonyRegistryManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
@@ -172,6 +173,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
+import android.telephony.ims.ImsManager;
 import android.telephony.ims.RcsMessageManager;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -607,6 +609,13 @@ final class SystemServiceRegistry {
                 return new TelephonyManager(ctx.getOuterContext());
             }});
 
+        registerService(Context.TELEPHONY_REGISTRY_SERVICE, TelephonyRegistryManager.class,
+            new CachedServiceFetcher<TelephonyRegistryManager>() {
+                @Override
+                public TelephonyRegistryManager createService(ContextImpl ctx) {
+                    return new TelephonyRegistryManager();
+                }});
+
         registerService(Context.TELEPHONY_SUBSCRIPTION_SERVICE, SubscriptionManager.class,
                 new CachedServiceFetcher<SubscriptionManager>() {
             @Override
@@ -619,6 +628,14 @@ final class SystemServiceRegistry {
                     @Override
                     public RcsMessageManager createService(ContextImpl ctx) {
                         return new RcsMessageManager(ctx.getOuterContext());
+                    }
+                });
+
+        registerService(Context.TELEPHONY_IMS_SERVICE, ImsManager.class,
+                new CachedServiceFetcher<ImsManager>() {
+                    @Override
+                    public ImsManager createService(ContextImpl ctx) {
+                        return new ImsManager(ctx.getOuterContext());
                     }
                 });
 

@@ -75,6 +75,8 @@ import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.server.DeviceIdleController;
+import com.android.server.LocalServices;
 import com.android.server.location.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
 import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
 
@@ -178,6 +180,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
     private static final int AGPS_SUPL_MODE_MSB = 0x01;
 
+    private static final int UPDATE_LOW_POWER_MODE = 1;
     private static final int SET_REQUEST = 3;
     private static final int INJECT_NTP_TIME = 5;
     // PSDS stands for Predicted Satellite Data Service
@@ -371,6 +374,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private boolean mDisableGpsForPowerManager = false;
 
     /**
+     * True if the device idle controller has determined that the device is stationary. This is only
+     * updated when the device enters idle mode.
+     */
+    private volatile boolean mIsDeviceStationary = false;
+
+    /**
      * Properties loaded from PROPERTIES_FILE.
      * It must be accessed only inside {@link #mHandler}.
      */
@@ -462,6 +471,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     public GnssNavigationMessageProvider getGnssNavigationMessageProvider() {
         return mGnssNavigationMessageProvider;
     }
+
+    private final DeviceIdleController.StationaryListener mDeviceIdleStationaryListener =
+            isStationary -> {
+                mIsDeviceStationary = isStationary;
+                // Call updateLowPowerMode on handler thread so it's always called from the same
+                // thread.
+                mHandler.sendEmptyMessage(UPDATE_LOW_POWER_MODE);
+            };
+
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -478,11 +496,22 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 case ALARM_TIMEOUT:
                     hibernate();
                     break;
-                case PowerManager.ACTION_POWER_SAVE_MODE_CHANGED:
                 case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
+                    DeviceIdleController.LocalService deviceIdleService = LocalServices.getService(
+                            DeviceIdleController.LocalService.class);
+                    if (mPowerManager.isDeviceIdleMode()) {
+                        deviceIdleService.registerStationaryListener(mDeviceIdleStationaryListener);
+                    } else {
+                        deviceIdleService.unregisterStationaryListener(
+                                mDeviceIdleStationaryListener);
+                    }
+                    // Intentional fall-through.
+                case PowerManager.ACTION_POWER_SAVE_MODE_CHANGED:
                 case Intent.ACTION_SCREEN_OFF:
                 case Intent.ACTION_SCREEN_ON:
-                    updateLowPowerMode();
+                    // Call updateLowPowerMode on handler thread so it's always called from the
+                    // same thread.
+                    mHandler.sendEmptyMessage(UPDATE_LOW_POWER_MODE);
                     break;
                 case CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED:
                 case TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED:
@@ -540,10 +569,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     private void updateLowPowerMode() {
-        // Disable GPS if we are in device idle mode.
-        boolean disableGpsForPowerManager = mPowerManager.isDeviceIdleMode();
-        final PowerSaveState result =
-                mPowerManager.getPowerSaveState(ServiceType.LOCATION);
+        // Disable GPS if we are in device idle mode and the device is stationary.
+        boolean disableGpsForPowerManager = mPowerManager.isDeviceIdleMode() && mIsDeviceStationary;
+        final PowerSaveState result = mPowerManager.getPowerSaveState(ServiceType.LOCATION);
         switch (result.locationMode) {
             case PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF:
             case PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF:
@@ -2047,6 +2075,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     break;
                 case REPORT_SV_STATUS:
                     handleReportSvStatus((SvStatusInfo) msg.obj);
+                    break;
+                case UPDATE_LOW_POWER_MODE:
+                    updateLowPowerMode();
                     break;
             }
             if (msg.arg2 == 1) {

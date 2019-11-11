@@ -26,7 +26,6 @@ import android.car.Car;
 import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
-import android.car.trust.CarTrustAgentEnrollmentManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -100,6 +99,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     private float mOpeningVelocity = DEFAULT_FLING_VELOCITY;
     private float mClosingVelocity = DEFAULT_FLING_VELOCITY;
+
+    private float mBackgroundAlphaDiff;
+    private float mInitialBackgroundAlpha;
 
     private TaskStackListenerImpl mTaskStackListener;
 
@@ -179,6 +181,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private boolean mHideNavBarForKeyboard;
     private boolean mBottomNavBarVisible;
 
+    private CarUxRestrictionManagerWrapper mCarUxRestrictionManagerWrapper;
+
     private final CarPowerStateListener mCarPowerStateListener =
             (int state) -> {
                 // When the car powers on, clear all notifications and mute/unread states.
@@ -214,6 +218,25 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // created.
         mHvacController = new HvacController(mContext);
 
+      	// Notification bar related setup.
+        mInitialBackgroundAlpha = (float) mContext.getResources().getInteger(
+            R.integer.config_initialNotificationBackgroundAlpha) / 100;
+        if (mInitialBackgroundAlpha < 0 || mInitialBackgroundAlpha > 100) {
+            throw new RuntimeException(
+              "Unable to setup notification bar due to incorrect initial background alpha"
+                      + " percentage");
+        }
+        float finalBackgroundAlpha = Math.max(
+            mInitialBackgroundAlpha,
+            (float) mContext.getResources().getInteger(
+                R.integer.config_finalNotificationBackgroundAlpha) / 100);
+        if (finalBackgroundAlpha < 0 || finalBackgroundAlpha > 100) {
+            throw new RuntimeException(
+              "Unable to setup notification bar due to incorrect final background alpha"
+                      + " percentage");
+        }
+        mBackgroundAlphaDiff = finalBackgroundAlpha - mInitialBackgroundAlpha;
+
         super.start();
         mTaskStackListener = new TaskStackListenerImpl();
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
@@ -245,14 +268,16 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     }
                 });
 
+        // Used by onDrivingStateChanged and it can be called inside
+        // DrivingStateHelper.connectToCarService()
+        mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
+
         // Register a listener for driving state changes.
         mDrivingStateHelper = new DrivingStateHelper(mContext, this::onDrivingStateChanged);
         mDrivingStateHelper.connectToCarService();
 
         mPowerManagerHelper = new PowerManagerHelper(mContext, mCarPowerStateListener);
         mPowerManagerHelper.connectToCarService();
-
-        mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
     }
 
     private void restartNavBarsIfNecessary() {
@@ -454,13 +479,23 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                         animateCollapsePanels();
                     }
                 });
-        Car car = Car.createCar(mContext);
-        CarUxRestrictionsManager carUxRestrictionsManager = (CarUxRestrictionsManager)
-                car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
+
         CarNotificationListener carNotificationListener = new CarNotificationListener();
-        CarUxRestrictionManagerWrapper carUxRestrictionManagerWrapper =
-                new CarUxRestrictionManagerWrapper();
-        carUxRestrictionManagerWrapper.setCarUxRestrictionsManager(carUxRestrictionsManager);
+        mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
+        // This can take time if car service is not ready up to this time.
+        // TODO(b/142808072) Refactor CarUxRestrictionManagerWrapper to allow setting
+        // CarUxRestrictionsManager later and switch to Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT.
+        Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_WAIT_FOREVER,
+                (car, ready) -> {
+                    if (!ready) {
+                        return;
+                    }
+                    CarUxRestrictionsManager carUxRestrictionsManager =
+                            (CarUxRestrictionsManager)
+                                    car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
+                    mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
+                            carUxRestrictionsManager);
+                });
 
         mNotificationDataManager = new NotificationDataManager();
         mNotificationDataManager.setOnUnseenCountUpdateListener(
@@ -489,7 +524,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                         mNotificationClickHandlerFactory, mNotificationDataManager);
         mNotificationClickHandlerFactory.setNotificationDataManager(mNotificationDataManager);
 
-        carNotificationListener.registerAsSystemService(mContext, carUxRestrictionManagerWrapper,
+        carNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
                 carHeadsUpNotificationManager, mNotificationDataManager);
 
         mNotificationView = mStatusBarWindow.findViewById(R.id.notification_view);
@@ -589,7 +624,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 mNotificationView,
                 PreprocessingManager.getInstance(mContext),
                 carNotificationListener,
-                carUxRestrictionManagerWrapper,
+                mCarUxRestrictionManagerWrapper,
                 mNotificationDataManager);
         mNotificationViewController.enable();
     }
@@ -1039,12 +1074,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         UserSwitcherController userSwitcherController =
                 Dependency.get(UserSwitcherController.class);
         if (userSwitcherController.useFullscreenUserSwitcher()) {
-            Car car = Car.createCar(mContext);
-            CarTrustAgentEnrollmentManager enrollmentManager = (CarTrustAgentEnrollmentManager) car
-                    .getCarManager(Car.CAR_TRUST_AGENT_ENROLLMENT_SERVICE);
             mFullscreenUserSwitcher = new FullscreenUserSwitcher(this,
-                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub),
-                    enrollmentManager, mContext);
+                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub), mContext);
         } else {
             super.createUserSwitcher();
         }
@@ -1155,15 +1186,20 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             mHandleBar.setTranslationY(height - mHandleBar.getHeight() - lp.bottomMargin);
         }
         if (mNotificationView.getHeight() > 0) {
-            // Calculates the alpha value for the background based on how much of the notification
-            // shade is visible to the user. When the notification shade is completely open then
-            // alpha value will be 1.
-            float alpha = (float) height / mNotificationView.getHeight();
             Drawable background = mNotificationView.getBackground().mutate();
-
-            background.setAlpha((int) (alpha * 255));
+            background.setAlpha((int) (getBackgroundAlpha(height) * 255));
             mNotificationView.setBackground(background);
         }
+    }
+
+    /**
+     * Calculates the alpha value for the background based on how much of the notification
+     * shade is visible to the user. When the notification shade is completely open then
+     * alpha value will be 1.
+     */
+    private float getBackgroundAlpha(int height) {
+        return mInitialBackgroundAlpha +
+            ((float) height / mNotificationView.getHeight() * mBackgroundAlphaDiff);
     }
 
     private void calculatePercentageFromBottom(float height) {

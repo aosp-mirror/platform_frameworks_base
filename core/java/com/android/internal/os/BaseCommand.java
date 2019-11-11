@@ -40,6 +40,10 @@ public abstract class BaseCommand {
 
     private String[] mRawArgs;
 
+    @UnsupportedAppUsage
+    public BaseCommand() {
+    }
+
     /**
      * Call to run the command.
      */

@@ -34,6 +34,27 @@ filegroup {
     path: "core/java",
 }
 
+// These are subset of framework-core-sources that are needed by the
+// android.test.mock library. Ideally, the library should use public APIs only,
+// but unfortunately its API signature has some references to these private APIs.
+filegroup {
+    name: "framework-core-sources-for-test-mock",
+    srcs: [
+        "core/java/android/app/IApplicationThread.aidl",
+        "core/java/android/app/IServiceConnection.aidl",
+        "core/java/android/content/IContentProvider.java",
+        "core/java/android/content/pm/IPackageDataObserver.aidl",
+        "core/java/android/content/pm/InstantAppInfo.java",
+        "core/java/android/content/pm/KeySet.java",
+        "core/java/android/content/pm/PackageManager.java",
+        "core/java/android/content/pm/VerifierDeviceIdentity.java",
+        "core/java/android/content/res/Resources.java",
+        "core/java/android/os/storage/VolumeInfo.java",
+        "core/java/android/view/DisplayAdjustments.java",
+    ],
+    path: "core/java",
+}
+
 filegroup {
     name: "framework-drm-sources",
     srcs: [
@@ -162,6 +183,23 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-telephony-common-sources",
+    srcs: [
+        "telephony/common/**/*.java",
+    ],
+    path: "telephony/common",
+}
+
+filegroup {
+    name: "framework-mms-sources",
+    srcs: [
+        "mms/java/**/*.java",
+        "mms/java/**/*.aidl",
+    ],
+    path: "mms/java",
+}
+
+filegroup {
     name: "framework-wifi-sources",
     srcs: [
         "wifi/java/**/*.java",
@@ -185,10 +223,12 @@ filegroup {
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
         ":framework-mime-sources",
+        ":framework-mms-sources",
         ":framework-opengl-sources",
         ":framework-rs-sources",
         ":framework-sax-sources",
         ":framework-telecomm-sources",
+        ":framework-telephony-common-sources",
         ":framework-telephony-sources",
         ":framework-wifi-sources",
         ":PacProcessor-aidl-sources",
@@ -246,6 +286,7 @@ java_defaults {
             "media/mca/effect/java",
             "media/mca/filterfw/java",
             "media/mca/filterpacks/java",
+            "mms/java",
             "opengl/java",
             "rs/java",
             "sax/java",
@@ -374,15 +415,38 @@ filegroup {
 }
 
 java_library {
-    name: "framework",
+    name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
+    installable: true,
     javac_shard_size: 150,
     required: [
         "framework-platform-compat-config",
         "libcore-platform-compat-config",
         "services-platform-compat-config",
     ],
+    // For backwards compatibility.
+    stem: "framework",
+}
+
+// This "framework" module is NOT installed to the device. It's
+// "framework-minus-apex" that gets installed to the device. Note that
+// the filename is still framework.jar (via the stem property) for
+// compatibility reason. The purpose of this module is to provide
+// framework APIs (both public and private) for bundled apps.
+// "framework-minus-apex" can't be used for the purpose because 1)
+// many apps have already hardcoded the name "framework" and
+// 2) it lacks API symbols from updatable modules - as it's clear from
+// its suffix "-minus-apex".
+java_library {
+    name: "framework",
+    defaults: ["framework-aidl-export-defaults"],
+    installable: false, // this lib is a build-only library
+    static_libs: [
+        "framework-minus-apex",
+        // TODO(jiyong): add stubs for APEXes here
+    ],
+    sdk_version: "core_platform",
 }
 
 java_library {
@@ -807,9 +871,11 @@ frameworks_base_subdirs = [
     "media/mca/filterfw/java",
     "media/mca/filterpacks/java",
     "drm/java",
+    "mms/java",
     "opengl/java",
     "sax/java",
     "telecomm/java",
+    "telephony/common",
     "telephony/java",
     "wifi/java",
     "lowpan/java",
@@ -891,10 +957,11 @@ framework_docs_only_libs = [
 ]
 
 metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
-    "--hide-package com.android.okhttp " +
-    "--hide-package com.android.org.conscrypt --hide-package com.android.server " +
+    "--ignore-classes-on-classpath " +
+    "--hide-package com.android.server " +
     "--error UnhiddenSystemApi " +
     "--hide RequiresPermission " +
+    "--hide CallbackInterface " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo "
@@ -953,7 +1020,6 @@ stubs_defaults {
     previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
         "metalava-manual",
-        "ojluni-annotated-sdk-stubs",
     ],
 }
 
@@ -1010,7 +1076,6 @@ stubs_defaults {
     previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
         "metalava-manual",
-        "ojluni-annotated-sdk-stubs",
     ],
     api_levels_annotations_enabled: true,
     api_levels_annotations_dirs: [
@@ -1345,7 +1410,6 @@ droidstubs {
     previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
         "metalava-manual",
-        "ojluni-annotated-sdk-stubs",
     ],
     args: " --show-annotation android.annotation.SystemApi",
 }
@@ -1377,8 +1441,6 @@ droidstubs {
     name: "hiddenapi-mappings",
     defaults: ["metalava-api-stubs-default"],
     srcs: [
-        ":non_openjdk_java_files",
-        ":openjdk_java_files",
         ":opt-telephony-common-srcs",
     ],
 
@@ -1392,29 +1454,6 @@ droidstubs {
         " --show-unannotated " +
         " --show-annotation android.annotation.SystemApi " +
         " --show-annotation android.annotation.TestApi ",
-}
-
-filegroup {
-    name: "apache-http-stubs-sources",
-    srcs: [
-        "core/java/org/apache/http/conn/ConnectTimeoutException.java",
-        "core/java/org/apache/http/conn/scheme/HostNameResolver.java",
-        "core/java/org/apache/http/conn/scheme/LayeredSocketFactory.java",
-        "core/java/org/apache/http/conn/scheme/SocketFactory.java",
-        "core/java/org/apache/http/conn/ssl/AbstractVerifier.java",
-        "core/java/org/apache/http/conn/ssl/AllowAllHostnameVerifier.java",
-        "core/java/org/apache/http/conn/ssl/AndroidDistinguishedNameParser.java",
-        "core/java/org/apache/http/conn/ssl/BrowserCompatHostnameVerifier.java",
-        "core/java/org/apache/http/conn/ssl/SSLSocketFactory.java",
-        "core/java/org/apache/http/conn/ssl/StrictHostnameVerifier.java",
-        "core/java/org/apache/http/conn/ssl/X509HostnameVerifier.java",
-        "core/java/org/apache/http/params/CoreConnectionPNames.java",
-        "core/java/org/apache/http/params/HttpConnectionParams.java",
-        "core/java/org/apache/http/params/HttpParams.java",
-        "core/java/android/net/http/SslCertificate.java",
-        "core/java/android/net/http/SslError.java",
-        "core/java/com/android/internal/util/HexDump.java",
-    ],
 }
 
 droidstubs {
@@ -1491,6 +1530,10 @@ droidstubs {
         current: {
             api_file: "api/test-current.txt",
             removed_api_file: "api/test-removed.txt",
+        },
+        api_lint: {
+            enabled: true,
+            baseline_file: "api/test-lint-baseline.txt",
         },
     },
 }

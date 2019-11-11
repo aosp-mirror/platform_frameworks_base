@@ -24,8 +24,8 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
-import android.telephony.TelephonyManager.NetworkType;
 
+import android.telephony.Annotation.NetworkType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;

@@ -97,6 +97,7 @@ import android.net.NetworkMonitorManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
+import android.net.NetworkScore;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
@@ -2643,7 +2644,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_SCORE_CHANGED: {
-                    updateNetworkScore(nai, msg.arg1);
+                    final NetworkScore ns = (NetworkScore) msg.obj;
+                    updateNetworkScore(nai, ns);
                     break;
                 }
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
@@ -5594,9 +5596,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // TODO: Instead of passing mDefaultRequest, provide an API to determine whether a Network
         // satisfies mDefaultRequest.
         final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
+        final NetworkScore ns = new NetworkScore();
+        ns.putIntExtension(NetworkScore.LEGACY_SCORE, currentScore);
         final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
                 new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
-                currentScore, mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd,
+                ns, mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd,
                 mDnsResolver, mNMS, factorySerialNumber);
         // Make sure the network capabilities reflect what the agent info says.
         nai.setNetworkCapabilities(mixInCapabilities(nai, nc));
@@ -6729,7 +6733,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void updateNetworkScore(NetworkAgentInfo nai, int score) {
+    private void updateNetworkScore(NetworkAgentInfo nai, NetworkScore ns) {
+        int score = ns.getIntExtension(NetworkScore.LEGACY_SCORE);
         if (VDBG || DDBG) log("updateNetworkScore for " + nai.name() + " to " + score);
         if (score < 0) {
             loge("updateNetworkScore for " + nai.name() + " got a negative score (" + score +
@@ -6738,7 +6743,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         final int oldScore = nai.getCurrentScore();
-        nai.setCurrentScore(score);
+        nai.setNetworkScore(ns);
 
         rematchAllNetworksAndRequests(nai, oldScore);
 

@@ -78,6 +78,10 @@ public class SntpClient {
         }
     }
 
+    @UnsupportedAppUsage
+    public SntpClient() {
+    }
+
     /**
      * Sends an SNTP request to the given host and processes the response.
      *

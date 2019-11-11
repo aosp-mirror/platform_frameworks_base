@@ -33,6 +33,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.telephony.Annotation.DataFailureCause;
+import android.telephony.Annotation.RadioPowerState;
+import android.telephony.Annotation.SrvccState;
 import android.telephony.CallAttributes;
 import android.telephony.CallQuality;
 import android.telephony.CellInfo;
@@ -245,7 +248,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int mActiveDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-    @TelephonyManager.RadioPowerState
+    @RadioPowerState
     private int mRadioPowerState = TelephonyManager.RADIO_POWER_UNAVAILABLE;
 
     private final LocalLog mLocalLog = new LocalLog(100);
@@ -382,7 +385,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
 
-        int numPhones = TelephonyManager.getDefault().getMaxPhoneCount();
+        int numPhones = TelephonyManager.getDefault().getSupportedModemCount();
         if (DBG) log("TelephonyRegistry: ctor numPhones=" + numPhones);
         mNumPhones = numPhones;
         mCallState = new int[numPhones];
@@ -961,13 +964,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyCallState(int state, String phoneNumber) {
+    public void notifyCallStateForAllSubs(int state, String phoneNumber) {
         if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
 
         if (VDBG) {
-            log("notifyCallState: state=" + state + " phoneNumber=" + phoneNumber);
+            log("notifyCallStateForAllSubs: state=" + state + " phoneNumber=" + phoneNumber);
         }
 
         synchronized (mRecords) {
@@ -994,13 +997,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 SubscriptionManager.INVALID_SUBSCRIPTION_ID);
     }
 
-    public void notifyCallStateForPhoneId(int phoneId, int subId, int state,
-                String incomingNumber) {
+    public void notifyCallState(int phoneId, int subId, int state, String incomingNumber) {
         if (!checkNotifyPermission("notifyCallState()")) {
             return;
         }
         if (VDBG) {
-            log("notifyCallStateForPhoneId: subId=" + subId
+            log("notifyCallState: subId=" + subId
                 + " state=" + state + " incomingNumber=" + incomingNumber);
         }
         synchronized (mRecords) {
@@ -1094,10 +1096,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 switch (activationType) {
-                    case PhoneConstants.SIM_ACTIVATION_TYPE_VOICE:
+                    case TelephonyManager.SIM_ACTIVATION_TYPE_VOICE:
                         mVoiceActivationState[phoneId] = activationState;
                         break;
-                    case PhoneConstants.SIM_ACTIVATION_TYPE_DATA:
+                    case TelephonyManager.SIM_ACTIVATION_TYPE_DATA:
                         mDataActivationState[phoneId] = activationState;
                         break;
                     default:
@@ -1110,7 +1112,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 + " state=" + activationState);
                     }
                     try {
-                        if ((activationType == PhoneConstants.SIM_ACTIVATION_TYPE_VOICE) &&
+                        if ((activationType == TelephonyManager.SIM_ACTIVATION_TYPE_VOICE) &&
                                 r.matchPhoneStateListenerEvent(
                                         PhoneStateListener.LISTEN_VOICE_ACTIVATION_STATE) &&
                                 idMatch(r.subId, subId, phoneId)) {
@@ -1121,7 +1123,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             }
                             r.callback.onVoiceActivationStateChanged(activationState);
                         }
-                        if ((activationType == PhoneConstants.SIM_ACTIVATION_TYPE_DATA) &&
+                        if ((activationType == TelephonyManager.SIM_ACTIVATION_TYPE_DATA) &&
                                 r.matchPhoneStateListenerEvent(
                                         PhoneStateListener.LISTEN_DATA_ACTIVATION_STATE) &&
                                 idMatch(r.subId, subId, phoneId)) {
@@ -1241,7 +1243,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyCellInfoForSubscriber(int subId, List<CellInfo> cellInfo) {
-        if (!checkNotifyPermission("notifyCellInfo()")) {
+        if (!checkNotifyPermission("notifyCellInfoForSubscriber()")) {
             return;
         }
         if (VDBG) {
@@ -1258,7 +1260,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
                         try {
                             if (DBG_LOC) {
-                                log("notifyCellInfo: mCellInfo=" + cellInfo + " r=" + r);
+                                log("notifyCellInfoForSubscriber: mCellInfo=" + cellInfo
+                                    + " r=" + r);
                             }
                             r.callback.onCellInfoChanged(cellInfo);
                         } catch (RemoteException ex) {
@@ -1718,7 +1721,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyPreciseDataConnectionFailed(int phoneId, int subId, String apnType,
-            String apn, @DataFailCause.FailCause int failCause) {
+            String apn, @DataFailureCause int failCause) {
         if (!checkNotifyPermission("notifyPreciseDataConnectionFailed()")) {
             return;
         }
@@ -1748,7 +1751,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void notifySrvccStateChanged(int subId, @TelephonyManager.SrvccState int state) {
+    public void notifySrvccStateChanged(int subId, @SrvccState int state) {
         if (!checkNotifyPermission("notifySrvccStateChanged()")) {
             return;
         }
@@ -1855,8 +1858,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyRadioPowerStateChanged(int phoneId, int subId,
-                                             @TelephonyManager.RadioPowerState int state) {
+    public void notifyRadioPowerStateChanged(int phoneId, int subId, @RadioPowerState int state) {
         if (!checkNotifyPermission("notifyRadioPowerStateChanged()")) {
             return;
         }
@@ -2227,7 +2229,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void broadcastPreciseDataConnectionStateChanged(int state, int networkType,
             String apnType, String apn, LinkProperties linkProperties,
-            @DataFailCause.FailCause int failCause) {
+            @DataFailureCause int failCause) {
         Intent intent = new Intent(TelephonyManager.ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED);
         intent.putExtra(PhoneConstants.STATE_KEY, state);
         intent.putExtra(PhoneConstants.DATA_NETWORK_TYPE_KEY, networkType);
