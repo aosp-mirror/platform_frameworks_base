@@ -512,8 +512,8 @@ public final class Call {
 
         /**
          * Indicates the call used Assisted Dialing.
-         * See also {@link Connection#PROPERTY_ASSISTED_DIALING_USED}
-         * @hide
+         *
+         * @see TelecomManager#EXTRA_USE_ASSISTED_DIALING
          */
         public static final int PROPERTY_ASSISTED_DIALING_USED = 0x00000200;
 
@@ -1181,7 +1181,8 @@ public final class Call {
         public void onConferenceableCallsChanged(Call call, List<Call> conferenceableCalls) {}
 
         /**
-         * Invoked when a {@link Call} receives an event from its associated {@link Connection}.
+         * Invoked when a {@link Call} receives an event from its associated {@link Connection} or
+         * {@link Conference}.
          * <p>
          * Where possible, the Call should make an attempt to handle {@link Connection} events which
          * are part of the {@code android.telecom.*} namespace.  The Call should ignore any events
@@ -1189,7 +1190,8 @@ public final class Call {
          * possible that a {@link ConnectionService} has defined its own Connection events which a
          * Call is not aware of.
          * <p>
-         * See {@link Connection#sendConnectionEvent(String, Bundle)}.
+         * See {@link Connection#sendConnectionEvent(String, Bundle)},
+         * {@link Conference#sendConferenceEvent(String, Bundle)}.
          *
          * @param call The {@code Call} receiving the event.
          * @param event The event.
