@@ -87,6 +87,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.volume.VolumeComponent;
 
 import java.util.Optional;
 
@@ -166,6 +167,7 @@ public class CarStatusBarModule {
             PowerManager powerManager,
             ScreenPinningRequest screenPinningRequest,
             DozeScrimController dozeScrimController,
+            VolumeComponent volumeComponent,
             CommandQueue commandQueue,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
@@ -235,6 +237,7 @@ public class CarStatusBarModule {
                 powerManager,
                 screenPinningRequest,
                 dozeScrimController,
+                volumeComponent,
                 commandQueue,
                 pluginManager,
                 remoteInputUriController,

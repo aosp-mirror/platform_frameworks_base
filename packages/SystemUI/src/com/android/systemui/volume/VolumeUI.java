@@ -56,31 +56,26 @@ public class VolumeUI extends SystemUI {
         if (!mEnabled) return;
 
         mVolumeComponent.setEnableDialogs(enableVolumeUi, enableSafetyWarning);
-        putComponent(VolumeComponent.class, getVolumeComponent());
         setDefaultVolumeController();
-    }
-
-    private VolumeComponent getVolumeComponent() {
-        return mVolumeComponent;
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (!mEnabled) return;
-        getVolumeComponent().onConfigurationChanged(newConfig);
+        mVolumeComponent.onConfigurationChanged(newConfig);
     }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mEnabled="); pw.println(mEnabled);
         if (!mEnabled) return;
-        getVolumeComponent().dump(fd, pw, args);
+        mVolumeComponent.dump(fd, pw, args);
     }
 
     private void setDefaultVolumeController() {
         DndTile.setVisible(mContext, true);
         if (LOGD) Log.d(TAG, "Registering default volume controller");
-        getVolumeComponent().register();
+        mVolumeComponent.register();
     }
 }
