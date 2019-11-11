@@ -95,6 +95,10 @@ public class MediaRouter2 {
     private final String mPackageName;
     private final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
 
+    //TODO: Use a lock for this to cover the below use case
+    // mRouter.setControlCategories(...);
+    // routes = mRouter.getRoutes();
+    // The current implementation returns empty list
     private volatile List<String> mControlCategories = Collections.emptyList();
 
     private MediaRoute2Info mSelectedRoute;
@@ -202,6 +206,7 @@ public class MediaRouter2 {
                     } catch (RemoteException ex) {
                         Log.e(TAG, "Unable to unregister media router.", ex);
                     }
+                    //TODO: Clean up mRoutes. (onHandler?)
                     mClient = null;
                 }
             }
@@ -221,7 +226,6 @@ public class MediaRouter2 {
         mHandler.sendMessage(obtainMessage(MediaRouter2::setControlCategoriesOnHandler,
                 MediaRouter2.this, new ArrayList<>(controlCategories)));
     }
-
 
     /**
      * Gets the unmodifiable list of {@link MediaRoute2Info routes} currently
