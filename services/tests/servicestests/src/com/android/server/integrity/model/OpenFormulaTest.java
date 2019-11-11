@@ -19,6 +19,10 @@ package com.android.server.integrity.model;
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import android.os.Parcel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,17 +34,17 @@ import java.util.Collections;
 @RunWith(JUnit4.class)
 public class OpenFormulaTest {
 
-    private static final AtomicFormula ATOMIC_FORMULA_1 = new AtomicFormula(
-            AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ, "test1");
-    private static final AtomicFormula ATOMIC_FORMULA_2 = new AtomicFormula(
-            AtomicFormula.Key.VERSION_CODE, AtomicFormula.Operator.EQ, 1);
+    private static final AtomicFormula ATOMIC_FORMULA_1 =
+            new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "test1");
+    private static final AtomicFormula ATOMIC_FORMULA_2 =
+            new AtomicFormula.IntAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 1);
 
     @Test
     public void testValidOpenFormula() {
-        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.AND,
-                Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
 
-        assertEquals(OpenFormula.Connector.AND, openFormula.getConnector());
+        assertEquals(OpenFormula.AND, openFormula.getConnector());
         assertEquals(Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2), openFormula.getFormulas());
     }
 
@@ -49,10 +53,10 @@ public class OpenFormulaTest {
         assertExpectException(
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex */
-                String.format("Connector %s must have at least 2 formulas",
-                        OpenFormula.Connector.AND),
-                () -> new OpenFormula(OpenFormula.Connector.AND,
-                        Collections.singletonList(ATOMIC_FORMULA_1)));
+                String.format("Connector AND must have at least 2 formulas"),
+                () ->
+                        new OpenFormula(
+                                OpenFormula.AND, Collections.singletonList(ATOMIC_FORMULA_1)));
     }
 
     @Test
@@ -60,8 +64,159 @@ public class OpenFormulaTest {
         assertExpectException(
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex */
-                String.format("Connector %s must have 1 formula only", OpenFormula.Connector.NOT),
-                () -> new OpenFormula(OpenFormula.Connector.NOT,
-                        Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2)));
+                String.format("Connector NOT must have 1 formula only"),
+                () ->
+                        new OpenFormula(
+                                OpenFormula.NOT,
+                                Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2)));
+    }
+
+    @Test
+    public void testIsSatisfiable_notFalse_true() {
+        OpenFormula openFormula = new OpenFormula(OpenFormula.NOT, Arrays.asList(ATOMIC_FORMULA_1));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").build();
+        // validate assumptions about the metadata
+        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+
+        assertTrue(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testIsSatisfiable_notTrue_false() {
+        OpenFormula openFormula = new OpenFormula(OpenFormula.NOT, Arrays.asList(ATOMIC_FORMULA_1));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").build();
+        // validate assumptions about the metadata
+        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+
+        assertFalse(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testIsSatisfiable_trueAndTrue_true() {
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(1).build();
+        // validate assumptions about the metadata
+        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+        assertTrue(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
+
+        assertTrue(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testIsSatisfiable_trueAndFalse_false() {
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(2).build();
+        // validate assumptions about the metadata
+        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+        assertFalse(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
+
+        assertFalse(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testIsSatisfiable_falseAndTrue_false() {
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(1).build();
+        // validate assumptions about the metadata
+        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+        assertTrue(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
+
+        assertFalse(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testIsSatisfiable_falseAndFalse_false() {
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.AND, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(2).build();
+        // validate assumptions about the metadata
+        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+        assertFalse(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
+
+        assertFalse(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testIsSatisfiable_trueOrTrue_true() {
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(1).build();
+        // validate assumptions about the metadata
+        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+        assertTrue(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
+
+        assertTrue(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testIsSatisfiable_trueOrFalse_true() {
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test1").setVersionCode(2).build();
+        // validate assumptions about the metadata
+        assertTrue(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+        assertFalse(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
+
+        assertTrue(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testIsSatisfiable_falseOrTrue_true() {
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(1).build();
+        // validate assumptions about the metadata
+        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+        assertTrue(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
+
+        assertTrue(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testIsSatisfiable_falseOrFalse_false() {
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.OR, Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
+        AppInstallMetadata appInstallMetadata =
+                getAppInstallMetadataBuilder().setPackageName("test2").setVersionCode(2).build();
+        // validate assumptions about the metadata
+        assertFalse(ATOMIC_FORMULA_1.isSatisfied(appInstallMetadata));
+        assertFalse(ATOMIC_FORMULA_2.isSatisfied(appInstallMetadata));
+
+        assertFalse(openFormula.isSatisfied(appInstallMetadata));
+    }
+
+    @Test
+    public void testParcelUnparcel() {
+        OpenFormula formula =
+                new OpenFormula(OpenFormula.AND, Arrays.asList(ATOMIC_FORMULA_2, ATOMIC_FORMULA_1));
+        Parcel p = Parcel.obtain();
+        formula.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        OpenFormula newFormula = OpenFormula.CREATOR.createFromParcel(p);
+
+        assertEquals(formula, newFormula);
+    }
+
+    /** Returns a builder with all fields filled with some dummy data. */
+    private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
+        return new AppInstallMetadata.Builder()
+                .setPackageName("abc")
+                .setAppCertificate("abc")
+                .setInstallerCertificate("abc")
+                .setInstallerName("abc")
+                .setVersionCode(-1)
+                .setIsPreInstalled(true);
     }
 }

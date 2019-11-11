@@ -16,6 +16,8 @@
 
 package com.android.server.integrity.model;
 
+import android.annotation.Nullable;
+
 /**
  * A class encapsulating the result from the evaluation engine after evaluating rules against app
  * install metadata.
@@ -31,9 +33,9 @@ public final class IntegrityCheckResult {
     }
 
     private final Effect mEffect;
-    private final Rule mRule;
+    @Nullable private final Rule mRule;
 
-    private IntegrityCheckResult(Effect effect, Rule rule) {
+    private IntegrityCheckResult(Effect effect, @Nullable Rule rule) {
         this.mEffect = effect;
         this.mRule = rule;
     }
@@ -49,10 +51,19 @@ public final class IntegrityCheckResult {
     /**
      * Create an ALLOW evaluation outcome.
      *
-     * @return An evaluation outcome with ALLOW effect and empty rule.
+     * @return An evaluation outcome with ALLOW effect and no rule.
      */
     public static IntegrityCheckResult allow() {
-        return new IntegrityCheckResult(Effect.ALLOW, Rule.EMPTY);
+        return new IntegrityCheckResult(Effect.ALLOW, null);
+    }
+
+    /**
+     * Create an ALLOW evaluation outcome.
+     *
+     * @return An evaluation outcome with ALLOW effect and rule causing that effect.
+     */
+    public static IntegrityCheckResult allow(Rule rule) {
+        return new IntegrityCheckResult(Effect.ALLOW, rule);
     }
 
     /**
