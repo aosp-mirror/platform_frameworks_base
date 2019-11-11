@@ -73,51 +73,65 @@ public class BootImageProfileTest implements IDeviceTest {
         res = mTestDevice.executeShellCommand("truncate -s 0 " + SYSTEM_SERVER_PROFILE).trim();
         assertTrue(res, res.length() == 0);
         // Wait up to 20 seconds for the profile to be saved.
-        for (int i = 0; i < 20; ++i) {
+        final int numIterations = 20;
+        for (int i = 1; i <= numIterations; ++i) {
             // Force save the profile since we truncated it.
             if (forceSaveProfile("system_server")) {
                 // Might fail if system server is not yet running.
                 String s = mTestDevice.executeShellCommand(
                         "wc -c <" + SYSTEM_SERVER_PROFILE).trim();
-                if (!"0".equals(s)) {
-                    break;
+                if ("0".equals(s)) {
+                    Thread.sleep(1000);
+                    continue;
                 }
             }
+
+            // In case the profile is partially saved, wait an extra second.
             Thread.sleep(1000);
-        }
-        // In case the profile is partially saved, wait an extra second.
-        Thread.sleep(1000);
-        // Validate that the profile is non empty.
-        res = mTestDevice.executeShellCommand("profman --dump-only --profile-file="
-                + SYSTEM_SERVER_PROFILE);
-        boolean sawFramework = false;
-        boolean sawServices = false;
-        for (String line : res.split("\n")) {
-            if (line.contains("framework.jar")) {
-                sawFramework = true;
-            } else if (line.contains("services.jar")) {
-                sawServices = true;
+
+            // Validate that the profile is non empty.
+            res = mTestDevice.executeShellCommand("profman --dump-only --profile-file="
+                    + SYSTEM_SERVER_PROFILE);
+            boolean sawFramework = false;
+            boolean sawServices = false;
+            for (String line : res.split("\n")) {
+                if (line.contains("framework.jar")) {
+                    sawFramework = true;
+                } else if (line.contains("services.jar")) {
+                    sawServices = true;
+                }
+            }
+            if (i == numIterations) {
+                // Only assert for last iteration since there are race conditions where the package
+                // manager might not be started whewn the profile saves.
+                assertTrue("Did not see framework.jar in " + res, sawFramework);
+                assertTrue("Did not see services.jar in " + res, sawServices);
+            }
+
+            // Test the profile contents contain common methods for core-oj that would normally be
+            // AOT compiled. Also test that services.jar has PackageManagerService.<init> since the
+            // package manager service should always be created during boot.
+            res = mTestDevice.executeShellCommand(
+                    "profman --dump-classes-and-methods --profile-file="
+                    + SYSTEM_SERVER_PROFILE + " --apk=/apex/com.android.art/javalib/core-oj.jar"
+                    + " --apk=/system/framework/services.jar");
+            boolean sawObjectInit = false;
+            boolean sawPmInit = false;
+            for (String line : res.split("\n")) {
+                if (line.contains("Ljava/lang/Object;-><init>()V")) {
+                    sawObjectInit = true;
+                } else if (line.contains("Lcom/android/server/pm/PackageManagerService;-><init>")) {
+                    sawPmInit = true;
+                }
+            }
+            if (i == numIterations) {
+                assertTrue("Did not see Object.<init> in " + res, sawObjectInit);
+                assertTrue("Did not see PackageManagerService.<init> in " + res, sawPmInit);
+            }
+
+            if (sawFramework && sawServices && sawObjectInit && sawPmInit) {
+                break;  // Asserts passed, exit.
             }
         }
-        assertTrue("Did not see framework.jar in " + res, sawFramework);
-        assertTrue("Did not see services.jar in " + res, sawServices);
-
-
-        // Test the profile contents contain common methods for core-oj that would normally be AOT
-        // compiled.
-        res = mTestDevice.executeShellCommand("profman --dump-classes-and-methods --profile-file="
-                + SYSTEM_SERVER_PROFILE + " --apk=/apex/com.android.art/javalib/core-oj.jar"
-                + " --apk=/system/framework/services.jar");
-        boolean sawObjectInit = false;
-        boolean sawPmInit = false;
-        for (String line : res.split("\n")) {
-            if (line.contains("Ljava/lang/Object;-><init>()V")) {
-                sawObjectInit = true;
-            } else if (line.contains("Lcom/android/server/pm/PackageManagerService;-><init>")) {
-                sawPmInit = true;
-            }
-        }
-        assertTrue("Did not see Object.<init> in " + res, sawObjectInit);
-        assertTrue("Did not see PackageManagerService.<init> in " + res, sawPmInit);
     }
 }
