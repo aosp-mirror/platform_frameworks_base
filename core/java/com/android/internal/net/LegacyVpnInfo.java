@@ -45,6 +45,10 @@ public class LegacyVpnInfo implements Parcelable {
     public int state = -1;
     public PendingIntent intent;
 
+    @UnsupportedAppUsage
+    public LegacyVpnInfo() {
+    }
+
     @Override
     public int describeContents() {
         return 0;

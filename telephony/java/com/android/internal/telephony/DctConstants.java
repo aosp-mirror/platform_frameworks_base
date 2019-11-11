@@ -17,6 +17,8 @@ package com.android.internal.telephony;
 
 import com.android.internal.util.Protocol;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 /**
  * @hide
  */
@@ -37,20 +39,34 @@ public class DctConstants {
      *      RETRYING or CONNECTING: CONNECTING
      *      CONNECTED : CONNECTED or DISCONNECTING
      */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Lcom/android/internal/telephony/DctConstants$State;")
     public enum State {
+        @UnsupportedAppUsage
         IDLE,
+        @UnsupportedAppUsage
         CONNECTING,
+        @UnsupportedAppUsage
         RETRYING,
+        @UnsupportedAppUsage
         CONNECTED,
+        @UnsupportedAppUsage
         DISCONNECTING,
+        @UnsupportedAppUsage
         FAILED,
     }
 
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Lcom/android/internal/telephony/DctConstants$Activity;")
     public enum Activity {
         NONE,
+        @UnsupportedAppUsage
         DATAIN,
+        @UnsupportedAppUsage
         DATAOUT,
+        @UnsupportedAppUsage
         DATAINANDOUT,
+        @UnsupportedAppUsage
         DORMANT
     }
 

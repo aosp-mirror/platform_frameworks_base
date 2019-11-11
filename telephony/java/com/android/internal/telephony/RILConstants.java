@@ -18,6 +18,8 @@ package com.android.internal.telephony;
 
 import android.telephony.TelephonyManager;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 /**
  * {@hide}
  */
@@ -230,6 +232,7 @@ public interface RILConstants {
     /** NR 5G, LTE, TD-SCDMA, CDMA, EVDO, GSM and WCDMA */
     int NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 33;
 
+    @UnsupportedAppUsage
     int PREFERRED_NETWORK_MODE = Integer.parseInt(TelephonyManager.getTelephonyProperty(0,
             "ro.telephony.default_network", Integer.toString(NETWORK_MODE_WCDMA_PREF)));
 

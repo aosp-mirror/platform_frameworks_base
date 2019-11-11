@@ -714,6 +714,9 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     static final class CreateServiceData {
         @UnsupportedAppUsage
+        CreateServiceData() {
+        }
+        @UnsupportedAppUsage
         IBinder token;
         @UnsupportedAppUsage
         ServiceInfo info;
@@ -754,6 +757,9 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     static final class AppBindData {
+        @UnsupportedAppUsage
+        AppBindData() {
+        }
         @UnsupportedAppUsage
         LoadedApk info;
         @UnsupportedAppUsage
