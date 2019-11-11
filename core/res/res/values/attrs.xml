@@ -363,9 +363,7 @@
         <attr name="windowOverscan" format="boolean" />
         <!-- Flag indicating whether this is a floating window. -->
         <attr name="windowIsFloating" format="boolean" />
-        <!-- Flag indicating whether this is a translucent window. If this attribute is unset (but
-             not if set to false), the window might still be considered translucent, if
-             windowSwipeToDismiss is set to true. -->
+        <!-- Flag indicating whether this is a translucent window. -->
         <attr name="windowIsTranslucent" format="boolean" />
         <!-- Flag indicating that this window's background should be the
              user's current wallpaper.  Corresponds
@@ -492,7 +490,9 @@
         <!-- Flag to indicate that a window can be swiped away to be dismissed.
              Corresponds to {@link android.view.Window#FEATURE_SWIPE_TO_DISMISS}. It will also
              dynamically change translucency of the window, if the windowIsTranslucent is not set.
-             If windowIsTranslucent is set (to either true or false) it will obey that setting. -->
+             If windowIsTranslucent is set (to either true or false) it will obey that setting.
+             @deprecated Swipe-to-dismiss isn't functional anymore.
+             -->
         <attr name="windowSwipeToDismiss" format="boolean" />
 
         <!-- Flag indicating whether this window requests that content changes be performed
@@ -1961,7 +1961,6 @@
         <attr name="windowCloseOnTouchOutside" />
         <attr name="windowTranslucentStatus" />
         <attr name="windowTranslucentNavigation" />
-        <attr name="windowSwipeToDismiss" />
         <attr name="windowContentTransitions" />
         <attr name="windowActivityTransitions" />
         <attr name="windowContentTransitionManager" />
