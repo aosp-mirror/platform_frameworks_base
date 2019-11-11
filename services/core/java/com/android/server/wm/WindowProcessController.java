@@ -165,7 +165,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // all activities running in the process
     private final ArrayList<ActivityRecord> mActivities = new ArrayList<>();
     // any tasks this process had run root activities in
-    private final ArrayList<TaskRecord> mRecentTasks = new ArrayList<>();
+    private final ArrayList<Task> mRecentTasks = new ArrayList<>();
     // The most recent top-most activity that was resumed in the process for pre-Q app.
     private ActivityRecord mPreQTopResumedActivity = null;
     // The last time an activity was launched in the process
@@ -550,7 +550,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     private boolean hasActivityInVisibleTask() {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
-            TaskRecord task = mActivities.get(i).getTaskRecord();
+            Task task = mActivities.get(i).getTask();
             if (task == null) {
                 continue;
             }
@@ -702,18 +702,18 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         ActivityRecord hist = mActivities.get(0);
         intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP, hist.packageName);
-        intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTaskRecord().mTaskId);
+        intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTask().mTaskId);
     }
 
-    boolean shouldKillProcessForRemovedTask(TaskRecord tr) {
+    boolean shouldKillProcessForRemovedTask(Task task) {
         for (int k = 0; k < mActivities.size(); k++) {
             final ActivityRecord activity = mActivities.get(k);
             if (!activity.stopped) {
                 // Don't kill process(es) that has an activity not stopped.
                 return false;
             }
-            final TaskRecord otherTask = activity.getTaskRecord();
-            if (tr.mTaskId != otherTask.mTaskId && otherTask.inRecents) {
+            final Task otherTask = activity.getTask();
+            if (task.mTaskId != otherTask.mTaskId && otherTask.inRecents) {
                 // Don't kill process(es) that has an activity in a different task that is
                 // also in recents.
                 return false;
@@ -722,11 +722,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return true;
     }
 
-    ArraySet<TaskRecord> getReleaseSomeActivitiesTasks() {
+    ArraySet<Task> getReleaseSomeActivitiesTasks() {
         // Examine all activities currently running in the process.
-        TaskRecord firstTask = null;
+        Task firstTask = null;
         // Tasks is non-null only if two or more tasks are found.
-        ArraySet<TaskRecord> tasks = null;
+        ArraySet<Task> tasks = null;
         if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Trying to release some activities in " + this);
         for (int i = 0; i < mActivities.size(); i++) {
             final ActivityRecord r = mActivities.get(i);
@@ -745,7 +745,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 continue;
             }
 
-            final TaskRecord task = r.getTaskRecord();
+            final Task task = r.getTask();
             if (task != null) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Collecting release task " + task
                         + " from " + r);
@@ -794,7 +794,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                     }
                 }
                 if (r.visible) {
-                    final TaskRecord task = r.getTaskRecord();
+                    final Task task = r.getTask();
                     if (task != null && minTaskLayer > 0) {
                         final int layer = task.mLayerRank;
                         if (layer >= 0 && minTaskLayer > layer) {
@@ -1023,11 +1023,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return (mListener != null) ? mListener.getCpuTime() : 0;
     }
 
-    void addRecentTask(TaskRecord task) {
+    void addRecentTask(Task task) {
         mRecentTasks.add(task);
     }
 
-    void removeRecentTask(TaskRecord task) {
+    void removeRecentTask(Task task) {
         mRecentTasks.remove(task);
     }
 

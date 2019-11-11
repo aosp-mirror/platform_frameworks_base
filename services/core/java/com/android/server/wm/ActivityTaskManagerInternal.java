@@ -229,7 +229,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
-            int userId, TaskRecord inTask, String reason, boolean validateIncomingUser,
+            int userId, Task inTask, String reason, boolean validateIncomingUser,
             PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart);
 
     /**

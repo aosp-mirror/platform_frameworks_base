@@ -78,7 +78,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         // This seems to be the easiest way to create an ActivityRecord.
         mTrampolineActivity = new ActivityBuilder(mService).setCreateTask(true).build();
         mTopActivity = new ActivityBuilder(mService)
-                .setTask(mTrampolineActivity.getTaskRecord())
+                .setTask(mTrampolineActivity.getTask())
                 .build();
     }
 
@@ -177,7 +177,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         mSupervisor.beginDeferResume();
         // Create an activity with different process that meets process switch.
         final ActivityRecord noDrawnActivity = new ActivityBuilder(mService)
-                .setTask(mTopActivity.getTaskRecord())
+                .setTask(mTopActivity.getTask())
                 .setProcessName("other")
                 .build();
         mSupervisor.readyToResume();

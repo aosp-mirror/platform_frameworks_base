@@ -67,14 +67,14 @@ class LaunchParamsController {
 
     /**
      * Returns the {@link LaunchParams} calculated by the registered modifiers
-     * @param task      The {@link TaskRecord} currently being positioned.
+     * @param task      The {@link Task} currently being positioned.
      * @param layout    The specified {@link WindowLayout}.
      * @param activity  The {@link ActivityRecord} currently being positioned.
      * @param source    The {@link ActivityRecord} from which activity was started from.
      * @param options   The {@link ActivityOptions} specified for the activity.
      * @param result    The resulting params.
      */
-    void calculate(TaskRecord task, WindowLayout layout, ActivityRecord activity,
+    void calculate(Task task, WindowLayout layout, ActivityRecord activity,
                    ActivityRecord source, ActivityOptions options, int phase, LaunchParams result) {
         result.reset();
 
@@ -120,11 +120,11 @@ class LaunchParamsController {
      * A convenience method for laying out a task.
      * @return {@code true} if bounds were set on the task. {@code false} otherwise.
      */
-    boolean layoutTask(TaskRecord task, WindowLayout layout) {
+    boolean layoutTask(Task task, WindowLayout layout) {
         return layoutTask(task, layout, null /*activity*/, null /*source*/, null /*options*/);
     }
 
-    boolean layoutTask(TaskRecord task, WindowLayout layout, ActivityRecord activity,
+    boolean layoutTask(Task task, WindowLayout layout, ActivityRecord activity,
             ActivityRecord source, ActivityOptions options) {
         calculate(task, layout, activity, source, options, PHASE_BOUNDS, mTmpParams);
 
@@ -184,7 +184,7 @@ class LaunchParamsController {
         /** The bounds within the parent container. */
         final Rect mBounds = new Rect();
 
-        /** The id of the display the {@link TaskRecord} would prefer to be on. */
+        /** The id of the display the {@link Task} would prefer to be on. */
         int mPreferredDisplayId;
 
         /** The windowing mode to be in. */
@@ -304,7 +304,7 @@ class LaunchParamsController {
          * @return see {@link LaunchParamsModifier.Result}
          */
         @Result
-        int onCalculate(TaskRecord task, WindowLayout layout, ActivityRecord activity,
+        int onCalculate(Task task, WindowLayout layout, ActivityRecord activity,
                 ActivityRecord source, ActivityOptions options, @Phase int phase,
                 LaunchParams currentParams, LaunchParams outParams);
     }

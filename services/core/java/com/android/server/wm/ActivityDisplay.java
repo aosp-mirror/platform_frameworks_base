@@ -403,7 +403,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
      * @see #getOrCreateStack(int, int, boolean)
      */
     <T extends ActivityStack> T getOrCreateStack(@Nullable ActivityRecord r,
-            @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, int activityType,
+            @Nullable ActivityOptions options, @Nullable Task candidateTask, int activityType,
             boolean onTop) {
         // First preference is the windowing mode in the activity options if set.
         int windowingMode = (options != null)
@@ -850,7 +850,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
      * @return The resolved (not UNDEFINED) windowing-mode that the activity would be in.
      */
     int resolveWindowingMode(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
-            @Nullable TaskRecord task, int activityType) {
+            @Nullable Task task, int activityType) {
 
         // First preference if the windowing mode in the activity options if set.
         int windowingMode = (options != null)
@@ -881,12 +881,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
      *
      * @param windowingMode The windowing-mode to validate.
      * @param r The {@link ActivityRecord} to check against.
-     * @param task The {@link TaskRecord} to check against.
+     * @param task The {@link Task} to check against.
      * @param activityType An activity type.
      * @return The provided windowingMode or the closest valid mode which is appropriate.
      */
-    int validateWindowingMode(int windowingMode, @Nullable ActivityRecord r,
-        @Nullable TaskRecord task, int activityType) {
+    int validateWindowingMode(int windowingMode, @Nullable ActivityRecord r, @Nullable Task task,
+            int activityType) {
         // Make sure the windowing mode we are trying to use makes sense for what is supported.
         boolean supportsMultiWindow = mService.mSupportsMultiWindow;
         boolean supportsSplitScreen = mService.mSupportsSplitScreenMultiWindow;
@@ -1447,9 +1447,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             return null;
         }
 
-        final ArrayList<TaskRecord> tasks = mHomeStack.getAllTasks();
+        final ArrayList<Task> tasks = mHomeStack.getAllTasks();
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final TaskRecord task = tasks.get(taskNdx);
+            final Task task = tasks.get(taskNdx);
             if (!task.isActivityTypeHome()) {
                 continue;
             }
@@ -1545,7 +1545,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     void removeAllTasks() {
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final ActivityStack stack = getChildAt(i);
-            final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+            final ArrayList<Task> tasks = stack.getAllTasks();
             for (int j = tasks.size() - 1; j >= 0; --j) {
                 stack.removeChild(tasks.get(j), "removeAllTasks");
             }

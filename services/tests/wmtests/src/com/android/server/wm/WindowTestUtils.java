@@ -35,7 +35,7 @@ class WindowTestUtils {
     /** Creates a {@link Task} and adds it to the specified {@link ActivityStack}. */
     static Task createTaskInStack(WindowManagerService service, ActivityStack stack, int userId) {
         synchronized (service.mGlobalLock) {
-            final TaskRecord task = new ActivityTestsBase.TaskBuilder(
+            final Task task = new ActivityTestsBase.TaskBuilder(
                     stack.mStackSupervisor)
                     .setUserId(userId)
                     .setStack(stack)

@@ -55,7 +55,7 @@ import java.util.function.IntFunction;
 /**
  * Persister that saves launch parameters in memory and in storage. It saves the last seen state of
  * tasks key-ed on task's user ID and the activity used to launch the task ({@link
- * TaskRecord#realActivity}) and that's used to determine the launch params when the activity is
+ * Task#realActivity}) and that's used to determine the launch params when the activity is
  * being launched again in {@link LaunchParamsController}.
  *
  * Need to hold {@link ActivityTaskManagerService#getGlobalLock()} to access this class.
@@ -196,7 +196,7 @@ class LaunchParamsPersister {
         }
     }
 
-    void saveTask(TaskRecord task) {
+    void saveTask(Task task) {
         final ComponentName name = task.realActivity;
         final int userId = task.mUserId;
         PersistableLaunchParams params;
@@ -220,7 +220,7 @@ class LaunchParamsPersister {
         }
     }
 
-    private boolean saveTaskToLaunchParam(TaskRecord task, PersistableLaunchParams params) {
+    private boolean saveTaskToLaunchParam(Task task, PersistableLaunchParams params) {
         final ActivityStack stack = task.getStack();
         final int displayId = stack.mDisplayId;
         final ActivityDisplay display =
@@ -245,7 +245,7 @@ class LaunchParamsPersister {
         return changed;
     }
 
-    void getLaunchParams(TaskRecord task, ActivityRecord activity, LaunchParams outParams) {
+    void getLaunchParams(Task task, ActivityRecord activity, LaunchParams outParams) {
         final ComponentName name = task != null ? task.realActivity : activity.mActivityComponent;
         final int userId = task != null ? task.mUserId : activity.mUserId;
 
@@ -412,7 +412,7 @@ class LaunchParamsPersister {
         /** The bounds within the parent container. */
         final Rect mBounds = new Rect();
 
-        /** The unique id of the display the {@link TaskRecord} would prefer to be on. */
+        /** The unique id of the display the {@link Task} would prefer to be on. */
         String mDisplayUniqueId;
 
         /** The windowing mode to be in. */

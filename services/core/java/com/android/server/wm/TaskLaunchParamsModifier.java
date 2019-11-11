@@ -93,7 +93,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     }
 
     @VisibleForTesting
-    int onCalculate(TaskRecord task, ActivityInfo.WindowLayout layout, ActivityRecord activity,
+    int onCalculate(Task task, ActivityInfo.WindowLayout layout, ActivityRecord activity,
             ActivityRecord source, ActivityOptions options, LaunchParams currentParams,
             LaunchParams outParams) {
         return onCalculate(task, layout, activity, source, options, PHASE_BOUNDS, currentParams,
@@ -101,7 +101,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     }
 
     @Override
-    public int onCalculate(TaskRecord task, ActivityInfo.WindowLayout layout,
+    public int onCalculate(Task task, ActivityInfo.WindowLayout layout,
                            ActivityRecord activity, ActivityRecord source, ActivityOptions options,
                            int phase, LaunchParams currentParams, LaunchParams outParams) {
         initLogBuilder(task, activity);
@@ -111,7 +111,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return result;
     }
 
-    private int calculate(TaskRecord task, ActivityInfo.WindowLayout layout,
+    private int calculate(Task task, ActivityInfo.WindowLayout layout,
             ActivityRecord activity, ActivityRecord source, ActivityOptions options, int phase,
             LaunchParams currentParams, LaunchParams outParams) {
         final ActivityRecord root;
@@ -292,7 +292,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return RESULT_CONTINUE;
     }
 
-    private int getPreferredLaunchDisplay(@Nullable TaskRecord task,
+    private int getPreferredLaunchDisplay(@Nullable Task task,
             @Nullable ActivityOptions options, ActivityRecord source, LaunchParams currentParams) {
         if (!mSupervisor.mService.mSupportsMultiDisplay) {
             return DEFAULT_DISPLAY;
@@ -865,7 +865,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         inOutBounds.offset(horizontalOffset, verticalOffset);
     }
 
-    private void initLogBuilder(TaskRecord task, ActivityRecord activity) {
+    private void initLogBuilder(Task task, ActivityRecord activity) {
         if (DEBUG) {
             mLogBuilder = new StringBuilder("TaskLaunchParamsModifier:task=" + task
                     + " activity=" + activity);

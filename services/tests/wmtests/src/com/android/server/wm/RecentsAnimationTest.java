@@ -234,7 +234,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
 
         // Start the recents animation.
         RecentsAnimationCallbacks recentsAnimation = startRecentsActivity(
-                targetActivity.getTaskRecord().getBaseIntent().getComponent(),
+                targetActivity.getTask().getBaseIntent().getComponent(),
                 true /* getRecentsAnimation */);
         // Ensure launch-behind is set for being visible.
         assertTrue(targetActivity.mLaunchTaskBehind);
@@ -342,7 +342,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 .setCreateTask(true)
                 .setComponent(new ComponentName(mContext.getPackageName(), "Home2"))
                 .build();
-        otherUserHomeActivity.getTaskRecord().mUserId = TEST_USER_ID;
+        otherUserHomeActivity.getTask().mUserId = TEST_USER_ID;
 
         ActivityStack fullscreenStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
@@ -357,7 +357,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 any() /* starting */, anyInt() /* configChanges */,
                 anyBoolean() /* preserveWindows */);
 
-        startRecentsActivity(otherUserHomeActivity.getTaskRecord().getBaseIntent().getComponent(),
+        startRecentsActivity(otherUserHomeActivity.getTask().getBaseIntent().getComponent(),
                 true);
 
         // Ensure we find the task for the right user and it is made visible

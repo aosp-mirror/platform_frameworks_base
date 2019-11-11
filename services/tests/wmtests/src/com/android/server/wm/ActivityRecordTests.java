@@ -113,7 +113,7 @@ import org.mockito.invocation.InvocationOnMock;
 @RunWith(WindowTestRunner.class)
 public class ActivityRecordTests extends ActivityTestsBase {
     private ActivityStack mStack;
-    private TaskRecord mTask;
+    private Task mTask;
     private ActivityRecord mActivity;
 
     @Before
@@ -147,7 +147,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testNoCleanupMovingActivityInSameStack() {
-        final TaskRecord newTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack)
+        final Task newTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack)
                 .build();
         mActivity.reparent(newTask, 0, null /*reason*/);
         verify(mStack, times(0)).onActivityRemovedFromStack(any());
@@ -255,7 +255,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Set options for two ActivityRecords in separate Tasks. Apply one ActivityRecord options.
         // Pending options should be cleared for only ActivityRecord that was applied
-        TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
+        Task task2 = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
         activity2 = new ActivityBuilder(mService).setTask(task2).build();
         activity2.updateOptionsLocked(activityOptions);
         mActivity.updateOptionsLocked(activityOptions);
@@ -1171,7 +1171,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testDestroyIfPossible_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
         final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
-        for (TaskRecord t : homeStack.getAllTasks()) {
+        for (Task t : homeStack.getAllTasks()) {
             homeStack.removeChild(t, "test");
         }
         mActivity.finishing = true;
@@ -1197,7 +1197,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testCompleteFinishing_lastActivityAboveEmptyHomeStack() {
         // Empty the home stack.
         final ActivityStack homeStack = mActivity.getDisplay().getHomeStack();
-        for (TaskRecord t : homeStack.getAllTasks()) {
+        for (Task t : homeStack.getAllTasks()) {
             homeStack.removeChild(t, "test");
         }
         mActivity.finishing = true;
@@ -1244,12 +1244,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testDestroyImmediately_noApp_finishing() {
         mActivity.app = null;
         mActivity.finishing = true;
-        final TaskRecord task = mActivity.getTaskRecord();
+        final Task task = mActivity.getTask();
 
         mActivity.destroyImmediately(false /* removeFromApp */, "test");
 
         assertEquals(DESTROYED, mActivity.getState());
-        assertNull(mActivity.getTaskRecord());
+        assertNull(mActivity.getTask());
         assertEquals(0, task.getChildCount());
     }
 
@@ -1261,12 +1261,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void testDestroyImmediately_noApp_notFinishing() {
         mActivity.app = null;
         mActivity.finishing = false;
-        final TaskRecord task = mActivity.getTaskRecord();
+        final Task task = mActivity.getTask();
 
         mActivity.destroyImmediately(false /* removeFromApp */, "test");
 
         assertEquals(DESTROYED, mActivity.getState());
-        assertEquals(task, mActivity.getTaskRecord());
+        assertEquals(task, mActivity.getTask());
         assertEquals(1, task.getChildCount());
     }
 
@@ -1297,13 +1297,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testRemoveFromHistory() {
         final ActivityStack stack = mActivity.getActivityStack();
-        final TaskRecord task = mActivity.getTaskRecord();
+        final Task task = mActivity.getTask();
 
         mActivity.removeFromHistory("test");
 
         assertEquals(DESTROYED, mActivity.getState());
         assertNull(mActivity.app);
-        assertNull(mActivity.getTaskRecord());
+        assertNull(mActivity.getTask());
         assertEquals(0, task.getChildCount());
         assertNull(task.getStack());
         assertEquals(0, stack.getChildCount());

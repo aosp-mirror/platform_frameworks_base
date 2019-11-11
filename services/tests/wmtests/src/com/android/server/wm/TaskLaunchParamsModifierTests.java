@@ -95,7 +95,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     @Test
     public void testReturnsSkipWithEmptyActivity() {
-        final TaskRecord task = new TaskBuilder(mSupervisor).build();
+        final Task task = new TaskBuilder(mSupervisor).build();
         assertEquals(RESULT_SKIP, mTarget.onCalculate(task, /* layout */ null,
                 /* activity */ null, /* source */ null, /* options */ null, mCurrent, mResult));
     }
@@ -183,7 +183,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         ActivityRecord reusableActivity = createSourceActivity(fullscreenDisplay);
         ActivityRecord source = createSourceActivity(freeformDisplay);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(reusableActivity.getTaskRecord(),
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(reusableActivity.getTask(),
                 /* layout */ null, mActivity, source, /* options */ null, mCurrent, mResult));
 
         assertEquals(fullscreenDisplay.mDisplayId, mResult.mPreferredDisplayId);
@@ -195,7 +195,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
                 WINDOWING_MODE_FREEFORM);
         ActivityRecord source = createSourceActivity(freeformDisplay);
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(source.getTaskRecord(), null /* layout */,
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(source.getTask(), null /* layout */,
                 null /* activity */, null /* source */, null /* options */, mCurrent, mResult));
 
         assertEquals(freeformDisplay.mDisplayId, mResult.mPreferredDisplayId);
@@ -214,7 +214,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         source.mHandoverLaunchDisplayId = freeformDisplay.mDisplayId;
         source.noDisplay = true;
 
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(reusableActivity.getTaskRecord(),
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(reusableActivity.getTask(),
                 null /* layout */, mActivity, source, null /* options */, mCurrent, mResult));
 
         assertEquals(freeformDisplay.mDisplayId, mResult.mPreferredDisplayId);
@@ -1319,7 +1319,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         final ActivityStack stack = display.createStack(display.getWindowingMode(),
                 ACTIVITY_TYPE_STANDARD, true);
         stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        final Task task = new TaskBuilder(mSupervisor).setStack(stack).build();
         // Just work around the unnecessary adjustments for bounds.
         task.getWindowConfiguration().setBounds(bounds);
     }

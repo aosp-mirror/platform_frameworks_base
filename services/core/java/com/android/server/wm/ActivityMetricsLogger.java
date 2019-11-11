@@ -92,6 +92,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.server.LocalServices;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -171,7 +172,7 @@ class ActivityMetricsLogger {
             switch (msg.what) {
                 case MSG_CHECK_VISIBILITY:
                     final SomeArgs args = (SomeArgs) msg.obj;
-                    checkVisibility((TaskRecord) args.arg1, (ActivityRecord) args.arg2);
+                    checkVisibility((Task) args.arg1, (ActivityRecord) args.arg2);
                     break;
             }
         }
@@ -536,7 +537,7 @@ class ActivityMetricsLogger {
         if (info.launchedActivity != activityRecord) {
             return;
         }
-        final TaskRecord t = activityRecord.getTaskRecord();
+        final Task t = activityRecord.getTask();
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = t;
         args.arg2 = activityRecord;
@@ -544,7 +545,7 @@ class ActivityMetricsLogger {
     }
 
     /** @return {@code true} if the given task has an activity will be drawn. */
-    private static boolean hasActivityToBeDrawn(TaskRecord t) {
+    private static boolean hasActivityToBeDrawn(Task t) {
         for (int i = t.getChildCount() - 1; i >= 0; --i) {
             final ActivityRecord r = t.getChildAt(i);
             if (r.visible && !r.mDrawn && !r.finishing) {
@@ -554,7 +555,7 @@ class ActivityMetricsLogger {
         return false;
     }
 
-    private void checkVisibility(TaskRecord t, ActivityRecord r) {
+    private void checkVisibility(Task t, ActivityRecord r) {
         synchronized (mSupervisor.mService.mGlobalLock) {
 
             final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(
@@ -984,7 +985,7 @@ class ActivityMetricsLogger {
             }
         } else if (info.startResult == START_SUCCESS
                 || (info.startResult == START_TASK_TO_FRONT)) {
-            // TaskRecord may still exist when cold launching an activity and the start
+            // Task may still exist when cold launching an activity and the start
             // result will be set to START_TASK_TO_FRONT. Treat this as a COLD launch.
             return TYPE_TRANSITION_COLD_LAUNCH;
         }

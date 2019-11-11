@@ -208,11 +208,9 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testSizeCompatBounds() {
-        // TODO(task-merge): Move once Task is merged into TaskRecord
-        final TaskRecord tr = (TaskRecord) mTask;
         // Disable the real configuration resolving because we only simulate partial flow.
         // TODO: Have test use full flow.
-        doNothing().when(tr).computeConfigResourceOverrides(any(), any());
+        doNothing().when(mTask).computeConfigResourceOverrides(any(), any());
         final Rect fixedBounds = mActivity.getRequestedOverrideConfiguration().windowConfiguration
                 .getBounds();
         fixedBounds.set(0, 0, 1200, 1600);
