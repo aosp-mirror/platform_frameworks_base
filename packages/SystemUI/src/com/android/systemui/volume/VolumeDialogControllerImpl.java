@@ -52,6 +52,7 @@ import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1082,10 +1083,12 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         @Override
         public void onRemoteUpdate(Token token, String name, PlaybackInfo pi) {
             addStream(token, "onRemoteUpdate");
+
             int stream = 0;
             synchronized (mRemoteStreams) {
                  stream = mRemoteStreams.get(token);
             }
+            Slog.d(TAG, "onRemoteUpdate: stream: " + stream + " volume: " + pi.getCurrentVolume());
             boolean changed = mState.states.indexOfKey(stream) < 0;
             final StreamState ss = streamStateW(stream);
             ss.dynamic = true;
@@ -1101,8 +1104,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 changed = true;
             }
             if (changed) {
-                if (D.BUG) Log.d(TAG, "onRemoteUpdate: " + name + ": " + ss.level
-                        + " of " + ss.levelMax);
+                Log.d(TAG, "onRemoteUpdate: " + name + ": " + ss.level + " of " + ss.levelMax);
                 mCallbacks.onStateChanged(mState);
             }
         }
@@ -1115,11 +1117,13 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 stream = mRemoteStreams.get(token);
             }
             final boolean showUI = shouldShowUI(flags);
+            Slog.d(TAG, "onRemoteVolumeChanged: stream: " + stream + " showui? " + showUI);
             boolean changed = updateActiveStreamW(stream);
             if (showUI) {
                 changed |= checkRoutedToBluetoothW(AudioManager.STREAM_MUSIC);
             }
             if (changed) {
+                Slog.d(TAG, "onRemoteChanged: updatingState");
                 mCallbacks.onStateChanged(mState);
             }
             if (showUI) {
@@ -1132,7 +1136,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             int stream = 0;
             synchronized (mRemoteStreams) {
                 if (!mRemoteStreams.containsKey(token)) {
-                    if (D.BUG) Log.d(TAG, "onRemoteRemoved: stream doesn't exist, "
+                    Log.d(TAG, "onRemoteRemoved: stream doesn't exist, "
                             + "aborting remote removed for token:" +  token.toString());
                     return;
                 }
@@ -1169,7 +1173,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             synchronized (mRemoteStreams) {
                 if (!mRemoteStreams.containsKey(token)) {
                     mRemoteStreams.put(token, mNextStream);
-                    if (D.BUG) Log.d(TAG, triggeringMethod + ": added stream " + mNextStream
+                    Log.d(TAG, triggeringMethod + ": added stream " + mNextStream
                             + " from token + " + token.toString());
                     mNextStream++;
                 }
