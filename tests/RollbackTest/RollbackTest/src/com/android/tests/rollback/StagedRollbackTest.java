@@ -79,8 +79,15 @@ public class StagedRollbackTest {
 
     private static final String MODULE_META_DATA_PACKAGE = getModuleMetadataPackageName();
     private static final TestApp NETWORK_STACK = new TestApp("NetworkStack",
-            getNetworkStackPackageName(), -1, false,
-            new File("/system/priv-app/NetworkStack/NetworkStack.apk"));
+            getNetworkStackPackageName(), -1, false, findNetworkStackApk());
+
+    private static File findNetworkStackApk() {
+        final File apk = new File("/system/priv-app/NetworkStack/NetworkStack.apk");
+        if (apk.isFile()) {
+            return apk;
+        }
+        return new File("/system/priv-app/NetworkStackNext/NetworkStackNext.apk");
+    }
 
     /**
      * Adopts common shell permissions needed for rollback tests.
