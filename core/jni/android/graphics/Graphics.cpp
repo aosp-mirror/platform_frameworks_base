@@ -158,6 +158,7 @@ static jfieldID gPointF_yFieldID;
 
 static jclass   gBitmapConfig_class;
 static jfieldID gBitmapConfig_nativeInstanceID;
+static jmethodID gBitmapConfig_nativeToConfigMethodID;
 
 static jclass   gBitmapRegionDecoder_class;
 static jmethodID gBitmapRegionDecoder_constructorMethodID;
@@ -343,6 +344,54 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
 
 void GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap, SkBitmap* outBitmap) {
     bitmap::toBitmap(env, bitmap).getSkBitmap(outBitmap);
+}
+
+AndroidBitmapFormat GraphicsJNI::getFormatFromConfig(JNIEnv* env, jobject jconfig) {
+    ALOG_ASSERT(env);
+    if (NULL == jconfig) {
+        return ANDROID_BITMAP_FORMAT_NONE;
+    }
+    ALOG_ASSERT(env->IsInstanceOf(jconfig, gBitmapConfig_class));
+    jint javaConfigId = env->GetIntField(jconfig, gBitmapConfig_nativeInstanceID);
+
+    const AndroidBitmapFormat config2BitmapFormat[] = {
+        ANDROID_BITMAP_FORMAT_NONE,
+        ANDROID_BITMAP_FORMAT_A_8,
+        ANDROID_BITMAP_FORMAT_NONE, // Previously Config.Index_8
+        ANDROID_BITMAP_FORMAT_RGB_565,
+        ANDROID_BITMAP_FORMAT_RGBA_4444,
+        ANDROID_BITMAP_FORMAT_RGBA_8888,
+        ANDROID_BITMAP_FORMAT_RGBA_F16,
+        ANDROID_BITMAP_FORMAT_NONE // Congfig.HARDWARE
+    };
+    return config2BitmapFormat[javaConfigId];
+}
+
+jobject GraphicsJNI::getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format) {
+    ALOG_ASSERT(env);
+    jint configId = kNo_LegacyBitmapConfig;
+    switch (format) {
+      case ANDROID_BITMAP_FORMAT_A_8:
+        configId = kA8_LegacyBitmapConfig;
+        break;
+      case ANDROID_BITMAP_FORMAT_RGB_565:
+        configId = kRGB_565_LegacyBitmapConfig;
+        break;
+      case ANDROID_BITMAP_FORMAT_RGBA_4444:
+        configId = kARGB_4444_LegacyBitmapConfig;
+        break;
+      case ANDROID_BITMAP_FORMAT_RGBA_8888:
+        configId = kARGB_8888_LegacyBitmapConfig;
+        break;
+      case ANDROID_BITMAP_FORMAT_RGBA_F16:
+        configId = kRGBA_16F_LegacyBitmapConfig;
+        break;
+      default:
+        break;
+    }
+
+    return env->CallStaticObjectMethod(gBitmapConfig_class,
+                                       gBitmapConfig_nativeToConfigMethodID, configId);
 }
 
 SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) {
@@ -634,6 +683,9 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     gBitmapConfig_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Bitmap$Config"));
     gBitmapConfig_nativeInstanceID = GetFieldIDOrDie(env, gBitmapConfig_class, "nativeInt", "I");
+    gBitmapConfig_nativeToConfigMethodID = GetStaticMethodIDOrDie(env, gBitmapConfig_class,
+                                                                  "nativeToConfig",
+                                                                  "(I)Landroid/graphics/Bitmap$Config;");
 
     gCanvas_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Canvas"));
     gCanvas_nativeInstanceID = GetFieldIDOrDie(env, gCanvas_class, "mNativeCanvasWrapper", "J");

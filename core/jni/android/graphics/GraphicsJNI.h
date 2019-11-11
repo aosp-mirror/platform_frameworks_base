@@ -76,6 +76,8 @@ public:
         or kUnknown_SkColorType if the java object is null.
     */
     static SkColorType getNativeBitmapColorType(JNIEnv*, jobject jconfig);
+    static AndroidBitmapFormat getFormatFromConfig(JNIEnv* env, jobject jconfig);
+    static jobject getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format);
 
     static bool isHardwareConfig(JNIEnv* env, jobject jconfig);
     static jint hardwareLegacyBitmapConfig();
