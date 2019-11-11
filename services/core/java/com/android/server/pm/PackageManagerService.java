@@ -23726,6 +23726,13 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    boolean readPermissionStateForUser(@UserIdInt int userId) {
+        synchronized (mPackages) {
+            mSettings.readPermissionStateForUserSyncLPr(userId);
+            return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
+        }
+    }
+
     @Override
     public VerifierDeviceIdentity getVerifierDeviceIdentity() throws RemoteException {
         mContext.enforceCallingOrSelfPermission(
