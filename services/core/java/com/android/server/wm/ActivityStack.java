@@ -4708,6 +4708,12 @@ class ActivityStack extends TaskStack {
             throw new RuntimeException("There should be only one task in a pinned stack.");
         }
 
+        // give pinned stack a chance to save current bounds, this should happen before reparent.
+        final ActivityRecord top = topRunningNonOverlayTaskActivity();
+        if (top != null && top.isVisible()) {
+            top.savePinnedStackBounds();
+        }
+
         mWindowManager.inSurfaceTransaction(() -> {
             final Task task = mChildren.get(0);
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
