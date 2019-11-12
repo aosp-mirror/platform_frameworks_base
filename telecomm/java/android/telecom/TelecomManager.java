@@ -14,6 +14,8 @@
 
 package android.telecom;
 
+import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
+
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -696,7 +698,17 @@ public class TelecomManager {
     /**
      * The boolean indicated by this extra controls whether or not a call is eligible to undergo
      * assisted dialing. This extra is stored under {@link #EXTRA_OUTGOING_CALL_EXTRAS}.
-     * @hide
+     * <p>
+     * The call initiator can use this extra to indicate that a call used assisted dialing to help
+     * place the call.  This is most commonly used by a Dialer app which provides the ability to
+     * automatically add dialing prefixes when placing international calls.
+     * <p>
+     * Setting this extra on the outgoing call extras will cause the
+     * {@link Connection#PROPERTY_ASSISTED_DIALING_USED} property and
+     * {@link Call.Details#PROPERTY_ASSISTED_DIALING_USED} property to be set on the
+     * {@link Connection}/{@link Call} in question.  When the call is logged to the call log, the
+     * {@link android.provider.CallLog.Calls#FEATURES_ASSISTED_DIALING_USED} call feature is set to
+     * indicate that assisted dialing was used for the call.
      */
     public static final String EXTRA_USE_ASSISTED_DIALING =
             "android.telecom.extra.USE_ASSISTED_DIALING";
@@ -737,6 +749,14 @@ public class TelecomManager {
      * Indicates that the address or number of a call belongs to a pay phone.
      */
     public static final int PRESENTATION_PAYPHONE = 4;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            prefix = { "PRESENTATION_" },
+            value = {PRESENTATION_ALLOWED, PRESENTATION_RESTRICTED, PRESENTATION_UNKNOWN,
+            PRESENTATION_PAYPHONE})
+    public @interface Presentation {}
 
     private static final String TAG = "TelecomManager";
 
@@ -883,9 +903,8 @@ public class TelecomManager {
      *                       queried for.
      * @return The phone account handle of the current sim call manager.
      * @see SubscriptionManager#getActiveSubscriptionInfoList()
-     * @hide
      */
-    public PhoneAccountHandle getSimCallManagerForSubscription(int subscriptionId) {
+    public @Nullable PhoneAccountHandle getSimCallManagerForSubscription(int subscriptionId) {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getSimCallManager(subscriptionId);
@@ -947,7 +966,7 @@ public class TelecomManager {
      */
     @SystemApi
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
     })
     public List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(String uriScheme) {
@@ -1234,6 +1253,28 @@ public class TelecomManager {
     }
 
     /**
+     * Used to determine the currently selected default dialer package for a specific user.
+     *
+     * @param userId the user id to query the default dialer package for.
+     * @return package name for the default dialer package or null if no package has been
+     *         selected as the default dialer.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
+    public @Nullable String getDefaultDialerPackage(int userId) {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().getDefaultDialerPackageForUser(userId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException attempting to get the default dialer package name.", e);
+        }
+        return null;
+    }
+
+    /**
      * Used to set the default dialer package.
      *
      * @param packageName to set the default dialer to, or {@code null} if the system provided
@@ -1432,7 +1473,7 @@ public class TelecomManager {
      */
     @SystemApi
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isRinging() {
@@ -1562,7 +1603,7 @@ public class TelecomManager {
      * Returns whether TTY is supported on this device.
      */
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isTtySupported() {
@@ -1588,7 +1629,7 @@ public class TelecomManager {
      */
     @SystemApi
     @TestApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(READ_PRIVILEGED_PHONE_STATE)
     public @TtyMode int getCurrentTtyMode() {
         try {
             if (isServiceConnected()) {

@@ -49,7 +49,7 @@ public abstract class Conference extends Conferenceable {
     public static final long CONNECT_TIME_NOT_SPECIFIED = 0;
 
     /** @hide */
-    public abstract static class Listener {
+    abstract static class Listener {
         public void onStateChanged(Conference conference, int oldState, int newState) {}
         public void onDisconnected(Conference conference, DisconnectCause disconnectCause) {}
         public void onConnectionAdded(Conference conference, Connection connection) {}
@@ -120,11 +120,17 @@ public abstract class Conference extends Conferenceable {
 
     /**
      * Returns the telecom internal call ID associated with this conference.
+     * <p>
+     * Note: This is ONLY used for debugging purposes so that the Telephony stack can better
+     * associate logs in Telephony with those in Telecom.
+     * The ID returned should not be used for any other purpose.
      *
      * @return The telecom call ID.
      * @hide
      */
-    public final String getTelecomCallId() {
+    @SystemApi
+    @TestApi
+    public final @NonNull String getTelecomCallId() {
         return mTelecomCallId;
     }
 
@@ -183,55 +189,6 @@ public abstract class Conference extends Conferenceable {
      */
     public final int getConnectionProperties() {
         return mConnectionProperties;
-    }
-
-    /**
-     * Whether the given capabilities support the specified capability.
-     *
-     * @param capabilities A capability bit field.
-     * @param capability The capability to check capabilities for.
-     * @return Whether the specified capability is supported.
-     * @hide
-     */
-    public static boolean can(int capabilities, int capability) {
-        return (capabilities & capability) != 0;
-    }
-
-    /**
-     * Whether the capabilities of this {@code Connection} supports the specified capability.
-     *
-     * @param capability The capability to check capabilities for.
-     * @return Whether the specified capability is supported.
-     * @hide
-     */
-    public boolean can(int capability) {
-        return can(mConnectionCapabilities, capability);
-    }
-
-    /**
-     * Removes the specified capability from the set of capabilities of this {@code Conference}.
-     *
-     * @param capability The capability to remove from the set.
-     * @hide
-     */
-    public void removeCapability(int capability) {
-        int newCapabilities = mConnectionCapabilities;
-        newCapabilities &= ~capability;
-
-        setConnectionCapabilities(newCapabilities);
-    }
-
-    /**
-     * Adds the specified capability to the set of capabilities of this {@code Conference}.
-     *
-     * @param capability The capability to add to the set.
-     * @hide
-     */
-    public void addCapability(int capability) {
-        int newCapabilities = mConnectionCapabilities;
-        newCapabilities |= capability;
-
-        setConnectionCapabilities(newCapabilities);
     }
 
     /**
@@ -553,7 +510,7 @@ public abstract class Conference extends Conferenceable {
      * @return This conference.
      * @hide
      */
-    public final Conference addListener(Listener listener) {
+    final Conference addListener(Listener listener) {
         mListeners.add(listener);
         return this;
     }
@@ -565,7 +522,7 @@ public abstract class Conference extends Conferenceable {
      * @return This conference.
      * @hide
      */
-    public final Conference removeListener(Listener listener) {
+    final Conference removeListener(Listener listener) {
         mListeners.remove(listener);
         return this;
     }
@@ -584,20 +541,6 @@ public abstract class Conference extends Conferenceable {
             return null;
         }
         return mUnmodifiableChildConnections.get(0);
-    }
-
-    /**
-     * Updates RIL voice radio technology used for current conference after its creation.
-     *
-     * @hide
-     */
-    public void updateCallRadioTechAfterCreation() {
-        final Connection primaryConnection = getPrimaryConnection();
-        if (primaryConnection != null) {
-            setCallRadioTech(primaryConnection.getCallRadioTech());
-        } else {
-            Log.w(this, "No primary connection found while updateCallRadioTechAfterCreation");
-        }
     }
 
     /**
@@ -668,46 +611,21 @@ public abstract class Conference extends Conferenceable {
      * Retrieves the connection start time of the {@link Conference}, if specified.  A value of
      * {@link #CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the start time
      * of the conference.
-     *
+     * <p>
      * This is based on the value of {@link SystemClock#elapsedRealtime()} to ensure that it is not
      * impacted by wall clock changes (user initiated, network initiated, time zone change, etc).
+     * <p>
+     * Note: This is only exposed for use by the Telephony framework which needs it to copy
+     * conference start times among conference participants.  It is exposed as a system API since it
+     * has no general use other than to the Telephony framework.
      *
      * @return The elapsed time at which the {@link Conference} was connected.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public final long getConnectionStartElapsedRealTime() {
         return mConnectionStartElapsedRealTime;
-    }
-
-    /**
-     * Sets RIL voice radio technology used for current conference.
-     *
-     * @param vrat the RIL voice radio technology used for current conference,
-     *             see {@code RIL_RADIO_TECHNOLOGY_*} in {@link android.telephony.ServiceState}.
-     *
-     * @hide
-     */
-    public final void setCallRadioTech(@ServiceState.RilRadioTechnology int vrat) {
-        putExtra(TelecomManager.EXTRA_CALL_NETWORK_TYPE,
-                ServiceState.rilRadioTechnologyToNetworkType(vrat));
-    }
-
-    /**
-     * Returns RIL voice radio technology used for current conference.
-     *
-     * @return the RIL voice radio technology used for current conference,
-     *         see {@code RIL_RADIO_TECHNOLOGY_*} in {@link android.telephony.ServiceState}.
-     *
-     * @hide
-     */
-    public final @ServiceState.RilRadioTechnology int getCallRadioTech() {
-        int voiceNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-        Bundle extras = getExtras();
-        if (extras != null) {
-            voiceNetworkType = extras.getInt(TelecomManager.EXTRA_CALL_NETWORK_TYPE,
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        }
-        return ServiceState.networkTypeToRilRadioTechnology(voiceNetworkType);
     }
 
     /**
@@ -969,11 +887,15 @@ public abstract class Conference extends Conferenceable {
      * single-party call when the participant count drops to 1.  Although the dialer/phone app
      * could perform this trickery, it makes sense to do this in Telephony since a fix there will
      * ensure that bluetooth head units, auto and wearable apps all behave consistently.
+     * <p>
+     * This API is intended for use by the platform Telephony stack only.
      *
      * @param isConference {@code true} if this {@link Conference} should be treated like a
      *      conference call, {@code false} if it should be treated like a single-party call.
      * @hide
      */
+    @SystemApi
+    @TestApi
     public void setConferenceState(boolean isConference) {
         for (Listener l : mListeners) {
             l.onConferenceStateChanged(this, isConference);
@@ -983,13 +905,19 @@ public abstract class Conference extends Conferenceable {
     /**
      * Sets the address of this {@link Conference}.  Used when {@link #setConferenceState(boolean)}
      * is called to mark a conference temporarily as NOT a conference.
+     * <p>
+     * Note: This is a Telephony-specific implementation detail related to IMS conferences.  It is
+     * not intended for use outside of the Telephony stack.
      *
      * @param address The new address.
      * @param presentation The presentation requirements for the address.
      *        See {@link TelecomManager} for valid values.
      * @hide
      */
-    public final void setAddress(Uri address, int presentation) {
+    @SystemApi
+    @TestApi
+    public final void setAddress(@NonNull Uri address,
+            @TelecomManager.Presentation int presentation) {
         Log.d(this, "setAddress %s", address);
         mAddress = address;
         mAddressPresentation = presentation;
@@ -1055,13 +983,19 @@ public abstract class Conference extends Conferenceable {
      * Sets the caller display name (CNAP) of this {@link Conference}.  Used when
      * {@link #setConferenceState(boolean)} is called to mark a conference temporarily as NOT a
      * conference.
+     * <p>
+     * Note: This is a Telephony-specific implementation detail related to IMS conferences.  It is
+     * not intended for use outside of the Telephony stack.
      *
      * @param callerDisplayName The new display name.
      * @param presentation The presentation requirements for the handle.
      *        See {@link TelecomManager} for valid values.
      * @hide
      */
-    public final void setCallerDisplayName(String callerDisplayName, int presentation) {
+    @SystemApi
+    @TestApi
+    public final void setCallerDisplayName(@NonNull String callerDisplayName,
+            @TelecomManager.Presentation int presentation) {
         Log.d(this, "setCallerDisplayName %s", callerDisplayName);
         mCallerDisplayName = callerDisplayName;
         mCallerDisplayNamePresentation = presentation;
@@ -1088,10 +1022,15 @@ public abstract class Conference extends Conferenceable {
     }
 
     /**
-     * See {@link Connection#sendConnectionEvent(String, Bundle)}
-     * @hide
+     * Sends an event associated with this {@code Conference} with associated event extras to the
+     * {@link InCallService} (note: this is identical in concept to
+     * {@link Connection#sendConnectionEvent(String, Bundle)}).
+     * @see Connection#sendConnectionEvent(String, Bundle)
+     *
+     * @param event The connection event.
+     * @param extras Optional bundle containing extra information associated with the event.
      */
-    public void sendConnectionEvent(String event, Bundle extras) {
+    public void sendConferenceEvent(@NonNull String event, @Nullable Bundle extras) {
         for (Listener l : mListeners) {
             l.onConnectionEvent(this, event, extras);
         }
