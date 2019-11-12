@@ -2417,6 +2417,24 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testLockChannelsForOEM_channelSpecific_clearData() {
+        NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
+        mHelper.getImportance(PKG_O, UID_O);
+        mHelper.lockChannelsForOEM(new String[] {PKG_O + ":" + a.getId()});
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByOEM());
+
+        mHelper.clearData(PKG_O, UID_O);
+
+        // it's back!
+        mHelper.createNotificationChannel(PKG_O, UID_O, a, true, false);
+        // and still locked
+        assertTrue(mHelper.getNotificationChannel(PKG_O, UID_O, a.getId(), false)
+                .isImportanceLockedByOEM());
+    }
+
+    @Test
     public void testLockChannelsForOEM_channelDoesNotExistYet_appWide() {
         NotificationChannel a = new NotificationChannel("a", "a", IMPORTANCE_HIGH);
         NotificationChannel b = new NotificationChannel("b", "b", IMPORTANCE_LOW);
