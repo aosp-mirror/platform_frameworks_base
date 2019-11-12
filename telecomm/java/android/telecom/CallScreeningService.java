@@ -106,8 +106,14 @@ public abstract class CallScreeningService extends Service {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         mCallScreeningAdapter = (ICallScreeningAdapter) args.arg1;
-                        onScreenCall(
-                                Call.Details.createFromParcelableCall((ParcelableCall) args.arg2));
+                        Call.Details callDetails = Call.Details
+                                .createFromParcelableCall((ParcelableCall) args.arg2);
+                        onScreenCall(callDetails);
+                        if (callDetails.getCallDirection() == Call.Details.DIRECTION_OUTGOING) {
+                            mCallScreeningAdapter.allowCall(callDetails.getTelecomCallId());
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(this, "Exception when screening call: " + e);
                     } finally {
                         args.recycle();
                     }
