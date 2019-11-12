@@ -1156,6 +1156,9 @@ class RootActivityContainer extends ConfigurationContainer
                 final ActivityStack focusedStack = display.getFocusedStack();
                 if (focusedStack != null) {
                     result |= focusedStack.resumeTopActivityUncheckedLocked(target, targetOptions);
+                } else if (targetStack == null && !display.hasChild()) {
+                    result |= resumeHomeActivity(null /* prev */, "empty-display",
+                            display.mDisplayId);
                 }
             }
         }
