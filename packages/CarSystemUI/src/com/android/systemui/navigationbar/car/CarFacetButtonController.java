@@ -43,6 +43,8 @@ import javax.inject.Singleton;
 @Singleton
 public class CarFacetButtonController {
 
+    private final Set<CarFacetButton> mRegisteredViews = new HashSet<>();
+
     protected ButtonMap mButtonsByCategory = new ButtonMap();
     protected ButtonMap mButtonsByPackage = new ButtonMap();
     protected ButtonMap mButtonsByComponentName = new ButtonMap();
@@ -60,7 +62,11 @@ public class CarFacetButtonController {
      * to get a reference to this controller via {@link com.android.systemui.Dependency}
      * and self add.
      */
-    public void addFacetButton(CarFacetButton facetButton) {
+    private void addFacetButton(CarFacetButton facetButton) {
+        if (mRegisteredViews.contains(facetButton)) {
+            return;
+        }
+
         String[] categories = facetButton.getCategories();
         for (int i = 0; i < categories.length; i++) {
             mButtonsByCategory.add(categories[i], facetButton);
@@ -74,6 +80,8 @@ public class CarFacetButtonController {
         for (int i = 0; i < componentNames.length; i++) {
             mButtonsByComponentName.add(componentNames[i], facetButton);
         }
+
+        mRegisteredViews.add(facetButton);
     }
 
     /** Removes all buttons from the button maps. */
@@ -82,6 +90,7 @@ public class CarFacetButtonController {
         mButtonsByPackage.clear();
         mButtonsByComponentName.clear();
         mSelectedFacetButtons.clear();
+        mRegisteredViews.clear();
     }
 
     /**
