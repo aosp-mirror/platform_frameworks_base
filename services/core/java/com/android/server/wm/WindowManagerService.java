@@ -260,6 +260,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
@@ -433,8 +434,10 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onVrStateChanged(boolean enabled) {
             synchronized (mGlobalLock) {
                 mVrModeEnabled = enabled;
-                mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
-                        DisplayPolicy::onVrStateChangedLw, PooledLambda.__(), enabled));
+                final PooledConsumer c = PooledLambda.obtainConsumer(
+                        DisplayPolicy::onVrStateChangedLw, PooledLambda.__(), enabled);
+                mRoot.forAllDisplayPolicies(c);
+                c.recycle();
             }
         }
     };
@@ -827,9 +830,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mPointerLocationEnabled = enablePointerLocation;
             synchronized (mGlobalLock) {
-                mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
+                final PooledConsumer c = PooledLambda.obtainConsumer(
                         DisplayPolicy::setPointerLocationEnabled, PooledLambda.__(),
-                        mPointerLocationEnabled));
+                        mPointerLocationEnabled);
+                mRoot.forAllDisplayPolicies(c);
+                c.recycle();
             }
         }
 
@@ -2797,8 +2802,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void onPowerKeyDown(boolean isScreenOn) {
-        mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
-                DisplayPolicy::onPowerKeyDown, PooledLambda.__(), isScreenOn));
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                DisplayPolicy::onPowerKeyDown, PooledLambda.__(), isScreenOn);
+        mRoot.forAllDisplayPolicies(c);
+        c.recycle();
     }
 
     @Override
@@ -5623,8 +5630,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     + android.Manifest.permission.STATUS_BAR);
         }
         synchronized (mGlobalLock) {
-            mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
-                    DisplayPolicy::setForceShowSystemBars, PooledLambda.__(), show));
+            final PooledConsumer c = PooledLambda.obtainConsumer(
+                    DisplayPolicy::setForceShowSystemBars, PooledLambda.__(), show);
+            mRoot.forAllDisplayPolicies(c);
+            c.recycle();
         }
     }
 
@@ -7564,8 +7573,10 @@ public class WindowManagerService extends IWindowManager.Stub
     void onLockTaskStateChanged(int lockTaskState) {
         // TODO: pass in displayId to determine which display the lock task state changed
         synchronized (mGlobalLock) {
-            mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
-                    DisplayPolicy::onLockTaskStateChangedLw, PooledLambda.__(), lockTaskState));
+            final PooledConsumer c = PooledLambda.obtainConsumer(
+                    DisplayPolicy::onLockTaskStateChangedLw, PooledLambda.__(), lockTaskState);
+            mRoot.forAllDisplayPolicies(c);
+            c.recycle();
         }
     }
 
