@@ -146,6 +146,11 @@ interface ITelecomService {
     String getDefaultDialerPackage();
 
     /**
+     * @see TelecomServiceImpl#getDefaultDialerPackage
+     */
+    String getDefaultDialerPackageForUser(int userId);
+
+    /**
      * @see TelecomServiceImpl#getSystemDialerPackage
      */
     String getSystemDialerPackage();

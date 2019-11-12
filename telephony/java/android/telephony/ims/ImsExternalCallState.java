@@ -23,7 +23,6 @@ import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telecom.Log;
 import android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -217,8 +216,8 @@ public final class ImsExternalCallState implements Parcelable {
     @Override
     public String toString() {
         return "ImsExternalCallState { mCallId = " + mCallId +
-                ", mAddress = " + Log.pii(mAddress) +
-                ", mLocalAddress = " + Log.pii(mLocalAddress) +
+                ", mAddress = " + Rlog.pii(TAG, mAddress) +
+                ", mLocalAddress = " + Rlog.pii(TAG, mLocalAddress) +
                 ", mIsPullable = " + mIsPullable +
                 ", mCallState = " + mCallState +
                 ", mCallType = " + mCallType +
