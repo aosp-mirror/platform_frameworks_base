@@ -37,12 +37,15 @@ import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -54,6 +57,7 @@ import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -67,6 +71,7 @@ import android.os.UserManagerInternal;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
@@ -85,6 +90,7 @@ import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
 import com.android.server.job.controllers.BackgroundJobsController;
@@ -102,6 +108,9 @@ import com.android.server.job.restrictions.JobRestriction;
 import com.android.server.job.restrictions.ThermalStatusRestriction;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
+import com.android.server.utils.quota.Categorizer;
+import com.android.server.utils.quota.Category;
+import com.android.server.utils.quota.CountQuotaTracker;
 
 import libcore.util.EmptyArray;
 
@@ -144,6 +153,16 @@ public class JobSchedulerService extends com.android.server.SystemService
     private static final boolean ENFORCE_MAX_JOBS = true;
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
     private static final int MAX_JOBS_PER_APP = 100;
+
+    /**
+     * {@link #schedule(JobInfo)}, {@link #scheduleAsPackage(JobInfo, String, int, String)}, and
+     * {@link #enqueue(JobInfo, JobWorkItem)} will throw a {@link IllegalStateException} if the app
+     * calls the APIs too frequently.
+     */
+    @ChangeId
+    // This means the change will be enabled for target SDK larger than 29 (Q), meaning R and up.
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    protected static final long CRASH_ON_EXCEEDED_LIMIT = 144363383L;
 
     @VisibleForTesting
     public static Clock sSystemClock = Clock.systemUTC();
@@ -237,6 +256,10 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     private final List<JobRestriction> mJobRestrictions;
 
+    private final CountQuotaTracker mQuotaTracker;
+    private static final String QUOTA_TRACKER_SCHEDULE_TAG = ".schedule()";
+    private final PlatformCompat mPlatformCompat;
+
     /**
      * Queue of pending jobs. The JobServiceContext class will receive jobs from this list
      * when ready to execute them.
@@ -274,6 +297,11 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Which uids are currently performing backups, so we shouldn't allow their jobs to run.
      */
     final SparseIntArray mBackingUpUids = new SparseIntArray();
+
+    /**
+     * Cache of debuggable app status.
+     */
+    final ArrayMap<String, Boolean> mDebuggableApps = new ArrayMap<>();
 
     /**
      * Named indices into standby bucket arrays, for clarity in referring to
@@ -315,6 +343,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                         final StateController sc = mControllers.get(controller);
                         sc.onConstantsUpdatedLocked();
                     }
+                    mQuotaTracker.setEnabled(mConstants.ENABLE_API_QUOTAS);
+                    mQuotaTracker.setCountLimit(Category.SINGLE_CATEGORY,
+                            mConstants.API_QUOTA_SCHEDULE_COUNT,
+                            mConstants.API_QUOTA_SCHEDULE_WINDOW_MS);
                 } catch (IllegalArgumentException e) {
                     // Failed to parse the settings string, log this and move on
                     // with defaults.
@@ -466,6 +498,11 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
         private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
         private static final String DEPRECATED_KEY_USE_HEARTBEATS = "use_heartbeats";
+        private static final String KEY_ENABLE_API_QUOTAS = "enable_api_quotas";
+        private static final String KEY_API_QUOTA_SCHEDULE_COUNT = "aq_schedule_count";
+        private static final String KEY_API_QUOTA_SCHEDULE_WINDOW_MS = "aq_schedule_window_ms";
+        private static final String KEY_API_QUOTA_SCHEDULE_THROW_EXCEPTION =
+                "aq_schedule_throw_exception";
 
         private static final int DEFAULT_MIN_IDLE_COUNT = 1;
         private static final int DEFAULT_MIN_CHARGING_COUNT = 1;
@@ -484,6 +521,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_MIN_EXP_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
+        private static final boolean DEFAULT_ENABLE_API_QUOTAS = true;
+        private static final int DEFAULT_API_QUOTA_SCHEDULE_COUNT = 500;
+        private static final long DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS = MINUTE_IN_MILLIS;
+        private static final boolean DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION = true;
 
         /**
          * Minimum # of idle jobs that must be ready in order to force the JMS to schedule things
@@ -618,6 +659,24 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         public float CONN_PREFETCH_RELAX_FRAC = DEFAULT_CONN_PREFETCH_RELAX_FRAC;
 
+        /**
+         * Whether to enable quota limits on APIs.
+         */
+        public boolean ENABLE_API_QUOTAS = DEFAULT_ENABLE_API_QUOTAS;
+        /**
+         * The maximum number of schedule() calls an app can make in a set amount of time.
+         */
+        public int API_QUOTA_SCHEDULE_COUNT = DEFAULT_API_QUOTA_SCHEDULE_COUNT;
+        /**
+         * The time window that {@link #API_QUOTA_SCHEDULE_COUNT} should be evaluated over.
+         */
+        public long API_QUOTA_SCHEDULE_WINDOW_MS = DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS;
+        /**
+         * Whether to throw an exception when an app hits its schedule quota limit.
+         */
+        public boolean API_QUOTA_SCHEDULE_THROW_EXCEPTION =
+                DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION;
+
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
         void updateConstantsLocked(String value) {
@@ -678,6 +737,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_CONN_CONGESTION_DELAY_FRAC);
             CONN_PREFETCH_RELAX_FRAC = mParser.getFloat(KEY_CONN_PREFETCH_RELAX_FRAC,
                     DEFAULT_CONN_PREFETCH_RELAX_FRAC);
+
+            ENABLE_API_QUOTAS = mParser.getBoolean(KEY_ENABLE_API_QUOTAS,
+                DEFAULT_ENABLE_API_QUOTAS);
+            API_QUOTA_SCHEDULE_COUNT = Math.max(250,
+                    mParser.getInt(KEY_API_QUOTA_SCHEDULE_COUNT, DEFAULT_API_QUOTA_SCHEDULE_COUNT));
+            API_QUOTA_SCHEDULE_WINDOW_MS = mParser.getDurationMillis(
+                KEY_API_QUOTA_SCHEDULE_WINDOW_MS, DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS);
+            API_QUOTA_SCHEDULE_THROW_EXCEPTION = mParser.getBoolean(
+                    KEY_API_QUOTA_SCHEDULE_THROW_EXCEPTION,
+                    DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION);
         }
 
         void dump(IndentingPrintWriter pw) {
@@ -716,6 +785,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.printPair(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
             pw.printPair(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
 
+            pw.printPair(KEY_ENABLE_API_QUOTAS, ENABLE_API_QUOTAS).println();
+            pw.printPair(KEY_API_QUOTA_SCHEDULE_COUNT, API_QUOTA_SCHEDULE_COUNT).println();
+            pw.printPair(KEY_API_QUOTA_SCHEDULE_WINDOW_MS, API_QUOTA_SCHEDULE_WINDOW_MS).println();
+            pw.printPair(KEY_API_QUOTA_SCHEDULE_THROW_EXCEPTION,
+                    API_QUOTA_SCHEDULE_THROW_EXCEPTION).println();
+
             pw.decreaseIndent();
         }
 
@@ -746,6 +821,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             proto.write(ConstantsProto.MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME);
             proto.write(ConstantsProto.CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC);
             proto.write(ConstantsProto.CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC);
+
+            proto.write(ConstantsProto.ENABLE_API_QUOTAS, ENABLE_API_QUOTAS);
+            proto.write(ConstantsProto.API_QUOTA_SCHEDULE_COUNT, API_QUOTA_SCHEDULE_COUNT);
+            proto.write(ConstantsProto.API_QUOTA_SCHEDULE_WINDOW_MS, API_QUOTA_SCHEDULE_WINDOW_MS);
+            proto.write(ConstantsProto.API_QUOTA_SCHEDULE_THROW_EXCEPTION,
+                    API_QUOTA_SCHEDULE_THROW_EXCEPTION);
         }
     }
 
@@ -847,6 +928,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         for (int c = 0; c < mControllers.size(); ++c) {
                             mControllers.get(c).onAppRemovedLocked(pkgName, pkgUid);
                         }
+                        mDebuggableApps.remove(pkgName);
                     }
                 }
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
@@ -972,6 +1054,45 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public int scheduleAsPackage(JobInfo job, JobWorkItem work, int uId, String packageName,
             int userId, String tag) {
+        final String pkg = packageName == null ? job.getService().getPackageName() : packageName;
+        if (!mQuotaTracker.isWithinQuota(userId, pkg, QUOTA_TRACKER_SCHEDULE_TAG)) {
+            Slog.e(TAG, userId + "-" + pkg + " has called schedule() too many times");
+            // TODO(b/145551233): attempt to restrict app
+            if (mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION
+                    && mPlatformCompat.isChangeEnabledByPackageName(
+                            CRASH_ON_EXCEEDED_LIMIT, pkg, userId)) {
+                final boolean isDebuggable;
+                synchronized (mLock) {
+                    if (!mDebuggableApps.containsKey(packageName)) {
+                        try {
+                            final ApplicationInfo appInfo = AppGlobals.getPackageManager()
+                                    .getApplicationInfo(pkg, 0, userId);
+                            if (appInfo != null) {
+                                mDebuggableApps.put(packageName,
+                                        (appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
+                            } else {
+                                return JobScheduler.RESULT_FAILURE;
+                            }
+                        } catch (RemoteException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    isDebuggable = mDebuggableApps.get(packageName);
+                }
+                if (isDebuggable) {
+                    // Only throw the exception for debuggable apps.
+                    throw new IllegalStateException(
+                            "schedule()/enqueue() called more than "
+                                    + mQuotaTracker.getLimit(Category.SINGLE_CATEGORY)
+                                    + " times in the past "
+                                    + mQuotaTracker.getWindowSizeMs(Category.SINGLE_CATEGORY)
+                                    + "ms");
+                }
+            }
+            return JobScheduler.RESULT_FAILURE;
+        }
+        mQuotaTracker.noteEvent(userId, pkg, QUOTA_TRACKER_SCHEDULE_TAG);
+
         try {
             if (ActivityManager.getService().isAppStartModeDisabled(uId,
                     job.getService().getPackageName())) {
@@ -1296,6 +1417,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Set up the app standby bucketing tracker
         mStandbyTracker = new StandbyTracker();
         mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+        mPlatformCompat =
+                (PlatformCompat) ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
+        mQuotaTracker = new CountQuotaTracker(context, Categorizer.SINGLE_CATEGORIZER);
+        mQuotaTracker.setCountLimit(Category.SINGLE_CATEGORY,
+                mConstants.API_QUOTA_SCHEDULE_COUNT,
+                mConstants.API_QUOTA_SCHEDULE_WINDOW_MS);
 
         AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
         appStandby.addListener(mStandbyTracker);
@@ -2745,7 +2872,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 return new ParceledListSlice<>(snapshots);
             }
         }
-    };
+    }
 
     // Shell command infrastructure: run the given job immediately
     int executeRunCommand(String pkgName, int userId, int jobId, boolean force) {
@@ -2968,6 +3095,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         return 0;
     }
 
+    void resetScheduleQuota() {
+        mQuotaTracker.clear();
+    }
+
     void triggerDockState(boolean idleState) {
         final Intent dockIntent;
         if (idleState) {
@@ -3028,6 +3159,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mJobRestrictions.get(i).dumpConstants(pw);
                 pw.println();
             }
+            pw.println();
+
+            mQuotaTracker.dump(pw);
             pw.println();
 
             pw.println("Started users: " + Arrays.toString(mStartedUsers));
@@ -3217,6 +3351,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             for (int u : mStartedUsers) {
                 proto.write(JobSchedulerServiceDumpProto.STARTED_USERS, u);
             }
+
+            mQuotaTracker.dump(proto, JobSchedulerServiceDumpProto.QUOTA_TRACKER);
+
             if (mJobs.size() > 0) {
                 final List<JobStatus> jobs = mJobs.mJobSet.getAllJobs();
                 sortJobs(jobs);
