@@ -69,7 +69,7 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         removeGlobalMinSizeRestriction();
         final ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
-        final TaskRecord task = stack.topTask();
+        final Task task = stack.topTask();
         WindowContainerTransaction t = new WindowContainerTransaction();
         Rect newBounds = new Rect(10, 10, 100, 100);
         t.setBounds(task.mRemoteToken, new Rect(10, 10, 100, 100));

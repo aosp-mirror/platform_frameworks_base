@@ -3054,7 +3054,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param userId
      * @param event
      * @param appToken ActivityRecord's appToken.
-     * @param taskRoot TaskRecord's root
+     * @param taskRoot Task's root
      */
     public void updateActivityUsageStats(ComponentName activity, int userId, int event,
             IBinder appToken, ComponentName taskRoot) {

@@ -117,9 +117,9 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_P
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_ONLY;
 import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
-import static com.android.server.wm.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
-import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
+import static com.android.server.wm.Task.LOCK_TASK_AUTH_DONT_LOCK;
+import static com.android.server.wm.Task.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -1572,7 +1572,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return true;
             }
             // Keep track of the root activity of the task before we finish it
-            final TaskRecord tr = r.getTaskRecord();
+            final Task tr = r.getTask();
             final ActivityRecord rootR = tr.getRootActivity();
             if (rootR == null) {
                 Slog.w(TAG, "Finishing task with all activities already finished");
@@ -1994,7 +1994,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r == null) {
                     return false;
                 }
-                final TaskRecord task = r.getTaskRecord();
+                final Task task = r.getTask();
                 int index = task.mChildren.lastIndexOf(r);
                 if (index > 0) {
                     ActivityRecord under = task.getChildAt(index - 1);
@@ -2086,7 +2086,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId,
+                final Task task = mRootActivityContainer.anyTaskForId(taskId,
                         MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     return;
@@ -2196,7 +2196,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final long origId = Binder.clearCallingIdentity();
             try {
                 int taskId = ActivityRecord.getTaskForActivityLocked(token, !nonRoot);
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId);
+                final Task task = mRootActivityContainer.anyTaskForId(taskId);
                 if (task != null) {
                     return ActivityRecord.getStackLocked(token).moveTaskToBackLocked(taskId);
                 }
@@ -2214,7 +2214,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         Rect rect = new Rect();
         try {
             synchronized (mGlobalLock) {
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId,
+                final Task task = mRootActivityContainer.anyTaskForId(taskId,
                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
                 if (task == null) {
                     Slog.w(TAG, "getTaskBounds: taskId=" + taskId + " not found");
@@ -2237,7 +2237,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             enforceCallerIsRecentsOrHasPermission(
                     MANAGE_ACTIVITY_STACKS, "getTaskDescription()");
-            final TaskRecord tr = mRootActivityContainer.anyTaskForId(id,
+            final Task tr = mRootActivityContainer.anyTaskForId(id,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
             if (tr != null) {
                 return tr.getTaskDescription();
@@ -2257,7 +2257,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId,
+                final Task task = mRootActivityContainer.anyTaskForId(taskId,
                         MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "setTaskWindowingMode: No task for id=" + taskId);
@@ -2335,7 +2335,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // windows above full screen activities. Instead of directly finishing the
                 // task, a task change listener is used to notify SystemUI so the action can be
                 // handled specially.
-                final TaskRecord task = r.getTaskRecord();
+                final Task task = r.getTask();
                 mTaskChangeNotificationController
                         .notifyBackPressedOnTaskRoot(task.getTaskInfo());
             } else {
@@ -2393,7 +2393,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
         try {
-            final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId);
+            final Task task = mRootActivityContainer.anyTaskForId(taskId);
             if (task == null) {
                 Slog.d(TAG, "Could not find task for id: "+ taskId);
                 SafeActivityOptions.abort(options);
@@ -2573,7 +2573,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId);
+                final Task task = mRootActivityContainer.anyTaskForId(taskId);
                 if (task == null) {
                     Slog.w(TAG, "moveTaskToStack: No task for id=" + taskId);
                     return;
@@ -2685,7 +2685,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId,
+                final Task task = mRootActivityContainer.anyTaskForId(taskId,
                         MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: No task for id=" + taskId);
@@ -2817,7 +2817,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (r == null) {
                 return;
             }
-            startLockTaskModeLocked(r.getTaskRecord(), false /* isSystemCaller */);
+            startLockTaskModeLocked(r.getTask(), false /* isSystemCaller */);
         }
     }
 
@@ -2828,7 +2828,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId,
+                final Task task = mRootActivityContainer.anyTaskForId(taskId,
                         MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     return;
@@ -2850,7 +2850,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (r == null) {
                 return;
             }
-            stopLockTaskModeInternal(r.getTaskRecord(), false /* isSystemCaller */);
+            stopLockTaskModeInternal(r.getTask(), false /* isSystemCaller */);
         }
     }
 
@@ -2864,7 +2864,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         stopLockTaskModeInternal(null, true /* isSystemCaller */);
     }
 
-    private void startLockTaskModeLocked(@Nullable TaskRecord task, boolean isSystemCaller) {
+    private void startLockTaskModeLocked(@Nullable Task task, boolean isSystemCaller) {
         if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "startLockTaskModeLocked: " + task);
         if (task == null || task.mLockTaskAuth == LOCK_TASK_AUTH_DONT_LOCK) {
             return;
@@ -2893,7 +2893,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    private void stopLockTaskModeInternal(@Nullable TaskRecord task, boolean isSystemCaller) {
+    private void stopLockTaskModeInternal(@Nullable Task task, boolean isSystemCaller) {
         final int callingUid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
         try {
@@ -2943,7 +2943,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
                 r.setTaskDescription(td);
-                final TaskRecord task = r.getTaskRecord();
+                final Task task = r.getTask();
                 task.updateTaskDescription();
             }
         }
@@ -2999,7 +2999,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isTopOfTask(IBinder token) {
         synchronized (mGlobalLock) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            return r != null && r.getTaskRecord().getTopActivity() == r;
+            return r != null && r.getTask().getTopActivity() == r;
         }
     }
 
@@ -3038,7 +3038,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             if (structure != null) {
                 // Pre-fill the task/activity component for all assist data receivers
-                structure.setTaskId(pae.activity.getTaskRecord().mTaskId);
+                structure.setTaskId(pae.activity.getTask().mTaskId);
                 structure.setActivityComponent(pae.activity.mActivityComponent);
                 structure.setHomeActivity(pae.isHome);
             }
@@ -3065,7 +3065,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // Caller wants result sent back to them.
                 sendBundle = new Bundle();
                 sendBundle.putInt(ActivityTaskManagerInternal.ASSIST_TASK_ID,
-                        pae.activity.getTaskRecord().mTaskId);
+                        pae.activity.getTask().mTaskId);
                 sendBundle.putBinder(ActivityTaskManagerInternal.ASSIST_ACTIVITY_ID,
                         pae.activity.assistToken);
                 sendBundle.putBundle(ASSIST_KEY_DATA, pae.extras);
@@ -3153,7 +3153,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 final ActivityStack stack = r.getActivityStack();
-                final TaskRecord task = stack.createTaskRecord(
+                final Task task = stack.createTask(
                         mStackSupervisor.getNextTaskIdForUserLocked(r.mUserId), ainfo, intent,
                         null /* voiceSession */, null /* voiceInteractor */, !ON_TOP);
                 if (!mRecentTasks.addToBottom(task)) {
@@ -3182,7 +3182,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void setTaskResizeable(int taskId, int resizeableMode) {
         synchronized (mGlobalLock) {
-            final TaskRecord task = mRootActivityContainer.anyTaskForId(
+            final Task task = mRootActivityContainer.anyTaskForId(
                     taskId, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
             if (task == null) {
                 Slog.w(TAG, "setTaskResizeable: taskId=" + taskId + " not found");
@@ -3198,7 +3198,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId,
+                final Task task = mRootActivityContainer.anyTaskForId(taskId,
                         MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
@@ -3243,7 +3243,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private void sanitizeAndApplyConfigChange(ConfigurationContainer container,
             WindowContainerTransaction.Change change) {
-        if (!(container instanceof TaskRecord)) {
+        if (!(container instanceof Task)) {
             throw new RuntimeException("Invalid token in task transaction");
         }
         // The "client"-facing API should prevent bad changes; however, just in case, sanitize
@@ -3884,7 +3884,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             try {
                 if (DEBUG_STACK) Slog.d(TAG_STACK, "positionTaskInStack: positioning task="
                         + taskId + " in stackId=" + stackId + " at position=" + position);
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId);
+                final Task task = mRootActivityContainer.anyTaskForId(taskId);
                 if (task == null) {
                     throw new IllegalArgumentException("positionTaskInStack: no task for id="
                             + taskId);
@@ -4359,7 +4359,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (ActivityRecord.forTokenLocked(callingActivity) != activity) {
                 throw new SecurityException("Only focused activity can call startVoiceInteraction");
             }
-            if (mRunningVoice != null || activity.getTaskRecord().voiceSession != null
+            if (mRunningVoice != null || activity.getTask().voiceSession != null
                     || activity.voiceSession != null) {
                 Slog.w(TAG, "Already in a voice interaction, cannot start new voice interaction");
                 return;
@@ -4469,7 +4469,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final TaskRecord task = mRootActivityContainer.anyTaskForId(taskId,
+                final Task task = mRootActivityContainer.anyTaskForId(taskId,
                         MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "cancelTaskWindowTransition: taskId=" + taskId + " not found");
@@ -4495,7 +4495,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private ActivityManager.TaskSnapshot getTaskSnapshot(int taskId, boolean reducedResolution,
             boolean restoreFromDisk) {
-        final TaskRecord task;
+        final Task task;
         synchronized (mGlobalLock) {
             task = mRootActivityContainer.anyTaskForId(taskId,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
@@ -4820,7 +4820,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /** Pokes the task persister. */
-    void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
+    void notifyTaskPersisterLocked(Task task, boolean flush) {
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
@@ -4977,7 +4977,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         String[] newArgs = new String[args.length - opti];
         System.arraycopy(args, opti, newArgs, 0, args.length - opti);
 
-        TaskRecord lastTask = null;
+        Task lastTask = null;
         boolean needSep = false;
         for (int i = activities.size() - 1; i >= 0; i--) {
             ActivityRecord r = activities.get(i);
@@ -4986,7 +4986,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             needSep = true;
             synchronized (mGlobalLock) {
-                final TaskRecord task = r.getTaskRecord();
+                final Task task = r.getTask();
                 if (lastTask != task) {
                     lastTask = task;
                     pw.print("TASK "); pw.print(lastTask.affinity);
@@ -5403,7 +5403,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** Update AMS states when an activity is resumed. */
     void setResumedActivityUncheckLocked(ActivityRecord r, String reason) {
-        final TaskRecord task = r.getTaskRecord();
+        final Task task = r.getTask();
         if (task.isActivityTypeStandard()) {
             if (mCurAppTimeTracker != r.appTimeTracker) {
                 // We are switching app tracking.  Complete the current one.
@@ -5435,7 +5435,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (mLastResumedActivity != null) {
                 final IVoiceInteractionSession session;
 
-                final TaskRecord lastResumedActivityTask = mLastResumedActivity.getTaskRecord();
+                final Task lastResumedActivityTask = mLastResumedActivity.getTask();
                 if (lastResumedActivityTask != null
                         && lastResumedActivityTask.voiceSession != null) {
                     session = lastResumedActivityTask.voiceSession;
@@ -5536,7 +5536,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void updateActivityUsageStats(ActivityRecord activity, int event) {
         ComponentName taskRoot = null;
-        final TaskRecord task = activity.getTaskRecord();
+        final Task task = activity.getTask();
         if (task != null) {
             final ActivityRecord rootActivity = task.getRootActivity();
             if (rootActivity != null) {
@@ -6141,7 +6141,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
                 String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
                 String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
-                int userId, TaskRecord inTask, String reason, boolean validateIncomingUser,
+                int userId, Task inTask, String reason, boolean validateIncomingUser,
                 PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
             synchronized (mGlobalLock) {
@@ -6570,13 +6570,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public ActivityTokens getTopActivityForTask(int taskId) {
             synchronized (mGlobalLock) {
-                final TaskRecord taskRecord = mRootActivityContainer.anyTaskForId(taskId);
-                if (taskRecord == null) {
+                final Task task = mRootActivityContainer.anyTaskForId(taskId);
+                if (task == null) {
                     Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
                             + " Requested task not found");
                     return null;
                 }
-                final ActivityRecord activity = taskRecord.getTopActivity();
+                final ActivityRecord activity = task.getTopActivity();
                 if (activity == null) {
                     Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
                             + " Requested activity not found");

@@ -79,12 +79,12 @@ class AppTaskImpl extends IAppTask.Stub {
         synchronized (mService.mGlobalLock) {
             long origId = Binder.clearCallingIdentity();
             try {
-                TaskRecord tr = mService.mRootActivityContainer.anyTaskForId(mTaskId,
+                Task task = mService.mRootActivityContainer.anyTaskForId(mTaskId,
                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
-                if (tr == null) {
+                if (task == null) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
-                return mService.getRecentTasks().createRecentTaskInfo(tr);
+                return mService.getRecentTasks().createRecentTaskInfo(task);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -136,12 +136,12 @@ class AppTaskImpl extends IAppTask.Stub {
         checkCaller();
 
         int callingUser = UserHandle.getCallingUserId();
-        TaskRecord tr;
+        Task task;
         IApplicationThread appThread;
         synchronized (mService.mGlobalLock) {
-            tr = mService.mRootActivityContainer.anyTaskForId(mTaskId,
+            task = mService.mRootActivityContainer.anyTaskForId(mTaskId,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
-            if (tr == null) {
+            if (task == null) {
                 throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
             }
             appThread = IApplicationThread.Stub.asInterface(whoThread);
@@ -156,7 +156,7 @@ class AppTaskImpl extends IAppTask.Stub {
                 .setResolvedType(resolvedType)
                 .setActivityOptions(bOptions)
                 .setUserId(callingUser)
-                .setInTask(tr)
+                .setInTask(task)
                 .execute();
     }
 
@@ -167,12 +167,12 @@ class AppTaskImpl extends IAppTask.Stub {
         synchronized (mService.mGlobalLock) {
             long origId = Binder.clearCallingIdentity();
             try {
-                TaskRecord tr = mService.mRootActivityContainer.anyTaskForId(mTaskId,
+                Task task = mService.mRootActivityContainer.anyTaskForId(mTaskId,
                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
-                if (tr == null) {
+                if (task == null) {
                     throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                 }
-                Intent intent = tr.getBaseIntent();
+                Intent intent = task.getBaseIntent();
                 if (exclude) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 } else {

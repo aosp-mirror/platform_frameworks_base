@@ -211,7 +211,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 // If there are multiple tasks in the target stack (ie. the home stack, with 3p
                 // and default launchers coexisting), then move the task to the top as a part of
                 // moving the stack to the front
-                final TaskRecord task = targetActivity.getTaskRecord();
+                final Task task = targetActivity.getTask();
                 if (targetStack.topTask() != task) {
                     targetStack.positionChildAtTop(task);
                 }
@@ -328,7 +328,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         if (sendUserLeaveHint) {
                             // Setting this allows the previous app to PiP.
                             mStackSupervisor.mUserLeaving = true;
-                            targetStack.moveTaskToFrontLocked(targetActivity.getTaskRecord(),
+                            targetStack.moveTaskToFrontLocked(targetActivity.getTask(),
                                     true /* noAnimation */, null /* activityOptions */,
                                     targetActivity.appTimeTracker,
                                     "RecentsAnimation.onAnimationFinished()");
@@ -491,7 +491,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         }
 
         for (int i = targetStack.getChildCount() - 1; i >= 0; i--) {
-            final TaskRecord task = targetStack.getChildAt(i);
+            final Task task = targetStack.getChildAt(i);
             if (task.mUserId == mUserId
                     && task.getBaseIntent().getComponent().equals(mTargetIntent.getComponent())) {
                 return task.getTopActivity();

@@ -58,7 +58,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.annotation.CallSuper;
 import android.app.RemoteAction;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -84,7 +83,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskStack extends WindowContainer<TaskRecord> implements
+public class TaskStack extends WindowContainer<Task> implements
         BoundsAnimationTarget, ConfigurationContainerListener {
     /** Minimum size of an adjusted stack bounds relative to original stack bounds. Used to
      * restrict IME adjustment so that a min portion of top stack remains visible.*/
@@ -483,7 +482,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
      * @param position Target position to add the task to.
      * @param showForAllUsers Whether to show the task regardless of the current user.
      */
-    void addChild(TaskRecord task, int position, boolean showForAllUsers, boolean moveParents) {
+    void addChild(Task task, int position, boolean showForAllUsers, boolean moveParents) {
         // Add child task.
         addChild(task, null);
 
@@ -496,11 +495,11 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
     }
 
     @Override
-    void addChild(TaskRecord task, int position) {
+    void addChild(Task task, int position) {
         addChild(task, position, task.showForAllUsers(), false /* includingParents */);
     }
 
-    void positionChildAt(TaskRecord child, int position) {
+    void positionChildAt(Task child, int position) {
         if (DEBUG_STACK) {
             Slog.i(TAG_WM, "positionChildAt: positioning task=" + child + " at " + position);
         }
@@ -515,7 +514,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
         getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
-    void positionChildAtTop(TaskRecord child, boolean includingParents) {
+    void positionChildAtTop(Task child, boolean includingParents) {
         if (child == null) {
             // TODO: Fix the call-points that cause this to happen.
             return;
@@ -531,7 +530,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
         displayContent.layoutAndAssignWindowLayersIfNeeded();
     }
 
-    void positionChildAtBottom(TaskRecord child, boolean includingParents) {
+    void positionChildAtBottom(Task child, boolean includingParents) {
         if (child == null) {
             // TODO: Fix the call-points that cause this to happen.
             return;
@@ -546,7 +545,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
     }
 
     @Override
-    void positionChildAt(int position, TaskRecord child, boolean includingParents) {
+    void positionChildAt(int position, Task child, boolean includingParents) {
         positionChildAt(position, child, includingParents, child.showForAllUsers());
     }
 
@@ -555,7 +554,7 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
      * {@link TaskStack#addChild(Task, int, boolean showForAllUsers, boolean)}, as it can receive
      * showForAllUsers param from {@link ActivityRecord} instead of {@link Task#showForAllUsers()}.
      */
-    private int positionChildAt(int position, TaskRecord child, boolean includingParents,
+    private int positionChildAt(int position, Task child, boolean includingParents,
             boolean showForAllUsers) {
         final int targetPosition = findPositionForTask(child, position, showForAllUsers);
         super.positionChildAt(targetPosition, child, includingParents);
@@ -572,8 +571,9 @@ public class TaskStack extends WindowContainer<TaskRecord> implements
 
     @Override
     void onChildPositionChanged(WindowContainer child) {
-        // TODO(task-merge): Read comment on updateTaskMovement method.
-        //((TaskRecord) child).updateTaskMovement(true);
+        if (mChildren.contains(child)) {
+            ((Task) child).updateTaskMovement(getTopChild() == child);
+        }
     }
 
     void reparent(DisplayContent newParent, boolean onTop) {

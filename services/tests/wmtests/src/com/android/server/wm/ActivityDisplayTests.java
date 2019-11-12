@@ -93,7 +93,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         // Create a pinned stack and move to front.
         final ActivityStack pinnedStack = mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final TaskRecord pinnedTask = new TaskBuilder(mService.mStackSupervisor)
+        final Task pinnedTask = new TaskBuilder(mService.mStackSupervisor)
                 .setStack(pinnedStack).build();
         new ActivityBuilder(mService).setActivityFlags(FLAG_ALWAYS_FOCUSABLE)
                 .setTask(pinnedTask).build();
@@ -167,7 +167,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     private ActivityStack createFullscreenStackWithSimpleActivityAt(ActivityDisplay display) {
         final ActivityStack fullscreenStack = display.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final TaskRecord fullscreenTask = new TaskBuilder(mService.mStackSupervisor)
+        final Task fullscreenTask = new TaskBuilder(mService.mStackSupervisor)
                 .setStack(fullscreenStack).build();
         new ActivityBuilder(mService).setTask(fullscreenTask).build();
         return fullscreenStack;
@@ -302,18 +302,10 @@ public class ActivityDisplayTests extends ActivityTestsBase {
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
         final ActivityStack stack4 = display.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, ON_TOP);
-        final TaskRecord task1 = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(stack1)
-                .build();
-        final TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(stack2)
-                .build();
-        final TaskRecord task3 = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(stack3)
-                .build();
-        final TaskRecord task4 = new TaskBuilder(mService.mStackSupervisor)
-                .setStack(stack4)
-                .build();
+        final Task task1 = new TaskBuilder(mService.mStackSupervisor).setStack(stack1).build();
+        final Task task2 = new TaskBuilder(mService.mStackSupervisor).setStack(stack2).build();
+        final Task task3 = new TaskBuilder(mService.mStackSupervisor).setStack(stack3).build();
+        final Task task4 = new TaskBuilder(mService.mStackSupervisor).setStack(stack4).build();
 
         // Reordering stacks while removing stacks.
         doAnswer(invocation -> {

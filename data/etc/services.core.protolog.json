@@ -1357,12 +1357,6 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/Session.java"
     },
-    "609651209": {
-      "message": "addChild: %s at top.",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/TaskRecord.java"
-    },
     "620368427": {
       "message": "******* TELLING SURFACE FLINGER WE ARE BOOTED!",
       "level": "INFO",
@@ -1680,6 +1674,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "1330804250": {
+      "message": "addChild: %s at top.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/Task.java"
     },
     "1331177619": {
       "message": "Attempted to add a toast window with unknown token %s.  Aborting.",

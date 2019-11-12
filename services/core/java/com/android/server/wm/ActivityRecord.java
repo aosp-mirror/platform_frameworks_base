@@ -416,7 +416,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int logo;               // resource identifier of activity's logo.
     private int theme;              // resource identifier of activity's theme.
     private int windowFlags;        // custom window flags for preview window.
-    private TaskRecord task;        // the task this is in.
+    private Task task;              // the task this is in.
     private long createTime = System.currentTimeMillis();
     long lastVisibleTime;         // last time this activity became visible
     long cpuTimeAtResume;         // the cpu time of host process at the time of resuming activity
@@ -1147,7 +1147,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    TaskRecord getTaskRecord() {
+    Task getTask() {
         return task;
     }
 
@@ -1155,32 +1155,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Sets the Task on this activity for the purposes of re-use during launch where we will
      * re-use another activity instead of this one for the launch.
      */
-    void setTaskForReuse(TaskRecord task) {
+    void setTaskForReuse(Task task) {
         this.task = task;
     }
 
-    Task getTask() {
-        return (Task) getParent();
-    }
-
     TaskStack getStack() {
-        final Task task = getTask();
-        if (task != null) {
-            return task.getTaskStack();
-        } else {
-            return null;
-        }
+        return task != null ? task.getTaskStack() : null;
     }
 
     @Override
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        final TaskRecord oldTask = oldParent != null ? (TaskRecord) oldParent : null;
-        final TaskRecord newTask = newParent != null ? (TaskRecord) newParent : null;
+        final Task oldTask = oldParent != null ? (Task) oldParent : null;
+        final Task newTask = newParent != null ? (Task) newParent : null;
         this.task = newTask;
 
         super.onParentChanged(newParent, oldParent);
-
-        final Task task = getTask();
 
         if (oldParent == null && newParent != null) {
             // First time we are adding the activity to the system.
@@ -1310,7 +1299,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // represents this. In fullscreen-mode, the stack does (since the orientation letterbox
             // is also applied to the task).
             Rect spaceToFill = (inMultiWindowMode() || getStack() == null)
-                    ? getTask().getDisplayedBounds() : getStack().getDisplayedBounds();
+                    ? task.getDisplayedBounds() : getStack().getDisplayedBounds();
             mLetterbox.layout(spaceToFill, w.getFrameLw(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
@@ -1636,8 +1625,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         final ActivityManager.TaskSnapshot snapshot =
-                mWmService.mTaskSnapshotController.getSnapshot(
-                        getTask().mTaskId, getTask().mUserId,
+                mWmService.mTaskSnapshotController.getSnapshot(task.mTaskId, task.mUserId,
                         false /* restoreFromDisk */, false /* reducedResolution */);
         final int type = getStartingWindowType(newTask, taskSwitch, processRunning,
                 allowTaskSnapshot, activityCreated, fromRecents, snapshot);
@@ -1822,7 +1810,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (snapshot == null) {
             return false;
         }
-        return getTask().getConfiguration().orientation == snapshot.getOrientation();
+        return task.getConfiguration().orientation == snapshot.getOrientation();
     }
 
     void removeStartingWindow() {
@@ -1892,12 +1880,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Reparents this activity into {@param newTask} at the provided {@param position}.  The caller
      * should ensure that the {@param newTask} is not already the parent of this activity.
      */
-    void reparent(TaskRecord newTask, int position, String reason) {
+    void reparent(Task newTask, int position, String reason) {
         if (getParent() == null) {
             Slog.w(TAG, "reparent: Attempted to reparent non-existing app token: " + appToken);
             return;
         }
-        final TaskRecord prevTask = task;
+        final Task prevTask = task;
         if (prevTask == newTask) {
             throw new IllegalArgumentException(reason + ": task=" + newTask
                     + " is already the parent of r=" + this);
@@ -1984,7 +1972,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         setActivityType(activityType);
     }
 
-    void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {
+    void setTaskToAffiliateWith(Task taskToAffiliateWith) {
         if (launchMode != LAUNCH_SINGLE_INSTANCE && launchMode != LAUNCH_SINGLE_TASK) {
             task.setTaskToAffiliateWith(taskToAffiliateWith);
         }
@@ -2253,7 +2241,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        final TaskRecord task = getTaskRecord();
         final ActivityStack stack = getActivityStack();
         if (stack == null) {
             Slog.w(TAG, "moveActivityStackToFront: invalid task or stack: activity="
@@ -2282,7 +2269,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /** Finish all activities in the task with the same affinity as this one. */
     void finishActivityAffinity() {
-        final ArrayList<ActivityRecord> activities = getTaskRecord().mChildren;
+        final ArrayList<ActivityRecord> activities = task.mChildren;
         for (int index = activities.indexOf(this); index >= 0; --index) {
             final ActivityRecord cur = activities.get(index);
             if (!Objects.equals(cur.taskAffinity, taskAffinity)) {
@@ -2390,7 +2377,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mAtmService.deferWindowLayout();
         try {
             makeFinishingLocked();
-            final TaskRecord task = getTaskRecord();
+            // Make a local reference to its task since this.task could be set to null once this
+            // activity is destroyed and detached from task.
+            final Task task = getTask();
             EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                     mUserId, System.identityHashCode(this),
                     task.mTaskId, shortComponentName, reason);
@@ -2667,7 +2656,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY, mUserId,
-                System.identityHashCode(this), getTaskRecord().mTaskId, shortComponentName, reason);
+                System.identityHashCode(this), task.mTaskId, shortComponentName, reason);
 
         boolean removedFromHistory = false;
 
@@ -2870,8 +2859,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean shouldFreezeBounds() {
-        final Task task = getTask();
-
         // For freeform windows, we can't freeze the bounds at the moment because this would make
         // the resizing unresponsive.
         if (task == null || task.inFreeformWindowingMode()) {
@@ -2882,7 +2869,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // the divider/drag handle being released, and the handling it's new
         // configuration. If we are relaunched outside of the drag resizing state,
         // we need to be careful not to do this.
-        return getTask().isDragResizing();
+        return task.isDragResizing();
     }
 
     void startRelaunching() {
@@ -2906,7 +2893,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * with a queue.
      */
     private void freezeBounds() {
-        final Task task = getTask();
         mFrozenBounds.offer(new Rect(task.mPreparedFrozenBounds));
 
         if (task.mPreparedFrozenMergedConfig.equals(Configuration.EMPTY)) {
@@ -3286,7 +3272,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * immediately finishes after, so we have to transfer T to M.
      */
     void transferStartingWindowFromHiddenAboveTokenIfNeeded() {
-        final Task task = getTask();
         for (int i = task.mChildren.size() - 1; i >= 0; i--) {
             final ActivityRecord fromActivity = task.mChildren.get(i);
             if (fromActivity == this) {
@@ -3398,7 +3383,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     @Nullable
     private ActivityRecord getActivityBelow() {
-        final Task task = getTask();
         final int pos = task.mChildren.indexOf(this);
         if (pos == -1) {
             throw new IllegalStateException("Activity not found in its task");
@@ -3474,7 +3458,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    void logStartActivity(int tag, TaskRecord task) {
+    void logStartActivity(int tag, Task task) {
         final Uri data = intent.getData();
         final String strData = data != null ? data.toSafeString() : null;
 
@@ -4211,10 +4195,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         mState = state;
 
-        final TaskRecord parent = getTaskRecord();
-
-        if (parent != null) {
-            parent.onActivityStateChanged(this, state, reason);
+        if (task != null) {
+            task.onActivityStateChanged(this, state, reason);
         }
 
         // The WindowManager interprets the app stopping signal as
@@ -5337,7 +5319,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (r == null) {
             return INVALID_TASK_ID;
         }
-        final TaskRecord task = r.task;
+        final Task task = r.task;
         final int activityNdx = task.mChildren.indexOf(r);
         if (activityNdx < 0
                 || (onlyRoot && activityNdx > task.findRootIndex(true /* effectiveRoot */))) {
@@ -5631,7 +5613,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @VisibleForTesting
     boolean shouldAnimate(int transit) {
-        final Task task = getTask();
         if (task != null && !task.shouldAnimate()) {
             return false;
         }
@@ -5647,11 +5628,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean isChangingAppTransition() {
-        final Task task = getTask();
-        if (task != null) {
-            return task.isChangingAppTransition();
-        }
-        return super.isChangingAppTransition();
+        return task != null ? task.isChangingAppTransition() : super.isChangingAppTransition();
     }
 
     @Override
@@ -5751,7 +5728,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        Task task = getTask();
         if (mThumbnail == null && task != null && !hasCommittedReparentToAnimationLeash()) {
             SurfaceControl.ScreenshotGraphicBuffer snapshot =
                     mWmService.mTaskSnapshotController.createTaskSnapshot(
@@ -5803,7 +5779,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // of the pinned stack or animation layer. The leash is then reparented to this new layer.
         if (mNeedsAnimationBoundsLayer) {
             mTmpRect.setEmpty();
-            final Task task = getTask();
             if (getDisplayContent().mAppTransitionController.isTransitWithinTask(
                     getTransit(), task)) {
                 task.getBounds(mTmpRect);
@@ -5860,9 +5835,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final GraphicBuffer thumbnailHeader =
-                getDisplayContent().mAppTransition.getAppTransitionThumbnailHeader(getTask());
+                getDisplayContent().mAppTransition.getAppTransitionThumbnailHeader(task);
         if (thumbnailHeader == null) {
-            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "No thumbnail header bitmap for: %s", getTask());
+            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "No thumbnail header bitmap for: %s", task);
             return;
         }
         clearThumbnail();
@@ -5886,7 +5861,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final Rect frame = win.getFrameLw();
-        final int thumbnailDrawableRes = getTask().mUserId == mWmService.mCurrentUserId
+        final int thumbnailDrawableRes = task.mUserId == mWmService.mCurrentUserId
                 ? R.drawable.ic_account_circle
                 : R.drawable.ic_corp_badge;
         final GraphicBuffer thumbnail =
@@ -5916,7 +5891,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect insets = win != null ? win.getContentInsets() : null;
         final Configuration displayConfig = mDisplayContent.getConfiguration();
         return getDisplayContent().mAppTransition.createThumbnailAspectScaleAnimationLocked(
-                appRect, insets, thumbnailHeader, getTask(), displayConfig.uiMode,
+                appRect, insets, thumbnailHeader, task, displayConfig.uiMode,
                 displayConfig.orientation);
     }
 
@@ -6256,7 +6231,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Ensure the screen related fields are set. It is used to prevent activity relaunch
         // when moving between displays. For screenWidthDp and screenWidthDp, because they
         // are relative to bounds and density, they will be calculated in
-        // {@link TaskRecord#computeConfigResourceOverrides} and the result will also be
+        // {@link Task#computeConfigResourceOverrides} and the result will also be
         // relatively fixed.
         overrideConfig.colorMode = fullConfig.colorMode;
         overrideConfig.densityDpi = fullConfig.densityDpi;
@@ -6366,9 +6341,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (rotation != ROTATION_UNDEFINED) {
             // Ensure the parent and container bounds won't overlap with insets.
-            TaskRecord.intersectWithInsetsIfFits(containingAppBounds, compatDisplayBounds,
+            Task.intersectWithInsetsIfFits(containingAppBounds, compatDisplayBounds,
                     mCompatDisplayInsets.mNonDecorInsets[rotation]);
-            TaskRecord.intersectWithInsetsIfFits(parentBounds, compatDisplayBounds,
+            Task.intersectWithInsetsIfFits(parentBounds, compatDisplayBounds,
                     mCompatDisplayInsets.mNonDecorInsets[rotation]);
         }
 
@@ -6415,7 +6390,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     Rect getDisplayedBounds() {
-        final Task task = getTask();
         if (task != null) {
             final Rect overrideDisplayedBounds = task.getOverrideDisplayedBounds();
             if (!overrideDisplayedBounds.isEmpty()) {
@@ -6434,7 +6408,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // Use task-bounds if available so that activity-level letterbox (maxAspectRatio) is
         // included in the animation.
-        return getTask() != null ? getTask().getBounds() : getBounds();
+        return task != null ? task.getBounds() : getBounds();
     }
 
     /**
@@ -6504,7 +6478,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTmpPrevBounds.set(getBounds());
         super.onConfigurationChanged(newParentConfig);
 
-        final Task task = getTask();
         final Rect overrideBounds = getResolvedOverrideBounds();
         if (task != null && !overrideBounds.isEmpty()
                 // If the changes come from change-listener, the incoming parent configuration is
@@ -6680,7 +6653,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Compute configuration based on max supported width and height.
         // Also account for the left / top insets (e.g. from display cutouts), which will be clipped
-        // away later in {@link TaskRecord#computeConfigResourceOverrides()}. Otherwise, the app
+        // away later in {@link Task#computeConfigResourceOverrides()}. Otherwise, the app
         // bounds would end up too small.
         outBounds.set(containingBounds.left, containingBounds.top,
                 activityWidth + containingAppBounds.left,
@@ -6822,7 +6795,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             preserveWindow &= isResizeOnlyChange(changes);
             final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());
             if (hasResizeChange) {
-                final boolean isDragResizing = getTaskRecord().isDragResizing();
+                final boolean isDragResizing = task.isDragResizing();
                 mRelaunchReason = isDragResizing ? RELAUNCH_REASON_FREE_RESIZE
                         : RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
             } else {
@@ -7429,7 +7402,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect[] mStableInsets = new Rect[4];
 
         /**
-         * Sets bounds to {@link TaskRecord} bounds. For apps in freeform, the task bounds are the
+         * Sets bounds to {@link Task} bounds. For apps in freeform, the task bounds are the
          * parent bounds from the app's perspective. No insets because within a window.
          */
         CompatDisplayInsets(DisplayContent display, Rect activityBounds, boolean isFloating) {
@@ -7489,7 +7462,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     RemoteAnimationTarget createRemoteAnimationTarget(
             RemoteAnimationController.RemoteAnimationRecord record) {
-        final Task task = getTask();
         final WindowState mainWindow = findMainWindow();
         if (task == null || mainWindow == null) {
             return null;
