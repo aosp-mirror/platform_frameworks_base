@@ -27,7 +27,11 @@ import java.lang.annotation.RetentionPolicy;
  * This class is used in conjunction with the {@link GnssStatus.Callback}.
  */
 public final class GnssStatus {
+
     // these must match the definitions in gps.h
+    //
+    // Note: these constants are also duplicated in GnssStatusCompat.java in the androidx support
+    // library. if adding a constellation, please update that file as well.
 
     /** Unknown constellation type. */
     public static final int CONSTELLATION_UNKNOWN = 0;
