@@ -63,7 +63,7 @@
     <string name="screenrecord_low_quality_label">Low quality</string>
     <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
     <string name="global_action_screenshot_cust">Screenshot</string>
-    <string name="global_action_screenrecord">Screenrecord</string>
+    <string name="global_action_screenrecord">Screen Rec</string>
 
     <!-- Advanced reboot -->
     <string name="global_action_restart_advanced">Advanced</string>
