@@ -461,6 +461,26 @@ public class ExifInterface {
     public static final int WHITEBALANCE_AUTO = 0;
     public static final int WHITEBALANCE_MANUAL = 1;
 
+    /**
+     * Constant used to indicate that the input stream contains the full image data.
+     * <p>
+     * The format of the image data should follow one of the image formats supported by this class.
+     */
+    public static final int STREAM_TYPE_FULL_IMAGE_DATA = 0;
+    /**
+     * Constant used to indicate that the input stream contains only Exif data.
+     * <p>
+     * The format of the Exif-only data must follow the below structure:
+     *     Exif Identifier Code ("Exif\0\0") + TIFF header + IFD data
+     * See JEITA CP-3451C Section 4.5.2 and 4.5.4 specifications for more details.
+     */
+    public static final int STREAM_TYPE_EXIF_DATA_ONLY = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STREAM_TYPE_FULL_IMAGE_DATA, STREAM_TYPE_EXIF_DATA_ONLY})
+    public @interface ExifStreamType {}
+
     // Maximum size for checking file type signature (see image_type_recognition_lite.cc)
     private static final int SIGNATURE_CHECK_SIZE = 5000;
 
@@ -1371,7 +1391,7 @@ public class ExifInterface {
     private AssetManager.AssetInputStream mAssetInputStream;
     private boolean mIsInputStream;
     private int mMimeType;
-    private boolean mIsStandalone;
+    private boolean mIsExifDataOnly;
     @UnsupportedAppUsage
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
     private Set<Integer> mHandledIfdOffsets = new HashSet<>(EXIF_TAGS.length);
@@ -1399,6 +1419,11 @@ public class ExifInterface {
 
     /**
      * Reads Exif tags from the specified image file.
+     *
+     * @param file the file of the image data
+     * @throws NullPointerException if file is null
+     * @throws IOException if an I/O error occurs while retrieving file descriptor via
+     *         {@link FileInputStream#getFD()}.
      */
     public ExifInterface(@NonNull File file) throws IOException {
         if (file == null) {
@@ -1409,6 +1434,11 @@ public class ExifInterface {
 
     /**
      * Reads Exif tags from the specified image file.
+     *
+     * @param filename the name of the file of the image data
+     * @throws NullPointerException if file name is null
+     * @throws IOException if an I/O error occurs while retrieving file descriptor via
+     *         {@link FileInputStream#getFD()}.
      */
     public ExifInterface(@NonNull String filename) throws IOException {
         if (filename == null) {
@@ -1421,6 +1451,11 @@ public class ExifInterface {
      * Reads Exif tags from the specified image file descriptor. Attribute mutation is supported
      * for writable and seekable file descriptors only. This constructor will not rewind the offset
      * of the given file descriptor. Developers should close the file descriptor after use.
+     *
+     * @param fileDescriptor the file descriptor of the image data
+     * @throws NullPointerException if file descriptor is null
+     * @throws IOException if an error occurs while duplicating the file descriptor via
+     *         {@link Os#dup(FileDescriptor)}.
      */
     public ExifInterface(@NonNull FileDescriptor fileDescriptor) throws IOException {
         if (fileDescriptor == null) {
@@ -1459,45 +1494,46 @@ public class ExifInterface {
     /**
      * Reads Exif tags from the specified image input stream. Attribute mutation is not supported
      * for input streams. The given input stream will proceed from its current position. Developers
-     * should close the input stream after use.
+     * should close the input stream after use. This constructor is not intended to be used with an
+     * input stream that performs any networking operations.
+     *
+     * @param inputStream the input stream that contains the image data
+     * @throws NullPointerException if the input stream is null
      */
     public ExifInterface(@NonNull InputStream inputStream) throws IOException {
         this(inputStream, false);
     }
 
     /**
-     * Reads Exif tags from the specified standalone input stream. Standalone data refers to Exif
-     * data that exists by itself and is not contained in a file format such as jpeg or png.
-     * The format of the standalone data must follow the below structure:
-     *     Exif Identifier Code ("Exif\0\0") + TIFF header + IFD data
-     * See JEITA CP-3451C Section 4.5.2 and 4.5.4 specifications for more details.
-     * <p>
-     * Attribute mutation is not supported for this constructor. The given input stream will proceed
-     * from its current position. Developers should close the input stream after use. This
-     * constructor is not intended to be used with an input stream that performs any networking
-     * operations.
+     * Reads Exif tags from the specified image input stream based on the stream type. Attribute
+     * mutation is not supported for input streams. The given input stream will proceed from its
+     * current position. Developers should close the input stream after use. This constructor is not
+     * intended to be used with an input stream that performs any networking operations.
      *
-     * @throws IOException if the data does not follow the aforementioned structure.
+     * @param inputStream the input stream that contains the image data
+     * @param streamType the type of input stream
+     * @throws NullPointerException if the input stream is null
+     * @throws IOException if an I/O error occurs while retrieving file descriptor via
+     *         {@link FileInputStream#getFD()}.
      */
-    @NonNull
-    public static ExifInterface fromStandalone(@NonNull InputStream inputStream)
+    public ExifInterface(@NonNull InputStream inputStream, @ExifStreamType int streamType)
             throws IOException {
-        if (isStandalone(inputStream)) {
-            return new ExifInterface(inputStream, true);
-        }
-        throw new IOException("Given data does not follow the structure of a standalone exif "
-                + "data.");
+        this(inputStream, (streamType == STREAM_TYPE_EXIF_DATA_ONLY) ? true : false);
     }
 
-    private ExifInterface(@NonNull InputStream inputStream, boolean isFromStandalone)
+    private ExifInterface(@NonNull InputStream inputStream, boolean shouldBeExifDataOnly)
             throws IOException {
         if (inputStream == null) {
             throw new NullPointerException("inputStream cannot be null");
         }
         mFilename = null;
 
-        if (isFromStandalone) {
-            mIsStandalone = true;
+        if (shouldBeExifDataOnly) {
+            if (!isExifDataOnly(inputStream)) {
+                Log.w(TAG, "Given data does not follow the structure of an Exif-only data.");
+                return;
+            }
+            mIsExifDataOnly = true;
             mAssetInputStream = null;
             mSeekableFileDescriptor = null;
         } else {
@@ -1835,10 +1871,9 @@ public class ExifInterface {
 
     /**
      * This function decides which parser to read the image data according to the given input stream
-     * type and the content of the input stream. In each case, it reads the first three bytes to
-     * determine whether the image data format is JPEG or not.
+     * type and the content of the input stream.
      */
-    private void loadAttributes(@NonNull InputStream in) throws IOException {
+    private void loadAttributes(@NonNull InputStream in) {
         if (in == null) {
             throw new NullPointerException("inputstream shouldn't be null");
         }
@@ -1849,7 +1884,7 @@ public class ExifInterface {
             }
 
             // Check file type
-            if (!mIsStandalone) {
+            if (!mIsExifDataOnly) {
                 in = new BufferedInputStream(in, SIGNATURE_CHECK_SIZE);
                 mMimeType = getMimeType((BufferedInputStream) in);
             }
@@ -1857,7 +1892,7 @@ public class ExifInterface {
             // Create byte-ordered input stream
             ByteOrderedDataInputStream inputStream = new ByteOrderedDataInputStream(in);
 
-            if (!mIsStandalone) {
+            if (!mIsExifDataOnly) {
                 switch (mMimeType) {
                     case IMAGE_TYPE_JPEG: {
                         getJpegAttributes(inputStream, 0, IFD_TYPE_PRIMARY); // 0 is offset
@@ -1924,11 +1959,14 @@ public class ExifInterface {
         }
     }
 
-    private static boolean isSeekableFD(FileDescriptor fd) throws IOException {
+    private static boolean isSeekableFD(FileDescriptor fd) {
         try {
             Os.lseek(fd, 0, OsConstants.SEEK_CUR);
             return true;
         } catch (ErrnoException e) {
+            if (DEBUG) {
+                Log.d(TAG, "The file descriptor for the given input is not seekable");
+            }
             return false;
         }
     }
@@ -2194,7 +2232,7 @@ public class ExifInterface {
         }
 
         if (mHasThumbnail) {
-            if (mIsStandalone) {
+            if (mIsExifDataOnly) {
                 return new long[] { mThumbnailOffset + mExifOffset, mThumbnailLength };
             }
             return new long[] { mThumbnailOffset, mThumbnailLength };
@@ -2658,16 +2696,20 @@ public class ExifInterface {
         return true;
     }
 
-    private static boolean isStandalone(InputStream inputStream) throws IOException {
-        byte[] signatureCheckBytes = new byte[IDENTIFIER_EXIF_APP1.length];
-        inputStream.read(signatureCheckBytes);
-
-        for (int i = 0; i < IDENTIFIER_EXIF_APP1.length; i++) {
-            if (signatureCheckBytes[i] != IDENTIFIER_EXIF_APP1[i]) {
-                return false;
+    private static boolean isExifDataOnly(InputStream inputStream) {
+        try {
+            byte[] signatureCheckBytes = new byte[IDENTIFIER_EXIF_APP1.length];
+            inputStream.read(signatureCheckBytes);
+            if (Arrays.equals(signatureCheckBytes, IDENTIFIER_EXIF_APP1)) {
+                return true;
+            }
+        } catch (IOException e) {
+            if (DEBUG) {
+                Log.w(TAG,
+                        "Encountered error while checking whether input stream is Exif data only");
             }
         }
-        return true;
+        return false;
     }
 
     /**
