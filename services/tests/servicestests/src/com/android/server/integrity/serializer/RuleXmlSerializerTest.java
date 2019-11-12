@@ -44,7 +44,7 @@ public class RuleXmlSerializerTest {
     public void testXmlString_serializeEmptyRule() throws Exception {
         Rule rule = null;
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
-        String expectedRules = "<RuleList />";
+        String expectedRules = "<RL />";
 
         String actualRules = xmlSerializer.serialize(Collections.singletonList(rule));
 
@@ -58,15 +58,15 @@ public class RuleXmlSerializerTest {
                 new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
                 Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
-        String expectedRules = "<RuleList>"
-                + "<Rule>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
-                + "<Value>com.app.test</Value>"
-                + "</AtomicFormula>"
-                + "<Effect>" + Rule.DENY + "</Effect>"
-                + "</Rule>"
-                + "</RuleList>";
+        String expectedRules = "<RL>"
+                + "<R>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.PACKAGE_NAME + "</K>"
+                + "<V>com.app.test</V>"
+                + "</AF>"
+                + "<E>" + Rule.DENY + "</E>"
+                + "</R>"
+                + "</RL>";
 
         String actualRules = xmlSerializer.serialize(Arrays.asList(rule1, rule2));
 
@@ -81,18 +81,18 @@ public class RuleXmlSerializerTest {
                                 "com.app.test"))), Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
         OutputStream outputStream = new ByteArrayOutputStream();
-        String expectedRules = "<RuleList>"
-                + "<Rule>"
-                + "<OpenFormula>"
-                + "<Connector>" + OpenFormula.NOT + "</Connector>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
-                + "<Value>com.app.test</Value>"
-                + "</AtomicFormula>"
-                + "</OpenFormula>"
-                + "<Effect>" + Rule.DENY + "</Effect>"
-                + "</Rule>"
-                + "</RuleList>";
+        String expectedRules = "<RL>"
+                + "<R>"
+                + "<OF>"
+                + "<C>" + OpenFormula.NOT + "</C>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.PACKAGE_NAME + "</K>"
+                + "<V>com.app.test</V>"
+                + "</AF>"
+                + "</OF>"
+                + "<E>" + Rule.DENY + "</E>"
+                + "</R>"
+                + "</RL>";
 
         xmlSerializer.serialize(Collections.singletonList(rule), outputStream);
 
@@ -107,18 +107,18 @@ public class RuleXmlSerializerTest {
                         new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME,
                                 "com.app.test"))), Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
-        String expectedRules = "<RuleList>"
-                + "<Rule>"
-                + "<OpenFormula>"
-                + "<Connector>" + OpenFormula.NOT + "</Connector>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
-                + "<Value>com.app.test</Value>"
-                + "</AtomicFormula>"
-                + "</OpenFormula>"
-                + "<Effect>" + Rule.DENY + "</Effect>"
-                + "</Rule>"
-                + "</RuleList>";
+        String expectedRules = "<RL>"
+                + "<R>"
+                + "<OF>"
+                + "<C>" + OpenFormula.NOT + "</C>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.PACKAGE_NAME + "</K>"
+                + "<V>com.app.test</V>"
+                + "</AF>"
+                + "</OF>"
+                + "<E>" + Rule.DENY + "</E>"
+                + "</R>"
+                + "</RL>";
 
         String actualRules = xmlSerializer.serialize(Collections.singletonList(rule));
 
@@ -133,22 +133,22 @@ public class RuleXmlSerializerTest {
                         new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE,
                                 "test_cert"))), Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
-        String expectedRules = "<RuleList>"
-                + "<Rule>"
-                + "<OpenFormula>"
-                + "<Connector>" + OpenFormula.AND + "</Connector>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
-                + "<Value>com.app.test</Value>"
-                + "</AtomicFormula>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.APP_CERTIFICATE + "</Key>"
-                + "<Value>test_cert</Value>"
-                + "</AtomicFormula>"
-                + "</OpenFormula>"
-                + "<Effect>" + Rule.DENY + "</Effect>"
-                + "</Rule>"
-                + "</RuleList>";
+        String expectedRules = "<RL>"
+                + "<R>"
+                + "<OF>"
+                + "<C>" + OpenFormula.AND + "</C>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.PACKAGE_NAME + "</K>"
+                + "<V>com.app.test</V>"
+                + "</AF>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.APP_CERTIFICATE + "</K>"
+                + "<V>test_cert</V>"
+                + "</AF>"
+                + "</OF>"
+                + "<E>" + Rule.DENY + "</E>"
+                + "</R>"
+                + "</RL>";
 
         String actualRules = xmlSerializer.serialize(Collections.singletonList(rule));
 
@@ -163,22 +163,22 @@ public class RuleXmlSerializerTest {
                         new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE,
                                 "test_cert"))), Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
-        String expectedRules = "<RuleList>"
-                + "<Rule>"
-                + "<OpenFormula>"
-                + "<Connector>" + OpenFormula.OR + "</Connector>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
-                + "<Value>com.app.test</Value>"
-                + "</AtomicFormula>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.APP_CERTIFICATE + "</Key>"
-                + "<Value>test_cert</Value>"
-                + "</AtomicFormula>"
-                + "</OpenFormula>"
-                + "<Effect>" + Rule.DENY + "</Effect>"
-                + "</Rule>"
-                + "</RuleList>";
+        String expectedRules = "<RL>"
+                + "<R>"
+                + "<OF>"
+                + "<C>" + OpenFormula.OR + "</C>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.PACKAGE_NAME + "</K>"
+                + "<V>com.app.test</V>"
+                + "</AF>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.APP_CERTIFICATE + "</K>"
+                + "<V>test_cert</V>"
+                + "</AF>"
+                + "</OF>"
+                + "<E>" + Rule.DENY + "</E>"
+                + "</R>"
+                + "</RL>";
 
         String actualRules = xmlSerializer.serialize(Collections.singletonList(rule));
 
@@ -191,15 +191,15 @@ public class RuleXmlSerializerTest {
                 new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
                 Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
-        String expectedRules = "<RuleList>"
-                + "<Rule>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.PACKAGE_NAME + "</Key>"
-                + "<Value>com.app.test</Value>"
-                + "</AtomicFormula>"
-                + "<Effect>" + Rule.DENY + "</Effect>"
-                + "</Rule>"
-                + "</RuleList>";
+        String expectedRules = "<RL>"
+                + "<R>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.PACKAGE_NAME + "</K>"
+                + "<V>com.app.test</V>"
+                + "</AF>"
+                + "<E>" + Rule.DENY + "</E>"
+                + "</R>"
+                + "</RL>";
 
         String actualRules = xmlSerializer.serialize(Collections.singletonList(rule));
 
@@ -212,16 +212,16 @@ public class RuleXmlSerializerTest {
                 new AtomicFormula.IntAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 1),
                 Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
-        String expectedRules = "<RuleList>"
-                + "<Rule>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.VERSION_CODE + "</Key>"
-                + "<Operator>" + AtomicFormula.EQ + "</Operator>"
-                + "<Value>1</Value>"
-                + "</AtomicFormula>"
-                + "<Effect>" + Rule.DENY + "</Effect>"
-                + "</Rule>"
-                + "</RuleList>";
+        String expectedRules = "<RL>"
+                + "<R>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.VERSION_CODE + "</K>"
+                + "<O>" + AtomicFormula.EQ + "</O>"
+                + "<V>1</V>"
+                + "</AF>"
+                + "<E>" + Rule.DENY + "</E>"
+                + "</R>"
+                + "</RL>";
 
         String actualRules = xmlSerializer.serialize(Collections.singletonList(rule));
 
@@ -234,15 +234,15 @@ public class RuleXmlSerializerTest {
                 new AtomicFormula.BooleanAtomicFormula(AtomicFormula.PRE_INSTALLED, true),
                 Rule.DENY);
         RuleSerializer xmlSerializer = new RuleXmlSerializer();
-        String expectedRules = "<RuleList>"
-                + "<Rule>"
-                + "<AtomicFormula>"
-                + "<Key>" + AtomicFormula.PRE_INSTALLED + "</Key>"
-                + "<Value>true</Value>"
-                + "</AtomicFormula>"
-                + "<Effect>" + Rule.DENY + "</Effect>"
-                + "</Rule>"
-                + "</RuleList>";
+        String expectedRules = "<RL>"
+                + "<R>"
+                + "<AF>"
+                + "<K>" + AtomicFormula.PRE_INSTALLED + "</K>"
+                + "<V>true</V>"
+                + "</AF>"
+                + "<E>" + Rule.DENY + "</E>"
+                + "</R>"
+                + "</RL>";
 
         String actualRules = xmlSerializer.serialize(Collections.singletonList(rule));
 

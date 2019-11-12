@@ -39,16 +39,15 @@ public class RuleXmlSerializer implements RuleSerializer {
     public static final String TAG = "RuleXmlSerializer";
     private static final String NAMESPACE = "";
 
-    // TODO: Use smaller tag names.
-    private static final String RULE_LIST_TAG = "RuleList";
-    private static final String RULE_TAG = "Rule";
-    private static final String OPEN_FORMULA_TAG = "OpenFormula";
-    private static final String ATOMIC_FORMULA_TAG = "AtomicFormula";
-    private static final String EFFECT_TAG = "Effect";
-    private static final String KEY_TAG = "Key";
-    private static final String OPERATOR_TAG = "Operator";
-    private static final String VALUE_TAG = "Value";
-    private static final String CONNECTOR_TAG = "Connector";
+    private static final String RULE_LIST_TAG = "RL";
+    private static final String RULE_TAG = "R";
+    private static final String OPEN_FORMULA_TAG = "OF";
+    private static final String ATOMIC_FORMULA_TAG = "AF";
+    private static final String EFFECT_TAG = "E";
+    private static final String KEY_TAG = "K";
+    private static final String OPERATOR_TAG = "O";
+    private static final String VALUE_TAG = "V";
+    private static final String CONNECTOR_TAG = "C";
 
     @Override
     public void serialize(List<Rule> rules, OutputStream outputStream)
