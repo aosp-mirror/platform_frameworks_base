@@ -95,6 +95,9 @@ applications that come with the platform
     <privapp-permissions package="com.android.mtp">
         <permission name="android.permission.ACCESS_MTP"/>
         <permission name="android.permission.MANAGE_USB"/>
+        <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.musicfx">
@@ -207,6 +210,7 @@ applications that come with the platform
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WATCH_APPOPS"/>
+        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
     </privapp-permissions>
 
