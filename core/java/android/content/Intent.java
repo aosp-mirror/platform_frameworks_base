@@ -1940,6 +1940,7 @@ public class Intent implements Parcelable, Cloneable {
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
+    @TestApi
     public static final String ACTION_MANAGE_DEFAULT_APP =
             "android.intent.action.MANAGE_DEFAULT_APP";
 
