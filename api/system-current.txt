@@ -3241,9 +3241,17 @@ package android.hardware.usb {
   }
 
   public class UsbManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public long getCurrentFunctions();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_USB) public java.util.List<android.hardware.usb.UsbPort> getPorts();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void grantPermission(android.hardware.usb.UsbDevice, String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setCurrentFunctions(long);
     field @RequiresPermission(android.Manifest.permission.MANAGE_USB) public static final String ACTION_USB_PORT_CHANGED = "android.hardware.usb.action.USB_PORT_CHANGED";
+    field public static final String ACTION_USB_STATE = "android.hardware.usb.action.USB_STATE";
+    field public static final long FUNCTION_NONE = 0L; // 0x0L
+    field public static final long FUNCTION_RNDIS = 32L; // 0x20L
+    field public static final String USB_CONFIGURED = "configured";
+    field public static final String USB_CONNECTED = "connected";
+    field public static final String USB_FUNCTION_RNDIS = "rndis";
   }
 
   public final class UsbPort {

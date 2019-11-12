@@ -91,7 +91,7 @@ public class UsbManager {
      *
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final String ACTION_USB_STATE =
             "android.hardware.usb.action.USB_STATE";
 
@@ -164,7 +164,7 @@ public class UsbManager {
      *
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final String USB_CONNECTED = "connected";
 
     /**
@@ -181,6 +181,7 @@ public class UsbManager {
      *
      * {@hide}
      */
+    @SystemApi
     public static final String USB_CONFIGURED = "configured";
 
     /**
@@ -217,6 +218,7 @@ public class UsbManager {
      *
      * {@hide}
      */
+    @SystemApi
     public static final String USB_FUNCTION_RNDIS = "rndis";
 
     /**
@@ -319,6 +321,7 @@ public class UsbManager {
      * Code for the charging usb function. Passed into {@link #setCurrentFunctions(long)}
      * {@hide}
      */
+    @SystemApi
     public static final long FUNCTION_NONE = 0;
 
     /**
@@ -337,6 +340,7 @@ public class UsbManager {
      * Code for the rndis usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
      * {@hide}
      */
+    @SystemApi
     public static final long FUNCTION_RNDIS = GadgetFunction.RNDIS;
 
     /**
@@ -698,6 +702,8 @@ public class UsbManager {
      *
      * {@hide}
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
     public void setCurrentFunctions(long functions) {
         try {
             mService.setCurrentFunctions(functions);
@@ -737,6 +743,8 @@ public class UsbManager {
      *
      * {@hide}
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
     public long getCurrentFunctions() {
         try {
             return mService.getCurrentFunctions();
