@@ -185,6 +185,9 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
 
+            // NOTE: This receiver could run before this method returns, as it's not dispatching
+            // on the main thread and BroadcastDispatcher may not need to register with Context.
+            // The receiver will return immediately if the view does not have a Handler yet.
             mBroadcastDispatcher.registerReceiver(mIntentReceiver, filter,
                     Dependency.get(Dependency.TIME_TICK_HANDLER), UserHandle.ALL);
             Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS,
@@ -197,11 +200,9 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             mCurrentUserId = mCurrentUserTracker.getCurrentUserId();
         }
 
-        // NOTE: It's safe to do these after registering the receiver since the receiver always runs
-        // in the main thread, therefore the receiver can't run before this method returns.
-
         // The time zone may have changed while the receiver wasn't registered, so update the Time
         mCalendar = Calendar.getInstance(TimeZone.getDefault());
+        mClockFormatString = "";
 
         // Make sure we update to the current time
         updateClock();
@@ -227,10 +228,16 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // If the handler is null, it means we received a broadcast while the view has not
+            // finished being attached or in the process of being detached.
+            // In that case, do not post anything.
+            Handler handler = getHandler();
+            if (handler == null) return;
+
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
                 String tz = intent.getStringExtra("time-zone");
-                getHandler().post(() -> {
+                handler.post(() -> {
                     mCalendar = Calendar.getInstance(TimeZone.getTimeZone(tz));
                     if (mClockFormat != null) {
                         mClockFormat.setTimeZone(mCalendar.getTimeZone());
@@ -238,14 +245,14 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                 });
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 final Locale newLocale = getResources().getConfiguration().locale;
-                getHandler().post(() -> {
+                handler.post(() -> {
                     if (!newLocale.equals(mLocale)) {
                         mLocale = newLocale;
                         mClockFormatString = ""; // force refresh
                     }
                 });
             }
-            getHandler().post(() -> updateClock());
+            handler.post(() -> updateClock());
         }
     };
 
