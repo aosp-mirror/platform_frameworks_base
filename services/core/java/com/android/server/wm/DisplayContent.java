@@ -2257,7 +2257,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     boolean pointWithinAppWindow(int x, int y) {
         final int[] targetWindowType = {-1};
-        final Consumer fn = PooledLambda.obtainConsumer((w, nonArg) -> {
+        final PooledConsumer fn = PooledLambda.obtainConsumer((w, nonArg) -> {
             if (targetWindowType[0] != -1) {
                 return;
             }
@@ -2268,7 +2268,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }, PooledLambda.__(WindowState.class), mTmpRect);
         forAllWindows(fn, true /* traverseTopToBottom */);
-        ((PooledConsumer) fn).recycle();
+        fn.recycle();
         return FIRST_APPLICATION_WINDOW <= targetWindowType[0]
                         && targetWindowType[0] <= LAST_APPLICATION_WINDOW;
     }
