@@ -1160,7 +1160,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         this.task = task;
     }
 
-    TaskStack getStack() {
+    ActivityStack getStack() {
         return task != null ? task.getTaskStack() : null;
     }
 
@@ -1202,7 +1202,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (mLastParent != null && mLastParent.getTaskStack() != null) {
             task.getTaskStack().mExitingActivities.remove(this);
         }
-        final TaskStack stack = getStack();
+        final ActivityStack stack = getStack();
 
         // If we reparent, make sure to remove ourselves from the old animation registry.
         if (mAnimatingActivityRegistry != null) {
@@ -1266,7 +1266,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         if (prevDc.mFocusedApp == this) {
             prevDc.setFocusedApp(null);
-            final TaskStack stack = dc.getTopStack();
+            final ActivityStack stack = dc.getTopStack();
             if (stack != null) {
                 final Task task = stack.getTopChild();
                 if (task != null && task.getTopChild() == this) {
@@ -3024,7 +3024,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             getDisplayContent().mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
-        final TaskStack stack = getStack();
+        final ActivityStack stack = getStack();
         if (delayed && !isEmpty()) {
             // set the token aside because it has an active animation to be finished
             ProtoLog.v(WM_DEBUG_ADD_REMOVE,
@@ -3754,7 +3754,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
                 // Notify the pinned stack upon all windows drawn. If there was an animation in
                 // progress then this signal will resume that animation.
-                final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
+                final ActivityStack pinnedStack = mDisplayContent.getPinnedStack();
                 if (pinnedStack != null) {
                     pinnedStack.onAllWindowsDrawn();
                 }
@@ -5787,7 +5787,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     getTransit(), task)) {
                 task.getBounds(mTmpRect);
             } else {
-                final TaskStack stack = getStack();
+                final ActivityStack stack = getStack();
                 if (stack == null) {
                     return;
                 }
@@ -6547,7 +6547,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void savePinnedStackBounds() {
         // Leaving PiP to fullscreen, save the snap fraction based on the pre-animation bounds
         // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
-        final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
+        final ActivityStack pinnedStack = mDisplayContent.getPinnedStack();
         if (pinnedStack == null) return;
         final Rect stackBounds;
         if (pinnedStack.lastAnimatingBoundsWasToFullscreen()) {

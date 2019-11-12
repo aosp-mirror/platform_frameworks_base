@@ -140,7 +140,7 @@ public class DockedStackDividerController {
     float mLastDividerProgress;
     private final DividerSnapAlgorithm[] mSnapAlgorithmForRotation = new DividerSnapAlgorithm[4];
     private boolean mImeHideRequested;
-    private TaskStack mDimmedStack;
+    private ActivityStack mDimmedStack;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -255,7 +255,7 @@ public class DockedStackDividerController {
     }
 
     boolean isHomeStackResizable() {
-        final TaskStack homeStack = mDisplayContent.getHomeStack();
+        final ActivityStack homeStack = mDisplayContent.getHomeStack();
         if (homeStack == null) {
             return false;
         }
@@ -371,7 +371,7 @@ public class DockedStackDividerController {
         if (mWindow == null) {
             return;
         }
-        TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
 
         // If the stack is invisible, we policy force hide it in WindowAnimator.shouldForceHide
         final boolean visible = stack != null;
@@ -415,7 +415,7 @@ public class DockedStackDividerController {
     }
 
     void positionDockedStackedDivider(Rect frame) {
-        TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
         if (stack == null) {
             // Unfortunately we might end up with still having a divider, even though the underlying
             // stack was already removed. This is because we are on AM thread and the removal of the
@@ -523,7 +523,8 @@ public class DockedStackDividerController {
 
             // If a primary stack was just created, it will not have access to display content at
             // this point so pass it from here to get a valid dock side.
-            final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+            final ActivityStack stack =
+                    mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             mOriginalDockedSide = stack.getDockSideForDisplay(mDisplayContent);
             return;
         }
@@ -558,7 +559,7 @@ public class DockedStackDividerController {
             boolean isHomeStackResizable) {
         long animDuration = 0;
         if (animate) {
-            final TaskStack stack =
+            final ActivityStack stack =
                     mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             final long transitionDuration = isAnimationMaximizing()
                     ? mDisplayContent.mAppTransition.getLastClipRevealTransitionDuration()
@@ -629,10 +630,10 @@ public class DockedStackDividerController {
      */
     void setResizeDimLayer(boolean visible, int targetWindowingMode, float alpha) {
         // TODO: Maybe only allow split-screen windowing modes?
-        final TaskStack stack = targetWindowingMode != WINDOWING_MODE_UNDEFINED
+        final ActivityStack stack = targetWindowingMode != WINDOWING_MODE_UNDEFINED
                 ? mDisplayContent.getTopStackInWindowingMode(targetWindowingMode)
                 : null;
-        final TaskStack dockedStack = mDisplayContent.getSplitScreenPrimaryStack();
+        final ActivityStack dockedStack = mDisplayContent.getSplitScreenPrimaryStack();
         boolean visibleAndValid = visible && stack != null && dockedStack != null;
 
         // Ensure an old dim that was shown for the docked stack divider is removed so we don't end
@@ -703,7 +704,7 @@ public class DockedStackDividerController {
         if (mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility() == null) {
             return;
         }
-        final TaskStack homeStack = mDisplayContent.getHomeStack();
+        final ActivityStack homeStack = mDisplayContent.getHomeStack();
         if (homeStack == null) {
             return;
         }
@@ -717,7 +718,7 @@ public class DockedStackDividerController {
         if (mMinimizedDock && mService.mKeyguardOrAodShowingOnDefaultDisplay) {
             return;
         }
-        final TaskStack topSecondaryStack = mDisplayContent.getTopStackInWindowingMode(
+        final ActivityStack topSecondaryStack = mDisplayContent.getTopStackInWindowingMode(
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         final RecentsAnimationController recentsAnim = mService.getRecentsAnimationController();
         final boolean minimizedForRecentsAnimation = recentsAnim != null &&
@@ -872,7 +873,7 @@ public class DockedStackDividerController {
     }
 
     private boolean setMinimizedDockedStack(boolean minimized) {
-        final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        final ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
         notifyDockedStackMinimizedChanged(minimized, false /* animate */, isHomeStackResizable());
         return stack != null && stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f);
     }
@@ -922,7 +923,7 @@ public class DockedStackDividerController {
     }
 
     private boolean animateForMinimizedDockedStack(long now) {
-        final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        final ActivityStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
         if (!mAnimationStarted) {
             mAnimationStarted = true;
             mAnimationStartTime = now;
@@ -956,7 +957,7 @@ public class DockedStackDividerController {
     /**
      * Gets the amount how much to minimize a stack depending on the interpolated fraction t.
      */
-    private float getMinimizeAmount(TaskStack stack, float t) {
+    private float getMinimizeAmount(ActivityStack stack, float t) {
         final float naturalAmount = getInterpolatedAnimationValue(t);
         if (isAnimationMaximizing()) {
             return adjustMaximizeAmount(stack, t, naturalAmount);
@@ -971,7 +972,7 @@ public class DockedStackDividerController {
      * transition so we don't create a visible "hole", but only if both the clip reveal and the
      * docked stack divider start from about the same portion on the screen.
      */
-    private float adjustMaximizeAmount(TaskStack stack, float t, float naturalAmount) {
+    private float adjustMaximizeAmount(ActivityStack stack, float t, float naturalAmount) {
         if (mMaximizeMeetFraction == 1f) {
             return naturalAmount;
         }
@@ -987,7 +988,7 @@ public class DockedStackDividerController {
      * Retrieves the animation fraction at which the docked stack has to meet the clip reveal
      * edge. See {@link #adjustMaximizeAmount}.
      */
-    private float getClipRevealMeetFraction(TaskStack stack) {
+    private float getClipRevealMeetFraction(ActivityStack stack) {
         if (!isAnimationMaximizing() || stack == null ||
                 !mDisplayContent.mAppTransition.hadClipRevealAnimation()) {
             return 1f;

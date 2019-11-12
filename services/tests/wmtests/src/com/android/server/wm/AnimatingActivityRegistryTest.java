@@ -37,7 +37,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests for the {@link TaskStack} class.
+ * Tests for the {@link ActivityStack} class.
  *
  * Build/Install/Run:
  *  atest FrameworksServicesTests:AnimatingActivityRegistryTest

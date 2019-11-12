@@ -1940,7 +1940,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // re-factor.
                 activity.firstWindowDrawn = false;
                 activity.clearAllDrawn();
-                final TaskStack stack = activity.getStack();
+                final ActivityStack stack = activity.getStack();
                 if (stack != null) {
                     stack.mExitingActivities.remove(activity);
                 }
@@ -2769,7 +2769,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void getStackBounds(int windowingMode, int activityType, Rect bounds) {
         synchronized (mGlobalLock) {
-            final TaskStack stack = mRoot.getStack(windowingMode, activityType);
+            final ActivityStack stack = mRoot.getStack(windowingMode, activityType);
             if (stack != null) {
                 stack.getBounds(bounds);
                 return;
@@ -3223,7 +3223,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Notify whether the docked stack exists for the current user
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            final TaskStack stack =
+            final ActivityStack stack =
                     displayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             displayContent.mDividerControllerLocked.notifyDockedStackExistsChanged(
                     stack != null && stack.hasTaskForUser(newUserId));
@@ -4423,7 +4423,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return mRoot.getTopFocusedDisplayContent().mCurrentFocus;
     }
 
-    TaskStack getImeFocusStackLocked() {
+    ActivityStack getImeFocusStackLocked() {
         // Don't use mCurrentFocus.getStack() because it returns home stack for system windows.
         // Also don't use mInputMethodTarget's stack, because some window with FLAG_NOT_FOCUSABLE
         // and FLAG_ALT_FOCUSABLE_IM flags both set might be set to IME target so they're moved
@@ -6483,7 +6483,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public int getDockedStackSide() {
         synchronized (mGlobalLock) {
-            final TaskStack dockedStack = getDefaultDisplayContentLocked()
+            final ActivityStack dockedStack = getDefaultDisplayContentLocked()
                     .getSplitScreenPrimaryStackIgnoringVisibility();
             return dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide();
         }
@@ -7737,7 +7737,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        final TaskStack stack = task.getTaskStack();
+        final ActivityStack stack = task.getTaskStack();
         // We ignore home stack since we don't want home stack to move to front when touched.
         // Specifically, in freeform we don't want tapping on home to cause the freeform apps to go
         // behind home. See b/117376413
