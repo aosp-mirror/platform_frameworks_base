@@ -202,6 +202,14 @@ public class RemoteViews implements Parcelable, Filter {
     public static final int FLAG_USE_LIGHT_BACKGROUND_LAYOUT = 4;
 
     /**
+     * Used to restrict the views which can be inflated
+     *
+     * @see android.view.LayoutInflater.Filter#onLoadClass(java.lang.Class)
+     */
+    private static final LayoutInflater.Filter INFLATER_FILTER =
+            (clazz) -> clazz.isAnnotationPresent(RemoteViews.RemoteView.class);
+
+    /**
      * Application that hosts the remote views.
      *
      * @hide
@@ -3413,10 +3421,21 @@ public class RemoteViews implements Parcelable, Filter {
         // Clone inflater so we load resources from correct context and
         // we don't add a filter to the static version returned by getSystemService.
         inflater = inflater.cloneInContext(inflationContext);
-        inflater.setFilter(this);
+        inflater.setFilter(shouldUseStaticFilter() ? INFLATER_FILTER : this);
         View v = inflater.inflate(rv.getLayoutId(), parent, false);
         v.setTagInternal(R.id.widget_frame, rv.getLayoutId());
         return v;
+    }
+
+    /**
+     * A static filter is much lighter than RemoteViews itself. It's optimized here only for
+     * RemoteVies class. Subclasses should always override this and return true if not overriding
+     * {@link this#onLoadClass(Class)}.
+     *
+     * @hide
+     */
+    protected boolean shouldUseStaticFilter() {
+        return this.getClass().equals(RemoteViews.class);
     }
 
     /**
@@ -3686,11 +3705,15 @@ public class RemoteViews implements Parcelable, Filter {
         return (mActions == null) ? 0 : mActions.size();
     }
 
-    /* (non-Javadoc)
+    /**
      * Used to restrict the views which can be inflated
      *
      * @see android.view.LayoutInflater.Filter#onLoadClass(java.lang.Class)
+     * @deprecated Used by system to enforce safe inflation of {@link RemoteViews}. Apps should not
+     * override this method. Changing of this method will NOT affect the process where RemoteViews
+     * is rendered.
      */
+    @Deprecated
     public boolean onLoadClass(Class clazz) {
         return clazz.isAnnotationPresent(RemoteView.class);
     }
