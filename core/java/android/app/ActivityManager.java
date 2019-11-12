@@ -155,6 +155,12 @@ public class ActivityManager {
      */
     public static final int INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL = 1 << 1;
 
+    /**
+     * Disable test API access for the newly started instrumentation.
+     * @hide
+     */
+    public static final int INSTR_FLAG_DISABLE_TEST_API_CHECKS = 1 << 2;
+
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
         final Context mContext;
