@@ -17,7 +17,6 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
           package="com.android.server.net.integrationtests">
 
     <!-- For ConnectivityService registerReceiverAsUser (receiving broadcasts) -->
@@ -26,13 +25,19 @@
     <uses-permission android:name="android.permission.MANAGE_USERS" />
     <!-- ConnectivityService sends notifications to BatteryStats -->
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
+    <!-- Reading network status -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+    <!-- Reading DeviceConfig flags -->
+    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
 
         <!-- This manifest is merged with the base manifest of the real NetworkStack app.
              Remove the NetworkStackService from the base (real) manifest, and replace with a test
              service that responds to the same intent -->
-        <service android:name="com.android.server.NetworkStackService" tools:node="remove"/>
         <service android:name=".TestNetworkStackService"
                  android:process="com.android.server.net.integrationtests.testnetworkstack">
             <intent-filter>
@@ -45,9 +50,9 @@
                 <action android:name=".INetworkStackInstrumentation"/>
             </intent-filter>
         </service>
-        <service tools:replace="android:process"
-                 android:name="com.android.server.connectivity.ipmemorystore.RegularMaintenanceJobService"
-                 android:process="com.android.server.net.integrationtests.testnetworkstack"/>
+        <service android:name="com.android.server.connectivity.ipmemorystore.RegularMaintenanceJobService"
+                 android:process="com.android.server.net.integrationtests.testnetworkstack"
+                 android:permission="android.permission.BIND_JOB_SERVICE"/>
 
     </application>
 
