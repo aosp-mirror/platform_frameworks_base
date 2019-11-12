@@ -65,7 +65,7 @@ public class VisibilityLoggerMixinTest {
 
         verify(mMetricsFeature, times(1))
                 .visible(nullable(Context.class), eq(MetricsProto.MetricsEvent.VIEW_UNKNOWN),
-                        eq(TestInstrumentable.TEST_METRIC));
+                        eq(TestInstrumentable.TEST_METRIC), anyInt());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class VisibilityLoggerMixinTest {
 
         verify(mMetricsFeature, times(1))
                 .visible(nullable(Context.class), eq(MetricsProto.MetricsEvent.SETTINGS_GESTURES),
-                        eq(TestInstrumentable.TEST_METRIC));
+                        eq(TestInstrumentable.TEST_METRIC), anyInt());
     }
 
     @Test
@@ -118,7 +118,8 @@ public class VisibilityLoggerMixinTest {
         TestActivity testActivity = ac.get();
         MockitoAnnotations.initMocks(testActivity);
         ac.create().start().resume();
-        verify(testActivity.mMetricsFeatureProvider, times(1)).visible(any(), anyInt(), anyInt());
+        verify(testActivity.mMetricsFeatureProvider, times(1)).visible(any(), anyInt(), anyInt(),
+                anyInt());
         ac.pause().stop().destroy();
         verify(testActivity.mMetricsFeatureProvider, times(1)).hidden(any(), anyInt());
     }

@@ -15,12 +15,12 @@
  */
 package com.android.settingslib.core.lifecycle.events;
 
-import android.content.Context;
-
 /**
- * @deprecated pass {@link Context} in constructor instead
+ * An Interface used by {@link LifecycleObserver} which changes to onAttach state.
  */
-@Deprecated
 public interface OnAttach {
-    void onAttach(Context context);
+    /**
+     * Called when {@link LifecycleObserver} is entering onAttach
+     */
+    void onAttach();
 }
