@@ -27,8 +27,8 @@ import android.os.SystemClock;
 import android.util.EventLog;
 import android.util.EventLog.Event;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import dalvik.system.DexClassLoader;
 
@@ -91,7 +91,7 @@ public final class DynamicCodeLoggerIntegrationTests {
 
     @BeforeClass
     public static void setUpAll() {
-        sContext = InstrumentationRegistry.getTargetContext();
+        sContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         sMyUid = android.os.Process.myUid();
     }
 
@@ -331,7 +331,7 @@ public final class DynamicCodeLoggerIntegrationTests {
 
     // Abstract out the logic for running a native code loading test multiple times if needed and
     // leaving time for audit messages to reach the log.
-    private abstract class TestNativeCodeWithRetries {
+    private abstract static class TestNativeCodeWithRetries {
         String mExpectedContentHash;
         String mExpectedNameHash;
 
