@@ -112,37 +112,20 @@ class UptcMap<T> {
         return data.get(tag);
     }
 
-    /**
-     * Returns the index for which {@link #getUserIdAtIndex(int)} would return the specified userId,
-     * or a negative number if the specified userId is not mapped.
-     */
-    public int indexOfUserId(int userId) {
-        return mData.indexOfKey(userId);
-    }
-
-    /**
-     * Returns the index for which {@link #getPackageNameAtIndex(int, int)} would return the
-     * specified userId, or a negative number if the specified userId and packageName are not mapped
-     * together.
-     */
-    public int indexOfUserIdAndPackage(int userId, @NonNull String packageName) {
-        return mData.indexOfKey(userId, packageName);
-    }
-
     /** Returns the userId at the given index. */
-    public int getUserIdAtIndex(int index) {
+    private int getUserIdAtIndex(int index) {
         return mData.keyAt(index);
     }
 
     /** Returns the package name at the given index. */
     @NonNull
-    public String getPackageNameAtIndex(int userIndex, int packageIndex) {
+    private String getPackageNameAtIndex(int userIndex, int packageIndex) {
         return mData.keyAt(userIndex, packageIndex);
     }
 
     /** Returns the tag at the given index. */
     @NonNull
-    public String getTagAtIndex(int userIndex, int packageIndex, int tagIndex) {
+    private String getTagAtIndex(int userIndex, int packageIndex, int tagIndex) {
         // This structure never inserts a null ArrayMap, so if the indices are valid, valueAt()
         // won't return null.
         return mData.valueAt(userIndex, packageIndex).keyAt(tagIndex);
