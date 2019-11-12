@@ -2007,7 +2007,7 @@
     <eat-comment />
 
     <!-- @SystemApi Allows granting runtime permissions to telephony related components.
-         @hide Used internally. -->
+         @hide -->
     <permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS"
         android:protectionLevel="signature|telephony" />
 
