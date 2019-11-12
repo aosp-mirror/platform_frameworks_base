@@ -16,15 +16,21 @@
 
 package android.location;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 
 /**
- * This class represents the current state of the GNSS engine.
- * This class is used in conjunction with the {@link GnssStatus.Callback}.
+ * This class represents the current state of the GNSS engine and is used in conjunction with
+ * {@link GnssStatus.Callback}.
+ *
+ * @see LocationManager#registerGnssStatusCallback
+ * @see GnssStatus.Callback
  */
 public final class GnssStatus {
 
@@ -52,75 +58,88 @@ public final class GnssStatus {
     /** @hide */
     public static final int CONSTELLATION_COUNT = 8;
 
-    /** @hide */
-    public static final int GNSS_SV_FLAGS_NONE = 0;
-    /** @hide */
-    public static final int GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA = (1 << 0);
-    /** @hide */
-    public static final int GNSS_SV_FLAGS_HAS_ALMANAC_DATA = (1 << 1);
-    /** @hide */
-    public static final int GNSS_SV_FLAGS_USED_IN_FIX = (1 << 2);
-    /** @hide */
-    public static final int GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY = (1 << 3);
+    private static final int SVID_FLAGS_NONE = 0;
+    private static final int SVID_FLAGS_HAS_EPHEMERIS_DATA = (1 << 0);
+    private static final int SVID_FLAGS_HAS_ALMANAC_DATA = (1 << 1);
+    private static final int SVID_FLAGS_USED_IN_FIX = (1 << 2);
+    private static final int SVID_FLAGS_HAS_CARRIER_FREQUENCY = (1 << 3);
 
-    /** @hide */
-    public static final int SVID_SHIFT_WIDTH = 8;
-    /** @hide */
-    public static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 4;
-    /** @hide */
-    public static final int CONSTELLATION_TYPE_MASK = 0xf;
+    private static final int SVID_SHIFT_WIDTH = 8;
+    private static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 4;
+    private static final int CONSTELLATION_TYPE_MASK = 0xf;
 
     /**
      * Used for receiving notifications when GNSS events happen.
+     *
+     * @see LocationManager#registerGnssStatusCallback
      */
     public static abstract class Callback {
         /**
          * Called when GNSS system has started.
          */
-        public void onStarted() {}
+        public void onStarted() {
+        }
 
         /**
          * Called when GNSS system has stopped.
          */
-        public void onStopped() {}
+        public void onStopped() {
+        }
 
         /**
          * Called when the GNSS system has received its first fix since starting.
+         *
          * @param ttffMillis the time from start to first fix in milliseconds.
          */
-        public void onFirstFix(int ttffMillis) {}
+        public void onFirstFix(int ttffMillis) {
+        }
 
         /**
          * Called periodically to report GNSS satellite status.
+         *
          * @param status the current status of all satellites.
          */
-        public void onSatelliteStatusChanged(GnssStatus status) {}
+        public void onSatelliteStatusChanged(@NonNull GnssStatus status) {
+        }
     }
 
     /**
      * Constellation type.
+     *
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CONSTELLATION_UNKNOWN, CONSTELLATION_GPS, CONSTELLATION_SBAS, CONSTELLATION_GLONASS,
             CONSTELLATION_QZSS, CONSTELLATION_BEIDOU, CONSTELLATION_GALILEO, CONSTELLATION_IRNSS})
-    public @interface ConstellationType {}
-
-    final int[] mSvidWithFlags;
-    final float[] mCn0DbHz;
-    final float[] mElevations;
-    final float[] mAzimuths;
-    final int mSvCount;
-    final float[] mCarrierFrequencies;
+    public @interface ConstellationType {
+    }
 
     /**
+     * Create a GnssStatus that wraps the given arguments without any additional overhead. Callers
+     * are responsible for guaranteeing that the arguments are never modified after calling this
+     * method.
+     *
      * @hide
      */
-    public GnssStatus(int svCount, int[] svidWithFlags, float[] cn0s, float[] elevations,
+    @NonNull
+    public static GnssStatus wrap(int svCount, int[] svidWithFlags, float[] cn0DbHzs,
+            float[] elevations, float[] azimuths, float[] carrierFrequencies) {
+        return new GnssStatus(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
+                carrierFrequencies);
+    }
+
+    private final int mSvCount;
+    private final int[] mSvidWithFlags;
+    private final float[] mCn0DbHzs;
+    private final float[] mElevations;
+    private final float[] mAzimuths;
+    private final float[] mCarrierFrequencies;
+
+    private GnssStatus(int svCount, int[] svidWithFlags, float[] cn0DbHzs, float[] elevations,
             float[] azimuths, float[] carrierFrequencies) {
         mSvCount = svCount;
         mSvidWithFlags = svidWithFlags;
-        mCn0DbHz = cn0s;
+        mCn0DbHzs = cn0DbHzs;
         mElevations = elevations;
         mAzimuths = azimuths;
         mCarrierFrequencies = carrierFrequencies;
@@ -129,6 +148,7 @@ public final class GnssStatus {
     /**
      * Gets the total number of satellites in satellite list.
      */
+    @IntRange(from = 0)
     public int getSatelliteCount() {
         return mSvCount;
     }
@@ -136,11 +156,11 @@ public final class GnssStatus {
     /**
      * Retrieves the constellation type of the satellite at the specified index.
      *
-     * @param satIndex the index of the satellite in the list.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
     @ConstellationType
-    public int getConstellationType(int satIndex) {
-        return ((mSvidWithFlags[satIndex] >> CONSTELLATION_TYPE_SHIFT_WIDTH)
+    public int getConstellationType(@IntRange(from = 0) int satelliteIndex) {
+        return ((mSvidWithFlags[satelliteIndex] >> CONSTELLATION_TYPE_SHIFT_WIDTH)
                 & CONSTELLATION_TYPE_MASK);
     }
 
@@ -158,110 +178,113 @@ public final class GnssStatus {
      * <li>SBAS: 120-151, 183-192</li>
      * <li>GLONASS: One of: OSN, or FCN+100
      * <ul>
-     *   <li>1-24 as the orbital slot number (OSN) (preferred, if known)</li>
-     *   <li>93-106 as the frequency channel number (FCN) (-7 to +6) plus 100.
-     *   i.e. encode FCN of -7 as 93, 0 as 100, and +6 as 106</li>
+     * <li>1-24 as the orbital slot number (OSN) (preferred, if known)</li>
+     * <li>93-106 as the frequency channel number (FCN) (-7 to +6) plus 100.
+     * i.e. encode FCN of -7 as 93, 0 as 100, and +6 as 106</li>
      * </ul></li>
      * <li>QZSS: 193-200</li>
      * <li>Galileo: 1-36</li>
      * <li>Beidou: 1-37</li>
      * </ul>
      *
-     * @param satIndex the index of the satellite in the list.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    public int getSvid(int satIndex) {
-        return mSvidWithFlags[satIndex] >> SVID_SHIFT_WIDTH;
+    @IntRange(from = 1, to = 200)
+    public int getSvid(@IntRange(from = 0) int satelliteIndex) {
+        return mSvidWithFlags[satelliteIndex] >> SVID_SHIFT_WIDTH;
     }
 
     /**
      * Retrieves the carrier-to-noise density at the antenna of the satellite at the specified index
      * in dB-Hz.
      *
-     * @param satIndex the index of the satellite in the list.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    public float getCn0DbHz(int satIndex) {
-        return mCn0DbHz[satIndex];
+    @FloatRange(from = 0, to = 63)
+    public float getCn0DbHz(@IntRange(from = 0) int satelliteIndex) {
+        return mCn0DbHzs[satelliteIndex];
     }
 
     /**
      * Retrieves the elevation of the satellite at the specified index.
      *
-     * @param satIndex the index of the satellite in the list.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    public float getElevationDegrees(int satIndex) {
-        return mElevations[satIndex];
+    @FloatRange(from = -90, to = 90)
+    public float getElevationDegrees(@IntRange(from = 0) int satelliteIndex) {
+        return mElevations[satelliteIndex];
     }
 
     /**
      * Retrieves the azimuth the satellite at the specified index.
      *
-     * @param satIndex the index of the satellite in the list.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    public float getAzimuthDegrees(int satIndex) {
-        return mAzimuths[satIndex];
+    @FloatRange(from = 0, to = 360)
+    public float getAzimuthDegrees(@IntRange(from = 0) int satelliteIndex) {
+        return mAzimuths[satelliteIndex];
     }
 
     /**
      * Reports whether the satellite at the specified index has ephemeris data.
      *
-     * @param satIndex the index of the satellite in the list.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    public boolean hasEphemerisData(int satIndex) {
-        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
+    public boolean hasEphemerisData(@IntRange(from = 0) int satelliteIndex) {
+        return (mSvidWithFlags[satelliteIndex] & SVID_FLAGS_HAS_EPHEMERIS_DATA) != 0;
     }
 
     /**
      * Reports whether the satellite at the specified index has almanac data.
      *
-     * @param satIndex the index of the satellite in the list.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    public boolean hasAlmanacData(int satIndex) {
-        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_ALMANAC_DATA) != 0;
+    public boolean hasAlmanacData(@IntRange(from = 0) int satelliteIndex) {
+        return (mSvidWithFlags[satelliteIndex] & SVID_FLAGS_HAS_ALMANAC_DATA) != 0;
     }
 
     /**
      * Reports whether the satellite at the specified index was used in the calculation of the most
      * recent position fix.
      *
-     * @param satIndex the index of the satellite in the list.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    public boolean usedInFix(int satIndex) {
-        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_USED_IN_FIX) != 0;
+    public boolean usedInFix(@IntRange(from = 0) int satelliteIndex) {
+        return (mSvidWithFlags[satelliteIndex] & SVID_FLAGS_USED_IN_FIX) != 0;
     }
 
     /**
-     * Reports whether a valid {@link #getCarrierFrequencyHz(int satIndex)} is available.
+     * Reports whether a valid {@link #getCarrierFrequencyHz(int satelliteIndex)} is available.
      *
-     * @param satIndex the index of the satellite in the list.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    public boolean hasCarrierFrequencyHz(int satIndex) {
-        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) != 0;
+    public boolean hasCarrierFrequencyHz(@IntRange(from = 0) int satelliteIndex) {
+        return (mSvidWithFlags[satelliteIndex] & SVID_FLAGS_HAS_CARRIER_FREQUENCY) != 0;
     }
 
     /**
      * Gets the carrier frequency of the signal tracked.
      *
-     * <p>For example it can be the GPS central frequency for L1 = 1575.45 MHz, or L2 = 1227.60 MHz,
-     * L5 = 1176.45 MHz, varying GLO channels, etc. If the field is not set, it is the primary
+     * <p>For example it can be the GPS central frequency for L1 = 1575.45 MHz, or L2 = 1227.60
+     * MHz, L5 = 1176.45 MHz, varying GLO channels, etc. If the field is not set, it is the primary
      * common use central frequency, e.g. L1 = 1575.45 MHz for GPS.
      *
      * For an L1, L5 receiver tracking a satellite on L1 and L5 at the same time, two measurements
-     * will be reported for this same satellite, in one all the values related to L1 will be filled,
-     * and in the other all of the values related to L5 will be filled.
+     * will be reported for this same satellite, in one all the values related to L1 will be
+     * filled, and in the other all of the values related to L5 will be filled.
      *
-     * <p>The value is only available if {@link #hasCarrierFrequencyHz(int satIndex)} is {@code true}.
+     * <p>The value is only available if {@link #hasCarrierFrequencyHz(int satelliteIndex)} is
+     * {@code true}.
      *
-     * @param satIndex the index of the satellite in the list.
-     *
-     * @return the carrier frequency of the signal tracked in Hz.
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
      */
-    public float getCarrierFrequencyHz(int satIndex) {
-        return mCarrierFrequencies[satIndex];
+    @FloatRange(from = 0)
+    public float getCarrierFrequencyHz(@IntRange(from = 0) int satelliteIndex) {
+        return mCarrierFrequencies[satelliteIndex];
     }
 
     /**
-     * Returns the string representation of a constellation type. For example,
-     * {@link #CONSTELLATION_GPS} is represented by the string GPS.
+     * Returns the string representation of a constellation type.
      *
      * @param constellationType the constellation type.
      * @return the string representation.
@@ -288,6 +311,110 @@ public final class GnssStatus {
                 return "IRNSS";
             default:
                 return Integer.toString(constellationType);
+        }
+    }
+
+    /**
+     * Builder class to help create new GnssStatus instances.
+     */
+    public static final class Builder {
+
+        private final ArrayList<GnssSvInfo> mSatellites = new ArrayList<>();
+
+        /**
+         * Adds a new satellite to the Builder.
+         *
+         * @param constellationType one of the CONSTELLATION_* constants
+         * @param svid the space vehicle identifier
+         * @param cn0DbHz carrier-to-noise density at the antenna in dB-Hz
+         * @param elevation satellite elevation in degrees
+         * @param azimuth satellite azimuth in degrees
+         * @param hasEphemeris whether the satellite has ephemeris data
+         * @param hasAlmanac whether the satellite has almanac data
+         * @param usedInFix whether the satellite was used in the most recent location fix
+         * @param hasCarrierFrequency whether carrier frequency data is available
+         * @param carrierFrequency satellite carrier frequency in Hz
+         */
+        @NonNull
+        public Builder addSatellite(@ConstellationType int constellationType,
+                @IntRange(from = 1, to = 200) int svid,
+                @FloatRange(from = 0, to = 63) float cn0DbHz,
+                @FloatRange(from = -90, to = 90) float elevation,
+                @FloatRange(from = 0, to = 360) float azimuth,
+                boolean hasEphemeris,
+                boolean hasAlmanac,
+                boolean usedInFix,
+                boolean hasCarrierFrequency,
+                @FloatRange(from = 0) float carrierFrequency) {
+            mSatellites.add(new GnssSvInfo(constellationType, svid, cn0DbHz, elevation, azimuth,
+                    hasEphemeris, hasAlmanac, usedInFix, hasCarrierFrequency, carrierFrequency));
+            return this;
+        }
+
+        /**
+         * Clears all satellites in the Builder.
+         */
+        @NonNull
+        public Builder clearSatellites() {
+            mSatellites.clear();
+            return this;
+        }
+
+        /**
+         * Builds a new GnssStatus based on the satellite information in the Builder.
+         */
+        @NonNull
+        public GnssStatus build() {
+            int svCount = mSatellites.size();
+            int[] svidWithFlags = new int[svCount];
+            float[] cn0DbHzs = new float[svCount];
+            float[] elevations = new float[svCount];
+            float[] azimuths = new float[svCount];
+            float[] carrierFrequencies = new float[svCount];
+
+            for (int i = 0; i < svidWithFlags.length; i++) {
+                svidWithFlags[i] = mSatellites.get(i).mSvidWithFlags;
+            }
+            for (int i = 0; i < cn0DbHzs.length; i++) {
+                cn0DbHzs[i] = mSatellites.get(i).mCn0DbHz;
+            }
+            for (int i = 0; i < elevations.length; i++) {
+                elevations[i] = mSatellites.get(i).mElevation;
+            }
+            for (int i = 0; i < azimuths.length; i++) {
+                azimuths[i] = mSatellites.get(i).mAzimuth;
+            }
+            for (int i = 0; i < carrierFrequencies.length; i++) {
+                carrierFrequencies[i] = mSatellites.get(i).mCarrierFrequency;
+            }
+
+            return wrap(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
+                    carrierFrequencies);
+        }
+    }
+
+    private static class GnssSvInfo {
+
+        private final int mSvidWithFlags;
+        private final float mCn0DbHz;
+        private final float mElevation;
+        private final float mAzimuth;
+        private final float mCarrierFrequency;
+
+        private GnssSvInfo(int constellationType, int svid, float cn0DbHz,
+                float elevation, float azimuth, boolean hasEphemeris, boolean hasAlmanac,
+                boolean usedInFix, boolean hasCarrierFrequency, float carrierFrequency) {
+            mSvidWithFlags = (svid << SVID_SHIFT_WIDTH)
+                    | ((constellationType & CONSTELLATION_TYPE_MASK)
+                    << CONSTELLATION_TYPE_SHIFT_WIDTH)
+                    | (hasEphemeris ? SVID_FLAGS_HAS_EPHEMERIS_DATA : SVID_FLAGS_NONE)
+                    | (hasAlmanac ? SVID_FLAGS_HAS_ALMANAC_DATA : SVID_FLAGS_NONE)
+                    | (usedInFix ? SVID_FLAGS_USED_IN_FIX : SVID_FLAGS_NONE)
+                    | (hasCarrierFrequency ? SVID_FLAGS_HAS_CARRIER_FREQUENCY : SVID_FLAGS_NONE);
+            mCn0DbHz = cn0DbHz;
+            mElevation = elevation;
+            mAzimuth = azimuth;
+            mCarrierFrequency = carrierFrequency;
         }
     }
 }

@@ -188,22 +188,18 @@ public class GnssMetrics {
 
     /**
     * Logs sv status data
-    *
-    * @param svCount
-    * @param svidWithFlags
-    * @param svCarrierFreqs
     */
-    public void logSvStatus(int svCount, int[] svidWithFlags, float[] svCarrierFreqs) {
+    public void logSvStatus(GnssStatus status) {
         boolean isL5 = false;
         // Calculate SvStatus Information
-        for (int i = 0; i < svCount; i++) {
-            if ((svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) != 0) {
+        for (int i = 0; i < status.getSatelliteCount(); i++) {
+            if (status.hasCarrierFrequencyHz(i)) {
                 mNumSvStatus++;
-                isL5 = isL5Sv(svCarrierFreqs[i]);
+                isL5 = isL5Sv(status.getCarrierFrequencyHz(i));
                 if (isL5) {
                     mNumL5SvStatus++;
                 }
-                if ((svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
+                if (status.usedInFix(i)) {
                     mNumSvStatusUsedInFix++;
                     if (isL5) {
                         mNumL5SvStatusUsedInFix++;
@@ -211,15 +207,10 @@ public class GnssMetrics {
                 }
             }
         }
-        return;
     }
 
     /**
     * Logs CN0 when at least 4 SVs are available L5 Only
-    *
-    * @param svCount
-    * @param cn0s
-    * @param svCarrierFreqs
     */
     private void logCn0L5(int svCount, float[] cn0s, float[] svCarrierFreqs) {
         if (svCount == 0 || cn0s == null || cn0s.length == 0 || cn0s.length < svCount
