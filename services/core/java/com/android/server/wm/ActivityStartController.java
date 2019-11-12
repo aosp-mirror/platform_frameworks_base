@@ -182,9 +182,17 @@ public class ActivityStartController {
 
         final ActivityDisplay display =
                 mService.mRootActivityContainer.getActivityDisplay(displayId);
-        // Make sure home stack exist on display.
-        final ActivityStack homeStack =
-                display.getOrCreateStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        // The home activity will be started later, defer resuming to avoid unneccerary operations
+        // (e.g. start home recursively) when creating home stack.
+        mSupervisor.beginDeferResume();
+        final ActivityStack homeStack;
+        try {
+            // Make sure home stack exist on display.
+            homeStack = display.getOrCreateStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME,
+                    ON_TOP);
+        } finally {
+            mSupervisor.endDeferResume();
+        }
 
         mLastHomeActivityStartResult = obtainStarter(intent, "startHomeActivity: " + reason)
                 .setOutActivity(tmpOutRecord)
