@@ -28,15 +28,14 @@ import java.lang.reflect.Modifier;
  * A Handler allows you to send and process {@link Message} and Runnable
  * objects associated with a thread's {@link MessageQueue}.  Each Handler
  * instance is associated with a single thread and that thread's message
- * queue.  When you create a new Handler, it is bound to the thread /
- * message queue of the thread that is creating it -- from that point on,
- * it will deliver messages and runnables to that message queue and execute
- * them as they come out of the message queue.
- * 
+ * queue. When you create a new Handler it is bound to a {@link Looper}.
+ * It will deliver messages and runnables to that Looper's message
+ * queue and execute them on that Looper's thread.
+ *
  * <p>There are two main uses for a Handler: (1) to schedule messages and
  * runnables to be executed at some point in the future; and (2) to enqueue
  * an action to be performed on a different thread than your own.
- * 
+ *
  * <p>Scheduling messages is accomplished with the
  * {@link #post}, {@link #postAtTime(Runnable, long)},
  * {@link #postDelayed}, {@link #sendEmptyMessage},
@@ -114,7 +113,18 @@ public class Handler {
      *
      * If this thread does not have a looper, this handler won't be able to receive messages
      * so an exception is thrown.
+     *
+     * @deprecated Implicitly choosing a Looper during Handler construction can lead to bugs
+     *   where operations are silently lost (if the Handler is not expecting new tasks and quits),
+     *   crashes (if a handler is sometimes created on a thread without a Looper active), or race
+     *   conditions, where the thread a handler is associated with is not what the author
+     *   anticipated. Instead, use an {@link java.util.concurrent.Executor} or specify the Looper
+     *   explicitly, using {@link Looper#getMainLooper}, {link android.view.View#getHandler}, or
+     *   similar. If the implicit thread local behavior is required for compatibility, use
+     *   {@code new Handler(Looper.myLooper())} to make it clear to readers.
+     *
      */
+    @Deprecated
     public Handler() {
         this(null, false);
     }
@@ -128,7 +138,17 @@ public class Handler {
      * so an exception is thrown.
      *
      * @param callback The callback interface in which to handle messages, or null.
+     *
+     * @deprecated Implicitly choosing a Looper during Handler construction can lead to bugs
+     *   where operations are silently lost (if the Handler is not expecting new tasks and quits),
+     *   crashes (if a handler is sometimes created on a thread without a Looper active), or race
+     *   conditions, where the thread a handler is associated with is not what the author
+     *   anticipated. Instead, use an {@link java.util.concurrent.Executor} or specify the Looper
+     *   explicitly, using {@link Looper#getMainLooper}, {link android.view.View#getHandler}, or
+     *   similar. If the implicit thread local behavior is required for compatibility, use
+     *   {@code new Handler(Looper.myLooper(), callback)} to make it clear to readers.
      */
+    @Deprecated
     public Handler(@Nullable Callback callback) {
         this(callback, false);
     }
