@@ -297,7 +297,7 @@ class ActivityStack extends TaskStack {
      * The first entry in the list is the least recently used.
      * It contains HistoryRecord objects.
      */
-    private final ArrayList<ActivityRecord> mLRUActivities = new ArrayList<>();
+    private final ArrayList<ActivityRecord> mLruActivities = new ArrayList<>();
 
     /**
      * When we are in the process of pausing an activity, before starting the
@@ -1060,14 +1060,15 @@ class ActivityStack extends TaskStack {
     }
 
     /** @return {@code true} if LRU list contained the specified activity. */
-    final boolean removeActivityFromLRUList(ActivityRecord activity) {
-        return mLRUActivities.remove(activity);
+    final boolean inLruList(ActivityRecord activity) {
+        return mLruActivities.contains(activity);
     }
 
-    final boolean updateLRUListLocked(ActivityRecord r) {
-        final boolean hadit = mLRUActivities.remove(r);
-        mLRUActivities.add(r);
-        return hadit;
+    /** @return {@code true} if the given activity was contained in LRU list. */
+    final boolean updateLruList(ActivityRecord r) {
+        final boolean contained = mLruActivities.remove(r);
+        mLruActivities.add(r);
+        return contained;
     }
 
     final boolean isHomeOrRecentsStack() {
@@ -2653,7 +2654,7 @@ class ActivityStack extends TaskStack {
 
             next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
                     true /* activityChange */, true /* updateOomAdj */);
-            updateLRUListLocked(next);
+            updateLruList(next);
 
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.
@@ -3643,10 +3644,10 @@ class ActivityStack extends TaskStack {
      * an activity moves away from the stack.
      */
     void onActivityRemovedFromStack(ActivityRecord r) {
-        removeActivityFromLRUList(r);
         removeTimeoutsForActivity(r);
 
         mExitingActivities.remove(r);
+        mLruActivities.remove(r);
 
         if (mResumedActivity != null && mResumedActivity == r) {
             setResumedActivity(null, "onActivityRemovedFromStack");
@@ -3657,8 +3658,11 @@ class ActivityStack extends TaskStack {
     }
 
     void onActivityAddedToStack(ActivityRecord r) {
-        if(r.getState() == RESUMED) {
+        if (r.isState(RESUMED)) {
             setResumedActivity(r, "onActivityAddedToStack");
+        }
+        if (r.hasProcess()) {
+            updateLruList(r);
         }
     }
 
@@ -3817,7 +3821,7 @@ class ActivityStack extends TaskStack {
     }
 
     private boolean removeHistoryRecordsForAppLocked(WindowProcessController app) {
-        removeHistoryRecordsForAppLocked(mLRUActivities, app, "mLRUActivities");
+        removeHistoryRecordsForAppLocked(mLruActivities, app, "mLruActivities");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mStoppingActivities, app,
                 "mStoppingActivities");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mGoingToSleepActivities, app,
@@ -4381,7 +4385,7 @@ class ActivityStack extends TaskStack {
         boolean printed = dumpActivitiesLocked(fd, pw, dumpAll, dumpClient, dumpPackage,
                 needSep);
 
-        printed |= dumpHistoryList(fd, pw, mLRUActivities, "    ", "Run", false,
+        printed |= dumpHistoryList(fd, pw, mLruActivities, "    ", "Run", false,
                 !dumpAll, false, dumpPackage, true,
                 "    Running activities (most recent first):", null);
 
@@ -4658,7 +4662,7 @@ class ActivityStack extends TaskStack {
         // Apps may depend on onResume()/onPause() being called in pairs.
         if (setResume) {
             r.setState(RESUMED, "moveToFrontAndResumeStateIfNeeded");
-            updateLRUListLocked(r);
+            updateLruList(r);
         }
         // If the activity was previously pausing, then ensure we transfer that as well
         if (setPause) {

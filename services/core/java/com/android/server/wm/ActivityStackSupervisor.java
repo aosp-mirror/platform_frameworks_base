@@ -913,7 +913,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
 
         r.launchFailed = false;
-        if (stack.updateLRUListLocked(r)) {
+        if (stack.updateLruList(r)) {
             Slog.w(TAG, "Activity " + r + " being launched, but already in LRU list");
         }
 
