@@ -548,7 +548,7 @@ class ActivityMetricsLogger {
     private static boolean hasActivityToBeDrawn(Task t) {
         for (int i = t.getChildCount() - 1; i >= 0; --i) {
             final ActivityRecord r = t.getChildAt(i);
-            if (r.visible && !r.mDrawn && !r.finishing) {
+            if (r.mVisibleRequested && !r.mDrawn && !r.finishing) {
                 return true;
             }
         }

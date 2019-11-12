@@ -271,7 +271,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                 doReturn(true).when(activity).occludesParent();
                 mTask.addChild(activity);
                 // Make visible by default...
-                activity.setHidden(false);
+                activity.setVisible(true);
             }
 
             final WindowProcessController wpc = new WindowProcessController(mService,

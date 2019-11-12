@@ -346,7 +346,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         activity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         activity.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        activity.visible = true;
+        activity.mVisibleRequested = true;
         activity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
 
         final ArrayList<CompletableFuture<IBinder>> resultWrapper = new ArrayList<>();
