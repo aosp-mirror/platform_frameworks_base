@@ -1173,6 +1173,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (!isReady() || mActivityDisplay == null) {
             return;
         }
+        if (mDisplayRotation.isWaitingForRemoteRotation()) {
+            return;
+        }
         final boolean configUpdated = mActivityDisplay.updateDisplayOverrideConfigurationLocked();
         if (configUpdated) {
             return;
@@ -2391,6 +2394,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWindowingLayer.release();
             mOverlayLayer.release();
             mInputMonitor.onDisplayRemoved();
+            mWmService.mDisplayNotificationController.dispatchDisplayRemoved(mActivityDisplay);
         } finally {
             mDisplayReady = false;
             mRemovingDisplay = false;
