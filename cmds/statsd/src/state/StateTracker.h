@@ -30,7 +30,7 @@ namespace statsd {
 
 class StateTracker : public virtual RefBase {
 public:
-    StateTracker(const int atomId, const util::StateAtomFieldOptions& stateAtomInfo);
+    StateTracker(const int32_t atomId, const util::StateAtomFieldOptions& stateAtomInfo);
 
     virtual ~StateTracker(){};
 
@@ -45,10 +45,12 @@ public:
 
     void unregisterListener(wp<StateListener> listener);
 
-    // Returns the state value mapped to the given query key.
+    // The output is a FieldValue object that has mStateField as the field and
+    // the original state value (found using the given query key) as the value.
+    //
     // If the key isn't mapped to a state or the key size doesn't match the
-    // primary key size, the default state is returned.
-    int getStateValue(const HashableDimensionKey& queryKey) const;
+    // number of primary fields, the output value is set to kStateUnknown.
+    bool getStateValue(const HashableDimensionKey& queryKey, FieldValue* output) const;
 
     inline int getListenersCount() const {
         return mListeners.size();

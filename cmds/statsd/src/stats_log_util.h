@@ -40,6 +40,8 @@ void writeDimensionLeafNodesToProto(const HashableDimensionKey& dimension,
 void writeDimensionPathToProto(const std::vector<Matcher>& fieldMatchers,
                                util::ProtoOutputStream* protoOutput);
 
+void writeStateToProto(const FieldValue& state, util::ProtoOutputStream* protoOutput);
+
 // Convert the TimeUnit enum to the bucket size in millis with a guardrail on
 // bucket size.
 int64_t TimeUnitToBucketSizeInMillisGuardrailed(int uid, TimeUnit unit);

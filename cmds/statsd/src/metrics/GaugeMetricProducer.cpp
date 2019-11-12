@@ -56,10 +56,8 @@ const int FIELD_ID_SKIPPED_START_MILLIS = 3;
 const int FIELD_ID_SKIPPED_END_MILLIS = 4;
 // for GaugeMetricData
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
-const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
 const int FIELD_ID_BUCKET_INFO = 3;
 const int FIELD_ID_DIMENSION_LEAF_IN_WHAT = 4;
-const int FIELD_ID_DIMENSION_LEAF_IN_CONDITION = 5;
 // for GaugeBucketInfo
 const int FIELD_ID_ATOM = 3;
 const int FIELD_ID_ELAPSED_ATOM_TIMESTAMP = 4;
@@ -166,10 +164,9 @@ void GaugeMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
             (unsigned long)mCurrentSlicedBucket->size());
     if (verbose) {
         for (const auto& it : *mCurrentSlicedBucket) {
-            fprintf(out, "\t(what)%s\t(condition)%s  %d atoms\n",
-                it.first.getDimensionKeyInWhat().toString().c_str(),
-                it.first.getDimensionKeyInCondition().toString().c_str(),
-                (int)it.second.size());
+            fprintf(out, "\t(what)%s\t(states)%s  %d atoms\n",
+                    it.first.getDimensionKeyInWhat().toString().c_str(),
+                    it.first.getStateValuesKey().toString().c_str(), (int)it.second.size());
         }
     }
 }
@@ -238,22 +235,9 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
             writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), str_set, protoOutput);
             protoOutput->end(dimensionToken);
-
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                uint64_t dimensionInConditionToken = protoOutput->start(
-                        FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
-                writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(),
-                                      str_set, protoOutput);
-                protoOutput->end(dimensionInConditionToken);
-            }
         } else {
             writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInWhat(),
                                            FIELD_ID_DIMENSION_LEAF_IN_WHAT, str_set, protoOutput);
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInCondition(),
-                                               FIELD_ID_DIMENSION_LEAF_IN_CONDITION,
-                                               str_set, protoOutput);
-            }
         }
 
         // Then fill bucket_info (GaugeBucketInfo).

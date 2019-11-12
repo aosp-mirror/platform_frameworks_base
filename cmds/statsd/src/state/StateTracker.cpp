@@ -25,10 +25,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
-StateTracker::StateTracker(const int atomId,
-                           const util::StateAtomFieldOptions& stateAtomInfo)
-  : mAtomId(atomId),
-    mStateField(getSimpleMatcher(atomId, stateAtomInfo.exclusiveField)) {
+StateTracker::StateTracker(const int32_t atomId, const util::StateAtomFieldOptions& stateAtomInfo)
+    : mAtomId(atomId), mStateField(getSimpleMatcher(atomId, stateAtomInfo.exclusiveField)) {
     // create matcher for each primary field
     // TODO(tsaichristine): b/142108433 handle when primary field is first uid in chain
     for (const auto& primary : stateAtomInfo.primaryFields) {
@@ -55,24 +53,26 @@ void StateTracker::onLogEvent(const LogEvent& event) {
     }
 
     // parse event for state value
-    Value state;
-    int32_t stateValue;
-    if (!filterValues(mStateField, event.getValues(), &state) || state.getType() != INT) {
-        ALOGE("StateTracker error extracting state from log event. Type: %d", state.getType());
+    FieldValue stateValue;
+    int32_t state;
+    if (!filterValues(mStateField, event.getValues(), &stateValue) ||
+        stateValue.mValue.getType() != INT) {
+        ALOGE("StateTracker error extracting state from log event. Type: %d",
+              stateValue.mValue.getType());
         handlePartialReset(primaryKey);
         return;
     }
-    stateValue = state.int_value;
+    state = stateValue.mValue.int_value;
 
-    if (stateValue == mResetState) {
-        VLOG("StateTracker Reset state: %s", state.toString().c_str());
+    if (state == mResetState) {
+        VLOG("StateTracker Reset state: %s", stateValue.mValue.toString().c_str());
         handleReset();
     }
 
     // track and update state
     int32_t oldState = 0;
     int32_t newState = 0;
-    updateState(primaryKey, stateValue, &oldState, &newState);
+    updateState(primaryKey, state, &oldState, &newState);
 
     // notify all listeners if state has changed
     if (oldState != newState) {
@@ -96,18 +96,27 @@ void StateTracker::unregisterListener(wp<StateListener> listener) {
     mListeners.erase(listener);
 }
 
-int StateTracker::getStateValue(const HashableDimensionKey& queryKey) const {
+bool StateTracker::getStateValue(const HashableDimensionKey& queryKey, FieldValue* output) const {
+    output->mField = mStateField.mMatcher;
+
+    // Check that the query key has the correct number of primary fields.
     if (queryKey.getValues().size() == mPrimaryFields.size()) {
         auto it = mStateMap.find(queryKey);
         if (it != mStateMap.end()) {
-            return it->second.state;
+            output->mValue = it->second.state;
+            return true;
         }
     } else if (queryKey.getValues().size() > mPrimaryFields.size()) {
         ALOGE("StateTracker query key size > primary key size is illegal");
     } else {
         ALOGE("StateTracker query key size < primary key size is not supported");
     }
-    return mDefaultState;
+
+    // Set the state value to unknown if:
+    // - query key size is incorrect
+    // - query key is not found in state map
+    output->mValue = StateTracker::kStateUnknown;
+    return false;
 }
 
 void StateTracker::handleReset() {

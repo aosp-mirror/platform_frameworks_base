@@ -53,10 +53,8 @@ const int FIELD_ID_IS_ACTIVE = 14;
 const int FIELD_ID_DATA = 1;
 // for DurationMetricData
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
-const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
 const int FIELD_ID_BUCKET_INFO = 3;
 const int FIELD_ID_DIMENSION_LEAF_IN_WHAT = 4;
-const int FIELD_ID_DIMENSION_LEAF_IN_CONDITION = 5;
 // for DurationBucketInfo
 const int FIELD_ID_DURATION = 3;
 const int FIELD_ID_BUCKET_NUM = 4;
@@ -120,9 +118,8 @@ DurationMetricProducer::DurationMetricProducer(
     mUseWhatDimensionAsInternalDimension = equalDimensions(mDimensionsInWhat, mInternalDimensions);
     if (mWizard != nullptr && mConditionTrackerIndex >= 0 &&
             mMetric2ConditionLinks.size() == 1) {
-        mHasLinksToAllConditionDimensionsInTracker =
-            mWizard->equalOutputDimensions(mConditionTrackerIndex,
-                                           mMetric2ConditionLinks.begin()->conditionFields);
+        mHasLinksToAllConditionDimensionsInTracker = mWizard->equalOutputDimensions(
+                mConditionTrackerIndex, mMetric2ConditionLinks.begin()->conditionFields);
     }
     flushIfNeededLocked(startTimeNs);
     // Adjust start for partial bucket
@@ -206,8 +203,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(bool conditio
         mWizard->getTrueSlicedDimensions(mConditionTrackerIndex, &trueConditionDimensions);
         for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
             HashableDimensionKey linkedConditionDimensionKey;
-            getDimensionForCondition(whatIt.first.getValues(),
-                                     mMetric2ConditionLinks[0],
+            getDimensionForCondition(whatIt.first.getValues(), mMetric2ConditionLinks[0],
                                      &linkedConditionDimensionKey);
             if (trueConditionDimensions.find(linkedConditionDimensionKey) !=
                     trueConditionDimensions.end()) {
@@ -222,8 +218,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(bool conditio
         if (currentUnSlicedPartCondition) {
             for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
                 HashableDimensionKey linkedConditionDimensionKey;
-                getDimensionForCondition(whatIt.first.getValues(),
-                                         mMetric2ConditionLinks[0],
+                getDimensionForCondition(whatIt.first.getValues(), mMetric2ConditionLinks[0],
                                          &linkedConditionDimensionKey);
                 if (dimensionsChangedToTrue->find(linkedConditionDimensionKey) !=
                         dimensionsChangedToTrue->end()) {
@@ -380,22 +375,9 @@ void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
             writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), str_set, protoOutput);
             protoOutput->end(dimensionToken);
-
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                uint64_t dimensionInConditionToken = protoOutput->start(
-                        FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
-                writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(),
-                                      str_set, protoOutput);
-                protoOutput->end(dimensionInConditionToken);
-            }
         } else {
             writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInWhat(),
                                            FIELD_ID_DIMENSION_LEAF_IN_WHAT, str_set, protoOutput);
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInCondition(),
-                                               FIELD_ID_DIMENSION_LEAF_IN_CONDITION,
-                                               str_set, protoOutput);
-            }
         }
         // Then fill bucket_info (DurationBucketInfo).
         for (const auto& bucket : pair.second) {
@@ -472,7 +454,7 @@ void DurationMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
     if (verbose) {
         for (const auto& whatIt : mCurrentSlicedDurationTrackerMap) {
             for (const auto& slice : whatIt.second) {
-                fprintf(out, "\t(what)%s\t(condition)%s\n", whatIt.first.toString().c_str(),
+                fprintf(out, "\t(what)%s\t(states)%s\n", whatIt.first.toString().c_str(),
                         slice.first.toString().c_str());
                 slice.second->dumpStates(out, verbose);
             }
@@ -483,8 +465,8 @@ void DurationMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
 bool DurationMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
     auto whatIt = mCurrentSlicedDurationTrackerMap.find(newKey.getDimensionKeyInWhat());
     if (whatIt != mCurrentSlicedDurationTrackerMap.end()) {
-        auto condIt = whatIt->second.find(newKey.getDimensionKeyInCondition());
-        if (condIt != whatIt->second.end()) {
+        auto stateIt = whatIt->second.find(newKey.getStateValuesKey());
+        if (stateIt != whatIt->second.end()) {
             return false;
         }
         if (whatIt->second.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
@@ -493,8 +475,8 @@ bool DurationMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey
                     mConfigKey, mMetricId, newTupleCount);
             // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
             if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
-                ALOGE("DurationMetric %lld dropping data for condition dimension key %s",
-                    (long long)mMetricId, newKey.getDimensionKeyInCondition().toString().c_str());
+                ALOGE("DurationMetric %lld dropping data for state values key %s",
+                      (long long)mMetricId, newKey.getStateValuesKey().toString().c_str());
                 StatsdStats::getInstance().noteHardDimensionLimitReached(mMetricId);
                 return true;
             }
@@ -521,24 +503,24 @@ void DurationMetricProducer::handleStartEvent(const MetricDimensionKey& eventKey
                                               const ConditionKey& conditionKeys,
                                               bool condition, const LogEvent& event) {
     const auto& whatKey = eventKey.getDimensionKeyInWhat();
-    const auto& condKey = eventKey.getDimensionKeyInCondition();
+    const auto& stateKey = eventKey.getStateValuesKey();
 
     auto whatIt = mCurrentSlicedDurationTrackerMap.find(whatKey);
     if (whatIt == mCurrentSlicedDurationTrackerMap.end()) {
         if (hitGuardRailLocked(eventKey)) {
             return;
         }
-        mCurrentSlicedDurationTrackerMap[whatKey][condKey] = createDurationTracker(eventKey);
+        mCurrentSlicedDurationTrackerMap[whatKey][stateKey] = createDurationTracker(eventKey);
     } else {
-        if (whatIt->second.find(condKey) == whatIt->second.end()) {
+        if (whatIt->second.find(stateKey) == whatIt->second.end()) {
             if (hitGuardRailLocked(eventKey)) {
                 return;
             }
-            mCurrentSlicedDurationTrackerMap[whatKey][condKey] = createDurationTracker(eventKey);
+            mCurrentSlicedDurationTrackerMap[whatKey][stateKey] = createDurationTracker(eventKey);
         }
     }
 
-    auto it = mCurrentSlicedDurationTrackerMap.find(whatKey)->second.find(condKey);
+    auto it = mCurrentSlicedDurationTrackerMap.find(whatKey)->second.find(stateKey);
     if (mUseWhatDimensionAsInternalDimension) {
         it->second->noteStart(whatKey, condition,
                               event.GetElapsedTimestampNs(), conditionKeys);
@@ -597,8 +579,8 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
         if (mUseWhatDimensionAsInternalDimension) {
             auto whatIt = mCurrentSlicedDurationTrackerMap.find(dimensionInWhat);
             if (whatIt != mCurrentSlicedDurationTrackerMap.end()) {
-                for (const auto& condIt : whatIt->second) {
-                    condIt.second->noteStop(dimensionInWhat, event.GetElapsedTimestampNs(), false);
+                for (const auto& stateIt : whatIt->second) {
+                    stateIt.second->noteStop(dimensionInWhat, event.GetElapsedTimestampNs(), false);
                 }
             }
             return;
@@ -611,9 +593,9 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
 
         auto whatIt = mCurrentSlicedDurationTrackerMap.find(dimensionInWhat);
         if (whatIt != mCurrentSlicedDurationTrackerMap.end()) {
-            for (const auto& condIt : whatIt->second) {
-                condIt.second->noteStop(
-                    internalDimensionKey, event.GetElapsedTimestampNs(), false);
+            for (const auto& stateIt : whatIt->second) {
+                stateIt.second->noteStop(internalDimensionKey, event.GetElapsedTimestampNs(),
+                                         false);
             }
         }
         return;

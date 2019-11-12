@@ -34,6 +34,12 @@ struct Metric2Condition {
     std::vector<Matcher> conditionFields;
 };
 
+struct Metric2State {
+    int32_t stateAtomId;
+    std::vector<Matcher> metricFields;
+    std::vector<Matcher> stateFields;
+};
+
 class HashableDimensionKey {
 public:
     explicit HashableDimensionKey(const std::vector<FieldValue>& values) {
@@ -76,17 +82,16 @@ private:
 };
 
 class MetricDimensionKey {
- public:
+public:
     explicit MetricDimensionKey(const HashableDimensionKey& dimensionKeyInWhat,
-                                const HashableDimensionKey& dimensionKeyInCondition)
-        : mDimensionKeyInWhat(dimensionKeyInWhat),
-          mDimensionKeyInCondition(dimensionKeyInCondition) {};
+                                const HashableDimensionKey& stateValuesKey)
+        : mDimensionKeyInWhat(dimensionKeyInWhat), mStateValuesKey(stateValuesKey){};
 
     MetricDimensionKey(){};
 
     MetricDimensionKey(const MetricDimensionKey& that)
         : mDimensionKeyInWhat(that.getDimensionKeyInWhat()),
-          mDimensionKeyInCondition(that.getDimensionKeyInCondition()) {};
+          mStateValuesKey(that.getStateValuesKey()){};
 
     MetricDimensionKey& operator=(const MetricDimensionKey& from) = default;
 
@@ -96,25 +101,25 @@ class MetricDimensionKey {
         return mDimensionKeyInWhat;
     }
 
-    inline const HashableDimensionKey& getDimensionKeyInCondition() const {
-        return mDimensionKeyInCondition;
+    inline const HashableDimensionKey& getStateValuesKey() const {
+        return mStateValuesKey;
     }
 
-    inline void setDimensionKeyInCondition(const HashableDimensionKey& key) {
-        mDimensionKeyInCondition = key;
+    inline void setStateValuesKey(const HashableDimensionKey& key) {
+        mStateValuesKey = key;
     }
 
-    bool hasDimensionKeyInCondition() const {
-        return mDimensionKeyInCondition.getValues().size() > 0;
+    bool hasStateValuesKey() const {
+        return mStateValuesKey.getValues().size() > 0;
     }
 
     bool operator==(const MetricDimensionKey& that) const;
 
     bool operator<(const MetricDimensionKey& that) const;
 
-  private:
-      HashableDimensionKey mDimensionKeyInWhat;
-      HashableDimensionKey mDimensionKeyInCondition;
+private:
+    HashableDimensionKey mDimensionKeyInWhat;
+    HashableDimensionKey mStateValuesKey;
 };
 
 android::hash_t hashDimension(const HashableDimensionKey& key);
@@ -124,7 +129,7 @@ android::hash_t hashDimension(const HashableDimensionKey& key);
  * The value of the FieldValue is output.
  */
 bool filterValues(const Matcher& matcherField, const std::vector<FieldValue>& values,
-                  Value* output);
+                  FieldValue* output);
 
 /**
  * Creating HashableDimensionKeys from FieldValues using matcher.
@@ -152,6 +157,13 @@ void getDimensionForCondition(const std::vector<FieldValue>& eventValues,
                               const Metric2Condition& links,
                               HashableDimensionKey* conditionDimension);
 
+/**
+ * Get dimension values using metric's "what" fields and fill statePrimaryKey's
+ * mField information using "state" fields.
+ */
+void getDimensionForState(const std::vector<FieldValue>& eventValues, const Metric2State& link,
+                          HashableDimensionKey* statePrimaryKey);
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
@@ -172,7 +184,7 @@ template <>
 struct hash<MetricDimensionKey> {
     std::size_t operator()(const MetricDimensionKey& key) const {
         android::hash_t hash = hashDimension(key.getDimensionKeyInWhat());
-        hash = android::JenkinsHashMix(hash, hashDimension(key.getDimensionKeyInCondition()));
+        hash = android::JenkinsHashMix(hash, hashDimension(key.getStateValuesKey()));
         return android::JenkinsHashWhiten(hash);
     }
 };
