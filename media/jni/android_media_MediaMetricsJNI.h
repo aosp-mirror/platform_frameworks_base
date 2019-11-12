@@ -20,6 +20,7 @@
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <media/MediaAnalyticsItem.h>
+#include <binder/PersistableBundle.h>
 
 // Copeid from core/jni/ (libandroid_runtime.so)
 namespace android {
@@ -28,6 +29,7 @@ class MediaMetricsJNI {
 public:
     static jobject writeMetricsToBundle(JNIEnv* env, MediaAnalyticsItem *item, jobject mybundle);
     static jobject writeAttributesToBundle(JNIEnv* env, jobject mybundle, char *buffer, size_t length);
+    static jobject nativeToJavaPersistableBundle(JNIEnv*, os::PersistableBundle*);
 };
 
 };  // namespace android
