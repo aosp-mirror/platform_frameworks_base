@@ -25,7 +25,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+
+import com.android.internal.telecom.IVideoProvider;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -2132,13 +2135,22 @@ public final class Call {
             cannedTextResponsesChanged = true;
         }
 
-        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl(mCallingPackage,
-                mTargetSdkVersion);
-        boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged() &&
-                !Objects.equals(mVideoCallImpl, newVideoCallImpl);
+        IVideoProvider previousVideoProvider = mVideoCallImpl == null ? null :
+                mVideoCallImpl.getVideoProvider();
+        IVideoProvider newVideoProvider = parcelableCall.getVideoProvider();
+
+        // parcelableCall.isVideoCallProviderChanged is only true when we have a video provider
+        // specified; so we should check if the actual IVideoProvider changes as well.
+        boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged()
+                && !Objects.equals(previousVideoProvider, newVideoProvider);
         if (videoCallChanged) {
-            mVideoCallImpl = newVideoCallImpl;
+            if (mVideoCallImpl != null) {
+                mVideoCallImpl.destroy();
+            }
+            mVideoCallImpl = parcelableCall.isVideoCallProviderChanged() ?
+                    parcelableCall.getVideoCallImpl(mCallingPackage, mTargetSdkVersion) : null;
         }
+
         if (mVideoCallImpl != null) {
             mVideoCallImpl.setVideoState(getDetails().getVideoState());
         }
