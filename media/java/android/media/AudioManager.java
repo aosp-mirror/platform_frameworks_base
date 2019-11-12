@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1931,12 +1932,11 @@ public class AudioManager {
      * application when it places a phone call, as it will cause signals from the radio layer
      * to feed the platform mixer.
      *
-     * @param mode  the requested audio mode ({@link #MODE_NORMAL}, {@link #MODE_RINGTONE},
-     *              {@link #MODE_IN_CALL} or {@link #MODE_IN_COMMUNICATION}).
+     * @param mode  the requested audio mode.
      *              Informs the HAL about the current audio state so that
      *              it can route the audio appropriately.
      */
-    public void setMode(int mode) {
+    public void setMode(@AudioMode int mode) {
         final IAudioService service = getService();
         try {
             service.setMode(mode, mICallBack, mApplicationContext.getOpPackageName());
@@ -1948,14 +1948,47 @@ public class AudioManager {
     /**
      * Returns the current audio mode.
      *
-     * @return      the current audio mode ({@link #MODE_NORMAL}, {@link #MODE_RINGTONE},
-     *              {@link #MODE_IN_CALL} or {@link #MODE_IN_COMMUNICATION}).
-     *              Returns the current current audio state from the HAL.
+     * @return      the current audio mode.
      */
+    @AudioMode
     public int getMode() {
         final IAudioService service = getService();
         try {
-            return service.getMode();
+            int mode = service.getMode();
+            int sdk;
+            try {
+                sdk = getContext().getApplicationInfo().targetSdkVersion;
+            } catch (NullPointerException e) {
+                // some tests don't have a Context
+                sdk = Build.VERSION.SDK_INT;
+            }
+            if (mode == MODE_CALL_SCREENING && sdk <= Build.VERSION_CODES.Q) {
+                mode = MODE_IN_CALL;
+            }
+            return mode;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+    * Indicates if the platform supports a special call screening and call monitoring mode.
+    * <p>
+    * When this mode is supported, it is possible to perform call screening and monitoring
+    * functions while other use cases like music or movie playback are active.
+    * <p>
+    * Use {@link #setMode(int)} with mode {@link #MODE_CALL_SCREENING} to place the platform in
+    * call screening mode.
+    * <p>
+    * If call screening mode is not supported, setting mode to
+    * MODE_CALL_SCREENING will be ignored and will not change current mode reported by
+    *  {@link #getMode()}.
+    * @return true if call screening mode is supported, false otherwise.
+    */
+    public boolean isCallScreeningModeSupported() {
+        final IAudioService service = getService();
+        try {
+            return service.isCallScreeningModeSupported();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1989,6 +2022,22 @@ public class AudioManager {
      * In communication audio mode. An audio/video chat or VoIP call is established.
      */
     public static final int MODE_IN_COMMUNICATION   = AudioSystem.MODE_IN_COMMUNICATION;
+    /**
+     * Call screening in progress. Call is connected and audio is accessible to call
+     * screening applications but other audio use cases are still possible.
+     */
+    public static final int MODE_CALL_SCREENING     = AudioSystem.MODE_CALL_SCREENING;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "MODE_", value = {
+            MODE_NORMAL,
+            MODE_RINGTONE,
+            MODE_IN_CALL,
+            MODE_IN_COMMUNICATION,
+            MODE_CALL_SCREENING }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioMode {}
 
     /* Routing bits for setRouting/getRouting API */
     /**
