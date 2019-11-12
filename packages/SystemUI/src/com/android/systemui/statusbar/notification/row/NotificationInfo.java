@@ -65,7 +65,10 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.bubbles.BubbleExperimentConfig;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 
 import java.lang.annotation.Retention;
@@ -99,6 +102,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     // standard controls
     private static final int ACTION_ALERT = 5;
 
+    private TextView mBubbleDescriptionView;
     private TextView mPriorityDescriptionView;
     private TextView mSilentDescriptionView;
 
@@ -116,6 +120,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private Set<NotificationChannel> mUniqueChannelsInRow;
     private NotificationChannel mSingleNotificationChannel;
     private int mStartingChannelImportance;
+    private boolean mStartedAsBubble;
     private boolean mWasShownHighPriority;
     private boolean mPressedApply;
     private boolean mPresentingChannelEditorDialog = false;
@@ -125,8 +130,15 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
      * level; non-null once the user takes an action which indicates an explicit preference.
      */
     @Nullable private Integer mChosenImportance;
+    /**
+     * The last bubble setting chosen by the user. Null if the user has not chosen a bubble level;
+     * non-null once the user takes an action which indicates an explicit preference.
+     */
+    @Nullable private Boolean mChosenBubbleEnabled;
     private boolean mIsSingleDefaultChannel;
     private boolean mIsNonblockable;
+    private boolean mIsBubbleable;
+    private NotificationEntry mEntry;
     private StatusBarNotification mSbn;
     private AnimatorSet mExpandAnimation;
     private boolean mIsDeviceProvisioned;
@@ -137,18 +149,27 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private NotificationGuts mGutsContainer;
     private Drawable mPkgIcon;
 
+    private BubbleController mBubbleController;
+
     /** Whether this view is being shown as part of the blocking helper. */
     private boolean mIsForBlockingHelper;
+
+    @VisibleForTesting
+    boolean mSkipPost = false;
 
     /**
      * String that describes how the user exit or quit out of this view, also used as a counter tag.
      */
     private String mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
 
+
     // used by standard ui
     private OnClickListener mOnAlert = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
         mChosenImportance = IMPORTANCE_DEFAULT;
+        if (mStartedAsBubble) {
+            mChosenBubbleEnabled = false;
+        }
         applyAlertingBehavior(BEHAVIOR_ALERTING, true /* userTriggered */);
     };
 
@@ -156,7 +177,17 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnClickListener mOnSilent = v -> {
         mExitReason = NotificationCounters.BLOCKING_HELPER_DELIVER_SILENTLY;
         mChosenImportance = IMPORTANCE_LOW;
+        if (mStartedAsBubble) {
+            mChosenBubbleEnabled = false;
+        }
         applyAlertingBehavior(BEHAVIOR_SILENT, true /* userTriggered */);
+    };
+
+    /** Used by standard ui (in an experiment) {@see BubbleExperimentConfig#allowNotifBubbleMenu} */
+    private OnClickListener mOnBubble = v -> {
+        mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
+        mChosenBubbleEnabled = true;
+        applyAlertingBehavior(BEHAVIOR_BUBBLE, true /* userTriggered */);
     };
 
     // used by standard ui
@@ -224,6 +255,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     protected void onFinishInflate() {
         super.onFinishInflate();
 
+        mBubbleDescriptionView = findViewById(R.id.bubble_summary);
         mPriorityDescriptionView = findViewById(R.id.alert_summary);
         mSilentDescriptionView = findViewById(R.id.silence_summary);
     }
@@ -251,7 +283,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             final String pkg,
             final NotificationChannel notificationChannel,
             final Set<NotificationChannel> uniqueChannelsInRow,
-            final StatusBarNotification sbn,
+            final NotificationEntry entry,
             final CheckSaveListener checkSaveListener,
             final OnSettingsClickListener onSettingsClick,
             final OnAppSettingsClickListener onAppSettingsClick,
@@ -261,7 +293,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean wasShownHighPriority)
             throws RemoteException {
         bindNotification(pm, iNotificationManager, visualStabilityManager, pkg, notificationChannel,
-                uniqueChannelsInRow, sbn, checkSaveListener, onSettingsClick,
+                uniqueChannelsInRow, entry, checkSaveListener, onSettingsClick,
                 onAppSettingsClick, isDeviceProvisioned, isNonblockable,
                 false /* isBlockingHelper */,
                 importance, wasShownHighPriority);
@@ -274,7 +306,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             String pkg,
             NotificationChannel notificationChannel,
             Set<NotificationChannel> uniqueChannelsInRow,
-            StatusBarNotification sbn,
+            NotificationEntry entry,
             CheckSaveListener checkSaveListener,
             OnSettingsClickListener onSettingsClick,
             OnAppSettingsClickListener onAppSettingsClick,
@@ -288,10 +320,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mMetricsLogger = Dependency.get(MetricsLogger.class);
         mVisualStabilityManager = visualStabilityManager;
         mChannelEditorDialogController = Dependency.get(ChannelEditorDialogController.class);
+        mBubbleController = Dependency.get(BubbleController.class);
         mPackageName = pkg;
         mUniqueChannelsInRow = uniqueChannelsInRow;
         mNumUniqueChannelsInRow = uniqueChannelsInRow.size();
-        mSbn = sbn;
+        mEntry = entry;
+        mSbn = entry.getSbn();
         mPm = pm;
         mAppSettingsClickListener = onAppSettingsClick;
         mAppName = mPackageName;
@@ -317,6 +351,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                             NotificationChannel.DEFAULT_CHANNEL_ID)
                     && numTotalChannels == 1;
         }
+
+        mIsBubbleable = mEntry.getBubbleMetadata() != null;
+        mStartedAsBubble = mEntry.isBubble();
 
         bindHeader();
         bindChannelDetails();
@@ -365,6 +402,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             findViewById(R.id.non_configurable_text).setVisibility(GONE);
             findViewById(R.id.non_configurable_multichannel_text).setVisibility(GONE);
             findViewById(R.id.interruptiveness_settings).setVisibility(VISIBLE);
+            findViewById(R.id.bubble).setVisibility(mIsBubbleable ? VISIBLE : GONE);
         }
 
         View turnOffButton = findViewById(R.id.turn_off_notifications);
@@ -378,12 +416,17 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         View silent = findViewById(R.id.silence);
         View alert = findViewById(R.id.alert);
+        View bubble = findViewById(R.id.bubble);
         silent.setOnClickListener(mOnSilent);
         alert.setOnClickListener(mOnAlert);
+        bubble.setOnClickListener(mOnBubble);
 
-        applyAlertingBehavior(
-                mWasShownHighPriority ? BEHAVIOR_ALERTING : BEHAVIOR_SILENT,
-                false /* userTriggered */);
+        int behavior = mStartedAsBubble
+                ? BEHAVIOR_BUBBLE
+                : mWasShownHighPriority
+                        ? BEHAVIOR_ALERTING
+                        : BEHAVIOR_SILENT;
+        applyAlertingBehavior(behavior, false /* userTriggered */);
     }
 
     private void bindHeader() {
@@ -544,12 +587,30 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 }
             }
 
+            if (mChosenBubbleEnabled != null && mStartedAsBubble != mChosenBubbleEnabled) {
+                if (mChosenBubbleEnabled) {
+                    mBubbleController.onUserCreatedBubbleFromNotification(mEntry);
+                } else {
+                    mBubbleController.onUserDemotedBubbleFromNotification(mEntry);
+                }
+            }
+
             Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
             bgHandler.post(
                     new UpdateImportanceRunnable(mINotificationManager, mPackageName, mAppUid,
                             mNumUniqueChannelsInRow == 1 ? mSingleNotificationChannel : null,
                             mStartingChannelImportance, newImportance));
             mVisualStabilityManager.temporarilyAllowReordering();
+        }
+    }
+
+    @Override
+    public boolean post(Runnable action) {
+        if (mSkipPost) {
+            action.run();
+            return true;
+        } else {
+            return super.post(action);
         }
     }
 
@@ -569,6 +630,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             TransitionManager.beginDelayedTransition(this, transition);
         }
 
+        View bubble = findViewById(R.id.bubble);
         View alert = findViewById(R.id.alert);
         View silence = findViewById(R.id.silence);
 
@@ -576,33 +638,53 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             case BEHAVIOR_ALERTING:
                 mPriorityDescriptionView.setVisibility(VISIBLE);
                 mSilentDescriptionView.setVisibility(GONE);
+                mBubbleDescriptionView.setVisibility(GONE);
                 post(() -> {
                     alert.setSelected(true);
                     silence.setSelected(false);
+                    bubble.setSelected(false);
                 });
                 break;
-            case BEHAVIOR_SILENT:
 
+            case BEHAVIOR_SILENT:
                 mSilentDescriptionView.setVisibility(VISIBLE);
                 mPriorityDescriptionView.setVisibility(GONE);
+                mBubbleDescriptionView.setVisibility(GONE);
                 post(() -> {
                     alert.setSelected(false);
                     silence.setSelected(true);
+                    bubble.setSelected(false);
                 });
                 break;
+
+            case BEHAVIOR_BUBBLE:
+                mBubbleDescriptionView.setVisibility(VISIBLE);
+                mSilentDescriptionView.setVisibility(GONE);
+                mPriorityDescriptionView.setVisibility(GONE);
+                post(() -> {
+                    alert.setSelected(false);
+                    silence.setSelected(false);
+                    bubble.setSelected(true);
+                });
+                break;
+
             default:
                 throw new IllegalArgumentException("Unrecognized alerting behavior: " + behavior);
         }
 
         boolean isAChange = mWasShownHighPriority != (behavior == BEHAVIOR_ALERTING);
+        boolean isABubbleChange = mStartedAsBubble != (behavior == BEHAVIOR_BUBBLE);
         TextView done = findViewById(R.id.done);
-        done.setText(isAChange ? R.string.inline_ok_button : R.string.inline_done_button);
+        done.setText((isAChange || isABubbleChange)
+                ? R.string.inline_ok_button
+                : R.string.inline_done_button);
     }
 
     private void saveImportanceAndExitReason(@NotificationInfoAction int action) {
         switch (action) {
             case ACTION_UNDO:
                 mChosenImportance = mStartingChannelImportance;
+                mChosenBubbleEnabled = mStartedAsBubble;
                 break;
             case ACTION_DELIVER_SILENTLY:
                 mExitReason = NotificationCounters.BLOCKING_HELPER_DELIVER_SILENTLY;
@@ -684,6 +766,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     public void onFinishedClosing() {
         if (mChosenImportance != null) {
             mStartingChannelImportance = mChosenImportance;
+        }
+        if (mChosenBubbleEnabled != null) {
+            mStartedAsBubble = mChosenBubbleEnabled;
         }
         mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
 
@@ -884,8 +969,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     @Retention(SOURCE)
-    @IntDef({BEHAVIOR_ALERTING, BEHAVIOR_SILENT})
+    @IntDef({BEHAVIOR_ALERTING, BEHAVIOR_SILENT, BEHAVIOR_BUBBLE})
     private @interface AlertingBehavior {}
     private static final int BEHAVIOR_ALERTING = 0;
     private static final int BEHAVIOR_SILENT = 1;
+    private static final int BEHAVIOR_BUBBLE = 2;
 }

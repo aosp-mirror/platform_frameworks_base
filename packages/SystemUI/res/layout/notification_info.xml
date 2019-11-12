@@ -220,6 +220,58 @@ asked for it -->
             android:orientation="vertical">
 
             <com.android.systemui.statusbar.notification.row.ButtonLinearLayout
+                android:id="@+id/bubble"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/notification_importance_button_padding"
+                android:layout_marginBottom="@dimen/notification_importance_button_separation"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@drawable/notification_guts_priority_button_bg"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                >
+                    <ImageView
+                        android:id="@+id/bubble_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_create_bubble"
+                        android:background="@android:color/transparent"
+                        android:tint="@color/notification_guts_priority_contents"
+                        android:clickable="false"
+                        android:focusable="false"/>
+                    <TextView
+                        android:id="@+id/bubble_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/notification_importance_drawable_padding"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:textAppearance="@style/TextAppearance.NotificationImportanceButton"
+                        android:text="@string/notification_bubble_title"/>
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/bubble_summary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/notification_importance_button_description_top_margin"
+                    android:visibility="gone"
+                    android:text="@string/notification_channel_summary_bubble"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
+            </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
+
+            <com.android.systemui.statusbar.notification.row.ButtonLinearLayout
                 android:id="@+id/alert"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

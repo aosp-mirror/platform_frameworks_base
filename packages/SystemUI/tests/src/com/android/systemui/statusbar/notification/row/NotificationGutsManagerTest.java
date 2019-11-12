@@ -321,6 +321,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .build();
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        NotificationEntry entry = row.getEntry();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
 
@@ -331,7 +332,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
-                eq(statusBarNotification),
+                eq(entry),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
@@ -352,6 +353,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .build();
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        NotificationEntry entry = row.getEntry();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
 
@@ -362,7 +364,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
-                eq(statusBarNotification),
+                eq(entry),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
@@ -385,6 +387,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         row.getEntry().setIsHighPriority(true);
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        NotificationEntry entry = row.getEntry();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
 
@@ -395,7 +398,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
-                eq(statusBarNotification),
+                eq(entry),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
@@ -416,6 +419,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .build();
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        NotificationEntry entry = row.getEntry();
+
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
@@ -427,7 +432,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
-                eq(statusBarNotification),
+                eq(entry),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
@@ -448,6 +453,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .build();
         when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        NotificationEntry entry = row.getEntry();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
 
@@ -458,7 +464,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(statusBarNotification.getPackageName()),
                 any(NotificationChannel.class),
                 anySet(),
-                eq(statusBarNotification),
+                eq(entry),
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),

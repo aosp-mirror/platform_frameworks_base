@@ -33,6 +33,7 @@ public class SbnBuilder {
     private int mUid;
     private int mInitialPid;
     private Notification mNotification = new Notification();
+    private Notification.BubbleMetadata mBubbleMetadata;
     private UserHandle mUser = UserHandle.of(0);
     private String mOverrideGroupKey;
     private long mPostTime;
@@ -54,6 +55,9 @@ public class SbnBuilder {
     }
 
     public StatusBarNotification build() {
+        if (mBubbleMetadata != null) {
+            mNotification.setBubbleMetadata(mBubbleMetadata);
+        }
         return new StatusBarNotification(
                 mPkg,
                 mOpPkg,
@@ -114,6 +118,11 @@ public class SbnBuilder {
 
     public SbnBuilder setPostTime(long postTime) {
         mPostTime = postTime;
+        return this;
+    }
+
+    public SbnBuilder setBubbleMetadata(Notification.BubbleMetadata data) {
+        mBubbleMetadata = data;
         return this;
     }
 }
