@@ -63,7 +63,7 @@ public final class StatsEvent {
      * Returns a new StatsEvent.Builder for building StatsEvent object.
      **/
     @NonNull
-    public StatsEvent.Builder newBuilder() {
+    public static StatsEvent.Builder newBuilder() {
         return new StatsEvent.Builder(Buffer.obtain());
     }
 
