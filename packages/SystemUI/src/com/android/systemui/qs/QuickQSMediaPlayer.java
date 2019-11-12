@@ -76,9 +76,11 @@ public class QuickQSMediaPlayer {
      * @param iconColor foreground color (for text, icons)
      * @param bgColor background color
      * @param actionsContainer a LinearLayout containing the media action buttons
+     * @param actionsToShow indices of which actions to display in the mini player
+     *                      (max 3: Notification.MediaStyle.MAX_MEDIA_BUTTONS_IN_COMPACT)
      */
     public void setMediaSession(MediaSession.Token token, Icon icon, int iconColor, int bgColor,
-            View actionsContainer) {
+            View actionsContainer, int[] actionsToShow) {
         Log.d(TAG, "Setting media session: " + token);
         mToken = token;
         mController = new MediaController(mContext, token);
@@ -110,32 +112,46 @@ public class QuickQSMediaPlayer {
         titleText.setText(songName);
         titleText.setTextColor(iconColor);
 
-        // Action buttons
-        LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
+        // Buttons we can display
         final int[] actionIds = {R.id.action0, R.id.action1, R.id.action2};
 
-        // TODO some apps choose different buttons to show in compact mode
+        // Existing buttons in the notification
+        LinearLayout parentActionsLayout = (LinearLayout) actionsContainer;
         final int[] notifActionIds = {
+                com.android.internal.R.id.action0,
                 com.android.internal.R.id.action1,
                 com.android.internal.R.id.action2,
-                com.android.internal.R.id.action3
+                com.android.internal.R.id.action3,
+                com.android.internal.R.id.action4
         };
-        for (int i = 0; i < parentActionsLayout.getChildCount() && i < actionIds.length; i++) {
-            ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
-            ImageButton thatBtn = parentActionsLayout.findViewById(notifActionIds[i]);
-            if (thatBtn == null || thatBtn.getDrawable() == null) {
-                thisBtn.setVisibility(View.GONE);
-                continue;
+
+        int i = 0;
+        if (actionsToShow != null) {
+            int maxButtons = Math.min(actionsToShow.length, parentActionsLayout.getChildCount());
+            maxButtons = Math.min(maxButtons, actionIds.length);
+            for (; i < maxButtons; i++) {
+                ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
+                int thatId = notifActionIds[actionsToShow[i]];
+                ImageButton thatBtn = parentActionsLayout.findViewById(thatId);
+                if (thatBtn == null || thatBtn.getDrawable() == null
+                        || thatBtn.getVisibility() != View.VISIBLE) {
+                    thisBtn.setVisibility(View.GONE);
+                    continue;
+                }
+
+                Drawable thatIcon = thatBtn.getDrawable();
+                thisBtn.setImageDrawable(thatIcon.mutate());
+                thisBtn.setVisibility(View.VISIBLE);
+                thisBtn.setOnClickListener(v -> {
+                    thatBtn.performClick();
+                });
             }
+        }
 
-            Drawable thatIcon = thatBtn.getDrawable();
-            thisBtn.setImageDrawable(thatIcon.mutate());
-            thisBtn.setVisibility(View.VISIBLE);
-
-            thisBtn.setOnClickListener(v -> {
-                Log.d(TAG, "clicking on other button");
-                thatBtn.performClick();
-            });
+        // Hide any unused buttons
+        for (; i < actionIds.length; i++) {
+            ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
+            thisBtn.setVisibility(View.GONE);
         }
     }
 
@@ -186,6 +202,7 @@ public class QuickQSMediaPlayer {
             mMediaNotifView.setBackground(roundedDrawable);
         } else {
             Log.e(TAG, "No album art available");
+            mMediaNotifView.setBackground(null);
         }
     }
 
