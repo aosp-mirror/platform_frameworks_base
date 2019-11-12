@@ -38,6 +38,9 @@ AndroidBitmapInfo ABitmap_getInfo(ABitmap* bitmap);
 
 void* ABitmap_getPixels(ABitmap* bitmap);
 
+AndroidBitmapFormat ABitmapConfig_getFormatFromConfig(JNIEnv* env, jobject bitmapConfigObj);
+jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format);
+
 __END_DECLS
 
 #ifdef	__cplusplus

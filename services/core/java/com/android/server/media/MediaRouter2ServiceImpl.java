@@ -469,7 +469,7 @@ class MediaRouter2ServiceImpl {
             mAllManagerRecords.put(binder, managerRecord);
 
             userRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::notifyProviderInfosUpdatedToManager,
+                    obtainMessage(UserHandler::notifyRoutesToManager,
                             userRecord.mHandler, manager));
 
             for (ClientRecord clientRecord : userRecord.mClientRecords) {
@@ -808,17 +808,20 @@ class MediaRouter2ServiceImpl {
                 }
 
                 List<IMediaRouter2Client> clients = getClients();
+                List<IMediaRouter2Manager> managers = getManagers();
                 if (addedRoutes.size() > 0) {
                     notifyRoutesAddedToClients(clients, addedRoutes);
+                    notifyRoutesAddedToManagers(managers, addedRoutes);
                 }
                 if (removedRoutes.size() > 0) {
                     notifyRoutesRemovedToClients(clients, removedRoutes);
+                    notifyRoutesRemovedToManagers(managers, removedRoutes);
                 }
                 if (changedRoutes.size() > 0) {
                     notifyRoutesChangedToClients(clients, changedRoutes);
+                    notifyRoutesChangedToManagers(managers, changedRoutes);
                 }
             }
-            scheduleUpdateProviderInfos();
         }
 
         private int getProviderInfoIndex(String providerId) {
@@ -874,33 +877,6 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void scheduleUpdateProviderInfos() {
-            if (!mProviderInfosUpdateScheduled) {
-                mProviderInfosUpdateScheduled = true;
-                sendMessage(PooledLambda.obtainMessage(UserHandler::updateProviderInfos, this));
-            }
-        }
-
-        //TODO: should be replaced into notifyRoutes...ToManagers
-        private void updateProviderInfos() {
-            mProviderInfosUpdateScheduled = false;
-
-            MediaRouter2ServiceImpl service = mServiceRef.get();
-            if (service == null) {
-                return;
-            }
-
-            final List<IMediaRouter2Manager> managers = new ArrayList<>();
-            synchronized (service.mLock) {
-                for (ManagerRecord managerRecord : mUserRecord.mManagerRecords) {
-                    managers.add(managerRecord.mManager);
-                }
-            }
-            for (IMediaRouter2Manager manager : managers) {
-                notifyProviderInfosUpdatedToManager(manager);
-            }
-        }
-
         private List<IMediaRouter2Client> getClients() {
             final List<IMediaRouter2Client> clients = new ArrayList<>();
             MediaRouter2ServiceImpl service = mServiceRef.get();
@@ -915,6 +891,20 @@ class MediaRouter2ServiceImpl {
                 }
             }
             return clients;
+        }
+
+        private List<IMediaRouter2Manager> getManagers() {
+            final List<IMediaRouter2Manager> managers = new ArrayList<>();
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            if (service == null) {
+                return managers;
+            }
+            synchronized (service.mLock) {
+                for (ManagerRecord managerRecord : mUserRecord.mManagerRecords) {
+                    managers.add(managerRecord.mManager);
+                }
+            }
+            return managers;
         }
 
         private void notifyRoutesToClient(IMediaRouter2Client client) {
@@ -965,11 +955,51 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifyProviderInfosUpdatedToManager(IMediaRouter2Manager manager) {
+        private void notifyRoutesToManager(IMediaRouter2Manager manager) {
+            List<MediaRoute2Info> routes = new ArrayList<>();
+            for (MediaRoute2ProviderInfo providerInfo : mProviderInfos) {
+                routes.addAll(providerInfo.getRoutes());
+            }
+            if (routes.size() == 0) {
+                return;
+            }
             try {
-                manager.notifyProviderInfosUpdated(mProviderInfos);
+                manager.notifyRoutesAdded(routes);
             } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to notify provider infos updated. Manager probably died.");
+                Slog.w(TAG, "Failed to notify all routes. Manager probably died.", ex);
+            }
+        }
+
+        private void notifyRoutesAddedToManagers(List<IMediaRouter2Manager> managers,
+                List<MediaRoute2Info> routes) {
+            for (IMediaRouter2Manager manager : managers) {
+                try {
+                    manager.notifyRoutesAdded(routes);
+                } catch (RemoteException ex) {
+                    Slog.w(TAG, "Failed to notify routes added. Manager probably died.", ex);
+                }
+            }
+        }
+
+        private void notifyRoutesRemovedToManagers(List<IMediaRouter2Manager> managers,
+                List<MediaRoute2Info> routes) {
+            for (IMediaRouter2Manager manager : managers) {
+                try {
+                    manager.notifyRoutesRemoved(routes);
+                } catch (RemoteException ex) {
+                    Slog.w(TAG, "Failed to notify routes removed. Manager probably died.", ex);
+                }
+            }
+        }
+
+        private void notifyRoutesChangedToManagers(List<IMediaRouter2Manager> managers,
+                List<MediaRoute2Info> routes) {
+            for (IMediaRouter2Manager manager : managers) {
+                try {
+                    manager.notifyRoutesChanged(routes);
+                } catch (RemoteException ex) {
+                    Slog.w(TAG, "Failed to notify routes changed. Manager probably died.", ex);
+                }
             }
         }
 

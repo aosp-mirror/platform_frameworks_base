@@ -20,7 +20,8 @@ import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
+
+import android.os.Parcel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,23 +32,13 @@ import java.util.Arrays;
 @RunWith(JUnit4.class)
 public class RuleTest {
 
-    private static final Rule.Effect DENY_EFFECT = Rule.Effect.DENY;
+    private static final @Rule.Effect int DENY_EFFECT = Rule.DENY;
     private static final String PACKAGE_NAME = "com.test.app";
     private static final String APP_CERTIFICATE = "test_cert";
     private static final Formula PACKAGE_NAME_ATOMIC_FORMULA =
-            new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                    PACKAGE_NAME);
+            new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME);
     private static final Formula APP_CERTIFICATE_ATOMIC_FORMULA =
-            new AtomicFormula(AtomicFormula.Key.APP_CERTIFICATE, AtomicFormula.Operator.EQ,
-                    APP_CERTIFICATE);
-
-    @Test
-    public void testEmptyRule() {
-        Rule emptyRule = Rule.EMPTY;
-
-        assertNull(emptyRule.getFormula());
-        assertNull(emptyRule.getEffect());
-    }
+            new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE);
 
     @Test
     public void testValidRule() {
@@ -55,14 +46,6 @@ public class RuleTest {
 
         assertEquals(PACKAGE_NAME_ATOMIC_FORMULA, validRule.getFormula());
         assertEquals(DENY_EFFECT, validRule.getEffect());
-    }
-
-    @Test
-    public void testInvalidRule_invalidEffect() {
-        assertExpectException(
-                NullPointerException.class,
-                /* expectedExceptionMessageRegex */ null,
-                () -> new Rule(PACKAGE_NAME_ATOMIC_FORMULA, null));
     }
 
     @Test
@@ -75,14 +58,17 @@ public class RuleTest {
 
     @Test
     public void testToString() {
-        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.AND,
-                Arrays.asList(PACKAGE_NAME_ATOMIC_FORMULA, APP_CERTIFICATE_ATOMIC_FORMULA));
-        Rule rule = new Rule(openFormula, Rule.Effect.DENY);
+        OpenFormula openFormula =
+                new OpenFormula(
+                        OpenFormula.AND,
+                        Arrays.asList(PACKAGE_NAME_ATOMIC_FORMULA, APP_CERTIFICATE_ATOMIC_FORMULA));
+        Rule rule = new Rule(openFormula, Rule.DENY);
 
-        String toString = rule.toString();
-
-        assertEquals(String.format("Rule: PACKAGE_NAME EQ %s AND APP_CERTIFICATE EQ %s, DENY",
-                PACKAGE_NAME, APP_CERTIFICATE), toString);
+        assertEquals(
+                String.format(
+                        "Rule: (PACKAGE_NAME EQ %s) AND (APP_CERTIFICATE EQ %s), DENY",
+                        PACKAGE_NAME, APP_CERTIFICATE),
+                rule.toString());
     }
 
     @Test
@@ -99,5 +85,25 @@ public class RuleTest {
         Rule rule2 = new Rule(APP_CERTIFICATE_ATOMIC_FORMULA, DENY_EFFECT);
 
         assertNotEquals(rule1, rule2);
+    }
+
+    @Test
+    public void testParcelUnparcel() {
+        Rule rule =
+                new Rule(
+                        new OpenFormula(
+                                OpenFormula.AND,
+                                Arrays.asList(
+                                        APP_CERTIFICATE_ATOMIC_FORMULA,
+                                        new OpenFormula(
+                                                OpenFormula.NOT,
+                                                Arrays.asList(PACKAGE_NAME_ATOMIC_FORMULA)))),
+                        Rule.DENY);
+        Parcel p = Parcel.obtain();
+        rule.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        Rule newRule = Rule.CREATOR.createFromParcel(p);
+
+        assertEquals(newRule, rule);
     }
 }

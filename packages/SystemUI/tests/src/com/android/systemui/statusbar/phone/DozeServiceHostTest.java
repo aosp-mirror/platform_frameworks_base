@@ -60,8 +60,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-import dagger.Lazy;
-
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DozeServiceHostTest extends SysuiTestCase {
@@ -71,7 +69,6 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
-    @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
@@ -97,13 +94,12 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
         mDozeServiceHost = new DozeServiceHost(mDozeLog, mPowerManager, mWakefullnessLifecycle,
                 mStatusBarStateController, mDeviceProvisionedController, mHeadsUpManager,
-                mBatteryController, mScrimController, mBiometricUnlockControllerLazy,
-                mKeyguardViewMediator, mAssistManager, mDozeScrimController, mKeyguardUpdateMonitor,
-                mVisualStabilityManager, mPulseExpansionHandler, mStatusBarWindowController,
-                mNotificationWakeUpCoordinator);
+                mBatteryController, mScrimController, () -> mBiometricUnlockController,
+                mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
+                mKeyguardUpdateMonitor, mVisualStabilityManager, mPulseExpansionHandler,
+                mStatusBarWindowController, mNotificationWakeUpCoordinator);
 
         mDozeServiceHost.initialize(mStatusBar, mNotificationIconAreaController,
                 mStatusBarWindowViewController, mStatusBarWindow, mStatusBarKeyguardViewManager,

@@ -32,9 +32,6 @@
     <!-- True if windowOverscan should be on by default. -->
     <bool name="config_windowOverscanByDefault">false</bool>
 
-    <!-- True if windowSwipeToDismiss should be on by default. -->
-    <bool name="config_windowSwipeToDismiss">false</bool>
-
     <!-- True if preference fragment should clip to padding. -->
     <bool name="config_preferenceFragmentClipToPadding">true</bool>
 

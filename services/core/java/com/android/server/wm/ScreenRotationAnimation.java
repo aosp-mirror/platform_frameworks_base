@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.ScreenRotationAnimationProto.ANIMATION_RUNNING;
 import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
@@ -558,8 +559,6 @@ class ScreenRotationAnimation {
         private SurfaceAnimator mEnterBlackFrameAnimator;
         private SurfaceAnimator mScreenshotRotationAnimator;
         private SurfaceAnimator mRotateScreenAnimator;
-        private final Runnable mNoopCallback = () -> { // b/141177184
-        };
 
         /**
          * Start the rotation animation of the display and the screenshot on the
@@ -592,7 +591,7 @@ class ScreenRotationAnimation {
                             .setHeight(mDisplayContent.getSurfaceHeight())
                             .build(),
                     createWindowAnimationSpec(mRotateEnterAnimation),
-                    this::cancel);
+                    this::onAnimationEnd);
         }
 
         private SurfaceAnimator startScreenshotAlphaAnimation() {
@@ -603,7 +602,7 @@ class ScreenRotationAnimation {
                             .setHeight(mHeight)
                             .build(),
                     createWindowAnimationSpec(mRotateAlphaAnimation),
-                    mNoopCallback);
+                    this::onAnimationEnd);
         }
 
         private SurfaceAnimator startEnterBlackFrameAnimation() {
@@ -612,7 +611,7 @@ class ScreenRotationAnimation {
                             .setAnimationLeashParent(mDisplayContent.getOverlayLayer())
                             .build(),
                     createWindowAnimationSpec(mRotateEnterAnimation),
-                    mNoopCallback);
+                    this::onAnimationEnd);
         }
 
         private SurfaceAnimator startScreenshotRotationAnimation() {
@@ -654,18 +653,38 @@ class ScreenRotationAnimation {
         }
 
         private void onAnimationEnd() {
-            mEnterBlackFrameAnimator = null;
-            mScreenshotRotationAnimator = null;
-            mRotateScreenAnimator = null;
-            mService.mAnimator.mBulkUpdateParams |= WindowSurfacePlacer.SET_UPDATE_ROTATION;
-            kill();
-            mService.updateRotation(false, false);
-            AccessibilityController accessibilityController = mService.mAccessibilityController;
+            synchronized (mService.mGlobalLock) {
+                if (isAnimating()) {
+                    ProtoLog.v(WM_DEBUG_ORIENTATION,
+                            "ScreenRotation sill animating: mDisplayAnimator: %s\n"
+                                    + "mEnterBlackFrameAnimator: "
+                                    + "%s\nmRotateScreenAnimator: %s\n"
+                                    + "mScreenshotRotationAnimator: %s",
+                            mDisplayAnimator != null
+                                    ? mDisplayAnimator.isAnimating() : null,
+                            mEnterBlackFrameAnimator != null
+                                    ? mEnterBlackFrameAnimator.isAnimating() : null,
+                            mRotateScreenAnimator != null
+                                    ? mRotateScreenAnimator.isAnimating() : null,
+                            mScreenshotRotationAnimator != null
+                                    ? mScreenshotRotationAnimator.isAnimating() : null
+                    );
+                    return;
+                }
+                ProtoLog.d(WM_DEBUG_ORIENTATION, "ScreenRotationAnimation onAnimationEnd");
+                mEnterBlackFrameAnimator = null;
+                mScreenshotRotationAnimator = null;
+                mRotateScreenAnimator = null;
+                mService.mAnimator.mBulkUpdateParams |= WindowSurfacePlacer.SET_UPDATE_ROTATION;
+                kill();
+                mService.updateRotation(false, false);
+                AccessibilityController accessibilityController = mService.mAccessibilityController;
 
-            if (accessibilityController != null) {
-                // We just finished rotation animation which means we did not
-                // announce the rotation and waited for it to end, announce now.
-                accessibilityController.onRotationChangedLocked(mDisplayContent);
+                if (accessibilityController != null) {
+                    // We just finished rotation animation which means we did not
+                    // announce the rotation and waited for it to end, announce now.
+                    accessibilityController.onRotationChangedLocked(mDisplayContent);
+                }
             }
         }
 

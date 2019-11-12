@@ -37,7 +37,6 @@ import android.widget.Button;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
@@ -59,7 +58,7 @@ public class EmergencyButton extends Button {
     KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
-        public void onSimStateChanged(int subId, int slotId, State simState) {
+        public void onSimStateChanged(int subId, int slotId, int simState) {
             updateEmergencyCallButton();
         }
 

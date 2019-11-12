@@ -16,14 +16,20 @@
 
 package com.android.server.integrity.engine;
 
+import static com.android.server.integrity.model.Rule.DENY;
+import static com.android.server.integrity.model.Rule.FORCE_ALLOW;
+
+import android.annotation.NonNull;
 import android.util.Slog;
 
 import com.android.server.integrity.model.AppInstallMetadata;
 import com.android.server.integrity.model.AtomicFormula;
 import com.android.server.integrity.model.Formula;
+import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.OpenFormula;
 import com.android.server.integrity.model.Rule;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,67 +46,40 @@ final class RuleEvaluator {
      * <p>Rules must be in disjunctive normal form (DNF). A rule should contain AND'ed formulas
      * only. All rules are OR'ed together by default.
      *
-     * @param rules              The list of rules to evaluate.
+     * @param rules The list of rules to evaluate.
      * @param appInstallMetadata Metadata of the app to be installed, and to evaluate the rules
-     *                           against.
-     * @return A rule matching the metadata. If there are multiple matching rules, returns any. If
-     * no rules are matching, returns {@link Rule#EMPTY}.
+     *     against.
+     * @return result of the integrity check
      */
-    static Rule evaluateRules(List<Rule> rules, AppInstallMetadata appInstallMetadata) {
+    @NonNull
+    static IntegrityCheckResult evaluateRules(
+            List<Rule> rules, AppInstallMetadata appInstallMetadata) {
+        List<Rule> matchedRules = new ArrayList<>();
         for (Rule rule : rules) {
-            if (isConjunctionOfFormulas(rule.getFormula()) && isMatch(rule, appInstallMetadata)) {
-                return rule;
-            }
-        }
-        return Rule.EMPTY;
-    }
-
-    /**
-     * Match a rule against app install metadata.
-     */
-    private static boolean isMatch(Rule rule, AppInstallMetadata appInstallMetadata) {
-        return isMatch(rule.getFormula(), appInstallMetadata);
-    }
-
-    private static boolean isMatch(Formula formula, AppInstallMetadata appInstallMetadata) {
-        if (formula instanceof AtomicFormula) {
-            AtomicFormula atomicFormula = (AtomicFormula) formula;
-            switch (atomicFormula.getKey()) {
-                case PACKAGE_NAME:
-                    return atomicFormula.isMatch(appInstallMetadata.getPackageName());
-                case APP_CERTIFICATE:
-                    return atomicFormula.isMatch(appInstallMetadata.getAppCertificate());
-                case INSTALLER_NAME:
-                    return atomicFormula.isMatch(appInstallMetadata.getInstallerName());
-                case INSTALLER_CERTIFICATE:
-                    return atomicFormula.isMatch(appInstallMetadata.getInstallerCertificate());
-                case VERSION_CODE:
-                    return atomicFormula.isMatch(appInstallMetadata.getVersionCode());
-                case PRE_INSTALLED:
-                    return atomicFormula.isMatch(appInstallMetadata.isPreInstalled());
-                default:
-                    Slog.i(TAG, String.format("Returned no match for unknown key %s",
-                            atomicFormula.getKey()));
-                    return false;
-            }
-        } else if (formula instanceof OpenFormula) {
-            OpenFormula openFormula = (OpenFormula) formula;
-            // A rule is in disjunctive normal form, so there are no OR connectors.
-            switch (openFormula.getConnector()) {
-                case NOT:
-                    // NOT connector has only 1 formula attached.
-                    return !isMatch(openFormula.getFormulas().get(0), appInstallMetadata);
-                case AND:
-                    return openFormula.getFormulas().stream().allMatch(
-                            subFormula -> isMatch(subFormula, appInstallMetadata));
-                default:
-                    Slog.i(TAG, String.format("Returned no match for unknown connector %s",
-                            openFormula.getConnector()));
-                    return false;
+            if (isConjunctionOfFormulas(rule.getFormula())
+                    && rule.getFormula().isSatisfied(appInstallMetadata)) {
+                matchedRules.add(rule);
             }
         }
 
-        return false;
+        boolean denied = false;
+        Rule denyRule = null;
+        for (Rule rule : matchedRules) {
+            switch (rule.getEffect()) {
+                case DENY:
+                    if (!denied) {
+                        denied = true;
+                        denyRule = rule;
+                    }
+                    break;
+                case FORCE_ALLOW:
+                    return IntegrityCheckResult.allow(rule);
+                default:
+                    Slog.e(TAG, "Matched an unknown effect rule: " + rule);
+                    return IntegrityCheckResult.allow();
+            }
+        }
+        return denied ? IntegrityCheckResult.deny(denyRule) : IntegrityCheckResult.allow();
     }
 
     private static boolean isConjunctionOfFormulas(Formula formula) {
@@ -111,7 +90,7 @@ final class RuleEvaluator {
             return true;
         }
         OpenFormula openFormula = (OpenFormula) formula;
-        return openFormula.getConnector() == OpenFormula.Connector.AND
+        return openFormula.getConnector() == OpenFormula.AND
                 && openFormula.getFormulas().stream().allMatch(RuleEvaluator::isAtomicFormula);
     }
 
@@ -120,7 +99,7 @@ final class RuleEvaluator {
             return true;
         }
         OpenFormula openFormula = (OpenFormula) formula;
-        return openFormula.getConnector() == OpenFormula.Connector.NOT
+        return openFormula.getConnector() == OpenFormula.NOT
                 && openFormula.getFormulas().get(0) instanceof AtomicFormula;
     }
 }

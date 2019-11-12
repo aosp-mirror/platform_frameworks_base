@@ -38,10 +38,13 @@ import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
+import java.util.Optional;
+
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Binds;
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -86,8 +89,8 @@ abstract class SystemUIDefaultModule {
 
     @Singleton
     @Provides
-    static Divider provideDivider(Context context) {
-        return new Divider(context);
+    static Divider provideDivider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy) {
+        return new Divider(context, recentsOptionalLazy);
     }
 
     @Provides

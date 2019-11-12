@@ -46,6 +46,7 @@ public class ShortcutKeyDispatcher extends SystemUI
 
     private static final String TAG = "ShortcutKeyDispatcher";
     private final Divider mDivider;
+    private final Recents mRecents;
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
     private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -59,9 +60,10 @@ public class ShortcutKeyDispatcher extends SystemUI
     protected final long SC_DOCK_RIGHT = META_MASK | KeyEvent.KEYCODE_RIGHT_BRACKET;
 
     @Inject
-    public ShortcutKeyDispatcher(Context context, Divider divider) {
+    public ShortcutKeyDispatcher(Context context, Divider divider, Recents recents) {
         super(context);
         mDivider = divider;
+        mRecents = recents;
     }
 
     /**
@@ -96,8 +98,7 @@ public class ShortcutKeyDispatcher extends SystemUI
             int dockSide = mWindowManagerService.getDockedStackSide();
             if (dockSide == WindowManager.DOCKED_INVALID) {
                 // Split the screen
-                Recents recents = getComponent(Recents.class);
-                recents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
+                mRecents.splitPrimaryTask((shortcutCode == SC_DOCK_LEFT)
                         ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
                         : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT, null, -1);
             } else {

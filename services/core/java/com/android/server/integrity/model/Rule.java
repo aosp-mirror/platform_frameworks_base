@@ -18,55 +18,96 @@ package com.android.server.integrity.model;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.android.internal.annotations.VisibleForTesting;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
  * Represent rules to be used in the rule evaluation engine to match against app installs.
  *
  * <p>Instances of this class are immutable.
+ *
+ * @hide
  */
-public final class Rule {
+@SystemApi
+@VisibleForTesting
+public final class Rule implements Parcelable {
 
-    public enum Effect {
-        DENY
-    }
+    @IntDef(
+            value = {
+                DENY,
+                FORCE_ALLOW,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Effect {}
 
-    // Holds an empty rule instance.
-    public static final Rule EMPTY = new Rule();
-
-    private final Formula mFormula;
-    private final Effect mEffect;
-
-    private Rule() {
-        this.mFormula = null;
-        this.mEffect = null;
-    }
-
-    public Rule(Formula formula, Effect effect) {
-        this.mFormula = checkNotNull(formula);
-        this.mEffect = checkNotNull(effect);
-    }
+    /** If this rule matches the install, the install should be denied. */
+    public static final int DENY = 0;
 
     /**
-     * Indicates whether the rule is empty or not.
-     *
-     * @return {@code true} if the rule is empty, and {@code false} otherwise.
+     * If this rule matches the install, the install will be allowed regardless of other matched
+     * rules.
      */
-    public boolean isEmpty() {
-        return mFormula == null && mEffect == null;
+    public static final int FORCE_ALLOW = 1;
+
+    private final Formula mFormula;
+    private final @Effect int mEffect;
+
+    public Rule(@NonNull Formula formula, @Effect int effect) {
+        this.mFormula = checkNotNull(formula);
+        this.mEffect = effect;
     }
 
+    Rule(Parcel in) {
+        mFormula = Formula.readFromParcel(in);
+        mEffect = in.readInt();
+    }
+
+    @NonNull
+    public static final Creator<Rule> CREATOR =
+            new Creator<Rule>() {
+                @Override
+                public Rule createFromParcel(Parcel in) {
+                    return new Rule(in);
+                }
+
+                @Override
+                public Rule[] newArray(int size) {
+                    return new Rule[size];
+                }
+            };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        Formula.writeToParcel(mFormula, dest, flags);
+        dest.writeInt(mEffect);
+    }
+
+    @NonNull
     public Formula getFormula() {
         return mFormula;
     }
 
-    public Effect getEffect() {
+    public @Effect int getEffect() {
         return mEffect;
     }
 
     @Override
     public String toString() {
-        return String.format("Rule: %s, %s", mFormula, mEffect);
+        return String.format("Rule: %s, %s", mFormula, effectToString(mEffect));
     }
 
     @Override
@@ -78,12 +119,22 @@ public final class Rule {
             return false;
         }
         Rule that = (Rule) o;
-        return Objects.equals(mFormula, that.mFormula)
-                && Objects.equals(mEffect, that.mEffect);
+        return Objects.equals(mFormula, that.mFormula) && mEffect == that.mEffect;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mFormula, mEffect);
+    }
+
+    private String effectToString(int effect) {
+        switch (effect) {
+            case DENY:
+                return "DENY";
+            case FORCE_ALLOW:
+                return "FORCE_ALLOW";
+            default:
+                throw new IllegalArgumentException("Unknown effect " + effect);
+        }
     }
 }

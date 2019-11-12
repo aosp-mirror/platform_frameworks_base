@@ -1539,6 +1539,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             public void onInstallPermissionUpdated() {
                 mDefaultPermissionCallback.onInstallPermissionUpdated();
             }
+
+            public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds,
+                    boolean sync, int uid) {
+                onPermissionUpdated(updatedUserIds, sync);
+                mOnPermissionChangeListeners.onPermissionsChanged(uid);
+            }
+
+            public void onInstallPermissionUpdatedNotifyListener(int uid) {
+                mDefaultPermissionCallback.onInstallPermissionUpdatedNotifyListener(uid);
+            }
         };
 
         for (int i = 0; i < permissionCount; i++) {

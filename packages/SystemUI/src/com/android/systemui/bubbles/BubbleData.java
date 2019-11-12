@@ -179,7 +179,8 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
-    void notificationEntryUpdated(NotificationEntry entry, boolean suppressFlyout) {
+    void notificationEntryUpdated(NotificationEntry entry, boolean suppressFlyout,
+            boolean showInShade) {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryUpdated: " + entry);
         }
@@ -208,7 +209,7 @@ public class BubbleData {
             setSelectedBubbleInternal(bubble);
         }
         boolean isBubbleExpandedAndSelected = mExpanded && mSelectedBubble == bubble;
-        bubble.setShowInShadeWhenBubble(!isBubbleExpandedAndSelected);
+        bubble.setShowInShadeWhenBubble(!isBubbleExpandedAndSelected && showInShade);
         bubble.setShowBubbleDot(!isBubbleExpandedAndSelected);
         dispatchPendingChanges();
     }

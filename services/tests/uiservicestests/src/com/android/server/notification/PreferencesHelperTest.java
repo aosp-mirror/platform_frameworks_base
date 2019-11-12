@@ -2715,4 +2715,57 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertNull(mHelper.getNotificationChannel(PKG_O, UID_O, extraChannel, true));
         assertNull(mHelper.getNotificationChannel(PKG_O, UID_O, extraChannel1, true));
     }
+
+    @Test
+    public void testRestoreMultiUser() throws Exception {
+        String pkg = "restore_pkg";
+        String channelId = "channelId";
+        int user0Importance = 3;
+        int user10Importance = 4;
+        when(mPm.getPackageUidAsUser(eq(pkg), anyInt())).thenReturn(UserHandle.USER_NULL);
+
+        // both users have the same package, but different notification settings
+        final String xmlUser0 = "<ranking version=\"1\">\n"
+                + "<package name=\"" + pkg + "\" >\n"
+                + "<channel id=\"" + channelId + "\" name=\"hi\""
+                + " importance=\"" + user0Importance + "\"/>"
+                + "</package>"
+                + "</ranking>";
+        final String xmlUser10 = "<ranking version=\"1\">\n"
+                + "<package name=\"" + pkg + "\" >\n"
+                + "<channel id=\"" + channelId + "\" name=\"hi\""
+                + " importance=\"" + user10Importance + "\"/>"
+                + "</package>"
+                + "</ranking>";
+
+        // trigger a restore for both users
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xmlUser0.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, true, 0);
+        parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xmlUser10.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, true, 10);
+
+        // "install" package on both users
+        String[] pkgList = new String[] {pkg};
+        int[] uidList0 = new int[] {UserHandle.PER_USER_RANGE};
+        int[] uidList10 = new int[] {UserHandle.PER_USER_RANGE + 1};
+        when(mPm.getPackageUidAsUser(pkg, 0)).thenReturn(uidList0[0]);
+        when(mPm.getPackageUidAsUser(pkg, 10)).thenReturn(uidList10[0]);
+        ApplicationInfo info = new ApplicationInfo();
+        info.targetSdkVersion = Build.VERSION_CODES.Q;
+        when(mPm.getApplicationInfoAsUser(eq(pkg), anyInt(), anyInt())).thenReturn(info);
+
+        mHelper.onPackagesChanged(false, 0, pkgList, uidList0);
+        mHelper.onPackagesChanged(false, 10, pkgList, uidList10);
+
+        assertEquals(user0Importance,
+                mHelper.getNotificationChannel(pkg, uidList0[0], channelId, false).getImportance());
+        assertEquals(user10Importance, mHelper.getNotificationChannel(
+                pkg, uidList10[0], channelId, false).getImportance());
+    }
 }

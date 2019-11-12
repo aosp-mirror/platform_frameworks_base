@@ -1093,6 +1093,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "200829729": {
+      "message": "ScreenRotationAnimation onAnimationEnd",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
+    },
     "221540118": {
       "message": "mUserActivityTimeout set to %d",
       "level": "DEBUG",
@@ -1158,6 +1164,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
+    "292555239": {
+      "message": "ScreenRotation sill animating: mDisplayAnimator: %s\nmEnterBlackFrameAnimator: %s\nmRotateScreenAnimator: %s\nmScreenshotRotationAnimator: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
     },
     "292904800": {
       "message": "Deferring rotation, animation in progress.",

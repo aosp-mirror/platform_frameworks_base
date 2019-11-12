@@ -46,10 +46,13 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.volume.CarVolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 
+import java.util.Optional;
+
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Binds;
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -76,8 +79,8 @@ abstract class CarSystemUIModule {
 
     @Singleton
     @Provides
-    static Divider provideDivider(Context context) {
-        return new Divider(context);
+    static Divider provideDivider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy) {
+        return new Divider(context, recentsOptionalLazy);
     }
 
     @Singleton
@@ -101,11 +104,8 @@ abstract class CarSystemUIModule {
     abstract NotificationData.KeyguardEnvironment bindKeyguardEnvironment(
             KeyguardEnvironmentImpl keyguardEnvironment);
 
-    @Singleton
-    @Provides
-    static ShadeController provideShadeController(Context context) {
-        return SysUiServiceProvider.getComponent(context, StatusBar.class);
-    }
+    @Binds
+    abstract ShadeController provideShadeController(CarStatusBar statusBar);
 
     @Provides
     @Singleton

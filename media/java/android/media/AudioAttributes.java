@@ -710,7 +710,7 @@ public final class AudioAttributes implements Parcelable {
          * @return the same Builder instance.
          */
         public Builder setFlags(int flags) {
-            flags &= AudioAttributes.FLAG_ALL;
+            flags &= AudioAttributes.FLAG_ALL_PUBLIC;
             mFlags |= flags;
             return this;
         }

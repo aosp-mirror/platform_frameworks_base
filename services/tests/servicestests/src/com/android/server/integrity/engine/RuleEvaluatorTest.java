@@ -16,11 +16,15 @@
 
 package com.android.server.integrity.engine;
 
+import static com.android.server.integrity.model.IntegrityCheckResult.Effect.ALLOW;
+import static com.android.server.integrity.model.IntegrityCheckResult.Effect.DENY;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 import com.android.server.integrity.model.AppInstallMetadata;
 import com.android.server.integrity.model.AtomicFormula;
+import com.android.server.integrity.model.AtomicFormula.StringAtomicFormula;
+import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.OpenFormula;
 import com.android.server.integrity.model.Rule;
 
@@ -43,141 +47,176 @@ public class RuleEvaluatorTest {
             new AppInstallMetadata.Builder()
                     .setPackageName(PACKAGE_NAME_1)
                     .setAppCertificate(APP_CERTIFICATE)
+                    .setVersionCode(2)
                     .build();
 
     @Test
-    public void testMatchRules_emptyRules() {
+    public void testEvaluateRules_noRules_allow() {
         List<Rule> rules = new ArrayList<>();
 
-        Rule matchedRule = RuleEvaluator.evaluateRules(rules, APP_INSTALL_METADATA);
+        IntegrityCheckResult result = RuleEvaluator.evaluateRules(rules, APP_INSTALL_METADATA);
 
-        assertEquals(Rule.EMPTY, matchedRule);
+        assertEquals(ALLOW, result.getEffect());
     }
 
     @Test
-    public void testMatchRules_emptyMatch() {
-        Rule rule1 = new Rule(
-                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                        PACKAGE_NAME_2), Rule.Effect.DENY);
+    public void testEvaluateRules_noMatchedRules_allow() {
+        Rule rule1 =
+                new Rule(
+                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_2),
+                        Rule.DENY);
 
-        Rule matchedRule = RuleEvaluator.evaluateRules(Collections.singletonList(rule1),
-                APP_INSTALL_METADATA);
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Collections.singletonList(rule1), APP_INSTALL_METADATA);
 
-        assertEquals(Rule.EMPTY, matchedRule);
-    }
-
-
-    @Test
-    public void testMatchRules_oneMatch() {
-        Rule rule1 = new Rule(
-                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                        PACKAGE_NAME_1), Rule.Effect.DENY);
-        Rule rule2 = new Rule(
-                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                        PACKAGE_NAME_2), Rule.Effect.DENY);
-
-        Rule matchedRule = RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2),
-                APP_INSTALL_METADATA);
-
-        assertEquals(rule1, matchedRule);
+        assertEquals(ALLOW, result.getEffect());
     }
 
     @Test
-    public void testMatchRules_multipleMatches() {
-        Rule rule1 = new Rule(
-                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                        PACKAGE_NAME_1), Rule.Effect.DENY);
-        OpenFormula openFormula2 = new OpenFormula(OpenFormula.Connector.AND, Arrays.asList(
-                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                        PACKAGE_NAME_1),
-                new AtomicFormula(AtomicFormula.Key.APP_CERTIFICATE,
-                        AtomicFormula.Operator.EQ,
-                        APP_CERTIFICATE)));
-        Rule rule2 = new Rule(
-                openFormula2, Rule.Effect.DENY);
+    public void testEvaluateRules_oneMatch_deny() {
+        Rule rule1 =
+                new Rule(
+                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                        Rule.DENY);
+        Rule rule2 =
+                new Rule(
+                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_2),
+                        Rule.DENY);
 
-        Rule matchedRule = RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2),
-                APP_INSTALL_METADATA);
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
 
-        assertNotEquals(Rule.EMPTY, matchedRule);
+        assertEquals(DENY, result.getEffect());
+        assertEquals(rule1, result.getRule());
     }
 
     @Test
-    public void testMatchRules_ruleWithNot() {
-        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.NOT,
-                Collections.singletonList(
-                        new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                                PACKAGE_NAME_2)));
-        Rule rule = new Rule(openFormula, Rule.Effect.DENY);
+    public void testEvaluateRules_multipleMatches_deny() {
+        Rule rule1 =
+                new Rule(
+                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                        Rule.DENY);
+        OpenFormula openFormula2 =
+                new OpenFormula(
+                        OpenFormula.AND,
+                        Arrays.asList(
+                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
+        Rule rule2 = new Rule(openFormula2, Rule.DENY);
 
-        Rule matchedRule = RuleEvaluator.evaluateRules(Collections.singletonList(rule),
-                APP_INSTALL_METADATA);
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
 
-        assertEquals(rule, matchedRule);
+        assertEquals(DENY, result.getEffect());
+        assertEquals(rule1, result.getRule());
     }
 
     @Test
-    public void testMatchRules_ruleWithIntegerOperators() {
-        Rule rule1 = new Rule(
-                new AtomicFormula(AtomicFormula.Key.VERSION_CODE, AtomicFormula.Operator.GT,
-                        1), Rule.Effect.DENY);
+    public void testEvaluateRules_ruleWithNot_deny() {
+        OpenFormula openFormula =
+                new OpenFormula(
+                        OpenFormula.NOT,
+                        Collections.singletonList(
+                                new StringAtomicFormula(
+                                        AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_2)));
+        Rule rule = new Rule(openFormula, Rule.DENY);
 
-        Rule matchedRule = RuleEvaluator.evaluateRules(Collections.singletonList(rule1),
-                APP_INSTALL_METADATA);
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(rule1, matchedRule);
+        assertEquals(DENY, result.getEffect());
+        assertEquals(rule, result.getRule());
     }
 
     @Test
-    public void testMatchRules_validForm() {
-        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.AND, Arrays.asList(
-                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                        PACKAGE_NAME_1),
-                new AtomicFormula(AtomicFormula.Key.APP_CERTIFICATE,
-                        AtomicFormula.Operator.EQ,
-                        APP_CERTIFICATE)));
-        Rule rule = new Rule(
-                openFormula, Rule.Effect.DENY);
+    public void testEvaluateRules_ruleWithIntegerOperators_deny() {
+        Rule rule =
+                new Rule(
+                        new AtomicFormula.IntAtomicFormula(
+                                AtomicFormula.VERSION_CODE, AtomicFormula.GT, 1),
+                        Rule.DENY);
 
-        Rule matchedRule = RuleEvaluator.evaluateRules(Collections.singletonList(rule),
-                APP_INSTALL_METADATA);
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(rule, matchedRule);
+        assertEquals(DENY, result.getEffect());
+        assertEquals(rule, result.getRule());
     }
 
     @Test
-    public void testMatchRules_ruleNotInDNF() {
-        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.OR, Arrays.asList(
-                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                        PACKAGE_NAME_1),
-                new AtomicFormula(AtomicFormula.Key.APP_CERTIFICATE,
-                        AtomicFormula.Operator.EQ,
-                        APP_CERTIFICATE)));
-        Rule rule = new Rule(
-                openFormula, Rule.Effect.DENY);
+    public void testEvaluateRules_validForm_deny() {
+        OpenFormula openFormula =
+                new OpenFormula(
+                        OpenFormula.AND,
+                        Arrays.asList(
+                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
+        Rule rule = new Rule(openFormula, Rule.DENY);
 
-        Rule matchedRule = RuleEvaluator.evaluateRules(Collections.singletonList(rule),
-                APP_INSTALL_METADATA);
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(Rule.EMPTY, matchedRule);
+        assertEquals(DENY, result.getEffect());
+        assertEquals(rule, result.getRule());
     }
 
     @Test
-    public void testMatchRules_openFormulaWithNot() {
-        OpenFormula openSubFormula = new OpenFormula(OpenFormula.Connector.AND, Arrays.asList(
-                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
-                        PACKAGE_NAME_2),
-                new AtomicFormula(AtomicFormula.Key.APP_CERTIFICATE,
-                        AtomicFormula.Operator.EQ,
-                        APP_CERTIFICATE)));
-        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.NOT,
-                Collections.singletonList(openSubFormula));
-        Rule rule = new Rule(
-                openFormula, Rule.Effect.DENY);
+    public void testEvaluateRules_ruleNotInDNF_ignoreAndAllow() {
+        OpenFormula openFormula =
+                new OpenFormula(
+                        OpenFormula.OR,
+                        Arrays.asList(
+                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
+        Rule rule = new Rule(openFormula, Rule.DENY);
 
-        Rule matchedRule = RuleEvaluator.evaluateRules(Collections.singletonList(rule),
-                APP_INSTALL_METADATA);
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
 
-        assertEquals(Rule.EMPTY, matchedRule);
+        assertEquals(ALLOW, result.getEffect());
+    }
+
+    @Test
+    public void testEvaluateRules_openFormulaWithNot_allow() {
+        OpenFormula openSubFormula =
+                new OpenFormula(
+                        OpenFormula.AND,
+                        Arrays.asList(
+                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_2),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
+        OpenFormula openFormula =
+                new OpenFormula(OpenFormula.NOT, Collections.singletonList(openSubFormula));
+        Rule rule = new Rule(openFormula, Rule.DENY);
+
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
+
+        assertEquals(ALLOW, result.getEffect());
+    }
+
+    @Test
+    public void testEvaluateRules_forceAllow() {
+        Rule rule1 =
+                new Rule(
+                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                        Rule.FORCE_ALLOW);
+        OpenFormula openFormula2 =
+                new OpenFormula(
+                        OpenFormula.AND,
+                        Arrays.asList(
+                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
+        Rule rule2 = new Rule(openFormula2, Rule.DENY);
+
+        IntegrityCheckResult result =
+                RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
+
+        assertEquals(ALLOW, result.getEffect());
+        assertEquals(rule1, result.getRule());
     }
 }

@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"နှိုးစက်သံ"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"အကြောင်းကြားချက်အသံ"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"အမျိုးအမည်မသိ"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wi-Fi ကွန်ယက်များရရှိနိုင်သည်</item>
-      <item quantity="one">Wi-Fi ကွန်ယက်ရရှိနိုင်သည်</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Wi-Fi ကွန်ယက်များရရှိနိုင်သည်အား ဖွင့်ပါ</item>
-      <item quantity="one">Wi-Fi ကွန်ယက်ရရှိနိုင်သည်အား ဖွင့်ပါ</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"အများသုံး Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်ပါ"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်နေသည်"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်ပြီးပါပြီ"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi ကွန်ရက်သို့ ချိတ်ဆက်၍ မရပါ"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ကွန်ရက်အားလုံးကို ကြည့်ရန် တို့ပါ"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"ချိတ်ဆက်ရန်"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ကွန်ရက်အားလုံး"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"အကြံပြုထားသည့် Wi‑Fi ကွန်ရက်များ ခွင့်ပြုမလား။"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> သည် ကွန်ရက်များကို အကြံပြုထားသည်။ စက်သည် အလိုအလျောက် ချိတ်ဆက်နိုင်သည်။"</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"ခွင့်ပြုရန်"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"မလိုပါ"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ကို အလိုအလျောက်​ ပြန်ဖွင့်ပေးလိမ့်ပါမည်"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"သိမ်းဆည်းထားသည့် အရည်အသွေးမြင့်ကွန်ရက်များအနီးသို့ ရောက်ရှိသည့်အခါ"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ပြန်မဖွင့်ပါနှင့်"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi ကို အလိုအလျောက် ဖွင့်ထားသည်"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"သင်သည် သိမ်းထားသည့် ကွန်ရက်အနီးတွင် ရှိသည်− <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ဝိုင်ဖိုင်ကွန်ရက်သို့ လက်မှတ်ထိုးဝင်ပါ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ကွန်ယက်သို့ လက်မှတ်ထိုးဝင်ရန်"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"ချိတ်ဆက်ထားသည်"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> တွင် ချိတ်ဆက်မှုကို ကန့်သတ်ထားသည်"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"မည်သို့ပင်ဖြစ်စေ ချိတ်ဆက်ရန် တို့ပါ"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"သင်၏ဟော့စပေါ့ ဆက်တင်များ ပြောင်းလဲမှု"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"သင်၏ ဟော့စပေါ့လိုင်း ပြောင်းသွားပါပြီ။"</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ဤစက်ပစ္စည်းသည် သင်၏ 5GHz သီးသန့်ရွေးချယ်မှုအတွက် ပံ့ပိုးမထားပါ။ ၎င်းအစား ဤစက်ပစ္စည်းသည် ရနိုင်သည့်အခါ 5GHz လိုင်းကို သုံးသွားပါမည်။"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ဖြင့် အင်တာနက် အသုံးမပြုနိုင်သည့်အချိန်တွင် စက်ပစ္စည်းသည် <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ကို သုံးပါသည်။ ဒေတာသုံးစွဲခ ကျသင့်နိုင်ပါသည်။"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> မှ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
@@ -1294,28 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"အမည်မသိကွန်ရက်အမျိုးအစား"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ဝိုင်ဖိုင်ကိုချိတ်ဆက်မရပါ"</string>
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4917472096696322767) -->
-    <skip />
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"ချိတ်ဆက်မှုကို ခွင့်ပြုမလား?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"အပလီကေးရှင်း %1$s သည် ဝိုင်ဖိုင်ကွန်ရက် %2$s ကိုချိတ်ဆက်လိုသည်"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"အပလီကေးရှင်း"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"တိုက်ရိုက် Wi-Fi"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"တိုက်ရိုက်Wi-Fi ကို စတင်ပါ။ ၎င်းသည် Wi-Fi  ဟော့စပေါ့ကို ရပ်ဆိုင်းစေမှာ ဖြစ်ပါသည်။"</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"တိုက်ရိုက်ဝိုင်ဖိုင်ကို စတင်လို့ မရပါ"</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi  တိုက်ရိုက် ကိုဖွင့်ထားသည်"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"ဆက်တင်များအတွက် တို့ပါ"</string>
     <string name="accept" msgid="1645267259272829559">"လက်ခံရန်"</string>
     <string name="decline" msgid="2112225451706137894">"လက်မခံပါ"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"ဖိတ်ကြားချက် ပို့ပြီး"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"ချိတ်ဆက်ရန် ဖိတ်ကြားချက်"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"မှ၊"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"သို့:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"လိုအပ်သော ပင် နံပါတ် ရိုက်ရန်:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ပင် နံပါတ်:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> နှင့် ဆက်သွယ်ထားစဉ် တက်ဘလက်ဟာ Wi-Fi  နှင့် ဆက်သွယ်မှု ရပ်ဆိုင်းထားမှာ ဖြစ်ပါတယ်"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"သင်၏ Android TV စက်ပစ္စည်းသည် <xliff:g id="DEVICE_NAME">%1$s</xliff:g> သို့ ချိတ်ဆက်ထားသည့်အခါ Wi-Fi မှနေ၍ ယာယီ ချိတ်ဆက်မှုဖြုတ်သွားပါမည်။"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ကို ဆက်သွယ်ထားစဉ် ဖုန်းအား ဝိုင်ဖိုင်မှ ဆက်သွယ်မှု ရပ်ဆိုင်းထားပါမည်"</string>
     <string name="select_character" msgid="3365550120617701745">"စာရိုက်ထည့်ရန်"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"စာတိုပို့စနစ်(SMS)ဖြင့် စာများ ပို့သည်"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; မှ စာ အမြောက်အများ ပို့နေပါသည်။ ဒီအပလီကေးရှင်းကို ဆက်လက်ပြီး လုပ်ဆောင်ရန် ခွင့်ပြုပါမလား"</string>
@@ -1818,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"သင်၏ စီမံခန့်ခွဲသူက အပ်ဒိတ်လုပ်ထားသည်"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"သင်၏ စီမံခန့်ခွဲသူက ဖျက်လိုက်ပါပြီ"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' က နောက်ခံလုပ်ဆောင်ချက်၊ အချို့ အမြင်အာရုံဆိုင်ရာ အထူးပြုလုပ်ချက်များနှင့် အခြား ပါဝါအလွန်သုံးသော ဝန်ဆောင်မှုများကို ပိတ်ခြင်း သို့မဟုတ် ကန့်သတ်ခြင်းတို့ ပြုလုပ်သည်။ "<annotation id="url">"ပိုမိုလေ့လာရန်"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် \'ဘက်ထရီအားထိန်း\' က နောက်ခံလုပ်ဆောင်ချက်၊ အချို့ အမြင်အာရုံဆိုင်ရာ အထူးပြုလုပ်ချက်များနှင့် အခြား ပါဝါအလွန်သုံးသော ဝန်ဆောင်မှုများကို ပိတ်ခြင်း သို့မဟုတ် ကန့်သတ်ခြင်းတို့ ပြုလုပ်သည်။"</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ဒေတာအသုံးပြုမှု ချွေတာမှုစနစ်ကို ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ဖွင့်ပါ"</string>
@@ -2052,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"တိုက်ရိုက်မျှဝေ၍ မရပါ"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"အက်ပ်စာရင်း"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"ဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။"</string>
 </resources>

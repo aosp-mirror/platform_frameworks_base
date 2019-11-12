@@ -24,7 +24,9 @@
 #include <GLES2/gl2ext.h>
 
 #include <gui/Surface.h>
+#include <gui/surfacetexture/SurfaceTexture.h>
 #include <gui/BufferQueue.h>
+#include <gui/surfacetexture/surface_texture_platform.h>
 
 #include "core_jni_helpers.h"
 
@@ -35,7 +37,6 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
-#include "surfacetexture/SurfaceTexture.h"
 
 // ----------------------------------------------------------------------------
 
@@ -402,3 +403,6 @@ int register_android_graphics_SurfaceTexture(JNIEnv* env)
 }
 
 } // namespace android
+
+//TODO: Move this file to frameworks/base/core/jni/android_graphics_SurfaceTexture.cpp. See
+//TODO: android_view_Surface.cpp for example.

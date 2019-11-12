@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Äratuse helid"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Märguannete helid"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Teadmata"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">WiFi-võrgud on saadaval</item>
-      <item quantity="one">WiFi-võrk on saadaval</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Avatud WiFi-võrgud on saadaval</item>
-      <item quantity="one">Avatud WiFi-võrk on saadaval</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Looge ühendus avatud WiFi-võrguga"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"WiFi-võrguga ühendamine"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Ühendatud WiFi-võrguga"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"WiFi-võrguga ei õnnestunud ühendust luua"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Puudutage kõikide võrkude nägemiseks"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Ühenda"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Kõik võrgud"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Kas lubada soovitatud WiFi-võrgud?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Rakenduse <xliff:g id="NAME">%s</xliff:g> soovitatud võrgud. Seade võib automaatselt ühenduse luua."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Luba"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Tänan, ei"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WiFi lülitub sisse automaatselt"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kui olete kvaliteetse salvestatud võrgu läheduses"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ära lülita tagasi sisse"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"WiFi lülitati automaatselt sisse"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Teie lähedal on salvestatud võrk: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Logi sisse WiFi-võrku"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Võrku sisselogimine"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Ühendatud"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"Võrgu <xliff:g id="NETWORK_SSID">%1$s</xliff:g> ühendus on piiratud"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Puudutage, kui soovite siiski ühenduse luua"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Muudatused teie kuumkoha seadetes"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Teie kuumkoha sagedusriba on muutunud."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"See seade ei toeta teie eelistatud ainult 5 GHz riba. Seade kasutab 5 GHz riba ainult siis, kui see on saadaval."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Lülitati võrgule <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Seade kasutab võrku <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, kui võrgul <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> puudub juurdepääs Internetile. Rakenduda võivad tasud."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lülitati võrgult <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> võrgule <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"tundmatu võrgutüüp"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ei saanud WiFi-ga ühendust"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" on halb Interneti-ühendus."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Kas lubada ühendus?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Rakendus %1$s soovib luua ühenduse WiFi-võrguga %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Rakendus"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"WiFi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käivitage WiFi otseühendus. See lülitab välja WiFi kliendi/kuumkoha."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"WiFi otseühenduse käivitamine ebaõnnestus."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"WiFi Direct on sees"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Puudutage seadete nägemiseks"</string>
     <string name="accept" msgid="1645267259272829559">"Nõustu"</string>
     <string name="decline" msgid="2112225451706137894">"Keeldu"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Kutse on saadetud"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Kutse ühendamiseks"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Saatja:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Saaja:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Sisestage nõutav PIN-kood:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-kood:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tahvelarvuti ühendus WiFi-ga katkestatakse ajutiselt, kui see on ühendatud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ühendamisel katkestatakse ajutiselt Android TV seadme ühendus WiFi-võrguga."</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Telefoni ühendus WiFi-ga katkestatakse ajutiselt, kui see on ühendatud seadmega <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Sisesta tähemärk"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-sõnumite saatmine"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; saadab suurel hulgal SMS-sõnumeid. Kas tahate lubada sellel rakendusel ka edaspidi sõnumeid saata?"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administraator on seda värskendanud"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administraator on selle kustutanud"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Aku tööea pikendamiseks lülitab akusäästja taustategevused, mõningad visuaalsed efektid ja muud akut koormavad funktsioonid välja või piirab neid. "<annotation id="url">"Lisateave"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Aku tööea pikendamiseks lülitab akusäästja taustategevused, mõningad visuaalsed efektid ja muud akut koormavad funktsioonid välja või piirab neid."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmemahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks pildid kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Lülita sisse"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Vahetu jagamine ei ole saadaval"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Rakenduste loend"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Sellele rakendusele pole antud salvestamise luba, kuid see saab heli jäädvustada selle USB-seadme kaudu."</string>
 </resources>

@@ -16,7 +16,9 @@
 
 package android.telecom;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -592,12 +594,17 @@ public final class PhoneAccount implements Parcelable {
          * only be one {@link PhoneAccount} with a non-empty group number registered to Telecom at a
          * time. By default, there is no group Id for a {@link PhoneAccount} (an empty String). Only
          * grouped {@link PhoneAccount}s with the same {@link ConnectionService} can be replaced.
+         * <p>
+         * Note: This is an API specific to the Telephony stack.
+         *
          * @param groupId The group Id of the {@link PhoneAccount} that will replace any other
          * registered {@link PhoneAccount} in Telecom with the same Group Id.
          * @return The builder
          * @hide
          */
-        public Builder setGroupId(String groupId) {
+        @SystemApi
+        @TestApi
+        public @NonNull Builder setGroupId(@NonNull String groupId) {
             if (groupId != null) {
                 mGroupId = groupId;
             } else {

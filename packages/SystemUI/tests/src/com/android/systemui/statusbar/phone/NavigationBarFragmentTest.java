@@ -157,13 +157,10 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     private void setupSysuiDependency() {
-        mSysuiContext.putComponent(StatusBar.class, mock(StatusBar.class));
-
         Display display = new Display(DisplayManagerGlobal.getInstance(), EXTERNAL_DISPLAY_ID,
                 new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS);
         mSysuiTestableContextExternal = (SysuiTestableContext) mSysuiContext.createDisplayContext(
                 display);
-        mSysuiTestableContextExternal.putComponent(StatusBar.class, mock(StatusBar.class));
 
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         WindowManager windowManager = mock(WindowManager.class);
@@ -255,7 +252,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 mBroadcastDispatcher,
                 mCommandQueue,
                 mDivider,
-                Optional.of(mRecents));
+                Optional.of(mRecents),
+                () -> mock(StatusBar.class));
     }
 
     private class HostCallbacksForExternalDisplay extends

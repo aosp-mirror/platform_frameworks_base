@@ -24,7 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telecom.Call;
 import android.telecom.Connection;
-import android.telecom.Log;
+import android.telephony.Rlog;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ import java.util.Set;
 @SystemApi
 @TestApi
 public final class ImsConferenceState implements Parcelable {
+    private static final String TAG = "ImsConferenceState";
     /**
      * conference-info : user
      */
@@ -194,7 +196,7 @@ public final class ImsConferenceState implements Parcelable {
                 sb.append("<");
                 while (iterator.hasNext()) {
                     Entry<String, Bundle> entry = iterator.next();
-                    sb.append(Log.pii(entry.getKey()));
+                    sb.append(Rlog.pii(TAG, entry.getKey()));
                     sb.append(": ");
                     Bundle participantData = entry.getValue();
 
@@ -202,7 +204,7 @@ public final class ImsConferenceState implements Parcelable {
                         sb.append(key);
                         sb.append("=");
                         if (ENDPOINT.equals(key) || USER.equals(key)) {
-                            sb.append(Log.pii(participantData.get(key)));
+                            sb.append(Rlog.pii(TAG, participantData.get(key)));
                         } else {
                             sb.append(participantData.get(key));
                         }

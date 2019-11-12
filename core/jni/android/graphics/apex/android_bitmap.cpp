@@ -17,6 +17,7 @@
 #include "android/graphics/bitmap.h"
 #include "Bitmap.h"
 #include "TypeCast.h"
+#include "GraphicsJNI.h"
 
 #include <hwui/Bitmap.h>
 
@@ -103,4 +104,12 @@ void* ABitmap_getPixels(ABitmap* bitmapHandle) {
         return nullptr;
     }
     return bitmap->pixels();
+}
+
+AndroidBitmapFormat ABitmapConfig_getFormatFromConfig(JNIEnv* env, jobject bitmapConfigObj) {
+  return GraphicsJNI::getFormatFromConfig(env, bitmapConfigObj);
+}
+
+jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format) {
+  return GraphicsJNI::getConfigFromFormat(env, format);
 }

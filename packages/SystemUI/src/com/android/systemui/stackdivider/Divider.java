@@ -34,12 +34,16 @@ import com.android.systemui.recents.Recents;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Optional;
+
+import dagger.Lazy;
 
 /**
  * Controls the docked stack divider.
  */
 public class Divider extends SystemUI implements DividerView.DividerCallbacks {
     private static final String TAG = "Divider";
+    private final Optional<Lazy<Recents>> mRecentsOptionalLazy;
 
     private DividerWindowManager mWindowManager;
     private DividerView mView;
@@ -51,8 +55,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks {
     private boolean mHomeStackResizable = false;
     private ForcedResizableInfoActivityController mForcedResizableController;
 
-    public Divider(Context context) {
+    public Divider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy) {
         super(context);
+        mRecentsOptionalLazy = recentsOptionalLazy;
     }
 
     @Override
@@ -216,10 +221,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks {
 
     @Override
     public void growRecents() {
-        Recents recents = getComponent(Recents.class);
-        if (recents != null) {
-            recents.growRecents();
-        }
+        mRecentsOptionalLazy.ifPresent(recentsLazy -> recentsLazy.get().growRecents());
     }
 
     @Override

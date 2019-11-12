@@ -1126,8 +1126,9 @@ public final class Telephony {
              * values:</p>
              *
              * <ul>
-             *   <li><em>"message"</em> - An SmsCbMessage object containing the broadcast message
-             *   data, including ETWS or CMAS warning notification info if present.</li>
+             *   <li><em>"message"</em> - An {@link android.telephony.SmsCbMessage} object
+             *   containing the broadcast message data, including ETWS or CMAS warning notification
+             *   info if present.</li>
              * </ul>
              *
              * <p>The extra values can be extracted using
@@ -1138,11 +1139,12 @@ public final class Telephony {
              *
              * <p>Requires {@link android.Manifest.permission#RECEIVE_EMERGENCY_BROADCAST} to
              * receive.</p>
-             * @removed
+             * @hide
              */
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            public static final String SMS_EMERGENCY_CB_RECEIVED_ACTION =
-                    "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+            @SystemApi
+            public static final String ACTION_SMS_EMERGENCY_CB_RECEIVED =
+                    "android.provider.action.SMS_EMERGENCY_CB_RECEIVED";
 
             /**
              * Broadcast Action: A new CDMA SMS has been received containing Service Category
@@ -1363,22 +1365,76 @@ public final class Telephony {
      * Base column for the table that contain Carrier Public key.
      * @hide
      */
+    @SystemApi
     public interface CarrierColumns extends BaseColumns {
 
+        /**
+         * Mobile Country Code (MCC).
+         * <P> Type: TEXT </P>
+         */
         public static final String MCC = "mcc";
+
+        /**
+         * Mobile Network Code (MNC).
+         * <P> Type: TEXT </P>
+         */
         public static final String MNC = "mnc";
+
+        /**
+         * KeyType whether the key is being used for WLAN or ePDG.
+         * <P> Type: INTEGER </P>
+         */
         public static final String KEY_TYPE = "key_type";
+
+        /**
+         * MVNO type:
+         * {@code SPN (Service Provider Name), IMSI, GID (Group Identifier Level 1)}.
+         * <P> Type: TEXT </P>
+         */
         public static final String MVNO_TYPE = "mvno_type";
+
+        /**
+         * MVNO data.
+         * Use the following examples.
+         * <ul>
+         *     <li>SPN: A MOBILE, BEN NL, ...</li>
+         *     <li>IMSI: 302720x94, 2060188, ...</li>
+         *     <li>GID: 4E, 33, ...</li>
+         * </ul>
+         * <P> Type: TEXT </P>
+         */
         public static final String MVNO_MATCH_DATA = "mvno_match_data";
+
+        /**
+         * The carrier public key that is used for the IMSI encryption.
+         * <P> Type: TEXT </P>
+         */
         public static final String PUBLIC_KEY = "public_key";
+
+        /**
+         * The key identifier Attribute value pair that helps a server locate
+         * the private key to decrypt the permanent identity.
+         * <P> Type: TEXT </P>
+         */
         public static final String KEY_IDENTIFIER = "key_identifier";
+
+        /**
+         * Date-Time in UTC when the key will expire.
+         * <P> Type: INTEGER (long) </P>
+         */
         public static final String EXPIRATION_TIME = "expiration_time";
+
+        /**
+         * Timestamp when this table was last modified, in milliseconds since
+         * January 1, 1970 00:00:00.0 UTC.
+         * <P> Type: INTEGER (long) </P>
+         */
         public static final String LAST_MODIFIED = "last_modified";
 
         /**
          * The {@code content://} style URL for this table.
-         * @hide
          */
+        @NonNull
         public static final Uri CONTENT_URI = Uri.parse("content://carrier_information/carrier");
     }
 
@@ -4691,7 +4747,16 @@ public final class Telephony {
          * Contains mappings between matching rules with carrier id for all carriers.
          * @hide
          */
+        @SystemApi
         public static final class All implements BaseColumns {
+
+            /**
+             * Not instantiable.
+             * @hide
+             */
+            private All() {
+            }
+
             /**
              * Numeric operator ID (as String). {@code MCC + MNC}
              * <P>Type: TEXT </P>
@@ -4749,6 +4814,7 @@ public final class Telephony {
             /**
              * The {@code content://} URI for this table.
              */
+            @NonNull
             public static final Uri CONTENT_URI = Uri.parse("content://carrier_id/all");
         }
     }

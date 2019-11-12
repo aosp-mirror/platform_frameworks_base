@@ -158,7 +158,7 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnEntryReinflated() throws RemoteException {
+    public void testOnEntryUpdated() throws RemoteException {
         mLogger.onExpansionChanged(NOTIFICATION_KEY, true, true,
                 NotificationVisibility.NotificationLocation.LOCATION_UNKNOWN);
         mLogger.onVisibilityChanged(
@@ -168,7 +168,7 @@ public class ExpansionStateLoggerTest extends SysuiTestCase {
         verify(mBarService).onNotificationExpansionChanged(
                 NOTIFICATION_KEY, true, true, ExpandableViewState.LOCATION_UNKNOWN);
 
-        mLogger.onEntryReinflated(NOTIFICATION_KEY);
+        mLogger.onEntryUpdated(NOTIFICATION_KEY);
         mLogger.onVisibilityChanged(
                 Collections.singletonList(createNotificationVisibility(NOTIFICATION_KEY, true)),
                 Collections.emptyList());

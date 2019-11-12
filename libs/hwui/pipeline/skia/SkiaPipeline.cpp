@@ -366,12 +366,12 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
     // capture is enabled.
     SkCanvas* canvas = tryCapture(surface.get());
 
-    renderFrameImpl(layers, clip, nodes, opaque, contentDrawBounds, canvas, preTransform);
+    renderFrameImpl(clip, nodes, opaque, contentDrawBounds, canvas, preTransform);
 
     endCapture(surface.get());
 
     if (CC_UNLIKELY(Properties::debugOverdraw)) {
-        renderOverdraw(layers, clip, nodes, contentDrawBounds, surface, preTransform);
+        renderOverdraw(clip, nodes, contentDrawBounds, surface, preTransform);
     }
 
     ATRACE_NAME("flush commands");
@@ -387,7 +387,7 @@ static Rect nodeBounds(RenderNode& node) {
 }
 }  // namespace
 
-void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
+void SkiaPipeline::renderFrameImpl(const SkRect& clip,
                                    const std::vector<sp<RenderNode>>& nodes, bool opaque,
                                    const Rect& contentDrawBounds, SkCanvas* canvas,
                                    const SkMatrix& preTransform) {
@@ -539,7 +539,7 @@ static const uint32_t kOverdrawColors[2][6] = {
         },
 };
 
-void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& clip,
+void SkiaPipeline::renderOverdraw(const SkRect& clip,
                                   const std::vector<sp<RenderNode>>& nodes,
                                   const Rect& contentDrawBounds, sk_sp<SkSurface> surface,
                                   const SkMatrix& preTransform) {
@@ -553,7 +553,7 @@ void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& 
     // each time a pixel would have been drawn.
     // Pass true for opaque so we skip the clear - the overdrawCanvas is already zero
     // initialized.
-    renderFrameImpl(layers, clip, nodes, true, contentDrawBounds, &overdrawCanvas, preTransform);
+    renderFrameImpl(clip, nodes, true, contentDrawBounds, &overdrawCanvas, preTransform);
     sk_sp<SkImage> counts = offscreen->makeImageSnapshot();
 
     // Draw overdraw colors to the canvas.  The color filter will convert counts to colors.

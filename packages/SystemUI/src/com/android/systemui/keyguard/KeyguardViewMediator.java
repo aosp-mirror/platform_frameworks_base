@@ -18,9 +18,6 @@ package com.android.systemui.keyguard;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
-import static com.android.internal.telephony.IccCardConstants.State.ABSENT;
-import static com.android.internal.telephony.IccCardConstants.State.PIN_REQUIRED;
-import static com.android.internal.telephony.IccCardConstants.State.PUK_REQUIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -61,7 +58,7 @@ import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManagerPolicyConstants;
@@ -72,7 +69,6 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardStateCallback;
-import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardConstants;
@@ -293,7 +289,7 @@ public class KeyguardViewMediator extends SystemUI {
      * Last SIM state reported by the telephony system.
      * Index is the slotId - in case of multiple SIM cards.
      */
-    private final SparseArray<IccCardConstants.State> mLastSimStates = new SparseArray<>();
+    private final SparseIntArray mLastSimStates = new SparseIntArray();
 
     private boolean mDeviceInteractive;
     private boolean mGoingToSleep;
@@ -433,7 +429,7 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
-        public void onSimStateChanged(int subId, int slotId, IccCardConstants.State simState) {
+        public void onSimStateChanged(int subId, int slotId, int simState) {
 
             if (DEBUG_SIM_STATES) {
                 Log.d(TAG, "onSimStateChanged(subId=" + subId + ", slotId=" + slotId
@@ -455,14 +451,15 @@ public class KeyguardViewMediator extends SystemUI {
 
             boolean simWasLocked;
             synchronized (KeyguardViewMediator.this) {
-                IccCardConstants.State lastState = mLastSimStates.get(slotId);
-                simWasLocked = (lastState == PIN_REQUIRED || lastState == PUK_REQUIRED);
+                int lastState = mLastSimStates.get(slotId);
+                simWasLocked = (lastState == TelephonyManager.SIM_STATE_PIN_REQUIRED
+                        || lastState == TelephonyManager.SIM_STATE_PUK_REQUIRED);
                 mLastSimStates.append(slotId, simState);
             }
 
             switch (simState) {
-                case NOT_READY:
-                case ABSENT:
+                case TelephonyManager.SIM_STATE_NOT_READY:
+                case TelephonyManager.SIM_STATE_ABSENT:
                     // only force lock screen in case of missing sim if user hasn't
                     // gone through setup wizard
                     synchronized (KeyguardViewMediator.this) {
@@ -476,7 +473,7 @@ public class KeyguardViewMediator extends SystemUI {
                                 resetStateLocked();
                             }
                         }
-                        if (simState == ABSENT) {
+                        if (simState == TelephonyManager.SIM_STATE_ABSENT) {
                             // MVNO SIMs can become transiently NOT_READY when switching networks,
                             // so we should only lock when they are ABSENT.
                             if (simWasLocked) {
@@ -487,8 +484,8 @@ public class KeyguardViewMediator extends SystemUI {
                         }
                     }
                     break;
-                case PIN_REQUIRED:
-                case PUK_REQUIRED:
+                case TelephonyManager.SIM_STATE_PIN_REQUIRED:
+                case TelephonyManager.SIM_STATE_PUK_REQUIRED:
                     synchronized (KeyguardViewMediator.this) {
                         if (!mShowing) {
                             if (DEBUG_SIM_STATES) Log.d(TAG,
@@ -500,7 +497,7 @@ public class KeyguardViewMediator extends SystemUI {
                         }
                     }
                     break;
-                case PERM_DISABLED:
+                case TelephonyManager.SIM_STATE_PERM_DISABLED:
                     synchronized (KeyguardViewMediator.this) {
                         if (!mShowing) {
                             if (DEBUG_SIM_STATES) Log.d(TAG, "PERM_DISABLED and "
@@ -513,7 +510,7 @@ public class KeyguardViewMediator extends SystemUI {
                         }
                     }
                     break;
-                case READY:
+                case TelephonyManager.SIM_STATE_READY:
                     synchronized (KeyguardViewMediator.this) {
                         if (DEBUG_SIM_STATES) Log.d(TAG, "READY, reset state? " + mShowing);
                         if (mShowing && simWasLocked) {
@@ -1334,9 +1331,9 @@ public class KeyguardViewMediator extends SystemUI {
             // if the setup wizard hasn't run yet, don't show
             final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim", false);
             final boolean absent = SubscriptionManager.isValidSubscriptionId(
-                    mUpdateMonitor.getNextSubIdForState(ABSENT));
+                    mUpdateMonitor.getNextSubIdForState(TelephonyManager.SIM_STATE_ABSENT));
             final boolean disabled = SubscriptionManager.isValidSubscriptionId(
-                    mUpdateMonitor.getNextSubIdForState(IccCardConstants.State.PERM_DISABLED));
+                    mUpdateMonitor.getNextSubIdForState(TelephonyManager.SIM_STATE_PERM_DISABLED));
             final boolean lockedOrMissing = mUpdateMonitor.isSimPinSecure()
                     || ((absent || disabled) && requireSim);
 

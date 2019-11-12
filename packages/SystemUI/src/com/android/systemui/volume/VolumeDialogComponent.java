@@ -72,10 +72,11 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     );
 
     @Inject
-    public VolumeDialogComponent(Context context, KeyguardViewMediator keyguardViewMediator) {
+    public VolumeDialogComponent(Context context, KeyguardViewMediator keyguardViewMediator,
+            VolumeDialogControllerImpl volumeDialogController) {
         mContext = context;
         mKeyguardViewMediator = keyguardViewMediator;
-        mController = (VolumeDialogControllerImpl) Dependency.get(VolumeDialogController.class);
+        mController = volumeDialogController;
         mController.setUserActivityListener(this);
         // Allow plugins to reference the VolumeDialogController.
         Dependency.get(PluginDependencyProvider.class)

@@ -36,6 +36,8 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.car.CarNavigationBarController;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -86,6 +88,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.volume.VolumeComponent;
 
 import java.util.Optional;
 
@@ -152,7 +155,7 @@ public class CarStatusBarModule {
             VisualStabilityManager visualStabilityManager,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
-            AssistManager assistManager,
+            Lazy<AssistManager> assistManagerLazy,
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
@@ -163,8 +166,11 @@ public class CarStatusBarModule {
             Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
             DozeServiceHost dozeServiceHost,
             PowerManager powerManager,
+            ScreenPinningRequest screenPinningRequest,
             DozeScrimController dozeScrimController,
+            VolumeComponent volumeComponent,
             CommandQueue commandQueue,
+            Optional<Recents> recentsOptional,
             PluginManager pluginManager,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
@@ -220,7 +226,7 @@ public class CarStatusBarModule {
                 visualStabilityManager,
                 deviceProvisionedController,
                 navigationBarController,
-                assistManager,
+                assistManagerLazy,
                 notificationListener,
                 configurationController,
                 statusBarWindowController,
@@ -231,8 +237,11 @@ public class CarStatusBarModule {
                 biometricUnlockControllerLazy,
                 dozeServiceHost,
                 powerManager,
+                screenPinningRequest,
                 dozeScrimController,
+                volumeComponent,
                 commandQueue,
+                recentsOptional,
                 pluginManager,
                 remoteInputUriController,
                 dividerOptional,

@@ -72,6 +72,8 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerServiceImpl;
+import com.android.systemui.volume.VolumeComponent;
+import com.android.systemui.volume.VolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 import dagger.Binds;
@@ -249,4 +251,10 @@ public abstract class DependencyBinder {
      */
     @Binds
     public abstract DozeHost provideDozeHost(DozeServiceHost dozeServiceHost);
+
+    /**
+     */
+    @Binds
+    public abstract VolumeComponent provideVolumeComponent(
+            VolumeDialogComponent volumeDialogComponent);
 }

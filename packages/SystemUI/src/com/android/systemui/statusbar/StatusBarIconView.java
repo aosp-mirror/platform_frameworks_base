@@ -185,6 +185,16 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         maybeUpdateIconScaleDimens();
     }
 
+    public StatusBarIconView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        mDozer = new NotificationIconDozeHelper(context);
+        mBlocked = false;
+        mAlwaysScaleIcon = true;
+        reloadDimens();
+        maybeUpdateIconScaleDimens();
+        mDensity = context.getResources().getDisplayMetrics().densityDpi;
+    }
+
     /** Should always be preceded by {@link #reloadDimens()} */
     private void maybeUpdateIconScaleDimens() {
         // We do not resize and scale system icons (on the right), only notification icons (on the
@@ -275,16 +285,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             setContentDescription(notification.getNotification());
         }
         maybeUpdateIconScaleDimens();
-    }
-
-    public StatusBarIconView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        mDozer = new NotificationIconDozeHelper(context);
-        mBlocked = false;
-        mAlwaysScaleIcon = true;
-        reloadDimens();
-        maybeUpdateIconScaleDimens();
-        mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
     private static boolean streq(String a, String b) {

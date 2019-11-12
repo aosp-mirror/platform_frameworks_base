@@ -310,6 +310,7 @@ public class SystemServicesTestRule implements TestRule {
         DisplayThread.dispose();
         AnimationThread.dispose();
         UiThread.dispose();
+        SurfaceAnimationThread.dispose();
         mInputChannel.dispose();
 
         tearDownLocalServices();

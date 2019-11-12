@@ -39,7 +39,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.telephony.IccCardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
@@ -154,8 +153,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onSimStateChanged(int subId, int slotId,
-                        IccCardConstants.State simState) {
+                public void onSimStateChanged(int subId, int slotId, int simState) {
                     mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
                     update();
                 }

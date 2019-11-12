@@ -41,7 +41,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
@@ -62,6 +61,8 @@ import java.io.PrintWriter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
@@ -99,15 +100,15 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @VisibleForTesting
     protected String mKeyToRemoveOnGutsClosed;
 
-    private StatusBar mStatusBar;
+    private final Lazy<StatusBar> mStatusBarLazy;
     private Runnable mOpenRunnable;
 
     @Inject
-    public NotificationGutsManager(
-            Context context,
-            VisualStabilityManager visualStabilityManager) {
+    public NotificationGutsManager(Context context, VisualStabilityManager visualStabilityManager,
+            Lazy<StatusBar> statusBarLazy) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;
+        mStatusBarLazy = statusBarLazy;
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
     }
@@ -119,7 +120,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mListContainer = listContainer;
         mCheckSaveListener = checkSave;
         mOnSettingsClickListener = onSettingsClick;
-        mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
     }
 
     public void setNotificationActivityStarter(
@@ -392,7 +392,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             Runnable r = () -> Dependency.get(Dependency.MAIN_HANDLER).post(
                     () -> openGutsInternal(view, x, y, menuItem));
 
-            mStatusBar.executeRunnableDismissingKeyguard(
+            mStatusBarLazy.get().executeRunnableDismissingKeyguard(
                     r,
                     null /* cancelAction */,
                     false /* dismissShade */,

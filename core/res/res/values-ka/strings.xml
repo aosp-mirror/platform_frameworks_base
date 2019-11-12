@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"მაღვიძარას ხმები"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"შეტყობინების ხმები"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"უცნობი"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">ხელმისაწვდომია Wi-Fi ქსელები</item>
-      <item quantity="one">ხელმისაწვდომია Wi-Fi ქსელი</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">ხელმისაწვდომია ღია Wi-Fi ქსელები</item>
-      <item quantity="one">ხელმისაწვდომია ღია Wi-Fi ქსელი</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"დაუკავშირდით ღია Wi‑Fi ქსელს"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"მიმდინარეობს Wi‑Fi ქსელთან დაკავშირება"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi ქსელთან დაკავშირება წარმატებით მოხერხდა"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi ქსელთან დაკავშირება ვერ მოხერხდა"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"შეეხეთ ყველა ქსელის სანახავად"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"დაკავშირება"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ყველა ქსელი"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"გსურთ, დაუშვათ შემოთავაზებული Wi‑Fi ქსელები?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> შემოთავაზებული ქსელები. მოწყობილობა შეიძლება ავტომატურად დაუკავშირდეს."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"დაშვება"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"არა, გმადლობთ"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi ავტომატურად ჩაირთვება"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"როცა შენახულ მაღალხარისხიან ქსელებთან ახლოს იმყოფებით"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ხელახლა ნუ ჩართავ"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi ავტომატურად ჩაირთო"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"თქვენ შენახული ქსელის მახლობლად ხართ: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ქსელთან დაკავშირება"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ქსელში შესვლა"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"დაკავშირებულია"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>-ის კავშირები შეზღუდულია"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"შეეხეთ, თუ მაინც გსურთ დაკავშირება"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"თქვენი უსადენო ქსელის პარამეტრების ცვლილება"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"თქვენი უსადენო ქსელის დიაპაზონი შეიცვალა."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ამ მოწყობილობას არ შეუძლია მხოლოდ 5 გჰც სიხშირეზე მუშაობა. აღნიშნული სიხშირის გამოყენება მოხდება მაშინ, როცა ეს შესაძლებელია."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"ახლა გამოიყენება <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"თუ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ინტერნეტთან კავშირს დაკარგავს, მოწყობილობის მიერ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> იქნება გამოყენებული, რამაც შეიძლება დამატებითი ხარჯები გამოიწვიოს."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"ახლა გამოიყენება <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> (გამოიყენებოდა <xliff:g id="NEW_NETWORK">%2$s</xliff:g>)"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"უცნობი ტიპის ქსელი"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-თან დაკავშირება ვერ მოხერხდა"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ცუდი ინტერნეტ-კავშირი."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"გსურთ კავშირის დაშვება?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"განაცხადს %1$s სურს დაუკავშირდეს Wifi ქსელს %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"აპლიკაცია"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ჩართეთ Wi-Fi Direct. ეს გამოიწვევს Wi-Fi კლიენტისა/უსადენო ქსელის გამორთვას."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ვერ მოხერხდა Wi-Fi Direct-ის გაშვება."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct ჩართულია"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"შეეხეთ პარამეტრების სანახავად"</string>
     <string name="accept" msgid="1645267259272829559">"მიღება"</string>
     <string name="decline" msgid="2112225451706137894">"უარყოფა"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"მოწვევა გაგზავნილია"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"მოწვევა დასაკავშირებლად"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"გამგზავნი:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"მიმღები:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"შეიყვანეთ საჭირო PIN:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"პინ-კოდი:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ტაბლეტი დროებით გაითიშება Wi-Fi-დან, სანამ მიერთებულია <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ზე"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"თქვენი Android TV მოწყობილობა დროებით გაითიშება Wi-Fi-დან, სანამ ის <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-თან იქნება დაკავშირებული"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ტელეფონი დროებით გაითიშება Wi-Fi-დან, სანამ მიერთებულია <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-ზე"</string>
     <string name="select_character" msgid="3365550120617701745">"სიმბოლოს ჩასმა"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS შეტყობინებები იგზავნება"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;აგზავნის დიდი რაოდენობის SMS შეტყობინებებს. გსურთ, მისცეთ ამ აპს უფლება გააგრძელოს შეტყობინეების დაგზავნა?"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"განახლებულია თქვენი ადმინისტრატორის მიერ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"წაიშალა თქვენი ადმინისტრატორის მიერ"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"კარგი"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"ბატარეის მუშაობის გახანგრძლივების მიზნით, ბატარეის დამზოგი გამორთავს ან შეზღუდავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტს და სხვა ფუნქციებს, რომლებზეც დიდი ენერგია იხარჯება. "<annotation id="url">"შეიტყვეთ მეტი"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"ბატარეის მუშაობის გახანგრძლივების მიზნით, ბატარეის დამზოგი გამორთავს ან შეზღუდავს ფონურ აქტივობას, ზოგიერთ ვიზუალურ ეფექტს და სხვა ფუნქციებს, რომლებზეც დიდი ენერგია იხარჯება."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"მობილური ინტერნეტის მოხმარების შემცირების მიზნით, მონაცემთა დამზოგველი ზოგიერთ აპს ფონურ რეჟიმში მონაცემთა გაგზავნასა და მიღებას შეუზღუდავს. თქვენ მიერ ამჟამად გამოყენებული აპი მაინც შეძლებს მობილურ ინტერნეტზე წვდომას, თუმცა ამას ნაკლები სიხშირით განახორციელებს. ეს ნიშნავს, რომ, მაგალითად, სურათები არ გამოჩნდება მანამ, სანამ მათ საგანგებოდ არ შეეხებით."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ჩაირთოს მონაცემთა დამზოგველი?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ჩართვა"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"პირდაპირი გაზიარება მიუწვდომელია"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"აპების სია"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"ამ აპს არ აქვს მინიჭებული ჩაწერის ნებართვა, მაგრამ შეუძლია ჩაიწეროს აუდიო ამ USB მოწყობილობის მეშვეობით."</string>
 </resources>

@@ -16,22 +16,22 @@
 
 #include "EglManager.h"
 
+#include <EGL/eglext.h>
+#include <GLES/gl.h>
 #include <cutils/properties.h>
 #include <log/log.h>
 #include <private/gui/SyncFeatures.h>
+#include <sync/sync.h>
+#include <system/window.h>
 #include <utils/Trace.h>
-#include "utils/Color.h"
-#include "utils/StringUtils.h"
+
+#include <string>
+#include <vector>
 
 #include "Frame.h"
 #include "Properties.h"
-
-#include <EGL/eglext.h>
-#include <GLES/gl.h>
-
-#include <system/window.h>
-#include <string>
-#include <vector>
+#include "utils/Color.h"
+#include "utils/StringUtils.h"
 
 #define GLES_VERSION 2
 
@@ -508,7 +508,21 @@ bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
     return preserved;
 }
 
-status_t EglManager::fenceWait(sp<Fence>& fence) {
+static status_t waitForeverOnFence(int fence, const char* logname) {
+    ATRACE_CALL();
+    if (fence == -1) {
+        return NO_ERROR;
+    }
+    constexpr int warningTimeout = 3000;
+    int err = sync_wait(fence, warningTimeout);
+    if (err < 0 && errno == ETIME) {
+        ALOGE("%s: fence %d didn't signal in %d ms", logname, fence, warningTimeout);
+        err = sync_wait(fence, -1);
+    }
+    return err < 0 ? -errno : status_t(NO_ERROR);
+}
+
+status_t EglManager::fenceWait(int fence) {
     if (!hasEglContext()) {
         ALOGE("EglManager::fenceWait: EGLDisplay not initialized");
         return INVALID_OPERATION;
@@ -518,7 +532,7 @@ status_t EglManager::fenceWait(sp<Fence>& fence) {
         SyncFeatures::getInstance().useNativeFenceSync()) {
         // Block GPU on the fence.
         // Create an EGLSyncKHR from the current fence.
-        int fenceFd = fence->dup();
+        int fenceFd = ::dup(fence);
         if (fenceFd == -1) {
             ALOGE("EglManager::fenceWait: error dup'ing fence fd: %d", errno);
             return -errno;
@@ -543,7 +557,7 @@ status_t EglManager::fenceWait(sp<Fence>& fence) {
         }
     } else {
         // Block CPU on the fence.
-        status_t err = fence->waitForever("EglManager::fenceWait");
+        status_t err = waitForeverOnFence(fence, "EglManager::fenceWait");
         if (err != NO_ERROR) {
             ALOGE("EglManager::fenceWait: error waiting for fence: %d", err);
             return err;
@@ -552,8 +566,8 @@ status_t EglManager::fenceWait(sp<Fence>& fence) {
     return OK;
 }
 
-status_t EglManager::createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence,
-                                        sp<Fence>& nativeFence) {
+status_t EglManager::createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence, int* nativeFence) {
+    *nativeFence = -1;
     if (!hasEglContext()) {
         ALOGE("EglManager::createReleaseFence: EGLDisplay not initialized");
         return INVALID_OPERATION;
@@ -574,7 +588,7 @@ status_t EglManager::createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence,
                   eglGetError());
             return UNKNOWN_ERROR;
         }
-        nativeFence = new Fence(fenceFd);
+        *nativeFence = fenceFd;
         *eglFence = EGL_NO_SYNC_KHR;
     } else if (useFenceSync && SyncFeatures::getInstance().useFenceSync()) {
         if (*eglFence != EGL_NO_SYNC_KHR) {

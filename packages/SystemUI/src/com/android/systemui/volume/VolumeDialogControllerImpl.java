@@ -58,7 +58,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.settingslib.volume.MediaSessions;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -70,9 +69,12 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  *  Source of truth for all state / events related to the volume dialog.  No presentation.
@@ -115,7 +117,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final Context mContext;
     private AudioManager mAudio;
     private IAudioService mAudioService;
-    protected StatusBar mStatusBar;
+    private final Optional<Lazy<StatusBar>> mStatusBarOptionalLazy;
     private final NotificationManager mNoMan;
     private final SettingObserver mObserver;
     private final Receiver mReceiver = new Receiver();
@@ -141,8 +143,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     protected final BroadcastDispatcher mBroadcastDispatcher;
 
     @Inject
-    public VolumeDialogControllerImpl(Context context, BroadcastDispatcher broadcastDispatcher) {
+    public VolumeDialogControllerImpl(Context context, BroadcastDispatcher broadcastDispatcher,
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
         mContext = context.getApplicationContext();
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
         mNotificationManager = (NotificationManager) mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         Events.writeEvent(mContext, Events.EVENT_COLLECTION_STARTED);
@@ -161,7 +165,6 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mHasVibrator = mVibrator != null && mVibrator.hasVibrator();
         mAudioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
-        updateStatusBar();
 
         boolean accessibilityVolumeStreamActive = context.getSystemService(
                 AccessibilityManager.class).isAccessibilityVolumeStreamActive();
@@ -444,23 +447,18 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         return changed;
     }
 
-    private void updateStatusBar() {
-        if (mStatusBar == null) {
-            mStatusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
-        }
-    }
-
     private boolean shouldShowUI(int flags) {
-        updateStatusBar();
         // if status bar isn't null, check if phone is in AOD, else check flags
         // since we could be using a different status bar
-        return mStatusBar != null ?
-                mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
-                && mStatusBar.getWakefulnessState() !=
-                        WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
-                && mStatusBar.isDeviceInteractive()
-                && (flags & AudioManager.FLAG_SHOW_UI) != 0 && mShowVolumeDialog
-                : mShowVolumeDialog && (flags & AudioManager.FLAG_SHOW_UI) != 0;
+        return mStatusBarOptionalLazy.map(statusBarLazy -> {
+            StatusBar statusBar = statusBarLazy.get();
+            return statusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
+                    && statusBar.getWakefulnessState()
+                    != WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
+                    && statusBar.isDeviceInteractive() && (flags & AudioManager.FLAG_SHOW_UI) != 0
+                    && mShowVolumeDialog;
+        }).orElse(
+                mShowVolumeDialog && (flags & AudioManager.FLAG_SHOW_UI) != 0);
     }
 
     boolean onVolumeChangedW(int stream, int flags) {

@@ -16,8 +16,6 @@
 
 package com.android.server.integrity.engine;
 
-import android.util.Slog;
-
 import com.android.server.integrity.model.AppInstallMetadata;
 import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.Rule;
@@ -53,23 +51,11 @@ public final class RuleEvaluationEngine {
      *
      * @param appInstallMetadata Metadata of the app to be installed, and to evaluate the rules
      *                           against.
-     * @return A rule matching the metadata. If there are multiple matching rules, returns any. If
-     * no rules are matching, returns {@link Rule#EMPTY}.
+     * @return result of the integrity check
      */
     public IntegrityCheckResult evaluate(AppInstallMetadata appInstallMetadata) {
         List<Rule> rules = loadRules(appInstallMetadata);
-        Rule matchedRule = RuleEvaluator.evaluateRules(rules, appInstallMetadata);
-        if (matchedRule == Rule.EMPTY) {
-            return IntegrityCheckResult.allow();
-        } else {
-            switch (matchedRule.getEffect()) {
-                case DENY:
-                    return IntegrityCheckResult.deny(matchedRule);
-                default:
-                    Slog.e(TAG, "Matched a non-DENY rule: " + matchedRule);
-                    return IntegrityCheckResult.allow();
-            }
-        }
+        return RuleEvaluator.evaluateRules(rules, appInstallMetadata);
     }
 
     private List<Rule> loadRules(AppInstallMetadata appInstallMetadata) {

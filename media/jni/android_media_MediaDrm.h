@@ -26,13 +26,25 @@
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 
+namespace {
+
+struct ListenerArgs {
+    jbyteArray jSessionId;
+    jbyteArray jData;
+    jlong jExpirationTime;
+    jobject jKeyStatusList;
+    jboolean jHasNewUsableKey;
+};
+
+}
+
 namespace android {
 
 class DrmListener: virtual public RefBase
 {
 public:
     virtual void notify(DrmPlugin::EventType eventType, int extra,
-                        const Parcel *obj) = 0;
+                        const ListenerArgs *args) = 0;
 };
 
 struct JDrm : public BnDrmClient {
@@ -81,7 +93,7 @@ private:
     static sp<IDrm> MakeDrm();
     static sp<IDrm> MakeDrm(const uint8_t uuid[16], const String8 &appPackageName);
 
-    void notify(DrmPlugin::EventType, int extra, const Parcel *obj);
+    void notify(DrmPlugin::EventType, int extra, const ListenerArgs *args);
 
     DISALLOW_EVIL_CONSTRUCTORS(JDrm);
 };

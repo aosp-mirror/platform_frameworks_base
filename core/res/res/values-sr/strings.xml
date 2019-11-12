@@ -48,7 +48,7 @@
     <string name="invalidPin" msgid="3850018445187475377">"Откуцајте PIN који има од 4 до 8 бројева."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"Унесите PUK који се састоји од 8 цифара или више."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM картица је закључана PUK кодом. Унесите PUK кôд да бисте је откључали."</string>
-    <string name="needPuk2" msgid="4526033371987193070">"Унесите PUK2 да бисте деблокирали SIM картицу."</string>
+    <string name="needPuk2" msgid="4526033371987193070">"Унесите PUK2 да бисте одблокирали SIM картицу."</string>
     <string name="enablePin" msgid="209412020907207950">"Није успело. Омогућите закључавање SIM/RUIM картице."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
       <item quantity="one">Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушај пре него што се SIM картица закључа.</item>
@@ -1264,32 +1264,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Звуци аларма"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Звуци обавештења"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Непознато"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Wi-Fi мреже су доступне</item>
-      <item quantity="few">Wi-Fi мреже су доступне</item>
-      <item quantity="other">Wi-Fi мреже су доступне</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">Отворене Wi-Fi мреже су доступне</item>
-      <item quantity="few">Отворене Wi-Fi мреже су доступне</item>
-      <item quantity="other">Отворене Wi-Fi мреже су доступне</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Повежите се са отвореном Wi‑Fi мрежом"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Повезује се са Wi-Fi мрежом..."</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Повезали сте се са Wi‑Fi мрежом"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Повезивање са Wi‑Fi мрежом није успело"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Додирните да бисте видели све мреже"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Повежи"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Све мреже"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Желите да дозволите предложене Wi‑Fi мреже?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Мреже које предлаже <xliff:g id="NAME">%s</xliff:g>. Уређај ће се можда повезати аутоматски."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Дозволи"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Не, хвала"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ће се аутоматски укључити"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Када сте у близини сачуване мреже високог квалитета"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не укључуј поново"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi је аутоматски укључен"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"У близини сте сачуване мреже: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Пријављивање на Wi-Fi мрежу"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Пријавите се на мрежу"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1302,9 +1276,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Повезано је"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> има ограничену везу"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Додирните да бисте се ипак повезали"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промене подешавања за хотспот"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Опсег хотспота је промењен."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Овај уређај не подржава подешавање само за 5 GHz. Уређај ће користити опсег од 5 GHz када буде доступан."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Прешли сте на тип мреже <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Уређај користи тип мреже <xliff:g id="NEW_NETWORK">%1$s</xliff:g> када тип мреже <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> нема приступ интернету. Можда ће се наплаћивати трошкови."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Прешли сте са типа мреже <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на тип мреже <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1316,27 +1287,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"непознат тип мреже"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Није могуће повезати са Wi-Fi мрежом"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" има лошу интернет везу."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Желите ли да дозволите повезивање?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Апликација %1$s жели да се повеже на Wi-Fi мрежу %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Апликација"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Покрените Wi-Fi Direct. Тиме ћете искључити клијента/хотспот за Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Није могуће покренути Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct је укључен"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Додирните за подешавања"</string>
     <string name="accept" msgid="1645267259272829559">"Прихвати"</string>
     <string name="decline" msgid="2112225451706137894">"Одбиј"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Позивница је послата"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Позивница за повезивање"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Од:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Коме:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Унесите потребни PIN:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Таблет ће привремено прекинути везу са Wi-Fi-јем док је повезан са уређајем <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Android TV уређај ће привремено прекинути везу са Wi-Fi мрежом док је повезан са уређајем <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Телефон ће привремено прекинути везу са Wi-Fi-јем док је повезан са уређајем <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Уметање знака"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Слање SMS порука"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; шаље велики број SMS порука. Желите ли да дозволите овој апликацији да настави са слањем порука?"</string>
@@ -1842,8 +1794,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избрисао је администратор"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Потврди"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Уштеда батерије искључује или ограничава активност у позадини, неке визуелне ефекте и друге функције са високом потрошњом да би продужила трајање батерије. "<annotation id="url">"Сазнајте више"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Уштеда батерије искључује или ограничава активност у позадини, неке визуелне ефекте и друге функције са високом потрошњом да би продужила трајање батерије."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Укључити Уштеду података?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Укључи"</string>
@@ -2087,4 +2041,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Директно дељење није доступно"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Листа апликација"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Ова апликација нема дозволу за снимање, али би могла да снима звук помоћу овог USB уређаја."</string>
 </resources>

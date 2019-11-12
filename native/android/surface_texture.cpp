@@ -23,25 +23,19 @@
 
 #include <gui/Surface.h>
 
+#include <gui/surfacetexture/surface_texture_platform.h>
+
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
-#include "surfacetexture/SurfaceTexture.h"
-
 using namespace android;
-
-struct ASurfaceTexture {
-    sp<SurfaceTexture> consumer;
-    sp<IGraphicBufferProducer> producer;
-};
 
 ASurfaceTexture* ASurfaceTexture_fromSurfaceTexture(JNIEnv* env, jobject surfacetexture) {
     if (!surfacetexture || !android_SurfaceTexture_isInstanceOf(env, surfacetexture)) {
         return nullptr;
     }
-    ASurfaceTexture* ast = new ASurfaceTexture;
-    ast->consumer = SurfaceTexture_getSurfaceTexture(env, surfacetexture);
-    ast->producer = SurfaceTexture_getProducer(env, surfacetexture);
-    return ast;
+    auto consumer = SurfaceTexture_getSurfaceTexture(env, surfacetexture);
+    auto producer = SurfaceTexture_getProducer(env, surfacetexture);
+    return ASurfaceTexture_create(consumer, producer);
 }
 
 ANativeWindow* ASurfaceTexture_acquireANativeWindow(ASurfaceTexture* st) {

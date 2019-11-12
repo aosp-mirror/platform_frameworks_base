@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Alarmlyde"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Notifikationslyde"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Ukendt"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Tilgængelige Wi-Fi-netværk</item>
-      <item quantity="other">Tilgængelige Wi-Fi-netværk</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">Åbne Wi-Fi-netværk er tilgængelige</item>
-      <item quantity="other">Åbne Wi-Fi-netværk er tilgængelige</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Opret forbindelse til et åbent Wi-Fi-netværk"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Opretter forbindelse til Wi-Fi-netværket"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Forbundet til Wi-Fi-netværket"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Der kan ikke oprettes forbindelse til Wi-Fi-netværket"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tryk for at se alle netværk"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Opret forbindelse"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Alle netværk"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Vil du tillade foreslåede Wi‑Fi-netværk?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Netværk foreslået af <xliff:g id="NAME">%s</xliff:g>. Enheden opretter muligvis forbindelse automatisk."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Tillad"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Nej tak"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi aktiveres automatisk"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Når du er i nærheden af et gemt netværk af høj kvalitet"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Aktivér ikke igen"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi blev automatisk aktiveret"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Du er i nærheden af et gemt netværk: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Log ind på Wi-Fi-netværk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Log ind på netværk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Der er oprettet forbindelse"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> har begrænset forbindelse"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Tryk for at oprette forbindelse alligevel"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ændringer af dine indstillinger for hotspot"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Dit hotspotbånd er ændret."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Denne enhed understøtter ikke din præference om kun 5 GHz. Denne enhed vil i stedet bruge 5 GHz-båndet, når det er muligt."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Der blev skiftet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Enheden benytter <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, når der ikke er internetadgang via <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Der opkræves muligvis betaling."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Der blev skiftet fra <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> til <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1294,27 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"en ukendt netværkstype"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kunne ikke oprette forbindelse til Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dårlig internetforbindelse."</string>
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vil du tillade denne forbindelse?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Applikationen %1$s vil gerne have forbindelse til Wi-Fi-netværk %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"En applikation"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Start Wi-Fi Direct. Dette slår Wi-Fi-klient/hotspot fra."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct kunne ikke startes."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct er slået til"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Tryk for at se indstillinger"</string>
     <string name="accept" msgid="1645267259272829559">"Accepter"</string>
     <string name="decline" msgid="2112225451706137894">"Afvis"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Invitationen er sendt"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Invitation til forbindelse"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Fra:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"Til:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Skriv den påkrævede pinkode:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Pinkode:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Wi-Fi-forbindelse til tabletten vil midlertidigt blive afbrudt, når den er tilsluttet <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Wi-Fi-forbindelsen til din Android TV-enhed bliver midlertidigt afbrudt, når den er tilsluttet <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Telefonens Wi-Fi-forbindelse vil midlertidigt blive afbrudt, når den er tilsluttet <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Indsæt tegn"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sender sms-beskeder"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sender et stort antal sms-beskeder. Vil du tillade, at denne app fortsat sender beskeder?"</string>
@@ -1817,8 +1771,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Opdateret af din administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet af din administrator"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Batterisparefunktion deaktiverer eller begrænser baggrundsaktivitet, visse visuelle effekter og andre batterikrævende funktioner for at forlænge batteritiden. "<annotation id="url">"Få flere oplysninger"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Batterisparefunktion deaktiverer eller begrænser baggrundsaktivitet, visse visuelle effekter og andre batterikrævende funktioner for at forlænge batteritiden."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå Datasparefunktion til?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå til"</string>
@@ -2051,4 +2007,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Det er ikke muligt at dele direkte"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Liste over apps"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Denne app har ikke fået tilladelse til at optage, men optager muligvis lyd via denne USB-enhed."</string>
 </resources>

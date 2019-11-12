@@ -24,11 +24,11 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.provider.Settings;
 import android.telephony.SubscriptionInfo;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -83,6 +83,18 @@ public class EmergencyCryptkeeperText extends TextView {
         getContext().unregisterReceiver(mReceiver);
     }
 
+    private boolean iccCardExist(int simState) {
+        return ((simState == TelephonyManager.SIM_STATE_PIN_REQUIRED)
+                || (simState == TelephonyManager.SIM_STATE_PUK_REQUIRED)
+                || (simState == TelephonyManager.SIM_STATE_NETWORK_LOCKED)
+                || (simState == TelephonyManager.SIM_STATE_READY)
+                || (simState == TelephonyManager.SIM_STATE_NOT_READY)
+                || (simState == TelephonyManager.SIM_STATE_PERM_DISABLED)
+                || (simState == TelephonyManager.SIM_STATE_CARD_IO_ERROR)
+                || (simState == TelephonyManager.SIM_STATE_CARD_RESTRICTED)
+                || (simState == TelephonyManager.SIM_STATE_LOADED));
+    }
+
     public void update() {
         boolean hasMobile = ConnectivityManager.from(mContext)
                 .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
@@ -102,9 +114,9 @@ public class EmergencyCryptkeeperText extends TextView {
         final int N = subs.size();
         for (int i = 0; i < N; i++) {
             int subId = subs.get(i).getSubscriptionId();
-            IccCardConstants.State simState = mKeyguardUpdateMonitor.getSimState(subId);
+            int simState = mKeyguardUpdateMonitor.getSimState(subId);
             CharSequence carrierName = subs.get(i).getCarrierName();
-            if (simState.iccCardExist() && !TextUtils.isEmpty(carrierName)) {
+            if (iccCardExist(simState) && !TextUtils.isEmpty(carrierName)) {
                 allSimsMissing = false;
                 displayText = carrierName;
             }

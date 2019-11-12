@@ -26,9 +26,9 @@
 #include "core_jni_helpers.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_graphics_SurfaceTexture.h"
-#include "surfacetexture/SurfaceTexture.h"
 
 #include <gui/Surface.h>
+#include <gui/surfacetexture/SurfaceTexture.h>
 #include <gui/IGraphicBufferProducer.h>
 #include <gui/IProducerListener.h>
 #include <ui/GraphicBuffer.h>

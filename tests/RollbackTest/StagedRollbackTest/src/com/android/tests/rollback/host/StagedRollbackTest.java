@@ -139,7 +139,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
                 + "watchdog_request_timeout_millis 300000");
         // Simulate re-installation of new NetworkStack with rollbacks enabled
         getDevice().executeShellCommand("pm install -r --staged --enable-rollback "
-                + "/system/priv-app/NetworkStack/NetworkStack.apk");
+                + getNetworkStackPath());
 
         // Sleep to allow writes to disk before reboot
         Thread.sleep(5000);
@@ -187,5 +187,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
             getDevice().executeShellCommand("kill " + pid);
             lastPid = pid;
         }
+    }
+
+    private String getNetworkStackPath() throws Exception {
+        // Find the NetworkStack path (can be NetworkStack.apk or NetworkStackNext.apk)
+        return getDevice().executeShellCommand("ls /system/priv-app/NetworkStack*/*.apk");
     }
 }

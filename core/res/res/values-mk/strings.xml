@@ -1244,30 +1244,6 @@
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Звуци за аларм"</string>
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Звуци за известување"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Непозната"</string>
-    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Wi-Fi мрежи се достапни</item>
-      <item quantity="other">Wi-Fi мрежи се достапни</item>
-    </plurals>
-    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">Отворени Wi-Fi мрежи се достапни</item>
-      <item quantity="other">Отворени Wi-Fi мрежи се достапни</item>
-    </plurals>
-    <string name="wifi_available_title" msgid="3817100557900599505">"Поврзете се на отворена Wi‑Fi-мрежа"</string>
-    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Поврзување со Wi-Fi мрежа"</string>
-    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Се поврзавте на Wi‑Fi-мрежа"</string>
-    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не можеше да се поврзе на Wi‑Fi-мрежа"</string>
-    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Допрете за да ги видите сите мрежи"</string>
-    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Поврзете се"</string>
-    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Сите мрежи"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Да се дозволат предложените Wi‑Fi мрежи?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Предложени мрежи од <xliff:g id="NAME">%s</xliff:g>. Уредот може да се поврзе автоматски."</string>
-    <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Дозволи"</string>
-    <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Не, фала"</string>
-    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ќе се вклучи автоматски"</string>
-    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Кога сте во близина на зачувана мрежа со висок квалитет"</string>
-    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не вклучувај повторно"</string>
-    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi се вклучи автоматски"</string>
-    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Близу сте до зачувана мрежа: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Најавете се на мрежа на Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Најавете се на мрежа"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1280,9 +1256,6 @@
     <string name="captive_portal_logged_in_detailed" msgid="8489345381637456021">"Поврзано"</string>
     <string name="network_partial_connectivity" msgid="7774883385494762741">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> има ограничена поврзливост"</string>
     <string name="network_partial_connectivity_detailed" msgid="1959697814165325217">"Допрете за да се поврзете и покрај тоа"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промени на поставките за точка на пристап"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Појасот за точка на пристап е променет."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Уредов не ги поддржува вашите поставки за само 5 GHz. Наместо тоа, ќе го користи појасот од 5 GHz кога е достапен."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Префрлено на <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Уредот користи <xliff:g id="NEW_NETWORK">%1$s</xliff:g> кога <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> нема пристап до интернет. Може да се наплатат трошоци."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Префрлено од <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1294,28 +1267,8 @@
     <item msgid="8257233890381651999">"VPN"</item>
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"непознат тип мрежа"</string>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не можеше да се поврзе со Wi-Fi"</string>
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4917472096696322767) -->
-    <skip />
-    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Дозволете поврзување?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Апликацијата %1$s сака да се поврзе со Wifi-мрежата %2$s"</string>
-    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Апликација"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Започни Wi-Fi Direct. Ова ќе го исклучи Wi-Fi клиентот/хточката на пристап."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Не можеше да се стартува Wi-Fi Direct."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct е вклучена"</string>
-    <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"Допрете за поставки"</string>
     <string name="accept" msgid="1645267259272829559">"Прифати"</string>
     <string name="decline" msgid="2112225451706137894">"Одбиј"</string>
-    <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Поканата е испратена"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Покана да се поврзе"</string>
-    <string name="wifi_p2p_from_message" msgid="570389174731951769">"Од:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"До:"</string>
-    <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Внеси го бараниот PIN:"</string>
-    <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Таблетот привремено ќе се исклучи од Wi-Fi, додека да се приклучи на <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="5046724574683503190">"Привремено ќе се прекине врската на вашиот уред Android TV со Wi-Fi додека е поврзан со <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Телефонот привремено ќе се исклучи од Wi-Fi додека е приклучен на <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Вметни знак"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Испраќање SMS пораки"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; испраќа голем број SMS пораки. Дали сакате да дозволите оваа апликација да продолжи со испраќање пораки?"</string>
@@ -1820,8 +1773,10 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"Штедачот на батерија ги исклучува или ограничува активноста во заднина, некои визуелни ефекти и други функции со голема потрошувачка на енергија за да се продолжи траењето на батеријата. "<annotation id="url">"Дознајте повеќе"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"Штедачот на батерија ги исклучува или ограничува активноста во заднина, некои визуелни ефекти и други функции со голема потрошувачка на енергија за да се продолжи траењето на батеријата."</string>
+    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
+    <skip />
+    <!-- no translation found for battery_saver_description (2307555792915978653) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Вклучи"</string>
@@ -2054,4 +2009,5 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Не е достапно директно споделување"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Список со апликации"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"На апликацијава не ѝ е доделена дозвола за снимање, но може да снима аудио преку овој USB-уред."</string>
 </resources>

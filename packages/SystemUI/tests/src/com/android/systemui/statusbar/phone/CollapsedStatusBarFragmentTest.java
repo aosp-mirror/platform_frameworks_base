@@ -60,7 +60,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     public void setup() {
         mSysuiContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         StatusBar statusBar = mock(StatusBar.class);
-        mSysuiContext.putComponent(StatusBar.class, statusBar);
+        mDependency.injectTestDependency(StatusBar.class, statusBar);
         mSysuiContext.putComponent(TunerService.class, mock(TunerService.class));
         mStatusBarStateController = mDependency
                 .injectMockDependency(StatusBarStateController.class);
