@@ -32,7 +32,9 @@
 #include <cutils/properties.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaErrors.h>
+#include <mediadrm/DrmMetricsConsumer.h>
 #include <mediadrm/DrmUtils.h>
+#include <mediadrm/IDrmMetricsConsumer.h>
 #include <mediadrm/IDrm.h>
 
 using ::android::os::PersistableBundle;
@@ -1889,7 +1891,8 @@ android_media_MediaDrm_native_getMetrics(JNIEnv *env, jobject thiz)
 
     // Retrieve current metrics snapshot from drm.
     PersistableBundle metrics;
-    status_t err = drm->getMetrics(&metrics);
+    sp<IDrmMetricsConsumer> consumer(new DrmMetricsConsumer(&metrics));
+    status_t err = drm->getMetrics(consumer);
     if (err != OK) {
         ALOGE("getMetrics failed: %d", (int)err);
         return (jobject) NULL;

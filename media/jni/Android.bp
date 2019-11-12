@@ -41,6 +41,7 @@ cc_library_shared {
         "libmedia_omx",
         "libmediametrics",
         "libmediadrm",
+        "libmediadrmmetrics_consumer",
         "libhwui",
         "libui",
         "liblog",
