@@ -1810,6 +1810,14 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public @Nullable GpsStatus getGpsStatus(@Nullable GpsStatus status) {
+        UnsupportedOperationException ex = new UnsupportedOperationException(
+                "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
+        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
+            throw ex;
+        } else {
+            Log.w(TAG, ex);
+        }
+
         if (status == null) {
             status = new GpsStatus();
         }
@@ -1837,8 +1845,8 @@ public class LocationManager {
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addGpsStatusListener(GpsStatus.Listener listener) {
         UnsupportedOperationException ex = new UnsupportedOperationException(
-                "GpsStatus APIs not supported in R and above, use GnssStatus APIs instead");
-        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R) {
+                "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
+        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
             throw ex;
         } else {
             Log.w(TAG, ex);
@@ -1862,8 +1870,8 @@ public class LocationManager {
     @Deprecated
     public void removeGpsStatusListener(GpsStatus.Listener listener) {
         UnsupportedOperationException ex = new UnsupportedOperationException(
-                "GpsStatus APIs not supported in R and above, use GnssStatus APIs instead");
-        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R) {
+                "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
+        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
             throw ex;
         } else {
             Log.w(TAG, ex);
