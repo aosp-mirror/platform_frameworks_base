@@ -296,6 +296,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static void setDurationScale(float durationScale) {
         sDurationScale = durationScale;
@@ -304,6 +305,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static float getDurationScale() {
         return sDurationScale;

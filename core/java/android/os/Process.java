@@ -229,6 +229,7 @@ public class Process {
      * First uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int FIRST_ISOLATED_UID = 99000;
 
@@ -236,6 +237,7 @@ public class Process {
      * Last uid used for fully isolated sandboxed processes (with no permissions of their own)
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final int LAST_ISOLATED_UID = 99999;
 
