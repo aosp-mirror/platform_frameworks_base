@@ -32,6 +32,8 @@ import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.util.time.SystemClock;
+import com.android.systemui.util.time.SystemClockImpl;
 
 import javax.inject.Singleton;
 
@@ -84,4 +86,8 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract StatusBar optionalStatusBar();
+
+    @Singleton
+    @Binds
+    abstract SystemClock bindSystemClock(SystemClockImpl systemClock);
 }
