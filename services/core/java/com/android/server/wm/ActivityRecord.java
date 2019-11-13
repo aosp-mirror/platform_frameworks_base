@@ -2659,14 +2659,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY, mUserId,
                 System.identityHashCode(this), task.mTaskId, shortComponentName, reason);
 
+        final ActivityStack stack = getActivityStack();
+        if (hasProcess() && !stack.inLruList(this)) {
+            Slog.w(TAG, "Activity " + this + " being finished, but not in LRU list");
+        }
+
         boolean removedFromHistory = false;
 
         cleanUp(false /* cleanServices */, false /* setState */);
 
-        final ActivityStack stack = getActivityStack();
-        final boolean hadApp = hasProcess();
-
-        if (hadApp) {
+        if (hasProcess()) {
             if (removeFromApp) {
                 app.removeActivity(this);
                 if (!app.hasActivities()) {
@@ -2730,10 +2732,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         configChangeFlags = 0;
-
-        if (!stack.removeActivityFromLRUList(this) && hadApp) {
-            Slog.w(TAG, "Activity " + this + " being finished, but not in LRU list");
-        }
 
         return removedFromHistory;
     }
