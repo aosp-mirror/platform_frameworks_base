@@ -162,12 +162,12 @@ public class ExternalStorageProvider extends FileSystemProvider {
             final String title;
             final UUID storageUuid;
             if (volume.getType() == VolumeInfo.TYPE_EMULATED) {
-                // We currently only support a single emulated volume mounted at
+                // We currently only support a single emulated volume per user mounted at
                 // a time, and it's always considered the primary
                 if (DEBUG) Log.d(TAG, "Found primary volume: " + volume);
                 rootId = ROOT_ID_PRIMARY_EMULATED;
 
-                if (VolumeInfo.ID_EMULATED_INTERNAL.equals(volume.getId())) {
+                if (volume.isPrimaryEmulatedForUser(userId)) {
                     // This is basically the user's primary device storage.
                     // Use device name for the volume since this is likely same thing
                     // the user sees when they mount their phone on another device.
