@@ -149,7 +149,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @Override
         public void onStart() {
+            // enable client caches by doing the first invalidate
+            LocationManager.invalidateLocalLocationEnabledCaches();
+
             publishBinderService(Context.LOCATION_SERVICE, mService);
+            // disable caching for whatever process contains LocationManagerService
+            ((LocationManager) mService.mContext.getSystemService(LocationManager.class))
+                    .disableLocalLocationEnabledCaches();
         }
 
         @Override
@@ -439,6 +445,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private void onLocationModeChanged(int userId) {
         boolean enabled = mSettingsHelper.isLocationEnabled(userId);
+        LocationManager.invalidateLocalLocationEnabledCaches();
 
         if (D) {
             Log.d(TAG, "[u" + userId + "] location enabled = " + enabled);
@@ -2538,6 +2545,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS,
                 "Requires WRITE_SECURE_SETTINGS permission");
+
+        LocationManager.invalidateLocalLocationEnabledCaches();
         mSettingsHelper.setLocationEnabled(enabled, userId);
     }
 
