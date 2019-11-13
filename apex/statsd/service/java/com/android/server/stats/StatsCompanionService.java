@@ -1735,7 +1735,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         e.writeString(Build.BRAND);
         e.writeString(Build.PRODUCT);
         e.writeString(Build.DEVICE);
-        e.writeString(Build.VERSION.RELEASE);
+        e.writeString(Build.VERSION.RELEASE_OR_CODENAME);
         e.writeString(Build.ID);
         e.writeString(Build.VERSION.INCREMENTAL);
         e.writeString(Build.TYPE);
