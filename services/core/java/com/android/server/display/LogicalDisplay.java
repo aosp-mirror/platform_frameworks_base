@@ -87,10 +87,12 @@ final class LogicalDisplay {
     // True if the logical display has unique content.
     private boolean mHasContent;
 
-    private int[] mAllowedDisplayModes = new int[0];
     private int mRequestedColorMode;
     private boolean mShouldSetAllm;
     private boolean mShouldSetGameContentType;
+
+    private DisplayModeDirector.DesiredDisplayModeSpecs mDesiredDisplayModeSpecs =
+            new DisplayModeDirector.DesiredDisplayModeSpecs();
 
     // The display offsets to apply to the display projection.
     private int mDisplayOffsetX;
@@ -356,12 +358,12 @@ final class LogicalDisplay {
 
         // Set the color mode and allowed display mode.
         if (device == mPrimaryDisplayDevice) {
-            // See ag/9588196 for correct values.
-            device.setDesiredDisplayConfigSpecs(0, 60, 60, mAllowedDisplayModes);
+            device.setDesiredDisplayModeSpecsLocked(mDesiredDisplayModeSpecs);
             device.setRequestedColorModeLocked(mRequestedColorMode);
         } else {
             // Reset to default for non primary displays
-            device.setDesiredDisplayConfigSpecs(0, 60, 60, new int[] {0});
+            device.setDesiredDisplayModeSpecsLocked(
+                    new DisplayModeDirector.DesiredDisplayModeSpecs());
             device.setRequestedColorModeLocked(0);
         }
 
@@ -469,17 +471,18 @@ final class LogicalDisplay {
     }
 
     /**
-     * Sets the display modes the system is free to switch between.
+     * Sets the display configs the system can use.
      */
-    public void setAllowedDisplayModesLocked(int[] modes) {
-        mAllowedDisplayModes = modes;
+    public void setDesiredDisplayModeSpecsLocked(
+            DisplayModeDirector.DesiredDisplayModeSpecs specs) {
+        mDesiredDisplayModeSpecs = specs;
     }
 
     /**
-     * Returns the display modes the system is free to switch between.
+     * Returns the display configs the system can choose.
      */
-    public int[] getAllowedDisplayModesLocked() {
-        return mAllowedDisplayModes;
+    public DisplayModeDirector.DesiredDisplayModeSpecs getDesiredDisplayModeSpecsLocked() {
+        return mDesiredDisplayModeSpecs;
     }
 
     /**
@@ -558,7 +561,7 @@ final class LogicalDisplay {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
-        pw.println("mAllowedDisplayModes=" + Arrays.toString(mAllowedDisplayModes));
+        pw.println("mDesiredDisplayModeSpecs={" + mDesiredDisplayModeSpecs + "}");
         pw.println("mRequestedColorMode=" + mRequestedColorMode);
         pw.println("mDisplayOffset=(" + mDisplayOffsetX + ", " + mDisplayOffsetY + ")");
         pw.println("mDisplayScalingDisabled=" + mDisplayScalingDisabled);

@@ -315,9 +315,9 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void setDesiredDisplayConfigSpecs(int defaultModeId, float minRefreshRate,
-                float maxRefreshRate, int[] modes) {
-            final int id = defaultModeId;
+        public void setDesiredDisplayModeSpecsLocked(
+                DisplayModeDirector.DesiredDisplayModeSpecs displayModeSpecs) {
+            final int id = displayModeSpecs.defaultModeId;
             int index = -1;
             if (id == 0) {
                 // Use the default.

@@ -158,11 +158,10 @@ public final class SurfaceControl implements Parcelable {
             IBinder displayToken, long numFrames, long timestamp);
     private static native int nativeGetActiveConfig(IBinder displayToken);
     private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
-    private static native boolean nativeSetAllowedDisplayConfigs(IBinder displayToken,
-                                                                 int[] allowedConfigs);
-    private static native int[] nativeGetAllowedDisplayConfigs(IBinder displayToken);
     private static native boolean nativeSetDesiredDisplayConfigSpecs(IBinder displayToken,
             SurfaceControl.DesiredDisplayConfigSpecs desiredDisplayConfigSpecs);
+    private static native SurfaceControl.DesiredDisplayConfigSpecs
+            nativeGetDesiredDisplayConfigSpecs(IBinder displayToken);
     private static native int[] nativeGetDisplayColorModes(IBinder displayToken);
     private static native SurfaceControl.DisplayPrimaries nativeGetDisplayNativePrimaries(
             IBinder displayToken);
@@ -1479,58 +1478,60 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * @hide
-     */
-    public static boolean setAllowedDisplayConfigs(IBinder displayToken, int[] allowedConfigs) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        if (allowedConfigs == null) {
-            throw new IllegalArgumentException("allowedConfigs must not be null");
-        }
-
-        return nativeSetAllowedDisplayConfigs(displayToken, allowedConfigs);
-    }
-
-    /**
-     * @hide
-     */
-    public static int[] getAllowedDisplayConfigs(IBinder displayToken) {
-        if (displayToken == null) {
-            throw new IllegalArgumentException("displayToken must not be null");
-        }
-        return nativeGetAllowedDisplayConfigs(displayToken);
-    }
-
-    /**
      * Contains information about desired display configuration.
      *
      * @hide
      */
     public static final class DesiredDisplayConfigSpecs {
-        /**
-         * @hide
-         */
-        public int mDefaultModeId;
+        public int defaultConfig;
+        public float minRefreshRate;
+        public float maxRefreshRate;
 
-        /**
-         * @hide
-         */
-        public float mMinRefreshRate;
+        public DesiredDisplayConfigSpecs() {}
 
-        /**
-         * @hide
-         */
-        public float mMaxRefreshRate;
+        public DesiredDisplayConfigSpecs(DesiredDisplayConfigSpecs other) {
+            copyFrom(other);
+        }
 
-        /**
-         * @hide
-         */
         public DesiredDisplayConfigSpecs(
-                int defaultModeId, float minRefreshRate, float maxRefreshRate) {
-            mDefaultModeId = defaultModeId;
-            mMinRefreshRate = minRefreshRate;
-            mMaxRefreshRate = maxRefreshRate;
+                int defaultConfig, float minRefreshRate, float maxRefreshRate) {
+            this.defaultConfig = defaultConfig;
+            this.minRefreshRate = minRefreshRate;
+            this.maxRefreshRate = maxRefreshRate;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof DesiredDisplayConfigSpecs && equals((DesiredDisplayConfigSpecs) o);
+        }
+
+        /**
+         * Tests for equality.
+         */
+        public boolean equals(DesiredDisplayConfigSpecs other) {
+            return other != null && defaultConfig == other.defaultConfig
+                    && minRefreshRate == other.minRefreshRate
+                    && maxRefreshRate == other.maxRefreshRate;
+        }
+
+        @Override
+        public int hashCode() {
+            return 0; // don't care
+        }
+
+        /**
+         * Copies the supplied object's values to this object.
+         */
+        public void copyFrom(DesiredDisplayConfigSpecs other) {
+            defaultConfig = other.defaultConfig;
+            minRefreshRate = other.minRefreshRate;
+            maxRefreshRate = other.maxRefreshRate;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("defaultConfig=%d min=%.0f max=%.0f", defaultConfig,
+                    minRefreshRate, maxRefreshRate);
         }
     }
 
@@ -1544,6 +1545,18 @@ public final class SurfaceControl implements Parcelable {
         }
 
         return nativeSetDesiredDisplayConfigSpecs(displayToken, desiredDisplayConfigSpecs);
+    }
+
+    /**
+     * @hide
+     */
+    public static SurfaceControl.DesiredDisplayConfigSpecs getDesiredDisplayConfigSpecs(
+            IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+
+        return nativeGetDesiredDisplayConfigSpecs(displayToken);
     }
 
     /**
