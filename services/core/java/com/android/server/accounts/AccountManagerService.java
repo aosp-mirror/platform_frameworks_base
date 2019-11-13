@@ -1839,6 +1839,8 @@ public class AccountManagerService
                                         + account.toSafeString()
                                         + ", skipping since insertExtra failed for key " + key);
                                 return false;
+                            } else {
+                                AccountManager.invalidateLocalAccountUserDataCaches();
                             }
                         }
                     }
@@ -2118,6 +2120,8 @@ public class AccountManagerService
                 for (String packageName : accountRemovedReceivers) {
                     sendAccountRemovedBroadcast(accountToRename, packageName, accounts.userId);
                 }
+
+                AccountManager.invalidateLocalAccountUserDataCaches();
             }
         }
         return resultAccount;
@@ -2384,6 +2388,8 @@ public class AccountManagerService
                 }
             }
         }
+
+        AccountManager.invalidateLocalAccountUserDataCaches();
 
         return isChanged;
     }
@@ -2720,6 +2726,7 @@ public class AccountManagerService
             }
             synchronized (accounts.cacheLock) {
                 writeUserDataIntoCacheLocked(accounts, account, key, value);
+                AccountManager.invalidateLocalAccountUserDataCaches();
             }
         }
     }
