@@ -2436,4 +2436,9 @@ enum PageId {
     // OS: R
     INSTALL_CERTIFICATE_FROM_STORAGE = 1803;
 
+    // OPEN: Settings > Apps and notifications > Special app access > notification access >
+    // an app
+    // CATEGORY: SETTINGS
+    // OS: R
+    NOTIFICATION_ACCESS_DETAIL = 1804;
 }
