@@ -1688,6 +1688,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
+        @UnsupportedAppUsage
         @TestApi
         public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 0x00000040;
 
@@ -1845,6 +1846,7 @@ public interface WindowManager extends ViewManager {
          * Control flags that are private to the platform.
          * @hide
          */
+        @UnsupportedAppUsage
         @ViewDebug.ExportedProperty(flagMapping = {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FAKE_HARDWARE_ACCELERATED,

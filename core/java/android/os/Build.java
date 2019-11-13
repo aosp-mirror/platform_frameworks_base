@@ -109,6 +109,7 @@ public class Build {
      * Whether this build was for an emulator device.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
 
@@ -337,8 +338,8 @@ public class Build {
         /**
          * @hide
          */
-        @TestApi
         @UnsupportedAppUsage
+        @TestApi
         public static final String[] ACTIVE_CODENAMES = "REL".equals(ALL_CODENAMES[0])
                 ? new String[0] : ALL_CODENAMES;
 

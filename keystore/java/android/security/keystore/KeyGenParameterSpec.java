@@ -1261,6 +1261,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          *
          * Sets whether to include a temporary unique ID field in the attestation certificate.
          */
+        @UnsupportedAppUsage
         @TestApi
         @NonNull
         public Builder setUniqueIdIncluded(boolean uniqueIdIncluded) {

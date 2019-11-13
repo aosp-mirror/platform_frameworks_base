@@ -1862,6 +1862,7 @@ public final class CalendarContract {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         @TestApi
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
             _SYNC_ID,
