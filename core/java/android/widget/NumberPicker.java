@@ -1266,12 +1266,12 @@ public class NumberPicker extends LinearLayout {
      * current value is set to the {@link NumberPicker#getMaxValue()} value.
      * </p>
      * <p>
-     * If the argument is less than the {@link NumberPicker#getMaxValue()} and
+     * If the argument is more than the {@link NumberPicker#getMaxValue()} and
      * {@link NumberPicker#getWrapSelectorWheel()} is <code>false</code> the
      * current value is set to the {@link NumberPicker#getMaxValue()} value.
      * </p>
      * <p>
-     * If the argument is less than the {@link NumberPicker#getMaxValue()} and
+     * If the argument is more than the {@link NumberPicker#getMaxValue()} and
      * {@link NumberPicker#getWrapSelectorWheel()} is <code>true</code> the
      * current value is set to the {@link NumberPicker#getMinValue()} value.
      * </p>

@@ -245,7 +245,7 @@ public class DisplayMetrics {
      * this density value will be 1; on a 120 dpi screen it would be .75; etc.
      *  
      * <p>This value does not exactly follow the real screen size (as given by 
-     * {@link #xdpi} and {@link #ydpi}, but rather is used to scale the size of
+     * {@link #xdpi} and {@link #ydpi}), but rather is used to scale the size of
      * the overall UI in steps based on gross changes in the display dpi.  For 
      * example, a 240x320 screen will have a density of 1 even if its width is 
      * 1.8", 1.3", etc. However, if the screen resolution is increased to 
