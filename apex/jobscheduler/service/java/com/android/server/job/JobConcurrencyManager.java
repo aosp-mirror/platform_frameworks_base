@@ -372,9 +372,10 @@ class JobConcurrencyManager {
                     continue;
                 }
 
-                // TODO lastEvaluatedPriority should be evaluateJobPriorityLocked. (double check it)
-                if (minPriorityForPreemption > nextPending.lastEvaluatedPriority) {
-                    minPriorityForPreemption = nextPending.lastEvaluatedPriority;
+                if (minPriorityForPreemption > jobPriority) {
+                    // Step down the preemption threshold - wind up replacing
+                    // the lowest-priority running job
+                    minPriorityForPreemption = jobPriority;
                     selectedContextId = j;
                     // In this case, we're just going to preempt a low priority job, we're not
                     // actually starting a job, so don't set startingJob.
