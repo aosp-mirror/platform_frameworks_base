@@ -20,16 +20,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.os.Handler;
-import android.os.Looper;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
@@ -49,10 +44,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class DozeDockHandlerTest extends SysuiTestCase {
-    @Mock
-    private DozeMachine mMachine;
-    @Mock
-    private DozeHost mHost;
+    @Mock private DozeMachine mMachine;
     private AmbientDisplayConfiguration mConfig;
     private DockManagerFake mDockManagerFake;
     private DozeDockHandler mDockHandler;
@@ -61,146 +53,52 @@ public class DozeDockHandlerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mConfig = DozeConfigurationUtil.createMockConfig();
-        doReturn(false).when(mConfig).alwaysOnEnabled(anyInt());
-
         mDockManagerFake = spy(new DockManagerFake());
-        mDockHandler = new DozeDockHandler(mContext, mMachine, mHost, mConfig,
-                Handler.createAsync(Looper.myLooper()), mDockManagerFake);
+        mDockHandler = new DozeDockHandler(mConfig, mMachine, mDockManagerFake);
+
+        doReturn(true).when(mConfig).alwaysOnEnabled(anyInt());
+        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
     }
 
     @Test
-    public void testDockEventListener_registerAndUnregister() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-
+    public void transitionToInitialized_registersDockEventListener() {
         verify(mDockManagerFake).addListener(any());
+    }
 
-        mDockHandler.transitionTo(DozeMachine.State.DOZE, DozeMachine.State.FINISH);
+    @Test
+    public void transitionToFinish_unregistersDockEventListener() {
+        mDockHandler.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.FINISH);
 
         verify(mDockManagerFake).removeListener(any());
     }
 
     @Test
-    public void testOnEvent_dockedWhenDoze_requestPulse() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
-
+    public void onEvent_docked_requestsDockedAodState() {
         mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED);
 
-        verify(mMachine).requestPulse(eq(DozeEvent.PULSE_REASON_DOCKING));
+        verify(mMachine).requestState(eq(State.DOZE_AOD_DOCKED));
     }
 
     @Test
-    public void testOnEvent_dockedWhenDozeAoD_requestPulse() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_AOD);
-
-        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED);
-
-        verify(mMachine).requestPulse(eq(DozeEvent.PULSE_REASON_DOCKING));
-    }
-
-    @Test
-    public void testOnEvent_dockedHideWhenPulsing_requestPulseOut() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(State.DOZE_PULSING);
-        when(mMachine.getPulseReason()).thenReturn(DozeEvent.PULSE_REASON_DOCKING);
-
-        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED_HIDE);
-
-        verify(mHost).stopPulsing();
-    }
-
-    @Test
-    public void testOnEvent_undockedWhenPulsing_requestPulseOut() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_PULSING);
-        when(mMachine.getPulseReason()).thenReturn(DozeEvent.PULSE_REASON_DOCKING);
-
-        mDockManagerFake.setDockEvent(DockManager.STATE_NONE);
-
-        verify(mHost).stopPulsing();
-    }
-
-    @Test
-    public void testOnEvent_undockedWhenDoze_neverRequestPulseOut() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
-
-        mDockManagerFake.setDockEvent(DockManager.STATE_NONE);
-
-        verify(mHost, never()).stopPulsing();
-    }
-
-    @Test
-    public void testOnEvent_undockedWhenDozeAndEnabledAoD_requestDozeAoD() {
-        doReturn(true).when(mConfig).alwaysOnEnabled(anyInt());
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
-
+    public void onEvent_noneWhileEnabledAod_requestsAodState() {
         mDockManagerFake.setDockEvent(DockManager.STATE_NONE);
 
         verify(mMachine).requestState(eq(State.DOZE_AOD));
     }
 
     @Test
-    public void testTransitionToDoze_whenDocked_requestPulse() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.INITIALIZED);
-        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
-        mDockHandler.transitionTo(State.INITIALIZED, DozeMachine.State.DOZE);
+    public void onEvent_noneWhileDisabledAod_requestsDozeState() {
+        doReturn(false).when(mConfig).alwaysOnEnabled(anyInt());
 
-        TestableLooper.get(this).processAllMessages();
-
-        verify(mMachine).requestPulse(eq(DozeEvent.PULSE_REASON_DOCKING));
-    }
-
-    @Test
-    public void testTransitionToDozeAoD_whenDocked_requestPulse() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.INITIALIZED);
-        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_AOD);
-        mDockHandler.transitionTo(State.INITIALIZED, DozeMachine.State.DOZE_AOD);
-
-        TestableLooper.get(this).processAllMessages();
-
-        verify(mMachine).requestPulse(eq(DozeEvent.PULSE_REASON_DOCKING));
-    }
-
-    @Test
-    public void testTransitionToDoze_whenDockedHide_neverRequestPulse() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.INITIALIZED);
-        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED_HIDE);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
-
-        mDockHandler.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
-
-        verify(mMachine, never()).requestPulse(eq(DozeEvent.PULSE_REASON_DOCKING));
-    }
-
-    @Test
-    public void testTransitionToDozeAoD_whenDockedHide_requestDoze() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.INITIALIZED);
-        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED_HIDE);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_AOD);
-
-        mDockHandler.transitionTo(DozeMachine.State.INITIALIZED, State.DOZE_AOD);
+        mDockManagerFake.setDockEvent(DockManager.STATE_NONE);
 
         verify(mMachine).requestState(eq(State.DOZE));
     }
 
     @Test
-    public void testTransitionToPulsing_whenDockedHide_requestPulseOut() {
-        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_PULSING);
-        when(mMachine.getPulseReason()).thenReturn(DozeEvent.PULSE_REASON_DOCKING);
+    public void onEvent_hide_requestsDozeState() {
         mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED_HIDE);
 
-        mDockHandler.transitionTo(DozeMachine.State.INITIALIZED, State.DOZE_PULSING);
-
-        verify(mHost).stopPulsing();
+        verify(mMachine).requestState(eq(State.DOZE));
     }
 }

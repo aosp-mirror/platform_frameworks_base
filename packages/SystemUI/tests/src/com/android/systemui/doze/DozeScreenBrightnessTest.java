@@ -18,6 +18,7 @@ package com.android.systemui.doze;
 
 import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
+import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_DOCKED;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSE_DONE;
@@ -169,6 +170,16 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mSensor.sendSensorEvent(1);
 
         assertEquals(1, mServiceFake.screenBrightness);
+    }
+
+    @Test
+    public void testDockedAod_usesLightSensor() {
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD_DOCKED);
+
+        mSensor.sendSensorEvent(3);
+
+        assertEquals(3, mServiceFake.screenBrightness);
     }
 
     @Test
