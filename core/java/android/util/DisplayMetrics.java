@@ -23,9 +23,8 @@ import android.os.SystemProperties;
 /**
  * A structure describing general information about a display, such as its
  * size, density, and font scaling.
- * <p>To access the DisplayMetrics members, initialize an object like this:</p>
- * <pre> DisplayMetrics metrics = new DisplayMetrics();
- * getWindowManager().getDefaultDisplay().getMetrics(metrics);</pre>
+ * <p>To access the DisplayMetrics members, retrieve display metrics like this:</p>
+ * <pre>context.getResources().getDisplayMetrics();</pre>
  */
 public class DisplayMetrics {
     /**
