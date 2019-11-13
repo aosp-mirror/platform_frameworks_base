@@ -100,10 +100,6 @@ class DisplayWindowSettings {
 
     private static class Entry {
         private final String mName;
-        private int mOverscanLeft;
-        private int mOverscanTop;
-        private int mOverscanRight;
-        private int mOverscanBottom;
         private int mWindowingMode = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
         private int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
         private int mUserRotation = Surface.ROTATION_0;
@@ -124,10 +120,6 @@ class DisplayWindowSettings {
 
         private Entry(String name, Entry copyFrom) {
             this(name);
-            mOverscanLeft = copyFrom.mOverscanLeft;
-            mOverscanTop = copyFrom.mOverscanTop;
-            mOverscanRight = copyFrom.mOverscanRight;
-            mOverscanBottom = copyFrom.mOverscanBottom;
             mWindowingMode = copyFrom.mWindowingMode;
             mUserRotationMode = copyFrom.mUserRotationMode;
             mUserRotation = copyFrom.mUserRotation;
@@ -144,9 +136,7 @@ class DisplayWindowSettings {
 
         /** @return {@code true} if all values are default. */
         private boolean isEmpty() {
-            return mOverscanLeft == 0 && mOverscanTop == 0 && mOverscanRight == 0
-                    && mOverscanBottom == 0
-                    && mWindowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED
+            return mWindowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED
                     && mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
                     && mUserRotation == Surface.ROTATION_0
                     && mForcedWidth == 0 && mForcedHeight == 0 && mForcedDensity == 0
@@ -200,15 +190,6 @@ class DisplayWindowSettings {
         removeEntry(displayInfo);
         mEntries.put(newEntry.mName, newEntry);
         return newEntry;
-    }
-
-    void setOverscanLocked(DisplayInfo displayInfo, int left, int top, int right, int bottom) {
-        final Entry entry = getOrCreateEntry(displayInfo);
-        entry.mOverscanLeft = left;
-        entry.mOverscanTop = top;
-        entry.mOverscanRight = right;
-        entry.mOverscanBottom = bottom;
-        writeSettingsIfNeeded(entry, displayInfo);
     }
 
     void setUserRotation(DisplayContent displayContent, int rotationMode, int rotation) {
@@ -405,11 +386,6 @@ class DisplayWindowSettings {
         // Setting windowing mode first, because it may override overscan values later.
         dc.setWindowingMode(getWindowingModeLocked(entry, dc.getDisplayId()));
 
-        displayInfo.overscanLeft = entry.mOverscanLeft;
-        displayInfo.overscanTop = entry.mOverscanTop;
-        displayInfo.overscanRight = entry.mOverscanRight;
-        displayInfo.overscanBottom = entry.mOverscanBottom;
-
         dc.getDisplayRotation().restoreSettings(entry.mUserRotationMode,
                 entry.mUserRotation, entry.mFixedToUserRotation);
 
@@ -536,10 +512,6 @@ class DisplayWindowSettings {
         String name = parser.getAttributeValue(null, "name");
         if (name != null) {
             Entry entry = new Entry(name);
-            entry.mOverscanLeft = getIntAttribute(parser, "overscanLeft");
-            entry.mOverscanTop = getIntAttribute(parser, "overscanTop");
-            entry.mOverscanRight = getIntAttribute(parser, "overscanRight");
-            entry.mOverscanBottom = getIntAttribute(parser, "overscanBottom");
             entry.mWindowingMode = getIntAttribute(parser, "windowingMode",
                     WindowConfiguration.WINDOWING_MODE_UNDEFINED);
             entry.mUserRotationMode = getIntAttribute(parser, "userRotationMode",
@@ -602,18 +574,6 @@ class DisplayWindowSettings {
             for (Entry entry : mEntries.values()) {
                 out.startTag(null, "display");
                 out.attribute(null, "name", entry.mName);
-                if (entry.mOverscanLeft != 0) {
-                    out.attribute(null, "overscanLeft", Integer.toString(entry.mOverscanLeft));
-                }
-                if (entry.mOverscanTop != 0) {
-                    out.attribute(null, "overscanTop", Integer.toString(entry.mOverscanTop));
-                }
-                if (entry.mOverscanRight != 0) {
-                    out.attribute(null, "overscanRight", Integer.toString(entry.mOverscanRight));
-                }
-                if (entry.mOverscanBottom != 0) {
-                    out.attribute(null, "overscanBottom", Integer.toString(entry.mOverscanBottom));
-                }
                 if (entry.mWindowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
                     out.attribute(null, "windowingMode", Integer.toString(entry.mWindowingMode));
                 }

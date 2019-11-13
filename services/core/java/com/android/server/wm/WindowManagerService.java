@@ -597,7 +597,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
-    CircularDisplayMask mCircularDisplayMask;
     EmulatorDisplayOverlay mEmulatorDisplayOverlay;
 
     final float[] mTmpFloats = new float[9];
@@ -769,11 +768,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mImmersiveModeConfirmationsUri.equals(uri) || mPolicyControlUri.equals(uri)) {
                 updateSystemUiSettings();
-                return;
-            }
-
-            if (mDisplayInversionEnabledUri.equals(uri)) {
-                updateCircularDisplayMaskIfNeeded();
                 return;
             }
 
@@ -1348,7 +1342,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int addWindow(Session session, IWindow client, int seq,
             LayoutParams attrs, int viewVisibility, int displayId, Rect outFrame,
-            Rect outContentInsets, Rect outStableInsets, Rect outOutsets,
+            Rect outContentInsets, Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState) {
         int[] appOp = new int[1];
@@ -1700,7 +1694,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 floatingStack = false;
             }
             if (displayPolicy.getLayoutHintLw(win.mAttrs, taskBounds, displayFrames, floatingStack,
-                    outFrame, outContentInsets, outStableInsets, outOutsets, outDisplayCutout)) {
+                    outFrame, outContentInsets, outStableInsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
             outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win));
@@ -2103,8 +2097,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int relayoutWindow(Session session, IWindow client, int seq, LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility, int flags,
-            long frameNumber, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
-            Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Rect outBackdropFrame,
+            long frameNumber, Rect outFrame, Rect outContentInsets,
+            Rect outVisibleInsets, Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper outCutout, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
         int result = 0;
@@ -2396,8 +2390,8 @@ public class WindowManagerService extends IWindowManager.Stub
             win.updateLastInsetValues();
 
             win.getCompatFrame(outFrame);
-            win.getInsetsForRelayout(outOverscanInsets, outContentInsets, outVisibleInsets,
-                    outStableInsets, outOutsets);
+            win.getInsetsForRelayout(outContentInsets, outVisibleInsets,
+                    outStableInsets);
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
             outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win));
@@ -3446,61 +3440,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void updateCircularDisplayMaskIfNeeded() {
-        if (mContext.getResources().getConfiguration().isScreenRound()
-                && mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_windowShowCircularMask)) {
-            final int currentUserId;
-            synchronized (mGlobalLock) {
-                currentUserId = mCurrentUserId;
-            }
-            // Device configuration calls for a circular display mask, but we only enable the mask
-            // if the accessibility color inversion feature is disabled, as the inverted mask
-            // causes artifacts.
-            int inversionState = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, currentUserId);
-            int showMask = (inversionState == 1) ? 0 : 1;
-            Message m = mH.obtainMessage(H.SHOW_CIRCULAR_DISPLAY_MASK);
-            m.arg1 = showMask;
-            mH.sendMessage(m);
-        }
-    }
-
     public void showEmulatorDisplayOverlayIfNeeded() {
         if (mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_windowEnableCircularEmulatorDisplayOverlay)
                 && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false)
                 && Build.IS_EMULATOR) {
             mH.sendMessage(mH.obtainMessage(H.SHOW_EMULATOR_DISPLAY_OVERLAY));
-        }
-    }
-
-    public void showCircularMask(boolean visible) {
-        synchronized (mGlobalLock) {
-            if (visible) {
-                // TODO(multi-display): support multiple displays
-                if (mCircularDisplayMask == null) {
-                    int screenOffset = mContext.getResources().getInteger(
-                            com.android.internal.R.integer.config_windowOutsetBottom);
-                    int maskThickness = mContext.getResources().getDimensionPixelSize(
-                            com.android.internal.R.dimen.circular_display_mask_thickness);
-
-
-                    if (SHOW_LIGHT_TRANSACTIONS) {
-                        Slog.i(TAG_WM,
-                                ">>> showCircularMask(visible=" + visible + ")");
-                    }
-                    mCircularDisplayMask = new CircularDisplayMask(mSurfaceFactory,
-                            getDefaultDisplayContentLocked(), mPolicy.getWindowLayerFromTypeLw(
-                            WindowManager.LayoutParams.TYPE_POINTER) * TYPE_LAYER_MULTIPLIER
-                            + 10, screenOffset, maskThickness, mTransaction);
-                }
-                mCircularDisplayMask.setVisibility(true, mTransaction);
-            } else if (mCircularDisplayMask != null) {
-                mCircularDisplayMask.setVisibility(false, mTransaction);
-                mCircularDisplayMask = null;
-            }
-            mTransaction.apply();
         }
     }
 
@@ -4500,8 +4445,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mActivityTaskManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
-
-        updateCircularDisplayMaskIfNeeded();
     }
 
     public void systemReady() {
@@ -4584,7 +4527,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int NEW_ANIMATOR_SCALE = 34;
 
-        public static final int SHOW_CIRCULAR_DISPLAY_MASK = 35;
         public static final int SHOW_EMULATOR_DISPLAY_OVERLAY = 36;
 
         public static final int CHECK_IF_BOOT_ANIMATION_FINISHED = 37;
@@ -4815,11 +4757,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case SHOW_STRICT_MODE_VIOLATION: {
                     showStrictModeViolation(msg.arg1, msg.arg2);
-                    break;
-                }
-
-                case SHOW_CIRCULAR_DISPLAY_MASK: {
-                    showCircularMask(msg.arg1 == 1);
                     break;
                 }
 
@@ -5229,38 +5166,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         return 0;
-    }
-
-    @Override
-    public void setOverscan(int displayId, int left, int top, int right, int bottom) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                if (displayContent != null) {
-                    setOverscanLocked(displayContent, left, top, right, bottom);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
-    private void setOverscanLocked(DisplayContent displayContent,
-            int left, int top, int right, int bottom) {
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        displayInfo.overscanLeft = left;
-        displayInfo.overscanTop = top;
-        displayInfo.overscanRight = right;
-        displayInfo.overscanBottom = bottom;
-
-        mDisplayWindowSettings.setOverscanLocked(displayInfo, left, top, right, bottom);
-
-        displayContent.reconfigureDisplayLocked();
     }
 
     @Override
