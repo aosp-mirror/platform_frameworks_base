@@ -34,7 +34,9 @@ import android.view.ViewStub;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.android.systemui.CarSystemUIFactory;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.car.CarTrustAgentUnlockDialogHelper.OnHideListener;
 import com.android.systemui.statusbar.car.UserGridRecyclerView.UserRecord;
 
@@ -65,7 +67,6 @@ public class FullscreenUserSwitcher {
             mContext.unregisterReceiver(mUserUnlockReceiver);
         }
     };
-    private final Car mCar;
 
     public FullscreenUserSwitcher(CarStatusBar statusBar, ViewStub containerStub, Context context) {
         mStatusBar = statusBar;
@@ -85,8 +86,8 @@ public class FullscreenUserSwitcher {
         mUnlockDialogHelper = new CarTrustAgentUnlockDialogHelper(mContext);
         mUserManager = mContext.getSystemService(UserManager.class);
 
-        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                (car, ready) -> {
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+                .addListener((car, ready) -> {
                     if (!ready) {
                         return;
                     }

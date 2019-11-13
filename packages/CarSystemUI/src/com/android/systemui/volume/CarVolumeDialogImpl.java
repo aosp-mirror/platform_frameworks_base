@@ -55,7 +55,9 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.systemui.CarSystemUIFactory;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.plugins.VolumeDialog;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -95,7 +97,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private CustomDialog mDialog;
     private RecyclerView mListView;
     private CarVolumeItemAdapter mVolumeItemsAdapter;
-    private Car mCar;
     private CarAudioManager mCarAudioManager;
     private boolean mHovering;
     private int mCurrentlyDisplayingGroupId;
@@ -196,8 +197,8 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     @Override
     public void init(int windowType, Callback callback) {
         initDialog();
-        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                mCarServiceLifecycleListener);
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+                .addListener(mCarServiceLifecycleListener);
     }
 
     @Override
@@ -205,12 +206,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mHandler.removeCallbacksAndMessages(/* token= */ null);
 
         cleanupAudioManager();
-        // unregisterVolumeCallback is not being called when disconnect car, so we manually cleanup
-        // audio manager beforehand.
-        if (mCar != null) {
-            mCar.disconnect();
-            mCar = null;
-        }
     }
 
     private void initDialog() {
