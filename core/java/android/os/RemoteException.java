@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.NonNull;
 import android.util.AndroidException;
 
 /**
@@ -37,7 +37,15 @@ public class RemoteException extends AndroidException {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    /** {@hide} */
+    /**
+     * Rethrow this as an unchecked runtime exception.
+     * <p>
+     * Apps making calls into other processes may end up persisting internal
+     * state or making security decisions based on the perceived success or
+     * failure of a call, or any default values returned. For this reason, we
+     * want to strongly throw when there was trouble with the transaction.
+     */
+    @NonNull
     public RuntimeException rethrowAsRuntimeException() {
         throw new RuntimeException(this);
     }
@@ -52,10 +60,8 @@ public class RemoteException extends AndroidException {
      * state or making security decisions based on the perceived success or
      * failure of a call, or any default values returned. For this reason, we
      * want to strongly throw when there was trouble with the transaction.
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
+    @NonNull
     public RuntimeException rethrowFromSystemServer() {
         if (this instanceof DeadObjectException) {
             throw new RuntimeException(new DeadSystemException());
