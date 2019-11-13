@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
@@ -74,6 +75,7 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
     @Mock private DozeLog mDozeLog;
     @Mock private DozeParameters mDozeParameters;
     @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    @Mock private DockManager mDockManager;
 
     @Before
     public void setUp() {
@@ -85,6 +87,7 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
         when(mSuperStatusBarViewFactory.getStatusBarWindowView()).thenReturn(mView);
+        when(mDockManager.isDocked()).thenReturn(false);
 
         mController = new StatusBarWindowViewController.Builder(
                 new InjectionInflationController(
@@ -103,7 +106,8 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
                 mDozeLog,
                 mDozeParameters,
                 new CommandQueue(mContext),
-                mSuperStatusBarViewFactory)
+                mSuperStatusBarViewFactory,
+                mDockManager)
                 .setShadeController(mShadeController)
                 .build();
         mController.setService(mStatusBar);
