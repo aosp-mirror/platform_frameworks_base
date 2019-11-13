@@ -110,8 +110,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             mCallbacks.add(callback);
             if (mWifiManager != null) {
                 if (mCallbacks.size() == 1) {
-                    mWifiManager.registerSoftApCallback(this,
-                            new HandlerExecutor(mMainHandler));
+                    mWifiManager.registerSoftApCallback(new HandlerExecutor(mMainHandler), this);
                 } else {
                     // mWifiManager#registerSoftApCallback triggers a call to
                     // onConnectedClientsChanged on the Main Handler. In order to always update
@@ -120,6 +119,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
                     mMainHandler.post(() ->
                             callback.onHotspotChanged(isHotspotEnabled(),
                                     mNumConnectedDevices));
+
                 }
             }
         }

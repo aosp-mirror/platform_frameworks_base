@@ -686,7 +686,7 @@ public class WifiManagerTest {
     @Test
     public void registerSoftApCallbackThrowsIllegalArgumentExceptionOnNullArgumentForCallback() {
         try {
-            mWifiManager.registerSoftApCallback(null, new HandlerExecutor(mHandler));
+            mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), null);
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException expected) {
         }
@@ -710,7 +710,7 @@ public class WifiManagerTest {
     @Test
     public void registerSoftApCallbackUsesMainLooperOnNullArgumentForHandler() {
         when(mContext.getMainLooper()).thenReturn(mLooper.getLooper());
-        mWifiManager.registerSoftApCallback(mSoftApCallback, null);
+        mWifiManager.registerSoftApCallback(null, mSoftApCallback);
         verify(mContext).getMainExecutor();
     }
 
@@ -719,7 +719,7 @@ public class WifiManagerTest {
      */
     @Test
     public void registerSoftApCallbackCallGoesToWifiServiceImpl() throws Exception {
-        mWifiManager.registerSoftApCallback(mSoftApCallback, new HandlerExecutor(mHandler));
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
         verify(mWifiService).registerSoftApCallback(any(IBinder.class),
                 any(ISoftApCallback.Stub.class), anyInt());
     }
@@ -730,7 +730,7 @@ public class WifiManagerTest {
     @Test
     public void unregisterSoftApCallbackCallGoesToWifiServiceImpl() throws Exception {
         ArgumentCaptor<Integer> callbackIdentifier = ArgumentCaptor.forClass(Integer.class);
-        mWifiManager.registerSoftApCallback(mSoftApCallback, new HandlerExecutor(mHandler));
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
         verify(mWifiService).registerSoftApCallback(any(IBinder.class),
                 any(ISoftApCallback.Stub.class), callbackIdentifier.capture());
 
@@ -745,7 +745,7 @@ public class WifiManagerTest {
     public void softApCallbackProxyCallsOnStateChanged() throws Exception {
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
-        mWifiManager.registerSoftApCallback(mSoftApCallback, new HandlerExecutor(mHandler));
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
         verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
                 anyInt());
 
@@ -761,7 +761,7 @@ public class WifiManagerTest {
     public void softApCallbackProxyCallsOnConnectedClientsChanged() throws Exception {
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
-        mWifiManager.registerSoftApCallback(mSoftApCallback, new HandlerExecutor(mHandler));
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
         verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
                 anyInt());
 
@@ -778,7 +778,7 @@ public class WifiManagerTest {
     public void softApCallbackProxyCallsOnMultipleUpdates() throws Exception {
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
-        mWifiManager.registerSoftApCallback(mSoftApCallback, new HandlerExecutor(mHandler));
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
         verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
                 anyInt());
 
@@ -802,7 +802,7 @@ public class WifiManagerTest {
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
         TestLooper altLooper = new TestLooper();
         Handler altHandler = new Handler(altLooper.getLooper());
-        mWifiManager.registerSoftApCallback(mSoftApCallback, new HandlerExecutor(altHandler));
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(altHandler), mSoftApCallback);
         verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
                 anyInt());
 
@@ -816,7 +816,7 @@ public class WifiManagerTest {
      */
     @Test
     public void testCorrectLooperIsUsedForSoftApCallbackHandler() throws Exception {
-        mWifiManager.registerSoftApCallback(mSoftApCallback, new HandlerExecutor(mHandler));
+        mWifiManager.registerSoftApCallback(new HandlerExecutor(mHandler), mSoftApCallback);
         mLooper.dispatchAll();
         verify(mWifiService).registerSoftApCallback(any(IBinder.class),
                 any(ISoftApCallback.Stub.class), anyInt());
