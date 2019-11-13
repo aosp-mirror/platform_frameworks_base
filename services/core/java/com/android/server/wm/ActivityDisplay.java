@@ -214,7 +214,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         if (position == POSITION_BOTTOM) {
             position = 0;
         } else if (toTop) {
-            position = mStacks.size();
+            position = getChildCount();
         }
         if (DEBUG_STACK) Slog.v(TAG_STACK, "addChild: attaching " + stack
                 + " to displayId=" + mDisplayId + " position=" + position);
@@ -254,7 +254,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
     void positionChildAtTop(ActivityStack stack, boolean includingParents,
             String updateLastFocusedStackReason) {
-        positionChildAt(stack, mStacks.size(), includingParents, updateLastFocusedStackReason);
+        positionChildAt(stack, getChildCount(), includingParents, updateLastFocusedStackReason);
     }
 
     void positionChildAtBottom(ActivityStack stack) {
@@ -289,7 +289,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         // we are looking for top focusable stack. The condition {@code wasContained} restricts the
         // preferred stack is set only when moving an existing stack to top instead of adding a new
         // stack that may be too early (e.g. in the middle of launching or reparenting).
-        if (wasContained && position >= mStacks.size() - 1 && stack.isFocusableAndVisible()) {
+        if (wasContained && position >= getChildCount() - 1 && stack.isFocusableAndVisible()) {
             mPreferredTopFocusableStack = stack;
         } else if (mPreferredTopFocusableStack == stack) {
             mPreferredTopFocusableStack = null;
@@ -315,14 +315,14 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     private int getTopInsertPosition(ActivityStack stack, int candidatePosition) {
-        int position = mStacks.size();
+        int position = getChildCount();
         if (stack.inPinnedWindowingMode()) {
             // Stack in pinned windowing mode is z-ordered on-top of all other stacks so okay to
             // just return the candidate position.
             return Math.min(position, candidatePosition);
         }
         while (position > 0) {
-            final ActivityStack targetStack = mStacks.get(position - 1);
+            final ActivityStack targetStack = getChildAt(position - 1);
             if (!targetStack.isAlwaysOnTop()) {
                 // We reached a stack that isn't always-on-top.
                 break;
@@ -337,8 +337,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     <T extends ActivityStack> T getStack(int stackId) {
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            final ActivityStack stack = mStacks.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = getChildAt(i);
             if (stack.mStackId == stackId) {
                 return (T) stack;
             }
@@ -363,8 +363,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             return (T) mSplitScreenPrimaryStack;
         }
 
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            final ActivityStack stack = mStacks.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = getChildAt(i);
             if (stack.isCompatible(windowingMode, activityType)) {
                 return (T) stack;
             }
@@ -490,8 +490,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             return mPreferredTopFocusableStack;
         }
 
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            final ActivityStack stack = mStacks.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = getChildAt(i);
             if (stack.isFocusableAndVisible()) {
                 return stack;
             }
@@ -505,8 +505,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                 ? currentFocus.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
 
         ActivityStack candidate = null;
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            final ActivityStack stack = mStacks.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = getChildAt(i);
             if (ignoreCurrent && stack == currentFocus) {
                 continue;
             }
@@ -561,8 +561,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     boolean allResumedActivitiesComplete() {
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityRecord r = mStacks.get(stackNdx).getResumedActivity();
+        for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityRecord r = getChildAt(stackNdx).getResumedActivity();
             if (r != null && !r.isState(RESUMED)) {
                 return false;
             }
@@ -588,8 +588,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
      */
     boolean pauseBackStacks(boolean userLeaving, ActivityRecord resuming) {
         boolean someActivityPaused = false;
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
+        for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = getChildAt(stackNdx);
             final ActivityRecord resumedActivity = stack.getResumedActivity();
             if (resumedActivity != null
                     && (stack.getVisibility(resuming) != STACK_VISIBILITY_VISIBLE
@@ -653,8 +653,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         final ArrayList<ActivityStack> stacks = new ArrayList<>();
         for (int j = windowingModes.length - 1 ; j >= 0; --j) {
             final int windowingMode = windowingModes[j];
-            for (int i = mStacks.size() - 1; i >= 0; --i) {
-                final ActivityStack stack = mStacks.get(i);
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                final ActivityStack stack = getChildAt(i);
                 if (!stack.isActivityTypeStandardOrUndefined()) {
                     continue;
                 }
@@ -681,8 +681,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         final ArrayList<ActivityStack> stacks = new ArrayList<>();
         for (int j = activityTypes.length - 1 ; j >= 0; --j) {
             final int activityType = activityTypes[j];
-            for (int i = mStacks.size() - 1; i >= 0; --i) {
-                final ActivityStack stack = mStacks.get(i);
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                final ActivityStack stack = getChildAt(i);
                 if (stack.getActivityType() == activityType) {
                     stacks.add(stack);
                 }
@@ -753,8 +753,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         mService.deferWindowLayout();
         try {
             // Adjust the windowing mode of any stack in secondary split-screen to fullscreen.
-            for (int i = mStacks.size() - 1; i >= 0; --i) {
-                final ActivityStack otherStack = mStacks.get(i);
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                final ActivityStack otherStack = getChildAt(i);
                 if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
                     continue;
                 }
@@ -782,8 +782,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         mService.deferWindowLayout();
         try {
             // Adjust the windowing mode of any affected by split-screen to split-screen secondary.
-            for (int i = mStacks.size() - 1; i >= 0; --i) {
-                final ActivityStack otherStack = mStacks.get(i);
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                final ActivityStack otherStack = getChildAt(i);
                 if (otherStack == mSplitScreenPrimaryStack
                         || !otherStack.affectedBySplitScreenResize()) {
                     continue;
@@ -931,7 +931,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
      * some stacks are not focusable (e.g. PiP).
      */
     ActivityStack getTopStack() {
-        return mStacks.isEmpty() ? null : mStacks.get(mStacks.size() - 1);
+        return mStacks.isEmpty() ? null : getChildAt(getChildCount() - 1);
     }
 
     boolean isTopStack(ActivityStack stack) {
@@ -939,8 +939,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     boolean isTopNotPinnedStack(ActivityStack stack) {
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            final ActivityStack current = mStacks.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack current = getChildAt(i);
             if (!current.inPinnedWindowingMode()) {
                 return current == stack;
             }
@@ -949,8 +949,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     ActivityStack getTopStackInWindowingMode(int windowingMode) {
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            final ActivityStack current = mStacks.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack current = getChildAt(i);
             if (windowingMode == current.getWindowingMode()) {
                 return current;
             }
@@ -980,8 +980,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
         // Look in other focusable stacks.
         if (topRunning == null) {
-            for (int i = mStacks.size() - 1; i >= 0; --i) {
-                final ActivityStack stack = mStacks.get(i);
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                final ActivityStack stack = getChildAt(i);
                 // Only consider focusable stacks other than the current focused one.
                 if (stack == focusedStack || !stack.isFocusable()) {
                     continue;
@@ -1113,8 +1113,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     void onLockTaskPackagesUpdated() {
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            mStacks.get(i).onLockTaskPackagesUpdated();
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            getChildAt(i).onLockTaskPackagesUpdated();
         }
     }
 
@@ -1166,7 +1166,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
     @Override
     public String toString() {
-        return "ActivityDisplay={" + mDisplayId + " numStacks=" + mStacks.size() + "}";
+        return "ActivityDisplay={" + mDisplayId + " numStacks=" + getChildCount() + "}";
     }
 
     @Override
@@ -1225,10 +1225,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         final ActivityDisplay toDisplay = mRootActivityContainer.getDefaultDisplay();
         mRootActivityContainer.mStackSupervisor.beginDeferResume();
         try {
-            int numStacks = mStacks.size();
+            int numStacks = getChildCount();
             // Keep the order from bottom to top.
             for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
-                final ActivityStack stack = mStacks.get(stackNdx);
+                final ActivityStack stack = getChildAt(stackNdx);
                 // Always finish non-standard type stacks.
                 if (destroyContentOnRemoval || !stack.isActivityTypeStandardOrUndefined()) {
                     stack.finishAllActivitiesImmediately();
@@ -1245,8 +1245,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                 }
                 // Stacks may be removed from this display. Ensure each stack will be processed and
                 // the loop will end.
-                stackNdx -= numStacks - mStacks.size();
-                numStacks = mStacks.size();
+                stackNdx -= numStacks - getChildCount();
+                numStacks = getChildCount();
             }
         } finally {
             mRootActivityContainer.mStackSupervisor.endDeferResume();
@@ -1272,7 +1272,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             return;
         }
 
-        final ActivityStack stack = mStacks.size() == 1 ? mStacks.get(0) : null;
+        final ActivityStack stack = getChildCount() == 1 ? getChildAt(0) : null;
         if (stack != null && stack.isActivityTypeHome() && stack.getAllTasks().isEmpty()) {
             // Release this display if an empty home stack is the only thing left.
             // Since it is the last stack, this display will be released along with the stack
@@ -1349,7 +1349,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
      */
     ActivityStack getStackAbove(ActivityStack stack) {
         final int stackIndex = mStacks.indexOf(stack) + 1;
-        return (stackIndex < mStacks.size()) ? mStacks.get(stackIndex) : null;
+        return (stackIndex < getChildCount()) ? getChildAt(stackIndex) : null;
     }
 
     /**
@@ -1366,9 +1366,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         positionChildAtBottom(stack);
 
         // Find the next position where the stack should be placed
-        final int numStacks = mStacks.size();
+        final int numStacks = getChildCount();
         for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
-            final ActivityStack s = mStacks.get(stackNdx);
+            final ActivityStack s = getChildAt(stackNdx);
             if (s == stack) {
                 continue;
             }
@@ -1554,7 +1554,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "displayId=" + mDisplayId + " stacks=" + mStacks.size()
+        pw.println(prefix + "displayId=" + mDisplayId + " stacks=" + getChildCount()
                 + (mSingleTaskInstance ? " mSingleTaskInstance" : ""));
         final String myPrefix = prefix + " ";
         if (mHomeStack != null) {
@@ -1578,8 +1578,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     }
 
     public void dumpStacks(PrintWriter pw) {
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            pw.print(mStacks.get(i).mStackId);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            pw.print(getChildAt(i).mStackId);
             if (i > 0) {
                 pw.print(",");
             }
@@ -1602,8 +1602,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         } else {
             proto.write(FOCUSED_STACK_ID, INVALID_STACK_ID);
         }
-        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityStack stack = mStacks.get(stackNdx);
+        for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = getChildAt(stackNdx);
             stack.writeToProto(proto, STACKS, logLevel);
         }
         proto.end(token);
