@@ -1817,10 +1817,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atnaujino administratorius"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Ištrynė administratorius"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Gerai"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Kad akumuliatorius veiktų ilgiau, akumuliatoriaus tausojimo priemonė:\n·įjungia tamsiąją temą;\n·išjungia arba apriboja veiklą fone, kai kuriuos vaizdinius efektus ir kitas funkcijas, pvz., „Hey Google“.\n\n"<annotation id="url">"Sužinokite daugiau"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Kad akumuliatorius veiktų ilgiau, akumuliatoriaus tausojimo priemonė:\n·įjungia tamsiąją temą;\n·išjungia arba apriboja veiklą fone, kai kuriuos vaizdinius efektus ir kitas funkcijas, pvz., „Hey Google“."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Kad padėtų sumažinti duomenų naudojimą, Duomenų taupymo priemonė neleidžia kai kurioms programoms siųsti ar gauti duomenų fone. Šiuo metu naudojama programa gali pasiekti duomenis, bet tai bus daroma rečiau. Tai gali reikšti, kad, pvz., vaizdai nebus pateikiami, jei jų nepaliesite."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Įj. Duomenų taupymo priemonę?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Įjungti"</string>
@@ -2076,4 +2074,22 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Tiesioginio bendrinimo funkcija nepasiekiama"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Programų sąrašas"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Šiai programai nebuvo suteiktas leidimas įrašyti, bet ji gali užfiksuoti garsą per šį USB įrenginį."</string>
+    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
+    <skip />
 </resources>

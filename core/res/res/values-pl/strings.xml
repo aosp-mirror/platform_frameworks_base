@@ -1817,10 +1817,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny, \nwyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny,\n wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>
@@ -2076,4 +2074,22 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Udostępnianie bezpośrednie jest niedostępne"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Lista aplikacji"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Ta aplikacja nie ma uprawnień do nagrywania, ale może rejestrować dźwięk za pomocą tego urządzenia USB."</string>
+    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
+    <skip />
 </resources>

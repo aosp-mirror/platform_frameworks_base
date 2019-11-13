@@ -1794,10 +1794,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избрисао је администратор"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Потврди"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Ради дужег трајања батерије, уштеда батерије:\n·укључује тамну тему\n·искључује или ограничава активности у позадини, неке визуелне ефекте и друге функције, на пример, „Ок Google“\n\n"<annotation id="url">"Сазнајте више"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Ради дужег трајања батерије, уштеда батерије:\n·укључује тамну тему\n·искључује или ограничава активности у позадини, неке визуелне ефекте и друге функције, на пример, „Ок Google“"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Укључити Уштеду података?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Укључи"</string>
@@ -2042,4 +2040,22 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Директно дељење није доступно"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Листа апликација"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Ова апликација нема дозволу за снимање, али би могла да снима звук помоћу овог USB уређаја."</string>
+    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
+    <skip />
 </resources>

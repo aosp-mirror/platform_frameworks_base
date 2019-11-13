@@ -2006,4 +2006,13 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‏‏‎‏‏‎‎‏‏‎‎‎‎‎‎‏‎‎‎‎‏‏‏‎‏‏‏‏‎‏‏‎‏‎‏‏‏‏‏‎‎‎‏‎‏‎‏‏‏‎‎‎‏‏‏‏‎Direct share not available‎‏‎‎‏‎"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‎‏‏‏‎‎‎‏‎‎‎‎‏‎‏‎‎‎‏‎‎‎‏‎‎‏‏‏‏‏‎‎‏‎‏‎‏‎‎‏‎‎‏‎‏‏‎‎‎‏‎Apps list‎‏‎‎‏‎"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‎‎‏‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‎‏‏‏‏‏‎‏‏‎‎‏‎‏‏‎‎‏‎‎‏‏‏‎‎‎‏‎‎‏‎‏‏‏‏‎‏‎This app has not been granted record permission but could capture audio through this USB device.‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_home_label" msgid="6089400419441597916">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‎‎‎‎‏‏‏‏‎‎‏‎‏‎‏‏‎‏‎‏‏‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‏‏‎‏‏‏‎‏‏‏‎‎‎Home‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_back_label" msgid="8986628898117178971">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‏‏‎‏‏‏‎‏‎‏‏‎‏‎‏‏‏‏‎‏‎‏‎‎‎‎‎‏‎‎‎‏‎‎‎‏‏‎‏‎‏‏‎‎‏‎‏‏‎‏‏‎Back‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_recents_label" msgid="7607601657790855723">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‎‏‎‎‎‎‏‎‏‏‎‎‏‏‎‏‎‏‎‎‏‎‏‎‏‎‎‏‎‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‎‏‏‎Recent Apps‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_notifications_label" msgid="1578681904050072545">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‎‏‎‎‎‏‎‎‏‏‎‏‎‏‏‎‏‎‎‏‏‏‏‎‏‏‎‎‎‎‎‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‏‎‎‎‎‏‎Notifications‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="3885565587471448947">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‎‏‏‎‎‎‏‎‎‏‏‎‏‎‏‎‏‎‎‎‎‏‎‏‏‎‎‎‎‏‎‏‏‎‏‏‏‏‎‏‏‏‎‏‏‎‏‏‏‎‎‏‏‎Quick Settings‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_power_dialog_label" msgid="2299530700682199873">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‎‎‏‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‏‎‎‏‎‎‎‎‎‏‏‎‏‎‎‎‎‎‏‎Power Dialog‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_toggle_split_screen_label" msgid="2853334443686935668">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‎‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‎‎‏‏‏‏‎‎‎‏‎‏‎‏‎‏‎‏‏‎‎‎‏‎‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎Toggle Split Screen‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="2377933717780192594">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‎‎‎‎‎‎‎‎‎‏‏‏‏‎‎‎‎‏‏‏‏‎‎‎‎‏‎‎‏‏‏‎‏‏‎‏‏‎‎‏‎‏‏‏‎‏‎‏‎‏‎‎‏‎‎Lock Screen‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="1933564892301816480">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‎‏‎‏‎‏‏‎‎‏‏‏‎‎‎‎‎‏‏‎‎‏‏‎‏‎‏‏‏‏‎‏‎‎‎‎‏‏‏‏‎‎‏‎‏‎‏‎‎‎‎‎‎Screenshot‎‏‎‎‏‎"</string>
 </resources>
