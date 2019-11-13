@@ -577,6 +577,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_NONE = -1;
     /** @hide Access to coarse location information. */
+    @UnsupportedAppUsage
     @TestApi
     public static final int OP_COARSE_LOCATION = 0;
     /** @hide Access to fine location information. */
@@ -649,6 +650,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_WRITE_SETTINGS = 23;
     /** @hide Required to draw on top of other apps. */
+    @UnsupportedAppUsage
     @TestApi
     public static final int OP_SYSTEM_ALERT_WINDOW = 24;
     /** @hide */
@@ -658,6 +660,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_CAMERA = 26;
     /** @hide */
+    @UnsupportedAppUsage
     @TestApi
     public static final int OP_RECORD_AUDIO = 27;
     /** @hide */
@@ -805,6 +808,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_MANAGE_IPSEC_TUNNELS = 75;
     /** @hide Any app start foreground service. */
+    @UnsupportedAppUsage
     @TestApi
     public static final int OP_START_FOREGROUND = 76;
     /** @hide */
@@ -2080,6 +2084,7 @@ public class AppOpsManager {
      * Retrieve the permission associated with an operation, or null if there is not one.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static String opToPermission(int op) {
         return sOpPerms[op];
@@ -2112,6 +2117,7 @@ public class AppOpsManager {
      * to the corresponding app op.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static int permissionToOpCode(String permission) {
         Integer boxedOpCode = sPermToOp.get(permission);
@@ -4600,6 +4606,7 @@ public class AppOpsManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(int code, int uid, String packageName, @Mode int mode) {
@@ -4927,6 +4934,7 @@ public class AppOpsManager {
     /**
      * {@hide}
      */
+    @UnsupportedAppUsage
     @TestApi
     public static int strOpToOp(@NonNull String op) {
         Integer val = sOpStrToOp.get(op);

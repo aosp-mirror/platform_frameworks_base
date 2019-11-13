@@ -2321,6 +2321,7 @@ class ContextImpl extends Context {
         return (mFlags & Context.CONTEXT_IGNORE_SECURITY) != 0;
     }
 
+    @UnsupportedAppUsage
     @TestApi
     @Override
     public Display getDisplay() {

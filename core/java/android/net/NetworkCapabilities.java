@@ -478,6 +478,7 @@ public final class NetworkCapabilities implements Parcelable {
      * @return an array of capability values for this instance.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public @NetCapability int[] getCapabilities() {
         return BitUtils.unpackBits(mNetworkCapabilities);
