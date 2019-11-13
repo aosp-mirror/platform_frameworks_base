@@ -41,15 +41,15 @@ public final class RuleXmlParser implements RuleParser {
     public static final String TAG = "RuleXmlParser";
 
     // TODO: Use XML attributes
-    private static final String RULE_LIST_TAG = "RuleList";
-    private static final String RULE_TAG = "Rule";
-    private static final String OPEN_FORMULA_TAG = "OpenFormula";
-    private static final String ATOMIC_FORMULA_TAG = "AtomicFormula";
-    private static final String EFFECT_TAG = "Effect";
-    private static final String KEY_TAG = "Key";
-    private static final String OPERATOR_TAG = "Operator";
-    private static final String VALUE_TAG = "Value";
-    private static final String CONNECTOR_TAG = "Connector";
+    private static final String RULE_LIST_TAG = "RL";
+    private static final String RULE_TAG = "R";
+    private static final String OPEN_FORMULA_TAG = "OF";
+    private static final String ATOMIC_FORMULA_TAG = "AF";
+    private static final String EFFECT_TAG = "E";
+    private static final String KEY_TAG = "K";
+    private static final String OPERATOR_TAG = "O";
+    private static final String VALUE_TAG = "V";
+    private static final String CONNECTOR_TAG = "C";
 
     @Override
     public List<Rule> parse(String ruleText) throws RuleParseException {
@@ -80,16 +80,16 @@ public final class RuleXmlParser implements RuleParser {
         // Skipping the first event type, which is always {@link XmlPullParser.START_DOCUMENT}
         parser.next();
 
-        // Processing the first tag; which should always be a <RuleList> tag.
+        // Processing the first tag; which should always be a RuleList <RL> tag.
         String nodeName = parser.getName();
-        // Validating that the XML is starting with a <RuleList> tag.
+        // Validating that the XML is starting with a RuleList <RL> tag.
         // Note: This is the only breaking validation to run against XML files in the platform.
         // All rules inside are assumed to be validated at the server. If a rule is found to be
         // corrupt in the XML, it will be skipped to the next rule.
         if (!nodeName.equals(RULE_LIST_TAG)) {
             throw new RuntimeException(
-                    String.format("Rules must start with <RuleList> tag. Found: %s at %s", nodeName,
-                            parser.getPositionDescription()));
+                    String.format("Rules must start with RuleList <RL> tag. Found: %s at %s",
+                            nodeName, parser.getPositionDescription()));
         }
 
         int eventType;
