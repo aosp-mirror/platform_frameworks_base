@@ -717,6 +717,7 @@ package android.content {
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public static final String ACTION_MANAGE_DEFAULT_APP = "android.intent.action.MANAGE_DEFAULT_APP";
     field public static final String ACTION_ROLLBACK_COMMITTED = "android.intent.action.ROLLBACK_COMMITTED";
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
   }
