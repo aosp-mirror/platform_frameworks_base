@@ -431,7 +431,7 @@ public final class DisplayManagerService extends SystemService {
             recordTopInsetLocked(mLogicalDisplays.get(Display.DEFAULT_DISPLAY));
         }
 
-        mDisplayModeDirector.setListener(new AllowedDisplayModeObserver());
+        mDisplayModeDirector.setDisplayModeListener(new AllowedDisplayModeObserver());
         mDisplayModeDirector.start(mSensorManager);
 
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
@@ -2488,7 +2488,7 @@ public final class DisplayManagerService extends SystemService {
 
     }
 
-    class AllowedDisplayModeObserver implements DisplayModeDirector.Listener {
+    class AllowedDisplayModeObserver implements DisplayModeDirector.DisplayModeListener {
         public void onAllowedDisplayModesChanged() {
             onAllowedDisplayModesChangedInternal();
         }

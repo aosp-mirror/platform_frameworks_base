@@ -95,7 +95,7 @@ public class DisplayModeDirector {
     private final BrightnessObserver mBrightnessObserver;
 
     private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
-    private Listener mListener;
+    private DisplayModeListener mDisplayModeListener;
 
     public DisplayModeDirector(@NonNull Context context, @NonNull Handler handler) {
         mContext = context;
@@ -311,11 +311,11 @@ public class DisplayModeDirector {
     }
 
     /**
-     * Sets the listener for changes to allowed display modes.
+     * Sets the modeListener for changes to allowed display modes.
      */
-    public void setListener(@Nullable Listener listener) {
+    public void setDisplayModeListener(@Nullable DisplayModeListener displayModeListener) {
         synchronized (mLock) {
-            mListener = listener;
+            mDisplayModeListener = displayModeListener;
         }
     }
 
@@ -393,12 +393,12 @@ public class DisplayModeDirector {
     }
 
     private void notifyAllowedModesChangedLocked() {
-        if (mListener != null && !mHandler.hasMessages(MSG_ALLOWED_MODES_CHANGED)) {
+        if (mDisplayModeListener != null && !mHandler.hasMessages(MSG_ALLOWED_MODES_CHANGED)) {
             // We need to post this to a handler to avoid calling out while holding the lock
             // since we know there are things that both listen for changes as well as provide
             // information. If we did call out while holding the lock, then there's no guaranteed
             // lock order and we run the real of risk deadlock.
-            Message msg = mHandler.obtainMessage(MSG_ALLOWED_MODES_CHANGED, mListener);
+            Message msg = mHandler.obtainMessage(MSG_ALLOWED_MODES_CHANGED, mDisplayModeListener);
             msg.sendToTarget();
         }
     }
@@ -432,7 +432,7 @@ public class DisplayModeDirector {
     /**
      * Listens for changes to display mode coordination.
      */
-    public interface Listener {
+    public interface DisplayModeListener {
         /**
          * Called when the allowed display modes may have changed.
          */
@@ -448,8 +448,8 @@ public class DisplayModeDirector {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_ALLOWED_MODES_CHANGED:
-                    Listener listener = (Listener) msg.obj;
-                    listener.onAllowedDisplayModesChanged();
+                    DisplayModeListener displayModeListener = (DisplayModeListener) msg.obj;
+                    displayModeListener.onAllowedDisplayModesChanged();
                     break;
 
                 case MSG_BRIGHTNESS_THRESHOLDS_CHANGED:
