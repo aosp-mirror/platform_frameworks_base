@@ -193,6 +193,11 @@ public final class Tuner implements AutoCloseable  {
         private long mNativeContext;
         private FilterCallback mCallback;
         int mId;
+
+        private native boolean nativeStartFilter();
+        private native boolean nativeStopFilter();
+        private native boolean nativeFlushFilter();
+
         private Filter(int id) {
             mId = id;
         }
@@ -202,6 +207,18 @@ public final class Tuner implements AutoCloseable  {
                 mHandler.sendMessage(
                         mHandler.obtainMessage(MSG_ON_FILTER_STATUS, status, 0, this));
             }
+        }
+
+        public boolean start() {
+            return nativeStartFilter();
+        }
+
+        public boolean stop() {
+            return nativeStopFilter();
+        }
+
+        public boolean flush() {
+            return nativeFlushFilter();
         }
     }
 

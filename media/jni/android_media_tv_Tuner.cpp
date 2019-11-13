@@ -308,7 +308,34 @@ static jobject android_media_tv_Tuner_open_filter(
     return tuner->openFilter(filterType, bufferSize);
 }
 
-static const JNINativeMethod gMethods[] = {
+static bool android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
+    sp<IFilter> filterSp = getFilter(env, filter);
+    if (filterSp == NULL) {
+        ALOGD("Failed to start filter: filter not found");
+        return false;
+    }
+    return filterSp->start() == Result::SUCCESS;
+}
+
+static bool android_media_tv_Tuner_stop_filter(JNIEnv *env, jobject filter) {
+    sp<IFilter> filterSp = getFilter(env, filter);
+    if (filterSp == NULL) {
+        ALOGD("Failed to stop filter: filter not found");
+        return false;
+    }
+    return filterSp->stop() == Result::SUCCESS;
+}
+
+static bool android_media_tv_Tuner_flush_filter(JNIEnv *env, jobject filter) {
+    sp<IFilter> filterSp = getFilter(env, filter);
+    if (filterSp == NULL) {
+        ALOGD("Failed to flush filter: filter not found");
+        return false;
+    }
+    return filterSp->flush() == Result::SUCCESS;
+}
+
+static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "()V", (void *)android_media_tv_Tuner_native_init },
     { "nativeSetup", "()V", (void *)android_media_tv_Tuner_native_setup },
     { "nativeGetFrontendIds", "()Ljava/util/List;",
@@ -319,9 +346,26 @@ static const JNINativeMethod gMethods[] = {
             (void *)android_media_tv_Tuner_open_filter },
 };
 
-static int register_android_media_tv_Tuner(JNIEnv *env) {
-    return AndroidRuntime::registerNativeMethods(
-            env, "android/media/tv/tuner/Tuner", gMethods, NELEM(gMethods));
+static const JNINativeMethod gFilterMethods[] = {
+    { "nativeStartFilter", "()Z", (void *)android_media_tv_Tuner_start_filter },
+    { "nativeStopFilter", "()Z", (void *)android_media_tv_Tuner_stop_filter },
+    { "nativeFlushFilter", "()Z", (void *)android_media_tv_Tuner_flush_filter },
+};
+
+static bool register_android_media_tv_Tuner(JNIEnv *env) {
+    if (AndroidRuntime::registerNativeMethods(
+            env, "android/media/tv/tuner/Tuner", gTunerMethods, NELEM(gTunerMethods)) != JNI_OK) {
+        ALOGE("Failed to register tuner native methods");
+        return false;
+    }
+    if (AndroidRuntime::registerNativeMethods(
+            env, "android/media/tv/tuner/Tuner$Filter",
+            gFilterMethods,
+            NELEM(gFilterMethods)) != JNI_OK) {
+        ALOGE("Failed to register filter native methods");
+        return false;
+    }
+    return true;
 }
 
 jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
@@ -335,7 +379,7 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     }
     assert(env != NULL);
 
-    if (register_android_media_tv_Tuner(env) != JNI_OK) {
+    if (!register_android_media_tv_Tuner(env)) {
         ALOGE("ERROR: Tuner native registration failed\n");
         return result;
     }
