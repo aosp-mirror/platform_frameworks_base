@@ -54,7 +54,7 @@ interface IMediaRouterService {
      * @param client the client that changes it's selected route
      * @param route the route to be selected
      */
-    void selectRoute2(IMediaRouter2Client client, in @nullable MediaRoute2Info route);
+    void requestSelectRoute2(IMediaRouter2Client client, in @nullable MediaRoute2Info route);
     void setControlCategories2(IMediaRouter2Client client, in List<String> categories);
 
     void registerManager(IMediaRouter2Manager manager, String packageName);

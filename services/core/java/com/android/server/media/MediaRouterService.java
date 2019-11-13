@@ -459,8 +459,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void selectRoute2(IMediaRouter2Client client, MediaRoute2Info route) {
-        mService2.selectRoute2(client, route);
+    public void requestSelectRoute2(IMediaRouter2Client client, MediaRoute2Info route) {
+        mService2.requestSelectRoute2(client, route);
     }
 
     // Binder call

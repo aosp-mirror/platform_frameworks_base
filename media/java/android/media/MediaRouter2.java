@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -102,6 +103,8 @@ public class MediaRouter2 {
     private volatile List<String> mControlCategories = Collections.emptyList();
 
     private MediaRoute2Info mSelectedRoute;
+    @GuardedBy("sLock")
+    private MediaRoute2Info mSelectingRoute;
     @GuardedBy("sLock")
     private Client mClient;
 
@@ -250,24 +253,28 @@ public class MediaRouter2 {
     }
 
     /**
-     * Selects the specified route.
+     * Request to select the specified route. When the route is selected,
+     * {@link Callback#onRouteSelected(MediaRoute2Info, int, Bundle)} will be called.
      *
      * @param route the route to select
      */
-    //TODO: add a parameter for category (e.g. mirroring/casting)
-    public void selectRoute(@NonNull MediaRoute2Info route) {
+    public void requestSelectRoute(@NonNull MediaRoute2Info route) {
         Objects.requireNonNull(route, "route must not be null");
 
         Client client;
         synchronized (sLock) {
-            mSelectedRoute = route;
+            if (mSelectingRoute == route) {
+                Log.w(TAG, "The route selection request is already sent.");
+                return;
+            }
+            mSelectingRoute = route;
             client = mClient;
         }
         if (client != null) {
             try {
-                mMediaRouterService.selectRoute2(client, route);
+                mMediaRouterService.requestSelectRoute2(client, route);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to select route.", ex);
+                Log.e(TAG, "Unable to request to select route.", ex);
             }
         }
     }
@@ -443,6 +450,22 @@ public class MediaRouter2 {
         }
     }
 
+    void selectRouteOnHandler(MediaRoute2Info route, int reason, Bundle controlHints) {
+        synchronized (sLock) {
+            if (reason == SELECT_REASON_USER_SELECTED) {
+                if (mSelectingRoute == null
+                        || !TextUtils.equals(mSelectingRoute.getUniqueId(), route.getUniqueId())) {
+                    Log.w(TAG, "Ignoring invalid or outdated notifyRouteSelected call. "
+                            + "selectingRoute=" + mSelectingRoute + " route=" + route);
+                    return;
+                }
+            }
+            mSelectingRoute = null;
+        }
+        mSelectedRoute = route;
+        notifyRouteSelected(route, reason, controlHints);
+    }
+
     private void refreshFilteredRoutes() {
         List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
 
@@ -475,12 +498,17 @@ public class MediaRouter2 {
         }
     }
 
+    private void notifyRouteSelected(MediaRoute2Info route, int reason, Bundle controlHints) {
+        for (CallbackRecord record: mCallbackRecords) {
+            record.mExecutor.execute(
+                    () -> record.mCallback.onRouteSelected(route, reason, controlHints));
+        }
+    }
+
     /**
      * Interface for receiving events about media routing changes.
      */
     public static class Callback {
-        //TODO: clean up these callbacks
-
         /**
          * Called when routes are added.
          * @param routes the list of routes that have been added. It's never empty.
@@ -505,20 +533,19 @@ public class MediaRouter2 {
          */
         public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
 
-        // TODO: Make this callback be called when we add requestSelectRoute().
         /**
          * Called when a route is selected. Exactly one route can be selected at a time.
          * @param route the selected route.
          * @param reason the reason why the route is selected.
-         * @param connectionHints An optional bundle of provider-specific arguments which may be
-         *                        used to control the selected route. Can be empty.
+         * @param controlHints An optional bundle of provider-specific arguments which may be
+         *                     used to control the selected route. Can be empty.
          * @see #SELECT_REASON_UNKNOWN
          * @see #SELECT_REASON_USER_SELECTED
          * @see #SELECT_REASON_FALLBACK
          * @see #getSelectedRoute()
          */
         public void onRouteSelected(@NonNull MediaRoute2Info route, @SelectReason int reason,
-                @NonNull Bundle connectionHints) {}
+                @NonNull Bundle controlHints) {}
     }
 
     final class CallbackRecord {
@@ -559,6 +586,13 @@ public class MediaRouter2 {
         public void notifyRoutesChanged(List<MediaRoute2Info> routes) {
             mHandler.sendMessage(obtainMessage(MediaRouter2::changeRoutesOnHandler,
                     MediaRouter2.this, routes));
+        }
+
+        @Override
+        public void notifyRouteSelected(MediaRoute2Info route, int reason,
+                Bundle controlHints) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2::selectRouteOnHandler,
+                    MediaRouter2.this, route, reason, controlHints));
         }
     }
 }
