@@ -721,6 +721,10 @@ public class SyntheticPasswordManager {
             }
             return VerifyCredentialResponse.fromGateKeeperResponse(response);
         } else if (persistentData.type == PersistentData.TYPE_SP_WEAVER) {
+            if (!isWeaverAvailable()) {
+                Slog.e(TAG, "No weaver service to verify SP-based FRP credential");
+                return VerifyCredentialResponse.ERROR;
+            }
             PasswordData pwd = PasswordData.fromBytes(persistentData.payload);
             byte[] pwdToken = computePasswordToken(userCredential, pwd);
             int weaverSlot = persistentData.userId;
