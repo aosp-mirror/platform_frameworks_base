@@ -27,7 +27,10 @@ java_sdk_library {
         ":framework-core-sources-for-test-mock",
         ":framework_native_aidl",
     ],
-    libs: ["framework-all"],
+    libs: [
+        "framework-all",
+        "app-compat-annotations",
+    ],
 
     api_packages: [
         "android.test.mock",
