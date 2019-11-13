@@ -1112,6 +1112,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // AutoFillUiCallback
     @Override
+    public void cancelSession() {
+        synchronized (mLock) {
+            removeSelfLocked();
+        }
+    }
+
+    // AutoFillUiCallback
+    @Override
     public void startIntentSenderAndFinishSession(IntentSender intentSender) {
         startIntentSender(intentSender, null);
     }
