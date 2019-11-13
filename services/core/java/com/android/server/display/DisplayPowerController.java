@@ -931,6 +931,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     autoBrightnessAdjustmentChanged, mPowerRequest.policy);
         }
 
+        if (mBrightnessTracker != null) {
+            mBrightnessTracker.setBrightnessConfiguration(mBrightnessConfiguration);
+        }
+
         // Apply auto-brightness.
         boolean slowChange = false;
         if (brightness < 0) {
