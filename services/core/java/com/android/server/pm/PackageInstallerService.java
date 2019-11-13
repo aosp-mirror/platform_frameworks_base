@@ -512,6 +512,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
+        String originatingPackageName = null;
+        if (params.originatingUid != SessionParams.UID_UNKNOWN
+                && params.originatingUid != callingUid) {
+            String[] packages = mPm.getPackagesForUid(params.originatingUid);
+            if (packages != null && packages.length > 0) {
+                // Choose an arbitrary representative package in the case of a shared UID.
+                originatingPackageName = packages[0];
+            }
+        }
+
         if (Build.IS_DEBUGGABLE || isDowngradeAllowedForCaller(callingUid)) {
             params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
         } else {
@@ -624,7 +634,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
         InstallSource installSource = InstallSource.create(installerPackageName,
-                requestedInstallerPackageName);
+                originatingPackageName, requestedInstallerPackageName, false);
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mInstallThread.getLooper(), mStagingManager, sessionId, userId, callingUid,
                 installSource, params, createdMillis,

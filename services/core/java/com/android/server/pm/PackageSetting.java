@@ -209,6 +209,8 @@ public final class PackageSetting extends PackageSettingBase {
             long sourceToken = proto.start(PackageProto.INSTALL_SOURCE);
             proto.write(PackageProto.InstallSourceProto.INITIATING_PACKAGE_NAME,
                     installSource.initiatingPackageName);
+            proto.write(PackageProto.InstallSourceProto.ORIGINATING_PACKAGE_NAME,
+                    installSource.originatingPackageName);
             proto.end(sourceToken);
         }
         writeUsersInfoToProto(proto, PackageProto.USERS);

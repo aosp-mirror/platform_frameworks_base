@@ -148,6 +148,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_INSTALLER_UID = "installerUid";
     private static final String ATTR_INITIATING_PACKAGE_NAME =
             "installInitiatingPackageName";
+    private static final String ATTR_ORIGINATING_PACKAGE_NAME =
+            "installOriginatingPackageName";
     private static final String ATTR_CREATED_MILLIS = "createdMillis";
     private static final String ATTR_UPDATED_MILLIS = "updatedMillis";
     private static final String ATTR_SESSION_STAGE_DIR = "sessionStageDir";
@@ -1227,7 +1229,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             mInstallerUid = newOwnerAppInfo.uid;
-            mInstallSource = InstallSource.create(packageName, packageName);
+            mInstallSource = InstallSource.create(packageName, null, packageName, false);
         }
 
         // Persist the fact that we've sealed ourselves to prevent
@@ -2336,7 +2338,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         pw.printPair("userId", userId);
         pw.printPair("mOriginalInstallerUid", mOriginalInstallerUid);
-        mInstallSource.dump(pw);
+        pw.printPair("installerPackageName", mInstallSource.installerPackageName);
+        pw.printPair("installInitiatingPackageName", mInstallSource.initiatingPackageName);
+        pw.printPair("installOriginatingPackageName", mInstallSource.originatingPackageName);
         pw.printPair("mInstallerUid", mInstallerUid);
         pw.printPair("createdMillis", createdMillis);
         pw.printPair("updatedMillis", updatedMillis);
@@ -2420,6 +2424,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeIntAttribute(out, ATTR_INSTALLER_UID, mInstallerUid);
             writeStringAttribute(out, ATTR_INITIATING_PACKAGE_NAME,
                     mInstallSource.initiatingPackageName);
+            writeStringAttribute(out, ATTR_ORIGINATING_PACKAGE_NAME,
+                    mInstallSource.originatingPackageName);
             writeLongAttribute(out, ATTR_CREATED_MILLIS, createdMillis);
             writeLongAttribute(out, ATTR_UPDATED_MILLIS, updatedMillis);
             if (stageDir != null) {
@@ -2527,6 +2533,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 installerPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId));
         final String installInitiatingPackageName =
                 readStringAttribute(in, ATTR_INITIATING_PACKAGE_NAME);
+        final String installOriginatingPackageName =
+                readStringAttribute(in, ATTR_ORIGINATING_PACKAGE_NAME);
         final long createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS);
         long updatedMillis = readLongAttribute(in, ATTR_UPDATED_MILLIS);
         final String stageDirRaw = readStringAttribute(in, ATTR_SESSION_STAGE_DIR);
@@ -2619,7 +2627,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
-                installerPackageName);
+                installOriginatingPackageName, installerPackageName, false);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 installerThread, stagingManager, sessionId, userId, installerUid,
                 installSource, params, createdMillis, stageDir, stageCid,

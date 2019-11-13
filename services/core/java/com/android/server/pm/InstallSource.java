@@ -18,8 +18,6 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 
-import com.android.internal.util.IndentingPrintWriter;
-
 import java.util.Objects;
 
 /**
@@ -31,11 +29,23 @@ final class InstallSource {
      * An instance of InstallSource representing an absence of knowledge of the source of
      * a package. Used in preference to null.
      */
-    static final InstallSource EMPTY = new InstallSource(null, null, false);
+    static final InstallSource EMPTY = new InstallSource(null, null, null, false);
+
+    /** We also memoize this case because it is common - all un-updated system apps. */
+    private static final InstallSource EMPTY_ORPHANED = new InstallSource(null, null, null, true);
 
     /** The package that requested the installation, if known. */
     @Nullable
     final String initiatingPackageName;
+
+    /**
+     * The package on behalf of which the initiating package requested the installation, if any.
+     * For example if a downloaded APK is installed via the Package Installer this could be the
+     * app that performed the download. This value is provided by the initiating package and not
+     * verified by the framework.
+     */
+    @Nullable
+    final String originatingPackageName;
 
     /**
      * Package name of the app that installed this package (the installer of record). Note that
@@ -48,47 +58,55 @@ final class InstallSource {
     final boolean isOrphaned;
 
     static InstallSource create(@Nullable String initiatingPackageName,
-            @Nullable String installerPackageName) {
-        return create(initiatingPackageName, installerPackageName, false);
-    }
-
-    static InstallSource create(@Nullable String initiatingPackageName,
-            @Nullable String installerPackageName, boolean isOrphaned) {
-        if (initiatingPackageName == null && installerPackageName == null && !isOrphaned) {
-            return EMPTY;
-        }
-        return new InstallSource(
-                initiatingPackageName == null ? null : initiatingPackageName.intern(),
-                installerPackageName == null ? null : installerPackageName.intern(),
+            @Nullable String originatingPackageName, @Nullable String installerPackageName,
+            boolean isOrphaned) {
+        return createInternal(
+                intern(initiatingPackageName),
+                intern(originatingPackageName),
+                intern(installerPackageName),
                 isOrphaned);
     }
 
-    private InstallSource(@Nullable String initiatingPackageName,
-            @Nullable String installerPackageName, boolean isOrphaned) {
-        this.initiatingPackageName = initiatingPackageName;
-        this.isOrphaned = isOrphaned;
-        this.installerPackageName = installerPackageName;
+    private static InstallSource createInternal(@Nullable String initiatingPackageName,
+            @Nullable String originatingPackageName, @Nullable String installerPackageName,
+            boolean isOrphaned) {
+        if (initiatingPackageName == null && originatingPackageName == null
+                && installerPackageName == null) {
+            return isOrphaned ? EMPTY_ORPHANED : EMPTY;
+        }
+        return new InstallSource(initiatingPackageName, originatingPackageName,
+                installerPackageName, isOrphaned);
     }
 
-    void dump(IndentingPrintWriter pw) {
-        pw.printPair("installerPackageName", installerPackageName);
-        pw.printPair("installInitiatingPackageName", initiatingPackageName);
+    private InstallSource(@Nullable String initiatingPackageName,
+            @Nullable String originatingPackageName, @Nullable String installerPackageName,
+            boolean isOrphaned) {
+        this.initiatingPackageName = initiatingPackageName;
+        this.originatingPackageName = originatingPackageName;
+        this.installerPackageName = installerPackageName;
+        this.isOrphaned = isOrphaned;
     }
 
     /**
      * Return an InstallSource the same as this one except with the specified installerPackageName.
      */
     InstallSource setInstallerPackage(String installerPackageName) {
-        return Objects.equals(installerPackageName, this.installerPackageName) ? this
-                : create(initiatingPackageName, installerPackageName, isOrphaned);
+        if (Objects.equals(installerPackageName, this.installerPackageName)) {
+            return this;
+        }
+        return createInternal(initiatingPackageName, originatingPackageName,
+                intern(installerPackageName), isOrphaned);
     }
 
     /**
      * Return an InstallSource the same as this one except with the specified value for isOrphaned.
      */
     InstallSource setIsOrphaned(boolean isOrphaned) {
-        return isOrphaned == this.isOrphaned ? this
-                : create(initiatingPackageName, installerPackageName, isOrphaned);
+        if (isOrphaned == this.isOrphaned) {
+            return this;
+        }
+        return createInternal(initiatingPackageName, originatingPackageName, installerPackageName,
+                isOrphaned);
     }
 
     /**
@@ -102,11 +120,16 @@ final class InstallSource {
 
         boolean modified = false;
         String initiatingPackageName = this.initiatingPackageName;
+        String originatingPackageName = this.originatingPackageName;
         String installerPackageName = this.installerPackageName;
         boolean isOrphaned = this.isOrphaned;
 
         if (packageName.equals(initiatingPackageName)) {
             initiatingPackageName = null;
+            modified = true;
+        }
+        if (packageName.equals(originatingPackageName)) {
+            originatingPackageName = null;
             modified = true;
         }
         if (packageName.equals(installerPackageName)) {
@@ -115,8 +138,15 @@ final class InstallSource {
             modified = true;
         }
 
-        return modified
-                ? create(initiatingPackageName, installerPackageName, isOrphaned)
-                : this;
+        if (!modified) {
+            return this;
+        }
+        return createInternal(initiatingPackageName, originatingPackageName, installerPackageName,
+                isOrphaned);
+    }
+
+    @Nullable
+    private static String intern(@Nullable String packageName) {
+        return packageName == null ? null : packageName.intern();
     }
 }
