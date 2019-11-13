@@ -18,7 +18,9 @@ package android.os;
 
 import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -39,6 +41,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This class gives you control of the power state of the device.
@@ -916,20 +919,22 @@ public final class PowerManager {
     final IPowerManager mService;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     final Handler mHandler;
+    final IThermalService mThermalService;
 
     /** We lazily initialize it.*/
     private DeviceIdleManager mDeviceIdleManager;
 
-    IThermalService mThermalService;
     private final ArrayMap<OnThermalStatusChangedListener, IThermalStatusListener>
             mListenerMap = new ArrayMap<>();
 
     /**
      * {@hide}
      */
-    public PowerManager(Context context, IPowerManager service, Handler handler) {
+    public PowerManager(Context context, IPowerManager service, IThermalService thermalService,
+            Handler handler) {
         mContext = context;
         mService = service;
+        mThermalService = thermalService;
         mHandler = handler;
     }
 
@@ -1877,18 +1882,11 @@ public final class PowerManager {
      * thermal throttling.
      */
     public @ThermalStatus int getCurrentThermalStatus() {
-        synchronized (this) {
-            if (mThermalService == null) {
-                mThermalService = IThermalService.Stub.asInterface(
-                        ServiceManager.getService(Context.THERMAL_SERVICE));
-            }
-            try {
-                return mThermalService.getCurrentThermalStatus();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        try {
+            return mThermalService.getCurrentThermalStatus();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-
     }
 
     /**
@@ -1915,13 +1913,7 @@ public final class PowerManager {
      */
     public void addThermalStatusListener(@NonNull OnThermalStatusChangedListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
-        synchronized (this) {
-            if (mThermalService == null) {
-                mThermalService = IThermalService.Stub.asInterface(
-                        ServiceManager.getService(Context.THERMAL_SERVICE));
-            }
-            this.addThermalStatusListener(mContext.getMainExecutor(), listener);
-        }
+        this.addThermalStatusListener(mContext.getMainExecutor(), listener);
     }
 
     /**
@@ -1934,35 +1926,29 @@ public final class PowerManager {
             @NonNull OnThermalStatusChangedListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         Preconditions.checkNotNull(executor, "executor cannot be null");
-        synchronized (this) {
-            if (mThermalService == null) {
-                mThermalService = IThermalService.Stub.asInterface(
-                        ServiceManager.getService(Context.THERMAL_SERVICE));
-            }
-            Preconditions.checkArgument(!mListenerMap.containsKey(listener),
-                    "Listener already registered: " + listener);
-            IThermalStatusListener internalListener = new IThermalStatusListener.Stub() {
-                @Override
-                public void onStatusChange(int status) {
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        executor.execute(() -> {
-                            listener.onThermalStatusChanged(status);
-                        });
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
+        Preconditions.checkArgument(!mListenerMap.containsKey(listener),
+                "Listener already registered: " + listener);
+        IThermalStatusListener internalListener = new IThermalStatusListener.Stub() {
+            @Override
+            public void onStatusChange(int status) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        listener.onThermalStatusChanged(status);
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(token);
                 }
-            };
-            try {
-                if (mThermalService.registerThermalStatusListener(internalListener)) {
-                    mListenerMap.put(listener, internalListener);
-                } else {
-                    throw new RuntimeException("Listener failed to set");
-                }
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
             }
+        };
+        try {
+            if (mThermalService.registerThermalStatusListener(internalListener)) {
+                mListenerMap.put(listener, internalListener);
+            } else {
+                throw new RuntimeException("Listener failed to set");
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1973,22 +1959,72 @@ public final class PowerManager {
      */
     public void removeThermalStatusListener(@NonNull OnThermalStatusChangedListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
-        synchronized (this) {
-            if (mThermalService == null) {
-                mThermalService = IThermalService.Stub.asInterface(
-                        ServiceManager.getService(Context.THERMAL_SERVICE));
+        IThermalStatusListener internalListener = mListenerMap.get(listener);
+        Preconditions.checkArgument(internalListener != null, "Listener was not added");
+        try {
+            if (mThermalService.unregisterThermalStatusListener(internalListener)) {
+                mListenerMap.remove(listener);
+            } else {
+                throw new RuntimeException("Listener failed to remove");
             }
-            IThermalStatusListener internalListener = mListenerMap.get(listener);
-            Preconditions.checkArgument(internalListener != null, "Listener was not added");
-            try {
-                if (mThermalService.unregisterThermalStatusListener(internalListener)) {
-                    mListenerMap.remove(listener);
-                } else {
-                    throw new RuntimeException("Listener failed to remove");
-                }
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @CurrentTimeMillisLong
+    private final AtomicLong mLastHeadroomUpdate = new AtomicLong(0L);
+    private static final int MINIMUM_HEADROOM_TIME_MILLIS = 500;
+
+    /**
+     * Provides an estimate of how much thermal headroom the device currently has before hitting
+     * severe throttling.
+     *
+     * Note that this only attempts to track the headroom of slow-moving sensors, such as the skin
+     * temperature sensor. This means that there is no benefit to calling this function more
+     * frequently than about once per second, and attempts to call significantly more frequently may
+     * result in the function returning {@code NaN}.
+     *
+     * In addition, in order to be able to provide an accurate forecast, the system does not attempt
+     * to forecast until it has multiple temperature samples from which to extrapolate. This should
+     * only take a few seconds from the time of the first call, but during this time, no forecasting
+     * will occur, and the current headroom will be returned regardless of the value of
+     * {@code forecastSeconds}.
+     *
+     * The value returned is a non-negative float that represents how much of the thermal envelope
+     * is in use (or is forecasted to be in use). A value of 1.0 indicates that the device is (or
+     * will be) throttled at {@link #THERMAL_STATUS_SEVERE}. Such throttling can affect the CPU,
+     * GPU, and other subsystems. Values may exceed 1.0, but there is no implied mapping to specific
+     * thermal status levels beyond that point. This means that values greater than 1.0 may
+     * correspond to {@link #THERMAL_STATUS_SEVERE}, but may also represent heavier throttling.
+     *
+     * A value of 0.0 corresponds to a fixed distance from 1.0, but does not correspond to any
+     * particular thermal status or temperature. Values on (0.0, 1.0] may be expected to scale
+     * linearly with temperature, though temperature changes over time are typically not linear.
+     * Negative values will be clamped to 0.0 before returning.
+     *
+     * @param forecastSeconds how many seconds in the future to forecast. Given that device
+     *                        conditions may change at any time, forecasts from further in the
+     *                        future will likely be less accurate than forecasts in the near future.
+     * @return a value greater than or equal to 0.0 where 1.0 indicates the SEVERE throttling
+     *         threshold, as described above. Returns NaN if the device does not support this
+     *         functionality or if this function is called significantly faster than once per
+     *         second.
+     */
+    public float getThermalHeadroom(@IntRange(from = 0, to = 60) int forecastSeconds) {
+        // Rate-limit calls into the thermal service
+        long now = SystemClock.elapsedRealtime();
+        long timeSinceLastUpdate = now - mLastHeadroomUpdate.get();
+        if (timeSinceLastUpdate < MINIMUM_HEADROOM_TIME_MILLIS) {
+            return Float.NaN;
+        }
+
+        try {
+            float forecast = mThermalService.getThermalHeadroom(forecastSeconds);
+            mLastHeadroomUpdate.set(SystemClock.elapsedRealtime());
+            return forecast;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
