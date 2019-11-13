@@ -37,9 +37,21 @@ using ::android::hardware::tv::tuner::V1_0::IFilter;
 using ::android::hardware::tv::tuner::V1_0::IFilterCallback;
 using ::android::hardware::tv::tuner::V1_0::IFrontend;
 using ::android::hardware::tv::tuner::V1_0::IFrontendCallback;
+using ::android::hardware::tv::tuner::V1_0::ILnb;
+using ::android::hardware::tv::tuner::V1_0::ILnbCallback;
 using ::android::hardware::tv::tuner::V1_0::ITuner;
+using ::android::hardware::tv::tuner::V1_0::LnbEventType;
+using ::android::hardware::tv::tuner::V1_0::LnbId;
 
 namespace android {
+
+struct LnbCallback : public ILnbCallback {
+    LnbCallback(jweak tunerObj, LnbId id);
+    virtual Return<void> onEvent(LnbEventType lnbEventType);
+    virtual Return<void> onDiseqcMessage(const hidl_vec<uint8_t>& diseqcMessage);
+    jweak mObject;
+    LnbId mId;
+};
 
 struct FilterCallback : public IFilterCallback {
     virtual Return<void> onFilterEvent(const DemuxFilterEvent& filterEvent);
@@ -67,7 +79,10 @@ struct JTuner : public RefBase {
     sp<ITuner> getTunerService();
     jobject getFrontendIds();
     jobject openFrontendById(int id);
+    jobject getLnbIds();
+    jobject openLnbById(int id);
     jobject openFilter(DemuxFilterType type, int bufferSize);
+
 protected:
     bool openDemux();
     virtual ~JTuner();
@@ -78,6 +93,8 @@ private:
     static sp<ITuner> mTuner;
     hidl_vec<FrontendId> mFeIds;
     sp<IFrontend> mFe;
+    hidl_vec<LnbId> mLnbIds;
+    sp<ILnb> mLnb;
     sp<IDemux> mDemux;
     int mDemuxId;
 };
