@@ -564,7 +564,7 @@ public class UserManagerService extends IUserManager.Stub {
             readUserListLP();
             sInstance = this;
         }
-        mSystemPackageInstaller = new UserSystemPackageInstaller(this);
+        mSystemPackageInstaller = new UserSystemPackageInstaller(this, mUserTypes);
         mLocalService = new LocalService();
         LocalServices.addService(UserManagerInternal.class, mLocalService);
         mLockPatternUtils = new LockPatternUtils(mContext);
@@ -1203,6 +1203,24 @@ public class UserManagerService extends IUserManager.Stub {
         } else {
             return orig;
         }
+    }
+
+    /** Returns whether the given user type is one of the FULL user types. */
+    boolean isUserTypeSubtypeOfFull(String userType) {
+        UserTypeDetails userTypeDetails = mUserTypes.get(userType);
+        return userTypeDetails != null && userTypeDetails.isFull();
+    }
+
+    /** Returns whether the given user type is one of the PROFILE user types. */
+    boolean isUserTypeSubtypeOfProfile(String userType) {
+        UserTypeDetails userTypeDetails = mUserTypes.get(userType);
+        return userTypeDetails != null && userTypeDetails.isProfile();
+    }
+
+    /** Returns whether the given user type is one of the SYSTEM user types. */
+    boolean isUserTypeSubtypeOfSystem(String userType) {
+        UserTypeDetails userTypeDetails = mUserTypes.get(userType);
+        return userTypeDetails != null && userTypeDetails.isSystem();
     }
 
     @Override
@@ -3233,8 +3251,8 @@ public class UserManagerService extends IUserManager.Stub {
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             t.traceEnd();
 
-            final Set<String> installablePackages = // TODO(b/142482943): use userType
-                    mSystemPackageInstaller.getInstallablePackagesForUserType(flags);
+            final Set<String> installablePackages =
+                    mSystemPackageInstaller.getInstallablePackagesForUserType(userType);
             t.traceBegin("PM.createNewUser");
             mPm.createNewUser(userId, installablePackages, disallowedPackages);
             t.traceEnd();

@@ -16,19 +16,30 @@
 
 <!--
 This XML file declares which system packages should be initially installed for new users based on
-the type of user. All system packages on the device should ideally have an entry in an xml file
+their user type. All system packages on the device should ideally have an entry in an xml file
 (keys by its manifest name).
 
-Main user-types (every user will be at least one of these types) are:
+Base user-types (every user will be at least one of these types) are:
   SYSTEM    (user 0)
   FULL      (any non-profile human user)
   PROFILE   (profile human user)
-
-Additional optional types are:   GUEST,    RESTRICTED,    MANAGED_PROFILE,    EPHEMERAL,    DEMO
-
-The meaning of each of these user types is delineated by flags in
+the precise meaning of which is defined in
 frameworks/base/core/java/android/content/pm/UserInfo.java.
-See frameworks/base/services/core/java/com/android/server/pm/UserSystemPackageInstaller#getFlagsFromUserTypes
+TODO(b/143784345): When UserInfo flags are categorized, reference the "base type" category here.
+
+More granular control is also available by specifying individual user types (every user is exactly
+one of these user types).
+This includes AOSP user types defined in frameworks/base/core/java/android/os/UserManager.java, like
+    android.os.usertype.full.SYSTEM
+    android.os.usertype.full.SECONDARY
+    android.os.usertype.full.GUEST
+    android.os.usertype.full.DEMO
+    android.os.usertype.full.RESTRICTED
+    android.os.usertype.profile.MANAGED
+    android.os.usertype.system.HEADLESS
+as well as any OEM custom user types defined using
+frameworks/base/services/core/java/com/android/server/pm/UserTypeFactory.java.
+Any specified user types must be valid user types on the device (i.e. created in UserTypeFactory).
 
 The following three examples should cover most normal cases:
 
@@ -63,16 +74,24 @@ Some system packages truly are required to be on all users, regardless of type, 
        <install-in user-type="PROFILE">
    </install-in-user-type>
 
-More fine-grained options are also available (see below). Additionally, packages can blacklist
-user types. Blacklists override any whitelisting (in any file).
+More fine-grained options are also available by specifying individual user types.
+E.g.
+   <install-in-user-type package="com.android.example">
+       <install-in user-type="android.os.usertype.profile.MANAGED">
+       <install-in user-type="android.os.usertype.full.GUEST">
+       <install-in user-type="SYSTEM">
+   </install-in-user-type>
+which installs this package on any user whose user type is a managed profile or a guest, or is of
+a SYSTEM base type.
+
+Additionally, packages can blacklist user types. Blacklists override any whitelisting (in any file).
 E.g.
      <install-in-user-type package="com.android.example">
         <install-in user-type="FULL" />
-        <do-not-install-in user-type="GUEST" />
+        <do-not-install-in user-type="android.os.usertype.full.GUEST" />
     </install-in-user-type>
-
-If a user is of type FULL and GUEST, this package will NOT be installed, because the
-'do-not-install-in' takes precedence over 'install-in'.
+If a user is of type android.os.usertype.full.GUEST (which itself is a subtype of FULL), this
+package will NOT be installed, because the 'do-not-install-in' takes precedence over 'install-in'.
 
 The way that a device treats system packages that do not have any entry (for any user type) at all
 is determined by the config resource value config_userTypePackageWhitelistMode.
