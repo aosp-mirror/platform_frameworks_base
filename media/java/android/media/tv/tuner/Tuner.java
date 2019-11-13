@@ -35,6 +35,7 @@ public final class Tuner implements AutoCloseable  {
     private static final int MSG_ON_FRONTEND_EVENT = 1;
     private static final int MSG_ON_FILTER_EVENT = 2;
     private static final int MSG_ON_FILTER_STATUS = 3;
+    private static final int MSG_ON_LNB_EVENT = 4;
 
     static {
         System.loadLibrary("media_tv_tuner");
@@ -44,6 +45,9 @@ public final class Tuner implements AutoCloseable  {
     private List<Integer> mFrontendIds;
     private Frontend mFrontend;
     private EventHandler mHandler;
+
+    private List<Integer> mLnbIds;
+    private Lnb mLnb;
 
     public Tuner() {
         nativeSetup();
@@ -76,6 +80,8 @@ public final class Tuner implements AutoCloseable  {
 
     private native Filter nativeOpenFilter(int type, int subType, int bufferSize);
 
+    private native List<Integer> nativeGetLnbIds();
+    private native Lnb nativeOpenLnbById(int id);
 
     /**
      * Frontend Callback.
@@ -86,6 +92,16 @@ public final class Tuner implements AutoCloseable  {
          * Invoked when there is a frontend event.
          */
         void onEvent(int frontendEventType);
+    }
+
+    /**
+     * LNB Callback.
+     */
+    public interface LnbCallback {
+        /**
+         * Invoked when there is a LNB event.
+         */
+        void onEvent(int lnbEventType);
     }
 
     /**
@@ -128,6 +144,11 @@ public final class Tuner implements AutoCloseable  {
                         filter.mCallback.onFilterStatus(msg.arg1);
                     }
                     break;
+                }
+                case MSG_ON_LNB_EVENT: {
+                    if (mLnb != null && mLnb.mCallback != null) {
+                        mLnb.mCallback.onEvent(msg.arg1);
+                    }
                 }
                 default:
                     // fall through
@@ -214,5 +235,46 @@ public final class Tuner implements AutoCloseable  {
             }
         }
         return filter;
+    }
+
+    protected class Lnb {
+        private int mId;
+        private LnbCallback mCallback;
+
+        private Lnb(int id) {
+            mId = id;
+        }
+
+        public void setCallback(@Nullable LnbCallback callback) {
+            mCallback = callback;
+            if (mCallback == null) {
+                return;
+            }
+            if (mHandler == null) {
+                mHandler = createEventHandler();
+            }
+        }
+    }
+
+    private List<Integer> getLnbIds() {
+        mLnbIds = nativeGetLnbIds();
+        return mLnbIds;
+    }
+
+    private Lnb openLnbById(int id) {
+        if (mLnbIds == null) {
+            mLnbIds = getLnbIds();
+        }
+        if (!mLnbIds.contains(id)) {
+            return null;
+        }
+        mLnb = nativeOpenLnbById(id);
+        return mLnb;
+    }
+
+    private void onLnbEvent(int eventType) {
+        if (mHandler != null) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_ON_LNB_EVENT, eventType, 0));
+        }
     }
 }
