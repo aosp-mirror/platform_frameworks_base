@@ -1556,16 +1556,16 @@ public class IpSecService extends IIpSecService.Stub {
         }
 
         Objects.requireNonNull(callingPackage, "Null calling package cannot create IpSec tunnels");
-        switch (getAppOpsManager().noteOp(TUNNEL_OP, Binder.getCallingUid(), callingPackage)) {
-            case AppOpsManager.MODE_DEFAULT:
-                mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.MANAGE_IPSEC_TUNNELS, "IpSecService");
-                break;
-            case AppOpsManager.MODE_ALLOWED:
-                return;
-            default:
-                throw new SecurityException("Request to ignore AppOps for non-legacy API");
+
+        // OP_MANAGE_IPSEC_TUNNELS will return MODE_ERRORED by default, including for the system
+        // server. If the appop is not granted, require that the caller has the MANAGE_IPSEC_TUNNELS
+        // permission or is the System Server.
+        if (AppOpsManager.MODE_ALLOWED == getAppOpsManager().noteOpNoThrow(
+                TUNNEL_OP, Binder.getCallingUid(), callingPackage)) {
+            return;
         }
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_IPSEC_TUNNELS, "IpSecService");
     }
 
     private void createOrUpdateTransform(
