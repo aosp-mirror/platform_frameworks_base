@@ -282,6 +282,7 @@ package android {
     field public static final int config_helpIntentNameKey = 17039390; // 0x104001e
     field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
+    field public static final int config_systemGallery = 17039402; // 0x104002a
   }
 
   public static final class R.style {

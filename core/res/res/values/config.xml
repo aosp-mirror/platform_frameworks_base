@@ -1895,6 +1895,8 @@
     <string name="config_defaultCallRedirection" translatable="false"></string>
     <!-- The name of the package that will hold the call screening role by default. -->
     <string name="config_defaultCallScreening" translatable="false"></string>
+    <!-- The name of the package that will hold the system gallery role. -->
+    <string name="config_systemGallery" translatable="false">com.android.gallery</string>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
