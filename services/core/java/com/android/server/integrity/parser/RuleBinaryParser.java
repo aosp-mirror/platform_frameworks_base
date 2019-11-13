@@ -25,13 +25,13 @@ import java.util.List;
 public class RuleBinaryParser implements RuleParser {
 
     @Override
-    public List<Rule> parse(byte[] ruleBytes) {
+    public List<Rule> parse(byte[] ruleBytes)  throws RuleParseException {
         // TODO: Implement binary text parser.
         return null;
     }
 
     @Override
-    public List<Rule> parse(InputStream inputStream) {
+    public List<Rule> parse(InputStream inputStream) throws RuleParseException {
         // TODO: Implement stream parser.
         return null;
     }

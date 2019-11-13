@@ -91,7 +91,7 @@ public class RuleXmlSerializerTest {
     }
 
     @Test
-    public void testXmlStream_serializeValidOpenFormula() throws Exception {
+    public void testXmlStream_serializeValidCompoundFormula() throws Exception {
         Rule rule =
                 new Rule(
                         new CompoundFormula(
@@ -134,7 +134,7 @@ public class RuleXmlSerializerTest {
     }
 
     @Test
-    public void testXmlString_serializeValidOpenFormula_notConnector() throws Exception {
+    public void testXmlString_serializeValidCompoundFormula_notConnector() throws Exception {
         Rule rule =
                 new Rule(
                         new CompoundFormula(
@@ -174,7 +174,7 @@ public class RuleXmlSerializerTest {
     }
 
     @Test
-    public void testXmlString_serializeValidOpenFormula_andConnector() throws Exception {
+    public void testXmlString_serializeValidCompoundFormula_andConnector() throws Exception {
         Rule rule =
                 new Rule(
                         new CompoundFormula(
@@ -224,7 +224,7 @@ public class RuleXmlSerializerTest {
     }
 
     @Test
-    public void testXmlString_serializeValidOpenFormula_orConnector() throws Exception {
+    public void testXmlString_serializeValidCompoundFormula_orConnector() throws Exception {
         Rule rule =
                 new Rule(
                         new CompoundFormula(

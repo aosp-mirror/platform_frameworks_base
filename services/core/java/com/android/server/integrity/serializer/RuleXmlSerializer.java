@@ -39,7 +39,7 @@ public class RuleXmlSerializer implements RuleSerializer {
 
     private static final String RULE_LIST_TAG = "RL";
     private static final String RULE_TAG = "R";
-    private static final String OPEN_FORMULA_TAG = "OF";
+    private static final String COMPOUND_FORMULA_TAG = "OF";
     private static final String ATOMIC_FORMULA_TAG = "AF";
     private static final String EFFECT_ATTRIBUTE = "E";
     private static final String KEY_ATTRIBUTE = "K";
@@ -78,13 +78,13 @@ public class RuleXmlSerializer implements RuleSerializer {
     private void serializeRules(List<Rule> rules, XmlSerializer xmlSerializer) throws IOException {
         xmlSerializer.startTag(NAMESPACE, RULE_LIST_TAG);
         for (Rule rule : rules) {
-            serialize(rule, xmlSerializer);
+            serializeRule(rule, xmlSerializer);
         }
         xmlSerializer.endTag(NAMESPACE, RULE_LIST_TAG);
         xmlSerializer.endDocument();
     }
 
-    private void serialize(Rule rule, XmlSerializer xmlSerializer) throws IOException {
+    private void serializeRule(Rule rule, XmlSerializer xmlSerializer) throws IOException {
         if (rule == null) {
             return;
         }
@@ -98,25 +98,25 @@ public class RuleXmlSerializer implements RuleSerializer {
         if (formula instanceof AtomicFormula) {
             serializeAtomicFormula((AtomicFormula) formula, xmlSerializer);
         } else if (formula instanceof CompoundFormula) {
-            serializeOpenFormula((CompoundFormula) formula, xmlSerializer);
+            serializeCompoundFormula((CompoundFormula) formula, xmlSerializer);
         } else {
             throw new IllegalArgumentException(
                     String.format("Invalid formula type: %s", formula.getClass()));
         }
     }
 
-    private void serializeOpenFormula(CompoundFormula compoundFormula, XmlSerializer xmlSerializer)
-            throws IOException {
+    private void serializeCompoundFormula(
+            CompoundFormula compoundFormula, XmlSerializer xmlSerializer) throws IOException {
         if (compoundFormula == null) {
             return;
         }
-        xmlSerializer.startTag(NAMESPACE, OPEN_FORMULA_TAG);
+        xmlSerializer.startTag(NAMESPACE, COMPOUND_FORMULA_TAG);
         serializeAttributeValue(
                 CONNECTOR_ATTRIBUTE, String.valueOf(compoundFormula.getConnector()), xmlSerializer);
         for (Formula formula : compoundFormula.getFormulas()) {
             serializeFormula(formula, xmlSerializer);
         }
-        xmlSerializer.endTag(NAMESPACE, OPEN_FORMULA_TAG);
+        xmlSerializer.endTag(NAMESPACE, COMPOUND_FORMULA_TAG);
     }
 
     private void serializeAtomicFormula(AtomicFormula atomicFormula, XmlSerializer xmlSerializer)
