@@ -32,10 +32,12 @@ import com.android.systemui.car.CarServiceProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -49,6 +51,7 @@ public class HvacController {
     public static final String TAG = "HvacController";
 
     private final CarServiceProvider mCarServiceProvider;
+    private final Set<TemperatureView> mRegisteredViews = new HashSet<>();
 
     private CarHvacManager mHvacManager;
     private HashMap<HvacKey, List<TemperatureView>> mTempComponents = new HashMap<>();
@@ -112,7 +115,10 @@ public class HvacController {
     /**
      * Add component to list and initialize it if the connection is up.
      */
-    public void addHvacTextView(TemperatureView temperatureView) {
+    private void addHvacTextView(TemperatureView temperatureView) {
+        if (mRegisteredViews.contains(temperatureView)) {
+            return;
+        }
 
         HvacKey hvacKey = new HvacKey(temperatureView.getPropertyId(), temperatureView.getAreaId());
         if (!mTempComponents.containsKey(hvacKey)) {
@@ -120,6 +126,8 @@ public class HvacController {
         }
         mTempComponents.get(hvacKey).add(temperatureView);
         initComponent(temperatureView);
+
+        mRegisteredViews.add(temperatureView);
     }
 
     private void initComponents() {
@@ -165,6 +173,7 @@ public class HvacController {
      */
     public void removeAllComponents() {
         mTempComponents.clear();
+        mRegisteredViews.clear();
     }
 
     /**
