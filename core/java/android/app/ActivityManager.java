@@ -70,6 +70,7 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
+import android.view.IWindowContainer;
 
 import com.android.internal.app.LocalePicker;
 import com.android.internal.app.procstats.ProcessStats;
@@ -2526,6 +2527,7 @@ public class ActivityManager {
         // Index of the stack in the display's stack list, can be used for comparison of stack order
         @UnsupportedAppUsage
         public int position;
+        public IWindowContainer stackToken;
         /**
          * The full configuration the stack is currently running in.
          * @hide
@@ -2559,6 +2561,7 @@ public class ActivityManager {
             dest.writeInt(userId);
             dest.writeInt(visible ? 1 : 0);
             dest.writeInt(position);
+            dest.writeStrongInterface(stackToken);
             if (topActivity != null) {
                 dest.writeInt(1);
                 topActivity.writeToParcel(dest, 0);
@@ -2590,6 +2593,7 @@ public class ActivityManager {
             userId = source.readInt();
             visible = source.readInt() > 0;
             position = source.readInt();
+            stackToken = IWindowContainer.Stub.asInterface(source.readStrongBinder());
             if (source.readInt() > 0) {
                 topActivity = ComponentName.readFromParcel(source);
             }

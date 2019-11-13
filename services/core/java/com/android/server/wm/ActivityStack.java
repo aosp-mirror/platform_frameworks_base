@@ -480,6 +480,7 @@ class ActivityStack extends TaskStack {
         mRootActivityContainer = mService.mRootActivityContainer;
         mHandler = new ActivityStackHandler(supervisor.mLooper);
         mWindowManager = mService.mWindowManager;
+        mRemoteToken = new RemoteToken(this);
         mCurrentUser = mService.mAmInternal.getCurrentUserId();
         // Set display id before setting activity and window type to make sure it won't affect
         // stacks on a wrong display.

@@ -1250,6 +1250,7 @@ class RootActivityContainer extends ConfigurationContainer
         stack.getBounds(info.bounds);
         info.displayId = displayId;
         info.stackId = stack.mStackId;
+        info.stackToken = stack.mRemoteToken;
         info.userId = stack.mCurrentUser;
         info.visible = stack.shouldBeVisible(null);
         // A stack might be not attached to a display.
