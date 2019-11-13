@@ -39,11 +39,11 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
+import android.telephony.PackageChangeReceiver;
 import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
@@ -782,7 +782,7 @@ public final class SmsApplication {
      * Tracks package changes and ensures that the default SMS app is always configured to be the
      * preferred activity for SENDTO sms/mms intents.
      */
-    private static final class SmsPackageMonitor extends PackageMonitor {
+    private static final class SmsPackageMonitor extends PackageChangeReceiver {
         final Context mContext;
 
         public SmsPackageMonitor(Context context) {
@@ -791,12 +791,12 @@ public final class SmsApplication {
         }
 
         @Override
-        public void onPackageDisappeared(String packageName, int reason) {
+        public void onPackageDisappeared() {
             onPackageChanged();
         }
 
         @Override
-        public void onPackageAppeared(String packageName, int reason) {
+        public void onPackageAppeared() {
             onPackageChanged();
         }
 
@@ -829,7 +829,7 @@ public final class SmsApplication {
 
     public static void initSmsPackageMonitor(Context context) {
         sSmsPackageMonitor = new SmsPackageMonitor(context);
-        sSmsPackageMonitor.register(context, context.getMainLooper(), UserHandle.ALL, false);
+        sSmsPackageMonitor.register(context, context.getMainLooper(), UserHandle.ALL);
     }
 
     @UnsupportedAppUsage
