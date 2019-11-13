@@ -4,6 +4,7 @@ java_library_static {
 
     libs: [
         "services.core",
+        "app-compat-annotations",
     ],
 
     plugins: [
