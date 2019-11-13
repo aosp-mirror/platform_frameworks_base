@@ -274,7 +274,7 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mId);
         dest.writeString(mProviderId);
         dest.writeString(mName);
