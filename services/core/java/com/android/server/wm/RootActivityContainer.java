@@ -62,8 +62,8 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
-import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
-import static com.android.server.wm.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
+import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
+import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -858,7 +858,7 @@ class RootActivityContainer extends ConfigurationContainer
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 stack.switchUser(userId);
-                TaskRecord task = stack.topTask();
+                Task task = stack.topTask();
                 if (task != null) {
                     stack.positionChildAtTop(task);
                 }
@@ -966,7 +966,7 @@ class RootActivityContainer extends ConfigurationContainer
         final ActivityDisplay display = r.getActivityStack().getDisplay();
 
         try {
-            final TaskRecord task = r.getTaskRecord();
+            final Task task = r.getTask();
 
             final ActivityStack pinnedStack = display.getPinnedStack();
             // This will change the pinned stack's windowing mode to its original mode, ensuring
@@ -995,7 +995,7 @@ class RootActivityContainer extends ConfigurationContainer
                 // activity into that task, and then reparent the whole task to the new stack. This
                 // ensures that all the necessary work to migrate states in the old and new stacks
                 // is also done.
-                final TaskRecord newTask = task.getStack().createTaskRecord(
+                final Task newTask = task.getStack().createTask(
                         mStackSupervisor.getNextTaskIdForUserLocked(r.mUserId), r.info,
                         r.intent, null, null, true);
                 r.reparent(newTask, MAX_VALUE, "moveActivityToStack");
@@ -1090,7 +1090,7 @@ class RootActivityContainer extends ConfigurationContainer
      * @return The task id that was finished in this stack, or INVALID_TASK_ID if none was finished.
      */
     int finishTopCrashedActivities(WindowProcessController app, String reason) {
-        TaskRecord finishedTask = null;
+        Task finishedTask = null;
         ActivityStack focusedStack = getTopDisplayFocusedStack();
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
@@ -1098,7 +1098,7 @@ class RootActivityContainer extends ConfigurationContainer
             // so we need to be careful with indexes in the loop and check child count every time.
             for (int stackNdx = 0; stackNdx < display.getChildCount(); ++stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
-                final TaskRecord t = stack.finishTopCrashedActivityLocked(app, reason);
+                final Task t = stack.finishTopCrashedActivityLocked(app, reason);
                 if (stack == focusedStack || finishedTask == null) {
                     finishedTask = t;
                 }
@@ -1156,6 +1156,9 @@ class RootActivityContainer extends ConfigurationContainer
                 final ActivityStack focusedStack = display.getFocusedStack();
                 if (focusedStack != null) {
                     result |= focusedStack.resumeTopActivityUncheckedLocked(target, targetOptions);
+                } else if (targetStack == null && !display.hasChild()) {
+                    result |= resumeHomeActivity(null /* prev */, "empty-display",
+                            display.mDisplayId);
                 }
             }
         }
@@ -1253,14 +1256,14 @@ class RootActivityContainer extends ConfigurationContainer
         info.position = display != null ? display.getIndexOf(stack) : 0;
         info.configuration.setTo(stack.getConfiguration());
 
-        ArrayList<TaskRecord> tasks = stack.getAllTasks();
+        ArrayList<Task> tasks = stack.getAllTasks();
         final int numTasks = tasks.size();
         int[] taskIds = new int[numTasks];
         String[] taskNames = new String[numTasks];
         Rect[] taskBounds = new Rect[numTasks];
         int[] taskUserIds = new int[numTasks];
         for (int i = 0; i < numTasks; ++i) {
-            final TaskRecord task = tasks.get(i);
+            final Task task = tasks.get(i);
             taskIds[i] = task.mTaskId;
             taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
                     : task.realActivity != null ? task.realActivity.flattenToString()
@@ -1547,7 +1550,7 @@ class RootActivityContainer extends ConfigurationContainer
 
     void releaseSomeActivitiesLocked(WindowProcessController app, String reason) {
         // Tasks is non-null only if two or more tasks are found.
-        ArraySet<TaskRecord> tasks = app.getReleaseSomeActivitiesTasks();
+        ArraySet<Task> tasks = app.getReleaseSomeActivitiesTasks();
         if (tasks == null) {
             if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Didn't find two or more tasks to release");
             return;
@@ -1630,7 +1633,7 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     ActivityStack getLaunchStack(@Nullable ActivityRecord r,
-            @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop) {
+            @Nullable ActivityOptions options, @Nullable Task candidateTask, boolean onTop) {
         return getLaunchStack(r, options, candidateTask, onTop, null /* launchParams */,
                 -1 /* no realCallingPid */, -1 /* no realCallingUid */);
     }
@@ -1648,7 +1651,7 @@ class RootActivityContainer extends ConfigurationContainer
      * @return The stack to use for the launch or INVALID_STACK_ID.
      */
     ActivityStack getLaunchStack(@Nullable ActivityRecord r,
-            @Nullable ActivityOptions options, @Nullable TaskRecord candidateTask, boolean onTop,
+            @Nullable ActivityOptions options, @Nullable Task candidateTask, boolean onTop,
             @Nullable LaunchParamsController.LaunchParams launchParams, int realCallingPid,
             int realCallingUid) {
         int taskId = INVALID_TASK_ID;
@@ -1666,7 +1669,7 @@ class RootActivityContainer extends ConfigurationContainer
         if (taskId != INVALID_TASK_ID) {
             // Temporarily set the task id to invalid in case in re-entry.
             options.setLaunchTaskId(INVALID_TASK_ID);
-            final TaskRecord task = anyTaskForId(taskId,
+            final Task task = anyTaskForId(taskId,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, options, onTop);
             options.setLaunchTaskId(taskId);
             if (task != null) {
@@ -1765,7 +1768,7 @@ class RootActivityContainer extends ConfigurationContainer
      * @return Existing stack if there is a valid one, new dynamic stack if it is valid or null.
      */
     private ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
-            @Nullable TaskRecord candidateTask, @Nullable ActivityOptions options,
+            @Nullable Task candidateTask, @Nullable ActivityOptions options,
             @Nullable LaunchParamsController.LaunchParams launchParams) {
         final ActivityDisplay activityDisplay = getActivityDisplayOrCreate(displayId);
         if (activityDisplay == null) {
@@ -1780,8 +1783,7 @@ class RootActivityContainer extends ConfigurationContainer
         // If {@code r} is already in target display and its task is the same as the candidate task,
         // the intention should be getting a launch stack for the reusable activity, so we can use
         // the existing stack.
-        if (candidateTask != null
-                && (r.getTaskRecord() == null || r.getTaskRecord() == candidateTask)) {
+        if (candidateTask != null && (r.getTask() == null || r.getTask() == candidateTask)) {
             final int attachedDisplayId = r.getDisplayId();
             if (attachedDisplayId == INVALID_DISPLAY || attachedDisplayId == displayId) {
                 return candidateTask.getStack();
@@ -1846,7 +1848,7 @@ class RootActivityContainer extends ConfigurationContainer
     }
 
     int resolveActivityType(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
-            @Nullable TaskRecord task) {
+            @Nullable Task task) {
         // Preference is given to the activity type for the activity then the task since the type
         // once set shouldn't change.
         int activityType = r != null ? r.getActivityType() : ACTIVITY_TYPE_UNDEFINED;
@@ -2103,9 +2105,9 @@ class RootActivityContainer extends ConfigurationContainer
                 final ActivityDisplay display = mActivityDisplays.get(displayNdx);
                 for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                     final ActivityStack stack = display.getChildAt(stackNdx);
-                    final List<TaskRecord> tasks = stack.getAllTasks();
+                    final List<Task> tasks = stack.getAllTasks();
                     for (int taskNdx = tasks.size() - 1; taskNdx >= 0; taskNdx--) {
-                        final TaskRecord task = tasks.get(taskNdx);
+                        final Task task = tasks.get(taskNdx);
 
                         // Check the task for a top activity belonging to userId, or returning a
                         // result to an activity belonging to userId. Example case: a document
@@ -2133,7 +2135,7 @@ class RootActivityContainer extends ConfigurationContainer
      *
      * @return {@code true} if the top activity looks like it belongs to {@param userId}.
      */
-    private boolean taskTopActivityIsUser(TaskRecord task, @UserIdInt int userId) {
+    private boolean taskTopActivityIsUser(Task task, @UserIdInt int userId) {
         // To handle the case that work app is in the task but just is not the top one.
         final ActivityRecord activityRecord = task.getTopActivity();
         final ActivityRecord resultTo = (activityRecord != null ? activityRecord.resultTo : null);
@@ -2152,22 +2154,22 @@ class RootActivityContainer extends ConfigurationContainer
         }
     }
 
-    TaskRecord anyTaskForId(int id) {
+    Task anyTaskForId(int id) {
         return anyTaskForId(id, MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE);
     }
 
-    TaskRecord anyTaskForId(int id, @AnyTaskForIdMatchTaskMode int matchMode) {
+    Task anyTaskForId(int id, @AnyTaskForIdMatchTaskMode int matchMode) {
         return anyTaskForId(id, matchMode, null, !ON_TOP);
     }
 
     /**
-     * Returns a {@link TaskRecord} for the input id if available. {@code null} otherwise.
+     * Returns a {@link Task} for the input id if available. {@code null} otherwise.
      * @param id Id of the task we would like returned.
      * @param matchMode The mode to match the given task id in.
      * @param aOptions The activity options to use for restoration. Can be null.
      * @param onTop If the stack for the task should be the topmost on the display.
      */
-    TaskRecord anyTaskForId(int id, @AnyTaskForIdMatchTaskMode int matchMode,
+    Task anyTaskForId(int id, @AnyTaskForIdMatchTaskMode int matchMode,
             @Nullable ActivityOptions aOptions, boolean onTop) {
         // If options are set, ensure that we are attempting to actually restore a task
         if (matchMode != MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE && aOptions != null) {
@@ -2180,7 +2182,7 @@ class RootActivityContainer extends ConfigurationContainer
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
-                final TaskRecord task = stack.taskForIdLocked(id);
+                final Task task = stack.taskForIdLocked(id);
                 if (task == null) {
                     continue;
                 }
@@ -2208,7 +2210,7 @@ class RootActivityContainer extends ConfigurationContainer
         // Otherwise, check the recent tasks and return if we find it there and we are not restoring
         // the task from recents
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS, "Looking for task id=" + id + " in recents");
-        final TaskRecord task = mStackSupervisor.mRecentTasks.getTask(id);
+        final Task task = mStackSupervisor.mRecentTasks.getTask(id);
 
         if (task == null) {
             if (DEBUG_RECENTS) {

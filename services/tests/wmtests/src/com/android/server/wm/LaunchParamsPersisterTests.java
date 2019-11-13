@@ -81,9 +81,9 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     private File mFolder;
     private ActivityDisplay mTestDisplay;
     private String mDisplayUniqueId;
-    private TaskRecord mTestTask;
-    private TaskRecord mTaskWithDifferentUser;
-    private TaskRecord mTaskWithDifferentComponent;
+    private Task mTestTask;
+    private Task mTaskWithDifferentUser;
+    private Task mTaskWithDifferentComponent;
     private PackageManagerInternal mMockPmi;
     private PackageManagerInternal.PackageListObserver mObserver;
 
@@ -234,7 +234,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         ActivityStack stack = mTestDisplay.createStack(TEST_WINDOWING_MODE,
                 ACTIVITY_TYPE_STANDARD, /* onTop */ true);
-        final TaskRecord anotherTaskOfTheSameUser = new TaskBuilder(mSupervisor)
+        final Task anotherTaskOfTheSameUser = new TaskBuilder(mSupervisor)
                 .setComponent(ALTERNATIVE_COMPONENT)
                 .setUserId(TEST_USER_ID)
                 .setStack(stack)
@@ -246,7 +246,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
 
         stack = mTestDisplay.createStack(TEST_WINDOWING_MODE,
                 ACTIVITY_TYPE_STANDARD, /* onTop */ true);
-        final TaskRecord anotherTaskOfDifferentUser = new TaskBuilder(mSupervisor)
+        final Task anotherTaskOfDifferentUser = new TaskBuilder(mSupervisor)
                 .setComponent(TEST_COMPONENT)
                 .setUserId(ALTERNATIVE_USER_ID)
                 .setStack(stack)

@@ -18,6 +18,7 @@ package com.android.systemui.volume;
 
 import android.content.Context;
 
+import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.VolumeDialog;
 
@@ -30,13 +31,20 @@ import javax.inject.Singleton;
 @Singleton
 public class CarVolumeDialogComponent extends VolumeDialogComponent {
 
+    private CarVolumeDialogImpl mCarVolumeDialog;
+
     @Inject
     public CarVolumeDialogComponent(Context context, KeyguardViewMediator keyguardViewMediator,
-            VolumeDialogControllerImpl volumeDialogController) {
+            VolumeDialogControllerImpl volumeDialogController,
+            CarServiceProvider carServiceProvider) {
         super(context, keyguardViewMediator, volumeDialogController);
+        mCarVolumeDialog.setCarServiceProvider(carServiceProvider);
     }
 
+    /** This method is called while calling the super constructor. */
+    @Override
     protected VolumeDialog createDefault() {
-        return new CarVolumeDialogImpl(mContext);
+        mCarVolumeDialog = new CarVolumeDialogImpl(mContext);
+        return mCarVolumeDialog;
     }
 }

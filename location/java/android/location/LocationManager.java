@@ -435,7 +435,7 @@ public class LocationManager {
      * {@link SecurityException} if the location permissions were not sufficient to use the
      * specified provider.
      *
-     * @param provider the name of the provider
+     * @param provider a provider listed by {@link #getAllProviders()}
      * @return true if the provider exists and is enabled
      *
      * @throws IllegalArgumentException if provider is null
@@ -453,7 +453,7 @@ public class LocationManager {
      * {@link SecurityException} if the location permissions were not sufficient to use the
      * specified provider.
      *
-     * @param provider the name of the provider
+     * @param provider a provider listed by {@link #getAllProviders()}
      * @param userHandle the user to query
      * @return true if the provider exists and is enabled
      *
@@ -477,8 +477,8 @@ public class LocationManager {
      * functions as a best effort. It should not be relied on in any meaningful sense as providers
      * may no longer be enabled or disabled by clients.
      *
-     * @param provider the name of the provider
-     * @param enabled true to enable the provider. false to disable the provider
+     * @param provider a provider listed by {@link #getAllProviders()}
+     * @param enabled whether to enable or disable the provider
      * @param userHandle the user to set
      * @return true if the value was set, false otherwise
      *
@@ -534,7 +534,7 @@ public class LocationManager {
      * will always attempt to return a current location, but will potentially use additional power
      * in the course of the attempt as compared to this method.
      *
-     * @param provider the name of the provider
+     * @param provider a provider listed by {@link #getAllProviders()}
      * @return the last known location for the given provider, or null if not available
      * @throws SecurityException if no suitable permission is present
      * @throws IllegalArgumentException if provider is null or doesn't exist
@@ -587,7 +587,7 @@ public class LocationManager {
      * determine a valid location fix more often than while in the foreground. Background
      * applications may be throttled in their location accesses to some degree.
      *
-     * @param provider           the name of the provider with which to register
+     * @param provider           a provider listed by {@link #getAllProviders()}
      * @param cancellationSignal an optional signal that allows for cancelling this call
      * @param executor           the callback will take place on this {@link Executor}
      * @param consumer           the callback invoked with either a {@link Location} or null
@@ -667,7 +667,7 @@ public class LocationManager {
      * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener, Looper)} for
      * more detail on how to use this method.
      *
-     * @param provider the name of the provider with which to register
+     * @param provider a provider listed by {@link #getAllProviders()}
      * @param listener the listener to receive location updates
      * @param looper   the looper handling listener callbacks, or null to use the looper of the
      *                 calling thread
@@ -729,7 +729,7 @@ public class LocationManager {
      * <p>See {@link #requestLocationUpdates(long, float, Criteria, PendingIntent)} for more detail
      * on how to use this method.
      *
-     * @param provider      the name of the provider with which to register
+     * @param provider      a provider listed by {@link #getAllProviders()}
      * @param pendingIntent the pending intent to send location updates
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
@@ -829,10 +829,10 @@ public class LocationManager {
      *
      * <p>To unregister for location updates, use {@link #removeUpdates(LocationListener)}.
      *
-     * @param provider the name of the provider with which to register
-     * @param minTimeMs minimum time interval between location updates in milliseconds
+     * @param provider     a provider listed by {@link #getAllProviders()}
+     * @param minTimeMs    minimum time interval between location updates in milliseconds
      * @param minDistanceM minimum distance between location updates in meters
-     * @param listener the listener to receive location updates
+     * @param listener     the listener to receive location updates
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if listener is null
@@ -857,12 +857,12 @@ public class LocationManager {
      * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener)}
      * for more detail on how this method works.
      *
-     * @param provider the name of the provider with which to register
-     * @param minTimeMs minimum time interval between location updates in milliseconds
+     * @param provider     a provider listed by {@link #getAllProviders()}
+     * @param minTimeMs    minimum time interval between location updates in milliseconds
      * @param minDistanceM minimum distance between location updates in meters
-     * @param listener the listener to receive location updates
-     * @param looper the looper handling listener callbacks, or null to use the looper of the
-     *               calling thread
+     * @param listener     the listener to receive location updates
+     * @param looper       the looper handling listener callbacks, or null to use the looper of the
+     *                     calling thread
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if listener is null
@@ -886,11 +886,11 @@ public class LocationManager {
      * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener)}
      * for more detail on how this method works.
      *
-     * @param provider the name of the provider with which to register
-     * @param minTimeMs minimum time interval between location updates in milliseconds
+     * @param provider     a provider listed by {@link #getAllProviders()}
+     * @param minTimeMs    minimum time interval between location updates in milliseconds
      * @param minDistanceM minimum distance between location updates in meters
-     * @param executor the executor handling listener callbacks
-     * @param listener the listener to receive location updates
+     * @param executor     the executor handling listener callbacks
+     * @param listener     the listener to receive location updates
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
      * @throws IllegalArgumentException if executor is null
@@ -980,9 +980,9 @@ public class LocationManager {
      * <p>See {@link #requestLocationUpdates(String, long, float, LocationListener)}
      * for more detail on how this method works.
      *
-     * @param provider the name of the provider with which to register
-     * @param minTimeMs minimum time interval between location updates in milliseconds
-     * @param minDistanceM minimum distance between location updates in meters
+     * @param provider      a provider listed by {@link #getAllProviders()}
+     * @param minTimeMs     minimum time interval between location updates in milliseconds
+     * @param minDistanceM  minimum distance between location updates in meters
      * @param pendingIntent the pending intent to send location updates
      *
      * @throws IllegalArgumentException if provider is null or doesn't exist
@@ -1317,7 +1317,7 @@ public class LocationManager {
      * Returns the information about the location provider with the given name, or null if no
      * provider exists by that name.
      *
-     * @param provider the provider name
+     * @param provider a provider listed by {@link #getAllProviders()}
      * @return location provider information, or null if provider does not exist
      *
      * @throws IllegalArgumentException if provider is null
@@ -1374,7 +1374,7 @@ public class LocationManager {
      * Sends additional commands to a location provider. Can be used to support provider specific
      * extensions to the Location Manager API.
      *
-     * @param provider name of the location provider
+     * @param provider a provider listed by {@link #getAllProviders()}
      * @param command  name of the command to send to the provider
      * @param extras   optional arguments for the command, or null
      * @return true always, the return value may be ignored
@@ -1810,6 +1810,14 @@ public class LocationManager {
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public @Nullable GpsStatus getGpsStatus(@Nullable GpsStatus status) {
+        UnsupportedOperationException ex = new UnsupportedOperationException(
+                "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
+        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
+            throw ex;
+        } else {
+            Log.w(TAG, ex);
+        }
+
         if (status == null) {
             status = new GpsStatus();
         }
@@ -1837,8 +1845,8 @@ public class LocationManager {
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean addGpsStatusListener(GpsStatus.Listener listener) {
         UnsupportedOperationException ex = new UnsupportedOperationException(
-                "GpsStatus APIs not supported in R and above, use GnssStatus APIs instead");
-        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R) {
+                "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
+        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
             throw ex;
         } else {
             Log.w(TAG, ex);
@@ -1862,8 +1870,8 @@ public class LocationManager {
     @Deprecated
     public void removeGpsStatusListener(GpsStatus.Listener listener) {
         UnsupportedOperationException ex = new UnsupportedOperationException(
-                "GpsStatus APIs not supported in R and above, use GnssStatus APIs instead");
-        if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R) {
+                "GpsStatus APIs not supported in S and above, use GnssStatus APIs instead");
+        if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.R) {
             throw ex;
         } else {
             Log.w(TAG, ex);
@@ -1955,23 +1963,21 @@ public class LocationManager {
     /**
      * No-op method to keep backward-compatibility.
      *
-     * @deprecated use {@link #addNmeaListener(OnNmeaMessageListener)} instead.
-     * @removed
+     * @deprecated Use {@link #addNmeaListener} instead.
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
-    public boolean addNmeaListener(GpsStatus.NmeaListener listener) {
+    public boolean addNmeaListener(@NonNull GpsStatus.NmeaListener listener) {
         return false;
     }
 
     /**
      * No-op method to keep backward-compatibility.
      *
-     * @deprecated use {@link #removeNmeaListener(OnNmeaMessageListener)} instead.
-     * @removed
+     * @deprecated Use {@link #removeNmeaListener(OnNmeaMessageListener)} instead.
      */
     @Deprecated
-    public void removeNmeaListener(GpsStatus.NmeaListener listener) {}
+    public void removeNmeaListener(@NonNull GpsStatus.NmeaListener listener) {}
 
     /**
      * Adds an NMEA listener.

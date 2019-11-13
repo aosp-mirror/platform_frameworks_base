@@ -52,7 +52,6 @@ const int FIELD_ID_TRIGGER_DETAILS = 4;
 const int FIELD_ID_TRIGGER_DETAILS_TRIGGER_METRIC = 1;
 const int FIELD_ID_METRIC_VALUE_METRIC_ID = 1;
 const int FIELD_ID_METRIC_VALUE_DIMENSION_IN_WHAT = 2;
-const int FIELD_ID_METRIC_VALUE_DIMENSION_IN_CONDITION = 3;
 const int FIELD_ID_METRIC_VALUE_VALUE = 4;
 
 const int FIELD_ID_PACKAGE_INFO = 3;
@@ -84,10 +83,8 @@ void getProtoData(const int64_t& rule_id, int64_t metricId, const MetricDimensio
     writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), nullptr, &headerProto);
     headerProto.end(dimToken);
 
+    // deprecated field
     // optional DimensionsValue dimension_in_condition = 3;
-    dimToken = headerProto.start(FIELD_TYPE_MESSAGE | FIELD_ID_METRIC_VALUE_DIMENSION_IN_CONDITION);
-    writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(), nullptr, &headerProto);
-    headerProto.end(dimToken);
 
     // optional int64 value = 4;
     headerProto.write(FIELD_TYPE_INT64 | FIELD_ID_METRIC_VALUE_VALUE, (long long)metricValue);
@@ -101,13 +98,6 @@ void getProtoData(const int64_t& rule_id, int64_t metricId, const MetricDimensio
     for (const auto& dim : dimensionKey.getDimensionKeyInWhat().getValues()) {
         int uid = getUidIfExists(dim);
         // any uid <= 2000 are predefined AID_*
-        if (uid > 2000) {
-            uids.insert(uid);
-        }
-    }
-
-    for (const auto& dim : dimensionKey.getDimensionKeyInCondition().getValues()) {
-        int uid = getUidIfExists(dim);
         if (uid > 2000) {
             uids.insert(uid);
         }

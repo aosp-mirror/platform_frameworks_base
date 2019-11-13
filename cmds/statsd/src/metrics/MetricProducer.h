@@ -30,6 +30,7 @@
 #include "matchers/matcher_util.h"
 #include "packages/PackageInfoListener.h"
 #include "state/StateListener.h"
+#include "state/StateManager.h"
 
 namespace android {
 namespace os {
@@ -340,6 +341,12 @@ protected:
         return (endNs - mTimeBaseNs) / mBucketSizeNs - 1;
     }
 
+    // Query StateManager for original state value.
+    // If no state map exists for this atom, return the original value.
+    // Otherwise, return the group_id mapped to the atom and original value.
+    void getMappedStateValue(const int32_t atomId, const HashableDimensionKey& queryKey,
+                             FieldValue* value);
+
     const int64_t mMetricId;
 
     const ConfigKey mConfigKey;
@@ -392,14 +399,19 @@ protected:
     bool mIsActive;
 
     // The slice_by_state atom ids defined in statsd_config.
-    std::vector<int> mSlicedStateAtoms;
+    std::vector<int32_t> mSlicedStateAtoms;
 
     // Maps atom ids and state values to group_ids (<atom_id, <value, group_id>>).
-    std::unordered_map<int, std::unordered_map<int, int64_t>> mStateGroupMap;
+    std::unordered_map<int32_t, std::unordered_map<int, int64_t>> mStateGroupMap;
 
-    FRIEND_TEST(CountMetricE2eTest, TestWithSimpleState);
-    FRIEND_TEST(CountMetricE2eTest, TestWithMappedState);
-    FRIEND_TEST(CountMetricE2eTest, TestWithMultipleStates);
+    // MetricStateLinks defined in statsd_config that link fields in the state
+    // atom to fields in the "what" atom.
+    std::vector<Metric2State> mMetric2StateLinks;
+
+    FRIEND_TEST(CountMetricE2eTest, TestSlicedState);
+    FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithMap);
+    FRIEND_TEST(CountMetricE2eTest, TestMultipleSlicedStates);
+    FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields);
 
     FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
     FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);

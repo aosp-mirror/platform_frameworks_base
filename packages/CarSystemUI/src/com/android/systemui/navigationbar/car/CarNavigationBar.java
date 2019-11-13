@@ -37,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -54,10 +55,12 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final WindowManager mWindowManager;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final CommandQueue mCommandQueue;
-    private final Lazy<FacetButtonTaskStackListener> mFacetButtonTaskStackListener;
+    private final Lazy<FacetButtonTaskStackListener> mFacetButtonTaskStackListenerLazy;
     private final Handler mMainHandler;
-    private final Lazy<KeyguardStateController> mKeyguardStateController;
-    private final Lazy<NavigationBarController> mNavigationBarController;
+    private final Lazy<KeyguardStateController> mKeyguardStateControllerLazy;
+    private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
+    private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    private final Lazy<CarFacetButtonController> mCarFacetButtonControllerLazy;
 
     private IStatusBarService mBarService;
     private ActivityManagerWrapper mActivityManagerWrapper;
@@ -67,10 +70,12 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private boolean mBottomNavBarVisible;
 
     // Nav bar views.
-    private ViewGroup mNavigationBarWindow;
+    private ViewGroup mTopNavigationBarWindow;
+    private ViewGroup mBottomNavigationBarWindow;
     private ViewGroup mLeftNavigationBarWindow;
     private ViewGroup mRightNavigationBarWindow;
-    private CarNavigationBarView mNavigationBarView;
+    private CarNavigationBarView mTopNavigationBarView;
+    private CarNavigationBarView mBottomNavigationBarView;
     private CarNavigationBarView mLeftNavigationBarView;
     private CarNavigationBarView mRightNavigationBarView;
 
@@ -84,19 +89,23 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             WindowManager windowManager,
             DeviceProvisionedController deviceProvisionedController,
             CommandQueue commandQueue,
-            Lazy<FacetButtonTaskStackListener> facetButtonTaskStackListener,
+            Lazy<FacetButtonTaskStackListener> facetButtonTaskStackListenerLazy,
             @MainHandler Handler mainHandler,
-            Lazy<KeyguardStateController> keyguardStateController,
-            Lazy<NavigationBarController> navigationBarController) {
+            Lazy<KeyguardStateController> keyguardStateControllerLazy,
+            Lazy<NavigationBarController> navigationBarControllerLazy,
+            SuperStatusBarViewFactory superStatusBarViewFactory,
+            Lazy<CarFacetButtonController> carFacetButtonControllerLazy) {
         super(context);
         mCarNavigationBarController = carNavigationBarController;
         mWindowManager = windowManager;
         mDeviceProvisionedController = deviceProvisionedController;
         mCommandQueue = commandQueue;
-        mFacetButtonTaskStackListener = facetButtonTaskStackListener;
+        mFacetButtonTaskStackListenerLazy = facetButtonTaskStackListenerLazy;
         mMainHandler = mainHandler;
-        mKeyguardStateController = keyguardStateController;
-        mNavigationBarController = navigationBarController;
+        mKeyguardStateControllerLazy = keyguardStateControllerLazy;
+        mNavigationBarControllerLazy = navigationBarControllerLazy;
+        mSuperStatusBarViewFactory = superStatusBarViewFactory;
+        mCarFacetButtonControllerLazy = carFacetButtonControllerLazy;
     }
 
     @Override
@@ -137,7 +146,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         createNavigationBar(result);
 
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
-        mActivityManagerWrapper.registerTaskStackListener(mFacetButtonTaskStackListener.get());
+        mActivityManagerWrapper.registerTaskStackListener(mFacetButtonTaskStackListenerLazy.get());
 
         mCarNavigationBarController.connectToHvac();
     }
@@ -158,10 +167,16 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         // remove and reattach all hvac components such that we don't keep a reference to unused
         // ui elements
         mCarNavigationBarController.removeAllFromHvac();
+        mCarFacetButtonControllerLazy.get().removeAll();
 
-        if (mNavigationBarWindow != null) {
-            mNavigationBarWindow.removeAllViews();
-            mNavigationBarView = null;
+        if (mTopNavigationBarWindow != null) {
+            mTopNavigationBarWindow.removeAllViews();
+            mTopNavigationBarView = null;
+        }
+
+        if (mBottomNavigationBarWindow != null) {
+            mBottomNavigationBarWindow.removeAllViews();
+            mBottomNavigationBarView = null;
         }
 
         if (mLeftNavigationBarWindow != null) {
@@ -177,8 +192,8 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         buildNavBarContent();
         // If the UI was rebuilt (day/night change) while the keyguard was up we need to
         // correctly respect that state.
-        if (mKeyguardStateController.get().isShowing()) {
-            updateNavBarForKeyguardContent();
+        if (mKeyguardStateControllerLazy.get().isShowing()) {
+            mCarNavigationBarController.showAllKeyguardButtons(mDeviceIsSetUpForUser);
         }
     }
 
@@ -196,20 +211,28 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
 
         // There has been a car customized nav bar on the default display, so just create nav bars
         // on external displays.
-        mNavigationBarController.get().createNavigationBars(/* includeDefaultDisplay= */ false,
+        mNavigationBarControllerLazy.get().createNavigationBars(/* includeDefaultDisplay= */ false,
                 result);
     }
 
     private void buildNavBarWindows() {
-        mNavigationBarWindow = mCarNavigationBarController.getBottomWindow();
+        mTopNavigationBarWindow = mSuperStatusBarViewFactory
+                .getStatusBarWindowView()
+                .findViewById(R.id.car_top_navigation_bar_container);
+        mBottomNavigationBarWindow = mCarNavigationBarController.getBottomWindow();
         mLeftNavigationBarWindow = mCarNavigationBarController.getLeftWindow();
         mRightNavigationBarWindow = mCarNavigationBarController.getRightWindow();
     }
 
     private void buildNavBarContent() {
-        mNavigationBarView = mCarNavigationBarController.getBottomBar(mDeviceIsSetUpForUser);
-        if (mNavigationBarView != null) {
-            mNavigationBarWindow.addView(mNavigationBarView);
+        mTopNavigationBarView = mCarNavigationBarController.getTopBar(mDeviceIsSetUpForUser);
+        if (mTopNavigationBarView != null) {
+            mTopNavigationBarWindow.addView(mTopNavigationBarView);
+        }
+
+        mBottomNavigationBarView = mCarNavigationBarController.getBottomBar(mDeviceIsSetUpForUser);
+        if (mBottomNavigationBarView != null) {
+            mBottomNavigationBarWindow.addView(mBottomNavigationBarView);
         }
 
         mLeftNavigationBarView = mCarNavigationBarController.getLeftBar(mDeviceIsSetUpForUser);
@@ -224,7 +247,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     }
 
     private void attachNavBarWindows() {
-        if (mNavigationBarWindow != null && !mBottomNavBarVisible) {
+        if (mBottomNavigationBarWindow != null && !mBottomNavBarVisible) {
             mBottomNavBarVisible = true;
 
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -237,7 +260,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
                     PixelFormat.TRANSLUCENT);
             lp.setTitle("CarNavigationBar");
             lp.windowAnimations = 0;
-            mWindowManager.addView(mNavigationBarWindow, lp);
+            mWindowManager.addView(mBottomNavigationBarWindow, lp);
         }
 
         if (mLeftNavigationBarWindow != null) {
@@ -297,23 +320,11 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
                 isKeyboardVisible ? View.GONE : View.VISIBLE);
     }
 
-    private void updateNavBarForKeyguardContent() {
-        if (mNavigationBarView != null) {
-            mNavigationBarView.showKeyguardButtons();
-        }
-        if (mLeftNavigationBarView != null) {
-            mLeftNavigationBarView.showKeyguardButtons();
-        }
-        if (mRightNavigationBarView != null) {
-            mRightNavigationBarView.showKeyguardButtons();
-        }
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("  mTaskStackListener=");
-        pw.println(mFacetButtonTaskStackListener.get());
-        pw.print("  mNavigationBarView=");
-        pw.println(mNavigationBarView);
+        pw.println(mFacetButtonTaskStackListenerLazy.get());
+        pw.print("  mBottomNavigationBarView=");
+        pw.println(mBottomNavigationBarView);
     }
 }

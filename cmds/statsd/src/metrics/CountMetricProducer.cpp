@@ -57,10 +57,9 @@ const int FIELD_ID_IS_ACTIVE = 14;
 const int FIELD_ID_DATA = 1;
 // for CountMetricData
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
-const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
+const int FIELD_ID_SLICE_BY_STATE = 6;
 const int FIELD_ID_BUCKET_INFO = 3;
 const int FIELD_ID_DIMENSION_LEAF_IN_WHAT = 4;
-const int FIELD_ID_DIMENSION_LEAF_IN_CONDITION = 5;
 // for CountBucketInfo
 const int FIELD_ID_COUNT = 3;
 const int FIELD_ID_BUCKET_NUM = 4;
@@ -102,7 +101,13 @@ CountMetricProducer::CountMetricProducer(
         mConditionSliced = true;
     }
 
-    // TODO(tsaichristine): b/142124705 handle metric state links
+    for (const auto& stateLink : metric.state_link()) {
+        Metric2State ms;
+        ms.stateAtomId = stateLink.state_atom_id();
+        translateFieldMatcher(stateLink.fields_in_what(), &ms.metricFields);
+        translateFieldMatcher(stateLink.fields_in_state(), &ms.stateFields);
+        mMetric2StateLinks.push_back(ms);
+    }
 
     flushIfNeededLocked(startTimeNs);
     // Adjust start for partial bucket
@@ -132,10 +137,9 @@ void CountMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
             (unsigned long)mCurrentSlicedCounter->size());
     if (verbose) {
         for (const auto& it : *mCurrentSlicedCounter) {
-            fprintf(out, "\t(what)%s\t(condition)%s  %lld\n",
-                it.first.getDimensionKeyInWhat().toString().c_str(),
-                it.first.getDimensionKeyInCondition().toString().c_str(),
-                (unsigned long long)it.second);
+            fprintf(out, "\t(what)%s\t(state)%s  %lld\n",
+                    it.first.getDimensionKeyInWhat().toString().c_str(),
+                    it.first.getStateValuesKey().toString().c_str(), (unsigned long long)it.second);
         }
     }
 }
@@ -196,22 +200,16 @@ void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
             writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), str_set, protoOutput);
             protoOutput->end(dimensionToken);
-
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                uint64_t dimensionInConditionToken = protoOutput->start(
-                        FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
-                writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(),
-                                      str_set, protoOutput);
-                protoOutput->end(dimensionInConditionToken);
-            }
         } else {
             writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInWhat(),
                                            FIELD_ID_DIMENSION_LEAF_IN_WHAT, str_set, protoOutput);
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInCondition(),
-                                               FIELD_ID_DIMENSION_LEAF_IN_CONDITION,
-                                               str_set, protoOutput);
-            }
+        }
+        // Then fill slice_by_state.
+        for (auto state : dimensionKey.getStateValuesKey().getValues()) {
+            uint64_t stateToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                                     FIELD_ID_SLICE_BY_STATE);
+            writeStateToProto(state, protoOutput);
+            protoOutput->end(stateToken);
         }
         // Then fill bucket_info (CountBucketInfo).
         for (const auto& bucket : counter.second) {
@@ -282,7 +280,7 @@ void CountMetricProducer::onMatchedLogEventInternalLocked(
     int64_t eventTimeNs = event.GetElapsedTimestampNs();
     flushIfNeededLocked(eventTimeNs);
 
-    if (condition == false) {
+    if (!condition) {
         return;
     }
 

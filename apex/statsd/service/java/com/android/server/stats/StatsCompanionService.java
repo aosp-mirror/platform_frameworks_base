@@ -18,7 +18,6 @@ package com.android.server.stats;
 import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
-import static android.os.Process.getPidsForCommands;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
@@ -27,6 +26,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
+import static com.android.server.stats.ProcfsMemoryUtil.forEachPid;
 import static com.android.server.stats.ProcfsMemoryUtil.readCmdlineFromProcfs;
 import static com.android.server.stats.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
@@ -144,6 +144,8 @@ import com.android.server.stats.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
+import com.google.android.collect.Sets;
+
 import libcore.io.IoUtils;
 
 import org.json.JSONArray;
@@ -163,6 +165,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -216,7 +219,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
      * <p>Processes are matched by their cmdline in procfs. Example: cat /proc/pid/cmdline returns
      * /system/bin/statsd for the stats daemon.
      */
-    private static final String[] MEMORY_INTERESTING_NATIVE_PROCESSES = new String[]{
+    private static final Set<String> MEMORY_INTERESTING_NATIVE_PROCESSES = Sets.newHashSet(
             "/system/bin/statsd",  // Stats daemon.
             "/system/bin/surfaceflinger",
             "/system/bin/apexd",  // APEX daemon.
@@ -239,8 +242,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             "/system/bin/traced_probes",  // Perfetto.
             "webview_zygote",
             "zygote",
-            "zygote64",
-    };
+            "zygote64");
     /**
      * Lowest available uid for apps.
      *
@@ -1220,27 +1222,28 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeInt(snapshot.rssHighWaterMarkInKilobytes);
             pulledData.add(e);
         }
-        int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
-        for (int pid : pids) {
-            final String processName = readCmdlineFromProcfs(pid);
+        forEachPid((pid, cmdLine) -> {
+            if (!MEMORY_INTERESTING_NATIVE_PROCESSES.contains(cmdLine)) {
+                return;
+            }
             final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
             if (snapshot == null) {
-                continue;
+                return;
             }
             // Sometimes we get here a process that is not included in the whitelist. It comes
             // from forking the zygote for an app. We can ignore that sample because this process
             // is collected by ProcessMemoryState.
             if (isAppUid(snapshot.uid)) {
-                continue;
+                return;
             }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(snapshot.uid);
-            e.writeString(processName);
+            e.writeString(cmdLine);
             // RSS high-water mark in bytes.
             e.writeLong((long) snapshot.rssHighWaterMarkInKilobytes * 1024L);
             e.writeInt(snapshot.rssHighWaterMarkInKilobytes);
             pulledData.add(e);
-        }
+        });
         // Invoke rss_hwm_reset binary to reset RSS HWM counters for all processes.
         SystemProperties.set("sys.rss_hwm_reset.on", "1");
     }
@@ -1267,22 +1270,23 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes);
             pulledData.add(e);
         }
-        int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
-        for (int pid : pids) {
-            final String processName = readCmdlineFromProcfs(pid);
+        forEachPid((pid, cmdLine) -> {
+            if (!MEMORY_INTERESTING_NATIVE_PROCESSES.contains(cmdLine)) {
+                return;
+            }
             final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
             if (snapshot == null) {
-                continue;
+                return;
             }
             // Sometimes we get here a process that is not included in the whitelist. It comes
             // from forking the zygote for an app. We can ignore that sample because this process
             // is collected by ProcessMemoryState.
             if (isAppUid(snapshot.uid)) {
-                continue;
+                return;
             }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(snapshot.uid);
-            e.writeString(processName);
+            e.writeString(cmdLine);
             e.writeInt(pid);
             e.writeInt(-1001);  // Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.
             e.writeInt(snapshot.rssInKilobytes);
@@ -1290,7 +1294,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeInt(snapshot.swapInKilobytes);
             e.writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes);
             pulledData.add(e);
-        }
+        });
     }
 
     private static boolean isAppUid(int uid) {

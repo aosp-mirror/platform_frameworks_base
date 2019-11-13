@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.ACCESS_SURFACE_FLINGER;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
@@ -211,6 +212,8 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IDisplayFoldListener;
+import android.view.IDisplayWindowListener;
+import android.view.IDisplayWindowRotationController;
 import android.view.IDockedStackListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
@@ -260,6 +263,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
@@ -433,8 +437,10 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onVrStateChanged(boolean enabled) {
             synchronized (mGlobalLock) {
                 mVrModeEnabled = enabled;
-                mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
-                        DisplayPolicy::onVrStateChangedLw, PooledLambda.__(), enabled));
+                final PooledConsumer c = PooledLambda.obtainConsumer(
+                        DisplayPolicy::onVrStateChangedLw, PooledLambda.__(), enabled);
+                mRoot.forAllDisplayPolicies(c);
+                c.recycle();
             }
         }
     };
@@ -658,6 +664,12 @@ public class WindowManagerService extends IWindowManager.Stub
     final WallpaperVisibilityListeners mWallpaperVisibilityListeners =
             new WallpaperVisibilityListeners();
 
+    IDisplayWindowRotationController mDisplayRotationController = null;
+    private final DeathRecipient mDisplayRotationControllerDeath =
+            () -> mDisplayRotationController = null;
+
+    final DisplayWindowListenerController mDisplayNotificationController;
+
     boolean mDisplayFrozen = false;
     long mDisplayFreezeTime = 0;
     int mLastDisplayFreezeDuration = 0;
@@ -827,9 +839,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mPointerLocationEnabled = enablePointerLocation;
             synchronized (mGlobalLock) {
-                mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
+                final PooledConsumer c = PooledLambda.obtainConsumer(
                         DisplayPolicy::setPointerLocationEnabled, PooledLambda.__(),
-                        mPointerLocationEnabled));
+                        mPointerLocationEnabled);
+                mRoot.forAllDisplayPolicies(c);
+                c.recycle();
             }
         }
 
@@ -1180,6 +1194,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mScreenFrozenLock = mPowerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
+
+        mDisplayNotificationController = new DisplayWindowListenerController(this);
 
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -2797,8 +2813,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void onPowerKeyDown(boolean isScreenOn) {
-        mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
-                DisplayPolicy::onPowerKeyDown, PooledLambda.__(), isScreenOn));
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                DisplayPolicy::onPowerKeyDown, PooledLambda.__(), isScreenOn);
+        mRoot.forAllDisplayPolicies(c);
+        c.recycle();
     }
 
     @Override
@@ -3781,6 +3799,27 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void setDisplayWindowRotationController(IDisplayWindowRotationController controller) {
+        if (mContext.checkCallingOrSelfPermission(MANAGE_ACTIVITY_STACKS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
+        }
+        try {
+            synchronized (mGlobalLock) {
+                if (mDisplayRotationController != null) {
+                    mDisplayRotationController.asBinder().unlinkToDeath(
+                            mDisplayRotationControllerDeath, 0);
+                    mDisplayRotationController = null;
+                }
+                controller.asBinder().linkToDeath(mDisplayRotationControllerDeath, 0);
+                mDisplayRotationController = controller;
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException("Unable to set rotation controller");
+        }
+    }
+
+    @Override
     public int watchRotation(IRotationWatcher watcher, int displayId) {
         final DisplayContent displayContent;
         synchronized (mGlobalLock) {
@@ -3942,6 +3981,31 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    /** Registers a hierarchy listener that gets callbacks when the hierarchy changes. */
+    @Override
+    public void registerDisplayWindowListener(IDisplayWindowListener listener) {
+        if (mContext.checkCallingOrSelfPermission(MANAGE_ACTIVITY_STACKS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mDisplayNotificationController.registerListener(listener);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /** Unregister a hierarchy listener so that it stops receiving callbacks. */
+    @Override
+    public void unregisterDisplayWindowListener(IDisplayWindowListener listener) {
+        if (mContext.checkCallingOrSelfPermission(MANAGE_ACTIVITY_STACKS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + MANAGE_ACTIVITY_STACKS);
+        }
+        mDisplayNotificationController.unregisterListener(listener);
     }
 
     @Override
@@ -5623,8 +5687,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     + android.Manifest.permission.STATUS_BAR);
         }
         synchronized (mGlobalLock) {
-            mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
-                    DisplayPolicy::setForceShowSystemBars, PooledLambda.__(), show));
+            final PooledConsumer c = PooledLambda.obtainConsumer(
+                    DisplayPolicy::setForceShowSystemBars, PooledLambda.__(), show);
+            mRoot.forAllDisplayPolicies(c);
+            c.recycle();
         }
     }
 
@@ -7564,8 +7630,10 @@ public class WindowManagerService extends IWindowManager.Stub
     void onLockTaskStateChanged(int lockTaskState) {
         // TODO: pass in displayId to determine which display the lock task state changed
         synchronized (mGlobalLock) {
-            mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
-                    DisplayPolicy::onLockTaskStateChangedLw, PooledLambda.__(), lockTaskState));
+            final PooledConsumer c = PooledLambda.obtainConsumer(
+                    DisplayPolicy::onLockTaskStateChangedLw, PooledLambda.__(), lockTaskState);
+            mRoot.forAllDisplayPolicies(c);
+            c.recycle();
         }
     }
 

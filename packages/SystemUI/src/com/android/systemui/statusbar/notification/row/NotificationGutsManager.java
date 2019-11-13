@@ -319,7 +319,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 packageName,
                 row.getEntry().getChannel(),
                 row.getUniqueChannels(),
-                sbn,
+                row.getEntry(),
                 mCheckSaveListener,
                 onSettingsClick,
                 onAppSettingsClick,

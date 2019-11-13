@@ -1771,10 +1771,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ശരി"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"ബാറ്ററി ലെെഫ് വികസിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\':\n ഡാർക്ക് തീം ഓണാക്കും\nപശ്ചാത്തല പ്രവർത്തനം, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “ഹേയ് Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യും\n\n"<annotation id="url">"കൂടുതലറിയുക"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"ബാറ്ററി ലെെഫ് വികസിപ്പിക്കാൻ, \'ബാറ്ററി ലാഭിക്കൽ\':\n ഡാർക്ക് തീം ഓണാക്കും\nപശ്ചാത്തല പ്രവർത്തനം, ചില വിഷ്വൽ ഇഫക്റ്റുകൾ, “ഹേയ് Google” പോലുള്ള മറ്റ് ഫീച്ചറുകൾ എന്നിവ ഓഫാക്കുകയോ നിയന്ത്രിക്കുകയോ ചെയ്യും"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ഓണാക്കുക"</string>
@@ -2008,4 +2006,22 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"നേരിട്ടുള്ള പങ്കിടൽ ലഭ്യമല്ല"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"ആപ്പുകളുടെ ലിസ്‌റ്റ്"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"ഈ ആപ്പിന് റെക്കോർഡ് അനുമതി നൽകിയിട്ടില്ല, എന്നാൽ ഈ USB ഉപകരണത്തിലൂടെ ഓഡിയോ ക്യാപ്‌ചർ ചെയ്യാനാവും."</string>
+    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
+    <skip />
 </resources>

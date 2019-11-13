@@ -117,7 +117,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
         private ComponentName mComponent;
         private String mTargetActivity;
-        private TaskRecord mTaskRecord;
+        private Task mTask;
         private String mProcessName = "name";
         private int mUid = 12345;
         private boolean mCreateTask;
@@ -151,8 +151,8 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                     DEFAULT_COMPONENT_PACKAGE_NAME);
         }
 
-        ActivityBuilder setTask(TaskRecord task) {
-            mTaskRecord = task;
+        ActivityBuilder setTask(Task task) {
+            mTask = task;
             return this;
         }
 
@@ -229,7 +229,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             }
 
             if (mCreateTask) {
-                mTaskRecord = new TaskBuilder(mService.mStackSupervisor)
+                mTask = new TaskBuilder(mService.mStackSupervisor)
                         .setComponent(mComponent)
                         .setStack(mStack).build();
             }
@@ -265,13 +265,13 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                     false /* rootVoiceInteraction */, mService.mStackSupervisor, options,
                     null /* sourceRecord */);
             spyOn(activity);
-            if (mTaskRecord != null) {
+            if (mTask != null) {
                 // fullscreen value is normally read from resources in ctor, so for testing we need
                 // to set it somewhere else since we can't mock resources.
                 doReturn(true).when(activity).occludesParent();
-                mTaskRecord.addChild(activity);
+                mTask.addChild(activity);
                 // Make visible by default...
-                activity.setHidden(false);
+                activity.setVisible(true);
             }
 
             final WindowProcessController wpc = new WindowProcessController(mService,
@@ -354,7 +354,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        TaskRecord build() {
+        Task build() {
             if (mStack == null && mCreateStack) {
                 mStack = mSupervisor.mRootActivityContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
@@ -374,7 +374,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             intent.setComponent(mComponent);
             intent.setFlags(mFlags);
 
-            final TaskRecord task = new TaskRecord(mSupervisor.mService, mTaskId, aInfo,
+            final Task task = new Task(mSupervisor.mService, mTaskId, aInfo,
                     intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/,
                     null /*taskDescription*/, mStack);
             spyOn(task);

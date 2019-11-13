@@ -47,6 +47,9 @@ class MockUidMap : public UidMap {
 HashableDimensionKey getMockedDimensionKey(int tagId, int key, std::string value);
 MetricDimensionKey getMockedMetricDimensionKey(int tagId, int key, std::string value);
 
+HashableDimensionKey getMockedDimensionKeyLongValue(int tagId, int key, int64_t value);
+MetricDimensionKey getMockedStateDimensionKey(int tagId, int key, int64_t value);
+
 // Utils to build FieldMatcher proto for simple one-depth atoms.
 void buildSimpleAtomFieldMatcher(const int tagId, const int atomFieldNum, FieldMatcher* matcher);
 void buildSimpleAtomFieldMatcher(const int tagId, FieldMatcher* matcher);

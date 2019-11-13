@@ -1771,10 +1771,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ओके"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"बॅटरी सेव्‍हर हे बॅटरीचे आयुष्य वाढवते:\n·गडद थीम सुरू करते \n· बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि \"Ok Google\" यासारखी वैशिष्ट्ये बंद किंवा मर्यादित करते.\n\n"<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"बॅटरी सेव्‍हर हे बॅटरीचे आयुष्य वाढवते:\n·गडद थीम सुरू करते \n· बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि \"Ok Google\" यासारखी वैशिष्ट्ये बंद किंवा मर्यादित करते."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा सर्व्हर डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना पार्श्वभूमीमध्ये डेटा पाठवण्यास किंवा  मिळवण्यास प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेव्हर चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
@@ -2008,4 +2006,22 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"थेट शेअर करणे उपलब्ध नाही"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"अ‍ॅप्स सूची"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"या अ‍ॅपला रेकॉर्ड करण्याची परवानगी दिली गेली नाही पण हे USB डिव्हाइस वापरून ऑडिओ कॅप्चर केला जाऊ शकतो."</string>
+    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
+    <skip />
 </resources>

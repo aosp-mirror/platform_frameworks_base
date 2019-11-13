@@ -33,11 +33,11 @@ import java.util.TreeSet;
 class RunningTasks {
 
     // Comparator to sort by last active time (descending)
-    private static final Comparator<TaskRecord> LAST_ACTIVE_TIME_COMPARATOR =
+    private static final Comparator<Task> LAST_ACTIVE_TIME_COMPARATOR =
             (o1, o2) -> Long.signum(o2.lastActiveTime - o1.lastActiveTime);
 
-    private final TreeSet<TaskRecord> mTmpSortedSet = new TreeSet<>(LAST_ACTIVE_TIME_COMPARATOR);
-    private final ArrayList<TaskRecord> mTmpStackTasks = new ArrayList<>();
+    private final TreeSet<Task> mTmpSortedSet = new TreeSet<>(LAST_ACTIVE_TIME_COMPARATOR);
+    private final ArrayList<Task> mTmpStackTasks = new ArrayList<>();
 
     void getTasks(int maxNum, List<RunningTaskInfo> list, @ActivityType int ignoreActivityType,
             @WindowingMode int ignoreWindowingMode, ArrayList<ActivityDisplay> activityDisplays,
@@ -62,13 +62,13 @@ class RunningTasks {
         }
 
         // Take the first {@param maxNum} tasks and create running task infos for them
-        final Iterator<TaskRecord> iter = mTmpSortedSet.iterator();
+        final Iterator<Task> iter = mTmpSortedSet.iterator();
         while (iter.hasNext()) {
             if (maxNum == 0) {
                 break;
             }
 
-            final TaskRecord task = iter.next();
+            final Task task = iter.next();
             list.add(createRunningTaskInfo(task));
             maxNum--;
         }
@@ -77,7 +77,7 @@ class RunningTasks {
     /**
      * Constructs a {@link RunningTaskInfo} from a given {@param task}.
      */
-    private RunningTaskInfo createRunningTaskInfo(TaskRecord task) {
+    private RunningTaskInfo createRunningTaskInfo(Task task) {
         final RunningTaskInfo rti = new RunningTaskInfo();
         task.fillTaskInfo(rti);
         // Fill in some deprecated values

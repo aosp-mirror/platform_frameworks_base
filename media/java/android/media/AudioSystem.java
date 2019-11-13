@@ -132,7 +132,8 @@ public class AudioSystem
     public static final int MODE_RINGTONE           = 1;
     public static final int MODE_IN_CALL            = 2;
     public static final int MODE_IN_COMMUNICATION   = 3;
-    public static final int NUM_MODES               = 4;
+    public static final int MODE_CALL_SCREENING     = 4;
+    public static final int NUM_MODES               = 5;
 
     public static String modeToString(int mode) {
         switch (mode) {
@@ -142,6 +143,7 @@ public class AudioSystem
             case MODE_INVALID: return "MODE_INVALID";
             case MODE_NORMAL: return "MODE_NORMAL";
             case MODE_RINGTONE: return "MODE_RINGTONE";
+            case MODE_CALL_SCREENING: return "MODE_CALL_SCREENING";
             default: return "unknown mode (" + mode + ")";
         }
     }
@@ -1129,6 +1131,11 @@ public class AudioSystem
      * when generating audio HAL servers tombstones
      */
     public static native int setAudioHalPids(int[] pids);
+
+    /**
+     * @see AudioManager#isCallScreeningModeSupported()
+     */
+    public static native boolean isCallScreeningModeSupported();
 
     // Items shared with audio service
 

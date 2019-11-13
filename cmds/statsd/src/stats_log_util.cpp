@@ -53,6 +53,11 @@ const int DIMENSIONS_VALUE_VALUE_STR_HASH = 8;
 
 const int DIMENSIONS_VALUE_TUPLE_VALUE = 1;
 
+// for StateValue Proto
+const int STATE_VALUE_ATOM_ID = 1;
+const int STATE_VALUE_CONTENTS_GROUP_ID = 2;
+const int STATE_VALUE_CONTENTS_VALUE = 3;
+
 // for PulledAtomStats proto
 const int FIELD_ID_PULLED_ATOM_STATS = 10;
 const int FIELD_ID_PULL_ATOM_ID = 1;
@@ -414,6 +419,23 @@ void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& value
     size_t index = 0;
     writeFieldValueTreeToStreamHelper(tagId, values, &index, 0, 0, protoOutput);
     protoOutput->end(atomToken);
+}
+
+void writeStateToProto(const FieldValue& state, util::ProtoOutputStream* protoOutput) {
+    protoOutput->write(FIELD_TYPE_INT32 | STATE_VALUE_ATOM_ID, state.mField.getTag());
+
+    switch (state.mValue.getType()) {
+        case INT:
+            protoOutput->write(FIELD_TYPE_INT32 | STATE_VALUE_CONTENTS_VALUE,
+                               state.mValue.int_value);
+            break;
+        case LONG:
+            protoOutput->write(FIELD_TYPE_INT64 | STATE_VALUE_CONTENTS_GROUP_ID,
+                               state.mValue.long_value);
+            break;
+        default:
+            break;
+    }
 }
 
 int64_t TimeUnitToBucketSizeInMillisGuardrailed(int uid, TimeUnit unit) {

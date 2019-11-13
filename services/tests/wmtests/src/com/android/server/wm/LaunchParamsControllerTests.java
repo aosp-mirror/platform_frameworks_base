@@ -89,9 +89,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
         final ActivityOptions options = mock(ActivityOptions.class);
 
-        mController.calculate(record.getTaskRecord(), layout, record, source, options, PHASE_BOUNDS,
+        mController.calculate(record.getTask(), layout, record, source, options, PHASE_BOUNDS,
                 new LaunchParams());
-        verify(positioner, times(1)).onCalculate(eq(record.getTaskRecord()), eq(layout), eq(record),
+        verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
                 eq(source), eq(options), anyInt(), any(), any());
     }
 
@@ -114,7 +114,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         mPersister.putLaunchParams(userId, name, expected);
 
-        mController.calculate(activity.getTaskRecord(), null /*layout*/, activity, null /*source*/,
+        mController.calculate(activity.getTask(), null /*layout*/, activity, null /*source*/,
                 null /*options*/, PHASE_BOUNDS, new LaunchParams());
         verify(positioner, times(1)).onCalculate(any(), any(), any(), any(), any(), anyInt(),
                 eq(expected), any());
@@ -263,9 +263,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, 0, 0, 0);
         final ActivityOptions options = mock(ActivityOptions.class);
 
-        mController.calculate(record.getTaskRecord(), layout, record, source, options, PHASE_BOUNDS,
+        mController.calculate(record.getTask(), layout, record, source, options, PHASE_BOUNDS,
                 new LaunchParams());
-        verify(positioner, times(1)).onCalculate(eq(record.getTaskRecord()), eq(layout), eq(record),
+        verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
                 eq(source), eq(options), eq(PHASE_BOUNDS), any(), any());
     }
 
@@ -278,7 +278,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final LaunchParams params = new LaunchParams();
         params.mPreferredDisplayId = 2;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -298,7 +298,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         final int windowingMode = WINDOWING_MODE_FREEFORM;
         params.mWindowingMode = windowingMode;
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -323,7 +323,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         params.mWindowingMode = WINDOWING_MODE_FREEFORM;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -331,7 +331,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         mController.layoutTask(task, null /* windowLayout */);
 
-        // TaskRecord will make adjustments to requested bounds. We only need to guarantee that the
+        // Task will make adjustments to requested bounds. We only need to guarantee that the
         // reuqested bounds are expected.
         assertEquals(expected, task.getRequestedOverrideBounds());
     }
@@ -348,7 +348,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         params.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         params.mBounds.set(expected);
         final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+        final Task task = new TaskBuilder(mService.mStackSupervisor).build();
 
         mController.registerModifier(positioner);
 
@@ -371,7 +371,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         }
 
         @Override
-        public int onCalculate(TaskRecord task, WindowLayout layout, ActivityRecord activity,
+        public int onCalculate(Task task, WindowLayout layout, ActivityRecord activity,
                    ActivityRecord source, ActivityOptions options, int phase,
                    LaunchParams currentParams, LaunchParams outParams) {
             outParams.set(mParams);
@@ -421,7 +421,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         }
 
         @Override
-        void saveTask(TaskRecord task) {
+        void saveTask(Task task) {
             final int userId = task.mUserId;
             final ComponentName realActivity = task.realActivity;
             mTmpParams.mPreferredDisplayId = task.getStack().mDisplayId;
@@ -435,7 +435,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         }
 
         @Override
-        void getLaunchParams(TaskRecord task, ActivityRecord activity, LaunchParams params) {
+        void getLaunchParams(Task task, ActivityRecord activity, LaunchParams params) {
             final int userId = task != null ? task.mUserId : activity.mUserId;
             final ComponentName name = task != null
                     ? task.realActivity : activity.mActivityComponent;

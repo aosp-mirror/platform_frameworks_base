@@ -50,6 +50,12 @@ public:
     }
 };
 
+int getStateInt(StateManager& mgr, int atomId, const HashableDimensionKey& queryKey) {
+    FieldValue output;
+    mgr.getStateValue(atomId, queryKey, &output);
+    return output.mValue.int_value;
+}
+
 // START: build event functions.
 // State with no primary fields - ScreenStateChanged
 std::shared_ptr<LogEvent> buildScreenEvent(int state) {
@@ -240,7 +246,7 @@ TEST(StateTrackerTest, TestStateChangeNoPrimaryFields) {
 
     // check StateTracker was updated by querying for state
     HashableDimensionKey queryKey = DEFAULT_DIMENSION_KEY;
-    EXPECT_EQ(2, mgr.getStateValue(android::util::SCREEN_STATE_CHANGED, queryKey));
+    EXPECT_EQ(2, getStateInt(mgr, android::util::SCREEN_STATE_CHANGED, queryKey));
 }
 
 /**
@@ -265,7 +271,7 @@ TEST(StateTrackerTest, TestStateChangeOnePrimaryField) {
     // check StateTracker was updated by querying for state
     HashableDimensionKey queryKey;
     getUidProcessKey(1000 /* uid */, &queryKey);
-    EXPECT_EQ(1002, mgr.getStateValue(android::util::UID_PROCESS_STATE_CHANGED, queryKey));
+    EXPECT_EQ(1002, getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey));
 }
 
 /**
@@ -290,7 +296,7 @@ TEST(StateTrackerTest, TestStateChangeMultiplePrimaryFields) {
     // check StateTracker was updated by querying for state
     HashableDimensionKey queryKey;
     getOverlayKey(1000 /* uid */, "package1", &queryKey);
-    EXPECT_EQ(1, mgr.getStateValue(android::util::OVERLAY_STATE_CHANGED, queryKey));
+    EXPECT_EQ(1, getStateInt(mgr, android::util::OVERLAY_STATE_CHANGED, queryKey));
 }
 
 /**
@@ -353,25 +359,25 @@ TEST(StateTrackerTest, TestStateQuery) {
     // Query for UidProcessState of uid 1001
     HashableDimensionKey queryKey1;
     getUidProcessKey(1001, &queryKey1);
-    EXPECT_EQ(1003, mgr.getStateValue(android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
+    EXPECT_EQ(1003, getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
 
     // Query for UidProcessState of uid 1004 - not in state map
     HashableDimensionKey queryKey2;
     getUidProcessKey(1004, &queryKey2);
-    EXPECT_EQ(-1, mgr.getStateValue(android::util::UID_PROCESS_STATE_CHANGED,
-                                    queryKey2));  // default state
+    EXPECT_EQ(-1, getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED,
+                              queryKey2));  // default state
 
     // Query for UidProcessState of uid 1001 - after change in state
     mgr.onLogEvent(*event4);
-    EXPECT_EQ(1002, mgr.getStateValue(android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
+    EXPECT_EQ(1002, getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
 
     // Query for ScreenState
-    EXPECT_EQ(2, mgr.getStateValue(android::util::SCREEN_STATE_CHANGED, DEFAULT_DIMENSION_KEY));
+    EXPECT_EQ(2, getStateInt(mgr, android::util::SCREEN_STATE_CHANGED, DEFAULT_DIMENSION_KEY));
 
     // Query for OverlayState of uid 1000, package name "package2"
     HashableDimensionKey queryKey3;
     getOverlayKey(1000, "package2", &queryKey3);
-    EXPECT_EQ(2, mgr.getStateValue(android::util::OVERLAY_STATE_CHANGED, queryKey3));
+    EXPECT_EQ(2, getStateInt(mgr, android::util::OVERLAY_STATE_CHANGED, queryKey3));
 }
 
 }  // namespace statsd

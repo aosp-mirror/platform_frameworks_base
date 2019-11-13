@@ -97,7 +97,7 @@ class ActivityStartInterceptor {
     ResolveInfo mRInfo;
     ActivityInfo mAInfo;
     String mResolvedType;
-    TaskRecord mInTask;
+    Task mInTask;
     ActivityOptions mActivityOptions;
 
     ActivityStartInterceptor(
@@ -144,7 +144,7 @@ class ActivityStartInterceptor {
      * @return true if an interception occurred
      */
     boolean intercept(Intent intent, ResolveInfo rInfo, ActivityInfo aInfo, String resolvedType,
-            TaskRecord inTask, int callingPid, int callingUid, ActivityOptions activityOptions) {
+            Task inTask, int callingPid, int callingUid, ActivityOptions activityOptions) {
         mUserManager = UserManager.get(mServiceContext);
 
         mIntent = intent;

@@ -149,7 +149,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final ActivityRecord hiddenActivity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        hiddenActivity.setHidden(true);
+        hiddenActivity.setVisible(false);
         mDisplayContent.getConfiguration().windowConfiguration.setRotation(
                 mDisplayContent.getRotation());
         mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);

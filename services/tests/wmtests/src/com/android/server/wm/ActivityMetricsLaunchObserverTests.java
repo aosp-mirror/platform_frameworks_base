@@ -78,7 +78,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         // This seems to be the easiest way to create an ActivityRecord.
         mTrampolineActivity = new ActivityBuilder(mService).setCreateTask(true).build();
         mTopActivity = new ActivityBuilder(mService)
-                .setTask(mTrampolineActivity.getTaskRecord())
+                .setTask(mTrampolineActivity.getTask())
                 .build();
     }
 
@@ -160,7 +160,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     public void testOnActivityLaunchCancelled_hasDrawn() {
         onActivityLaunched();
 
-        mTopActivity.visible = mTopActivity.mDrawn = true;
+        mTopActivity.mVisibleRequested = mTopActivity.mDrawn = true;
 
         // Cannot time already-visible activities.
         mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT, mTopActivity);
@@ -171,13 +171,13 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
     @Test
     public void testOnActivityLaunchCancelled_finishedBeforeDrawn() {
-        mTopActivity.visible = mTopActivity.mDrawn = true;
+        mTopActivity.mVisibleRequested = mTopActivity.mDrawn = true;
 
         // Suppress resume when creating the record because we want to notify logger manually.
         mSupervisor.beginDeferResume();
         // Create an activity with different process that meets process switch.
         final ActivityRecord noDrawnActivity = new ActivityBuilder(mService)
-                .setTask(mTopActivity.getTaskRecord())
+                .setTask(mTopActivity.getTask())
                 .setProcessName("other")
                 .build();
         mSupervisor.readyToResume();

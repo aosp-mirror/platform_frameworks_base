@@ -20,7 +20,9 @@
 #include <nativehelper/JNIHelp.h>
 
 #include "android_media_MediaMetricsJNI.h"
+#include "android_os_Parcel.h"
 #include <media/MediaAnalyticsItem.h>
+#include <binder/Parcel.h>
 
 
 // This source file is compiled and linked into:
@@ -221,6 +223,73 @@ jobject MediaMetricsJNI::writeAttributesToBundle(JNIEnv* env, jobject mybundle, 
 
   badness:
     return NULL;
+}
+
+// Helper function to convert a native PersistableBundle to a Java
+// PersistableBundle.
+jobject MediaMetricsJNI::nativeToJavaPersistableBundle(JNIEnv *env,
+                                                       os::PersistableBundle* nativeBundle) {
+    if (env == NULL || nativeBundle == NULL) {
+        ALOGE("Unexpected NULL parmeter");
+        return NULL;
+    }
+
+    // Create a Java parcel with the native parcel data.
+    // Then create a new PersistableBundle with that parcel as a parameter.
+    jobject jParcel = android::createJavaParcelObject(env);
+    if (jParcel == NULL) {
+      ALOGE("Failed to create a Java Parcel.");
+      return NULL;
+    }
+
+    android::Parcel* nativeParcel = android::parcelForJavaObject(env, jParcel);
+    if (nativeParcel == NULL) {
+      ALOGE("Failed to get the native Parcel.");
+      return NULL;
+    }
+
+    android::status_t result = nativeBundle->writeToParcel(nativeParcel);
+    nativeParcel->setDataPosition(0);
+    if (result != android::OK) {
+      ALOGE("Failed to write nativeBundle to Parcel: %d.", result);
+      return NULL;
+    }
+
+#define STATIC_INIT_JNI(T, obj, method, globalref, ...) \
+    static T obj{};\
+    if (obj == NULL) { \
+        obj = method(__VA_ARGS__); \
+        if (obj == NULL) { \
+            ALOGE("%s can't find " #obj, __func__); \
+            return NULL; \
+        } else { \
+            obj = globalref; \
+        }\
+    } \
+
+    STATIC_INIT_JNI(jclass, clazzBundle, env->FindClass,
+            static_cast<jclass>(env->NewGlobalRef(clazzBundle)),
+            "android/os/PersistableBundle");
+    STATIC_INIT_JNI(jfieldID, bundleCreatorId, env->GetStaticFieldID,
+            bundleCreatorId,
+            clazzBundle, "CREATOR", "Landroid/os/Parcelable$Creator;");
+    STATIC_INIT_JNI(jobject, bundleCreator, env->GetStaticObjectField,
+            env->NewGlobalRef(bundleCreator),
+            clazzBundle, bundleCreatorId);
+    STATIC_INIT_JNI(jclass, clazzCreator, env->FindClass,
+            static_cast<jclass>(env->NewGlobalRef(clazzCreator)),
+            "android/os/Parcelable$Creator");
+    STATIC_INIT_JNI(jmethodID, createFromParcelId, env->GetMethodID,
+            createFromParcelId,
+            clazzCreator, "createFromParcel", "(Landroid/os/Parcel;)Ljava/lang/Object;");
+
+    jobject newBundle = env->CallObjectMethod(bundleCreator, createFromParcelId, jParcel);
+    if (newBundle == NULL) {
+        ALOGE("Failed to create a new PersistableBundle "
+              "from the createFromParcel call.");
+    }
+
+    return newBundle;
 }
 
 };  // namespace android

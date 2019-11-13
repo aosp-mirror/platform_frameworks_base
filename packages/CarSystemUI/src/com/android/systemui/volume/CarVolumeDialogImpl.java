@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.car.Car;
-import android.car.Car.CarServiceLifecycleListener;
 import android.car.media.CarAudioManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,6 +55,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.systemui.R;
+import com.android.systemui.car.CarServiceProvider;
 import com.android.systemui.plugins.VolumeDialog;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -95,7 +95,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private CustomDialog mDialog;
     private RecyclerView mListView;
     private CarVolumeItemAdapter mVolumeItemsAdapter;
-    private Car mCar;
     private CarAudioManager mCarAudioManager;
     private boolean mHovering;
     private int mCurrentlyDisplayingGroupId;
@@ -147,30 +146,28 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 }
             };
 
-    private final CarServiceLifecycleListener mCarServiceLifecycleListener = (car, ready) -> {
-        if (!ready) {
-            return;
-        }
-        mExpanded = false;
-        mCarAudioManager = (CarAudioManager) car.getCarManager(Car.AUDIO_SERVICE);
-        int volumeGroupCount = mCarAudioManager.getVolumeGroupCount();
-        // Populates volume slider items from volume groups to UI.
-        for (int groupId = 0; groupId < volumeGroupCount; groupId++) {
-            VolumeItem volumeItem = getVolumeItemForUsages(
-                    mCarAudioManager.getUsagesForVolumeGroupId(groupId));
-            mAvailableVolumeItems.add(volumeItem);
-            // The first one is the default item.
-            if (groupId == 0) {
-                clearAllAndSetupDefaultCarVolumeLineItem(0);
-            }
-        }
+    private final CarServiceProvider.CarServiceOnConnectedListener mCarServiceOnConnectedListener =
+            car -> {
+                mExpanded = false;
+                mCarAudioManager = (CarAudioManager) car.getCarManager(Car.AUDIO_SERVICE);
+                int volumeGroupCount = mCarAudioManager.getVolumeGroupCount();
+                // Populates volume slider items from volume groups to UI.
+                for (int groupId = 0; groupId < volumeGroupCount; groupId++) {
+                    VolumeItem volumeItem = getVolumeItemForUsages(
+                            mCarAudioManager.getUsagesForVolumeGroupId(groupId));
+                    mAvailableVolumeItems.add(volumeItem);
+                    // The first one is the default item.
+                    if (groupId == 0) {
+                        clearAllAndSetupDefaultCarVolumeLineItem(0);
+                    }
+                }
 
-        // If list is already initiated, update its content.
-        if (mVolumeItemsAdapter != null) {
-            mVolumeItemsAdapter.notifyDataSetChanged();
-        }
-        mCarAudioManager.registerCarVolumeCallback(mVolumeChangeCallback);
-    };
+                // If list is already initiated, update its content.
+                if (mVolumeItemsAdapter != null) {
+                    mVolumeItemsAdapter.notifyDataSetChanged();
+                }
+                mCarAudioManager.registerCarVolumeCallback(mVolumeChangeCallback);
+            };
 
     public CarVolumeDialogImpl(Context context) {
         mContext = context;
@@ -179,6 +176,11 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 R.integer.car_volume_dialog_display_normal_timeout);
         mHoveringTimeout = mContext.getResources().getInteger(
                 R.integer.car_volume_dialog_display_hovering_timeout);
+    }
+
+    /** Sets a {@link CarServiceProvider} which connects to the audio service. */
+    public void setCarServiceProvider(CarServiceProvider carServiceProvider) {
+        carServiceProvider.addListener(mCarServiceOnConnectedListener);
     }
 
     private static int getSeekbarValue(CarAudioManager carAudioManager, int volumeGroupId) {
@@ -196,8 +198,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     @Override
     public void init(int windowType, Callback callback) {
         initDialog();
-        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                mCarServiceLifecycleListener);
     }
 
     @Override
@@ -205,12 +205,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mHandler.removeCallbacksAndMessages(/* token= */ null);
 
         cleanupAudioManager();
-        // unregisterVolumeCallback is not being called when disconnect car, so we manually cleanup
-        // audio manager beforehand.
-        if (mCar != null) {
-            mCar.disconnect();
-            mCar = null;
-        }
     }
 
     private void initDialog() {

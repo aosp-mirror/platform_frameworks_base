@@ -1794,10 +1794,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizat de administratorul dvs."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Șters de administratorul dvs."</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Pentru a prelungi autonomia bateriei, Economisirea bateriei:\n·activează tema întunecată;\n·activează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții, cum ar fi „Ok Google”.\n\n"<annotation id="url">"Aflați mai multe"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Pentru a prelungi autonomia bateriei, Economisirea bateriei:\n·activează tema întunecată;\n·activează sau restricționează activitatea în fundal, unele efecte vizuale și alte funcții, cum ar fi „Ok Google”."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activați Economizorul de date?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activați"</string>
@@ -2042,4 +2040,22 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Trimiterea directă nu este disponibilă"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Lista de aplicații"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Permisiunea de înregistrare nu a fost acordată aplicației, dar aceasta poate să înregistreze conținut audio prin intermediul acestui dispozitiv USB."</string>
+    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
+    <skip />
 </resources>

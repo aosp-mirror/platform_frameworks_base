@@ -652,12 +652,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     + " config reported=" + w.isLastConfigReportedToClient());
             final ActivityRecord activity = w.mActivityRecord;
             if (gone) Slog.v(TAG, "  GONE: mViewVisibility=" + w.mViewVisibility
-                    + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.isHidden()
-                    + " hiddenRequested=" + (activity != null && activity.hiddenRequested)
+                    + " mRelayoutCalled=" + w.mRelayoutCalled + " visible=" + w.mToken.isVisible()
+                    + " visibleRequested=" + (activity != null && activity.mVisibleRequested)
                     + " parentHidden=" + w.isParentWindowHidden());
             else Slog.v(TAG, "  VIS: mViewVisibility=" + w.mViewVisibility
-                    + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.isHidden()
-                    + " hiddenRequested=" + (activity != null && activity.hiddenRequested)
+                    + " mRelayoutCalled=" + w.mRelayoutCalled + " visible=" + w.mToken.isVisible()
+                    + " visibleRequested=" + (activity != null && activity.mVisibleRequested)
                     + " parentHidden=" + w.isParentWindowHidden());
         }
 
@@ -1171,6 +1171,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     void sendNewConfiguration() {
         if (!isReady() || mActivityDisplay == null) {
+            return;
+        }
+        if (mDisplayRotation.isWaitingForRemoteRotation()) {
             return;
         }
         final boolean configUpdated = mActivityDisplay.updateDisplayOverrideConfigurationLocked();
@@ -2257,7 +2260,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     boolean pointWithinAppWindow(int x, int y) {
         final int[] targetWindowType = {-1};
-        final Consumer fn = PooledLambda.obtainConsumer((w, nonArg) -> {
+        final PooledConsumer fn = PooledLambda.obtainConsumer((w, nonArg) -> {
             if (targetWindowType[0] != -1) {
                 return;
             }
@@ -2268,7 +2271,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }, PooledLambda.__(WindowState.class), mTmpRect);
         forAllWindows(fn, true /* traverseTopToBottom */);
-        ((PooledConsumer) fn).recycle();
+        fn.recycle();
         return FIRST_APPLICATION_WINDOW <= targetWindowType[0]
                         && targetWindowType[0] <= LAST_APPLICATION_WINDOW;
     }
@@ -2391,6 +2394,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWindowingLayer.release();
             mOverlayLayer.release();
             mInputMonitor.onDisplayRemoved();
+            mWmService.mDisplayNotificationController.dispatchDisplayRemoved(mActivityDisplay);
         } finally {
             mDisplayReady = false;
             mRemovingDisplay = false;

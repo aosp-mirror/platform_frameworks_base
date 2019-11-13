@@ -118,7 +118,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         mPersisterQueue.addListener(this);
     }
 
-    private void removeThumbnails(TaskRecord task) {
+    private void removeThumbnails(Task task) {
         mPersisterQueue.removeItems(
                 item -> {
                     File file = new File(item.mFilePath);
@@ -185,7 +185,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         mTaskIdsInFile.delete(userId);
     }
 
-    void wakeup(TaskRecord task, boolean flush) {
+    void wakeup(Task task, boolean flush) {
         synchronized (mPersisterQueue) {
             if (task != null) {
                 final TaskWriteQueueItem item = mPersisterQueue.findLastItem(
@@ -256,12 +256,12 @@ public class TaskPersister implements PersisterQueue.Listener {
         }
     }
 
-    private TaskRecord taskIdToTask(int taskId, ArrayList<TaskRecord> tasks) {
+    private Task taskIdToTask(int taskId, ArrayList<Task> tasks) {
         if (taskId < 0) {
             return null;
         }
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final TaskRecord task = tasks.get(taskNdx);
+            final Task task = tasks.get(taskNdx);
             if (task.mTaskId == taskId) {
                 return task;
             }
@@ -270,8 +270,8 @@ public class TaskPersister implements PersisterQueue.Listener {
         return null;
     }
 
-    List<TaskRecord> restoreTasksForUserLocked(final int userId, SparseBooleanArray preaddedTasks) {
-        final ArrayList<TaskRecord> tasks = new ArrayList<TaskRecord>();
+    List<Task> restoreTasksForUserLocked(final int userId, SparseBooleanArray preaddedTasks) {
+        final ArrayList<Task> tasks = new ArrayList<Task>();
         ArraySet<Integer> recoveredTaskIds = new ArraySet<Integer>();
 
         File userTasksDir = getUserTasksDir(userId);
@@ -320,7 +320,7 @@ public class TaskPersister implements PersisterQueue.Listener {
                     if (event == XmlPullParser.START_TAG) {
                         if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: START_TAG name=" + name);
                         if (TAG_TASK.equals(name)) {
-                            final TaskRecord task = TaskRecord.restoreFromXml(in, mStackSupervisor);
+                            final Task task = Task.restoreFromXml(in, mStackSupervisor);
                             if (DEBUG) Slog.d(TAG, "restoreTasksForUserLocked: restored task="
                                     + task);
                             if (task != null) {
@@ -375,14 +375,14 @@ public class TaskPersister implements PersisterQueue.Listener {
 
         // Fix up task affiliation from taskIds
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final TaskRecord task = tasks.get(taskNdx);
+            final Task task = tasks.get(taskNdx);
             task.setPrevAffiliate(taskIdToTask(task.mPrevAffiliateTaskId, tasks));
             task.setNextAffiliate(taskIdToTask(task.mNextAffiliateTaskId, tasks));
         }
 
-        Collections.sort(tasks, new Comparator<TaskRecord>() {
+        Collections.sort(tasks, new Comparator<Task>() {
             @Override
-            public int compare(TaskRecord lhs, TaskRecord rhs) {
+            public int compare(Task lhs, Task rhs) {
                 final long diff = rhs.mLastTimeMoved - lhs.mLastTimeMoved;
                 if (diff < 0) {
                     return -1;
@@ -507,14 +507,14 @@ public class TaskPersister implements PersisterQueue.Listener {
 
     private static class TaskWriteQueueItem implements PersisterQueue.WriteQueueItem {
         private final ActivityTaskManagerService mService;
-        private final TaskRecord mTask;
+        private final Task mTask;
 
-        TaskWriteQueueItem(TaskRecord task, ActivityTaskManagerService service) {
+        TaskWriteQueueItem(Task task, ActivityTaskManagerService service) {
             mTask = task;
             mService = service;
         }
 
-        private StringWriter saveToXml(TaskRecord task) throws IOException, XmlPullParserException {
+        private StringWriter saveToXml(Task task) throws IOException, XmlPullParserException {
             if (DEBUG) Slog.d(TAG, "saveToXml: task=" + task);
             final XmlSerializer xmlSerializer = new FastXmlSerializer();
             StringWriter stringWriter = new StringWriter();
@@ -542,7 +542,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         public void process() {
             // Write out one task.
             StringWriter stringWriter = null;
-            TaskRecord task = mTask;
+            Task task = mTask;
             if (DEBUG) Slog.d(TAG, "Writing task=" + task);
             synchronized (mService.mGlobalLock) {
                 if (task.inRecents) {

@@ -43,8 +43,8 @@ public:
      * [oldState]: Previous state value before state change
      * [newState]: Current state value after state change
      */
-    virtual void onStateChanged(int atomId, const HashableDimensionKey& primaryKey, int oldState,
-                                int newState) = 0;
+    virtual void onStateChanged(int32_t atomId, const HashableDimensionKey& primaryKey,
+                                int oldState, int newState) = 0;
 };
 
 }  // namespace statsd

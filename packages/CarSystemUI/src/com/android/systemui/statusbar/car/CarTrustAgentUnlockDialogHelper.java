@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -36,15 +37,21 @@ import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.MainResources;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * A helper class displays an unlock dialog and receives broadcast about detecting trusted device
  * & unlocking state to show the appropriate message on the dialog.
  */
+@Singleton
 class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
     private static final String TAG = CarTrustAgentUnlockDialogHelper.class.getSimpleName();
 
     private final Context mContext;
+    private final Resources mResources;
     private final WindowManager mWindowManager;
     private final UserManager mUserManager;
     private final WindowManager.LayoutParams mParams;
@@ -60,10 +67,13 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
     private boolean mIsDialogShowing;
     private OnHideListener mOnHideListener;
 
-    CarTrustAgentUnlockDialogHelper(Context context) {
+    @Inject
+    CarTrustAgentUnlockDialogHelper(Context context, @MainResources Resources resources,
+            UserManager userManager, WindowManager windowManager) {
         mContext = context;
-        mUserManager = mContext.getSystemService(UserManager.class);
-        mWindowManager = mContext.getSystemService(WindowManager.class);
+        mResources = resources;
+        mUserManager = userManager;
+        mWindowManager = windowManager;
         mParams = createLayoutParams();
         mFilter = getIntentFilter();
 
@@ -125,7 +135,7 @@ class CarTrustAgentUnlockDialogHelper extends BroadcastReceiver{
      * @param listener listener that listens to dialog hide
      */
     void showUnlockDialogAfterDelay(int uid, OnHideListener listener) {
-        long delayMillis = mContext.getResources().getInteger(R.integer.unlock_dialog_delay_ms);
+        long delayMillis = mResources.getInteger(R.integer.unlock_dialog_delay_ms);
         showUnlockDialogAfterDelay(uid, delayMillis, listener);
     }
 

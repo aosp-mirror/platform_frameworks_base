@@ -772,6 +772,8 @@ public class AudioService extends IAudioService.Stub
 
         readAndSetLowRamDevice();
 
+        mIsCallScreeningModeSupported = AudioSystem.isCallScreeningModeSupported();
+
         // Call setRingerModeInt() to apply correct mute
         // state on streams affected by ringer mode.
         mRingerAndZenModeMutedStreams = 0;
@@ -964,6 +966,8 @@ public class AudioService extends IAudioService.Stub
         AudioSystem.setParameters("restarting=true");
 
         readAndSetLowRamDevice();
+
+        mIsCallScreeningModeSupported = AudioSystem.isCallScreeningModeSupported();
 
         // Restore device connection states, BT state
         mDeviceBroker.onAudioServerDied();
@@ -1469,10 +1473,13 @@ public class AudioService extends IAudioService.Stub
         }
         if (!TextUtils.isEmpty(packageName)) {
             PackageManager pm = mContext.getPackageManager();
+            ActivityManager am =
+                          (ActivityManager) mContext.getSystemService(mContext.ACTIVITY_SERVICE);
+
             if (pm.checkPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD, packageName)
                     == PackageManager.PERMISSION_GRANTED) {
                 try {
-                    assistantUid = pm.getPackageUid(packageName, 0);
+                    assistantUid = pm.getPackageUidAsUser(packageName, am.getCurrentUser());
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.e(TAG,
                             "updateAssistantUId() could not find UID for package: " + packageName);
@@ -3287,6 +3294,12 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
+        if (mode == AudioSystem.MODE_CALL_SCREENING && !mIsCallScreeningModeSupported) {
+            Log.w(TAG, "setMode(MODE_CALL_SCREENING) not permitted "
+                    + "when call screening is not supported");
+            return;
+        }
+
         if (mode < AudioSystem.MODE_CURRENT || mode >= AudioSystem.NUM_MODES) {
             return;
         }
@@ -3415,6 +3428,14 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#getMode() */
     public int getMode() {
         return mMode;
+    }
+
+    /** cached value read from audiopolicy manager after initialization. */
+    private boolean mIsCallScreeningModeSupported = false;
+
+    /** @see AudioManager#isCallScreeningModeSupported() */
+    public boolean isCallScreeningModeSupported() {
+        return mIsCallScreeningModeSupported;
     }
 
     //==========================================================================================
@@ -6149,6 +6170,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mHdmiPlaybackClient="); pw.println(mHdmiPlaybackClient);
         pw.print("  mHdmiTvClient="); pw.println(mHdmiTvClient);
         pw.print("  mHdmiSystemAudioSupported="); pw.println(mHdmiSystemAudioSupported);
+        pw.print("  mIsCallScreeningModeSupported="); pw.println(mIsCallScreeningModeSupported);
 
         dumpAudioPolicies(pw);
         mDynPolicyLogger.dump(pw);

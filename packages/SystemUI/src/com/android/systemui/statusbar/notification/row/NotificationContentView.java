@@ -1546,9 +1546,11 @@ public class NotificationContentView extends FrameLayout {
         }
         if (mExpandedWrapper != null) {
             mExpandedWrapper.setRemoved();
+            mMediaTransferManager.setRemoved(mExpandedChild);
         }
         if (mContractedWrapper != null) {
             mContractedWrapper.setRemoved();
+            mMediaTransferManager.setRemoved(mContractedChild);
         }
         if (mHeadsUpWrapper != null) {
             mHeadsUpWrapper.setRemoved();

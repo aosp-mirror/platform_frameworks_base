@@ -196,6 +196,8 @@ public final class SurfaceControl implements Parcelable {
             float brightness);
     private static native long nativeReadTransactionFromParcel(Parcel in);
     private static native void nativeWriteTransactionToParcel(long nativeObject, Parcel out);
+    private static native void nativeSetShadowRadius(long transactionObj, long nativeObject,
+            float shadowRadius);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -2542,6 +2544,29 @@ public final class SurfaceControl implements Parcelable {
          */
         public Transaction setMetadata(SurfaceControl sc, int key, Parcel data) {
             nativeSetMetadata(mNativeObject, sc.mNativeObject, key, data);
+            return this;
+        }
+
+         /**
+          * Draws shadows of length {@code shadowRadius} around the surface {@link SurfaceControl}.
+          * If the length is 0.0f then the shadows will not be drawn.
+          *
+          * Shadows are drawn around the screen bounds, these are the post transformed cropped
+          * bounds. They can draw over their parent bounds and will be occluded by layers with a
+          * higher z-order. The shadows will respect the surface's corner radius if the
+          * rounded corner bounds (transformed source bounds) are within the screen bounds.
+          *
+          * A shadow will only be drawn on buffer and color layers. If the radius is applied on a
+          * container layer, it will be passed down the hierarchy to be applied on buffer and color
+          * layers but not its children. A scenario where this is useful is when SystemUI animates
+          * a task by controlling a leash to it, can draw a shadow around the app surface by
+          * setting a shadow on the leash. This is similar to how rounded corners are set.
+          *
+          * @hide
+          */
+        public Transaction setShadowRadius(SurfaceControl sc, float shadowRadius) {
+            sc.checkNotReleased();
+            nativeSetShadowRadius(mNativeObject, sc.mNativeObject, shadowRadius);
             return this;
         }
 

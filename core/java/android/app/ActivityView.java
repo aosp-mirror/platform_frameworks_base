@@ -412,8 +412,8 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
             return;
         }
         mSurfaceView.getHolder().removeCallback(mSurfaceCallback);
-        mTaskEmbedder.setListener(null);
         mTaskEmbedder.release();
+        mTaskEmbedder.setListener(null);
 
         mGuard.close();
         mOpened = false;

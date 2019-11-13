@@ -67,9 +67,16 @@ public class MetricsFeatureProvider {
                 SettingsEnums.PAGE_UNKNOWN);
     }
 
-    public void visible(Context context, int source, int category) {
+    /**
+     * Logs an event when target page is visible.
+     *
+     * @param source from this page id to target page
+     * @param category the target page id
+     * @param latency the latency of target page creation
+     */
+    public void visible(Context context, int source, int category, int latency) {
         for (LogWriter writer : mLoggerWriters) {
-            writer.visible(context, source, category);
+            writer.visible(context, source, category, latency);
         }
     }
 

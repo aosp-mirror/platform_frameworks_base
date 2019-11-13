@@ -219,7 +219,7 @@ public abstract class ActivityManagerInternal {
      * @param userId
      * @param event
      * @param appToken ActivityRecord's appToken.
-     * @param taskRoot TaskRecord's root
+     * @param taskRoot Task's root
      */
     public abstract void updateActivityUsageStats(
             ComponentName activity, @UserIdInt int userId, int event, IBinder appToken,

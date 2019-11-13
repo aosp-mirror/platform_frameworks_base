@@ -59,10 +59,8 @@ const int FIELD_ID_SKIPPED_START_MILLIS = 3;
 const int FIELD_ID_SKIPPED_END_MILLIS = 4;
 // for ValueMetricData
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
-const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
 const int FIELD_ID_BUCKET_INFO = 3;
 const int FIELD_ID_DIMENSION_LEAF_IN_WHAT = 4;
-const int FIELD_ID_DIMENSION_LEAF_IN_CONDITION = 5;
 // for ValueBucketInfo
 const int FIELD_ID_VALUE_INDEX = 1;
 const int FIELD_ID_VALUE_LONG = 2;
@@ -129,6 +127,7 @@ ValueMetricProducer::ValueMetricProducer(
     if (metric.has_dimensions_in_what()) {
         translateFieldMatcher(metric.dimensions_in_what(), &mDimensionsInWhat);
         mContainANYPositionInDimensionsInWhat = HasPositionANY(metric.dimensions_in_what());
+        mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what());
     }
 
     if (metric.links().size() > 0) {
@@ -141,8 +140,6 @@ ValueMetricProducer::ValueMetricProducer(
         }
         mConditionSliced = true;
     }
-
-    mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what());
 
     int64_t numBucketsForward = calcBucketsForwardCount(startTimeNs);
     mCurrentBucketNum += numBucketsForward;
@@ -267,21 +264,9 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
             writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), str_set, protoOutput);
             protoOutput->end(dimensionToken);
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                uint64_t dimensionInConditionToken =
-                        protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
-                writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(), str_set,
-                                      protoOutput);
-                protoOutput->end(dimensionInConditionToken);
-            }
         } else {
             writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInWhat(),
                                            FIELD_ID_DIMENSION_LEAF_IN_WHAT, str_set, protoOutput);
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInCondition(),
-                                               FIELD_ID_DIMENSION_LEAF_IN_CONDITION, str_set,
-                                               protoOutput);
-            }
         }
 
         // Then fill bucket_info (ValueBucketInfo).
@@ -366,7 +351,7 @@ void ValueMetricProducer::resetBase() {
 // - ConditionTimer tracks changes based on AND of condition and active state.
 void ValueMetricProducer::onActiveStateChangedLocked(const int64_t& eventTimeNs) {
     bool isEventTooLate  = eventTimeNs < mCurrentBucketStartTimeNs;
-    if (ConditionState::kTrue == mCondition && isEventTooLate) {
+    if (isEventTooLate) {
         // Drop bucket because event arrived too late, ie. we are missing data for this bucket.
         invalidateCurrentBucket();
     }
@@ -401,53 +386,61 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
     ConditionState newCondition = condition ? ConditionState::kTrue : ConditionState::kFalse;
     bool isEventTooLate  = eventTimeNs < mCurrentBucketStartTimeNs;
 
-    if (mIsActive) {
-        if (isEventTooLate) {
-            VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
-                 (long long)mCurrentBucketStartTimeNs);
-            StatsdStats::getInstance().noteConditionChangeInNextBucket(mMetricId);
-            invalidateCurrentBucket();
-        } else {
-            if (mCondition == ConditionState::kUnknown) {
-                // If the condition was unknown, we mark the bucket as invalid since the bucket will
-                // contain partial data. For instance, the condition change might happen close to
-                // the end of the bucket and we might miss lots of data.
-                //
-                // We still want to pull to set the base.
-                invalidateCurrentBucket();
-            }
-
-            // Pull on condition changes.
-            bool conditionChanged =
-                    (mCondition == ConditionState::kTrue && newCondition == ConditionState::kFalse)
-                    || (mCondition == ConditionState::kFalse &&
-                            newCondition == ConditionState::kTrue);
-            // We do not need to pull when we go from unknown to false.
-            //
-            // We also pull if the condition was already true in order to be able to flush the
-            // bucket at the end if needed.
-            //
-            // onConditionChangedLocked might happen on bucket boundaries if this is called before
-            // #onDataPulled.
-            if (mIsPulled && (conditionChanged || condition)) {
-                pullAndMatchEventsLocked(eventTimeNs, newCondition);
-            }
-
-            // When condition change from true to false, clear diff base but don't
-            // reset other counters as we may accumulate more value in the bucket.
-            if (mUseDiff && mCondition == ConditionState::kTrue
-                    && newCondition == ConditionState::kFalse) {
-                resetBase();
-            }
-        }
+    // If the config is not active, skip the event.
+    if (!mIsActive) {
+        mCondition = isEventTooLate ? ConditionState::kUnknown : newCondition;
+        return;
     }
 
-    mCondition = isEventTooLate ? initialCondition(mConditionTrackerIndex) : newCondition;
-
-    if (mIsActive) {
-        flushIfNeededLocked(eventTimeNs);
+    // If the event arrived late, mark the bucket as invalid and skip the event.
+    if (isEventTooLate) {
+        VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
+             (long long)mCurrentBucketStartTimeNs);
+        StatsdStats::getInstance().noteConditionChangeInNextBucket(mMetricId);
+        invalidateCurrentBucket();
+        mCondition = ConditionState::kUnknown;
         mConditionTimer.onConditionChanged(mCondition, eventTimeNs);
+        return;
     }
+
+    // If the previous condition was unknown, mark the bucket as invalid
+    // because the bucket will contain partial data. For example, the condition
+    // change might happen close to the end of the bucket and we might miss a
+    // lot of data.
+    //
+    // We still want to pull to set the base.
+    if (mCondition == ConditionState::kUnknown) {
+        invalidateCurrentBucket();
+    }
+
+    // Pull and match for the following condition change cases:
+    // unknown/false -> true - condition changed
+    // true -> false - condition changed
+    // true -> true - old condition was true so we can flush the bucket at the
+    // end if needed.
+    //
+    // We don’t need to pull for unknown -> false or false -> false.
+    //
+    // onConditionChangedLocked might happen on bucket boundaries if this is
+    // called before #onDataPulled.
+    if (mIsPulled &&
+        (newCondition == ConditionState::kTrue || mCondition == ConditionState::kTrue)) {
+        pullAndMatchEventsLocked(eventTimeNs, newCondition);
+    }
+
+    // For metrics that use diff, when condition changes from true to false,
+    // clear diff base but don't reset other counts because we may accumulate
+    // more value in the bucket.
+    if (mUseDiff &&
+        (mCondition == ConditionState::kTrue && newCondition == ConditionState::kFalse)) {
+        resetBase();
+    }
+
+    // Update condition state after pulling.
+    mCondition = newCondition;
+
+    flushIfNeededLocked(eventTimeNs);
+    mConditionTimer.onConditionChanged(mCondition, eventTimeNs);
 }
 
 void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs,
@@ -472,33 +465,33 @@ int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTime
 void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData,
                                        bool pullSuccess, int64_t originalPullTimeNs) {
     std::lock_guard<std::mutex> lock(mMutex);
-        if (mCondition == ConditionState::kTrue) {
-            // If the pull failed, we won't be able to compute a diff.
-            if (!pullSuccess) {
-                invalidateCurrentBucket();
+    if (mCondition == ConditionState::kTrue) {
+        // If the pull failed, we won't be able to compute a diff.
+        if (!pullSuccess) {
+            invalidateCurrentBucket();
+        } else {
+            bool isEventLate = originalPullTimeNs < getCurrentBucketEndTimeNs();
+            if (isEventLate) {
+                // If the event is late, we are in the middle of a bucket. Just
+                // process the data without trying to snap the data to the nearest bucket.
+                accumulateEvents(allData, originalPullTimeNs, originalPullTimeNs, mCondition);
             } else {
-                bool isEventLate = originalPullTimeNs < getCurrentBucketEndTimeNs();
-                if (isEventLate) {
-                    // If the event is late, we are in the middle of a bucket. Just
-                    // process the data without trying to snap the data to the nearest bucket.
-                    accumulateEvents(allData, originalPullTimeNs, originalPullTimeNs, mCondition);
-                } else {
-                    // For scheduled pulled data, the effective event time is snap to the nearest
-                    // bucket end. In the case of waking up from a deep sleep state, we will
-                    // attribute to the previous bucket end. If the sleep was long but not very
-                    // long, we will be in the immediate next bucket. Previous bucket may get a
-                    // larger number as we pull at a later time than real bucket end.
-                    //
-                    // If the sleep was very long, we skip more than one bucket before sleep. In
-                    // this case, if the diff base will be cleared and this new data will serve as
-                    // new diff base.
-                    int64_t bucketEndTime = calcPreviousBucketEndTime(originalPullTimeNs) - 1;
-                    StatsdStats::getInstance().noteBucketBoundaryDelayNs(
-                            mMetricId, originalPullTimeNs - bucketEndTime);
-                    accumulateEvents(allData, originalPullTimeNs, bucketEndTime, mCondition);
-                }
+                // For scheduled pulled data, the effective event time is snap to the nearest
+                // bucket end. In the case of waking up from a deep sleep state, we will
+                // attribute to the previous bucket end. If the sleep was long but not very
+                // long, we will be in the immediate next bucket. Previous bucket may get a
+                // larger number as we pull at a later time than real bucket end.
+                //
+                // If the sleep was very long, we skip more than one bucket before sleep. In
+                // this case, if the diff base will be cleared and this new data will serve as
+                // new diff base.
+                int64_t bucketEndTime = calcPreviousBucketEndTime(originalPullTimeNs) - 1;
+                StatsdStats::getInstance().noteBucketBoundaryDelayNs(
+                        mMetricId, originalPullTimeNs - bucketEndTime);
+                accumulateEvents(allData, originalPullTimeNs, bucketEndTime, mCondition);
             }
         }
+    }
 
     // We can probably flush the bucket. Since we used bucketEndTime when calling
     // #onMatchedLogEventInternalLocked, the current bucket will not have been flushed.
@@ -579,10 +572,10 @@ void ValueMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
     if (verbose) {
         for (const auto& it : mCurrentSlicedBucket) {
           for (const auto& interval : it.second) {
-            fprintf(out, "\t(what)%s\t(condition)%s  (value)%s\n",
-                    it.first.getDimensionKeyInWhat().toString().c_str(),
-                    it.first.getDimensionKeyInCondition().toString().c_str(),
-                    interval.value.toString().c_str());
+              fprintf(out, "\t(what)%s\t(states)%s  (value)%s\n",
+                      it.first.getDimensionKeyInWhat().toString().c_str(),
+                      it.first.getStateValuesKey().toString().c_str(),
+                      interval.value.toString().c_str());
           }
         }
     }
@@ -821,7 +814,7 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
 void ValueMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
     int64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
     if (eventTimeNs < currentBucketEndTimeNs) {
-        VLOG("eventTime is %lld, less than next bucket start time %lld", (long long)eventTimeNs,
+        VLOG("eventTime is %lld, less than current bucket end time %lld", (long long)eventTimeNs,
              (long long)(currentBucketEndTimeNs));
         return;
     }

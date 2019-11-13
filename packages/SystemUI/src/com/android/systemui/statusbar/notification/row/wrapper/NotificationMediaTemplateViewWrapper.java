@@ -183,6 +183,8 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                 .getParcelable(Notification.EXTRA_MEDIA_SESSION);
 
         if (Utils.useQsMediaPlayer(mContext)) {
+            final int[] compactActions = mRow.getEntry().getSbn().getNotification().extras
+                    .getIntArray(Notification.EXTRA_COMPACT_ACTIONS);
             StatusBarWindowController ctrl = Dependency.get(StatusBarWindowController.class);
             QuickQSPanel panel = ctrl.getStatusBarView().findViewById(
                     com.android.systemui.R.id.quick_qs_panel);
@@ -190,7 +192,8 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
                     mRow.getStatusBarNotification().getNotification().getSmallIcon(),
                     getNotificationHeader().getOriginalIconColor(),
                     mRow.getCurrentBackgroundTint(),
-                    mActions);
+                    mActions,
+                    compactActions);
             QSPanel bigPanel = ctrl.getStatusBarView().findViewById(
                     com.android.systemui.R.id.quick_settings_panel);
             bigPanel.addMediaSession(token,

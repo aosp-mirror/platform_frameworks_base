@@ -132,7 +132,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     @Test
     public void testUpdateLaunchBounds() {
         // When in a non-resizeable stack, the task bounds should be updated.
-        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor)
+        final Task task = new TaskBuilder(mService.mStackSupervisor)
                 .setStack(mService.mRootActivityContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .build();
@@ -143,7 +143,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         assertEquals(new Rect(), task.getStack().getRequestedOverrideBounds());
 
         // When in a resizeable stack, the stack bounds should be updated as well.
-        final TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor)
+        final Task task2 = new TaskBuilder(mService.mStackSupervisor)
                 .setStack(mService.mRootActivityContainer.getDefaultDisplay().createStack(
                         WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */))
                 .build();
@@ -712,10 +712,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
         verify(options, times(shouldHaveAborted ? 1 : 0)).abort();
 
         final ActivityRecord startedActivity = outActivity[0];
-        if (startedActivity != null && startedActivity.getTaskRecord() != null) {
+        if (startedActivity != null && startedActivity.getTask() != null) {
             // Remove the activity so it doesn't interfere with with subsequent activity launch
             // tests from this method.
-            startedActivity.getTaskRecord().removeChild(startedActivity);
+            startedActivity.getTask().removeChild(startedActivity);
         }
     }
 
@@ -807,7 +807,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // Create another activity on top of the secondary display.
         final ActivityStack topStack = secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final TaskRecord topTask = new TaskBuilder(mSupervisor).setStack(topStack).build();
+        final Task topTask = new TaskBuilder(mSupervisor).setStack(topStack).build();
         new ActivityBuilder(mService).setTask(topTask).build();
 
         // Start activity with the same intent as {@code singleTaskActivity} on secondary display.
@@ -829,14 +829,14 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final ComponentName componentName = ComponentName.createRelative(
                 DEFAULT_COMPONENT_PACKAGE_NAME,
                 DEFAULT_COMPONENT_PACKAGE_NAME + ".SingleTaskActivity");
-        final TaskRecord taskRecord = new TaskBuilder(mSupervisor)
+        final Task task = new TaskBuilder(mSupervisor)
                 .setComponent(componentName)
                 .setStack(stack)
                 .build();
         return new ActivityBuilder(mService)
                 .setComponent(componentName)
                 .setLaunchMode(LAUNCH_SINGLE_TASK)
-                .setTask(taskRecord)
+                .setTask(task)
                 .build();
     }
 

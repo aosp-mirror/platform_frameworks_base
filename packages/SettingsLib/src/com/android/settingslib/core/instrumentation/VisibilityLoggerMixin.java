@@ -23,15 +23,16 @@ import android.content.Intent;
 import android.os.SystemClock;
 
 import androidx.lifecycle.Lifecycle.Event;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
 
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.settingslib.core.lifecycle.LifecycleObserver;
+import com.android.settingslib.core.lifecycle.events.OnAttach;
 
 /**
  * Logs visibility change of a fragment.
  */
-public class VisibilityLoggerMixin implements LifecycleObserver {
+public class VisibilityLoggerMixin implements LifecycleObserver, OnAttach {
 
     private static final String TAG = "VisibilityLoggerMixin";
 
@@ -39,24 +40,36 @@ public class VisibilityLoggerMixin implements LifecycleObserver {
 
     private MetricsFeatureProvider mMetricsFeature;
     private int mSourceMetricsCategory = MetricsProto.MetricsEvent.VIEW_UNKNOWN;
-    private long mVisibleTimestamp;
+    private long mTimestamp;
 
     public VisibilityLoggerMixin(int metricsCategory, MetricsFeatureProvider metricsFeature) {
         mMetricsCategory = metricsCategory;
         mMetricsFeature = metricsFeature;
     }
 
+    @Override
+    public void onAttach() {
+        mTimestamp = SystemClock.elapsedRealtime();
+    }
+
     @OnLifecycleEvent(Event.ON_RESUME)
     public void onResume() {
-        mVisibleTimestamp = SystemClock.elapsedRealtime();
-        if (mMetricsFeature != null && mMetricsCategory != METRICS_CATEGORY_UNKNOWN) {
-            mMetricsFeature.visible(null /* context */, mSourceMetricsCategory, mMetricsCategory);
+        if (mMetricsFeature == null || mMetricsCategory == METRICS_CATEGORY_UNKNOWN) {
+            return;
+        }
+        if (mTimestamp != 0L) {
+            final int elapse = (int) (SystemClock.elapsedRealtime() - mTimestamp);
+            mMetricsFeature.visible(null /* context */, mSourceMetricsCategory,
+                    mMetricsCategory, elapse);
+        } else {
+            mMetricsFeature.visible(null /* context */, mSourceMetricsCategory,
+                    mMetricsCategory, 0);
         }
     }
 
     @OnLifecycleEvent(Event.ON_PAUSE)
     public void onPause() {
-        mVisibleTimestamp = 0;
+        mTimestamp = 0;
         if (mMetricsFeature != null && mMetricsCategory != METRICS_CATEGORY_UNKNOWN) {
             mMetricsFeature.hidden(null /* context */, mMetricsCategory);
         }

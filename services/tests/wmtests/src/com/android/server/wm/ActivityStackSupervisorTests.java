@@ -116,7 +116,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         final ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setDisplay(newDisplay).build();
         final ActivityRecord unresizableActivity = stack.getTopActivity();
-        final TaskRecord task = unresizableActivity.getTaskRecord();
+        final Task task = unresizableActivity.getTask();
         unresizableActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         task.setResizeMode(unresizableActivity.info.resizeMode);
 
