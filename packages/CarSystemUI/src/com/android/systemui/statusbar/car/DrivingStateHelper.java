@@ -26,6 +26,9 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.CarSystemUIFactory;
+import com.android.systemui.SystemUIFactory;
+
 /**
  * Helper class for connecting to the {@link CarDrivingStateManager} and listening for driving state
  * changes.
@@ -35,7 +38,6 @@ public class DrivingStateHelper {
 
     private final Context mContext;
     private CarDrivingStateManager mDrivingStateManager;
-    private Car mCar;
     private CarDrivingStateEventListener mDrivingStateHandler;
 
     public DrivingStateHelper(Context context,
@@ -64,8 +66,8 @@ public class DrivingStateHelper {
      * Establishes connection with the Car service.
      */
     public void connectToCarService() {
-        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                mCarServiceLifecycleListener);
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+                .addListener(mCarServiceLifecycleListener);
     }
 
     private final CarServiceLifecycleListener mCarServiceLifecycleListener = (car, ready) -> {
