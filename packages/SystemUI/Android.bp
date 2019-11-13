@@ -126,10 +126,7 @@ android_library {
         "truth-prebuilt",
         "dagger2-2.19",
         "jsr330",
-<<<<<<< HEAD
         "org.lineageos.platform.internal",
-=======
->>>>>>> 2e93092b06f... base: Fix systemui tests with in-display fingerprint
         "vendor.lineage.biometrics.fingerprint.inscreen-V1.0-java",
     ],
     libs: [
