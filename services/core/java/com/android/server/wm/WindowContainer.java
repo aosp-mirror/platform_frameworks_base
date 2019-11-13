@@ -490,6 +490,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
 
             mSurfaceControl = null;
+            mLastSurfacePosition.set(0, 0);
             scheduleAnimation();
         }
 
