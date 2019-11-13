@@ -2006,4 +2006,22 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Direct share not available"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Apps list"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"This app has not been granted record permission but could capture audio through this USB device."</string>
+    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
+    <skip />
 </resources>

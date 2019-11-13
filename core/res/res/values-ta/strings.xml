@@ -1771,10 +1771,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"சரி"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n·டார்க் தீமினை ஆன் செய்யும்\n·“Hey Google” போன்ற பிற அம்சங்கள், பின்னணி செயல்பாடுகள், சில விஷுவல் எஃபெக்ட்கள், ஆகியவற்றை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்\n\n"<annotation id="url">"மேலும் அறிக"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n·டார்க் தீமினை ஆன் செய்யும்\n·“Hey Google” போன்ற பிற அம்சங்கள், பின்னணி செயல்பாடுகள், சில விஷுவல் எஃபெக்ட்கள், ஆகியவற்றை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில ஆப்ஸை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் ஆப்ஸானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"இயக்கு"</string>
@@ -2008,4 +2006,22 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"நேரடிப் பகிர்வு இல்லை"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"ஆப்ஸ் பட்டியல்"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"இந்த ஆப்ஸிற்கு ரெக்கார்டு செய்வதற்கான அனுமதி வழங்கப்படவில்லை, எனினும் இந்த USB சாதனம் மூலம் ஆடியோவைப் பதிவுசெய்ய முடியும்."</string>
+    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
+    <skip />
 </resources>

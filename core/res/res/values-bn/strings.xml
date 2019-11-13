@@ -1771,10 +1771,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"আপনার প্রশাসক আপডেট করেছেন"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ঠিক আছে"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে\n\n"<annotation id="url">"আরও জানুন"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"ব্যাটারি আরও বেশিক্ষণ চালাতে, ব্যাটারি সেভার:\n·গাঢ় থিম চালু করে\n·ব্যাকগ্রাউন্ড অ্যাক্টিভিটি, কিছু ভিজ্যুয়াল এফেক্ট, এবং “হ্যালো Google”-এর মতো অন্যান্য ফিচার বন্ধ বা সীমাবদ্ধ করে"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার ব্যাকগ্রাউন্ডে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবির উপর ট্যাপ না করা পর্যন্ত সেগুলি দেখানো হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"চালু করুন"</string>
@@ -2008,4 +2006,22 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"সরাসরি শেয়ার করার সুবিধা নেই"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"অ্যাপের তালিকা"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"এই অ্যাপকে রেকর্ড করার অনুমতি দেওয়া হয়নি কিন্তু USB ডিভাইসের মাধ্যমে সেটি অডিও রেকর্ড করতে পারে।"</string>
+    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
+    <skip />
 </resources>
