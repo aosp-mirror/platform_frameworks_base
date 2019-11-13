@@ -21,6 +21,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import android.app.Activity;
 import android.app.UiAutomation;
 import android.content.Intent;
+import android.os.ParcelFileDescriptor;
 import android.perftests.utils.PerfTestActivity;
 
 import androidx.test.rule.ActivityTestRule;
@@ -32,6 +33,10 @@ import org.junit.BeforeClass;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class WindowManagerPerfTestBase {
@@ -40,13 +45,51 @@ public class WindowManagerPerfTestBase {
     static final long TIME_1_S_IN_NS = 1 * NANOS_PER_S;
     static final long TIME_5_S_IN_NS = 5 * NANOS_PER_S;
 
+    /**
+     * The out directory matching the directory-keys of collector in AndroidTest.xml. The directory
+     * is in /data because while enabling method profling of system server, it cannot write the
+     * trace to external storage.
+     */
+    static final File BASE_OUT_PATH = new File("/data/local/CorePerfTests");
+
     @BeforeClass
     public static void setUpOnce() {
+        if (!BASE_OUT_PATH.exists()) {
+            executeShellCommand("mkdir -p " + BASE_OUT_PATH);
+        }
         // In order to be closer to the real use case.
-        sUiAutomation.executeShellCommand("input keyevent KEYCODE_WAKEUP");
-        sUiAutomation.executeShellCommand("wm dismiss-keyguard");
+        executeShellCommand("input keyevent KEYCODE_WAKEUP");
+        executeShellCommand("wm dismiss-keyguard");
         getInstrumentation().getContext().startActivity(new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    }
+
+    /**
+     * Executes shell command with reading the output. It may also used to block until the current
+     * command is completed.
+     */
+    static ByteArrayOutputStream executeShellCommand(String command) {
+        final ParcelFileDescriptor pfd = sUiAutomation.executeShellCommand(command);
+        final byte[] buf = new byte[512];
+        final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        int bytesRead;
+        try (FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+            while ((bytesRead = fis.read(buf)) != -1) {
+                bytes.write(buf, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return bytes;
+    }
+
+    /** Starts method tracing on system server. */
+    void startProfiling(String subPath) {
+        executeShellCommand("am profile start system " + new File(BASE_OUT_PATH, subPath));
+    }
+
+    void stopProfiling() {
+        executeShellCommand("am profile stop system");
     }
 
     /**
