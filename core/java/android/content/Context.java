@@ -3384,6 +3384,7 @@ public abstract class Context {
             //@hide: SYSTEM_UPDATE_SERVICE,
             //@hide: TIME_DETECTOR_SERVICE,
             PERMISSION_SERVICE,
+            INCREMENTAL_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -4915,6 +4916,13 @@ public abstract class Context {
      */
     @SystemApi
     public static final String APP_INTEGRITY_SERVICE = "app_integrity";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.os.incremental.IncrementalManager}.
+     * @hide
+     */
+    public static final String INCREMENTAL_SERVICE = "incremental";
 
     /**
      * Determine whether the given permission is allowed for a particular

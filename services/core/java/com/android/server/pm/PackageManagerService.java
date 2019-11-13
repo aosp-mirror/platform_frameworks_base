@@ -87,6 +87,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageManager.RESTRICTION_NONE;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.os.incremental.IncrementalManager.isIncrementalPath;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
@@ -226,6 +227,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.os.incremental.IncrementalManager;
 import android.os.storage.DiskInfo;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageEventListener;
@@ -1073,6 +1075,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private File mCacheDir;
 
     private Future<?> mPrepareAppDataFuture;
+
+    private final IncrementalManager mIncrementalManager;
 
     private static class IFVerificationParams {
         PackageParser.Package pkg;
@@ -2509,6 +2513,8 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager = injector.getPermissionManagerServiceInternal();
         mSettings = injector.getSettings();
         mPermissionManagerService = (IPermissionManager) ServiceManager.getService("permissionmgr");
+        mIncrementalManager =
+                (IncrementalManager) mContext.getSystemService(Context.INCREMENTAL_SERVICE);
 
         // CHECKSTYLE:ON IndentationCheck
         t.traceEnd();
@@ -8798,6 +8804,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Full APK verification can be skipped during certificate collection, only if the file is
         // in verified partition, or can be verified on access (when apk verity is enabled). In both
         // cases, only data in Signing Block is verified instead of the whole file.
+        // TODO(b/136132412): skip for Incremental installation
         final boolean skipVerify = scanSystemPartition
                 || (forceCollect && canSkipForcedPackageVerification(pkg));
         collectCertificatesLI(pkgSetting, pkg, forceCollect, skipVerify);
@@ -14675,9 +14682,16 @@ public class PackageManagerService extends IPackageManager.Stub
             final File afterCodeFile = getNextCodePath(targetDir, pkg.packageName);
 
             if (DEBUG_INSTALL) Slog.d(TAG, "Renaming " + beforeCodeFile + " to " + afterCodeFile);
+            final boolean onIncremental = mIncrementalManager != null
+                    && isIncrementalPath(beforeCodeFile.getAbsolutePath());
             try {
-                Os.rename(beforeCodeFile.getAbsolutePath(), afterCodeFile.getAbsolutePath());
-            } catch (ErrnoException e) {
+                if (onIncremental) {
+                    mIncrementalManager.rename(beforeCodeFile.getAbsolutePath(),
+                            afterCodeFile.getAbsolutePath());
+                } else {
+                    Os.rename(beforeCodeFile.getAbsolutePath(), afterCodeFile.getAbsolutePath());
+                }
+            } catch (IOException | ErrnoException e) {
                 Slog.w(TAG, "Failed to rename", e);
                 return false;
             }
@@ -14735,6 +14749,11 @@ public class PackageManagerService extends IPackageManager.Stub
         private boolean cleanUp() {
             if (codeFile == null || !codeFile.exists()) {
                 return false;
+            }
+
+            String codePath = codeFile.getAbsolutePath();
+            if (mIncrementalManager != null && isIncrementalPath(codePath)) {
+                mIncrementalManager.closeStorage(codePath);
             }
 
             removeCodePathLI(codeFile);
@@ -15928,6 +15947,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             & PackageManagerService.SCAN_AS_INSTANT_APP) != 0);
             final PackageParser.Package pkg = reconciledPkg.pkgSetting.pkg;
             final String packageName = pkg.packageName;
+            final boolean onIncremental = mIncrementalManager != null
+                    && isIncrementalPath(pkg.codePath);
             prepareAppDataAfterInstallLIF(pkg);
             if (reconciledPkg.prepareResult.clearCodeCache) {
                 clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
@@ -15958,6 +15979,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // We only need to dexopt if the package meets ALL of the following conditions:
             //   1) it is not an instant app or if it is then dexopt is enabled via gservices.
             //   2) it is not debuggable.
+            //   3) it is not on Incremental File System.
             //
             // Note that we do not dexopt instant apps by default. dexopt can take some time to
             // complete, so we skip this step during installation. Instead, we'll take extra time
@@ -15968,7 +15990,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean performDexopt =
                     (!instantApp || Global.getInt(mContext.getContentResolver(),
                     Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
-                    && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0);
+                    && ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0)
+                    && (!onIncremental);
 
             if (performDexopt) {
                 // Compile the layout resources.
@@ -16200,6 +16223,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (args.signingDetails != PackageParser.SigningDetails.UNKNOWN) {
                 pkg.setSigningDetails(args.signingDetails);
             } else {
+                // TODO(b/136132412): skip for Incremental installation
                 PackageParser.collectCertificates(pkg, false /* skipVerify */);
             }
         } catch (PackageParserException e) {

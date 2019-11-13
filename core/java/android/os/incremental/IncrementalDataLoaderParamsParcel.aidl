@@ -23,7 +23,7 @@ import android.os.incremental.NamedParcelFileDescriptor;
  * @hide
  */
 parcelable IncrementalDataLoaderParamsParcel {
-    @utf8InCpp String staticUri;
     @utf8InCpp String packageName;
+    @utf8InCpp String staticArgs;
     NamedParcelFileDescriptor[] dynamicArgs;
 }
