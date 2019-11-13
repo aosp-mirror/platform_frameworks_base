@@ -4829,8 +4829,18 @@ package android.net.wifi {
   }
 
   public class WifiInfo implements android.os.Parcelable {
+    method @Nullable public String getAppPackageName();
+    method public double getRxSuccessRate();
+    method public int getScore();
+    method public double getTxBadRate();
+    method public double getTxRetriesRate();
+    method public double getTxSuccessRate();
+    method public boolean isEphemeral();
     method public boolean isOsuAp();
     method public boolean isPasspointAp();
+    method @Nullable public static String removeDoubleQuotes(@Nullable String);
+    field public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
+    field public static final int INVALID_RSSI = -127; // 0xffffff81
   }
 
   public class WifiManager {
