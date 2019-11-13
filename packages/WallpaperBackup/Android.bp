@@ -24,3 +24,27 @@ android_app {
     certificate: "platform",
     privileged: false,
 }
+
+android_test {
+    name: "WallpaperBackupAgentTests",
+    manifest: "test/AndroidManifest.xml",
+    test_config: "test/AndroidTest.xml",
+    srcs: [
+        // Include the app source code because the app runs as the system user on-device.
+        "src/**/*.java",
+        "test/src/**/*.java"
+    ],
+    libs: [
+        "android.test.base",
+        "android.test.runner",
+    ],
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "truth-prebuilt",
+    ],
+    certificate: "platform",
+    platform_apis: true,
+    test_suites: ["device-tests"]
+}
