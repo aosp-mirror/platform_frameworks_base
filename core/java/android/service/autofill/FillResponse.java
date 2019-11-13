@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.Activity;
+import android.app.slice.Slice;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
@@ -86,6 +87,7 @@ public final class FillResponse implements Parcelable {
     private int mRequestId;
     private final @Nullable UserData mUserData;
     private final @Nullable int[] mCancelIds;
+    private final @Nullable ParceledListSlice<Slice> mInlineSuggestionSlices;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
@@ -103,6 +105,8 @@ public final class FillResponse implements Parcelable {
         mRequestId = INVALID_REQUEST_ID;
         mUserData = builder.mUserData;
         mCancelIds = builder.mCancelIds;
+        mInlineSuggestionSlices = (builder.mInlineSuggestionSlices != null)
+                ? new ParceledListSlice<>(builder.mInlineSuggestionSlices) : null;
     }
 
     /** @hide */
@@ -195,6 +199,11 @@ public final class FillResponse implements Parcelable {
         return mCancelIds;
     }
 
+    /** @hide */
+    public List<Slice> getInlineSuggestionSlices() {
+        return (mInlineSuggestionSlices != null) ? mInlineSuggestionSlices.getList() : null;
+    }
+
     /**
      * Builder for {@link FillResponse} objects. You must to provide at least
      * one dataset or set an authentication intent with a presentation view.
@@ -215,6 +224,7 @@ public final class FillResponse implements Parcelable {
         private boolean mDestroyed;
         private UserData mUserData;
         private int[] mCancelIds;
+        private ArrayList<Slice> mInlineSuggestionSlices;
 
         /**
          * Triggers a custom UI before before autofilling the screen with any data set in this
@@ -570,6 +580,20 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
+         * TODO(b/137800469): add javadoc
+         */
+        @NonNull
+        public Builder addInlineSuggestionSlice(@NonNull Slice inlineSuggestionSlice) {
+            throwIfDestroyed();
+            throwIfAuthenticationCalled();
+            if (mInlineSuggestionSlices == null) {
+                mInlineSuggestionSlices = new ArrayList<>();
+            }
+            mInlineSuggestionSlices.add(inlineSuggestionSlice);
+            return this;
+        }
+
+        /**
          * Builds a new {@link FillResponse} instance.
          *
          * @throws IllegalStateException if any of the following conditions occur:
@@ -670,7 +694,9 @@ public final class FillResponse implements Parcelable {
         if (mCancelIds != null) {
             builder.append(", mCancelIds=").append(mCancelIds.length);
         }
-
+        if (mInlineSuggestionSlices != null) {
+            builder.append(", inlinedSuggestions=").append(mInlineSuggestionSlices.getList());
+        }
         return builder.append("]").toString();
     }
 
@@ -699,7 +725,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelableArray(mFieldClassificationIds, flags);
         parcel.writeInt(mFlags);
         parcel.writeIntArray(mCancelIds);
-
+        parcel.writeParcelable(mInlineSuggestionSlices, flags);
         parcel.writeInt(mRequestId);
     }
 
@@ -754,6 +780,16 @@ public final class FillResponse implements Parcelable {
             builder.setFlags(parcel.readInt());
             final int[] cancelIds = parcel.createIntArray();
             builder.setCancelTargetIds(cancelIds);
+
+            final ParceledListSlice<Slice> parceledInlineSuggestionSlices =
+                    parcel.readParcelable(null);
+            if (parceledInlineSuggestionSlices != null) {
+                final List<Slice> inlineSuggestionSlices = parceledInlineSuggestionSlices.getList();
+                final int size = inlineSuggestionSlices.size();
+                for (int i = 0; i < size; i++) {
+                    builder.addInlineSuggestionSlice(inlineSuggestionSlices.get(i));
+                }
+            }
 
             final FillResponse response = builder.build();
             response.setRequestId(parcel.readInt());

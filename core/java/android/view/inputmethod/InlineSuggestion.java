@@ -271,7 +271,7 @@ public final class InlineSuggestion implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1574446220398L,
+            time = 1575933636929L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/view/inputmethod/InlineSuggestion.java",
             inputSignatures = "private static final  java.lang.String TAG\nprivate final @android.annotation.NonNull android.view.inputmethod.InlineSuggestionInfo mInfo\nprivate final @android.annotation.Nullable com.android.internal.view.inline.IInlineContentProvider mContentProvider\npublic  void inflate(android.content.Context,android.util.Size,java.util.concurrent.Executor,java.util.function.Consumer<android.view.View>)\nclass InlineSuggestion extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genHiddenConstDefs=true, genHiddenConstructor=true)")

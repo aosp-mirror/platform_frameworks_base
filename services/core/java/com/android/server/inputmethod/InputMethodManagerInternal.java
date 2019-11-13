@@ -18,8 +18,14 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.content.ComponentName;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.autofill.AutofillId;
+import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
+import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.server.LocalServices;
 
 import java.util.Collections;
@@ -57,6 +63,17 @@ public abstract class InputMethodManagerInternal {
     public abstract List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId);
 
     /**
+     * Called by the Autofill Frameworks to request an {@link InlineSuggestionsRequest} from
+     * the input method.
+     *
+     * @param componentName {@link ComponentName} of current app/activity.
+     * @param autofillId {@link AutofillId} of currently focused field.
+     * @param cb {@link IInlineSuggestionsRequestCallback} used to pass back the request object.
+     */
+    public abstract void onCreateInlineSuggestionsRequest(ComponentName componentName,
+            AutofillId autofillId, IInlineSuggestionsRequestCallback cb);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -77,6 +94,17 @@ public abstract class InputMethodManagerInternal {
                 @Override
                 public List<InputMethodInfo> getEnabledInputMethodListAsUser(int userId) {
                     return Collections.emptyList();
+                }
+
+                @Override
+                public void onCreateInlineSuggestionsRequest(ComponentName componentName,
+                        AutofillId autofillId, IInlineSuggestionsRequestCallback cb) {
+                    try {
+                        cb.onInlineSuggestionsUnsupported();
+                    } catch (RemoteException e) {
+                        Log.w("IMManagerInternal", "RemoteException calling"
+                                + " onInlineSuggestionsUnsupported: " + e);
+                    }
                 }
             };
 
