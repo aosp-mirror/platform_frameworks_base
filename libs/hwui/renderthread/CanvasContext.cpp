@@ -147,7 +147,6 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
         mNativeSurface = new ReliableSurface{std::move(surface)};
         // TODO: Fix error handling & re-shorten timeout
         ANativeWindow_setDequeueTimeout(mNativeSurface.get(), 4000_ms);
-        mNativeSurface->enableFrameTimestamps(true);
     } else {
         mNativeSurface = nullptr;
     }
@@ -169,6 +168,10 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
     if (hasSurface) {
         mHaveNewSurface = true;
         mSwapHistory.clear();
+        // Enable frame stats after the surface has been bound to the appropriate graphics API.
+        // Order is important when new and old surfaces are the same, because old surface has
+        // its frame stats disabled automatically.
+        mNativeSurface->enableFrameTimestamps(true);
     } else {
         mRenderThread.removeFrameCallback(this);
         mGenerationID++;
