@@ -35,7 +35,7 @@ import android.widget.TextSwitcher;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.car.hvac.TemperatureView;
+import com.android.systemui.navigationbar.car.hvac.TemperatureView;
 
 /**
  * Simple text display of HVAC properties, It is designed to show mTemperature and is configured in

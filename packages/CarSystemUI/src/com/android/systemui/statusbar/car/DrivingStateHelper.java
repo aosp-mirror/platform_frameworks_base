@@ -17,31 +17,43 @@
 package com.android.systemui.statusbar.car;
 
 import android.car.Car;
-import android.car.Car.CarServiceLifecycleListener;
 import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarDrivingStateManager;
 import android.car.drivingstate.CarDrivingStateManager.CarDrivingStateEventListener;
-import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+
+import com.android.systemui.car.CarServiceProvider;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Helper class for connecting to the {@link CarDrivingStateManager} and listening for driving state
  * changes.
  */
+@Singleton
 public class DrivingStateHelper {
     public static final String TAG = "DrivingStateHelper";
 
-    private final Context mContext;
+    private final CarServiceProvider mCarServiceProvider;
+
     private CarDrivingStateManager mDrivingStateManager;
-    private Car mCar;
     private CarDrivingStateEventListener mDrivingStateHandler;
 
-    public DrivingStateHelper(Context context,
-            @NonNull CarDrivingStateEventListener drivingStateHandler) {
-        mContext = context;
-        mDrivingStateHandler = drivingStateHandler;
+    @Inject
+    public DrivingStateHelper(CarServiceProvider carServiceProvider) {
+        mCarServiceProvider = carServiceProvider;
+    }
+
+    /**
+     * Sets the {@link CarDrivingStateEventListener}. Should be set before calling {@link
+     * #connectToCarService()}.
+     */
+    public void setCarDrivingStateEventListener(
+            @NonNull CarDrivingStateEventListener carDrivingStateEventListener) {
+        mDrivingStateHandler = carDrivingStateEventListener;
     }
 
     /**
@@ -64,25 +76,22 @@ public class DrivingStateHelper {
      * Establishes connection with the Car service.
      */
     public void connectToCarService() {
-        mCar = Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                mCarServiceLifecycleListener);
+        mCarServiceProvider.addListener(mCarServiceLifecycleListener);
     }
 
-    private final CarServiceLifecycleListener mCarServiceLifecycleListener = (car, ready) -> {
-        if (!ready) {
-            return;
-        }
-        logD("Car Service connected");
-        mDrivingStateManager = (CarDrivingStateManager) car.getCarManager(
-                Car.CAR_DRIVING_STATE_SERVICE);
-        if (mDrivingStateManager != null) {
-            mDrivingStateManager.registerListener(mDrivingStateHandler);
-            mDrivingStateHandler.onDrivingStateChanged(
-                    mDrivingStateManager.getCurrentCarDrivingState());
-        } else {
-            Log.e(TAG, "CarDrivingStateService service not available");
-        }
-    };
+    private final CarServiceProvider.CarServiceOnConnectedListener mCarServiceLifecycleListener =
+            car -> {
+                logD("Car Service connected");
+                mDrivingStateManager = (CarDrivingStateManager) car.getCarManager(
+                        Car.CAR_DRIVING_STATE_SERVICE);
+                if (mDrivingStateManager != null) {
+                    mDrivingStateManager.registerListener(mDrivingStateHandler);
+                    mDrivingStateHandler.onDrivingStateChanged(
+                            mDrivingStateManager.getCurrentCarDrivingState());
+                } else {
+                    Log.e(TAG, "CarDrivingStateService service not available");
+                }
+            };
 
     private void logD(String message) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {

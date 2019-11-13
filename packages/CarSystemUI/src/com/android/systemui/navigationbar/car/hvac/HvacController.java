@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.car.hvac;
+package com.android.systemui.navigationbar.car.hvac;
 
 import static android.car.VehicleAreaType.VEHICLE_AREA_TYPE_GLOBAL;
 import static android.car.VehiclePropertyIds.HVAC_TEMPERATURE_DISPLAY_UNITS;
 
 import android.car.Car;
-import android.car.Car.CarServiceLifecycleListener;
 import android.car.VehicleUnit;
 import android.car.hardware.CarPropertyValue;
 import android.car.hardware.hvac.CarHvacManager;
 import android.car.hardware.hvac.CarHvacManager.CarHvacEventCallback;
-import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.android.systemui.car.CarServiceProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,19 +38,18 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Manages the connection to the Car service and delegates value changes to the registered
  * {@link TemperatureView}s
  */
+@Singleton
 public class HvacController {
-
     public static final String TAG = "HvacController";
-    public static final int BIND_TO_HVAC_RETRY_DELAY = 5000;
 
-    private Context mContext;
-    private Handler mHandler;
-    private Car mCar;
+    private final CarServiceProvider mCarServiceProvider;
+
     private CarHvacManager mHvacManager;
     private HashMap<HvacKey, List<TemperatureView>> mTempComponents = new HashMap<>();
 
@@ -85,22 +85,20 @@ public class HvacController {
         }
     };
 
-    private final CarServiceLifecycleListener mCarServiceLifecycleListener = (car, ready) -> {
-        if (!ready) {
-            return;
-        }
-        try {
-            mHvacManager = (CarHvacManager) car.getCarManager(Car.HVAC_SERVICE);
-            mHvacManager.registerCallback(mHardwareCallback);
-            initComponents();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to correctly connect to HVAC", e);
-        }
-    };
+    private final CarServiceProvider.CarServiceOnConnectedListener mCarServiceLifecycleListener =
+            car -> {
+                try {
+                    mHvacManager = (CarHvacManager) car.getCarManager(Car.HVAC_SERVICE);
+                    mHvacManager.registerCallback(mHardwareCallback);
+                    initComponents();
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to correctly connect to HVAC", e);
+                }
+            };
 
     @Inject
-    public HvacController(Context context) {
-        mContext = context;
+    public HvacController(CarServiceProvider carServiceProvider) {
+        mCarServiceProvider = carServiceProvider;
     }
 
     /**
@@ -108,9 +106,7 @@ public class HvacController {
      * ({@link CarHvacManager}) will happen on the same thread this method was called from.
      */
     public void connectToCarService() {
-        mHandler = new Handler();
-        mCar = Car.createCar(mContext, /* handler= */ mHandler, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                mCarServiceLifecycleListener);
+        mCarServiceProvider.addListener(mCarServiceLifecycleListener);
     }
 
     /**
@@ -169,6 +165,21 @@ public class HvacController {
      */
     public void removeAllComponents() {
         mTempComponents.clear();
+    }
+
+    /**
+     * Iterate through a view, looking for {@link TemperatureView} instances and add them to the
+     * controller if found.
+     */
+    public void addTemperatureViewToController(View v) {
+        if (v instanceof TemperatureView) {
+            addHvacTextView((TemperatureView) v);
+        } else if (v instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) v;
+            for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                addTemperatureViewToController(viewGroup.getChildAt(i));
+            }
+        }
     }
 
     /**
