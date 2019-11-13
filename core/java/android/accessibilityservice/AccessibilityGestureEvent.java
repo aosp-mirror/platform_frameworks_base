@@ -76,9 +76,9 @@ public final class AccessibilityGestureEvent implements Parcelable {
             GESTURE_SWIPE_RIGHT_AND_DOWN
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface GestureType {}
+    public @interface GestureId {}
 
-    @GestureType
+    @GestureId
     private final int mGestureId;
     private final int mDisplayId;
 
@@ -110,7 +110,7 @@ public final class AccessibilityGestureEvent implements Parcelable {
      * @return the performed gesture id.
      *
      */
-    @GestureType public int getGestureId() {
+    @GestureId public int getGestureId() {
         return mGestureId;
     }
 
