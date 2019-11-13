@@ -5295,13 +5295,17 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         });
     }
 
-    public void testGetPasswordComplexity_securityExceptionIfParentInstance() {
-        assertThrows(SecurityException.class,
-                () -> new DevicePolicyManagerTestable(
-                        mServiceContext,
-                        dpms,
-                        /* parentInstance= */ true)
-                        .getPasswordComplexity());
+    public void testGetPasswordComplexity_securityExceptionNotThrownForParentInstance() {
+        mServiceContext.permissions.add(permission.REQUEST_PASSWORD_COMPLEXITY);
+        setAsProfileOwner(admin1);
+
+        new DevicePolicyManagerTestable(
+                mServiceContext,
+                dpms,
+                /* parentInstance= */ true)
+                .getPasswordComplexity();
+
+        assertEquals(PASSWORD_COMPLEXITY_NONE, dpm.getPasswordComplexity());
     }
 
     public void testGetPasswordComplexity_illegalStateExceptionIfLocked() {
