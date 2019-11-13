@@ -805,6 +805,16 @@ static jintArray nativeGetAllowedDisplayConfigs(JNIEnv* env, jclass clazz, jobje
     return allowedConfigsArray;
 }
 
+static jboolean nativeSetDesiredDisplayConfigSpecs(JNIEnv* env, jclass clazz,
+        jobject tokenObj, jint displayModeId, jfloat minRefreshRate, jfloat maxRefreshRate) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == nullptr) return JNI_FALSE;
+
+    size_t result = SurfaceComposerClient::setDesiredDisplayConfigSpecs(
+        token, displayModeId, minRefreshRate, maxRefreshRate);
+    return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
+}
+
 static jint nativeGetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return -1;
@@ -1345,6 +1355,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetAllowedDisplayConfigs },
     {"nativeGetAllowedDisplayConfigs", "(Landroid/os/IBinder;)[I",
             (void*)nativeGetAllowedDisplayConfigs },
+    {"nativeSetDesiredDisplayConfigSpecs", "(Landroid/os/IBinder;IFF)Z",
+            (void*)nativeSetDesiredDisplayConfigSpecs },
     {"nativeGetDisplayColorModes", "(Landroid/os/IBinder;)[I",
             (void*)nativeGetDisplayColorModes},
     {"nativeGetDisplayNativePrimaries", "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DisplayPrimaries;",

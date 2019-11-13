@@ -138,13 +138,17 @@ abstract class DisplayDevice {
     }
 
     /**
-     * Sets the display modes the system is allowed to switch between, roughly ordered by
-     * preference.
+     * Sets the refresh ranges, and display modes that the system is allowed to switch between.
+     * Display modes are roughly ordered by preference.
      *
      * Not all display devices will automatically switch between modes, so it's important that the
      * most-desired modes are at the beginning of the allowed array.
+     *
+     * @param defaultModeId is used, if the device does not support multiple refresh
+     * rates, and to navigate other parameters.
      */
-    public void setAllowedDisplayModesLocked(int[] modes) {
+    public void setDesiredDisplayConfigSpecs(int defaultModeId, float minRefreshRate,
+            float maxRefreshRate, int[] modes) {
     }
 
     /**
