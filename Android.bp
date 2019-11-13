@@ -425,6 +425,7 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
+    libs: ["app-compat-annotations"],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -463,6 +464,7 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
+    libs: ["app-compat-annotations"],
     plugins: [
         "unsupportedappusage-annotation-processor",
         "compat-changeid-annotation-processor",
@@ -502,6 +504,7 @@ java_library {
 java_library {
     name: "framework-atb-backward-compatibility",
     installable: true,
+    libs: ["app-compat-annotations"],
     srcs: [
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
