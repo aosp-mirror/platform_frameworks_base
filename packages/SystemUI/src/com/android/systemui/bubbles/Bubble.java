@@ -321,20 +321,6 @@ class Bubble {
         return (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
     }
 
-    /**
-     * Whether this bubble was explicitly created by the user via a SysUI affordance.
-     */
-    boolean isUserCreated() {
-        return mIsUserCreated;
-    }
-
-    /**
-     * Set whether this bubble was explicitly created by the user via a SysUI affordance.
-     */
-    void setUserCreated(boolean isUserCreated) {
-        mIsUserCreated = isUserCreated;
-    }
-
     float getDesiredHeight(Context context) {
         Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
         boolean useRes = data.getDesiredHeightResId() != 0;

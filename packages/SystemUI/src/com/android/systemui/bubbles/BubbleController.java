@@ -31,6 +31,7 @@ import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
+import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_EXPERIMENTS;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
@@ -92,6 +93,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -144,6 +146,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private int mCurrentUserId;
     // Saves notification keys of active bubbles when users are switched.
     private final SparseSetArray<String> mSavedBubbleKeysPerUser;
+
+    // Saves notification keys of user created "fake" bubbles so that we can allow notifications
+    // like these to bubble by default. Doesn't persist across reboots, not a long-term solution.
+    private final HashSet<String> mUserCreatedBubbles;
 
     // Bubbles get added to the status bar view
     private final StatusBarWindowController mStatusBarWindowController;
@@ -312,6 +318,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     restoreBubbles(newUserId);
                     mCurrentUserId = newUserId;
                 });
+
+        mUserCreatedBubbles = new HashSet<>();
     }
 
     /**
@@ -535,10 +543,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param entry the notification to show as a bubble.
      */
     public void onUserCreatedBubbleFromNotification(NotificationEntry entry) {
+        if (DEBUG_EXPERIMENTS || DEBUG_BUBBLE_CONTROLLER) {
+            Log.d(TAG, "onUserCreatedBubble: " + entry.getKey());
+        }
         mShadeController.get().collapsePanel(true);
         entry.setFlagBubble(true);
         updateBubble(entry, true /* suppressFlyout */, false /* showInShade */);
-        mBubbleData.getBubbleWithKey(entry.getKey()).setUserCreated(true);
+        mUserCreatedBubbles.add(entry.getKey());
     }
 
     /**
@@ -548,8 +559,19 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param entry the notification to no longer show as a bubble.
      */
     public void onUserDemotedBubbleFromNotification(NotificationEntry entry) {
+        if (DEBUG_EXPERIMENTS || DEBUG_BUBBLE_CONTROLLER) {
+            Log.d(TAG, "onUserDemotedBubble: " + entry.getKey());
+        }
         entry.setFlagBubble(false);
         removeBubble(entry.getKey(), DISMISS_BLOCKED);
+        mUserCreatedBubbles.remove(entry.getKey());
+    }
+
+    /**
+     * Whether this bubble was explicitly created by the user via a SysUI affordance.
+     */
+    boolean isUserCreatedBubble(String key) {
+        return mUserCreatedBubbles.contains(key);
     }
 
     /**
@@ -616,7 +638,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     mNotificationEntryManager.updateNotifications(
                             "BubbleController.onNotificationRemoveRequested");
                     return true;
-                } else if (!userRemovedNotif && entry != null && !bubble.isUserCreated()) {
+                } else if (!userRemovedNotif && entry != null
+                        && !isUserCreatedBubble(bubble.getKey())) {
                     // This wasn't a user removal so we should remove the bubble as well
                     mBubbleData.notificationEntryRemoved(entry, DISMISS_NOTIF_CANCEL);
                     return false;
@@ -676,8 +699,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
         @Override
         public void onPendingEntryAdded(NotificationEntry entry) {
-            Bubble b = mBubbleData.getBubbleWithKey(entry.getKey());
-            BubbleExperimentConfig.adjustForExperiments(mContext, entry, b);
+            boolean previouslyUserCreated = mUserCreatedBubbles.contains(entry.getKey());
+            BubbleExperimentConfig.adjustForExperiments(mContext, entry, previouslyUserCreated);
 
             if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && canLaunchInActivityView(mContext, entry)) {
@@ -687,8 +710,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void onPreEntryUpdated(NotificationEntry entry) {
-            Bubble b = mBubbleData.getBubbleWithKey(entry.getKey());
-            BubbleExperimentConfig.adjustForExperiments(mContext, entry, b);
+            boolean previouslyUserCreated = mUserCreatedBubbles.contains(entry.getKey());
+            BubbleExperimentConfig.adjustForExperiments(mContext, entry, previouslyUserCreated);
 
             boolean shouldBubble = mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
                     && canLaunchInActivityView(mContext, entry);
