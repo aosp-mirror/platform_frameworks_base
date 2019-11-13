@@ -24,12 +24,22 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.IBinder;
+import android.os.IPullAtomCallback;
+import android.os.IPullAtomResultReceiver;
+import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
 import android.os.IStatsPullerCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.AndroidException;
 import android.util.Slog;
+import android.util.StatsEvent;
+
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * API for statsd clients to send configurations and retrieve data.
@@ -43,7 +53,11 @@ public final class StatsManager {
 
     private final Context mContext;
 
+    @GuardedBy("this")
     private IStatsManager mService;
+
+    @GuardedBy("this")
+    private IStatsCompanionService mStatsCompanion;
 
     /**
      * Long extra of uid that added the relevant stats config.
@@ -449,7 +463,9 @@ public final class StatsManager {
      * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      *
      * @hide
+     * @deprecated Please use registerPullAtomCallback
      */
+    @Deprecated
     @RequiresPermission(allOf = { DUMP, PACKAGE_USAGE_STATS })
     public void setPullerCallback(int atomTag, IStatsPullerCallback callback)
             throws StatsUnavailableException {
@@ -472,6 +488,75 @@ public final class StatsManager {
         }
     }
 
+
+    /**
+     * Registers a callback for an atom when that atom is to be pulled. The stats service will
+     * invoke pullData in the callback when the stats service determines that this atom needs to be
+     * pulled.
+     *
+     * @param atomTag           The tag of the atom for this puller callback.
+     * @param coolDownNs        The minimum time between successive pulls. A cache of the previous
+     *                          pull will be used if the time between pulls is less than coolDownNs.
+     * @param timeoutNs         The maximum time a pull should take. Statsd will wait timeoutNs for
+     *                          the pull to complete before timing out and marking the pull as
+     *                          failed.
+     * @param additiveFields    Fields that are added when mapping isolated uids to host uids.
+     * @param callback          The callback to be invoked when the stats service pulls the atom.
+     * @throws RemoteException  if unsuccessful due to failing to connect to system server.
+     *
+     * @hide
+     */
+    public void registerPullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
+            int[] additiveFields, @NonNull StatsPullAtomCallback callback,
+            @NonNull Executor executor) throws RemoteException, SecurityException {
+        synchronized (this) {
+            IStatsCompanionService service = getIStatsCompanionServiceLocked();
+            PullAtomCallbackInternal rec =
+                    new PullAtomCallbackInternal(atomTag, callback, executor);
+            service.registerPullAtomCallback(atomTag, coolDownNs, timeoutNs, additiveFields, rec);
+        }
+    }
+
+    private static class  PullAtomCallbackInternal extends IPullAtomCallback.Stub {
+        public final int mAtomId;
+        public final StatsPullAtomCallback mCallback;
+        public final Executor mExecutor;
+
+        PullAtomCallbackInternal(int atomId, StatsPullAtomCallback callback, Executor executor) {
+            mAtomId = atomId;
+            mCallback = callback;
+            mExecutor = executor;
+        }
+
+        @Override
+        public void onPullAtom(int atomTag, IPullAtomResultReceiver resultReceiver) {
+            mExecutor.execute(() -> {
+                List<StatsEvent> data = new ArrayList<>();
+                boolean success = mCallback.onPullAtom(atomTag, data);
+                StatsEvent[] arr = new StatsEvent[data.size()];
+                arr = data.toArray(arr);
+                try {
+                    resultReceiver.pullFinished(atomTag, success, arr);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId);
+                }
+            });
+        }
+    }
+
+    /**
+     * Callback interface for pulling atoms requested by the stats service.
+     *
+     * @hide
+     */
+    public interface StatsPullAtomCallback {
+        /**
+         * Pull data for the specified atom tag, filling in the provided list of StatsEvent data.
+         * @return if the pull was successful
+         */
+        boolean onPullAtom(int atomTag, List<StatsEvent> data);
+    }
+
     private class StatsdDeathRecipient implements IBinder.DeathRecipient {
         @Override
         public void binderDied() {
@@ -481,6 +566,7 @@ public final class StatsManager {
         }
     }
 
+    @GuardedBy("this")
     private IStatsManager getIStatsManagerLocked() throws StatsUnavailableException {
         if (mService != null) {
             return mService;
@@ -495,6 +581,16 @@ public final class StatsManager {
             throw new StatsUnavailableException("could not connect when linkToDeath", e);
         }
         return mService;
+    }
+
+    @GuardedBy("this")
+    private IStatsCompanionService getIStatsCompanionServiceLocked() {
+        if (mStatsCompanion != null) {
+            return mStatsCompanion;
+        }
+        mStatsCompanion = IStatsCompanionService.Stub.asInterface(
+                ServiceManager.getService("statscompanion"));
+        return mStatsCompanion;
     }
 
     /**

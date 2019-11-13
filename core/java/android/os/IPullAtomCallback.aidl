@@ -16,21 +16,16 @@
 
 package android.os;
 
-import android.os.StatsLogEventWrapper;
+import android.os.IPullAtomResultReceiver;
 
 /**
-  * DEPRECATED
   * Binder interface to pull atoms for the stats service.
   * {@hide}
   */
-interface IStatsPullerCallback {
+interface IPullAtomCallback {
     /**
-     * Pull data for the specified atom tag. Returns an array of StatsLogEventWrapper containing
-     * the data.
-     *
-     * Note: These pulled atoms should not have uid/attribution chain. Additionally, the event
-     * timestamps will be truncated to the nearest 5 minutes.
+     * Initiate a request for a pull for an atom.
      */
-    StatsLogEventWrapper[] pullData(int atomTag, long elapsedNanos, long wallClocknanos);
+     void onPullAtom(int atomTag, IPullAtomResultReceiver resultReceiver);
 
 }
