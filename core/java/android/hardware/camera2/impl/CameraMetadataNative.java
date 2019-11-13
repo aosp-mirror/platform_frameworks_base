@@ -30,7 +30,6 @@ import android.hardware.camera2.marshal.MarshalRegistry;
 import android.hardware.camera2.marshal.Marshaler;
 import android.hardware.camera2.marshal.impl.MarshalQueryableArray;
 import android.hardware.camera2.marshal.impl.MarshalQueryableBlackLevelPattern;
-import android.hardware.camera2.marshal.impl.MarshalQueryableCapabilityAndMaxSize;
 import android.hardware.camera2.marshal.impl.MarshalQueryableBoolean;
 import android.hardware.camera2.marshal.impl.MarshalQueryableColorSpaceTransform;
 import android.hardware.camera2.marshal.impl.MarshalQueryableEnum;
@@ -50,7 +49,7 @@ import android.hardware.camera2.marshal.impl.MarshalQueryableSizeF;
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfiguration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableStreamConfigurationDuration;
 import android.hardware.camera2.marshal.impl.MarshalQueryableString;
-import android.hardware.camera2.params.CapabilityAndMaxSize;
+import android.hardware.camera2.params.Capability;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.HighSpeedVideoConfiguration;
 import android.hardware.camera2.params.LensShadingMap;
@@ -71,6 +70,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ServiceSpecificException;
 import android.util.Log;
+import android.util.Range;
 import android.util.Size;
 
 import com.android.internal.util.Preconditions;
@@ -1385,22 +1385,57 @@ public class CameraMetadataNative implements Parcelable {
         return samples;
     }
 
-    private CapabilityAndMaxSize[] getBokehCapabilities() {
-        CapabilityAndMaxSize[] bcs = getBase(
-                CameraCharacteristics.CONTROL_AVAILABLE_BOKEH_CAPABILITIES);
+    private Capability[] getBokehCapabilities() {
+        int[] bokehMaxSizes = getBase(CameraCharacteristics.CONTROL_AVAILABLE_BOKEH_MAX_SIZES);
+        float[] bokehZoomRanges = getBase(
+                CameraCharacteristics.CONTROL_AVAILABLE_BOKEH_ZOOM_RATIO_RANGES);
+        Range<Float> zoomRange = getBase(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE);
+        float maxDigitalZoom = getBase(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM);
 
-        if (bcs != null) {
-            for (CapabilityAndMaxSize bc : bcs) {
-                if (bc.getMode() < CameraMetadata.CONTROL_BOKEH_MODE_OFF ||
-                        bc.getMode() > CameraMetadata.CONTROL_BOKEH_MODE_CONTINUOUS) {
-                    throw new AssertionError(String.format(
-                            "bokehMode %d is out of valid range [%d, %d]", bc.getMode(),
-                            CameraMetadata.CONTROL_BOKEH_MODE_OFF,
-                            CameraMetadata.CONTROL_BOKEH_MODE_CONTINUOUS));
-                }
+        if (bokehMaxSizes == null) {
+            return null;
+        }
+        if (bokehMaxSizes.length % 3 != 0) {
+            throw new AssertionError("availableBokehMaxSizes must be tuples of " +
+                    "[mode, width, height]");
+        }
+        int numBokehModes = bokehMaxSizes.length / 3;
+        int numBokehZoomRanges = 0;
+        if (bokehZoomRanges != null) {
+            if (bokehZoomRanges.length % 2 != 0) {
+                throw new AssertionError("availableBokehZoomRanges must be tuples of " +
+                        "[minZoom, maxZoom]");
+            }
+            numBokehZoomRanges = bokehZoomRanges.length / 2;
+            if (numBokehModes - numBokehZoomRanges != 1) {
+                throw new AssertionError("Number of bokeh zoom ranges must be 1 less than " +
+                        "number of supported bokeh modes");
             }
         }
-        return bcs;
+
+        float bokehOffMinZoomRatio = 1.0f;
+        float bokehOffMaxZoomRatio = maxDigitalZoom;
+        if (zoomRange != null) {
+            bokehOffMinZoomRatio = zoomRange.getLower();
+            bokehOffMaxZoomRatio = zoomRange.getUpper();
+        }
+
+        Capability[] capabilities = new Capability[numBokehModes];
+        for (int i = 0, j = 0; i < numBokehModes; i++) {
+            int mode = bokehMaxSizes[3 * i];
+            int width = bokehMaxSizes[3 * i + 1];
+            int height = bokehMaxSizes[3 * i + 2];
+            if (mode != CameraMetadata.CONTROL_BOKEH_MODE_OFF && j < numBokehZoomRanges) {
+                capabilities[i] = new Capability(mode, width, height, bokehZoomRanges[2 * j],
+                        bokehZoomRanges[2 * j + 1]);
+                j++;
+            } else {
+                capabilities[i] = new Capability(mode, width, height, bokehOffMinZoomRatio,
+                        bokehOffMaxZoomRatio);
+            }
+        }
+
+        return capabilities;
     }
 
     private <T> void setBase(CameraCharacteristics.Key<T> key, T value) {
@@ -1780,7 +1815,6 @@ public class CameraMetadataNative implements Parcelable {
                 new MarshalQueryableBlackLevelPattern(),
                 new MarshalQueryableHighSpeedVideoConfiguration(),
                 new MarshalQueryableRecommendedStreamConfiguration(),
-                new MarshalQueryableCapabilityAndMaxSize(),
 
                 // generic parcelable marshaler (MUST BE LAST since it has lowest priority)
                 new MarshalQueryableParcelable(),

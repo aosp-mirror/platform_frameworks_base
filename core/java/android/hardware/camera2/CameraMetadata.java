@@ -764,6 +764,7 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}</li>
      * <li>{@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}</li>
      * <li>{@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}</li>
+     * <li>{@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}</li>
      * </ul>
      * <p>Outside of android.control.*, the following controls will work:</p>
      * <ul>
@@ -812,6 +813,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#CONTROL_AWB_REGIONS
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CaptureRequest#FLASH_MODE
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      * @see CaptureRequest#SCALER_CROP_REGION
@@ -2271,6 +2273,7 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}</li>
      * <li>{@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}</li>
      * <li>{@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}</li>
+     * <li>{@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}</li>
      * </ul>
      * <p>Outside of android.control.*, the following controls will work:</p>
      * <ul>
@@ -2317,6 +2320,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#CONTROL_AWB_REGIONS
      * @see CaptureRequest#CONTROL_EFFECT_MODE
      * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CaptureRequest#FLASH_MODE
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      * @see CaptureRequest#SCALER_CROP_REGION
