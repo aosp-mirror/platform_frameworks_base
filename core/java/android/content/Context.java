@@ -5308,6 +5308,7 @@ public abstract class Context {
      * Get the user associated with this context
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public @UserIdInt int getUserId() {
         return android.os.UserHandle.myUserId();
@@ -5424,6 +5425,7 @@ public abstract class Context {
      * @return Returns the {@link Display} object this context is associated with.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public abstract Display getDisplay();
 

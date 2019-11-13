@@ -173,6 +173,7 @@ public final class StorageVolume implements Parcelable {
      * @return the mount path
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public String getPath() {
         return mPath.toString();

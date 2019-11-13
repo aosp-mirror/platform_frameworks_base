@@ -35,6 +35,8 @@ import android.util.proto.ProtoOutputStream;
 import android.util.proto.WireTypeMismatchException;
 import android.view.DisplayInfo;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 import java.io.IOException;
 
 /**
@@ -199,6 +201,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** @hide */
     public static final int PINNED_WINDOWING_MODE_ELEVATION_IN_DIP = 5;
 
+    @UnsupportedAppUsage
     public WindowConfiguration() {
         unset();
     }
