@@ -175,6 +175,11 @@ public class RankingBuilder {
         return this;
     }
 
+    public RankingBuilder setVisuallyInterruptive(boolean interruptive) {
+        mIsVisuallyInterruptive = interruptive;
+        return this;
+    }
+
     public RankingBuilder setImportance(@Importance int importance) {
         mImportance = importance;
         return this;
