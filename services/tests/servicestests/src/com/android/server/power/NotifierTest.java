@@ -45,6 +45,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySavingStats;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -61,6 +62,7 @@ public class NotifierTest {
     private static final String SYSTEM_PROPERTY_QUIESCENT = "ro.boot.quiescent";
     private static final int USER_ID = 0;
 
+    @Mock private BatterySaverController mBatterySaverControllerMock;
     @Mock private BatterySaverPolicy mBatterySaverPolicyMock;
     @Mock private PowerManagerService.NativeWrapper mNativeWrapperMock;
     @Mock private Notifier mNotifierMock;
@@ -223,6 +225,13 @@ public class NotifierTest {
         }
 
         @Override
+        BatterySaverController createBatterySaverController(
+                Object lock, Context context, BatterySaverPolicy batterySaverPolicy,
+                BatterySavingStats batterySavingStats) {
+            return mBatterySaverControllerMock;
+        }
+
+        @Override
         PowerManagerService.NativeWrapper createNativeWrapper() {
             return mNativeWrapperMock;
         }
@@ -246,6 +255,11 @@ public class NotifierTest {
         @Override
         public SystemPropertiesWrapper createSystemPropertiesWrapper() {
             return mSystemPropertiesMock;
+        }
+
+        @Override
+        void invalidateIsInteractiveCaches() {
+            // Avoids an SELinux denial.
         }
     };
 
