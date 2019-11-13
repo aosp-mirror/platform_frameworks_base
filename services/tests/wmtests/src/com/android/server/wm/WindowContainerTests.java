@@ -221,6 +221,32 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveImmediatelyClearsLastSurfacePosition() {
+        reset(mTransaction);
+        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mWm)) {
+            final WindowContainer<WindowContainer> child1 = new WindowContainer(mWm);
+            child1.setBounds(1, 1, 10, 10);
+
+            top.addChild(child1, 0);
+            assertEquals(1, child1.getLastSurfacePosition().x);
+            assertEquals(1, child1.getLastSurfacePosition().y);
+
+            WindowContainer child11 = new WindowContainer(mWm);
+            child1.addChild(child11, 0);
+
+            child1.setBounds(2, 2, 20, 20);
+            assertEquals(2, child1.getLastSurfacePosition().x);
+            assertEquals(2, child1.getLastSurfacePosition().y);
+
+            child1.removeImmediately();
+            assertEquals(0, child1.getLastSurfacePosition().x);
+            assertEquals(0, child1.getLastSurfacePosition().y);
+            assertEquals(0, child11.getLastSurfacePosition().x);
+            assertEquals(0, child11.getLastSurfacePosition().y);
+        }
+    }
+
+    @Test
     public void testAddChildByIndex() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
