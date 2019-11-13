@@ -2919,11 +2919,14 @@ public class AudioService extends IAudioService.Stub
             final boolean currentMute = AudioSystem.isMicrophoneMuted();
             final long identity = Binder.clearCallingIdentity();
             AudioSystem.muteMicrophone(muted);
-            Binder.restoreCallingIdentity(identity);
-            if (muted != currentMute) {
-                mContext.sendBroadcastAsUser(
+            try {
+                if (muted != currentMute) {
+                    mContext.sendBroadcastAsUser(
                         new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
                                 .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
         }
     }
