@@ -22,7 +22,7 @@ import java.util.Collection;
  * Interface for the class responsible for converting a NotifCollection into the final sorted,
  * filtered, and grouped list of currently visible notifications.
  */
-public interface NotifListBuilder {
+public interface CollectionReadyForBuildListener {
     /**
      * Called after the NotifCollection has received an update from NotificationManager but before
      * it dispatches any change events to its listeners. This is to inform the list builder that
