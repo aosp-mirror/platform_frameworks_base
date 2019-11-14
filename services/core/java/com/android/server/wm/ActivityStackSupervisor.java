@@ -142,6 +142,7 @@ import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.UserState;
+import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -443,8 +444,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mInitialized = true;
         setRunningTasks(new RunningTasks());
 
-        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext,
-                mHandler.getLooper());
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mHandler.getLooper());
         mKeyguardController = new KeyguardController(mService, this);
 
         mPersisterQueue = new PersisterQueue();
@@ -576,8 +576,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void stopWaitingForActivityVisible(ActivityRecord r) {
-        stopWaitingForActivityVisible(r,
-                getActivityMetricsLogger().getLastDrawnDelayMs(r.getWindowingMode()));
+        stopWaitingForActivityVisible(r, getActivityMetricsLogger().getLastDrawnDelayMs(r));
     }
 
     void stopWaitingForActivityVisible(ActivityRecord r, long totalTime) {
@@ -2762,7 +2761,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
                 mRootActivityContainer.sendPowerHintForLaunchStartIfNeeded(
                         true /* forceSend */, targetActivity);
-                mActivityMetricsLogger.notifyActivityLaunching(task.intent);
+                final LaunchingState launchingState =
+                        mActivityMetricsLogger.notifyActivityLaunching(task.intent);
                 try {
                     mService.moveTaskToFrontLocked(null /* appThread */, null /* callingPackage */,
                             task.mTaskId, 0, options, true /* fromRecents */);
@@ -2770,8 +2770,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     // the override pending app transition will be applied immediately.
                     targetActivity.applyOptionsLocked();
                 } finally {
-                    mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
-                            targetActivity);
+                    mActivityMetricsLogger.notifyActivityLaunched(launchingState,
+                            START_TASK_TO_FRONT, targetActivity);
                 }
 
                 mService.getActivityStartController().postStartActivityProcessingForLastStarter(

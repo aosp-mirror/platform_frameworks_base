@@ -220,7 +220,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -1228,25 +1227,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
         final WaitResult res = new WaitResult();
-        synchronized (mGlobalLock) {
-            enforceNotIsolatedCaller("startActivityAndWait");
-            userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                    userId, "startActivityAndWait");
-            // TODO: Switch to user app stacks here.
-            getActivityStartController().obtainStarter(intent, "startActivityAndWait")
-                    .setCaller(caller)
-                    .setCallingPackage(callingPackage)
-                    .setResolvedType(resolvedType)
-                    .setResultTo(resultTo)
-                    .setResultWho(resultWho)
-                    .setRequestCode(requestCode)
-                    .setStartFlags(startFlags)
-                    .setActivityOptions(bOptions)
-                    .setUserId(userId)
-                    .setProfilerInfo(profilerInfo)
-                    .setWaitResult(res)
-                    .execute();
-        }
+        enforceNotIsolatedCaller("startActivityAndWait");
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, "startActivityAndWait");
+        // TODO: Switch to user app stacks here.
+        getActivityStartController().obtainStarter(intent, "startActivityAndWait")
+                .setCaller(caller)
+                .setCallingPackage(callingPackage)
+                .setResolvedType(resolvedType)
+                .setResultTo(resultTo)
+                .setResultWho(resultWho)
+                .setRequestCode(requestCode)
+                .setStartFlags(startFlags)
+                .setActivityOptions(bOptions)
+                .setUserId(userId)
+                .setProfilerInfo(profilerInfo)
+                .setWaitResult(res)
+                .execute();
         return res;
     }
 
@@ -1254,24 +1251,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public final int startActivityWithConfig(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, Configuration config, Bundle bOptions, int userId) {
-        synchronized (mGlobalLock) {
-            enforceNotIsolatedCaller("startActivityWithConfig");
-            userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
-                    "startActivityWithConfig");
-            // TODO: Switch to user app stacks here.
-            return getActivityStartController().obtainStarter(intent, "startActivityWithConfig")
-                    .setCaller(caller)
-                    .setCallingPackage(callingPackage)
-                    .setResolvedType(resolvedType)
-                    .setResultTo(resultTo)
-                    .setResultWho(resultWho)
-                    .setRequestCode(requestCode)
-                    .setStartFlags(startFlags)
-                    .setGlobalConfiguration(config)
-                    .setActivityOptions(bOptions)
-                    .setUserId(userId)
-                    .execute();
-        }
+        enforceNotIsolatedCaller("startActivityWithConfig");
+        userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,
+                "startActivityWithConfig");
+        // TODO: Switch to user app stacks here.
+        return getActivityStartController().obtainStarter(intent, "startActivityWithConfig")
+                .setCaller(caller)
+                .setCallingPackage(callingPackage)
+                .setResolvedType(resolvedType)
+                .setResultTo(resultTo)
+                .setResultWho(resultWho)
+                .setRequestCode(requestCode)
+                .setStartFlags(startFlags)
+                .setGlobalConfiguration(config)
+                .setActivityOptions(bOptions)
+                .setUserId(userId)
+                .execute();
     }
 
 
@@ -6095,15 +6090,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
             synchronized (mGlobalLock) {
                 onLocalVoiceInteractionStartedLocked(activity, voiceSession, voiceInteractor);
-            }
-        }
-
-        @Override
-        public void notifyAppTransitionStarting(SparseIntArray reasons,
-                long timestampNs) {
-            synchronized (mGlobalLock) {
-                mStackSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
-                        reasons, timestampNs);
             }
         }
 

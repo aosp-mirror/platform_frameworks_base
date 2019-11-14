@@ -52,11 +52,10 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import android.os.SystemClock;
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
@@ -81,7 +80,7 @@ public class AppTransitionController {
     private final WallpaperController mWallpaperControllerLocked;
     private RemoteAnimationDefinition mRemoteAnimationDefinition = null;
 
-    private final SparseIntArray mTempTransitionReasons = new SparseIntArray();
+    private final ArrayMap<ActivityRecord, Integer> mTempTransitionReasons = new ArrayMap<>();
 
     AppTransitionController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -208,8 +207,8 @@ public class AppTransitionController {
 
         mDisplayContent.computeImeTarget(true /* updateImeTarget */);
 
-        mService.mAtmInternal.notifyAppTransitionStarting(mTempTransitionReasons.clone(),
-            SystemClock.elapsedRealtimeNanos());
+        mService.mAtmService.mStackSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
+                mTempTransitionReasons);
 
         if (transit == TRANSIT_SHOW_SINGLE_TASK_DISPLAY) {
             mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
@@ -442,7 +441,8 @@ public class AppTransitionController {
         }
     }
 
-    private boolean transitionGoodToGo(ArraySet<ActivityRecord> apps, SparseIntArray outReasons) {
+    private boolean transitionGoodToGo(ArraySet<ActivityRecord> apps,
+            ArrayMap<ActivityRecord, Integer> outReasons) {
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Checking %d opening apps (frozen=%b timeout=%b)...", apps.size(),
                 mService.mDisplayFrozen, mDisplayContent.mAppTransition.isTimeout());
@@ -478,11 +478,10 @@ public class AppTransitionController {
                 if (!allDrawn && !activity.startingDisplayed && !activity.startingMoved) {
                     return false;
                 }
-                final int windowingMode = activity.getWindowingMode();
                 if (allDrawn) {
-                    outReasons.put(windowingMode,  APP_TRANSITION_WINDOWS_DRAWN);
+                    outReasons.put(activity, APP_TRANSITION_WINDOWS_DRAWN);
                 } else {
-                    outReasons.put(windowingMode,
+                    outReasons.put(activity,
                             activity.mStartingData instanceof SplashScreenStartingData
                                     ? APP_TRANSITION_SPLASH_SCREEN
                                     : APP_TRANSITION_SNAPSHOT);

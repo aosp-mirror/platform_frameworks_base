@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
@@ -42,10 +41,10 @@ import android.os.Binder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
@@ -502,10 +501,13 @@ public class RecentsAnimationController implements DeathRecipient {
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to start recents animation", e);
         }
-        final SparseIntArray reasons = new SparseIntArray();
-        reasons.put(WINDOWING_MODE_FULLSCREEN, APP_TRANSITION_RECENTS_ANIM);
-        mService.mAtmInternal
-            .notifyAppTransitionStarting(reasons, SystemClock.elapsedRealtimeNanos());
+
+        if (mTargetActivityRecord != null) {
+            final ArrayMap<ActivityRecord, Integer> reasons = new ArrayMap<>(1);
+            reasons.put(mTargetActivityRecord, APP_TRANSITION_RECENTS_ANIM);
+            mService.mAtmService.mStackSupervisor.getActivityMetricsLogger()
+                    .notifyTransitionStarting(reasons);
+        }
     }
 
     private RemoteAnimationTarget[] createAppAnimations() {

@@ -32,9 +32,7 @@ import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
-import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.app.IVoiceInteractor;
@@ -152,17 +150,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onLocalVoiceInteractionStarted(IBinder callingActivity,
             IVoiceInteractionSession mSession,
             IVoiceInteractor mInteractor);
-
-    /**
-     * Callback for window manager to let activity manager know that we are finally starting the
-     * app transition;
-     *
-     * @param reasons A map from windowing mode to a reason integer why the transition was started,
-     *                which must be one of the APP_TRANSITION_* values.
-     * @param timestampNs The time at which the app transition started in
-     *                  {@link SystemClock#elapsedRealtimeNs()} ()} timebase.
-     */
-    public abstract void notifyAppTransitionStarting(SparseIntArray reasons, long timestampNs);
 
     /**
      * Callback for window manager to let activity manager know that the app transition was
