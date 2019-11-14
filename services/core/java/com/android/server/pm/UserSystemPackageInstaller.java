@@ -382,7 +382,7 @@ class UserSystemPackageInstaller {
         final ArrayMap<String, Integer> result = new ArrayMap<>(whitelist.size() + 1);
         // First, do the whitelisted user types.
         for (int i = 0; i < whitelist.size(); i++) {
-            final String pkgName = whitelist.keyAt(i);
+            final String pkgName = whitelist.keyAt(i).intern();
             final int flags = getFlagsFromUserTypes(whitelist.valueAt(i));
             if (flags != 0) {
                 result.put(pkgName, flags);
@@ -395,7 +395,7 @@ class UserSystemPackageInstaller {
         final ArrayMap<String, Set<String>> blacklist =
                 sysConfig.getAndClearPackageToUserTypeBlacklist();
         for (int i = 0; i < blacklist.size(); i++) {
-            final String pkgName = blacklist.keyAt(i);
+            final String pkgName = blacklist.keyAt(i).intern();
             final int nonFlags = getFlagsFromUserTypes(blacklist.valueAt(i));
             final Integer flags = result.get(pkgName);
             if (flags != null) {
