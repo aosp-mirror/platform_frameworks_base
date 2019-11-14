@@ -394,6 +394,15 @@ public final class ContentService extends IContentService.Stub {
      *     allowed.
      */
     @Override
+    public void notifyChange(Uri[] uris, IContentObserver observer,
+            boolean observerWantsSelfNotifications, int flags, int userHandle,
+            int targetSdkVersion, String callingPackage) {
+        for (Uri uri : uris) {
+            notifyChange(uri, observer, observerWantsSelfNotifications, flags, userHandle,
+                    targetSdkVersion, callingPackage);
+        }
+    }
+
     public void notifyChange(Uri uri, IContentObserver observer,
             boolean observerWantsSelfNotifications, int flags, int userHandle,
             int targetSdkVersion, String callingPackage) {

@@ -65,6 +65,7 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Size;
+import android.util.SparseArray;
 
 import com.android.internal.util.MimeIconUtils;
 import com.android.internal.util.Preconditions;
@@ -2381,15 +2382,15 @@ public abstract class ContentResolver implements ContentInterface {
      *            true.
      * @param syncToNetwork If true, same as {@link #NOTIFY_SYNC_TO_NETWORK}.
      * @see #requestSync(android.accounts.Account, String, android.os.Bundle)
+     * @deprecated callers should consider migrating to
+     *             {@link #notifyChange(Uri, ContentObserver, int)}, as it
+     *             offers support for many more options than just
+     *             {@link #NOTIFY_SYNC_TO_NETWORK}.
      */
+    @Deprecated
     public void notifyChange(@NonNull Uri uri, @Nullable ContentObserver observer,
             boolean syncToNetwork) {
-        Preconditions.checkNotNull(uri, "uri");
-        notifyChange(
-                ContentProvider.getUriWithoutUserId(uri),
-                observer,
-                syncToNetwork,
-                ContentProvider.getUserIdFromUri(uri, mContext.getUserId()));
+        notifyChange(uri, observer, syncToNetwork ? NOTIFY_SYNC_TO_NETWORK : 0);
     }
 
     /**
@@ -2398,10 +2399,10 @@ public abstract class ContentResolver implements ContentInterface {
      * To observe events sent through this call, use
      * {@link #registerContentObserver(Uri, boolean, ContentObserver)}.
      * <p>
-     * If syncToNetwork is true, this will attempt to schedule a local sync
-     * using the sync adapter that's registered for the authority of the
-     * provided uri. No account will be passed to the sync adapter, so all
-     * matching accounts will be synchronized.
+     * If {@link #NOTIFY_SYNC_TO_NETWORK} is set, this will attempt to schedule
+     * a local sync using the sync adapter that's registered for the authority
+     * of the provided uri. No account will be passed to the sync adapter, so
+     * all matching accounts will be synchronized.
      * <p>
      * Starting in {@link android.os.Build.VERSION_CODES#O}, all content
      * notifications must be backed by a valid {@link ContentProvider}.
@@ -2427,21 +2428,71 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /**
+     * Notify registered observers that several rows have been updated.
+     * <p>
+     * To observe events sent through this call, use
+     * {@link #registerContentObserver(Uri, boolean, ContentObserver)}.
+     * <p>
+     * If {@link #NOTIFY_SYNC_TO_NETWORK} is set, this will attempt to schedule
+     * a local sync using the sync adapter that's registered for the authority
+     * of the provided uri. No account will be passed to the sync adapter, so
+     * all matching accounts will be synchronized.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#O}, all content
+     * notifications must be backed by a valid {@link ContentProvider}.
+     *
+     * @param uris The uris of the content that was changed.
+     * @param observer The observer that originated the change, may be
+     *            <code>null</null>. The observer that originated the change
+     *            will only receive the notification if it has requested to
+     *            receive self-change notifications by implementing
+     *            {@link ContentObserver#deliverSelfNotifications()} to return
+     *            true.
+     * @param flags Flags such as {@link #NOTIFY_SYNC_TO_NETWORK} or
+     *            {@link #NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS}.
+     */
+    public void notifyChange(@NonNull Iterable<Uri> uris, @Nullable ContentObserver observer,
+            @NotifyFlags int flags) {
+        Preconditions.checkNotNull(uris, "uris");
+
+        // Cluster based on user ID
+        final SparseArray<ArrayList<Uri>> clusteredByUser = new SparseArray<>();
+        for (Uri uri : uris) {
+            final int userId = ContentProvider.getUserIdFromUri(uri, mContext.getUserId());
+            ArrayList<Uri> list = clusteredByUser.get(userId);
+            if (list == null) {
+                list = new ArrayList<>();
+                clusteredByUser.put(userId, list);
+            }
+            list.add(ContentProvider.getUriWithoutUserId(uri));
+        }
+
+        for (int i = 0; i < clusteredByUser.size(); i++) {
+            final int userId = clusteredByUser.keyAt(i);
+            final ArrayList<Uri> list = clusteredByUser.valueAt(i);
+            notifyChange(list.toArray(new Uri[list.size()]), observer, flags, userId);
+        }
+    }
+
+    /**
      * Notify registered observers within the designated user(s) that a row was updated.
      *
+     * @deprecated callers should consider migrating to
+     *             {@link #notifyChange(Uri, ContentObserver, int)}, as it
+     *             offers support for many more options than just
+     *             {@link #NOTIFY_SYNC_TO_NETWORK}.
      * @hide
      */
+    @Deprecated
     public void notifyChange(@NonNull Uri uri, ContentObserver observer, boolean syncToNetwork,
             @UserIdInt int userHandle) {
-        try {
-            getContentService().notifyChange(
-                    uri, observer == null ? null : observer.getContentObserver(),
-                    observer != null && observer.deliverSelfNotifications(),
-                    syncToNetwork ? NOTIFY_SYNC_TO_NETWORK : 0,
-                    userHandle, mTargetSdkVersion, mContext.getPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        notifyChange(uri, observer, syncToNetwork ? NOTIFY_SYNC_TO_NETWORK : 0, userHandle);
+    }
+
+    /** {@hide} */
+    public void notifyChange(@NonNull Uri uri, ContentObserver observer, @NotifyFlags int flags,
+            @UserIdInt int userHandle) {
+        notifyChange(new Uri[] { uri }, observer, flags, userHandle);
     }
 
     /**
@@ -2449,11 +2500,11 @@ public abstract class ContentResolver implements ContentInterface {
      *
      * @hide
      */
-    public void notifyChange(@NonNull Uri uri, ContentObserver observer, @NotifyFlags int flags,
+    public void notifyChange(@NonNull Uri[] uris, ContentObserver observer, @NotifyFlags int flags,
             @UserIdInt int userHandle) {
         try {
             getContentService().notifyChange(
-                    uri, observer == null ? null : observer.getContentObserver(),
+                    uris, observer == null ? null : observer.getContentObserver(),
                     observer != null && observer.deliverSelfNotifications(), flags,
                     userHandle, mTargetSdkVersion, mContext.getPackageName());
         } catch (RemoteException e) {
