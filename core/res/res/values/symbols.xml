@@ -3840,4 +3840,5 @@
   <java-symbol type="layout" name="platlogo_layout" />
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
+  <java-symbol type="bool" name="reset_geo_fencing_check_after_boot_or_apm" />
 </resources>
