@@ -27,12 +27,8 @@
         android:title="@string/headset" />
 
     <com.android.systemui.tuner.StatusBarSwitch
-        android:key="data_saver"
-        android:title="@string/status_bar_data_saver" />
-
-    <com.android.systemui.tuner.StatusBarSwitch
-        android:key="zen"
-        android:title="@string/quick_settings_dnd_label" />
+        android:key="managed_profile"
+        android:title="@string/status_bar_work" />
 
     <!-- ime -->
     <!-- sync_failing -->
@@ -55,27 +51,14 @@
     <!-- speakerphone -->
 
     <com.android.systemui.tuner.StatusBarSwitch
-<<<<<<< HEAD:packages/SystemUI/res/xml/status_bar_prefs.xml
         android:key="zen"
         android:title="@string/quick_settings_dnd_label" />
 
     <!-- mute -->
-=======
-        android:key="roaming"
-        android:title="@string/status_bar_roaming" />
-
-    <com.android.systemui.tuner.StatusBarSwitch
-        android:key="cast"
-        android:title="@string/quick_settings_cast_title" />
->>>>>>> 90187899e76... Add switch for vpn, data saver and roaming icons:packages/SystemUI/res/xml/statusbar_items.xml
 
     <com.android.systemui.tuner.StatusBarSwitch
         android:key="volume"
         android:title="@*android:string/volume_unknown" />
-
-    <com.android.systemui.tuner.StatusBarSwitch
-        android:key="vpn"
-        android:title="@string/status_bar_vpn" />
 
     <com.android.systemui.tuner.StatusBarSwitch
         android:key="wifi"
