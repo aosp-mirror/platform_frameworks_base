@@ -17,4 +17,4 @@
 package com.android.internal.infra;
 
 /** @hide */
-parcelable AndroidFuture;
+parcelable AndroidFuture<T>;
