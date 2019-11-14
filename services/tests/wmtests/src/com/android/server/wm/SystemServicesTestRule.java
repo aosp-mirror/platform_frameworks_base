@@ -303,6 +303,7 @@ public class SystemServicesTestRule implements TestRule {
         // a static object, so we need to clean it up in tearDown(), even though we didn't set up
         // in tests.
         DeviceConfig.removeOnPropertiesChangedListener(mWmService.mPropertiesChangedListener);
+        mWmService.mHighRefreshRateBlacklist.dispose();
 
         waitUntilWindowManagerHandlersIdle();
         // Needs to explicitly dispose current static threads because there could be messages
