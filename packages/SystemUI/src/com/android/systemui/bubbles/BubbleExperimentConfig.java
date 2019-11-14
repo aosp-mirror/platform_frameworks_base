@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles;
 
+import static android.app.Notification.EXTRA_MESSAGES;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
@@ -24,16 +25,21 @@ import static com.android.systemui.bubbles.BubbleController.canLaunchIntentInAct
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -148,11 +154,21 @@ public class BubbleExperimentConfig {
     static Notification.BubbleMetadata createFromNotif(Context context, NotificationEntry entry) {
         Notification notification = entry.getSbn().getNotification();
         final PendingIntent intent = notification.contentIntent;
-        final Icon smallIcon = entry.getSbn().getNotification().getSmallIcon();
+        Icon icon = null;
+        // Use the icon of the person if available
+        List<Person> personList = getPeopleFromNotification(entry);
+        if (personList.size() > 0) {
+            icon = personList.get(0).getIcon();
+        }
+        if (icon == null) {
+            icon = notification.getLargeIcon() != null
+                    ? notification.getLargeIcon()
+                    : notification.getSmallIcon();
+        }
         if (canLaunchIntentInActivityView(context, entry, intent)) {
             return new Notification.BubbleMetadata.Builder()
                     .setDesiredHeight(BUBBLE_HEIGHT)
-                    .setIcon(smallIcon)
+                    .setIcon(icon)
                     .setIntent(intent)
                     .build();
         }
@@ -198,5 +214,32 @@ public class BubbleExperimentConfig {
 
     static boolean isShortcutIntent(PendingIntent intent) {
         return intent.equals(sDummyShortcutIntent);
+    }
+
+    static List<Person> getPeopleFromNotification(NotificationEntry entry) {
+        Bundle extras = entry.getSbn().getNotification().extras;
+        ArrayList<Person> personList = new ArrayList<>();
+        if (extras == null) {
+            return personList;
+        }
+
+        List<Person> p = extras.getParcelableArrayList(Notification.EXTRA_PEOPLE_LIST);
+
+        if (p != null) {
+            personList.addAll(p);
+        }
+
+        if (Notification.MessagingStyle.class.equals(
+                entry.getSbn().getNotification().getNotificationStyle())) {
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            if (!ArrayUtils.isEmpty(messages)) {
+                for (Notification.MessagingStyle.Message message :
+                        Notification.MessagingStyle.Message
+                                .getMessagesFromBundleArray(messages)) {
+                    personList.add(message.getSenderPerson());
+                }
+            }
+        }
+        return personList;
     }
 }
