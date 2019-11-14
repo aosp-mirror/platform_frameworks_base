@@ -4225,6 +4225,7 @@ package android.net {
 
   public class NetworkKey implements android.os.Parcelable {
     ctor public NetworkKey(android.net.WifiKey);
+    method @Nullable public static android.net.NetworkKey createFromScanResult(@Nullable android.net.wifi.ScanResult);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkKey> CREATOR;
@@ -4247,16 +4248,23 @@ package android.net {
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, "android.permission.REQUEST_NETWORK_SCORES"}) public boolean clearScores() throws java.lang.SecurityException;
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, "android.permission.REQUEST_NETWORK_SCORES"}) public void disableScoring() throws java.lang.SecurityException;
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, "android.permission.REQUEST_NETWORK_SCORES"}) public String getActiveScorerPackage();
+    method @RequiresPermission("android.permission.REQUEST_NETWORK_SCORES") public void registerNetworkScoreCallback(int, int, @NonNull java.util.concurrent.Executor, @NonNull android.net.NetworkScoreManager.NetworkScoreCallback) throws java.lang.SecurityException;
+    method @RequiresPermission("android.permission.REQUEST_NETWORK_SCORES") public boolean requestScores(@NonNull android.net.NetworkKey[]) throws java.lang.SecurityException;
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, "android.permission.REQUEST_NETWORK_SCORES"}) public boolean setActiveScorer(String) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.SCORE_NETWORKS) public boolean updateScores(android.net.ScoredNetwork[]) throws java.lang.SecurityException;
-    field public static final String ACTION_CHANGE_ACTIVE = "android.net.scoring.CHANGE_ACTIVE";
+    method @RequiresPermission(android.Manifest.permission.SCORE_NETWORKS) public boolean updateScores(@NonNull android.net.ScoredNetwork[]) throws java.lang.SecurityException;
+    field @Deprecated public static final String ACTION_CHANGE_ACTIVE = "android.net.scoring.CHANGE_ACTIVE";
     field public static final String ACTION_CUSTOM_ENABLE = "android.net.scoring.CUSTOM_ENABLE";
     field public static final String ACTION_RECOMMEND_NETWORKS = "android.net.action.RECOMMEND_NETWORKS";
     field public static final String ACTION_SCORER_CHANGED = "android.net.scoring.SCORER_CHANGED";
-    field public static final String ACTION_SCORE_NETWORKS = "android.net.scoring.SCORE_NETWORKS";
-    field public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
+    field @Deprecated public static final String ACTION_SCORE_NETWORKS = "android.net.scoring.SCORE_NETWORKS";
+    field @Deprecated public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
     field public static final String EXTRA_NEW_SCORER = "newScorer";
-    field public static final String EXTRA_PACKAGE_NAME = "packageName";
+    field @Deprecated public static final String EXTRA_PACKAGE_NAME = "packageName";
+  }
+
+  public static interface NetworkScoreManager.NetworkScoreCallback {
+    method public void clearScores();
+    method public void updateScores(@NonNull java.util.List<android.net.ScoredNetwork>);
   }
 
   public class NetworkStack {

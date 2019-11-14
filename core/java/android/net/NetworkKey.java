@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -27,6 +28,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -48,6 +51,13 @@ public class NetworkKey implements Parcelable {
     /** A wifi network, for which {@link #wifiKey} will be populated. */
     public static final int TYPE_WIFI = 1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"TYPE_"}, value = {
+            TYPE_WIFI
+    })
+    public @interface NetworkType {}
+
     /**
      * The type of this network.
      * @see #TYPE_WIFI
@@ -65,7 +75,6 @@ public class NetworkKey implements Parcelable {
      *
      * @return  A new {@link NetworkKey} instance or <code>null</code> if the given
      *          {@link ScanResult} instance is malformed.
-     * @hide
      */
     @Nullable
     public static NetworkKey createFromScanResult(@Nullable ScanResult result) {

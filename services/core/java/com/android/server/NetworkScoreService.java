@@ -58,12 +58,10 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -902,17 +900,6 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 return;
             }
             writer.println("Current scorer: " + currentScorer);
-
-            sendCacheUpdateCallback(new BiConsumer<INetworkScoreCache, Object>() {
-                @Override
-                public void accept(INetworkScoreCache networkScoreCache, Object cookie) {
-                    try {
-                        TransferPipe.dumpAsync(networkScoreCache.asBinder(), fd, args);
-                    } catch (IOException | RemoteException e) {
-                        writer.println("Failed to dump score cache: " + e);
-                    }
-                }
-            }, getScoreCacheLists());
 
             synchronized (mServiceConnectionLock) {
                 if (mServiceConnection != null) {
