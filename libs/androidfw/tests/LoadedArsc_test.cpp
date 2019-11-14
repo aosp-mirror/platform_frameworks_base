@@ -144,8 +144,7 @@ TEST(LoadedArscTest, LoadAppAsSharedLibrary) {
                                       "resources.arsc", &contents));
 
   std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(StringPiece(contents), nullptr /* loaded_idmap */, false /*system*/,
-                       true /*load_as_shared_library*/);
+      LoadedArsc::Load(StringPiece(contents), nullptr /* loaded_idmap */, PROPERTY_DYNAMIC);
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const auto& packages = loaded_arsc->GetPackages();
@@ -227,9 +226,7 @@ TEST(LoadedArscTest, LoadOverlayable) {
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlayable/overlayable.apk",
                                       "resources.arsc", &contents));
 
-  std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(StringPiece(contents), nullptr /* loaded_idmap */, false /*system*/,
-                       false /*load_as_shared_library*/);
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
 
   ASSERT_THAT(loaded_arsc, NotNull());
   const LoadedPackage* package = loaded_arsc->GetPackageById(
@@ -346,7 +343,7 @@ TEST(LoadedArscTest, LoadCustomLoader) {
       asset->getLength());
 
   std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(data, nullptr, false, false, true);
+      LoadedArsc::Load(data, nullptr, PROPERTY_LOADER);
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const LoadedPackage* package =

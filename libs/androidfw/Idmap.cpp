@@ -44,8 +44,8 @@ static bool compare_overlay_entries(const Idmap_overlay_entry& e1, const uint32_
 }
 
 OverlayStringPool::OverlayStringPool(const LoadedIdmap* loaded_idmap)
-                                     : data_header_(loaded_idmap->data_header_),
-                                       idmap_string_pool_(loaded_idmap->string_pool_.get()) { };
+    : data_header_(loaded_idmap->data_header_),
+      idmap_string_pool_(loaded_idmap->string_pool_.get()) { };
 
 OverlayStringPool::~OverlayStringPool() {
   uninit();
@@ -188,11 +188,12 @@ LoadedIdmap::LoadedIdmap(const Idmap_header* header,
                          const Idmap_data_header* data_header,
                          const Idmap_target_entry* target_entries,
                          const Idmap_overlay_entry* overlay_entries,
-                         ResStringPool* string_pool) : header_(header),
-                                                       data_header_(data_header),
-                                                       target_entries_(target_entries),
-                                                       overlay_entries_(overlay_entries),
-                                                       string_pool_(string_pool) {
+                         ResStringPool* string_pool)
+     : header_(header),
+       data_header_(data_header),
+       target_entries_(target_entries),
+       overlay_entries_(overlay_entries),
+       string_pool_(string_pool) {
 
   size_t length = strnlen(reinterpret_cast<const char*>(header_->overlay_path),
                           arraysize(header_->overlay_path));
@@ -264,7 +265,7 @@ std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_da
     }
   }
 
-   // Can't use make_unique because LoadedImpl constructor is private.
+  // Can't use make_unique because LoadedIdmap constructor is private.
   std::unique_ptr<LoadedIdmap> loaded_idmap = std::unique_ptr<LoadedIdmap>(
       new LoadedIdmap(header, data_header, target_entries, overlay_entries,
                       idmap_string_pool.release()));

@@ -1215,7 +1215,8 @@ public final class LoadedApk {
         }
 
         // Rewrite the R 'constants' for all library apks.
-        SparseArray<String> packageIdentifiers = getAssets().getAssignedPackageIdentifiers();
+        SparseArray<String> packageIdentifiers = getAssets().getAssignedPackageIdentifiers(
+                false, false);
         final int N = packageIdentifiers.size();
         for (int i = 0; i < N; i++) {
             final int id = packageIdentifiers.keyAt(i);
