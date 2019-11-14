@@ -184,8 +184,9 @@ public class BubbleData {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryUpdated: " + entry);
         }
+
         Bubble bubble = getBubbleWithKey(entry.getKey());
-        suppressFlyout = !entry.getRanking().visuallyInterruptive() || suppressFlyout;
+        suppressFlyout |= !shouldShowFlyout(entry);
 
         if (bubble == null) {
             // Create a new bubble
@@ -296,6 +297,15 @@ public class BubbleData {
             }
         }
         return bubbleChildren;
+    }
+
+    private boolean shouldShowFlyout(NotificationEntry notif) {
+        if (notif.getRanking().visuallyInterruptive()) {
+            return true;
+        }
+        final boolean suppressedFromShade = hasBubbleWithKey(notif.getKey())
+                && !getBubbleWithKey(notif.getKey()).showInShadeWhenBubble();
+        return suppressedFromShade;
     }
 
     private void doAdd(Bubble bubble) {
@@ -510,7 +520,7 @@ public class BubbleData {
      * required to keep grouping intact.
      *
      * @param minPosition the first insert point to consider
-     * @param newBubble the bubble to insert
+     * @param newBubble   the bubble to insert
      * @return the position where the bubble was inserted
      */
     private int insertBubble(int minPosition, Bubble newBubble) {
@@ -683,15 +693,19 @@ public class BubbleData {
      * Description of current bubble data state.
      */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.print("selected: "); pw.println(mSelectedBubble != null
+        pw.print("selected: ");
+        pw.println(mSelectedBubble != null
                 ? mSelectedBubble.getKey()
                 : "null");
-        pw.print("expanded: "); pw.println(mExpanded);
-        pw.print("count:    "); pw.println(mBubbles.size());
+        pw.print("expanded: ");
+        pw.println(mExpanded);
+        pw.print("count:    ");
+        pw.println(mBubbles.size());
         for (Bubble bubble : mBubbles) {
             bubble.dump(fd, pw, args);
         }
-        pw.print("summaryKeys: "); pw.println(mSuppressedGroupKeys.size());
+        pw.print("summaryKeys: ");
+        pw.println(mSuppressedGroupKeys.size());
         for (String key : mSuppressedGroupKeys.keySet()) {
             pw.println("   suppressing: " + key);
         }

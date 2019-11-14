@@ -84,9 +84,9 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         mCallback = callback;
     }
 
-    public void selectRoute(String packageName, String routeId) {
+    public void requestSelectRoute(String packageName, String routeId, int seq) {
         if (mConnectionReady) {
-            mActiveConnection.selectRoute(packageName, routeId);
+            mActiveConnection.requestSelectRoute(packageName, routeId, seq);
             updateBinding();
         }
     }
@@ -328,9 +328,9 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
             mClient.dispose();
         }
 
-        public void selectRoute(String packageName, String routeId) {
+        public void requestSelectRoute(String packageName, String routeId, int seq) {
             try {
-                mProvider.selectRoute(packageName, routeId);
+                mProvider.requestSelectRoute(packageName, routeId, seq);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to set discovery mode.", ex);
             }

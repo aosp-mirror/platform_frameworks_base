@@ -11287,16 +11287,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public WindowInsets computeSystemWindowInsets(WindowInsets in, Rect outLocalInsets) {
         if ((mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) == 0
                 || mAttachInfo == null
-                || ((mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0
-                && !mAttachInfo.mOverscanRequested)) {
+                || ((mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0)) {
             outLocalInsets.set(in.getSystemWindowInsetsAsRect());
             return in.consumeSystemWindowInsets().inset(outLocalInsets);
         } else {
             // The application wants to take care of fitting system window for
-            // the content...  however we still need to take care of any overscan here.
-            final Rect overscan = mAttachInfo.mOverscanInsets;
-            outLocalInsets.set(overscan);
-            return in.inset(outLocalInsets);
+            // the content.
+            outLocalInsets.setEmpty();
+            return in;
         }
     }
 
@@ -11373,19 +11371,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage
     public void makeOptionalFitsSystemWindows() {
         setFlags(OPTIONAL_FITS_SYSTEM_WINDOWS, OPTIONAL_FITS_SYSTEM_WINDOWS);
-    }
-
-    /**
-     * Returns the outsets, which areas of the device that aren't a surface, but we would like to
-     * treat them as such.
-     * @hide
-     */
-    public void getOutsets(Rect outOutsetRect) {
-        if (mAttachInfo != null) {
-            outOutsetRect.set(mAttachInfo.mOutsets);
-        } else {
-            outOutsetRect.setEmpty();
-        }
     }
 
     /**
@@ -24729,6 +24714,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param isRoot true if the view belongs to the root namespace, false
      *        otherwise
      */
+    @UnsupportedAppUsage
     @TestApi
     public void setIsRootNamespace(boolean isRoot) {
         if (isRoot) {
@@ -28444,13 +28430,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         /**
          * For windows that are full-screen but using insets to layout inside
-         * of the screen areas, these are the current insets to appear inside
-         * the overscan area of the display.
-         */
-        final Rect mOverscanInsets = new Rect();
-
-        /**
-         * For windows that are full-screen but using insets to layout inside
          * of the screen decorations, these are the current insets for the
          * content of the window.
          */
@@ -28475,12 +28454,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         final DisplayCutout.ParcelableWrapper mDisplayCutout =
                 new DisplayCutout.ParcelableWrapper(DisplayCutout.NO_CUTOUT);
-
-        /**
-         * For windows that include areas that are not covered by real surface these are the outsets
-         * for real surface.
-         */
-        final Rect mOutsets = new Rect();
 
         /**
          * In multi-window we force show the system bars. Because we don't want that the surface
@@ -28589,12 +28562,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * attached.
          */
         boolean mHasSystemUiListeners;
-
-        /**
-         * Set if the window has requested to extend into the overscan region
-         * via WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN.
-         */
-        boolean mOverscanRequested;
 
         /**
          * Set if the visibility of any views has changed.

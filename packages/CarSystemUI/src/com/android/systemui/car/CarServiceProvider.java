@@ -19,6 +19,8 @@ package com.android.systemui.car;
 import android.car.Car;
 import android.content.Context;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +50,12 @@ public class CarServiceProvider {
                         }
                     }
                 });
+    }
+
+    @VisibleForTesting
+    public CarServiceProvider(Context context, Car car) {
+        mContext = context;
+        mCar = car;
     }
 
     /**

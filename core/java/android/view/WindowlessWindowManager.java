@@ -90,7 +90,7 @@ class WindowlessWindowManager implements IWindowSession {
     @Override
     public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
-            Rect outStableInsets, Rect outOutsets,
+            Rect outStableInsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
             InsetsState outInsetsState) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
@@ -140,8 +140,8 @@ class WindowlessWindowManager implements IWindowSession {
     @Override
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
-            Rect outFrame, Rect outOverscanInsets, Rect outContentInsets, Rect outVisibleInsets,
-            Rect outStableInsets, Rect outsets, Rect outBackdropFrame,
+            Rect outFrame, Rect outContentInsets, Rect outVisibleInsets,
+            Rect outStableInsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
         State state = null;

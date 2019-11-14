@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.graphics.Color;
 import android.os.Trace;
 
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
@@ -128,10 +129,11 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
+            final boolean isDocked = mDockManager.isDocked();
             mBlankScreen = mDisplayRequiresBlanking;
 
             mFrontTint = Color.BLACK;
-            mFrontAlpha = alwaysOnEnabled ? mAodFrontScrimAlpha : 1f;
+            mFrontAlpha = (alwaysOnEnabled || isDocked) ? mAodFrontScrimAlpha : 1f;
 
             mBehindTint = Color.BLACK;
             mBehindAlpha = ScrimController.TRANSPARENT;
@@ -258,6 +260,7 @@ public enum ScrimState {
     ScrimView mScrimForBubble;
 
     DozeParameters mDozeParameters;
+    DockManager mDockManager;
     boolean mDisplayRequiresBlanking;
     boolean mWallpaperSupportsAmbientMode;
     boolean mHasBackdrop;
@@ -267,12 +270,13 @@ public enum ScrimState {
     long mKeyguardFadingAwayDuration;
 
     public void init(ScrimView scrimInFront, ScrimView scrimBehind, ScrimView scrimForBubble,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters, DockManager dockManager) {
         mScrimInFront = scrimInFront;
         mScrimBehind = scrimBehind;
         mScrimForBubble = scrimForBubble;
 
         mDozeParameters = dozeParameters;
+        mDockManager = dockManager;
         mDisplayRequiresBlanking = dozeParameters.getDisplayNeedsBlanking();
     }
 

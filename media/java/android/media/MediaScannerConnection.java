@@ -197,7 +197,7 @@ public class MediaScannerConnection implements ServiceConnection {
     private static Uri scanFileQuietly(ContentProviderClient client, File file) {
         Uri uri = null;
         try {
-            uri = MediaStore.scanFile(client, file);
+            uri = MediaStore.scanFile(client, file.getCanonicalFile());
             Log.d(TAG, "Scanned " + file + " to " + uri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to scan " + file + ": " + e);

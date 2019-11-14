@@ -44,7 +44,11 @@ import org.junit.Rule;
 import org.junit.Test;
 
 @LargeTest
-public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase {
+public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
+        implements ManualBenchmarkState.CustomizedIterationListener {
+
+    private static final int PROFILED_ITERATIONS = 2;
+
     @Rule
     public final PerfManualStatusReporter mPerfStatusReporter = new PerfManualStatusReporter();
 
@@ -59,10 +63,24 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase {
         sUiAutomation.dropShellPermissionIdentity();
     }
 
+    /** The last {@link #PROFILED_ITERATIONS} will provide the information of method profiling. */
+    @Override
+    public void onStart(int iteration) {
+        startProfiling(WindowAddRemovePerfTest.class.getSimpleName()
+                + "_MethodTracing_" + iteration + ".trace");
+    }
+
+    @Override
+    public void onFinished(int iteration) {
+        stopProfiling();
+    }
+
     @Test
     @ManualBenchmarkTest(warmupDurationNs = TIME_1_S_IN_NS, targetTestDurationNs = TIME_5_S_IN_NS)
     public void testAddRemoveWindow() throws Throwable {
-        new TestWindow().runBenchmark(mPerfStatusReporter.getBenchmarkState());
+        final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        state.setCustomizedIterations(PROFILED_ITERATIONS, this);
+        new TestWindow().runBenchmark(state);
     }
 
     private static class TestWindow extends BaseIWindow {
@@ -70,7 +88,6 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase {
         final Rect mOutFrame = new Rect();
         final Rect mOutContentInsets = new Rect();
         final Rect mOutStableInsets = new Rect();
-        final Rect mOutOutsets = new Rect();
         final DisplayCutout.ParcelableWrapper mOutDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
         final InsetsState mOutInsetsState = new InsetsState();
@@ -92,7 +109,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase {
                 long startTime = SystemClock.elapsedRealtimeNanos();
                 session.addToDisplay(this, mSeq, mLayoutParams, View.VISIBLE,
                         Display.DEFAULT_DISPLAY, mOutFrame, mOutContentInsets, mOutStableInsets,
-                        mOutOutsets, mOutDisplayCutout, inputChannel, mOutInsetsState);
+                        mOutDisplayCutout, inputChannel, mOutInsetsState);
                 final long elapsedTimeNsOfAdd = SystemClock.elapsedRealtimeNanos() - startTime;
                 state.addExtraResult("add", elapsedTimeNsOfAdd);
 
@@ -102,6 +119,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase {
                 state.addExtraResult("remove", elapsedTimeNsOfRemove);
 
                 elapsedTimeNs = elapsedTimeNsOfAdd + elapsedTimeNsOfRemove;
+                inputChannel.dispose();
             }
         }
     }

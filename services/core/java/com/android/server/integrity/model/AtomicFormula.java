@@ -177,6 +177,14 @@ public abstract class AtomicFormula implements Formula {
             dest.writeInt(mOperator);
         }
 
+        public int getValue() {
+            return mValue;
+        }
+
+        public int getOperator() {
+            return mOperator;
+        }
+
         private int getMetadataValueByKey(AppInstallMetadata appInstallMetadata) {
             switch (getKey()) {
                 case VERSION_CODE:
@@ -269,6 +277,10 @@ public abstract class AtomicFormula implements Formula {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(getKey());
             dest.writeStringNoHelper(mValue);
+        }
+
+        public String getValue() {
+            return mValue;
         }
 
         private String getMetadataValueByKey(AppInstallMetadata appInstallMetadata) {
@@ -365,6 +377,10 @@ public abstract class AtomicFormula implements Formula {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(getKey());
             dest.writeByte((byte) (mValue ? 1 : 0));
+        }
+
+        public boolean getValue() {
+            return mValue;
         }
 
         private boolean getMetadataValueByKey(AppInstallMetadata appInstallMetadata) {

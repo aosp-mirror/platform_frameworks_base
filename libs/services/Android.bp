@@ -22,6 +22,7 @@ cc_library_shared {
         "src/os/DropBoxManager.cpp",
         "src/os/StatsDimensionsValue.cpp",
         "src/os/StatsLogEventWrapper.cpp",
+        "src/util/StatsEvent.cpp",
     ],
 
     shared_libs: [

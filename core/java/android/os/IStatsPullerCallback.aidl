@@ -19,6 +19,7 @@ package android.os;
 import android.os.StatsLogEventWrapper;
 
 /**
+  * DEPRECATED
   * Binder interface to pull atoms for the stats service.
   * {@hide}
   */

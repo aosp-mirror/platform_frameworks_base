@@ -95,8 +95,8 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
      * Gets the route for the given route id or null if no matching route exists.
      */
     @Nullable
-    public MediaRoute2Info getRoute(String routeId) {
-        return mRoutes.get(routeId);
+    public MediaRoute2Info getRoute(@NonNull String routeId) {
+        return mRoutes.get(Objects.requireNonNull(routeId, "routeId must not be null"));
     }
 
     /**
@@ -113,7 +113,7 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mUniqueId);
         dest.writeTypedArrayMap(mRoutes, flags);
     }
@@ -155,6 +155,7 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
          * </p>
          * @hide
          */
+        @NonNull
         public Builder setUniqueId(@Nullable String uniqueId) {
             if (TextUtils.equals(mUniqueId, uniqueId)) {
                 return this;
@@ -174,6 +175,7 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
         /**
          * Adds a route to the provider
          */
+        @NonNull
         public Builder addRoute(@NonNull MediaRoute2Info route) {
             Objects.requireNonNull(route, "route must not be null");
 
@@ -192,6 +194,7 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
         /**
          * Adds a list of routes to the provider
          */
+        @NonNull
         public Builder addRoutes(@NonNull Collection<MediaRoute2Info> routes) {
             Objects.requireNonNull(routes, "routes must not be null");
 

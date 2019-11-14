@@ -113,6 +113,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                 break;
             case DOZE_AOD:
             case DOZE_REQUEST_PULSE:
+            case DOZE_AOD_DOCKED:
                 setLightSensorEnabled(true);
                 break;
             case DOZE:

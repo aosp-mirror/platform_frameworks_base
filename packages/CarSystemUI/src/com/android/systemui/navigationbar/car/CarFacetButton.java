@@ -29,9 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.keyguard.AlphaOptimizedImageButton;
-import com.android.systemui.CarSystemUIFactory;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIFactory;
 
 /**
  * CarFacetButton is a ui component designed to be used as a shortcut for an app of a defined
@@ -82,10 +80,6 @@ public class CarFacetButton extends LinearLayout {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CarFacetButton);
         setupIntents(typedArray);
         setupIcons(typedArray);
-        CarSystemUIFactory factory = SystemUIFactory.getInstance();
-        CarFacetButtonController carFacetButtonController = factory.getCarDependencyComponent()
-                .getCarFacetButtonController();
-        carFacetButtonController.addFacetButton(this);
     }
 
     /**

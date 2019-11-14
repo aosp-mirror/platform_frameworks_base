@@ -19,36 +19,16 @@ package com.android.systemui;
 import android.content.Context;
 
 import com.android.systemui.dagger.SystemUIRootComponent;
-import com.android.systemui.navigationbar.car.CarFacetButtonController;
-
-import javax.inject.Singleton;
-
-import dagger.Component;
 
 /**
  * Class factory to provide car specific SystemUI components.
  */
 public class CarSystemUIFactory extends SystemUIFactory {
 
-    private CarDependencyComponent mCarDependencyComponent;
-
     @Override
     protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
-        mCarDependencyComponent = DaggerCarSystemUIFactory_CarDependencyComponent.builder()
-                .contextHolder(new ContextHolder(context))
-                .build();
         return DaggerCarSystemUIRootComponent.builder()
                 .contextHolder(new ContextHolder(context))
                 .build();
-    }
-
-    public CarDependencyComponent getCarDependencyComponent() {
-        return mCarDependencyComponent;
-    }
-
-    @Singleton
-    @Component(modules = ContextHolder.class)
-    public interface CarDependencyComponent {
-        CarFacetButtonController getCarFacetButtonController();
     }
 }

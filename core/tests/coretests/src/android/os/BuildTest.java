@@ -60,7 +60,7 @@ public class BuildTest extends TestCase {
         assertNotEmpty("BRAND", Build.BRAND);
         assertNotEmpty("MODEL", Build.MODEL);
         assertNotEmpty("VERSION.INCREMENTAL", Build.VERSION.INCREMENTAL);
-        assertNotEmpty("VERSION.RELEASE", Build.VERSION.RELEASE);
+        assertNotEmpty("VERSION.RELEASE", Build.VERSION.RELEASE_OR_CODENAME);
         assertNotEmpty("TYPE", Build.TYPE);
         Assert.assertNotNull("TAGS", Build.TAGS); // TAGS is allowed to be empty.
         assertNotEmpty("FINGERPRINT", Build.FINGERPRINT);

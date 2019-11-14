@@ -88,6 +88,15 @@ public final class ManualBenchmarkState {
         int[] percentiles() default {};
     }
 
+    /** The interface to receive the events of customized iteration. */
+    public interface CustomizedIterationListener {
+        /** The customized iteration starts. */
+        void onStart(int iteration);
+
+        /** The customized iteration finished. */
+        void onFinished(int iteration);
+    }
+
     /** It means the entire {@link StatsReport} is not given. */
     private static final int DEFAULT_STATS_REPORT = -2;
 
@@ -105,7 +114,8 @@ public final class ManualBenchmarkState {
     private static final int NOT_STARTED = 0;  // The benchmark has not started yet.
     private static final int WARMUP = 1; // The benchmark is warming up.
     private static final int RUNNING = 2;  // The benchmark is running.
-    private static final int FINISHED = 3;  // The benchmark has stopped.
+    private static final int RUNNING_CUSTOMIZED = 3;  // Running for customized measurement.
+    private static final int FINISHED = 4;  // The benchmark has stopped.
 
     private int mState = NOT_STARTED;  // Current benchmark state.
 
@@ -115,6 +125,14 @@ public final class ManualBenchmarkState {
     private int mWarmupIterations = 0;
 
     private int mMaxIterations = 0;
+
+    /**
+     * Additinal iteration that used to apply customized measurement. The result during these
+     * iterations won't be counted into {@link #mStats}.
+     */
+    private int mMaxCustomizedIterations;
+    private int mCustomizedIterations;
+    private CustomizedIterationListener mCustomizedIterationListener;
 
     // Individual duration in nano seconds.
     private ArrayList<Long> mResults = new ArrayList<>();
@@ -189,9 +207,24 @@ public final class ManualBenchmarkState {
                 final boolean keepRunning = mResults.size() < mMaxIterations;
                 if (!keepRunning) {
                     mStats = new Stats(mResults);
+                    if (mMaxCustomizedIterations > 0 && mCustomizedIterationListener != null) {
+                        mState = RUNNING_CUSTOMIZED;
+                        mCustomizedIterationListener.onStart(mCustomizedIterations);
+                        return true;
+                    }
                     mState = FINISHED;
                 }
                 return keepRunning;
+            }
+            case RUNNING_CUSTOMIZED: {
+                mCustomizedIterationListener.onFinished(mCustomizedIterations);
+                mCustomizedIterations++;
+                if (mCustomizedIterations >= mMaxCustomizedIterations) {
+                    mState = FINISHED;
+                    return false;
+                }
+                mCustomizedIterationListener.onStart(mCustomizedIterations);
+                return true;
             }
             case FINISHED:
                 throw new IllegalStateException("The benchmark has finished.");
@@ -210,11 +243,21 @@ public final class ManualBenchmarkState {
     }
 
     /**
-     * Adds additional result while this benchmark isn't warming up. It is used when a sequence of
-     * operations is executed consecutively, the duration of each operation can also be recorded.
+     * This is used to run the benchmark with more information by enabling some debug mechanism but
+     * we don't want to account the special runs (slower) in the stats report.
+     */
+    public void setCustomizedIterations(int iterations, CustomizedIterationListener listener) {
+        mMaxCustomizedIterations = iterations;
+        mCustomizedIterationListener = listener;
+    }
+
+    /**
+     * Adds additional result while this benchmark isn't warming up or running in customized state.
+     * It is used when a sequence of operations is executed consecutively, the duration of each
+     * operation can also be recorded.
      */
     public void addExtraResult(String key, long duration) {
-        if (isWarmingUp()) {
+        if (isWarmingUp() || mState == RUNNING_CUSTOMIZED) {
             return;
         }
         if (mExtraResults == null) {

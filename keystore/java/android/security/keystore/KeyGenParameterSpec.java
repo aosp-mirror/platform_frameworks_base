@@ -19,6 +19,7 @@ package android.security.keystore;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
@@ -808,10 +809,14 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         /**
          * Sets the UID which will own the key.
          *
+         * Such cross-UID access is permitted to a few system UIDs and only to a few other UIDs
+         * (e.g., Wi-Fi, VPN) all of which are system.
+         *
          * @param uid UID or {@code -1} for the UID of the current process.
          *
          * @hide
          */
+        @SystemApi
         @NonNull
         public Builder setUid(int uid) {
             mUid = uid;
@@ -1256,6 +1261,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          *
          * Sets whether to include a temporary unique ID field in the attestation certificate.
          */
+        @UnsupportedAppUsage
         @TestApi
         @NonNull
         public Builder setUniqueIdIncluded(boolean uniqueIdIncluded) {

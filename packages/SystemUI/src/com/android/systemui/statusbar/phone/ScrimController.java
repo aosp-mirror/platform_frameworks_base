@@ -46,6 +46,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.MainResources;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -136,6 +137,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
+    private final DockManager mDockManager;
     private final AlarmTimeout mTimeTicker;
     private final KeyguardVisibilityCallback mKeyguardVisibilityCallback;
     private final Handler mHandler;
@@ -192,7 +194,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             AlarmManager alarmManager, KeyguardStateController keyguardStateController,
             @MainResources Resources resources,
             DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
-            KeyguardUpdateMonitor keyguardUpdateMonitor, SysuiColorExtractor sysuiColorExtractor) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor, SysuiColorExtractor sysuiColorExtractor,
+            DockManager dockManager) {
 
         mScrimStateListener = lightBarController::setScrimState;
 
@@ -209,6 +212,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // to make sure that text on top of it is legible.
         mScrimBehindAlpha = mScrimBehindAlphaResValue;
         mDozeParameters = dozeParameters;
+        mDockManager = dockManager;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -234,7 +238,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         final ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {
-            states[i].init(mScrimInFront, mScrimBehind, mScrimForBubble, mDozeParameters);
+            states[i].init(mScrimInFront, mScrimBehind, mScrimForBubble, mDozeParameters,
+                    mDockManager);
             states[i].setScrimBehindAlphaKeyguard(mScrimBehindAlphaKeyguard);
         }
 
@@ -356,11 +361,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
 
         if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()) {
-            return true;
-        }
-
-        if (mState == ScrimState.PULSING
-                && mCallback != null && mCallback.shouldTimeoutWallpaper()) {
             return true;
         }
 
@@ -520,14 +520,26 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * device is dozing when the light sensor is on.
      */
     public void setAodFrontScrimAlpha(float alpha) {
-        if (((mState == ScrimState.AOD && mDozeParameters.getAlwaysOn())
-                || mState == ScrimState.PULSING) && mInFrontAlpha != alpha) {
+        if (mInFrontAlpha != alpha && shouldUpdateFrontScrimAlpha()) {
             mInFrontAlpha = alpha;
             updateScrims();
         }
 
         mState.AOD.setAodFrontScrimAlpha(alpha);
         mState.PULSING.setAodFrontScrimAlpha(alpha);
+    }
+
+    private boolean shouldUpdateFrontScrimAlpha() {
+        if (mState == ScrimState.AOD
+                && (mDozeParameters.getAlwaysOn() || mDockManager.isDocked())) {
+            return true;
+        }
+
+        if (mState == ScrimState.PULSING) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -1021,10 +1033,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
 
         default void onCancelled() {
-        }
-        /** Returns whether to timeout wallpaper or not. */
-        default boolean shouldTimeoutWallpaper() {
-            return false;
         }
     }
 

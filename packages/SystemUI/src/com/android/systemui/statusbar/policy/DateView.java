@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -47,6 +48,12 @@ public class DateView extends TextView {
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // If the handler is null, it means we received a broadcast while the view has not
+            // finished being attached or in the process of being detached.
+            // In that case, do not post anything.
+            Handler handler = getHandler();
+            if (handler == null) return;
+
             final String action = intent.getAction();
             if (Intent.ACTION_TIME_TICK.equals(action)
                     || Intent.ACTION_TIME_CHANGED.equals(action)
@@ -55,9 +62,9 @@ public class DateView extends TextView {
                 if (Intent.ACTION_LOCALE_CHANGED.equals(action)
                         || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                     // need to get a fresh date format
-                    getHandler().post(() -> mDateFormat = null);
+                    handler.post(() -> mDateFormat = null);
                 }
-                getHandler().post(() -> updateClock());
+                handler.post(() -> updateClock());
             }
         }
     };

@@ -212,15 +212,21 @@ public class BluetoothEventManager {
     }
 
     private void dispatchAudioModeChanged() {
-        mDeviceManager.dispatchAudioModeChanged();
+        for (CachedBluetoothDevice cachedDevice : mDeviceManager.getCachedDevicesCopy()) {
+            cachedDevice.onAudioModeChanged();
+        }
         for (BluetoothCallback callback : mCallbacks) {
             callback.onAudioModeChanged();
         }
     }
 
-    private void dispatchActiveDeviceChanged(CachedBluetoothDevice activeDevice,
+    @VisibleForTesting
+    void dispatchActiveDeviceChanged(CachedBluetoothDevice activeDevice,
             int bluetoothProfile) {
-        mDeviceManager.onActiveDeviceChanged(activeDevice, bluetoothProfile);
+        for (CachedBluetoothDevice cachedDevice : mDeviceManager.getCachedDevicesCopy()) {
+            boolean isActive = Objects.equals(cachedDevice, activeDevice);
+            cachedDevice.onActiveDeviceChanged(isActive, bluetoothProfile);
+        }
         for (BluetoothCallback callback : mCallbacks) {
             callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
         }

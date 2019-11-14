@@ -50,6 +50,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
@@ -101,6 +102,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private SysuiColorExtractor mSysuiColorExtractor;
+    @Mock
+    private DockManager mDockManager;
 
 
     private static class AnimatorListener implements Animator.AnimatorListener {
@@ -210,10 +213,13 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         when(mSysuiColorExtractor.getNeutralColors()).thenReturn(new GradientColors());
 
+        when(mDockManager.isDocked()).thenReturn(false);
+
         mScrimController = new ScrimController(mLightBarController,
                 mDozeParamenters, mAlarmManager, mKeyguardStateController,
                 mResources, mDelayedWakeLockBuilder,
-                new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor, mSysuiColorExtractor);
+                new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor, mSysuiColorExtractor,
+                mDockManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mScrimInFront, mScrimForBubble);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -366,6 +372,45 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setAodFrontScrimAlpha(0.3f);
         Assert.assertEquals(ScrimState.AOD.getFrontAlpha(), mScrimInFront.getViewAlpha(), 0.001f);
         Assert.assertNotEquals(0.3f, mScrimInFront.getViewAlpha(), 0.001f);
+
+        // Reset value since enums are static.
+        mScrimController.setAodFrontScrimAlpha(0f);
+    }
+
+    @Test
+    public void transitionToAod_afterDocked_ignoresAlwaysOnAndUpdatesFrontAlpha() {
+        // Assert that setting the AOD front scrim alpha doesn't take effect in a non-AOD state.
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        mScrimController.setAodFrontScrimAlpha(0.5f);
+        finishAnimationsImmediately();
+
+        assertScrimAlpha(TRANSPARENT /* front */,
+                SEMI_TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
+
+        // ... and doesn't take effect when disabled always_on
+        mAlwaysOnEnabled = false;
+        mScrimController.transitionTo(ScrimState.AOD);
+        finishAnimationsImmediately();
+        assertScrimAlpha(OPAQUE /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
+
+        // ... but will take effect after docked
+        when(mDockManager.isDocked()).thenReturn(true);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        mScrimController.setAodFrontScrimAlpha(0.5f);
+        mScrimController.transitionTo(ScrimState.AOD);
+
+        assertScrimAlpha(SEMI_TRANSPARENT /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
+
+        // ... and that if we set it while we're in AOD, it does take immediate effect after docked.
+        mScrimController.setAodFrontScrimAlpha(1f);
+        assertScrimAlpha(OPAQUE /* front */,
+                OPAQUE /* back */,
+                TRANSPARENT /* bubble */);
 
         // Reset value since enums are static.
         mScrimController.setAodFrontScrimAlpha(0f);
@@ -712,38 +757,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
-    }
-
-    @Test
-    public void transitionToPulsing_withTimeoutWallpaperCallback_willHideWallpaper() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
-
-        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {
-            @Override
-            public boolean shouldTimeoutWallpaper() {
-                return true;
-            }
-        });
-
-        verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
-    }
-
-    @Test
-    public void transitionToPulsing_withDefaultCallback_wontHideWallpaper() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
-
-        mScrimController.transitionTo(ScrimState.PULSING, new ScrimController.Callback() {});
-
-        verify(mAlarmManager, never()).setExact(anyInt(), anyLong(), any(), any(), any());
-    }
-
-    @Test
-    public void transitionToPulsing_withoutCallback_wontHideWallpaper() {
-        mScrimController.setWallpaperSupportsAmbientMode(true);
-
-        mScrimController.transitionTo(ScrimState.PULSING);
-
-        verify(mAlarmManager, never()).setExact(anyInt(), anyLong(), any(), any(), any());
     }
 
     @Test

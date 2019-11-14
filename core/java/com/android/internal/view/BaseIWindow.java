@@ -49,8 +49,8 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
-    public void resized(Rect frame, Rect overscanInsets, Rect contentInsets, Rect visibleInsets,
-            Rect stableInsets, Rect outsets, boolean reportDraw,
+    public void resized(Rect frame, Rect contentInsets, Rect visibleInsets,
+            Rect stableInsets, boolean reportDraw,
             MergedConfiguration mergedConfiguration, Rect backDropFrame, boolean forceLayout,
             boolean alwaysConsumeSystemBars, int displayId,
             DisplayCutout.ParcelableWrapper displayCutout) {

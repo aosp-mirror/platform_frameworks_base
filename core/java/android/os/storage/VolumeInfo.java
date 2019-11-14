@@ -266,7 +266,7 @@ public class VolumeInfo implements Parcelable {
 
     @UnsupportedAppUsage
     public @Nullable String getDescription() {
-        if (ID_PRIVATE_INTERNAL.equals(id) || ID_EMULATED_INTERNAL.equals(id)) {
+        if (ID_PRIVATE_INTERNAL.equals(id) || id.startsWith(ID_EMULATED_INTERNAL + ";")) {
             return Resources.getSystem().getString(com.android.internal.R.string.storage_internal);
         } else if (!TextUtils.isEmpty(fsLabel)) {
             return fsLabel;
@@ -301,13 +301,20 @@ public class VolumeInfo implements Parcelable {
     }
 
     public boolean isVisibleForUser(int userId) {
-        if ((type == TYPE_PUBLIC || type == TYPE_STUB) && mountUserId == userId) {
+        if ((type == TYPE_PUBLIC || type == TYPE_STUB || type == TYPE_EMULATED)
+                && mountUserId == userId) {
             return isVisible();
-        } else if (type == TYPE_EMULATED) {
-            return isVisible();
-        } else {
-            return false;
         }
+        return false;
+    }
+
+    /**
+     * Returns {@code true} if this volume is the primary emulated volume for {@code userId},
+     * {@code false} otherwise.
+     */
+    @UnsupportedAppUsage
+    public boolean isPrimaryEmulatedForUser(int userId) {
+        return id.equals(ID_EMULATED_INTERNAL + ";" + userId);
     }
 
     public boolean isVisibleForRead(int userId) {
@@ -390,7 +397,7 @@ public class VolumeInfo implements Parcelable {
                 derivedFsUuid = privateVol.fsUuid;
             }
 
-            if (ID_EMULATED_INTERNAL.equals(id)) {
+            if (isPrimaryEmulatedForUser(userId)) {
                 removable = false;
             } else {
                 removable = true;

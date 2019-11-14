@@ -405,6 +405,8 @@ filegroup {
 filegroup {
     name: "statsd_aidl",
     srcs: [
+        "core/java/android/os/IPullAtomCallback.aidl",
+        "core/java/android/os/IPullAtomResultReceiver.aidl",
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
         "core/java/android/os/IStatsPullerCallback.aidl",
@@ -425,6 +427,7 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
+    libs: ["app-compat-annotations"],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -463,13 +466,7 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
-}
-
-java_library {
-    name: "framework-annotation-proc",
-    defaults: ["framework-aidl-export-defaults"],
-    srcs: [":framework-all-sources"],
-    installable: false,
+    libs: ["app-compat-annotations"],
     plugins: [
         "unsupportedappusage-annotation-processor",
         "compat-changeid-annotation-processor",
@@ -478,7 +475,7 @@ java_library {
 
 platform_compat_config {
     name: "framework-platform-compat-config",
-    src: ":framework-annotation-proc",
+    src: ":framework-all",
 }
 
 // A library including just UnsupportedAppUsage.java classes.
@@ -509,6 +506,7 @@ java_library {
 java_library {
     name: "framework-atb-backward-compatibility",
     installable: true,
+    libs: ["app-compat-annotations"],
     srcs: [
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
@@ -1007,21 +1005,6 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
     "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*"
-
-// http://b/129765390 Rewrite links to "platform" or "technotes" folders
-// which are siblings (and thus outside of) {@docRoot}.
-//
-// We have to escape \ as \\ and $ as $$ here because they get resolved by
-// different layers of the build tooling. The arguments are wrapped in '' so
-// that the shell doesn't add yet another level of escaping.
-metalava_framework_docs_args += " --replace-documentation " +
-    // packages whose descendants to apply replacement to (all packages from
-    // libcore/ojluni/src/main/java that contribute to documentation).
-    "com.sun:java:javax:jdk.net:sun " +
-    // regex of the string to replace
-    "'(<a\\s+href\\s?=[\\*\\s]*\")(?:(?:\\{@docRoot\\}/\\.\\./)|(?:(?:\\.\\./)+))((?:platform|technotes).+)\">' " +
-    // replacement (with $1, $2 backreferences to the regex groups)
-    "'$$1https://docs.oracle.com/javase/8/docs/$$2\">' "
 
 packages_to_document = [
     "android",
@@ -1617,7 +1600,7 @@ aidl_mapping {
 
 genrule {
     name: "framework-annotation-proc-index",
-    srcs: [":framework-annotation-proc"],
+    srcs: [":framework-all"],
     cmd: "unzip -qp $(in) unsupportedappusage/unsupportedappusage_index.csv > $(out)",
     out: ["unsupportedappusage_index.csv"],
     dist: {

@@ -1226,9 +1226,9 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @Override
-    protected boolean rebuildList() {
+    protected boolean postRebuildList(boolean rebuildCompleted) {
         mChooserListAdapter = (ChooserListAdapter) mAdapter;
-        return rebuildListInternal();
+        return postRebuildListInternal(rebuildCompleted);
     }
 
     @Override

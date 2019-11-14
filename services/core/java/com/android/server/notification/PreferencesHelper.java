@@ -757,7 +757,7 @@ public class PreferencesHelper implements RankingConfig {
             clearLockedFieldsLocked(channel);
             channel.setImportanceLockedByOEM(r.oemLockedImportance);
             if (!channel.isImportanceLockedByOEM()) {
-                if (r.futureOemLockedChannels.remove(channel.getId())) {
+                if (r.oemLockedChannels.contains(channel.getId())) {
                     channel.setImportanceLockedByOEM(true);
                 }
             }
@@ -952,11 +952,10 @@ public class PreferencesHelper implements RankingConfig {
                                     NotificationChannel channel = r.channels.get(channelId);
                                     if (channel != null) {
                                         channel.setImportanceLockedByOEM(true);
-                                    } else {
-                                        // if this channel shows up in the future, make sure it'll
-                                        // be locked immediately
-                                        r.futureOemLockedChannels.add(channelId);
                                     }
+                                    // Also store the locked channels on the record, so they aren't
+                                    // temporarily lost when data is cleared on the package
+                                    r.oemLockedChannels.add(channelId);
                                 }
                             }
                         }
@@ -1528,9 +1527,9 @@ public class PreferencesHelper implements RankingConfig {
                     pw.print(" oemLocked=");
                     pw.print(r.oemLockedImportance);
                 }
-                if (!r.futureOemLockedChannels.isEmpty()) {
+                if (!r.oemLockedChannels.isEmpty()) {
                     pw.print(" futureLockedChannels=");
-                    pw.print(r.futureOemLockedChannels);
+                    pw.print(r.oemLockedChannels);
                 }
                 pw.println();
                 for (NotificationChannel channel : r.channels.values()) {
@@ -1940,7 +1939,7 @@ public class PreferencesHelper implements RankingConfig {
         // these fields are loaded on boot from a different source of truth and so are not
         // written to notification policy xml
         boolean oemLockedImportance = DEFAULT_OEM_LOCKED_IMPORTANCE;
-        List<String> futureOemLockedChannels = new ArrayList<>();
+        List<String> oemLockedChannels = new ArrayList<>();
         boolean defaultAppLockedImportance = DEFAULT_APP_LOCKED_IMPORTANCE;
 
         Delegate delegate = null;

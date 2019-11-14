@@ -136,30 +136,6 @@ public final class DisplayInfo implements Parcelable {
     public int logicalHeight;
 
     /**
-     * @hide
-     * Number of overscan pixels on the left side of the display.
-     */
-    public int overscanLeft;
-
-    /**
-     * @hide
-     * Number of overscan pixels on the top side of the display.
-     */
-    public int overscanTop;
-
-    /**
-     * @hide
-     * Number of overscan pixels on the right side of the display.
-     */
-    public int overscanRight;
-
-    /**
-     * @hide
-     * Number of overscan pixels on the bottom side of the display.
-     */
-    public int overscanBottom;
-
-    /**
      * The {@link DisplayCutout} if present, otherwise {@code null}.
      *
      * @hide
@@ -322,10 +298,6 @@ public final class DisplayInfo implements Parcelable {
                 && largestNominalAppHeight == other.largestNominalAppHeight
                 && logicalWidth == other.logicalWidth
                 && logicalHeight == other.logicalHeight
-                && overscanLeft == other.overscanLeft
-                && overscanTop == other.overscanTop
-                && overscanRight == other.overscanRight
-                && overscanBottom == other.overscanBottom
                 && Objects.equals(displayCutout, other.displayCutout)
                 && rotation == other.rotation
                 && modeId == other.modeId
@@ -365,10 +337,6 @@ public final class DisplayInfo implements Parcelable {
         largestNominalAppHeight = other.largestNominalAppHeight;
         logicalWidth = other.logicalWidth;
         logicalHeight = other.logicalHeight;
-        overscanLeft = other.overscanLeft;
-        overscanTop = other.overscanTop;
-        overscanRight = other.overscanRight;
-        overscanBottom = other.overscanBottom;
         displayCutout = other.displayCutout;
         rotation = other.rotation;
         modeId = other.modeId;
@@ -404,10 +372,6 @@ public final class DisplayInfo implements Parcelable {
         largestNominalAppHeight = source.readInt();
         logicalWidth = source.readInt();
         logicalHeight = source.readInt();
-        overscanLeft = source.readInt();
-        overscanTop = source.readInt();
-        overscanRight = source.readInt();
-        overscanBottom = source.readInt();
         displayCutout = DisplayCutout.ParcelableWrapper.readCutoutFromParcel(source);
         rotation = source.readInt();
         modeId = source.readInt();
@@ -452,10 +416,6 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(largestNominalAppHeight);
         dest.writeInt(logicalWidth);
         dest.writeInt(logicalHeight);
-        dest.writeInt(overscanLeft);
-        dest.writeInt(overscanTop);
-        dest.writeInt(overscanRight);
-        dest.writeInt(overscanBottom);
         DisplayCutout.ParcelableWrapper.writeCutoutToParcel(displayCutout, dest, flags);
         dest.writeInt(rotation);
         dest.writeInt(modeId);
@@ -632,17 +592,6 @@ public final class DisplayInfo implements Parcelable {
         sb.append(logicalWidth);
         sb.append(" x ");
         sb.append(logicalHeight);
-        if (overscanLeft != 0 || overscanTop != 0 || overscanRight != 0 || overscanBottom != 0) {
-            sb.append(", overscan (");
-            sb.append(overscanLeft);
-            sb.append(",");
-            sb.append(overscanTop);
-            sb.append(",");
-            sb.append(overscanRight);
-            sb.append(",");
-            sb.append(overscanBottom);
-            sb.append(")");
-        }
         sb.append(", largest app ");
         sb.append(largestNominalAppWidth);
         sb.append(" x ");

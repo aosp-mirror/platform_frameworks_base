@@ -236,7 +236,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     ViewGroup mContentRoot;
 
     private Rect mTempRect;
-    private Rect mOutsets = new Rect();
 
     // This is the caption view for the window, containing the caption and window control
     // buttons. The visibility of this decor depends on the workspace and the window type.
@@ -729,24 +728,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
         }
 
-        getOutsets(mOutsets);
-        if (mOutsets.top > 0 || mOutsets.bottom > 0) {
-            int mode = MeasureSpec.getMode(heightMeasureSpec);
-            if (mode != MeasureSpec.UNSPECIFIED) {
-                int height = MeasureSpec.getSize(heightMeasureSpec);
-                heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                        height + mOutsets.top + mOutsets.bottom, mode);
-            }
-        }
-        if (mOutsets.left > 0 || mOutsets.right > 0) {
-            int mode = MeasureSpec.getMode(widthMeasureSpec);
-            if (mode != MeasureSpec.UNSPECIFIED) {
-                int width = MeasureSpec.getSize(widthMeasureSpec);
-                widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                        width + mOutsets.left + mOutsets.right, mode);
-            }
-        }
-
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         int width = getMeasuredWidth();
@@ -785,13 +766,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        getOutsets(mOutsets);
-        if (mOutsets.left > 0) {
-            offsetLeftAndRight(-mOutsets.left);
-        }
-        if (mOutsets.top > 0) {
-            offsetTopAndBottom(-mOutsets.top);
-        }
         if (mApplyFloatingVerticalInsets) {
             offsetTopAndBottom(mFloatingInsets.top);
         }

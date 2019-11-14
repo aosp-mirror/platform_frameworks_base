@@ -13,23 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef STATS_EVENT_H
+#define STATS_EVENT_H
 
-package android.app;
+#include <binder/Parcel.h>
+#include <binder/Parcelable.h>
+#include <binder/Status.h>
+#include <vector>
 
-import android.content.Context;
-import android.os.DeviceIdleManager;
-import android.os.IDeviceIdleController;
+namespace android {
+namespace util {
+class StatsEvent : public android::Parcelable {
+    public:
+        StatsEvent();
 
-/**
- * @hide
- */
-public class DeviceIdleFrameworkInitializer {
-    private static IDeviceIdleController sIDeviceIdleController;
+        StatsEvent(StatsEvent&& in) = default;
 
-    public static void initialize() {
-        SystemServiceRegistry.registerCachedService(
-                Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
-                (context, b) -> new DeviceIdleManager(
-                        context, IDeviceIdleController.Stub.asInterface(b)));
-    }
-}
+        android::status_t writeToParcel(android::Parcel* out) const;
+
+        android::status_t readFromParcel(const android::Parcel* in);
+
+    private:
+        int mAtomTag;
+        std::vector<uint8_t> mBuffer;
+};
+} // Namespace util
+} // Namespace android
+
+#endif  // STATS_ EVENT_H

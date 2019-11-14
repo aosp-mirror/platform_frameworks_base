@@ -277,47 +277,6 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDefaultToZeroOverscan() {
-        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
-
-        assertOverscan(mPrimaryDisplay, 0 /* left */, 0 /* top */, 0 /* right */, 0 /* bottom */);
-    }
-
-    @Test
-    public void testPersistOverscanInSameInstance() {
-        final DisplayInfo info = mPrimaryDisplay.getDisplayInfo();
-        try {
-            mTarget.setOverscanLocked(info, 1 /* left */, 2 /* top */, 3 /* right */,
-                    4 /* bottom */);
-
-            mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
-
-            assertOverscan(mPrimaryDisplay, 1 /* left */, 2 /* top */, 3 /* right */,
-                    4 /* bottom */);
-        } finally {
-            mTarget.setOverscanLocked(info, 0, 0, 0, 0);
-            mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
-        }
-    }
-
-    @Test
-    public void testPersistOverscanAcrossInstances() {
-        final DisplayInfo info = mPrimaryDisplay.getDisplayInfo();
-        try {
-            mTarget.setOverscanLocked(info, 10 /* left */, 20 /* top */, 30 /* right */,
-                    40 /* bottom */);
-
-            applySettingsToDisplayByNewInstance(mPrimaryDisplay);
-
-            assertOverscan(mPrimaryDisplay, 10 /* left */, 20 /* top */, 30 /* right */,
-                    40 /* bottom */);
-        } finally {
-            mTarget.setOverscanLocked(info, 0, 0, 0, 0);
-            mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
-        }
-    }
-
-    @Test
     public void testDefaultToFreeUserRotation() {
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
 
@@ -688,16 +647,6 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
             mStorage.closeRead();
         }
         return null;
-    }
-
-    private static void assertOverscan(DisplayContent display, int left, int top, int right,
-            int bottom) {
-        final DisplayInfo info = display.getDisplayInfo();
-
-        assertEquals(left, info.overscanLeft);
-        assertEquals(top, info.overscanTop);
-        assertEquals(right, info.overscanRight);
-        assertEquals(bottom, info.overscanBottom);
     }
 
     /**

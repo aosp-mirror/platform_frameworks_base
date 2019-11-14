@@ -38,4 +38,9 @@ public class DockManagerImpl implements DockManager {
     public boolean isDocked() {
         return false;
     }
+
+    @Override
+    public boolean isHidden() {
+        return false;
+    }
 }

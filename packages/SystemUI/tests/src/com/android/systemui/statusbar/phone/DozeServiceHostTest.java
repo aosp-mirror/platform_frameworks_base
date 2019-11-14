@@ -158,26 +158,6 @@ public class DozeServiceHostTest extends SysuiTestCase {
         verify(mStatusBar).updateScrimController();
     }
 
-
-    @Test
-    public void testPulseWhileDozingWithDockingReason_suppressWakeUpGesture() {
-        // Keep track of callback to be able to stop the pulse
-        final DozeHost.PulseCallback[] pulseCallback = new DozeHost.PulseCallback[1];
-        doAnswer(invocation -> {
-            pulseCallback[0] = invocation.getArgument(0);
-            return null;
-        }).when(mDozeScrimController).pulse(any(), anyInt());
-
-        // Starting a pulse while docking should suppress wakeup gesture
-        mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class),
-                DozeEvent.PULSE_REASON_DOCKING);
-        verify(mStatusBarWindowViewController).suppressWakeUpGesture(eq(true));
-
-        // Ending a pulse should restore wakeup gesture
-        pulseCallback[0].onPulseFinished();
-        verify(mStatusBarWindowViewController).suppressWakeUpGesture(eq(false));
-    }
-
     @Test
     public void testPulseWhileDozing_notifyAuthInterrupt() {
         HashSet<Integer> reasonsWantingAuth = new HashSet<>(

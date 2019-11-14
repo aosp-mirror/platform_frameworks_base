@@ -104,7 +104,14 @@ public final class MediaStore {
     /** The authority for the media provider */
     public static final String AUTHORITY = "media";
     /** A content:// style uri to the authority for the media provider */
-    public static final @NonNull Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
+    public static final @NonNull Uri AUTHORITY_URI =
+            Uri.parse("content://" + AUTHORITY);
+
+    /** @hide */
+    public static final String AUTHORITY_LEGACY = "media_legacy";
+    /** @hide */
+    public static final @NonNull Uri AUTHORITY_LEGACY_URI =
+            Uri.parse("content://" + AUTHORITY_LEGACY);
 
     /**
      * Synthetic volume name that provides a view of all content across the
@@ -875,6 +882,16 @@ public final class MediaStore {
         values.put(MediaColumns.IS_TRASHED, 0);
         values.putNull(MediaColumns.DATE_EXPIRES);
         context.getContentResolver().update(uri, values, null, null);
+    }
+
+    /**
+     * Rewrite the given {@link Uri} to point at
+     * {@link MediaStore#AUTHORITY_LEGACY}.
+     *
+     * @hide
+     */
+    public static @NonNull Uri rewriteToLegacy(@NonNull Uri uri) {
+        return uri.buildUpon().authority(MediaStore.AUTHORITY_LEGACY).build();
     }
 
     /**
@@ -3477,11 +3494,15 @@ public final class MediaStore {
      */
     public static @NonNull String getVolumeName(@NonNull Uri uri) {
         final List<String> segments = uri.getPathSegments();
-        if (uri.getAuthority().equals(AUTHORITY) && segments != null && segments.size() > 0) {
-            return segments.get(0);
-        } else {
-            throw new IllegalArgumentException("Missing volume name: " + uri);
+        switch (uri.getAuthority()) {
+            case AUTHORITY:
+            case AUTHORITY_LEGACY: {
+                if (segments != null && segments.size() > 0) {
+                    return segments.get(0);
+                }
+            }
         }
+        throw new IllegalArgumentException("Missing volume name: " + uri);
     }
 
     /** {@hide} */

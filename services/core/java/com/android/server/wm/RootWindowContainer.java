@@ -818,10 +818,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (mWmService.mStrictModeFlash != null) {
             mWmService.mStrictModeFlash.positionSurface(defaultDw, defaultDh, mDisplayTransaction);
         }
-        if (mWmService.mCircularDisplayMask != null) {
-            mWmService.mCircularDisplayMask.positionSurface(defaultDw, defaultDh,
-                    mWmService.getDefaultDisplayRotation(), mDisplayTransaction);
-        }
         if (mWmService.mEmulatorDisplayOverlay != null) {
             mWmService.mEmulatorDisplayOverlay.positionSurface(defaultDw, defaultDh,
                     mWmService.getDefaultDisplayRotation(), mDisplayTransaction);

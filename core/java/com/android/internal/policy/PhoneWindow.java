@@ -2378,10 +2378,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     & (~getForcedWindowFlags()));
         }
 
-        if (a.getBoolean(R.styleable.Window_windowOverscan, false)) {
-            setFlags(FLAG_LAYOUT_IN_OVERSCAN, FLAG_LAYOUT_IN_OVERSCAN&(~getForcedWindowFlags()));
-        }
-
         if (a.getBoolean(R.styleable.Window_windowShowWallpaper, false)) {
             setFlags(FLAG_SHOW_WALLPAPER, FLAG_SHOW_WALLPAPER&(~getForcedWindowFlags()));
         }

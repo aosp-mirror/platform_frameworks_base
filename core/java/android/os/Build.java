@@ -109,6 +109,7 @@ public class Build {
      * Whether this build was for an emulator device.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
 
@@ -239,6 +240,13 @@ public class Build {
         public static final String RELEASE = getString("ro.build.version.release");
 
         /**
+         * The version string we show to the user; may be {@link #RELEASE} or
+         * {@link #CODENAME} if not a final release build.
+         */
+        @NonNull public static final String RELEASE_OR_CODENAME = getString(
+                "ro.build.version.release_or_codename");
+
+        /**
          * The base OS build the product is based on.
          */
         public static final String BASE_OS = SystemProperties.get("ro.build.version.base_os", "");
@@ -337,8 +345,8 @@ public class Build {
         /**
          * @hide
          */
-        @TestApi
         @UnsupportedAppUsage
+        @TestApi
         public static final String[] ACTIVE_CODENAMES = "REL".equals(ALL_CODENAMES[0])
                 ? new String[0] : ALL_CODENAMES;
 

@@ -102,7 +102,7 @@ public class DozeFactory {
                 wrappedService, mDozeParameters);
 
         DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock,
-                                              mWakefulnessLifecycle, mBatteryController, mDozeLog);
+                mWakefulnessLifecycle, mBatteryController, mDozeLog, mDockManager);
         machine.setParts(new DozeMachine.Part[]{
                 new DozePauser(mHandler, machine, mAlarmManager, mDozeParameters.getPolicy()),
                 new DozeFalsingManagerAdapter(mFalsingManager),
@@ -117,8 +117,7 @@ public class DozeFactory {
                         mDozeServiceHost, mDozeParameters, mHandler),
                 new DozeWallpaperState(mWallpaperManager, mBiometricUnlockController,
                         mDozeParameters),
-                new DozeDockHandler(dozeService, machine, mDozeServiceHost, config, mHandler,
-                        mDockManager),
+                new DozeDockHandler(config, machine, mDockManager),
                 new DozeAuthRemover(dozeService)
         });
 

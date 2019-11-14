@@ -515,18 +515,16 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final Rect outFrame = new Rect();
         final Rect outContentInsets = new Rect();
         final Rect outStableInsets = new Rect();
-        final Rect outOutsets = new Rect();
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
 
         mDisplayPolicy.getLayoutHintLw(mWindow.mAttrs, null, mFrames,
                 false /* floatingStack */, outFrame, outContentInsets, outStableInsets,
-                outOutsets, outDisplayCutout);
+                outDisplayCutout);
 
         assertThat(outFrame, is(mFrames.mUnrestricted));
         assertThat(outContentInsets, is(new Rect(0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT)));
         assertThat(outStableInsets, is(new Rect(0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT)));
-        assertThat(outOutsets, is(new Rect()));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
     }
 
@@ -540,18 +538,16 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final Rect outFrame = new Rect();
         final Rect outContentInsets = new Rect();
         final Rect outStableInsets = new Rect();
-        final Rect outOutsets = new Rect();
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
 
         mDisplayPolicy.getLayoutHintLw(mWindow.mAttrs, taskBounds, mFrames,
                 false /* floatingStack */, outFrame, outContentInsets, outStableInsets,
-                outOutsets, outDisplayCutout);
+                outDisplayCutout);
 
         assertThat(outFrame, is(taskBounds));
         assertThat(outContentInsets, is(new Rect()));
         assertThat(outStableInsets, is(new Rect()));
-        assertThat(outOutsets, is(new Rect()));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
     }
 
@@ -568,18 +564,16 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         final Rect outFrame = new Rect();
         final Rect outContentInsets = new Rect();
         final Rect outStableInsets = new Rect();
-        final Rect outOutsets = new Rect();
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
 
         mDisplayPolicy.getLayoutHintLw(mWindow.mAttrs, taskBounds, mFrames,
                 true /* floatingStack */, outFrame, outContentInsets, outStableInsets,
-                outOutsets, outDisplayCutout);
+                outDisplayCutout);
 
         assertThat(outFrame, is(taskBounds));
         assertThat(outContentInsets, is(new Rect()));
         assertThat(outStableInsets, is(new Rect()));
-        assertThat(outOutsets, is(new Rect()));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
     }
 

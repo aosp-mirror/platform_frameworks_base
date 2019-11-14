@@ -674,13 +674,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         boolean kept = true;
         try {
             final ActivityRecord r = topRunningActivityLocked();
-            // give pinned stack a chance to save current bounds, this needs to be before the
-            // actual reparent.
-            if (inPinnedWindowingMode()
-                    && !(toStackWindowingMode == WINDOWING_MODE_UNDEFINED)
-                    && r.isVisible()) {
-                r.savePinnedStackBounds();
-            }
             final boolean wasFocused = r != null && root.isTopDisplayFocusedStack(sourceStack)
                     && (topRunningActivityLocked() == r);
             final boolean wasResumed = r != null && sourceStack.getResumedActivity() == r;
@@ -2527,7 +2520,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final ActivityRecord token = mChildren.get(i);
             // skip hidden (or about to hide) apps
-            if (token.mIsExiting || token.isClientHidden() || !token.mVisibleRequested) {
+            if (token.mIsExiting || !token.isClientVisible() || !token.mVisibleRequested) {
                 continue;
             }
             final WindowState win = token.findMainWindow();
@@ -2745,10 +2738,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     ActivityRecord getTopVisibleActivity() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final ActivityRecord token = mChildren.get(i);
-            // skip hidden (or about to hide) apps
-            if (!token.mIsExiting && !token.isClientHidden() && token.mVisibleRequested) {
-                return token;
+            final ActivityRecord activity = mChildren.get(i);
+            if (!activity.mIsExiting && activity.isClientVisible() && activity.mVisibleRequested) {
+                return activity;
             }
         }
         return null;

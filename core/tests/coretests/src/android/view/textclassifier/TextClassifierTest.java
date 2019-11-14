@@ -32,7 +32,6 @@ import android.text.SpannableString;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.truth.Truth;
 
@@ -43,6 +42,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,10 +54,19 @@ import java.util.List;
  * Tests are skipped if such a textclassifier does not exist.
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public class TextClassifierTest {
+    private static final String LOCAL = "local";
+    private static final String SESSION = "session";
 
-    // TODO: Implement TextClassifierService testing.
+    // TODO: Add SYSTEM, which tests TextClassifier.SYSTEM.
+    @Parameterized.Parameters(name = "{0}")
+    public static Iterable<Object> textClassifierTypes() {
+        return Arrays.asList(LOCAL, SESSION);
+    }
+
+    @Parameterized.Parameter
+    public String mTextClassifierType;
 
     private static final TextClassificationConstants TC_CONSTANTS =
             new TextClassificationConstants(() -> "");
@@ -72,7 +81,17 @@ public class TextClassifierTest {
     public void setup() {
         mContext = InstrumentationRegistry.getTargetContext();
         mTcm = mContext.getSystemService(TextClassificationManager.class);
-        mClassifier = mTcm.getTextClassifier(TextClassifier.LOCAL);
+
+        if (mTextClassifierType.equals(LOCAL)) {
+            mClassifier = mTcm.getTextClassifier(TextClassifier.LOCAL);
+        } else {
+            mClassifier = mTcm.createTextClassificationSession(
+                    new TextClassificationContext.Builder(
+                            "android",
+                            TextClassifier.WIDGET_TYPE_NOTIFICATION)
+                            .build(),
+                    mTcm.getTextClassifier(TextClassifier.LOCAL));
+        }
     }
 
     @Test

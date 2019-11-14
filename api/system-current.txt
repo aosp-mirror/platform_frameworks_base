@@ -6410,6 +6410,10 @@ package android.provider {
 
 package android.security.keystore {
 
+  public class AndroidKeyStoreProvider extends java.security.Provider {
+    method @NonNull public static java.security.KeyStore getKeyStoreForUid(int) throws java.security.KeyStoreException, java.security.NoSuchProviderException;
+  }
+
   public abstract class AttestationUtils {
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static java.security.cert.X509Certificate[] attestDeviceIds(android.content.Context, @NonNull int[], @NonNull byte[]) throws android.security.keystore.DeviceIdAttestationException;
     field public static final int ID_TYPE_IMEI = 2; // 0x2
@@ -6421,6 +6425,10 @@ package android.security.keystore {
   public class DeviceIdAttestationException extends java.lang.Exception {
     ctor public DeviceIdAttestationException(@Nullable String);
     ctor public DeviceIdAttestationException(@Nullable String, @Nullable Throwable);
+  }
+
+  public static final class KeyGenParameterSpec.Builder {
+    method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setUid(int);
   }
 
 }
@@ -6812,7 +6820,7 @@ package android.service.euicc {
     method public android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean, @Nullable android.os.Bundle);
     method @Deprecated public int onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean);
     method @Deprecated public abstract int onEraseSubscriptions(int);
-    method public int onEraseSubscriptionsWithOptions(int, @android.telephony.euicc.EuiccCardManager.ResetOption int);
+    method public int onEraseSubscriptions(int, @android.telephony.euicc.EuiccCardManager.ResetOption int);
     method public abstract android.service.euicc.GetDefaultDownloadableSubscriptionListResult onGetDefaultDownloadableSubscriptionList(int, boolean);
     method public abstract android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, android.telephony.euicc.DownloadableSubscription, boolean);
     method public abstract String onGetEid(int);
@@ -6832,6 +6840,8 @@ package android.service.euicc {
     field public static final String ACTION_RESOLVE_DEACTIVATE_SIM = "android.service.euicc.action.RESOLVE_DEACTIVATE_SIM";
     field public static final String ACTION_RESOLVE_NO_PRIVILEGES = "android.service.euicc.action.RESOLVE_NO_PRIVILEGES";
     field public static final String ACTION_RESOLVE_RESOLVABLE_ERRORS = "android.service.euicc.action.RESOLVE_RESOLVABLE_ERRORS";
+    field public static final String ACTION_START_CARRIER_ACTIVATION = "android.service.euicc.action.START_CARRIER_ACTIVATION";
+    field public static final String ACTION_START_EUICC_ACTIVATION = "android.service.euicc.action.START_EUICC_ACTIVATION";
     field public static final String ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED = "android.service.euicc.action.TOGGLE_SUBSCRIPTION_PRIVILEGED";
     field public static final String CATEGORY_EUICC_UI = "android.service.euicc.category.EUICC_UI";
     field public static final String EUICC_SERVICE_INTERFACE = "android.service.euicc.EuiccService";
@@ -8941,7 +8951,7 @@ package android.telephony.euicc {
   public class EuiccManager {
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void continueOperation(android.content.Intent, android.os.Bundle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void eraseSubscriptions(@NonNull android.app.PendingIntent);
-    method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void eraseSubscriptionsWithOptions(@android.telephony.euicc.EuiccCardManager.ResetOption int, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void eraseSubscriptions(@android.telephony.euicc.EuiccCardManager.ResetOption int, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void getDefaultDownloadableSubscriptionList(android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void getDownloadableSubscriptionMetadata(android.telephony.euicc.DownloadableSubscription, android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public int getOtaStatus();
@@ -8964,6 +8974,7 @@ package android.telephony.euicc {
     field public static final String EXTRA_ENABLE_SUBSCRIPTION = "android.telephony.euicc.extra.ENABLE_SUBSCRIPTION";
     field public static final String EXTRA_FORCE_PROVISION = "android.telephony.euicc.extra.FORCE_PROVISION";
     field public static final String EXTRA_FROM_SUBSCRIPTION_ID = "android.telephony.euicc.extra.FROM_SUBSCRIPTION_ID";
+    field public static final String EXTRA_PHYSICAL_SLOT_ID = "android.telephony.euicc.extra.PHYSICAL_SLOT_ID";
     field public static final String EXTRA_SUBSCRIPTION_ID = "android.telephony.euicc.extra.SUBSCRIPTION_ID";
     field public static final String EXTRA_SUBSCRIPTION_NICKNAME = "android.telephony.euicc.extra.SUBSCRIPTION_NICKNAME";
   }
@@ -9216,7 +9227,7 @@ package android.telephony.ims {
 
   public class ImsMmTelManager implements android.telephony.ims.RegistrationManager {
     method @NonNull public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getFeatureState(@NonNull java.util.function.Consumer<java.lang.Integer>, @NonNull java.util.concurrent.Executor) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getFeatureState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getRegistrationTransportType(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoWiFiModeSetting();

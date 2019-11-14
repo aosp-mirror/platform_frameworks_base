@@ -73,6 +73,7 @@
 ?audio/3gpp 3gpp 3ga
 ?audio/aac-adts aac
 ?audio/ac3 ac3 a52
+?audio/amr amr
 ?audio/imelody imy
 ?audio/midi rtttl xmf
 ?audio/mobile-xmf mxmf

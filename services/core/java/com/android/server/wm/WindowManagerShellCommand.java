@@ -66,8 +66,6 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runDisplayDensity(pw);
                 case "folded-area":
                     return runDisplayFoldedArea(pw);
-                case "overscan":
-                    return runDisplayOverscan(pw);
                 case "scaling":
                     return runDisplayScaling(pw);
                 case "dismiss-keyguard":
@@ -247,30 +245,6 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runDisplayOverscan(PrintWriter pw) throws RemoteException {
-        String overscanStr = getNextArgRequired();
-        Rect rect = new Rect();
-        final int displayId = getDisplayId(overscanStr);
-        if ("reset".equals(overscanStr)) {
-            rect.set(0, 0, 0, 0);
-        } else {
-            final Pattern FLATTENED_PATTERN = Pattern.compile(
-                    "(-?\\d+),(-?\\d+),(-?\\d+),(-?\\d+)");
-            Matcher matcher = FLATTENED_PATTERN.matcher(overscanStr);
-            if (!matcher.matches()) {
-                getErrPrintWriter().println("Error: bad rectangle arg: " + overscanStr);
-                return -1;
-            }
-            rect.left = Integer.parseInt(matcher.group(1));
-            rect.top = Integer.parseInt(matcher.group(2));
-            rect.right = Integer.parseInt(matcher.group(3));
-            rect.bottom = Integer.parseInt(matcher.group(4));
-        }
-
-        mInterface.setOverscan(displayId, rect.left, rect.top, rect.right, rect.bottom);
-        return 0;
-    }
-
     private int runDisplayScaling(PrintWriter pw) throws RemoteException {
         String scalingStr = getNextArgRequired();
         if ("auto".equals(scalingStr)) {
@@ -380,8 +354,6 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Return or override display density.");
         pw.println("  folded-area [reset|LEFT,TOP,RIGHT,BOTTOM]");
         pw.println("    Return or override folded area.");
-        pw.println("  overscan [reset|LEFT,TOP,RIGHT,BOTTOM] [-d DISPLAY ID]");
-        pw.println("    Set overscan area for display.");
         pw.println("  scaling [off|auto] [-d DISPLAY_ID]");
         pw.println("    Set display scaling mode.");
         pw.println("  dismiss-keyguard");

@@ -150,7 +150,7 @@ public class WindowFrameTests extends WindowTestsBase {
         // When mFrame extends past cf, the content insets are
         // the difference between mFrame and ContentFrame. Visible
         // and stable frames work the same way.
-        w.getWindowFrames().setFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
+        w.getWindowFrames().setFrames(pf, df, cf, vf, dcf, sf);
         w.computeFrameLw();
         assertFrame(w, 0, 0, 1000, 1000);
         assertContentInset(w, 0, topContentInset, 0, bottomContentInset);
@@ -186,7 +186,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
         // Here the window has FILL_PARENT, FILL_PARENT
         // so we expect it to fill the entire available frame.
-        w.getWindowFrames().setFrames(pf, pf, pf, pf, pf, pf, pf, pf);
+        w.getWindowFrames().setFrames(pf, pf, pf, pf, pf, pf);
         w.computeFrameLw();
         assertFrame(w, 0, 0, 1000, 1000);
 
@@ -274,7 +274,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
         final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
         final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf, pf, mEmptyRect);
+        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
         w.computeFrameLw();
         // For non fullscreen tasks the containing frame is based off the
         // task bounds not the parent frame.
@@ -287,7 +287,7 @@ public class WindowFrameTests extends WindowTestsBase {
         final int cfRight = logicalWidth / 2;
         final int cfBottom = logicalHeight / 2;
         final Rect cf = new Rect(0, 0, cfRight, cfBottom);
-        windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
+        windowFrames.setFrames(pf, pf, cf, cf, pf, cf);
         w.computeFrameLw();
         assertEquals(resolvedTaskBounds, w.getFrameLw());
         int contentInsetRight = resolvedTaskBounds.right - cfRight;
@@ -306,7 +306,7 @@ public class WindowFrameTests extends WindowTestsBase {
         final int insetBottom = insetTop + (resolvedTaskBounds.bottom - resolvedTaskBounds.top);
         task.setOverrideDisplayedBounds(resolvedTaskBounds);
         task.setBounds(insetLeft, insetTop, insetRight, insetBottom);
-        windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
+        windowFrames.setFrames(pf, pf, cf, cf, pf, cf);
         w.computeFrameLw();
         assertEquals(resolvedTaskBounds, w.getFrameLw());
         contentInsetRight = insetRight - cfRight;
@@ -328,7 +328,6 @@ public class WindowFrameTests extends WindowTestsBase {
         final int logicalHeight = displayInfo.logicalHeight;
         final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
         final Rect df = pf;
-        final Rect of = df;
         final Rect cf = new Rect(pf);
         // Produce some insets
         cf.top += displayInfo.logicalWidth / 10;
@@ -339,7 +338,7 @@ public class WindowFrameTests extends WindowTestsBase {
         Rect dcf = new Rect(cf);
 
         final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
+        windowFrames.setFrames(pf, df, cf, vf, dcf, sf);
         w.computeFrameLw();
         assertPolicyCrop(w, 0, cf.top, logicalWidth, cf.bottom);
 
@@ -353,7 +352,7 @@ public class WindowFrameTests extends WindowTestsBase {
         // we need to account for the fact the windows surface will be made
         // fullscreen and thus also make the crop fullscreen.
 
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf, pf, pf);
+        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
         w.mAttrs.width = logicalWidth / 2;
         w.mAttrs.height = logicalHeight / 2;
@@ -395,7 +394,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
         final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
         final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf, pf, mEmptyRect);
+        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
         w.computeFrameLw();
         // For non fullscreen tasks the containing frame is based off the
         // task bounds not the parent frame.
@@ -413,7 +412,7 @@ public class WindowFrameTests extends WindowTestsBase {
         pf.set(0, 0, logicalWidth, logicalHeight);
         task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         task.setBounds(null);
-        windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
+        windowFrames.setFrames(pf, pf, cf, cf, pf, cf);
         w.computeFrameLw();
         assertFrame(w, cf);
         assertContentFrame(w, cf);
@@ -434,7 +433,7 @@ public class WindowFrameTests extends WindowTestsBase {
                 pf.width(), pf.height());
 
         final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf, pf, pf);
+        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
         windowFrames.setDisplayCutout(cutout);
         w.computeFrameLw();
 
@@ -461,7 +460,7 @@ public class WindowFrameTests extends WindowTestsBase {
                 pf.width(), pf.height());
 
         final WindowFrames windowFrames = w.getWindowFrames();
-        windowFrames.setFrames(pf, pf, pf, pf, pf, pf, pf, pf);
+        windowFrames.setFrames(pf, pf, pf, pf, pf, pf);
         windowFrames.setDisplayCutout(cutout);
         w.computeFrameLw();
 
@@ -501,7 +500,7 @@ public class WindowFrameTests extends WindowTestsBase {
         final Rect winRect = new Rect(200, 200, 300, 500);
 
         task.setBounds(winRect);
-        w.getWindowFrames().setFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
+        w.getWindowFrames().setFrames(pf, df, cf, vf, dcf, sf);
         w.computeFrameLw();
 
         final Rect expected = new Rect(winRect.left, cf.bottom - winRect.height(),
@@ -514,7 +513,7 @@ public class WindowFrameTests extends WindowTestsBase {
         winRect.bottom = 600;
         task.setBounds(winRect);
         w.setBounds(winRect);
-        w.getWindowFrames().setFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
+        w.getWindowFrames().setFrames(pf, df, cf, vf, dcf, sf);
         w.computeFrameLw();
 
         assertFrame(w, winRect.left, 0, winRect.right, winRect.height());
@@ -524,7 +523,7 @@ public class WindowFrameTests extends WindowTestsBase {
         assertVisibleFrame(w, expected);
 
         // Check that it's moved back without ime insets
-        w.getWindowFrames().setFrames(pf, df, of, pf, pf, dcf, sf, mEmptyRect);
+        w.getWindowFrames().setFrames(pf, df, pf, pf, dcf, sf);
         w.computeFrameLw();
         assertEquals(winRect, w.getFrameLw());
     }

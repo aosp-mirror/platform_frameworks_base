@@ -120,7 +120,9 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             synchronized (mManagerService.mLock) {
                 UserState userState = mManagerService.peekUserStateLocked(userId);
                 if (userState != null) {
-                    userState.mConnection.cleanupService();
+                    if (userState.mConnection != null) {
+                        userState.mConnection.cleanupService();
+                    }
                     mManagerService.mUserStates.remove(userId);
                 }
             }

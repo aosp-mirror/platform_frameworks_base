@@ -163,7 +163,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
-import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.view.AppearanceRegion;
@@ -293,9 +292,6 @@ public class DisplayPolicy {
     private int[] mNavigationBarFrameHeightForRotationDefault = new int[4];
 
     private boolean mIsFreeformWindowOverlappingWithNavBar;
-
-    /** Cached value of {@link ScreenShapeHelper#getWindowOutsetBottomPx} */
-    @Px private int mWindowOutsetBottom;
 
     private final StatusBarController mStatusBarController;
 
@@ -1209,7 +1205,6 @@ public class DisplayPolicy {
      * @param outContentInsets The areas covered by system windows, expressed as positive insets.
      * @param outStableInsets The areas covered by stable system windows irrespective of their
      *                        current visibility. Expressed as positive insets.
-     * @param outOutsets The areas that are not real display, but we would like to treat as such.
      * @param outDisplayCutout The area that has been cut away from the display.
      * @return Whether to always consume the system bars.
      *         See {@link #areSystemBarsForcedShownLw(WindowState)}.
@@ -1217,28 +1212,11 @@ public class DisplayPolicy {
     public boolean getLayoutHintLw(LayoutParams attrs, Rect taskBounds,
             DisplayFrames displayFrames, boolean floatingStack, Rect outFrame,
             Rect outContentInsets, Rect outStableInsets,
-            Rect outOutsets, DisplayCutout.ParcelableWrapper outDisplayCutout) {
+            DisplayCutout.ParcelableWrapper outDisplayCutout) {
         final int fl = PolicyControl.getWindowFlags(null, attrs);
         final int pfl = attrs.privateFlags;
         final int requestedSysUiVis = PolicyControl.getSystemUiVisibility(null, attrs);
         final int sysUiVis = requestedSysUiVis | getImpliedSysUiFlagsForLayout(attrs);
-        final int displayRotation = displayFrames.mRotation;
-
-        final boolean useOutsets = outOutsets != null && shouldUseOutsets(attrs, fl);
-        if (useOutsets) {
-            int outset = mWindowOutsetBottom;
-            if (outset > 0) {
-                if (displayRotation == Surface.ROTATION_0) {
-                    outOutsets.bottom += outset;
-                } else if (displayRotation == Surface.ROTATION_90) {
-                    outOutsets.right += outset;
-                } else if (displayRotation == Surface.ROTATION_180) {
-                    outOutsets.top += outset;
-                } else if (displayRotation == Surface.ROTATION_270) {
-                    outOutsets.left += outset;
-                }
-            }
-        }
 
         final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) != 0;
         final boolean layoutInScreenAndInsetDecor = layoutInScreen
@@ -1268,8 +1246,8 @@ public class DisplayPolicy {
                 } else {
                     cf = displayFrames.mStable;
                 }
-            } else if ((fl & FLAG_FULLSCREEN) != 0 || (fl & FLAG_LAYOUT_IN_OVERSCAN) != 0) {
-                cf = displayFrames.mOverscan;
+            } else if ((fl & FLAG_FULLSCREEN) != 0) {
+                cf = displayFrames.mUnrestricted;
             } else {
                 cf = displayFrames.mCurrent;
             }
@@ -1310,11 +1288,6 @@ public class DisplayPolicy {
             impliedFlags |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         }
         return impliedFlags;
-    }
-
-    private static boolean shouldUseOutsets(WindowManager.LayoutParams attrs, int fl) {
-        return attrs.type == TYPE_WALLPAPER || (fl & (WindowManager.LayoutParams.FLAG_FULLSCREEN
-                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN)) != 0;
     }
 
     private final Runnable mClearHideNavigationFlag = new Runnable() {
@@ -1482,11 +1455,9 @@ public class DisplayPolicy {
 
             w.getWindowFrames().setFrames(displayFrames.mUnrestricted /* parentFrame */,
                     displayFrames.mUnrestricted /* displayFrame */,
-                    displayFrames.mUnrestricted /* overscanFrame */,
                     displayFrames.mUnrestricted /* contentFrame */,
                     displayFrames.mUnrestricted /* visibleFrame */, sTmpRect /* decorFrame */,
-                    displayFrames.mUnrestricted /* stableFrame */,
-                    displayFrames.mUnrestricted /* outsetFrame */);
+                    displayFrames.mUnrestricted /* stableFrame */);
             w.getWindowFrames().setDisplayCutout(displayFrames.mDisplayCutout);
             w.computeFrameLw();
             final Rect frame = w.getFrameLw();
@@ -1530,7 +1501,6 @@ public class DisplayPolicy {
         displayFrames.mVoiceContent.set(dockFrame);
         displayFrames.mSystem.set(dockFrame);
         displayFrames.mContent.set(dockFrame);
-        displayFrames.mRestrictedOverscan.set(dockFrame);
     }
 
     private boolean layoutStatusBar(DisplayFrames displayFrames, int sysui,
@@ -1544,9 +1514,9 @@ public class DisplayPolicy {
         final WindowFrames windowFrames = mStatusBar.getWindowFrames();
         windowFrames.setFrames(displayFrames.mUnrestricted /* parentFrame */,
                 displayFrames.mUnrestricted /* displayFrame */,
-                displayFrames.mStable /* overscanFrame */, displayFrames.mStable /* contentFrame */,
+                displayFrames.mStable /* contentFrame */,
                 displayFrames.mStable /* visibleFrame */, sTmpRect /* decorFrame */,
-                displayFrames.mStable /* stableFrame */, displayFrames.mStable /* outsetFrame */);
+                displayFrames.mStable /* stableFrame */);
         windowFrames.setDisplayCutout(displayFrames.mDisplayCutout);
 
         // Let the status bar determine its size.
@@ -1630,8 +1600,7 @@ public class DisplayPolicy {
                 mNavigationBarController.setBarShowingLw(true);
             } else if (navVisible) {
                 mNavigationBarController.setBarShowingLw(true);
-                dockFrame.bottom = displayFrames.mRestricted.bottom =
-                        displayFrames.mRestrictedOverscan.bottom = top;
+                dockFrame.bottom = displayFrames.mRestricted.bottom = top;
             } else {
                 // We currently want to hide the navigation UI - unless we expanded the status bar.
                 mNavigationBarController.setBarShowingLw(statusBarForcesShowingNavigation);
@@ -1653,8 +1622,7 @@ public class DisplayPolicy {
                 mNavigationBarController.setBarShowingLw(true);
             } else if (navVisible) {
                 mNavigationBarController.setBarShowingLw(true);
-                dockFrame.right = displayFrames.mRestricted.right =
-                        displayFrames.mRestrictedOverscan.right = left;
+                dockFrame.right = displayFrames.mRestricted.right = left;
             } else {
                 // We currently want to hide the navigation UI - unless we expanded the status bar.
                 mNavigationBarController.setBarShowingLw(statusBarForcesShowingNavigation);
@@ -1676,8 +1644,7 @@ public class DisplayPolicy {
                 mNavigationBarController.setBarShowingLw(true);
             } else if (navVisible) {
                 mNavigationBarController.setBarShowingLw(true);
-                dockFrame.left = displayFrames.mRestricted.left =
-                        displayFrames.mRestrictedOverscan.left = right;
+                dockFrame.left = displayFrames.mRestricted.left = right;
             } else {
                 // We currently want to hide the navigation UI - unless we expanded the status bar.
                 mNavigationBarController.setBarShowingLw(statusBarForcesShowingNavigation);
@@ -1699,11 +1666,10 @@ public class DisplayPolicy {
         // And compute the final frame.
         sTmpRect.setEmpty();
         mNavigationBar.getWindowFrames().setFrames(navigationFrame /* parentFrame */,
-                navigationFrame /* displayFrame */, navigationFrame /* overscanFrame */,
+                navigationFrame /* displayFrame */,
                 displayFrames.mDisplayCutoutSafe /* contentFrame */,
                 navigationFrame /* visibleFrame */, sTmpRect /* decorFrame */,
-                navigationFrame /* stableFrame */,
-                displayFrames.mDisplayCutoutSafe /* outsetFrame */);
+                navigationFrame /* stableFrame */);
         mNavigationBar.getWindowFrames().setDisplayCutout(displayFrames.mDisplayCutout);
         mNavigationBar.computeFrameLw();
         mNavigationBarController.setContentFrame(mNavigationBar.getContentFrameLw());
@@ -1713,7 +1679,7 @@ public class DisplayPolicy {
     }
 
     private void setAttachedWindowFrames(WindowState win, int fl, int adjust, WindowState attached,
-            boolean insetDecors, Rect pf, Rect df, Rect of, Rect cf, Rect vf,
+            boolean insetDecors, Rect pf, Rect df, Rect cf, Rect vf,
             DisplayFrames displayFrames) {
         if (!win.isInputMethodTarget() && attached.isInputMethodTarget()) {
             // Here's a special case: if the child window is not the 'dock window'
@@ -1725,29 +1691,25 @@ public class DisplayPolicy {
             // compute the frames that would be appropriate without the dock.
             vf.set(displayFrames.mDock);
             cf.set(displayFrames.mDock);
-            of.set(displayFrames.mDock);
             df.set(displayFrames.mDock);
         } else {
 
-            // In case we forced the window to draw behind the navigation bar, restrict df/of to
-            // DF.RestrictedOverscan to simulate old compat behavior.
+            // In case we forced the window to draw behind the navigation bar, restrict df to
+            // DF.Restricted to simulate old compat behavior.
             Rect parentDisplayFrame = attached.getDisplayFrameLw();
-            Rect parentOverscan = attached.getOverscanFrameLw();
             final WindowManager.LayoutParams attachedAttrs = attached.mAttrs;
             if ((attachedAttrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
                     && (attachedAttrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
                     && (attachedAttrs.systemUiVisibility
                             & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0) {
-                parentOverscan = new Rect(parentOverscan);
-                parentOverscan.intersect(displayFrames.mRestrictedOverscan);
                 parentDisplayFrame = new Rect(parentDisplayFrame);
-                parentDisplayFrame.intersect(displayFrames.mRestrictedOverscan);
+                parentDisplayFrame.intersect(displayFrames.mRestricted);
             }
 
             // The effective display frame of the attached window depends on whether it is taking
             // care of insetting its content. If not, we need to use the parent's content frame so
             // that the entire window is positioned within that content. Otherwise we can use the
-            // overscan frame and let the attached window take care of positioning its content
+            // parent display frame and let the attached window take care of positioning its content
             // appropriately.
             if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
                 // Set the content frame of the attached window to the parent's decor frame
@@ -1755,7 +1717,7 @@ public class DisplayPolicy {
                 // setting {@link WindowManager.LayoutParams#FLAG_LAYOUT_ATTACHED_IN_DECOR} flag.
                 // Otherwise, use the overscan frame.
                 cf.set((fl & FLAG_LAYOUT_ATTACHED_IN_DECOR) != 0
-                        ? attached.getContentFrameLw() : parentOverscan);
+                        ? attached.getContentFrameLw() : parentDisplayFrame);
             } else {
                 // If the window is resizing, then we want to base the content frame on our attached
                 // content frame to resize...however, things can be tricky if the attached window is
@@ -1770,7 +1732,6 @@ public class DisplayPolicy {
                 }
             }
             df.set(insetDecors ? parentDisplayFrame : cf);
-            of.set(insetDecors ? parentOverscan : cf);
             vf.set(attached.getVisibleFrameLw());
         }
         // The LAYOUT_IN_SCREEN flag is used to determine whether the attached window should be
@@ -1820,7 +1781,6 @@ public class DisplayPolicy {
             return;
         }
         final WindowManager.LayoutParams attrs = win.getAttrs();
-        final boolean isDefaultDisplay = win.isDefaultDisplay();
 
         final int type = attrs.type;
         final int fl = PolicyControl.getWindowFlags(win, attrs);
@@ -1831,11 +1791,9 @@ public class DisplayPolicy {
 
         final WindowFrames windowFrames = win.getWindowFrames();
 
-        windowFrames.setHasOutsets(false);
         sTmpLastParentFrame.set(windowFrames.mParentFrame);
         final Rect pf = windowFrames.mParentFrame;
         final Rect df = windowFrames.mDisplayFrame;
-        final Rect of = windowFrames.mOverscanFrame;
         final Rect cf = windowFrames.mContentFrame;
         final Rect vf = windowFrames.mVisibleFrame;
         final Rect dcf = windowFrames.mDecorFrame;
@@ -1860,21 +1818,20 @@ public class DisplayPolicy {
         if (type == TYPE_INPUT_METHOD) {
             vf.set(displayFrames.mDock);
             cf.set(displayFrames.mDock);
-            of.set(displayFrames.mDock);
             df.set(displayFrames.mDock);
             windowFrames.mParentFrame.set(displayFrames.mDock);
             // IM dock windows layout below the nav bar...
-            pf.bottom = df.bottom = of.bottom = displayFrames.mUnrestricted.bottom;
+            pf.bottom = df.bottom = displayFrames.mUnrestricted.bottom;
             // ...with content insets above the nav bar
             cf.bottom = vf.bottom = displayFrames.mStable.bottom;
             if (mStatusBar != null && mFocusedWindow == mStatusBar && canReceiveInput(mStatusBar)) {
                 // The status bar forces the navigation bar while it's visible. Make sure the IME
                 // avoids the navigation bar in that case.
                 if (mNavigationBarPosition == NAV_BAR_RIGHT) {
-                    pf.right = df.right = of.right = cf.right = vf.right =
+                    pf.right = df.right = cf.right = vf.right =
                             displayFrames.mStable.right;
                 } else if (mNavigationBarPosition == NAV_BAR_LEFT) {
-                    pf.left = df.left = of.left = cf.left = vf.left = displayFrames.mStable.left;
+                    pf.left = df.left = cf.left = vf.left = displayFrames.mStable.left;
                 }
             }
 
@@ -1897,7 +1854,6 @@ public class DisplayPolicy {
             // IM dock windows always go to the bottom of the screen.
             attrs.gravity = Gravity.BOTTOM;
         } else if (type == TYPE_VOICE_INTERACTION) {
-            of.set(displayFrames.mUnrestricted);
             df.set(displayFrames.mUnrestricted);
             pf.set(displayFrames.mUnrestricted);
             if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
@@ -1911,9 +1867,8 @@ public class DisplayPolicy {
                 vf.set(cf);
             }
         } else if (type == TYPE_WALLPAPER) {
-            layoutWallpaper(displayFrames, pf, df, of, cf);
+            layoutWallpaper(displayFrames, pf, df, cf);
         } else if (win == mStatusBar) {
-            of.set(displayFrames.mUnrestricted);
             df.set(displayFrames.mUnrestricted);
             pf.set(displayFrames.mUnrestricted);
             cf.set(displayFrames.mStable);
@@ -1967,7 +1922,7 @@ public class DisplayPolicy {
                 if (attached != null) {
                     // If this window is attached to another, our display
                     // frame is the same as the one we are attached to.
-                    setAttachedWindowFrames(win, fl, adjust, attached, true, pf, df, of, cf, vf,
+                    setAttachedWindowFrames(win, fl, adjust, attached, true, pf, df, cf, vf,
                             displayFrames);
                 } else {
                     if (type == TYPE_STATUS_BAR_PANEL || type == TYPE_STATUS_BAR_SUB_PANEL) {
@@ -1977,24 +1932,17 @@ public class DisplayPolicy {
                         //
                         // However, they should still dodge the navigation bar if it exists.
 
-                        pf.left = df.left = of.left = hasNavBar
+                        pf.left = df.left = hasNavBar
                                 ? displayFrames.mDock.left : displayFrames.mUnrestricted.left;
-                        pf.top = df.top = of.top = displayFrames.mUnrestricted.top;
-                        pf.right = df.right = of.right = hasNavBar
+                        pf.top = df.top = displayFrames.mUnrestricted.top;
+                        pf.right = df.right = hasNavBar
                                 ? displayFrames.mRestricted.right
                                 : displayFrames.mUnrestricted.right;
-                        pf.bottom = df.bottom = of.bottom = hasNavBar
+                        pf.bottom = df.bottom = hasNavBar
                                 ? displayFrames.mRestricted.bottom
                                 : displayFrames.mUnrestricted.bottom;
 
                         if (DEBUG_LAYOUT) Slog.v(TAG, "Laying out status bar window: " + pf);
-                    } else if ((fl & FLAG_LAYOUT_IN_OVERSCAN) != 0
-                            && type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW) {
-                        // Asking to layout into the overscan region, so give it that pure
-                        // unrestricted area.
-                        of.set(displayFrames.mOverscan);
-                        df.set(displayFrames.mOverscan);
-                        pf.set(displayFrames.mOverscan);
                     } else if ((sysUiFl & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                             && (type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW
                             || type == TYPE_VOLUME_OVERLAY
@@ -2003,19 +1951,11 @@ public class DisplayPolicy {
                         // extend into the unrestricted overscan screen area. We only do this for
                         // application windows and certain system windows to ensure no window that
                         // can be above the nav bar can do this.
-                        df.set(displayFrames.mOverscan);
-                        pf.set(displayFrames.mOverscan);
-                        // We need to tell the app about where the frame inside the overscan is, so
-                        // it can inset its content by that amount -- it didn't ask to actually
-                        // extend itself into the overscan region.
-                        of.set(displayFrames.mUnrestricted);
+                        df.set(displayFrames.mUnrestricted);
+                        pf.set(displayFrames.mUnrestricted);
                     } else {
-                        df.set(displayFrames.mRestrictedOverscan);
-                        pf.set(displayFrames.mRestrictedOverscan);
-                        // We need to tell the app about where the frame inside the overscan
-                        // is, so it can inset its content by that amount -- it didn't ask
-                        // to actually extend itself into the overscan region.
-                        of.set(displayFrames.mUnrestricted);
+                        df.set(displayFrames.mRestricted);
+                        pf.set(displayFrames.mRestricted);
                     }
 
                     if ((fl & FLAG_FULLSCREEN) == 0) {
@@ -2053,19 +1993,17 @@ public class DisplayPolicy {
                 // gets everything, period.
                 if (type == TYPE_STATUS_BAR_PANEL || type == TYPE_STATUS_BAR_SUB_PANEL) {
                     cf.set(displayFrames.mUnrestricted);
-                    of.set(displayFrames.mUnrestricted);
                     df.set(displayFrames.mUnrestricted);
                     pf.set(displayFrames.mUnrestricted);
                     if (hasNavBar) {
-                        pf.left = df.left = of.left = cf.left = displayFrames.mDock.left;
-                        pf.right = df.right = of.right = cf.right = displayFrames.mRestricted.right;
-                        pf.bottom = df.bottom = of.bottom = cf.bottom =
+                        pf.left = df.left = cf.left = displayFrames.mDock.left;
+                        pf.right = df.right = cf.right = displayFrames.mRestricted.right;
+                        pf.bottom = df.bottom = cf.bottom =
                                 displayFrames.mRestricted.bottom;
                     }
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Laying out IN_SCREEN status bar window: " + pf);
                 } else if (type == TYPE_NAVIGATION_BAR || type == TYPE_NAVIGATION_BAR_PANEL) {
                     // The navigation bar has Real Ultimate Power.
-                    of.set(displayFrames.mUnrestricted);
                     df.set(displayFrames.mUnrestricted);
                     pf.set(displayFrames.mUnrestricted);
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Laying out navigation bar window: " + pf);
@@ -2073,24 +2011,14 @@ public class DisplayPolicy {
                         && ((fl & FLAG_FULLSCREEN) != 0)) {
                     // Fullscreen secure system overlays get what they ask for. Screenshot region
                     // selection overlay should also expand to full screen.
-                    cf.set(displayFrames.mOverscan);
-                    of.set(displayFrames.mOverscan);
-                    df.set(displayFrames.mOverscan);
-                    pf.set(displayFrames.mOverscan);
+                    cf.set(displayFrames.mUnrestricted);
+                    df.set(displayFrames.mUnrestricted);
+                    pf.set(displayFrames.mUnrestricted);
                 } else if (type == TYPE_BOOT_PROGRESS) {
                     // Boot progress screen always covers entire display.
-                    cf.set(displayFrames.mOverscan);
-                    of.set(displayFrames.mOverscan);
-                    df.set(displayFrames.mOverscan);
-                    pf.set(displayFrames.mOverscan);
-                } else if ((fl & FLAG_LAYOUT_IN_OVERSCAN) != 0
-                        && type >= FIRST_APPLICATION_WINDOW && type <= LAST_SUB_WINDOW) {
-                    // Asking to layout into the overscan region, so give it that pure unrestricted
-                    // area.
-                    cf.set(displayFrames.mOverscan);
-                    of.set(displayFrames.mOverscan);
-                    df.set(displayFrames.mOverscan);
-                    pf.set(displayFrames.mOverscan);
+                    cf.set(displayFrames.mUnrestricted);
+                    df.set(displayFrames.mUnrestricted);
+                    pf.set(displayFrames.mUnrestricted);
                 } else if ((sysUiFl & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                         && (type == TYPE_STATUS_BAR
                         || type == TYPE_TOAST
@@ -2105,11 +2033,9 @@ public class DisplayPolicy {
                     // ask for layout in only content.  We can't currently figure out
                     // what the screen would be if only laying out to hide the nav bar.
                     cf.set(displayFrames.mUnrestricted);
-                    of.set(displayFrames.mUnrestricted);
                     df.set(displayFrames.mUnrestricted);
                     pf.set(displayFrames.mUnrestricted);
                 } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0) {
-                    of.set(displayFrames.mRestricted);
                     df.set(displayFrames.mRestricted);
                     pf.set(displayFrames.mRestricted);
 
@@ -2123,7 +2049,6 @@ public class DisplayPolicy {
                     }
                 } else {
                     cf.set(displayFrames.mRestricted);
-                    of.set(displayFrames.mRestricted);
                     df.set(displayFrames.mRestricted);
                     pf.set(displayFrames.mRestricted);
                 }
@@ -2140,7 +2065,7 @@ public class DisplayPolicy {
                         + "): attached to " + attached);
                 // A child window should be placed inside of the same visible
                 // frame that its parent had.
-                setAttachedWindowFrames(win, fl, adjust, attached, false, pf, df, of, cf, vf,
+                setAttachedWindowFrames(win, fl, adjust, attached, false, pf, df, cf, vf,
                         displayFrames);
             } else {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "layoutWindowLw(" + attrs.getTitle()
@@ -2152,28 +2077,23 @@ public class DisplayPolicy {
                     // top of the status bar. They are protected by the STATUS_BAR_SERVICE
                     // permission, so they have the same privileges as the status bar itself.
                     cf.set(displayFrames.mRestricted);
-                    of.set(displayFrames.mRestricted);
                     df.set(displayFrames.mRestricted);
                     pf.set(displayFrames.mRestricted);
                 } else if (type == TYPE_TOAST || type == TYPE_SYSTEM_ALERT) {
                     // These dialogs are stable to interim decor changes.
                     cf.set(displayFrames.mStable);
-                    of.set(displayFrames.mStable);
                     df.set(displayFrames.mStable);
                     pf.set(displayFrames.mStable);
                 } else {
                     pf.set(displayFrames.mContent);
                     if (win.isVoiceInteraction()) {
                         cf.set(displayFrames.mVoiceContent);
-                        of.set(displayFrames.mVoiceContent);
                         df.set(displayFrames.mVoiceContent);
                     } else if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
                         cf.set(displayFrames.mDock);
-                        of.set(displayFrames.mDock);
                         df.set(displayFrames.mDock);
                     } else {
                         cf.set(displayFrames.mContent);
-                        of.set(displayFrames.mContent);
                         df.set(displayFrames.mContent);
                     }
                     if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
@@ -2252,34 +2172,8 @@ public class DisplayPolicy {
             df.left = df.top = -10000;
             df.right = df.bottom = 10000;
             if (type != TYPE_WALLPAPER) {
-                of.left = of.top = cf.left = cf.top = vf.left = vf.top = -10000;
-                of.right = of.bottom = cf.right = cf.bottom = vf.right = vf.bottom = 10000;
-            }
-        }
-
-        // If the device has a chin (e.g. some watches), a dead area at the bottom of the screen we
-        // need to provide information to the clients that want to pretend that you can draw there.
-        // We only want to apply outsets to certain types of windows. For example, we never want to
-        // apply the outsets to floating dialogs, because they wouldn't make sense there.
-        final boolean useOutsets = shouldUseOutsets(attrs, fl);
-        if (isDefaultDisplay && useOutsets) {
-            final Rect osf = windowFrames.mOutsetFrame;
-            osf.set(cf.left, cf.top, cf.right, cf.bottom);
-            windowFrames.setHasOutsets(true);
-            int outset = mWindowOutsetBottom;
-            if (outset > 0) {
-                int rotation = displayFrames.mRotation;
-                if (rotation == Surface.ROTATION_0) {
-                    osf.bottom += outset;
-                } else if (rotation == Surface.ROTATION_90) {
-                    osf.right += outset;
-                } else if (rotation == Surface.ROTATION_180) {
-                    osf.top -= outset;
-                } else if (rotation == Surface.ROTATION_270) {
-                    osf.left -= outset;
-                }
-                if (DEBUG_LAYOUT) Slog.v(TAG, "applying bottom outset of " + outset
-                        + " with rotation " + rotation + ", result: " + osf);
+                cf.left = cf.top = vf.left = vf.top = -10000;
+                cf.right = cf.bottom = vf.right = vf.bottom = 10000;
             }
         }
 
@@ -2288,11 +2182,9 @@ public class DisplayPolicy {
                 + " attach=" + attached + " type=" + type
                 + String.format(" flags=0x%08x", fl)
                 + " pf=" + pf.toShortString() + " df=" + df.toShortString()
-                + " of=" + of.toShortString()
                 + " cf=" + cf.toShortString() + " vf=" + vf.toShortString()
                 + " dcf=" + dcf.toShortString()
-                + " sf=" + sf.toShortString()
-                + " osf=" + windowFrames.mOutsetFrame.toShortString() + " " + win);
+                + " sf=" + sf.toShortString());
 
         if (!sTmpLastParentFrame.equals(pf)) {
             windowFrames.setContentChanged(true);
@@ -2311,12 +2203,11 @@ public class DisplayPolicy {
         }
     }
 
-    private void layoutWallpaper(DisplayFrames displayFrames, Rect pf, Rect df, Rect of, Rect cf) {
-        // The wallpaper has Real Ultimate Power, but we want to tell it about the overscan area.
-        df.set(displayFrames.mOverscan);
-        pf.set(displayFrames.mOverscan);
+    private void layoutWallpaper(DisplayFrames displayFrames, Rect pf, Rect df, Rect cf) {
+        // The wallpaper has Real Ultimate Power
+        df.set(displayFrames.mUnrestricted);
+        pf.set(displayFrames.mUnrestricted);
         cf.set(displayFrames.mUnrestricted);
-        of.set(displayFrames.mUnrestricted);
     }
 
     private void offsetInputMethodWindowLw(WindowState win, DisplayFrames displayFrames) {
@@ -2722,7 +2613,6 @@ public class DisplayPolicy {
                         - getNavigationBarFrameHeight(portraitRotation, uiMode);
 
         updateConfigurationAndScreenSizeDependentBehaviors();
-        mWindowOutsetBottom = ScreenShapeHelper.getWindowOutsetBottomPx(mContext.getResources());
     }
 
     void updateConfigurationAndScreenSizeDependentBehaviors() {

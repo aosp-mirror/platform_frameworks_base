@@ -613,6 +613,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int navigationHidden;
 
+    /** @hide **/
+    @IntDef(prefix = {"ORIENTATION_"}, value = {
+            ORIENTATION_UNDEFINED,
+            ORIENTATION_PORTRAIT,
+            ORIENTATION_LANDSCAPE,
+            ORIENTATION_SQUARE
+    })
+    public @interface Orientation {
+    }
+
     /** Constant for {@link #orientation}: a value indicating that no value has been set. */
     public static final int ORIENTATION_UNDEFINED = 0;
     /** Constant for {@link #orientation}, value corresponding to the
@@ -630,6 +640,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Overall orientation of the screen.  May be one of
      * {@link #ORIENTATION_LANDSCAPE}, {@link #ORIENTATION_PORTRAIT}.
      */
+    @Orientation
     public int orientation;
 
     /** Constant for {@link #uiMode}: bits that encode the mode type. */
@@ -798,6 +809,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link ActivityInfo#CONFIG_ASSETS_PATHS}.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public int assetsSeq;
 
