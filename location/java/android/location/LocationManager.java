@@ -1818,15 +1818,14 @@ public class LocationManager {
             Log.w(TAG, ex);
         }
 
-        if (status == null) {
-            status = new GpsStatus();
-        }
-        // When mGnssStatus is null, that means that this method is called outside
-        // onGpsStatusChanged().  Return an empty status to maintain backwards compatibility.
         GnssStatus gnssStatus = mGnssStatusListenerManager.getGnssStatus();
         int ttff = mGnssStatusListenerManager.getTtff();
         if (gnssStatus != null) {
-            status.setStatus(gnssStatus, ttff);
+            if (status == null) {
+                status = GpsStatus.create(gnssStatus, ttff);
+            } else {
+                status.setStatus(gnssStatus, ttff);
+            }
         }
         return status;
     }
@@ -2820,8 +2819,8 @@ public class LocationManager {
             @Override
             public void onSvStatusChanged(int svCount, int[] svidWithFlags, float[] cn0s,
                     float[] elevations, float[] azimuths, float[] carrierFreqs) {
-                GnssStatus localStatus = new GnssStatus(svCount, svidWithFlags, cn0s, elevations,
-                        azimuths, carrierFreqs);
+                GnssStatus localStatus = GnssStatus.wrap(svCount, svidWithFlags, cn0s,
+                        elevations, azimuths, carrierFreqs);
                 mGnssStatus = localStatus;
                 execute((callback) -> callback.onSatelliteStatusChanged(localStatus));
             }

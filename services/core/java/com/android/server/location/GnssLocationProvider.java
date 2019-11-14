@@ -1482,39 +1482,35 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             Log.v(TAG, "SV count: " + info.mSvCount);
         }
         // Calculate number of satellites used in fix.
+        GnssStatus gnssStatus = GnssStatus.wrap(
+                info.mSvCount,
+                info.mSvidWithFlags,
+                info.mCn0s,
+                info.mSvElevations,
+                info.mSvAzimuths,
+                info.mSvCarrierFreqs);
         int usedInFixCount = 0;
         int maxCn0 = 0;
         int meanCn0 = 0;
-        for (int i = 0; i < info.mSvCount; i++) {
-            if ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
+        for (int i = 0; i < gnssStatus.getSatelliteCount(); i++) {
+            if (gnssStatus.usedInFix(i)) {
                 ++usedInFixCount;
-                if (info.mCn0s[i] > maxCn0) {
-                    maxCn0 = (int) info.mCn0s[i];
+                if (gnssStatus.getCn0DbHz(i) > maxCn0) {
+                    maxCn0 = (int) gnssStatus.getCn0DbHz(i);
                 }
-                meanCn0 += info.mCn0s[i];
+                meanCn0 += gnssStatus.getCn0DbHz(i);
+                mGnssMetrics.logConstellationType(gnssStatus.getConstellationType(i));
             }
             if (VERBOSE) {
-                Log.v(TAG, "svid: " + (info.mSvidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH) +
-                        " cn0: " + info.mCn0s[i] +
-                        " elev: " + info.mSvElevations[i] +
-                        " azimuth: " + info.mSvAzimuths[i] +
-                        " carrier frequency: " + info.mSvCarrierFreqs[i] +
-                        ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) == 0
-                                ? "  " : " E") +
-                        ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) == 0
-                                ? "  " : " A") +
-                        ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) == 0
-                                ? "" : "U") +
-                        ((info.mSvidWithFlags[i] &
-                                GnssStatus.GNSS_SV_FLAGS_HAS_CARRIER_FREQUENCY) == 0
-                                ? "" : "F"));
-            }
-
-            if ((info.mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
-                int constellationType =
-                        (info.mSvidWithFlags[i] >> GnssStatus.CONSTELLATION_TYPE_SHIFT_WIDTH)
-                                & GnssStatus.CONSTELLATION_TYPE_MASK;
-                mGnssMetrics.logConstellationType(constellationType);
+                Log.v(TAG, "svid: " + gnssStatus.getSvid(i)
+                        + " cn0: " + gnssStatus.getCn0DbHz(i)
+                        + " elev: " + gnssStatus.getElevationDegrees(i)
+                        + " azimuth: " + gnssStatus.getAzimuthDegrees(i)
+                        + " carrier frequency: " + gnssStatus.getCn0DbHz(i)
+                        + (gnssStatus.hasEphemerisData(i) ? " E" : "  ")
+                        + (gnssStatus.hasAlmanacData(i) ? " A" : "  ")
+                        + (gnssStatus.usedInFix(i) ? "U" : "")
+                        + (gnssStatus.hasCarrierFrequencyHz(i) ? "F" : ""));
             }
         }
         if (usedInFixCount > 0) {
@@ -1523,7 +1519,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // return number of sats used in fix instead of total reported
         mLocationExtras.set(usedInFixCount, meanCn0, maxCn0);
 
-        mGnssMetrics.logSvStatus(info.mSvCount, info.mSvidWithFlags, info.mSvCarrierFreqs);
+        mGnssMetrics.logSvStatus(gnssStatus);
     }
 
     @NativeEntryPoint
