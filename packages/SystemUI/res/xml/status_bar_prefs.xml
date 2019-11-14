@@ -55,17 +55,19 @@
     <!-- speakerphone -->
 
     <com.android.systemui.tuner.StatusBarSwitch
+<<<<<<< HEAD:packages/SystemUI/res/xml/status_bar_prefs.xml
         android:key="zen"
         android:title="@string/quick_settings_dnd_label" />
 
-    <com.android.systemui.tuner.StatusBarSwitch
+    <!-- mute -->
+=======
         android:key="roaming"
         android:title="@string/status_bar_roaming" />
 
     <com.android.systemui.tuner.StatusBarSwitch
         android:key="cast"
         android:title="@string/quick_settings_cast_title" />
-
+>>>>>>> 90187899e76... Add switch for vpn, data saver and roaming icons:packages/SystemUI/res/xml/statusbar_items.xml
 
     <com.android.systemui.tuner.StatusBarSwitch
         android:key="volume"
