@@ -382,12 +382,7 @@ public class WifiConfiguration implements Parcelable {
     public void setSecurityParams(@SecurityType int securityType) {
         // Clear all the bitsets.
         allowedKeyManagement.clear();
-        allowedProtocols.clear();
         allowedAuthAlgorithms.clear();
-        allowedPairwiseCiphers.clear();
-        allowedGroupCiphers.clear();
-        allowedGroupManagementCiphers.clear();
-        allowedSuiteBCiphers.clear();
 
         switch (securityType) {
             case SECURITY_TYPE_OPEN:
@@ -410,6 +405,9 @@ public class WifiConfiguration implements Parcelable {
                 requirePMF = true;
                 break;
             case SECURITY_TYPE_EAP_SUITE_B:
+                allowedGroupCiphers.clear();
+                allowedGroupManagementCiphers.clear();
+                allowedSuiteBCiphers.clear();
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SUITE_B_192);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 allowedGroupManagementCiphers.set(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
@@ -921,6 +919,12 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public int meteredOverride = METERED_OVERRIDE_NONE;
+
+    /**
+     * This Wifi configuration is a clone of another network with lower security
+     * @hide
+     */
+    public String clonedNetworkConfigKey;
 
     /**
      * Blend together all the various opinions to decide if the given network
@@ -1793,6 +1797,7 @@ public class WifiConfiguration implements Parcelable {
         shared = true;
         dtimInterval = 0;
         mRandomizedMacAddress = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
+        clonedNetworkConfigKey = null;
     }
 
     /**
@@ -2352,6 +2357,7 @@ public class WifiConfiguration implements Parcelable {
 
     /** copy constructor {@hide} */
     @UnsupportedAppUsage
+
     public WifiConfiguration(WifiConfiguration source) {
         if (source != null) {
             networkId = source.networkId;
@@ -2431,6 +2437,7 @@ public class WifiConfiguration implements Parcelable {
             macRandomizationSetting = source.macRandomizationSetting;
             requirePMF = source.requirePMF;
             updateIdentifier = source.updateIdentifier;
+            clonedNetworkConfigKey = source.clonedNetworkConfigKey;
         }
     }
 
@@ -2502,6 +2509,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeParcelable(mRandomizedMacAddress, flags);
         dest.writeInt(macRandomizationSetting);
         dest.writeInt(osu ? 1 : 0);
+        dest.writeString(clonedNetworkConfigKey);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -2575,6 +2583,8 @@ public class WifiConfiguration implements Parcelable {
                 config.mRandomizedMacAddress = in.readParcelable(null);
                 config.macRandomizationSetting = in.readInt();
                 config.osu = in.readInt() != 0;
+                config.clonedNetworkConfigKey = in.readString();
+
                 return config;
             }
 
