@@ -50,8 +50,10 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
@@ -65,6 +67,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -100,6 +103,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private DockManager mDockManager;
+    @Captor
+    private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     private KeyguardIndicationTextView mTextView;
 
     private KeyguardIndicationController mController;
@@ -135,7 +142,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         }
         mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
                 mLockPatternUtils, mWakeLock, mShadeController, mAccessibilityController,
-                mUnlockMethodCache, mStatusBarStateController, mKeyguardUpdateMonitor);
+                mUnlockMethodCache, mStatusBarStateController, mKeyguardUpdateMonitor,
+                mDockManager);
         mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
     }
 
@@ -203,6 +211,74 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         verify(mDisclosure).setVisibility(View.GONE);
         verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void createController_addsAlignmentListener() {
+        createController();
+
+        verify(mDockManager).addAlignmentStateListener(
+                any(DockManager.AlignmentStateListener.class));
+    }
+
+    @Test
+    public void onAlignmentStateChanged_showsSlowChargingIndication() {
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+
+        mAlignmentListener.getValue().onAlignmentStateChanged(
+                DockManager.ALIGN_STATE_POOR);
+
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getResources().getString(R.string.dock_alignment_slow_charging));
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
+    }
+
+    @Test
+    public void onAlignmentStateChanged_showsNotChargingIndication() {
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+
+        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getResources().getString(R.string.dock_alignment_not_charging));
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
+    }
+
+    @Test
+    public void onAlignmentStateChanged_whileDozing_showsSlowChargingIndication() {
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+        mController.setDozing(true);
+
+        mAlignmentListener.getValue().onAlignmentStateChanged(
+                DockManager.ALIGN_STATE_POOR);
+
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getResources().getString(R.string.dock_alignment_slow_charging));
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
+    }
+
+    @Test
+    public void onAlignmentStateChanged_whileDozing_showsNotChargingIndication() {
+        createController();
+        verify(mDockManager).addAlignmentStateListener(mAlignmentListener.capture());
+        mController.setVisible(true);
+        mController.setDozing(true);
+
+        mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
+
+        assertThat(mTextView.getText()).isEqualTo(
+                mContext.getResources().getString(R.string.dock_alignment_not_charging));
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(
+                Utils.getColorError(mContext).getDefaultColor());
     }
 
     @Test
