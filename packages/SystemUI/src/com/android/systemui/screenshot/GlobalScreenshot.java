@@ -59,13 +59,16 @@ import android.graphics.Picture;
 import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.media.ExifInterface;
 import android.media.MediaActionSound;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -107,9 +110,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -323,10 +332,40 @@ public class GlobalScreenshot {
                 final Uri uri = MediaStore.createPending(context, params);
                 final MediaStore.PendingSession session = MediaStore.openPending(context, uri);
                 try {
+                    // First, write the actual data for our screenshot
                     try (OutputStream out = session.openOutputStream()) {
                         if (!image.compress(Bitmap.CompressFormat.PNG, 100, out)) {
                             throw new IOException("Failed to compress");
                         }
+                    }
+
+                    // Next, write metadata to help index the screenshot
+                    try (ParcelFileDescriptor pfd = session.open()) {
+                        final ExifInterface exif = new ExifInterface(pfd.getFileDescriptor());
+
+                        exif.setAttribute(ExifInterface.TAG_SOFTWARE,
+                                "Android " + Build.DISPLAY);
+
+                        exif.setAttribute(ExifInterface.TAG_IMAGE_WIDTH,
+                                Integer.toString(image.getWidth()));
+                        exif.setAttribute(ExifInterface.TAG_IMAGE_LENGTH,
+                                Integer.toString(image.getHeight()));
+
+                        final ZonedDateTime time = ZonedDateTime.ofInstant(
+                                Instant.ofEpochMilli(mImageTime), ZoneId.systemDefault());
+                        exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL,
+                                DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss").format(time));
+                        exif.setAttribute(ExifInterface.TAG_SUBSEC_TIME_ORIGINAL,
+                                DateTimeFormatter.ofPattern("SSS").format(time));
+
+                        if (Objects.equals(time.getOffset(), ZoneOffset.UTC)) {
+                            exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL, "+00:00");
+                        } else {
+                            exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL,
+                                    DateTimeFormatter.ofPattern("XXX").format(time));
+                        }
+
+                        exif.saveAttributes();
                     }
                     session.publish();
                 } catch (Exception e) {
