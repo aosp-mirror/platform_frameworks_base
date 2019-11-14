@@ -26,6 +26,8 @@ import android.util.MutableInt;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.FastNative;
+
 import libcore.util.HexEncoding;
 
 import java.nio.charset.StandardCharsets;
@@ -34,6 +36,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+
 
 /**
  * Gives access to the system properties store.  The system properties
@@ -93,18 +96,32 @@ public class SystemProperties {
         }
     }
 
+    // The one-argument version of native_get used to be a regular native function. Nowadays,
+    // we use the two-argument form of native_get all the time, but we can't just delete the
+    // one-argument overload: apps use it via reflection, as the UnsupportedAppUsage annotation
+    // indicates. Let's just live with having a Java function with a very unusual name.
     @UnsupportedAppUsage
-    private static native String native_get(String key);
+    private static String native_get(String key) {
+        return native_get(key, "");
+    }
+
+    @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native String native_get(String key, String def);
+    @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native int native_get_int(String key, int def);
+    @FastNative
     @UnsupportedAppUsage
     private static native long native_get_long(String key, long def);
+    @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native boolean native_get_boolean(String key, boolean def);
+
+    // _NOT_ FastNative: native_set performs IPC and can block
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native void native_set(String key, String def);
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native void native_add_change_callback();
     private static native void native_report_sysprop_change();
@@ -229,25 +246,27 @@ public class SystemProperties {
 
     @SuppressWarnings("unused")  // Called from native code.
     private static void callChangeCallbacks() {
+        ArrayList<Runnable> callbacks = null;
         synchronized (sChangeCallbacks) {
             //Log.i("foo", "Calling " + sChangeCallbacks.size() + " change callbacks!");
             if (sChangeCallbacks.size() == 0) {
                 return;
             }
-            ArrayList<Runnable> callbacks = new ArrayList<Runnable>(sChangeCallbacks);
-            final long token = Binder.clearCallingIdentity();
-            try {
-                for (int i = 0; i < callbacks.size(); i++) {
-                    try {
-                        callbacks.get(i).run();
-                    } catch (Throwable t) {
-                        Log.wtf(TAG, "Exception in SystemProperties change callback", t);
-                        // Ignore and try to go on.
-                    }
+            callbacks = new ArrayList<Runnable>(sChangeCallbacks);
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            for (int i = 0; i < callbacks.size(); i++) {
+                try {
+                    callbacks.get(i).run();
+                } catch (Throwable t) {
+                    // Ignore and try to go on. Don't use wtf here: that
+                    // will cause the process to exit on some builds and break tests.
+                    Log.e(TAG, "Exception in SystemProperties change callback", t);
                 }
-            } finally {
-                Binder.restoreCallingIdentity(token);
             }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
