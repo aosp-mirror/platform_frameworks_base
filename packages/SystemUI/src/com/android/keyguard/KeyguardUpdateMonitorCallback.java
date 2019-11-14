@@ -316,11 +316,6 @@ public class KeyguardUpdateMonitorCallback {
 
 
     /**
-     * Called when authenticated biometrics are cleared.
-     */
-    public void onBiometricsCleared() { }
-
-    /**
      * Called when a pulsing is received.
      */
     public void onPulsing(boolean pulsing) { }
