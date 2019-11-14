@@ -426,7 +426,7 @@ interface IDevicePolicyManager {
     int getGlobalPrivateDnsMode(in ComponentName admin);
     String getGlobalPrivateDnsHost(in ComponentName admin);
 
-    void grantDeviceIdsAccessToProfileOwner(in ComponentName who, int userId);
+    void markProfileOwnerOnOrganizationOwnedDevice(in ComponentName who, int userId);
 
     void installUpdateFromFile(in ComponentName admin, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
 
