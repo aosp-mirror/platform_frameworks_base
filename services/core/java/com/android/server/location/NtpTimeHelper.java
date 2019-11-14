@@ -181,11 +181,7 @@ class NtpTimeHelper {
                 mHandler.postDelayed(this::retrieveAndInjectNtpTime, delay);
             }
         }
-        try {
-            // release wake lock held by task
-            mWakeLock.release();
-        } catch (Exception e) {
-            // This happens when the WakeLock is already released.
-        }
+        // release wake lock held by task
+        mWakeLock.release();
     }
 }

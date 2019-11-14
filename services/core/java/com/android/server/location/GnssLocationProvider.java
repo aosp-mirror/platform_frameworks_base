@@ -301,6 +301,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // Timeout when holding wakelocks for downloading PSDS data.
     private static final long DOWNLOAD_PSDS_DATA_TIMEOUT_MS = 60 * 1000;
+    private static final long WAKELOCK_TIMEOUT_MILLIS = 30 * 1000;
 
     private final ExponentialBackOff mPsdsBackOff = new ExponentialBackOff(RETRY_INTERVAL,
             MAX_RETRY_INTERVAL);
@@ -901,13 +902,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 if (mDownloadPsdsWakeLock.isHeld()) {
                     // This wakelock may have time-out, if a timeout was specified.
                     // Catch (and ignore) any timeout exceptions.
-                    try {
-                        mDownloadPsdsWakeLock.release();
-                        if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadPsdsData()");
-                    } catch (Exception e) {
-                        Log.i(TAG, "Wakelock timeout & release race exception in "
-                                + "handleDownloadPsdsData()", e);
-                    }
+                    mDownloadPsdsWakeLock.release();
+                    if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadPsdsData()");
                 } else {
                     Log.e(TAG, "WakeLock expired before release in "
                             + "handleDownloadPsdsData()");
@@ -2013,7 +2009,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // hold a wake lock until this message is delivered
         // note that this assumes the message will not be removed from the queue before
         // it is handled (otherwise the wake lock would be leaked).
-        mWakeLock.acquire();
+        mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
         if (DEBUG) {
             Log.d(TAG, "WakeLock acquired by sendMessage(" + messageIdAsString(message) + ", " + arg
                     + ", " + obj + ")");
