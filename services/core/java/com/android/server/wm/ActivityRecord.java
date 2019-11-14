@@ -173,7 +173,7 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_W
 import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutLocked;
 import static com.android.server.wm.AppWindowTokenProto.ALL_DRAWN;
 import static com.android.server.wm.AppWindowTokenProto.APP_STOPPED;
-import static com.android.server.wm.AppWindowTokenProto.CLIENT_VISIBLE;
+import static com.android.server.wm.AppWindowTokenProto.CLIENT_HIDDEN;
 import static com.android.server.wm.AppWindowTokenProto.DEFER_HIDING_CLIENT;
 import static com.android.server.wm.AppWindowTokenProto.FILLS_PARENT;
 import static com.android.server.wm.AppWindowTokenProto.FROZEN_BOUNDS;
@@ -465,13 +465,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mVisible;        // Should this token's windows be visible?
     boolean visibleIgnoringKeyguard; // is this activity visible, ignoring the fact that Keyguard
                                      // might hide this activity?
-    // True if the visible state of this token was forced to true due to a transferred starting
+    // True if the hidden state of this token was forced to false due to a transferred starting
     // window.
     private boolean mVisibleSetFromTransferredStartingWindow;
     // TODO: figure out how to consolidate with the same variable in ActivityRecord.
     private boolean mDeferHidingClient; // If true we told WM to defer reporting to the client
                                         // process that it is hidden.
-    private boolean mLastDeferHidingClient; // If true we will defer setting mClientVisible to false
+    private boolean mLastDeferHidingClient; // If true we will defer setting mClientHidden to true
                                            // and reporting to the client that it is hidden.
     boolean sleeping;       // have we told the activity to sleep?
     boolean nowVisible;     // is this activity's window visible?
@@ -536,8 +536,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     private Task mLastParent;
 
-    // Have we told the window clients to show themselves?
-    private boolean mClientVisible;
+    // Have we told the window clients to hide themselves?
+    private boolean mClientHidden;
 
     boolean firstWindowDrawn;
     // Last drawn state we reported to the app token.
@@ -861,7 +861,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         pw.print(prefix); pw.print(" mOccludesParent="); pw.print(mOccludesParent);
         pw.print(" mOrientation="); pw.println(mOrientation);
         pw.println(prefix + "mVisibleRequested=" + mVisibleRequested
-                + " mClientVisible=" + mClientVisible
+                + " mClientHidden=" + mClientHidden
                 + ((mDeferHidingClient) ? " mDeferHidingClient=" + mDeferHidingClient : "")
                 + " reportedDrawn=" + reportedDrawn + " reportedVisible=" + reportedVisible);
         if (paused) {
@@ -1520,7 +1520,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         inHistory = false;
         nowVisible = false;
         mDrawn = false;
-        mClientVisible = true;
         idle = false;
         hasBeenLaunched = false;
         mStackSupervisor = supervisor;
@@ -3231,7 +3230,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     mVisibleRequested = true;
                     mVisibleSetFromTransferredStartingWindow = true;
                 }
-                setClientVisible(fromActivity.mClientVisible);
+                setClientHidden(fromActivity.mClientHidden);
 
                 transferAnimation(fromActivity);
 
@@ -3886,7 +3885,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // We previously deferred telling the client to hide itself when visibility was
                 // initially set to false. Now we would like it to hide, so go ahead and set it.
                 mLastDeferHidingClient = deferHidingClient;
-                setClientVisible(false);
+                setClientHidden(true);
             }
             return;
         }
@@ -3931,7 +3930,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     waitingToShow = true;
 
                     // If the client isn't hidden, we don't need to reset the drawing state.
-                    if (!isClientVisible()) {
+                    if (isClientHidden()) {
                         // Let's reset the draw state in order to prevent the starting window to be
                         // immediately dismissed when the app still has the surface.
                         forAllWindows(w -> {
@@ -3951,7 +3950,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // we still need to tell the client to make its windows visible so they get drawn.
             // Otherwise, we will wait on performing the transition until all windows have been
             // drawn, they never will be, and we are sad.
-            setClientVisible(true);
+            setClientHidden(false);
 
             requestUpdateWallpaperIfNeeded();
 
@@ -4099,7 +4098,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // If we're becoming invisible, update the client visibility if we are not running an
             // animation. Otherwise, we'll update client visibility in onAnimationFinished.
             if (visible || !isAnimating()) {
-                setClientVisible(visible);
+                setClientHidden(!visible);
             }
 
             if (!displayContent.mClosingApps.contains(this)
@@ -5131,18 +5130,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    boolean isClientVisible() {
-        return mClientVisible;
+    boolean isClientHidden() {
+        return mClientHidden;
     }
 
-    void setClientVisible(boolean clientVisible) {
-        if (mClientVisible == clientVisible || (!clientVisible && mDeferHidingClient)) {
+    void setClientHidden(boolean hideClient) {
+        if (mClientHidden == hideClient || (hideClient && mDeferHidingClient)) {
             return;
         }
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                "setClientVisible: %s clientVisible=%b Callers=%s", this, clientVisible,
+                "setClientHidden: %s clientHidden=%b Callers=%s", this, hideClient,
                 Debug.getCallers(5));
-        mClientVisible = clientVisible;
+        mClientHidden = hideClient;
         sendAppVisibilityToClients();
     }
 
@@ -5925,7 +5924,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 "AppWindowToken");
 
         clearThumbnail();
-        setClientVisible(isVisible() || mVisibleRequested);
+        setClientHidden(!isVisible() && !mVisibleRequested);
 
         getDisplayContent().computeImeTargetIfNeeded(this);
 
@@ -7347,7 +7346,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(FILLS_PARENT, mOccludesParent);
         proto.write(APP_STOPPED, mAppStopped);
         proto.write(com.android.server.wm.AppWindowTokenProto.VISIBLE_REQUESTED, mVisibleRequested);
-        proto.write(CLIENT_VISIBLE, mClientVisible);
+        proto.write(CLIENT_HIDDEN, mClientHidden);
         proto.write(DEFER_HIDING_CLIENT, mDeferHidingClient);
         proto.write(REPORTED_DRAWN, reportedDrawn);
         proto.write(REPORTED_VISIBLE, reportedVisible);
