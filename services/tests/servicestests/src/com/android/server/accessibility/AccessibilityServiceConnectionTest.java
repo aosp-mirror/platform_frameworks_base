@@ -44,6 +44,7 @@ import android.os.UserHandle;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.Display;
 
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
@@ -80,6 +81,7 @@ public class AccessibilityServiceConnectionTest {
     @Mock ResolveInfo mMockResolveInfo;
     @Mock AccessibilitySecurityPolicy mMockSecurityPolicy;
     @Mock AccessibilityWindowManager mMockA11yWindowManager;
+    @Mock ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
     @Mock AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock SystemActionPerformer mMockSystemActionPerformer;
@@ -111,7 +113,8 @@ public class AccessibilityServiceConnectionTest {
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
                 COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, mHandler, new Object(),
                 mMockSecurityPolicy, mMockSystemSupport, mMockWindowManagerInternal,
-                mMockSystemActionPerformer, mMockA11yWindowManager);
+                mMockSystemActionPerformer, mMockA11yWindowManager,
+                mMockActivityTaskManagerInternal);
         when(mMockSecurityPolicy.canPerformGestures(mConnection)).thenReturn(true);
     }
 
