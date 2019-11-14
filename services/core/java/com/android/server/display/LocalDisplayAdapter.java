@@ -410,6 +410,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 final DisplayAddress.Physical physicalAddress =
                         DisplayAddress.fromPhysicalDisplayId(mPhysicalDisplayId);
                 mInfo.address = physicalAddress;
+                mInfo.densityDpi = (int) (phys.density * 160 + 0.5f);
+                mInfo.xDpi = phys.xDpi;
+                mInfo.yDpi = phys.yDpi;
 
                 // Assume that all built-in displays that have secure output (eg. HDCP) also
                 // support compositing from gralloc protected buffers.
@@ -436,9 +439,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
                             mInfo.width, mInfo.height);
                     mInfo.type = Display.TYPE_BUILT_IN;
-                    mInfo.densityDpi = (int)(phys.density * 160 + 0.5f);
-                    mInfo.xDpi = phys.xDpi;
-                    mInfo.yDpi = phys.yDpi;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                 } else {
                     mInfo.displayCutout = null;
@@ -447,7 +447,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.name = getContext().getResources().getString(
                             com.android.internal.R.string.display_manager_hdmi_display_name);
                     mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
-                    mInfo.setAssumedDensityForExternalDisplay(phys.width, phys.height);
 
                     // For demonstration purposes, allow rotation of the external display.
                     // In the future we might allow the user to configure this directly.
