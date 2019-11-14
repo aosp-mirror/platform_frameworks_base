@@ -456,14 +456,6 @@ java_library {
     srcs: [":framework-all-sources"],
     installable: false,
     libs: ["app-compat-annotations"],
-}
-
-java_library {
-    name: "framework-annotation-proc",
-    defaults: ["framework-defaults"],
-    srcs: [":framework-all-sources"],
-    libs: ["app-compat-annotations"],
-    installable: false,
     plugins: [
         "unsupportedappusage-annotation-processor",
         "compat-changeid-annotation-processor",
@@ -472,7 +464,7 @@ java_library {
 
 platform_compat_config {
     name: "framework-platform-compat-config",
-    src: ":framework-annotation-proc",
+    src: ":framework-all",
 }
 
 // A library including just UnsupportedAppUsage.java classes.
@@ -1564,7 +1556,7 @@ aidl_mapping {
 
 genrule {
     name: "framework-annotation-proc-index",
-    srcs: [":framework-annotation-proc"],
+    srcs: [":framework-all"],
     cmd: "unzip -qp $(in) unsupportedappusage/unsupportedappusage_index.csv > $(out)",
     out: ["unsupportedappusage_index.csv"],
     dist: {
