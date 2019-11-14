@@ -29,6 +29,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowTokenProto.HASH_CODE;
+import static com.android.server.wm.WindowTokenProto.HIDDEN;
 import static com.android.server.wm.WindowTokenProto.PAUSED;
 import static com.android.server.wm.WindowTokenProto.WAITING_TO_SHOW;
 import static com.android.server.wm.WindowTokenProto.WINDOWS;
@@ -70,6 +71,9 @@ class WindowToken extends WindowContainer<WindowState> {
 
     // Is key dispatching paused for this token?
     boolean paused = false;
+
+    // Should this token's windows be hidden?
+    private boolean mHidden;
 
     // Temporary for finding which tokens no longer have visible windows.
     boolean hasVisible;
@@ -124,6 +128,16 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
+    void setHidden(boolean hidden) {
+        if (hidden != mHidden) {
+            mHidden = hidden;
+        }
+    }
+
+    boolean isHidden() {
+        return mHidden;
+    }
+
     void removeAllWindowsIfPossible() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState win = mChildren.get(i);
@@ -142,7 +156,7 @@ class WindowToken extends WindowContainer<WindowState> {
         // This token is exiting, so allow it to be removed when it no longer contains any windows.
         mPersistOnEmpty = false;
 
-        if (!isVisible()) {
+        if (mHidden) {
             return;
         }
 
@@ -155,10 +169,7 @@ class WindowToken extends WindowContainer<WindowState> {
             changed |= win.onSetAppExiting();
         }
 
-        final ActivityRecord app = asActivityRecord();
-        if (app != null) {
-            app.setVisible(false);
-        }
+        setHidden(true);
 
         if (changed) {
             mWmService.mWindowPlacerLocked.performSurfacePlacement();
@@ -275,6 +286,7 @@ class WindowToken extends WindowContainer<WindowState> {
             final WindowState w = mChildren.get(i);
             w.writeToProto(proto, WINDOWS, logLevel);
         }
+        proto.write(HIDDEN, mHidden);
         proto.write(WAITING_TO_SHOW, waitingToShow);
         proto.write(PAUSED, paused);
         proto.end(token);
@@ -284,7 +296,8 @@ class WindowToken extends WindowContainer<WindowState> {
         super.dump(pw, prefix, dumpAll);
         pw.print(prefix); pw.print("windows="); pw.println(mChildren);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
-        pw.print(" hasVisible="); pw.println(hasVisible);
+                pw.print(" hidden="); pw.print(mHidden);
+                pw.print(" hasVisible="); pw.println(hasVisible);
         if (waitingToShow || sendingToBottom) {
             pw.print(prefix); pw.print("waitingToShow="); pw.print(waitingToShow);
                     pw.print(" sendingToBottom="); pw.print(sendingToBottom);
