@@ -46,7 +46,6 @@ import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -73,7 +72,6 @@ import java.util.List;
 @TestableLooper.RunWithLooper
 public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
-    @Mock private NotificationData mNotificationData;
     @Spy private FakeListContainer mListContainer = new FakeListContainer();
 
     // Dependency mocks:
@@ -104,8 +102,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
         mHelper = new NotificationTestHelper(mContext, mDependency);
-
-        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mViewHierarchyManager = new NotificationViewHierarchyManager(mContext,
                 mHandler, mLockscreenUserManager, mGroupManager, mVisualStabilityManager,
@@ -139,7 +135,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mListContainer.addContainerView(entry0.getRow());
         mListContainer.addContainerView(entry1.getRow());
         mListContainer.addContainerView(entry2.getRow());
-        when(mNotificationData.getActiveNotifications()).thenReturn(
+        when(mEntryManager.getVisibleNotifications()).thenReturn(
                 Lists.newArrayList(entry0, entry1, entry2));
 
         // Set up group manager to report that they should be bundled now.
@@ -168,7 +164,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
 
         // Set up the prior state to look like one top level notification.
         mListContainer.addContainerView(entry0.getRow());
-        when(mNotificationData.getActiveNotifications()).thenReturn(
+        when(mEntryManager.getVisibleNotifications()).thenReturn(
                 Lists.newArrayList(entry0, entry1, entry2));
 
         // Set up group manager to report that they should not be bundled now.
@@ -197,7 +193,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
 
         // Set up the prior state to look like a top level notification.
         mListContainer.addContainerView(entry0.getRow());
-        when(mNotificationData.getActiveNotifications()).thenReturn(
+        when(mEntryManager.getVisibleNotifications()).thenReturn(
                 Lists.newArrayList(entry0, entry1));
 
         // Set up group manager to report a suppressed summary now.
@@ -219,7 +215,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     public void testUpdateNotificationViews_appOps() throws Exception {
         NotificationEntry entry0 = createEntry();
         entry0.setRow(spy(entry0.getRow()));
-        when(mNotificationData.getActiveNotifications()).thenReturn(
+        when(mEntryManager.getVisibleNotifications()).thenReturn(
                 Lists.newArrayList(entry0));
         mListContainer.addContainerView(entry0.getRow());
 

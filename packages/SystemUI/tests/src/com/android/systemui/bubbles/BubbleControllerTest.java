@@ -72,7 +72,6 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -141,8 +140,6 @@ public class BubbleControllerTest extends SysuiTestCase {
     private ExpandableNotificationRow mNonBubbleNotifRow;
 
     @Mock
-    private NotificationData mNotificationData;
-    @Mock
     private BubbleController.BubbleStateChangeListener mBubbleStateChangeListener;
     @Mock
     private BubbleController.BubbleExpandListener mBubbleExpandListener;
@@ -183,10 +180,9 @@ public class BubbleControllerTest extends SysuiTestCase {
         mNonBubbleNotifRow = mNotificationTestHelper.createRow();
 
         // Return non-null notification data from the NEM
-        when(mNotificationEntryManager.getNotificationData()).thenReturn(mNotificationData);
-        when(mNotificationData.get(mRow.getEntry().getKey())).thenReturn(mRow.getEntry());
-        when(mNotificationData.getChannel(mRow.getEntry().getKey())).thenReturn(
-                mRow.getEntry().getChannel());
+        when(mNotificationEntryManager
+                .getActiveNotificationUnfiltered(mRow.getEntry().getKey())).thenReturn(
+                mRow.getEntry());
 
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);

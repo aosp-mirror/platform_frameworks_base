@@ -326,12 +326,14 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             collapseOnMainThread();
         }
 
-        final int count =
-                mEntryManager.getNotificationData().getActiveNotifications().size();
-        final int rank = mEntryManager.getNotificationData().getRank(notificationKey);
+        //TODO(b/144306683): prove that this `activeEntry` is the same as `entry` above and simplify
+        // this call stack
+        NotificationEntry activeEntry =
+                mEntryManager.getActiveNotificationUnfiltered(notificationKey);
+        final int count = mEntryManager.getActiveNotificationsCount();
+        final int rank = activeEntry != null ? activeEntry.getRanking().getRank() : 0;
         NotificationVisibility.NotificationLocation location =
-                NotificationLogger.getNotificationLocation(
-                        mEntryManager.getNotificationData().get(notificationKey));
+                NotificationLogger.getNotificationLocation(activeEntry);
         final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
                 rank, count, true, location);
         try {

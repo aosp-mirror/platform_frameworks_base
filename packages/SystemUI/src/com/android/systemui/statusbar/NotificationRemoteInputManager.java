@@ -184,8 +184,9 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ViewGroup actionGroup = (ViewGroup) parent;
                 buttonIndex = actionGroup.indexOfChild(view);
             }
-            final int count = mEntryManager.getNotificationData().getActiveNotifications().size();
-            final int rank = mEntryManager.getNotificationData().getRank(key);
+            final int count = mEntryManager.getActiveNotificationsCount();
+            final int rank = mEntryManager
+                    .getActiveNotificationUnfiltered(key).getRanking().getRank();
 
             // Notification may be updated before this function is executed, and thus play safe
             // here and verify that the action object is still the one that where the click happens.
@@ -202,7 +203,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             }
             NotificationVisibility.NotificationLocation location =
                     NotificationLogger.getNotificationLocation(
-                            mEntryManager.getNotificationData().get(key));
+                            mEntryManager.getActiveNotificationUnfiltered(key));
             final NotificationVisibility nv =
                     NotificationVisibility.obtain(key, rank, count, true, location);
             try {

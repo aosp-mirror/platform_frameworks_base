@@ -101,7 +101,6 @@ import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
@@ -120,12 +119,9 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
-import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -177,7 +173,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ArrayList<NotificationEntry> mNotificationList;
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock private BiometricUnlockController mBiometricUnlockController;
-    @Mock private NotificationData mNotificationData;
     @Mock private NotificationInterruptionStateProvider.HeadsUpSuppressor mHeadsUpSuppressor;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private NotificationListener mNotificationListener;
@@ -240,6 +235,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ViewMediatorCallback mViewMediatorCallback;
     @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
     @Mock private ScreenPinningRequest mScreenPinningRequest;
+    @Mock private NotificationEntryManager mEntryManager;
 
     @Before
     public void setup() throws Exception {
@@ -260,10 +256,8 @@ public class StatusBarTest extends SysuiTestCase {
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
 
         mMetricsLogger = new FakeMetricsLogger();
-        TestableNotificationEntryManager entryManager = new TestableNotificationEntryManager(
-                mNotificationData);
         NotificationLogger notificationLogger = new NotificationLogger(mNotificationListener,
-                Dependency.get(UiOffloadThread.class), entryManager, mStatusBarStateController,
+                Dependency.get(UiOffloadThread.class), mEntryManager, mStatusBarStateController,
                 mExpansionStateLogger);
         notificationLogger.setVisibilityReporter(mock(Runnable.class));
 
@@ -332,7 +326,7 @@ public class StatusBarTest extends SysuiTestCase {
                 ),
                 mNotificationGutsManager,
                 notificationLogger,
-                entryManager,
+                mEntryManager,
                 mNotificationInterruptionStateProvider,
                 mNotificationViewHierarchyManager,
                 mKeyguardViewMediator,
@@ -407,9 +401,6 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mStatusBarWindowViewController = mStatusBarWindowViewController;
         mStatusBar.startKeyguard();
         Dependency.get(InitController.class).executePostInitTasks();
-        entryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,
-                mHeadsUpManager);
-        entryManager.addNotificationEntryListener(mEntryListener);
         notificationLogger.setUpWithContainer(mStackScroller);
     }
 
@@ -645,8 +636,7 @@ public class StatusBarTest extends SysuiTestCase {
     public void testPanelOpenForHeadsUp() {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
-        when(mNotificationData.getActiveNotifications()).thenReturn(mNotificationList);
-        when(mNotificationList.size()).thenReturn(5);
+        when(mEntryManager.getActiveNotificationsCount()).thenReturn(5);
         when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(true);
         mStatusBar.setBarStateForTest(StatusBarState.SHADE);
 
@@ -664,8 +654,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     public void testPanelOpenAndClear() {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
-        when(mNotificationData.getActiveNotifications()).thenReturn(mNotificationList);
-        when(mNotificationList.size()).thenReturn(5);
+        when(mEntryManager.getActiveNotificationsCount()).thenReturn(5);
+
         when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(false);
         mStatusBar.setBarStateForTest(StatusBarState.SHADE);
 
@@ -683,8 +673,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     public void testPanelOpenAndNoClear() {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
-        when(mNotificationData.getActiveNotifications()).thenReturn(mNotificationList);
-        when(mNotificationList.size()).thenReturn(5);
+        when(mEntryManager.getActiveNotificationsCount()).thenReturn(5);
         when(mNotificationPresenter.isPresenterFullyCollapsed()).thenReturn(false);
         mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
 
@@ -840,19 +829,6 @@ public class StatusBarTest extends SysuiTestCase {
                 any(IntentFilter.class),
                 eq(null),
                 any(UserHandle.class));
-    }
-
-    public static class TestableNotificationEntryManager extends NotificationEntryManager {
-
-        public TestableNotificationEntryManager(NotificationData notificationData) {
-            super(notificationData, mock(NotifLog.class));
-        }
-
-        public void setUpForTest(NotificationPresenter presenter,
-                NotificationListContainer listContainer,
-                HeadsUpManagerPhone headsUpManager) {
-            super.setUpWithPresenter(presenter, listContainer, headsUpManager);
-        }
     }
 
     public static class TestableNotificationInterruptionStateProvider extends

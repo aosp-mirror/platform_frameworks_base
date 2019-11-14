@@ -54,11 +54,9 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
-import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -239,11 +237,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                     mock(ShadeController.class),
                     mock(NotificationLockscreenUserManager.class),
                     new NotificationEntryManager(
-                            new NotificationData(
-                                    mock(NotificationSectionsFeatureManager.class),
-                                    mock(NotifLog.class),
-                                    mock(PeopleNotificationIdentifier.class)),
-                            mock(NotifLog.class)),
+                            mock(NotifLog.class),
+                            mock(NotificationGroupManager.class),
+                            mock(NotificationRankingManager.class),
+                            mock(NotificationEntryManager.KeyguardEnvironment.class)),
                     mock(KeyguardStateController.class),
                     statusBarStateController,
                     mock(DozeLog.class),

@@ -44,7 +44,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationTestHelper;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -71,7 +71,7 @@ public class NotificationFilterTest extends SysuiTestCase {
     @Mock
     ForegroundServiceController mFsc;
     @Mock
-    NotificationData.KeyguardEnvironment mEnvironment;
+    KeyguardEnvironment mEnvironment;
     private final IPackageManager mMockPackageManager = mock(IPackageManager.class);
 
     private NotificationFilter mNotificationFilter;
@@ -96,7 +96,7 @@ public class NotificationFilterTest extends SysuiTestCase {
                 new NotificationGroupManager(mock(StatusBarStateController.class)));
         mDependency.injectMockDependency(ShadeController.class);
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
-        mDependency.injectTestDependency(NotificationData.KeyguardEnvironment.class, mEnvironment);
+        mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
         mRow = new NotificationTestHelper(getContext(), mDependency).createRow();

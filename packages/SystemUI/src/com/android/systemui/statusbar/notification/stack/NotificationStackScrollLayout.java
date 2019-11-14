@@ -696,8 +696,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateFooter() {
         boolean showDismissView = mClearAllEnabled && hasActiveClearableNotifications(ROWS_ALL);
-        boolean showFooterView = (showDismissView ||
-                mEntryManager.getNotificationData().getActiveNotifications().size() != 0)
+        boolean showFooterView = (showDismissView || mEntryManager.hasActiveNotifications())
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mRemoteInputManager.getController().isRemoteInputActive();
 
@@ -5787,11 +5786,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
   }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public boolean hasActiveNotifications() {
-        return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateSpeedBumpIndex() {
         int speedBumpIndex = 0;
         int currentIndex = 0;
@@ -6400,7 +6394,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         @Override
         public boolean onDraggedDown(View startingChild, int dragLengthY) {
             if (mStatusBarState == StatusBarState.KEYGUARD
-                    && hasActiveNotifications()) {
+                    && mEntryManager.hasActiveNotifications()) {
                 mLockscreenGestureLogger.write(
                         MetricsEvent.ACTION_LS_SHADE,
                         (int) (dragLengthY / mDisplayMetrics.density),

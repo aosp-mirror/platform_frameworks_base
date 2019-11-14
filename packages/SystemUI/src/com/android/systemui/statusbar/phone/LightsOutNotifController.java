@@ -97,7 +97,7 @@ public class LightsOutNotifController {
     }
 
     private boolean hasActiveNotifications() {
-        return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
+        return mEntryManager.hasActiveNotifications();
     }
 
     @VisibleForTesting

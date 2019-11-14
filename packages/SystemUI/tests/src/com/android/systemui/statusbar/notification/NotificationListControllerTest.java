@@ -17,9 +17,7 @@
 package com.android.systemui.statusbar.notification;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -34,14 +32,10 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.logging.NotifLog;
-import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
-import com.android.systemui.util.DeviceConfigProxyFake;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,21 +61,12 @@ public class NotificationListControllerTest extends SysuiTestCase {
     private NotificationEntryListener mEntryListener;
     private DeviceProvisionedListener mProvisionedListener;
 
-    // TODO: Remove this once EntryManager no longer needs to be mocked
-    private NotificationData mNotificationData =
-            new NotificationData(
-                    new NotificationSectionsFeatureManager(new DeviceConfigProxyFake(), mContext),
-                    mock(NotifLog.class),
-                    mock(PeopleNotificationIdentifier.class));
-
     private int mNextNotifId = 0;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
-
-        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mController = new NotificationListController(
                 mEntryManager,

@@ -37,14 +37,14 @@ import javax.inject.Singleton
  */
 @Singleton
 class BypassHeadsUpNotifier @Inject constructor(
-        private val context: Context,
-        private val bypassController: KeyguardBypassController,
-        private val statusBarStateController: StatusBarStateController,
-        private val headsUpManager: HeadsUpManagerPhone,
-        private val notificationLockscreenUserManager: NotificationLockscreenUserManager,
-        private val mediaManager: NotificationMediaManager,
-        tunerService: TunerService) : StatusBarStateController.StateListener,
-        NotificationMediaManager.MediaListener {
+    private val context: Context,
+    private val bypassController: KeyguardBypassController,
+    private val statusBarStateController: StatusBarStateController,
+    private val headsUpManager: HeadsUpManagerPhone,
+    private val notificationLockscreenUserManager: NotificationLockscreenUserManager,
+    private val mediaManager: NotificationMediaManager,
+    tunerService: TunerService
+) : StatusBarStateController.StateListener, NotificationMediaManager.MediaListener {
 
     private lateinit var entryManager: NotificationEntryManager
     private var currentMediaEntry: NotificationEntry? = null
@@ -77,7 +77,8 @@ class BypassHeadsUpNotifier @Inject constructor(
 
     override fun onMetadataOrStateChanged(metadata: MediaMetadata?, state: Int) {
         val previous = currentMediaEntry
-        var newEntry = entryManager.notificationData.get(mediaManager.mediaNotificationKey)
+        var newEntry = entryManager
+                .getActiveNotificationUnfiltered(mediaManager.mediaNotificationKey)
         if (!NotificationMediaManager.isPlayingState(state)) {
             newEntry = null
         }
@@ -101,7 +102,7 @@ class BypassHeadsUpNotifier @Inject constructor(
      */
     private fun canAutoHeadsUp(entry: NotificationEntry): Boolean {
         if (!isAutoHeadsUpAllowed()) {
-            return false;
+            return false
         }
         if (entry.isSensitive) {
             // filter sensitive notifications
@@ -111,7 +112,7 @@ class BypassHeadsUpNotifier @Inject constructor(
             // filter notifications invisible on Keyguard
             return false
         }
-        if (!entryManager.notificationData.activeNotifications.contains(entry)) {
+        if (entryManager.getActiveNotificationUnfiltered(entry.key) != null) {
             // filter notifications not the active list currently
             return false
         }
@@ -125,7 +126,7 @@ class BypassHeadsUpNotifier @Inject constructor(
     /**
      * @return {@code true} if autoHeadsUp is possible right now.
      */
-    private fun isAutoHeadsUpAllowed() : Boolean {
+    private fun isAutoHeadsUpAllowed(): Boolean {
         if (!enabled) {
             return false
         }
