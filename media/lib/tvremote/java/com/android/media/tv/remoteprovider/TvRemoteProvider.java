@@ -19,18 +19,18 @@ package com.android.media.tv.remoteprovider;
 import android.content.Context;
 import android.media.tv.ITvRemoteProvider;
 import android.media.tv.ITvRemoteServiceInput;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.LinkedList;
 
 /**
  * Base class for emote providers implemented in unbundled service.
  * <p/>
  * This object is not thread safe.  It is only intended to be accessed on the
  * {@link Context#getMainLooper main looper thread} of an application.
+ * The callback {@link #onInputBridgeConnected()} may be called from a different thread.
  * </p><p>
  * IMPORTANT: This class is effectively a system API for unbundled emote service, and
  * must remain API stable. See README.txt in the root of this package for more information.
@@ -50,11 +50,9 @@ public abstract class TvRemoteProvider {
 
     private static final String TAG = "TvRemoteProvider";
     private static final boolean DEBUG_KEYS = false;
-    private static final int MSG_SET_SERVICE_INPUT = 1;
-    private static final int MSG_SEND_INPUTBRIDGE_CONNECTED = 2;
     private final Context mContext;
     private final ProviderStub mStub;
-    private final ProviderHandler mHandler;
+    private final LinkedList<Runnable> mOpenBridgeRunnables;
     private ITvRemoteServiceInput mRemoteServiceInput;
 
     /**
@@ -67,7 +65,7 @@ public abstract class TvRemoteProvider {
     public TvRemoteProvider(Context context) {
         mContext = context.getApplicationContext();
         mStub = new ProviderStub();
-        mHandler = new ProviderHandler(mContext.getMainLooper());
+        mOpenBridgeRunnables = new LinkedList<Runnable>();
     }
 
     /**
@@ -76,7 +74,6 @@ public abstract class TvRemoteProvider {
     public final Context getContext() {
         return mContext;
     }
-
 
     /**
      * Gets the Binder associated with the provider.
@@ -105,7 +102,11 @@ public abstract class TvRemoteProvider {
      * @param tvServiceInput sink defined in framework service
      */
     private void setRemoteServiceInputSink(ITvRemoteServiceInput tvServiceInput) {
-        mRemoteServiceInput = tvServiceInput;
+        synchronized (mOpenBridgeRunnables) {
+            mRemoteServiceInput = tvServiceInput;
+        }
+        mOpenBridgeRunnables.forEach(Runnable::run);
+        mOpenBridgeRunnables.clear();
     }
 
     /**
@@ -125,8 +126,25 @@ public abstract class TvRemoteProvider {
      */
     public void openRemoteInputBridge(IBinder token, String name, int width, int height,
                                       int maxPointers) throws RuntimeException {
+        synchronized (mOpenBridgeRunnables) {
+            if (mRemoteServiceInput == null) {
+                Log.d(TAG, "Delaying openRemoteInputBridge() for " + name);
+
+                mOpenBridgeRunnables.add(() -> {
+                    try {
+                        mRemoteServiceInput.openInputBridge(
+                                token, name, width, height, maxPointers);
+                        Log.d(TAG, "Delayed openRemoteInputBridge() for " + name + ": success");
+                    } catch (RemoteException re) {
+                        Log.e(TAG, "Delayed openRemoteInputBridge() for " + name + ": failure", re);
+                    }
+                });
+                return;
+            }
+        }
         try {
             mRemoteServiceInput.openInputBridge(token, name, width, height, maxPointers);
+            Log.d(TAG, "openRemoteInputBridge() for " + name + ": success");
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -271,33 +289,12 @@ public abstract class TvRemoteProvider {
     private final class ProviderStub extends ITvRemoteProvider.Stub {
         @Override
         public void setRemoteServiceInputSink(ITvRemoteServiceInput tvServiceInput) {
-            mHandler.obtainMessage(MSG_SET_SERVICE_INPUT, tvServiceInput).sendToTarget();
+            TvRemoteProvider.this.setRemoteServiceInputSink(tvServiceInput);
         }
 
         @Override
         public void onInputBridgeConnected(IBinder token) {
-            mHandler.obtainMessage(MSG_SEND_INPUTBRIDGE_CONNECTED, 0, 0,
-                    (IBinder) token).sendToTarget();
-        }
-    }
-
-    private final class ProviderHandler extends Handler {
-        public ProviderHandler(Looper looper) {
-            super(looper, null, true);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_SET_SERVICE_INPUT: {
-                    setRemoteServiceInputSink((ITvRemoteServiceInput) msg.obj);
-                    break;
-                }
-                case MSG_SEND_INPUTBRIDGE_CONNECTED: {
-                    onInputBridgeConnected((IBinder) msg.obj);
-                    break;
-                }
-            }
+            TvRemoteProvider.this.onInputBridgeConnected(token);
         }
     }
 }
