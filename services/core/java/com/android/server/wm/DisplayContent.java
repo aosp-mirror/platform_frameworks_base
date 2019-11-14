@@ -652,12 +652,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     + " config reported=" + w.isLastConfigReportedToClient());
             final ActivityRecord activity = w.mActivityRecord;
             if (gone) Slog.v(TAG, "  GONE: mViewVisibility=" + w.mViewVisibility
-                    + " mRelayoutCalled=" + w.mRelayoutCalled + " visible=" + w.mToken.isVisible()
-                    + " visibleRequested=" + (activity != null && activity.mVisibleRequested)
+                    + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.isHidden()
+                    + " hiddenRequested=" + (activity != null && activity.hiddenRequested)
                     + " parentHidden=" + w.isParentWindowHidden());
             else Slog.v(TAG, "  VIS: mViewVisibility=" + w.mViewVisibility
-                    + " mRelayoutCalled=" + w.mRelayoutCalled + " visible=" + w.mToken.isVisible()
-                    + " visibleRequested=" + (activity != null && activity.mVisibleRequested)
+                    + " mRelayoutCalled=" + w.mRelayoutCalled + " hidden=" + w.mToken.isHidden()
+                    + " hiddenRequested=" + (activity != null && activity.hiddenRequested)
                     + " parentHidden=" + w.isParentWindowHidden());
         }
 
@@ -3061,7 +3061,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 wsa.destroySurface();
                 mWmService.mForceRemoves.add(w);
                 mTmpWindow = w;
-            } else if (w.mActivityRecord != null && !w.mActivityRecord.isClientVisible()) {
+            } else if (w.mActivityRecord != null && w.mActivityRecord.isClientHidden()) {
                 Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
                         + w + " surface=" + wsa.mSurfaceController
                         + " token=" + w.mActivityRecord);

@@ -1539,7 +1539,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     // TODO: Can we consolidate this with #isVisible() or have a more appropriate name for this?
     boolean isWinVisibleLw() {
-        return (mActivityRecord == null || mActivityRecord.mVisibleRequested
+        return (mActivityRecord == null || !mActivityRecord.hiddenRequested
                 || mActivityRecord.isAnimating(TRANSITION)) && isVisible();
     }
 
@@ -1548,7 +1548,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * not the pending requested hidden state.
      */
     boolean isVisibleNow() {
-        return (mToken.isVisible() || mAttrs.type == TYPE_APPLICATION_STARTING)
+        return (!mToken.isHidden() || mAttrs.type == TYPE_APPLICATION_STARTING)
                 && isVisible();
     }
 
@@ -1570,7 +1570,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final ActivityRecord atoken = mActivityRecord;
         return (mHasSurface || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
                 && isVisibleByPolicy() && !isParentWindowHidden()
-                && (atoken == null || atoken.mVisibleRequested)
+                && (atoken == null || !atoken.hiddenRequested)
                 && !mAnimatingExit && !mDestroying;
     }
 
@@ -1585,7 +1585,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         final ActivityRecord atoken = mActivityRecord;
         if (atoken != null) {
-            return ((!isParentWindowHidden() && atoken.mVisibleRequested)
+            return ((!isParentWindowHidden() && !atoken.hiddenRequested)
                     || isAnimating(TRANSITION | PARENTS));
         }
         return !isParentWindowHidden() || isAnimating(TRANSITION | PARENTS);
@@ -1621,7 +1621,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         final boolean parentAndClientVisible = !isParentWindowHidden()
-                && mViewVisibility == View.VISIBLE && mToken.isVisible();
+                && mViewVisibility == View.VISIBLE && !mToken.isHidden();
         return mHasSurface && isVisibleByPolicy() && !mDestroying
                 && (parentAndClientVisible || isAnimating(TRANSITION | PARENTS));
     }
@@ -1640,7 +1640,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             final Task task = getTask();
             final boolean canFromTask = task != null && task.canAffectSystemUiFlags();
-            return canFromTask && mActivityRecord.isVisible();
+            return canFromTask && !mActivityRecord.isHidden();
         }
     }
 
@@ -1652,7 +1652,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public boolean isDisplayedLw() {
         final ActivityRecord atoken = mActivityRecord;
         return isDrawnLw() && isVisibleByPolicy()
-                && ((!isParentWindowHidden() && (atoken == null || atoken.mVisibleRequested))
+                && ((!isParentWindowHidden() && (atoken == null || !atoken.hiddenRequested))
                         || isAnimating(TRANSITION | PARENTS));
     }
 
@@ -1669,8 +1669,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final ActivityRecord atoken = mActivityRecord;
         return mViewVisibility == View.GONE
                 || !mRelayoutCalled
-                || (atoken == null && !mToken.isVisible())
-                || (atoken != null && !atoken.mVisibleRequested)
+                || (atoken == null && mToken.isHidden())
+                || (atoken != null && atoken.hiddenRequested)
                 || isParentWindowGoneForLayout()
                 || (mAnimatingExit && !isAnimatingLw())
                 || mDestroying;
@@ -2162,8 +2162,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         + " parentHidden=" + isParentWindowHidden()
                         + " exiting=" + mAnimatingExit + " destroying=" + mDestroying);
                 if (mActivityRecord != null) {
-                    Slog.i(TAG_WM, "  mActivityRecord.visibleRequested="
-                            + mActivityRecord.mVisibleRequested);
+                    Slog.i(TAG_WM, "  mActivityRecord.hiddenRequested=" + mActivityRecord.hiddenRequested);
                 }
             }
         }
@@ -2574,7 +2573,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * interacts with it.
      */
     private boolean shouldKeepVisibleDeadAppWindow() {
-        if (!isWinVisibleLw() || mActivityRecord == null || !mActivityRecord.isClientVisible()) {
+        if (!isWinVisibleLw() || mActivityRecord == null || mActivityRecord.isClientHidden()) {
             // Not a visible app window or the app isn't dead.
             return false;
         }
@@ -2611,14 +2610,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return showBecauseOfActivity || showBecauseOfWindow;
     }
 
-    /** @return {@code false} if this window desires touch events. */
+    /** @return false if this window desires touch events. */
     boolean cantReceiveTouchInput() {
         if (mActivityRecord == null || mActivityRecord.getTask() == null) {
             return false;
         }
 
         return mActivityRecord.getTask().getTaskStack().shouldIgnoreInput()
-                || !mActivityRecord.mVisibleRequested
+                || mActivityRecord.hiddenRequested
                 || isAnimatingToRecents();
     }
 
@@ -2886,13 +2885,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void sendAppVisibilityToClients() {
         super.sendAppVisibilityToClients();
 
-        final boolean clientVisible = mActivityRecord.isClientVisible();
-        if (mAttrs.type == TYPE_APPLICATION_STARTING && !clientVisible) {
+        final boolean clientHidden = mActivityRecord.isClientHidden();
+        if (mAttrs.type == TYPE_APPLICATION_STARTING && clientHidden) {
             // Don't hide the starting window.
             return;
         }
 
-        if (!clientVisible) {
+        if (clientHidden) {
             // Once we are notifying the client that it's visibility has changed, we need to prevent
             // it from destroying child surfaces until the animation has finished. We do this by
             // detaching any surface control the client added from the client.
@@ -2906,8 +2905,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             if (DEBUG_VISIBILITY) Slog.v(TAG,
-                    "Setting visibility of " + this + ": " + clientVisible);
-            mClient.dispatchAppVisibility(clientVisible);
+                    "Setting visibility of " + this + ": " + (!clientHidden));
+            mClient.dispatchAppVisibility(!clientHidden);
         } catch (RemoteException e) {
         }
     }
@@ -4147,9 +4146,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " starting=" + (mAttrs.type == TYPE_APPLICATION_STARTING)
                     + " during animation: policyVis=" + isVisibleByPolicy()
                     + " parentHidden=" + isParentWindowHidden()
-                    + " tok.visibleRequested="
-                    + (mActivityRecord != null && mActivityRecord.mVisibleRequested)
-                    + " tok.visible=" + (mActivityRecord != null && mActivityRecord.isVisible())
+                    + " tok.hiddenRequested="
+                    + (mActivityRecord != null && mActivityRecord.hiddenRequested)
+                    + " tok.hidden=" + (mActivityRecord != null && mActivityRecord.isHidden())
                     + " animating=" + isAnimating(TRANSITION | PARENTS)
                     + " tok animating="
                     + (mActivityRecord != null && mActivityRecord.isAnimating(TRANSITION))
@@ -4556,7 +4555,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         + " pv=" + isVisibleByPolicy()
                         + " mDrawState=" + mWinAnimator.mDrawState
                         + " ph=" + isParentWindowHidden()
-                        + " th=" + (mActivityRecord != null && mActivityRecord.mVisibleRequested)
+                        + " th=" + (mActivityRecord != null ? mActivityRecord.hiddenRequested : false)
                         + " a=" + isAnimating(TRANSITION | PARENTS));
             }
         }

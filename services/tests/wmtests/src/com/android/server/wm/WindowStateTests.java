@@ -383,11 +383,11 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testCanAffectSystemUiFlags() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        app.mActivityRecord.setVisible(true);
+        app.mToken.setHidden(false);
         assertTrue(app.canAffectSystemUiFlags());
-        app.mActivityRecord.setVisible(false);
+        app.mToken.setHidden(true);
         assertFalse(app.canAffectSystemUiFlags());
-        app.mActivityRecord.setVisible(true);
+        app.mToken.setHidden(false);
         app.mAttrs.alpha = 0.0f;
         assertFalse(app.canAffectSystemUiFlags());
     }
@@ -395,7 +395,7 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testCanAffectSystemUiFlags_disallow() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        app.mActivityRecord.setVisible(true);
+        app.mToken.setHidden(false);
         assertTrue(app.canAffectSystemUiFlags());
         app.getTask().setCanAffectSystemUiFlags(false);
         assertFalse(app.canAffectSystemUiFlags());
@@ -569,7 +569,7 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testCantReceiveTouchWhenAppTokenHiddenRequested() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-        win0.mActivityRecord.mVisibleRequested = false;
+        win0.mActivityRecord.hiddenRequested = true;
         assertTrue(win0.cantReceiveTouchInput());
     }
 
