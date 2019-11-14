@@ -328,11 +328,6 @@ void StatsLogProcessor::OnConfigUpdatedLocked(
                                mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
     if (newMetricsManager->isConfigValid()) {
         mUidMap->OnConfigUpdated(key);
-        if (newMetricsManager->shouldAddUidMapListener()) {
-            // We have to add listener after the MetricsManager is constructed because it's
-            // not safe to create wp or sp from this pointer inside its constructor.
-            mUidMap->addListener(newMetricsManager.get());
-        }
         newMetricsManager->refreshTtl(timestampNs);
         mMetricsManagers[key] = newMetricsManager;
         VLOG("StatsdConfig valid");
@@ -750,6 +745,32 @@ int64_t StatsLogProcessor::getLastReportTimeNs(const ConfigKey& key) {
         return 0;
     } else {
         return it->second->getLastReportTimeNs();
+    }
+}
+
+void StatsLogProcessor::notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk,
+                                         const int uid, const int64_t version) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    ALOGW("Received app upgrade");
+    for (auto it : mMetricsManagers) {
+        it.second->notifyAppUpgrade(eventTimeNs, apk, uid, version);
+    }
+}
+
+void StatsLogProcessor::notifyAppRemoved(const int64_t& eventTimeNs, const string& apk,
+                                         const int uid) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    ALOGW("Received app removed");
+    for (auto it : mMetricsManagers) {
+        it.second->notifyAppRemoved(eventTimeNs, apk, uid);
+    }
+}
+
+void StatsLogProcessor::onUidMapReceived(const int64_t& eventTimeNs) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    ALOGW("Received uid map");
+    for (auto it : mMetricsManagers) {
+        it.second->onUidMapReceived(eventTimeNs);
     }
 }
 
