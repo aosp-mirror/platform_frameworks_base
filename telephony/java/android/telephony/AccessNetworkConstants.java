@@ -45,6 +45,7 @@ public final class AccessNetworkConstants {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int TRANSPORT_TYPE_INVALID = -1;
 
     /**

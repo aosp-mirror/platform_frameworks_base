@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -45,6 +46,7 @@ import java.util.List;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class ImsCallProfile implements Parcelable {
     private static final String TAG = "ImsCallProfile";
 
