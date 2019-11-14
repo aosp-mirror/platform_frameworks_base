@@ -2287,6 +2287,77 @@ public class CarrierConfigManager {
             "use_only_rsrp_for_lte_signal_bar_bool";
 
     /**
+     * List of 4 customized 5G SS reference signal received power (SSRSRP) thresholds.
+     *
+     * Reference: 3GPP TS 38.215
+     *
+     * 4 threshold integers must be within the boundaries [-140 dB, -44 dB], and the levels are:
+     *     "NONE: [-140, threshold1]"
+     *     "POOR: (threshold1, threshold2]"
+     *     "MODERATE: (threshold2, threshold3]"
+     *     "GOOD:  (threshold3, threshold4]"
+     *     "EXCELLENT:  (threshold4, -44]"
+     *
+     * This key is considered invalid if the format is violated. If the key is invalid or
+     * not configured, a default value set will apply.
+     */
+    public static final String KEY_5G_NR_SSRSRP_THRESHOLDS_INT_ARRAY =
+            "5g_nr_ssrsrp_thresholds_int_array";
+
+    /**
+     * List of 4 customized 5G SS reference signal received quality (SSRSRQ) thresholds.
+     *
+     * Reference: 3GPP TS 38.215
+     *
+     * 4 threshold integers must be within the boundaries [-20 dB, -3 dB], and the levels are:
+     *     "NONE: [-23, threshold1]"
+     *     "POOR: (threshold1, threshold2]"
+     *     "MODERATE: (threshold2, threshold3]"
+     *     "GOOD:  (threshold3, threshold4]"
+     *     "EXCELLENT:  (threshold4, -3]"
+     *
+     * This key is considered invalid if the format is violated. If the key is invalid or
+     * not configured, a default value set will apply.
+     */
+    public static final String KEY_5G_NR_SSRSRQ_THRESHOLDS_INT_ARRAY =
+            "5g_nr_ssrsrq_thresholds_int_array";
+
+    /**
+     * List of 4 customized 5G SS signal-to-noise and interference ratio (SSSINR) thresholds.
+     *
+     * Reference: 3GPP TS 38.215,
+     *            3GPP TS 38.133 10.1.16.1
+     *
+     * 4 threshold integers must be within the boundaries [-23 dB, 40 dB], and the levels are:
+     *     "NONE: [-23, threshold1]"
+     *     "POOR: (threshold1, threshold2]"
+     *     "MODERATE: (threshold2, threshold3]"
+     *     "GOOD:  (threshold3, threshold4]"
+     *     "EXCELLENT:  (threshold4, 40]"
+     *
+     * This key is considered invalid if the format is violated. If the key is invalid or
+     * not configured, a default value set will apply.
+     */
+    public static final String KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY =
+            "5g_nr_sssinr_thresholds_int_array";
+
+    /**
+     * Bit-field integer to determine whether to use SS reference signal received power (SSRSRP),
+     * SS reference signal received quality (SSRSRQ), or/and SS signal-to-noise and interference
+     * ratio (SSSINR) for the number of 5G NR signal bars. If multiple measures are set bit, the
+     * parameter whose value is smallest is used to indicate the signal bar.
+     *
+     *  SSRSRP = 1 << 0,
+     *  SSRSRQ = 1 << 1,
+     *  SSSINR = 1 << 2,
+     *
+     *  Reference: 3GPP TS 38.215,
+     *             3GPP TS 38.133 10.1.16.1
+     */
+    public static final String KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT =
+            "parameters_use_for_5g_nr_signal_bar_int";
+
+    /**
      * Key identifying if voice call barring notification is required to be shown to the user.
      * @hide
      */
