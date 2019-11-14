@@ -75,25 +75,35 @@ class TaskSnapshotLoader {
             final byte[] bytes = Files.readAllBytes(protoFile.toPath());
             final TaskSnapshotProto proto = TaskSnapshotProto.parseFrom(bytes);
             final Options options = new Options();
-            options.inPreferredConfig = Config.HARDWARE;
+            options.inPreferredConfig = mPersister.use16BitFormat() && !proto.isTranslucent
+                    ? Config.RGB_565
+                    : Config.ARGB_8888;
             final Bitmap bitmap = BitmapFactory.decodeFile(bitmapFile.getPath(), options);
             if (bitmap == null) {
                 Slog.w(TAG, "Failed to load bitmap: " + bitmapFile.getPath());
                 return null;
             }
-            final GraphicBuffer buffer = bitmap.createGraphicBufferHandle();
+
+            final Bitmap hwBitmap = bitmap.copy(Config.HARDWARE, false);
+            bitmap.recycle();
+            if (hwBitmap == null) {
+                Slog.w(TAG, "Failed to create hardware bitmap: " + bitmapFile.getPath());
+                return null;
+            }
+            final GraphicBuffer buffer = hwBitmap.createGraphicBufferHandle();
             if (buffer == null) {
                 Slog.w(TAG, "Failed to retrieve gralloc buffer for bitmap: "
                         + bitmapFile.getPath());
                 return null;
             }
+
             final ComponentName topActivityComponent = ComponentName.unflattenFromString(
                     proto.topActivityComponent);
             // For legacy snapshots, restore the scale based on the reduced resolution state
             final float legacyScale = reducedResolution ? mPersister.getReducedScale() : 1f;
             final float scale = Float.compare(proto.scale, 0f) != 0 ? proto.scale : legacyScale;
-            return new TaskSnapshot(proto.id, topActivityComponent, buffer, bitmap.getColorSpace(),
-                    proto.orientation,
+            return new TaskSnapshot(proto.id, topActivityComponent, buffer,
+                    hwBitmap.getColorSpace(), proto.orientation,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
                     reducedResolution, scale, proto.isRealSnapshot, proto.windowingMode,
                     proto.systemUiVisibility, proto.isTranslucent);
