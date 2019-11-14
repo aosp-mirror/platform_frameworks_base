@@ -17,6 +17,7 @@
 package android.media.tv.tuner;
 
 import android.annotation.Nullable;
+import android.media.tv.tuner.TunerConstants.DemuxPidType;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -82,6 +83,9 @@ public final class Tuner implements AutoCloseable  {
 
     private native List<Integer> nativeGetLnbIds();
     private native Lnb nativeOpenLnbById(int id);
+
+    private native Descrambler nativeOpenDescrambler();
+
 
     /**
      * Frontend Callback.
@@ -293,5 +297,28 @@ public final class Tuner implements AutoCloseable  {
         if (mHandler != null) {
             mHandler.sendMessage(mHandler.obtainMessage(MSG_ON_LNB_EVENT, eventType, 0));
         }
+    }
+
+    protected class Descrambler {
+        private long mNativeContext;
+
+        private native boolean nativeAddPid(int pidType, int pid, Filter filter);
+        private native boolean nativeRemovePid(int pidType, int pid, Filter filter);
+
+        private Descrambler() {}
+
+        private boolean addPid(@DemuxPidType int pidType, int pid, Filter filter) {
+            return nativeAddPid(pidType, pid, filter);
+        }
+
+        private boolean removePid(@DemuxPidType int pidType, int pid, Filter filter) {
+            return nativeRemovePid(pidType, pid, filter);
+        }
+
+    }
+
+    private Descrambler openDescrambler() {
+        Descrambler descrambler = nativeOpenDescrambler();
+        return descrambler;
     }
 }

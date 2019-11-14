@@ -28,11 +28,13 @@ using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterEvent;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterStatus;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
+using ::android::hardware::tv::tuner::V1_0::DemuxPid;
 using ::android::hardware::tv::tuner::V1_0::FrontendEventType;
 using ::android::hardware::tv::tuner::V1_0::FrontendId;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
 using ::android::hardware::tv::tuner::V1_0::IDemux;
+using ::android::hardware::tv::tuner::V1_0::IDescrambler;
 using ::android::hardware::tv::tuner::V1_0::IFilter;
 using ::android::hardware::tv::tuner::V1_0::IFilterCallback;
 using ::android::hardware::tv::tuner::V1_0::IFrontend;
@@ -82,6 +84,7 @@ struct JTuner : public RefBase {
     jobject getLnbIds();
     jobject openLnbById(int id);
     jobject openFilter(DemuxFilterType type, int bufferSize);
+    jobject openDescrambler();
 
 protected:
     bool openDemux();
