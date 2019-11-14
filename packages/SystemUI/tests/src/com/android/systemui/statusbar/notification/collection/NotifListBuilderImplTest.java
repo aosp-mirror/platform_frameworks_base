@@ -34,7 +34,6 @@ import static org.mockito.Mockito.verify;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 
@@ -121,7 +120,7 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
         addNotif(6, PACKAGE_1).setRank(0);
         dispatchBuild();
 
-        // The final output is sorted based on rank
+        // The final output is sorted based first by rank and then by when
         verifyBuiltList(
                 notif(6),
                 notif(5),
@@ -204,7 +203,7 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
         addGroupSummary(6, PACKAGE_1, GROUP_1).setRank(3);
         dispatchBuild();
 
-        // THEN the notifs are grouped together
+        // THEN the children are sorted by rank and when
         verifyBuiltList(
                 group(
                         summary(6),
@@ -502,10 +501,6 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
         addGroupSummary(4, PACKAGE_2, GROUP_1);
         addNotif(5, PACKAGE_3);
         dispatchBuild();
-
-        for (NotificationEntry entry : mEntrySet) {
-            Log.d("pizza", "entry: " + entry.getKey() + " " + entry);
-        }
 
         // THEN both promoters are called on each child, except for children that a previous
         // promoter has already promoted
@@ -840,6 +835,9 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
                 notif(0)
         );
         assertNull(group.getParent());
+
+        // but its previous parent indicates that it was added in the previous iteration
+        assertEquals(GroupEntry.ROOT_ENTRY, group.getPreviousParent());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -860,14 +858,14 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
 
     @Test(expected = IllegalStateException.class)
     public void testOutOfOrderPrompterInvalidationThrows() {
-        // GIVEN a NotifFilter that gets invalidated during the grouping stage
+        // GIVEN a NotifPromoter that gets invalidated during the sorting stage
         NotifPromoter promoter = new IdPromoter(47);
         OnBeforeSortListener listener =
                 (list) -> promoter.invalidateList();
         mListBuilder.addPromoter(promoter);
         mListBuilder.addOnBeforeSortListener(listener);
 
-        // WHEN we try to run the pipeline and the filter is invalidated
+        // WHEN we try to run the pipeline and the promoter is invalidated
         addNotif(0, PACKAGE_1);
         dispatchBuild();
 
@@ -876,14 +874,14 @@ public class NotifListBuilderImplTest extends SysuiTestCase {
 
     @Test(expected = IllegalStateException.class)
     public void testOutOfOrderComparatorInvalidationThrows() {
-        // GIVEN a NotifFilter that gets invalidated during the grouping stage
+        // GIVEN a NotifComparator that gets invalidated during the finalizing stage
         NotifComparator comparator = new HypeComparator(PACKAGE_5);
         OnBeforeRenderListListener listener =
                 (list) -> comparator.invalidateList();
         mListBuilder.setComparators(Collections.singletonList(comparator));
         mListBuilder.addOnBeforeRenderListListener(listener);
 
-        // WHEN we try to run the pipeline and the filter is invalidated
+        // WHEN we try to run the pipeline and the comparator is invalidated
         addNotif(0, PACKAGE_1);
         dispatchBuild();
 
