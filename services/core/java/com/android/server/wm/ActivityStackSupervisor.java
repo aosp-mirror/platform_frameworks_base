@@ -773,11 +773,12 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             }
 
             if (r.getActivityStack().checkKeyguardVisibility(r, true /* shouldBeVisible */,
-                    true /* isTop */) && r.allowMoveToFront()) {
-                // We only set the visibility to true if the activity is not being launched in
-                // background, and is allowed to be visible based on keyguard state. This avoids
-                // setting this into motion in window manager that is later cancelled due to later
-                // calls to ensure visible activities that set visibility back to false.
+                    true /* isTop */)) {
+                // We only set the visibility to true if the activity is allowed to be visible
+                // based on
+                // keyguard state. This avoids setting this into motion in window manager that is
+                // later cancelled due to later calls to ensure visible activities that set
+                // visibility back to false.
                 r.setVisibility(true);
             }
 
