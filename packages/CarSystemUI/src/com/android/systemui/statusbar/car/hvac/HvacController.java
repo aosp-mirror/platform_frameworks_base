@@ -26,8 +26,10 @@ import android.car.hardware.CarPropertyValue;
 import android.car.hardware.hvac.CarHvacManager;
 import android.car.hardware.hvac.CarHvacManager.CarHvacEventCallback;
 import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
+
+import com.android.systemui.CarSystemUIFactory;
+import com.android.systemui.SystemUIFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,13 +43,9 @@ import java.util.Objects;
  * {@link TemperatureView}s
  */
 public class HvacController {
-
     public static final String TAG = "HvacController";
-    public static final int BIND_TO_HVAC_RETRY_DELAY = 5000;
 
     private Context mContext;
-    private Handler mHandler;
-    private Car mCar;
     private CarHvacManager mHvacManager;
     private HashMap<HvacKey, List<TemperatureView>> mTempComponents = new HashMap<>();
 
@@ -105,9 +103,8 @@ public class HvacController {
      * ({@link CarHvacManager}) will happen on the same thread this method was called from.
      */
     public void connectToCarService() {
-        mHandler = new Handler();
-        mCar = Car.createCar(mContext, /* handler= */ mHandler, Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT,
-                mCarServiceLifecycleListener);
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+            .addListener(mCarServiceLifecycleListener);
     }
 
     /**
