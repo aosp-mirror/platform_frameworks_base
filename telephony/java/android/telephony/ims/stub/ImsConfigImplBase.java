@@ -18,6 +18,7 @@ package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.os.RemoteCallbackList;
@@ -48,6 +49,7 @@ import java.util.HashMap;
  * @hide
  */
 @SystemApi
+@TestApi
 public class ImsConfigImplBase {
 
     private static final String TAG = "ImsConfigImplBase";

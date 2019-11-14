@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.pm.IPackageManager;
@@ -59,6 +60,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
+@TestApi
 public class ProvisioningManager {
 
     /**@hide*/
