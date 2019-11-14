@@ -830,7 +830,7 @@ public class EuiccManager {
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      *
      * @deprecated From R, callers should specify a flag for specific set of subscriptions to erase
-     * and use {@link #eraseSubscriptionsWithOptions(int, PendingIntent)} instead
+     * and use {@link #eraseSubscriptions(int, PendingIntent)} instead
      *
      * @hide
      */
@@ -862,7 +862,7 @@ public class EuiccManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
-    public void eraseSubscriptionsWithOptions(
+    public void eraseSubscriptions(
             @ResetOption int options, @NonNull PendingIntent callbackIntent) {
         if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
