@@ -499,7 +499,6 @@
     <protected-broadcast android:name="android.telephony.action.CARRIER_CONFIG_CHANGED" />
     <protected-broadcast android:name="android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED" />
-    <protected-broadcast android:name="android.telephony.action.OTA_EMERGENCY_NUMBER_DB_INSTALLED" />
     <protected-broadcast android:name="android.telephony.action.SECRET_CODE" />
     <protected-broadcast android:name="android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION" />
     <protected-broadcast android:name="android.telephony.action.SUBSCRIPTION_PLANS_CHANGED" />
