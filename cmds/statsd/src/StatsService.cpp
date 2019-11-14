@@ -200,6 +200,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper, shared_ptr<LogEventQ
                 }
             });
 
+    mUidMap->setListener(mProcessor);
     mConfigManager->AddListener(mProcessor);
 
     init_system_properties();
