@@ -199,6 +199,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Override
     public void start() {
+        // Non blocking call to connect to car service. Call this early so that we'll be connected
+        // asap.
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext);
+
         // get the provisioned state before calling the parent class since it's that flow that
         // builds the nav bar
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
@@ -482,11 +486,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         CarNotificationListener carNotificationListener = new CarNotificationListener();
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
-        // This can take time if car service is not ready up to this time.
-        // TODO(b/142808072) Refactor CarUxRestrictionManagerWrapper to allow setting
-        // CarUxRestrictionsManager later and switch to Car.CAR_WAIT_TIMEOUT_DO_NOT_WAIT.
-        Car.createCar(mContext, /* handler= */ null, Car.CAR_WAIT_TIMEOUT_WAIT_FOREVER,
-                (car, ready) -> {
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+                .addListener((car, ready) -> {
                     if (!ready) {
                         return;
                     }
