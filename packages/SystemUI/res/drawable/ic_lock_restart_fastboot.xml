@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2019 The LineageOS Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M 22 9 L 22 7 L 20 7 L 20 5 C 20 4.47 19.789 3.961 19.414 3.586 C 19.039 3.211 18.53 3 18 3 L 4 3 C 3.47 3 2.961 3.211 2.586 3.586 C 2.211 3.961 2 4.47 2 5 L 2 19 C 2 19.53 2.211 20.039 2.586 20.414 C 2.961 20.789 3.47 21 4 21 L 18 21 C 18.53 21 19.039 20.789 19.414 20.414 C 19.789 20.039 20 19.53 20 19 L 20 17 L 22 17 L 22 15 L 20 15 L 20 13 L 22 13 L 22 11 L 20 11 L 20 9 L 22 9 M 18 19 L 4 19 L 4 5 L 18 5 L 18 19 M 6 13 L 11 13 L 11 17 L 6 17 L 6 13 M 12 7 L 16 7 L 16 10 L 12 10 L 12 7 M 6 7 L 11 7 L 11 12 L 6 12 L 6 7 M 12 11 L 16 11 L 16 17 L 12 17 L 12 11 Z"
+        android:fillColor="#000000" />
+</vector>
