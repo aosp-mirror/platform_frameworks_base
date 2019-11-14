@@ -8375,7 +8375,6 @@ public final class Settings {
 
             INSTANT_APP_SETTINGS.add(ANDROID_ID);
 
-            INSTANT_APP_SETTINGS.add(PACKAGE_VERIFIER_USER_CONSENT);
             INSTANT_APP_SETTINGS.add(ALLOW_MOCK_LOCATION);
         }
 
