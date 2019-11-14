@@ -75,7 +75,7 @@ class WindowTestUtils {
         activity.onDisplayChanged(dc);
         activity.setOccludesParent(true);
         activity.setHidden(false);
-        activity.mVisibleRequested = true;
+        activity.hiddenRequested = false;
     }
 
     static TestWindowToken createTestWindowToken(int type, DisplayContent dc) {

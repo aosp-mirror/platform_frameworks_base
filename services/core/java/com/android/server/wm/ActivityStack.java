@@ -1629,8 +1629,7 @@ class ActivityStack extends TaskStack {
                 prev = prev.completeFinishing("completePausedLocked");
             } else if (prev.hasProcess()) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueue pending stop if needed: " + prev
-                        + " wasStopping=" + wasStopping
-                        + " visibleRequested=" + prev.mVisibleRequested);
+                        + " wasStopping=" + wasStopping + " visible=" + prev.visible);
                 if (prev.deferRelaunchUntilPaused) {
                     // Complete the deferred relaunch that was waiting for pause to complete.
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Re-launching after pause: " + prev);
@@ -1640,7 +1639,7 @@ class ActivityStack extends TaskStack {
                     // We can't clobber it, because the stop confirmation will not be handled.
                     // We don't need to schedule another stop, we only need to let it happen.
                     prev.setState(STOPPING, "completePausedLocked");
-                } else if (!prev.mVisibleRequested || shouldSleepOrShutDownActivities()) {
+                } else if (!prev.visible || shouldSleepOrShutDownActivities()) {
                     // Clear out any deferred client hide we might currently have.
                     prev.setDeferHidingClient(false);
                     // If we were visible then resumeTopActivities will release resources before
@@ -1761,7 +1760,7 @@ class ActivityStack extends TaskStack {
 
     boolean isTopActivityVisible() {
         final ActivityRecord topActivity = getTopActivity();
-        return topActivity != null && topActivity.mVisibleRequested;
+        return topActivity != null && topActivity.visible;
     }
 
     /**
@@ -1902,7 +1901,7 @@ class ActivityStack extends TaskStack {
         for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = getChildAt(taskNdx);
             ActivityRecord r = task.topRunningActivityLocked();
-            if (r == null || r.finishing || !r.mVisibleRequested) {
+            if (r == null || r.finishing || !r.visible) {
                 task.mLayerRank = -1;
             } else {
                 task.mLayerRank = baseLayer + layer++;
@@ -1991,7 +1990,7 @@ class ActivityStack extends TaskStack {
                         if (!r.attachedToProcess()) {
                             makeVisibleAndRestartIfNeeded(starting, configChanges, isTop,
                                     resumeTopActivity && isTop, r);
-                        } else if (r.mVisibleRequested) {
+                        } else if (r.visible) {
                             // If this activity is already visible, then there is nothing to do here.
                             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                                     "Skipping: already visible at " + r);
@@ -2168,16 +2167,16 @@ class ActivityStack extends TaskStack {
         // invisible. If the app is already visible, it must have died while it was visible. In this
         // case, we'll show the dead window but will not restart the app. Otherwise we could end up
         // thrashing.
-        if (isTop || !r.mVisibleRequested) {
+        if (isTop || !r.visible) {
             // This activity needs to be visible, but isn't even running...
             // get it started and resume if no other stack in this stack is resumed.
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
             if (r != starting) {
                 r.startFreezingScreenLocked(configChanges);
             }
-            if (!r.mVisibleRequested || r.mLaunchTaskBehind) {
+            if (!r.visible || r.mLaunchTaskBehind) {
                 if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
-                r.setVisibility(true);
+                r.setVisible(true);
             }
             if (r != starting) {
                 mStackSupervisor.startSpecificActivityLocked(r, andResume, true /* checkConfig */);
@@ -2620,8 +2619,7 @@ class ActivityStack extends TaskStack {
 
         if (next.attachedToProcess()) {
             if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next
-                    + " stopped=" + next.stopped
-                    + " visibleRequested=" + next.mVisibleRequested);
+                    + " stopped=" + next.stopped + " visible=" + next.visible);
 
             // If the previous activity is translucent, force a visibility update of
             // the next activity, so that it's added to WM's opening app list, and
@@ -2636,7 +2634,7 @@ class ActivityStack extends TaskStack {
                     && !lastFocusedStack.mLastPausedActivity.occludesParent()));
 
             // This activity is now becoming visible.
-            if (!next.mVisibleRequested || next.stopped || lastActivityTranslucent) {
+            if (!next.visible || next.stopped || lastActivityTranslucent) {
                 next.setVisibility(true);
             }
 
@@ -2691,7 +2689,7 @@ class ActivityStack extends TaskStack {
                     // Do over!
                     mStackSupervisor.scheduleResumeTopActivities();
                 }
-                if (!next.mVisibleRequested || next.stopped) {
+                if (!next.visible || next.stopped) {
                     next.setVisibility(true);
                 }
                 next.completeResumeLocked();
@@ -3360,7 +3358,7 @@ class ActivityStack extends TaskStack {
 
         final ActivityRecord top = stack.topRunningActivityLocked();
 
-        if (stack.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
+        if (stack.isActivityTypeHome() && (top == null || !top.visible)) {
             // If we will be focusing on the home stack next and its current top activity isn't
             // visible, then use the move the home stack task to top to make the activity visible.
             stack.getDisplay().moveHomeActivityToTop(reason);
@@ -3857,7 +3855,7 @@ class ActivityStack extends TaskStack {
                         "Record #" + targetIndex + " " + r + ": app=" + r.app);
 
                 if (r.app == app) {
-                    if (r.mVisibleRequested) {
+                    if (r.visible) {
                         hasVisibleActivities = true;
                     }
                     final boolean remove;
@@ -3873,8 +3871,8 @@ class ActivityStack extends TaskStack {
                         // Don't currently have state for the activity, or
                         // it is finishing -- always remove it.
                         remove = true;
-                    } else if (!r.mVisibleRequested && r.launchCount > 2
-                            && r.lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
+                    } else if (!r.visible && r.launchCount > 2 &&
+                            r.lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
                         // We have launched this activity too many times since it was
                         // able to run, so give up and remove it.
                         // (Note if the activity is visible, we don't remove the record.
@@ -3910,7 +3908,7 @@ class ActivityStack extends TaskStack {
                         // it died, we leave the dead window on screen so it's basically visible.
                         // This is needed when user later tap on the dead window, we need to stop
                         // other apps when user transfers focus to the restarted activity.
-                        r.nowVisible = r.mVisibleRequested;
+                        r.nowVisible = r.visible;
                     }
                     r.cleanUp(true /* cleanServices */, true /* setState */);
                     if (remove) {
@@ -4092,7 +4090,7 @@ class ActivityStack extends TaskStack {
      * Ensures all visible activities at or below the input activity have the right configuration.
      */
     void ensureVisibleActivitiesConfigurationLocked(ActivityRecord start, boolean preserveWindow) {
-        if (start == null || !start.mVisibleRequested) {
+        if (start == null || !start.visible) {
             return;
         }
 
@@ -4487,7 +4485,7 @@ class ActivityStack extends TaskStack {
                 final ActivityRecord a = task.getChildAt(activityNdx);
                 if (a.info.packageName.equals(packageName)) {
                     a.forceNewConfig = true;
-                    if (starting != null && a == starting && a.mVisibleRequested) {
+                    if (starting != null && a == starting && a.visible) {
                         a.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
                     }
                 }
