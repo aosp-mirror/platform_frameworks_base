@@ -17,10 +17,11 @@
 package android.telephony.ims.stub;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.RemoteException;
+import android.telephony.ims.ImsExternalCallState;
 import android.util.Log;
 
-import android.telephony.ims.ImsExternalCallState;
 import com.android.ims.internal.IImsExternalCallStateListener;
 import com.android.ims.internal.IImsMultiEndpoint;
 
@@ -37,6 +38,7 @@ import java.util.List;
  * @hide
  */
 @SystemApi
+@TestApi
 public class ImsMultiEndpointImplBase {
     private static final String TAG = "MultiEndpointImplBase";
 

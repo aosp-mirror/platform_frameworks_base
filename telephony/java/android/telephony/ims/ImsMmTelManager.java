@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -58,6 +59,7 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
+@TestApi
 public class ImsMmTelManager implements RegistrationManager {
 
     /**
