@@ -2627,7 +2627,6 @@ public class WifiConfiguration implements Parcelable {
         out.writeInt(apBand);
         out.writeInt(apChannel);
         BackupUtils.writeString(out, preSharedKey);
-        BackupUtils.writeString(out, saePasswordId);
         out.writeInt(getAuthType());
         out.writeBoolean(hiddenSSID);
         return baos.toByteArray();
@@ -2651,7 +2650,6 @@ public class WifiConfiguration implements Parcelable {
         config.apBand = in.readInt();
         config.apChannel = in.readInt();
         config.preSharedKey = BackupUtils.readString(in);
-        config.saePasswordId = BackupUtils.readString(in);
         config.allowedKeyManagement.set(in.readInt());
         if (version >= 3) {
             config.hiddenSSID = in.readBoolean();
