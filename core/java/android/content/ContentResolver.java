@@ -304,31 +304,61 @@ public abstract class ContentResolver implements ContentInterface {
      */
     public static final String QUERY_ARG_SQL_SORT_ORDER = "android:query-arg-sql-sort-order";
 
-    /** {@hide} */
+    /**
+     * Key for an SQL style {@code GROUP BY} string that may be present in the
+     * query Bundle argument passed to
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}.
+     *
+     * <p><b>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher are strongly
+     * encourage to use structured query arguments in lieu of opaque SQL query clauses.</b>
+     *
+     * @see #QUERY_ARG_GROUP_COLUMNS
+     */
     public static final String QUERY_ARG_SQL_GROUP_BY = "android:query-arg-sql-group-by";
-    /** {@hide} */
+
+    /**
+     * Key for an SQL style {@code HAVING} string that may be present in the
+     * query Bundle argument passed to
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}.
+     *
+     * <p><b>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher are strongly
+     * encourage to use structured query arguments in lieu of opaque SQL query clauses.</b>
+     */
     public static final String QUERY_ARG_SQL_HAVING = "android:query-arg-sql-having";
-    /** {@hide} */
+
+    /**
+     * Key for an SQL style {@code LIMIT} string that may be present in the
+     * query Bundle argument passed to
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}.
+     *
+     * <p><b>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher are strongly
+     * encourage to use structured query arguments in lieu of opaque SQL query clauses.</b>
+     *
+     * @see #QUERY_ARG_LIMIT
+     * @see #QUERY_ARG_OFFSET
+     */
     public static final String QUERY_ARG_SQL_LIMIT = "android:query-arg-sql-limit";
 
     /**
-     * Specifies the list of columns against which to sort results. When first column values
-     * are identical, records are then sorted based on second column values, and so on.
-     *
-     * <p>Columns present in this list must also be included in the projection
-     * supplied to {@link ContentResolver#query(Uri, String[], Bundle, CancellationSignal)}.
-     *
-     * <p>Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher:
-     *
+     * Specifies the list of columns (stored as a {@code String[]}) against
+     * which to sort results. When first column values are identical, records
+     * are then sorted based on second column values, and so on.
+     * <p>
+     * Columns present in this list must also be included in the projection
+     * supplied to
+     * {@link ContentResolver#query(Uri, String[], Bundle, CancellationSignal)}.
+     * <p>
+     * Apps targeting {@link android.os.Build.VERSION_CODES#O} or higher:
      * <li>{@link ContentProvider} implementations: When preparing data in
-     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}, if sort columns
-     * is reflected in the returned Cursor, it is  strongly recommended that
-     * {@link #QUERY_ARG_SORT_COLUMNS} then be included in the array of honored arguments
-     * reflected in {@link Cursor} extras {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
-     *
-     * <li>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in the
-     * arguments {@link Bundle}, the Content framework will attempt to synthesize
-     * an QUERY_ARG_SQL* argument using the corresponding QUERY_ARG_SORT* values.
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)},
+     * if sort columns is reflected in the returned Cursor, it is strongly
+     * recommended that {@link #QUERY_ARG_SORT_COLUMNS} then be included in the
+     * array of honored arguments reflected in {@link Cursor} extras
+     * {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
+     * <li>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in
+     * the arguments {@link Bundle}, the Content framework will attempt to
+     * synthesize an QUERY_ARG_SQL* argument using the corresponding
+     * QUERY_ARG_SORT* values.
      */
     public static final String QUERY_ARG_SORT_COLUMNS = "android:query-arg-sort-columns";
 
@@ -402,6 +432,29 @@ public abstract class ContentResolver implements ContentInterface {
     public static final String QUERY_ARG_SORT_LOCALE = "android:query-arg-sort-locale";
 
     /**
+     * Specifies the list of columns (stored as a {@code String[]}) against
+     * which to group results. When column values are identical, multiple
+     * records are collapsed together into a single record.
+     * <p>
+     * Columns present in this list must also be included in the projection
+     * supplied to
+     * {@link ContentResolver#query(Uri, String[], Bundle, CancellationSignal)}.
+     * <p>
+     * Apps targeting {@link android.os.Build.VERSION_CODES#R} or higher:
+     * <li>{@link ContentProvider} implementations: When preparing data in
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)},
+     * if group columns is reflected in the returned Cursor, it is strongly
+     * recommended that {@link #QUERY_ARG_SORT_COLUMNS} then be included in the
+     * array of honored arguments reflected in {@link Cursor} extras
+     * {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
+     * <li>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in
+     * the arguments {@link Bundle}, the Content framework will attempt to
+     * synthesize an QUERY_ARG_SQL* argument using the corresponding
+     * QUERY_ARG_SORT* values.
+     */
+    public static final String QUERY_ARG_GROUP_COLUMNS = "android:query-arg-group-columns";
+
+    /**
      * Allows provider to report back to client which query keys are honored in a Cursor.
      *
      * <p>Key identifying a {@code String[]} containing all QUERY_ARG_SORT* arguments
@@ -415,6 +468,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @see #QUERY_ARG_SORT_DIRECTION
      * @see #QUERY_ARG_SORT_COLLATION
      * @see #QUERY_ARG_SORT_LOCALE
+     * @see #QUERY_ARG_GROUP_COLUMNS
      */
     public static final String EXTRA_HONORED_ARGS = "android.content.extra.HONORED_ARGS";
 
