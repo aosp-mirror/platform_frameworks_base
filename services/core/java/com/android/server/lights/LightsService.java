@@ -90,7 +90,7 @@ public class LightsService extends SystemService {
                 } else {
                     int color = brightness & 0x000000ff;
                     color = 0xff000000 | (color << 16) | (color << 8) | color;
-                    setLightLocked(color, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
+                    setLightLocked(brightness * 2047 / 255, LIGHT_FLASH_NONE, 0, 0, brightnessMode);
                 }
             }
         }
