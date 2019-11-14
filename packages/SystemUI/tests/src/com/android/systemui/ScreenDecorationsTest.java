@@ -136,7 +136,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mTestableLooper.processAllMessages();
             }
         };
-        mScreenDecorations.mComponents = mContext.getComponents();
         reset(mTunerService);
     }
 

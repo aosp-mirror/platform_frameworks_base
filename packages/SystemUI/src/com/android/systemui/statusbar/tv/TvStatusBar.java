@@ -50,8 +50,6 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
 
     @Override
     public void start() {
-        putComponent(TvStatusBar.class, this);
-
         final IStatusBarService barService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mCommandQueue.addCallback(this);

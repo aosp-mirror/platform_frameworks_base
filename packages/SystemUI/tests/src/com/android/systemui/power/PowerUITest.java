@@ -687,7 +687,6 @@ public class PowerUITest extends SysuiTestCase {
 
     private void createPowerUi() {
         mPowerUI = new PowerUI(mContext, mBroadcastDispatcher, mStatusBarLazy);
-        mPowerUI.mComponents = mContext.getComponents();
         mPowerUI.mThermalService = mThermalServiceMock;
     }
 

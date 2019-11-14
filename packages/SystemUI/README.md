@@ -24,12 +24,6 @@ the main path for onConfigurationChanged, now also happens through
 ConfigurationController). They also receive a callback for onBootCompleted
 since these objects may be started before the device has finished booting.
 
-SystemUI and SystemUIApplication also have methods for putComponent and
-getComponent which were existing systems to get a hold of other parts of
-sysui before Dependency existed. Generally new things should not be added
-to putComponent, instead Dependency and other refactoring is preferred to
-make sysui structure cleaner.
-
 Each SystemUI service is expected to be a major part of system ui and the
 goal is to minimize communication between them. So in general they should be
 relatively silo'd.

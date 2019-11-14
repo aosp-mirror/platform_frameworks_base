@@ -148,7 +148,6 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.doze.DozeHost;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -794,7 +793,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 R.bool.config_vibrateOnIconAnimation);
 
         DateTimeView.setReceiverHandler(Dependency.get(Dependency.TIME_TICK_HANDLER));
-        putComponent(StatusBar.class, this);
 
         // start old BaseStatusBar.start().
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -896,7 +894,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDozeServiceHost.initialize(this, mNotificationIconAreaController,
                 mStatusBarWindowViewController, mStatusBarWindow, mStatusBarKeyguardViewManager,
                 mNotificationPanel, mAmbientIndicationContainer);
-        putComponent(DozeHost.class, mDozeServiceHost);
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 

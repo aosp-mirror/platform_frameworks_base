@@ -389,7 +389,6 @@ public class StatusBarTest extends SysuiTestCase {
 
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
-        mStatusBar.mComponents = mContext.getComponents();
         mStatusBar.mStatusBarWindow = mStatusBarWindowView;
         mStatusBar.mNotificationPanel = mNotificationPanelView;
         mStatusBar.mDozeScrimController = mDozeScrimController;

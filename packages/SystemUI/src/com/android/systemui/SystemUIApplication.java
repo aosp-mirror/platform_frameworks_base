@@ -36,13 +36,11 @@ import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Application class for SystemUI.
  */
-public class SystemUIApplication extends Application implements SysUiServiceProvider,
+public class SystemUIApplication extends Application implements
         SystemUIAppComponentFactory.ContextInitializer {
 
     public static final String TAG = "SystemUIService";
@@ -56,7 +54,6 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     private SystemUI[] mServices;
     private boolean mServicesStarted;
     private boolean mBootCompleted;
-    private final Map<Class<?>, Object> mComponents = new HashMap<>();
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
 
     public SystemUIApplication() {
@@ -199,7 +196,6 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                 throw new RuntimeException(ex);
             }
 
-            mServices[i].mComponents = mComponents;
             if (DEBUG) Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
             log.traceEnd();
@@ -230,11 +226,6 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                 }
             }
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getComponent(Class<T> interfaceType) {
-        return (T) mComponents.get(interfaceType);
     }
 
     public SystemUI[] getServices() {

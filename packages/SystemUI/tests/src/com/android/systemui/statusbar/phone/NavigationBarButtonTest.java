@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
@@ -37,7 +36,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.After;
@@ -60,11 +58,9 @@ public class NavigationBarButtonTest extends SysuiTestCase {
 
     @Before
     public void setup() {
-        mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         final Display display = createVirtualDisplay();
         final SysuiTestableContext context =
                 (SysuiTestableContext) mContext.createDisplayContext(display);
-        context.putComponent(CommandQueue.class, mock(CommandQueue.class));
 
         mDependency.injectMockDependency(AssistManager.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
