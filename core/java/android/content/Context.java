@@ -2072,7 +2072,7 @@ public abstract class Context {
      *               Intent will receive the broadcast.
      * @param receiverPermissions Array of names of permissions that a receiver must hold
      *                            in order to receive your broadcast.
-     *                            If null or empty, no permissions are required.
+     *                            If empty, no permissions are required.
      *
      * @see android.content.BroadcastReceiver
      * @see #registerReceiver
@@ -2081,8 +2081,11 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      * @hide
      */
-    public abstract void sendBroadcastMultiplePermissions(Intent intent,
-            String[] receiverPermissions);
+    @SystemApi
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Broadcast the given intent to all interested BroadcastReceivers, allowing
