@@ -161,6 +161,8 @@ public class StatusBarModule {
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
             LightsOutNotifController lightsOutNotifController,
+            StatusBarNotificationActivityStarter.Builder
+                    statusBarNotificationActivityStarterBuilder,
             SuperStatusBarViewFactory superStatusBarViewFactory,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
@@ -233,6 +235,7 @@ public class StatusBarModule {
                 remoteInputUriController,
                 dividerOptional,
                 lightsOutNotifController,
+                statusBarNotificationActivityStarterBuilder,
                 superStatusBarViewFactory,
                 statusBarKeyguardViewManager,
                 viewMediatorCallback,

@@ -236,6 +236,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private LockscreenLockIconController mLockscreenLockIconController;
+    @Mock private StatusBarNotificationActivityStarter.Builder
+            mStatusBarNotificationActivityStarterBuilder;
 
     @Before
     public void setup() throws Exception {
@@ -369,6 +371,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mRemoteInputUriController,
                 Optional.of(mDivider),
                 mLightsOutNotifController,
+                mStatusBarNotificationActivityStarterBuilder,
                 mSuperStatusBarViewFactory,
                 mStatusBarKeyguardViewManager,
                 mViewMediatorCallback,
