@@ -41,6 +41,8 @@ struct prop_info;
 namespace android {
 namespace {
 
+using android::base::ParseBoolResult;
+
 template<typename Functor>
 void ReadProperty(const prop_info* prop, Functor&& functor)
 {
@@ -102,14 +104,7 @@ T SystemProperties_get_integral(JNIEnv *env, jclass, jstring keyJ,
     return ret;
 }
 
-jboolean SystemProperties_get_boolean(JNIEnv *env, jclass, jstring keyJ,
-                                      jboolean defJ)
-{
-    using android::base::ParseBoolResult;
-    ParseBoolResult parseResult;
-    ReadProperty(env, keyJ, [&](const char* value) {
-        parseResult = android::base::ParseBool(value);
-    });
+static jboolean jbooleanFromParseBoolResult(ParseBoolResult parseResult, jboolean defJ) {
     jboolean ret;
     switch (parseResult) {
         case ParseBoolResult::kError:
@@ -123,6 +118,62 @@ jboolean SystemProperties_get_boolean(JNIEnv *env, jclass, jstring keyJ,
             break;
     }
     return ret;
+}
+
+jboolean SystemProperties_get_boolean(JNIEnv *env, jclass, jstring keyJ,
+                                      jboolean defJ)
+{
+    ParseBoolResult parseResult;
+    ReadProperty(env, keyJ, [&](const char* value) {
+        parseResult = android::base::ParseBool(value);
+    });
+    return jbooleanFromParseBoolResult(parseResult, defJ);
+}
+
+jlong SystemProperties_find(JNIEnv* env, jclass, jstring keyJ)
+{
+#if defined(__BIONIC__)
+    ScopedUtfChars key(env, keyJ);
+    if (!key.c_str()) {
+        return 0;
+    }
+    const prop_info* prop = __system_property_find(key.c_str());
+    return reinterpret_cast<jlong>(prop);
+#else
+    LOG(FATAL) << "fast property access supported only on device";
+    __builtin_unreachable();  // Silence warning
+#endif
+}
+
+jstring SystemProperties_getH(JNIEnv* env, jclass clazz, jlong propJ)
+{
+    jstring ret;
+    auto prop = reinterpret_cast<const prop_info*>(propJ);
+    ReadProperty(prop, [&](const char* value) {
+        ret = env->NewStringUTF(value);
+    });
+    return ret;
+}
+
+template <typename T>
+T SystemProperties_get_integralH(CRITICAL_JNI_PARAMS_COMMA jlong propJ, T defJ)
+{
+    T ret = defJ;
+    auto prop = reinterpret_cast<const prop_info*>(propJ);
+    ReadProperty(prop, [&](const char* value) {
+        android::base::ParseInt<T>(value, &ret);
+    });
+    return ret;
+}
+
+jboolean SystemProperties_get_booleanH(CRITICAL_JNI_PARAMS_COMMA jlong propJ, jboolean defJ)
+{
+    ParseBoolResult parseResult;
+    auto prop = reinterpret_cast<const prop_info*>(propJ);
+    ReadProperty(prop, [&](const char* value) {
+        parseResult = android::base::ParseBool(value);
+    });
+    return jbooleanFromParseBoolResult(parseResult, defJ);
 }
 
 void SystemProperties_set(JNIEnv *env, jobject clazz, jstring keyJ,
@@ -204,6 +255,18 @@ int register_android_os_SystemProperties(JNIEnv *env)
           (void*) SystemProperties_get_integral<jlong> },
         { "native_get_boolean", "(Ljava/lang/String;Z)Z",
           (void*) SystemProperties_get_boolean },
+        { "native_find",
+          "(Ljava/lang/String;)J",
+          (void*) SystemProperties_find },
+        { "native_get",
+          "(J)Ljava/lang/String;",
+          (void*) SystemProperties_getH },
+        { "native_get_int", "(JI)I",
+          (void*) SystemProperties_get_integralH<jint> },
+        { "native_get_long", "(JJ)J",
+          (void*) SystemProperties_get_integralH<jlong> },
+        { "native_get_boolean", "(JZ)Z",
+          (void*) SystemProperties_get_booleanH },
         { "native_set", "(Ljava/lang/String;Ljava/lang/String;)V",
           (void*) SystemProperties_set },
         { "native_add_change_callback", "()V",

@@ -26,6 +26,7 @@ import android.util.MutableInt;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.HexEncoding;
@@ -36,7 +37,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-
 
 /**
  * Gives access to the system properties store.  The system properties
@@ -117,6 +117,17 @@ public class SystemProperties {
     @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native boolean native_get_boolean(String key, boolean def);
+
+    @FastNative
+    private static native long native_find(String name);
+    @FastNative
+    private static native String native_get(long handle);
+    @CriticalNative
+    private static native int native_get_int(long handle, int def);
+    @CriticalNative
+    private static native long native_get_long(long handle, long def);
+    @CriticalNative
+    private static native boolean native_get_boolean(long handle, boolean def);
 
     // _NOT_ FastNative: native_set performs IPC and can block
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -302,5 +313,61 @@ public class SystemProperties {
 
     @UnsupportedAppUsage
     private SystemProperties() {
+    }
+
+    /**
+     * Look up a property location by name.
+     * @name name of the property
+     * @return property handle or {@code null} if property isn't set
+     * @hide
+     */
+    @Nullable public static Handle find(@NonNull String name) {
+        long nativeHandle = native_find(name);
+        if (nativeHandle == 0) {
+            return null;
+        }
+        return new Handle(nativeHandle);
+    }
+
+    /**
+     * Handle to a pre-located property. Looking up a property handle in advance allows
+     * for optimal repeated lookup of a single property.
+     * @hide
+     */
+    public static final class Handle {
+
+        private final long mNativeHandle;
+
+        /**
+         * @return Value of the property
+         */
+        @NonNull public String get() {
+            return native_get(mNativeHandle);
+        }
+        /**
+         * @param def default value
+         * @return value or {@code def} on parse error
+         */
+        public int getInt(int def) {
+            return native_get_int(mNativeHandle, def);
+        }
+        /**
+         * @param def default value
+         * @return value or {@code def} on parse error
+         */
+        public long getLong(long def) {
+            return native_get_long(mNativeHandle, def);
+        }
+        /**
+         * @param def default value
+         * @return value or {@code def} on parse error
+         */
+        public boolean getBoolean(boolean def) {
+            return native_get_boolean(mNativeHandle, def);
+        }
+
+        private Handle(long nativeHandle) {
+            mNativeHandle = nativeHandle;
+        }
     }
 }
