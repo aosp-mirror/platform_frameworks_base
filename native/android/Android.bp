@@ -36,7 +36,6 @@ cc_library_shared {
 
     srcs: [
         "asset_manager.cpp",
-        "choreographer.cpp",
         "configuration.cpp",
         "hardware_buffer_jni.cpp",
         "input.cpp",
@@ -80,7 +79,7 @@ cc_library_shared {
         "libarect",
     ],
 
-    whole_static_libs: ["libnativewindow"],
+    whole_static_libs: ["libnativedisplay", "libnativewindow"],
 
     export_static_lib_headers: ["libarect"],
 
