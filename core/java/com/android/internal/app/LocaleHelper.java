@@ -208,7 +208,7 @@ public class LocaleHelper {
      * @return the maximized Locale instance.
      */
     public static Locale addLikelySubtags(Locale locale) {
-        return libcore.icu.ICU.addLikelySubtags(locale);
+        return ULocale.addLikelySubtags(ULocale.forLocale(locale)).toLocale();
     }
 
     /**
