@@ -210,6 +210,7 @@ genrule {
     tools: [":soong_zip"],
     srcs: [
         "Configuration.proto",
+        "ResourcesInternal.proto",
         "Resources.proto",
     ],
     out: ["aapt2-protos.zip"],
