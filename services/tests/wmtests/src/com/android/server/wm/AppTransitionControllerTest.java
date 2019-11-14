@@ -62,7 +62,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final ActivityRecord translucentOpening = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         translucentOpening.setOccludesParent(false);
-        translucentOpening.setVisible(false);
+        translucentOpening.setHidden(true);
         mDisplayContent.mOpeningApps.add(behind);
         mDisplayContent.mOpeningApps.add(translucentOpening);
         assertEquals(WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
@@ -90,7 +90,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
         final ActivityRecord translucentOpening = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         translucentOpening.setOccludesParent(false);
-        translucentOpening.setVisible(false);
+        translucentOpening.setHidden(true);
         mDisplayContent.mOpeningApps.add(behind);
         mDisplayContent.mOpeningApps.add(translucentOpening);
         assertEquals(TRANSIT_TASK_CHANGE_WINDOWING_MODE,

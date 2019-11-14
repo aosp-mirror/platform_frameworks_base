@@ -403,7 +403,7 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
         public String getStatus() {
             return mContext.getString(
                     com.android.internal.R.string.bugreport_status,
-                    Build.VERSION.RELEASE_OR_CODENAME,
+                    Build.VERSION.RELEASE,
                     Build.ID);
         }
     }

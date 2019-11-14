@@ -56,6 +56,7 @@ class WallpaperWindowToken extends WindowToken {
             final WindowState wallpaper = mChildren.get(j);
             wallpaper.hideWallpaperWindow(wasDeferred, reason);
         }
+        setHidden(true);
     }
 
     void sendWindowWallpaperCommand(
@@ -87,7 +88,9 @@ class WallpaperWindowToken extends WindowToken {
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
 
-        if (isVisible() != visible) {
+        if (isHidden() == visible) {
+            setHidden(!visible);
+
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }
@@ -115,9 +118,10 @@ class WallpaperWindowToken extends WindowToken {
 
     void updateWallpaperWindows(boolean visible) {
 
-        if (isVisible() != visible) {
+        if (isHidden() == visible) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
-                    "Wallpaper token " + token + " visible=" + visible);
+                    "Wallpaper token " + token + " hidden=" + !visible);
+            setHidden(!visible);
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }
