@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
+import static com.android.systemui.statusbar.ForegroundServiceLifetimeExtender.MIN_FGS_TIME_MS;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.fail;
@@ -37,6 +39,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.trust.TrustManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -49,6 +52,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.NotificationListenerService.RankingMap;
 import android.support.test.filters.SmallTest;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.support.test.runner.AndroidJUnit4;
@@ -64,6 +68,11 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.systemui.ForegroundServiceController;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.ForegroundServiceLifetimeExtender;
+import com.android.systemui.statusbar.NotificationLifetimeExtender;
+import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -83,11 +92,17 @@ import org.junit.runner.RunWith;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Map;
+
+import junit.framework.Assert;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class StatusBarTest extends SysuiTestCase {
+
+    private static final String TEST_PACKAGE_NAME = "test";
+    private static final int TEST_UID = 123;
 
     StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     UnlockMethodCache mUnlockMethodCache;
@@ -101,8 +116,12 @@ public class StatusBarTest extends SysuiTestCase {
     SystemServicesProxy mSystemServicesProxy;
     NotificationPanelView mNotificationPanelView;
     IStatusBarService mBarService;
+    RemoteInputController mRemoteInputController;
+    ForegroundServiceController mForegroundServiceController;
     ArrayList<Entry> mNotificationList;
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    private ForegroundServiceLifetimeExtender mFGSExtender =
+        new ForegroundServiceLifetimeExtender();
 
     @Before
     public void setup() throws Exception {
@@ -120,6 +139,8 @@ public class StatusBarTest extends SysuiTestCase {
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         mNotificationList = mock(ArrayList.class);
         IPowerManager powerManagerService = mock(IPowerManager.class);
+        mRemoteInputController = mock(RemoteInputController.class);
+        mForegroundServiceController = mock(ForegroundServiceController.class);
         HandlerThread handlerThread = new HandlerThread("TestThread");
         handlerThread.start();
         mPowerManager = new PowerManager(mContext, powerManagerService,
@@ -128,11 +149,12 @@ public class StatusBarTest extends SysuiTestCase {
         mBarService = mock(IStatusBarService.class);
 
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
+        mFGSExtender.setCallback(key -> mStatusBar.removeNotification(key, mock(RankingMap.class)));
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
                 mNotificationData, mPowerManager, mSystemServicesProxy, mNotificationPanelView,
-                mBarService);
-        mStatusBar.mContext = mContext;
+                mBarService, mFGSExtender, mRemoteInputController, mForegroundServiceController);
+
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
             onDismissAction.onDismiss();
@@ -410,6 +432,53 @@ public class StatusBarTest extends SysuiTestCase {
         assertTrue(mStatusBar.shouldPeek(entry, sbn));
     }
 
+    @Test
+    public void testForegroundServiceNotificationKeptForFiveSeconds() throws Exception {
+        RankingMap rm = mock(RankingMap.class);
+
+        // sbn posted "just now"
+        Notification n = new Notification.Builder(mContext, "")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text")
+                .build();
+        n.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        StatusBarNotification sbn =
+                new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
+                0, n, new UserHandle(ActivityManager.getCurrentUser()), null,
+                System.currentTimeMillis());
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        when(mNotificationData.get(any())).thenReturn(entry);
+        mStatusBar.removeNotification(sbn.getKey(), rm);
+        Map<NotificationData.Entry, NotificationLifetimeExtender> map =
+                mStatusBar.getRetainedNotificationMap();
+        Assert.assertTrue(map.containsKey(entry));
+    }
+
+    @Test
+    public void testForegroundServiceNotification_notRetainedIfShownForFiveSeconds() 
+        throws Exception {
+
+        RankingMap rm = mock(RankingMap.class);
+
+        // sbn posted "more than 5 seconds ago"
+        Notification n = new Notification.Builder(mContext, "")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text")
+                .build();
+        n.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        StatusBarNotification sbn =
+            new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
+                0, n, new UserHandle(ActivityManager.getCurrentUser()), null,
+                System.currentTimeMillis() - MIN_FGS_TIME_MS - 1);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        when(mNotificationData.get(any())).thenReturn(entry);
+        mStatusBar.removeNotification(sbn.getKey(), rm);
+        Map<NotificationData.Entry, NotificationLifetimeExtender> map =
+                mStatusBar.getRetainedNotificationMap();
+        Assert.assertFalse(map.containsKey(entry));
+    }
 
     @Test
     public void testLogHidden() {
@@ -489,7 +558,8 @@ public class StatusBarTest extends SysuiTestCase {
                 UnlockMethodCache unlock, KeyguardIndicationController key,
                 NotificationStackScrollLayout stack, HeadsUpManager hum, NotificationData nd,
                 PowerManager pm, SystemServicesProxy ssp, NotificationPanelView panelView,
-                IStatusBarService barService) {
+                IStatusBarService barService, ForegroundServiceLifetimeExtender fgsExtender,
+                RemoteInputController ric, ForegroundServiceController fsc) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -501,6 +571,9 @@ public class StatusBarTest extends SysuiTestCase {
             mSystemServicesProxy = ssp;
             mNotificationPanel = panelView;
             mBarService = barService;
+            mFGSExtender = fgsExtender;
+            mRemoteInputController = ric;
+            mForegroundServiceController = fsc;
             mWakefulnessLifecycle = createAwakeWakefulnessLifecycle();
         }
 
@@ -510,6 +583,7 @@ public class StatusBarTest extends SysuiTestCase {
             wakefulnessLifecycle.dispatchFinishedWakingUp();
             return wakefulnessLifecycle;
         }
+
 
         public void setBarStateForTest(int state) {
             mState = state;
