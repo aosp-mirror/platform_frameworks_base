@@ -55,8 +55,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -811,27 +811,22 @@ public final class KeyChain {
             throw new NullPointerException("context == null");
         }
         ensureNotOnMainThread(context);
-        final BlockingQueue<IKeyChainService> q = new LinkedBlockingQueue<IKeyChainService>(1);
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final AtomicReference<IKeyChainService> keyChainService = new AtomicReference<>();
         ServiceConnection keyChainServiceConnection = new ServiceConnection() {
             volatile boolean mConnectedAtLeastOnce = false;
             @Override public void onServiceConnected(ComponentName name, IBinder service) {
                 if (!mConnectedAtLeastOnce) {
                     mConnectedAtLeastOnce = true;
-                    try {
-                        q.put(IKeyChainService.Stub.asInterface(Binder.allowBlocking(service)));
-                    } catch (InterruptedException e) {
-                        // will never happen, since the queue starts with one available slot
-                    }
+                    keyChainService.set(
+                            IKeyChainService.Stub.asInterface(Binder.allowBlocking(service)));
+                    countDownLatch.countDown();
                 }
             }
             @Override public void onBindingDied(ComponentName name) {
                 if (!mConnectedAtLeastOnce) {
                     mConnectedAtLeastOnce = true;
-                    try {
-                        q.put(null);
-                    } catch (InterruptedException e) {
-                        // will never happen, since the queue starts with one available slot
-                    }
+                    countDownLatch.countDown();
                 }
             }
             @Override public void onServiceDisconnected(ComponentName name) {}
@@ -843,7 +838,8 @@ public final class KeyChain {
                 intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, user)) {
             throw new AssertionError("could not bind to KeyChainService");
         }
-        IKeyChainService service = q.take();
+        countDownLatch.await();
+        IKeyChainService service = keyChainService.get();
         if (service != null) {
             return new KeyChainConnection(context, keyChainServiceConnection, service);
         } else {
