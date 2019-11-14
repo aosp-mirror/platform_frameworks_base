@@ -546,7 +546,7 @@ public abstract class EuiccService extends Service {
      * @see android.telephony.euicc.EuiccManager#eraseSubscriptions
      *
      * @deprecated From R, callers should specify a flag for specific set of subscriptions to erase
-     * and use {@link #onEraseSubscriptionsWithOptions(int, int)} instead
+     * and use {@link #onEraseSubscriptions(int, int)} instead
      */
     @Deprecated
     public abstract int onEraseSubscriptions(int slotId);
@@ -563,7 +563,7 @@ public abstract class EuiccService extends Service {
      *     constants or any implementation-specific code starting with {@link #RESULT_FIRST_USER}.
      * @see android.telephony.euicc.EuiccManager#eraseSubscriptionsWithOptions
      */
-    public int onEraseSubscriptionsWithOptions(int slotIndex, @ResetOption int options) {
+    public int onEraseSubscriptions(int slotIndex, @ResetOption int options) {
         throw new UnsupportedOperationException(
                 "This method must be overridden to enable the ResetOption parameter");
     }
@@ -809,8 +809,7 @@ public abstract class EuiccService extends Service {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    int result = EuiccService.this.onEraseSubscriptionsWithOptions(
-                            slotIndex, options);
+                    int result = EuiccService.this.onEraseSubscriptions(slotIndex, options);
                     try {
                         callback.onComplete(result);
                     } catch (RemoteException e) {
