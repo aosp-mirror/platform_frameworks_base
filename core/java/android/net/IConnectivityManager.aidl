@@ -130,8 +130,6 @@ interface IConnectivityManager
 
     VpnConfig getVpnConfig(int userId);
 
-    VpnProfile[] getAllLegacyVpns();
-
     @UnsupportedAppUsage
     void startLegacyVpn(in VpnProfile profile);
 

@@ -15,11 +15,8 @@
  */
 package com.android.systemui.statusbar.policy;
 
-import com.android.internal.net.VpnProfile;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.SecurityController.SecurityControllerCallback;
-
-import java.util.List;
 
 public interface SecurityController extends CallbackController<SecurityControllerCallback>,
         Dumpable {
@@ -41,12 +38,6 @@ public interface SecurityController extends CallbackController<SecurityControlle
     boolean hasCACertInCurrentUser();
     boolean hasCACertInWorkProfile();
     void onUserSwitched(int newUserId);
-
-    List<VpnProfile> getConfiguredLegacyVpns();
-    List<String> getVpnAppPackageNames();
-    void connectLegacyVpn(VpnProfile profile);
-    void launchVpnApp(String packageName);
-    void disconnectPrimaryVpn();
 
     public interface SecurityControllerCallback {
         void onStateChanged();
