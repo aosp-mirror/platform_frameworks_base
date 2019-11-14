@@ -132,7 +132,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 if (mPickedChild != null && mTouchingHeadsUpView) {
                     // We may swallow this click if the heads up just came in.
                     if (mHeadsUpManager.shouldSwallowClick(
-                            mPickedChild.getStatusBarNotification().getKey())) {
+                            mPickedChild.getEntry().getSbn().getKey())) {
                         endMotion();
                         return true;
                     }

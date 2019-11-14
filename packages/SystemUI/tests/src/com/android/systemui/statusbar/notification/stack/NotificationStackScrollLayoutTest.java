@@ -448,12 +448,12 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(ExpandableNotificationRow.LongPressListener.class));
 
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
-        when(row.getStatusBarNotification().getLogMaker()).thenReturn(new LogMaker(
+        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
                 MetricsProto.MetricsEvent.VIEW_UNKNOWN));
 
         mStackScroller.mMenuEventListener.onMenuClicked(row, 0, 0, mock(
                 NotificationMenuRowPlugin.MenuItem.class));
-        verify(row.getStatusBarNotification()).getLogMaker();  // This writes most of the log data
+        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
         verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_TOUCH_GEAR,
                 MetricsProto.MetricsEvent.TYPE_ACTION));
     }
@@ -463,11 +463,11 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     public void testOnMenuShownLogging() { ;
 
         ExpandableNotificationRow row = mock(ExpandableNotificationRow.class, RETURNS_DEEP_STUBS);
-        when(row.getStatusBarNotification().getLogMaker()).thenReturn(new LogMaker(
+        when(row.getEntry().getSbn().getLogMaker()).thenReturn(new LogMaker(
                 MetricsProto.MetricsEvent.VIEW_UNKNOWN));
 
         mStackScroller.mMenuEventListener.onMenuShown(row);
-        verify(row.getStatusBarNotification()).getLogMaker();  // This writes most of the log data
+        verify(row.getEntry().getSbn()).getLogMaker();  // This writes most of the log data
         verify(mMetricsLogger).write(logMatcher(MetricsProto.MetricsEvent.ACTION_REVEAL_GEAR,
                 MetricsProto.MetricsEvent.TYPE_ACTION));
     }

@@ -55,7 +55,7 @@ public final class NotificationClicker implements View.OnClickListener {
         mShadeController.wakeUpIfDozing(SystemClock.uptimeMillis(), v, "NOTIFICATION_CLICK");
 
         final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-        final StatusBarNotification sbn = row.getStatusBarNotification();
+        final StatusBarNotification sbn = row.getEntry().getSbn();
         if (sbn == null) {
             Log.e(TAG, "NotificationClicker called on an unclickable notification,");
             return;

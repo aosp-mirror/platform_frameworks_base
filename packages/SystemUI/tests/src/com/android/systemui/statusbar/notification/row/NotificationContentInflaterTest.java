@@ -139,7 +139,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     @Test
     public void testInflationThrowsErrorDoesntCallUpdated() throws Exception {
         mRow.getPrivateLayout().removeAllViews();
-        mRow.getStatusBarNotification().getNotification().contentView
+        mRow.getEntry().getSbn().getNotification().contentView
                 = new RemoteViews(mContext.getPackageName(), R.layout.status_bar);
         runThenWaitForInflation(() -> mNotificationInflater.inflateNotificationViews(),
                 true /* expectingException */, mNotificationInflater);

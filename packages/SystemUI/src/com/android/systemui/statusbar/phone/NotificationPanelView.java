@@ -986,7 +986,7 @@ public class NotificationPanelView extends PanelView implements
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             boolean suppressedSummary = mGroupManager != null
-                    && mGroupManager.isSummaryOfSuppressedGroup(row.getStatusBarNotification());
+                    && mGroupManager.isSummaryOfSuppressedGroup(row.getEntry().getSbn());
             if (suppressedSummary) {
                 continue;
             }

@@ -204,7 +204,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         }
 
         for (ExpandableNotificationRow viewToRemove : viewsToRemove) {
-            if (mGroupManager.isChildInGroupWithSummary(viewToRemove.getStatusBarNotification())) {
+            if (mGroupManager.isChildInGroupWithSummary(viewToRemove.getEntry().getSbn())) {
                 // we are only transferring this notification to its parent, don't generate an
                 // animation
                 mListContainer.setChildTransferInProgress(true);
@@ -339,7 +339,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 for (ExpandableNotificationRow remove : toRemove) {
                     parent.removeChildNotification(remove);
                     if (mEntryManager.getActiveNotificationUnfiltered(
-                            remove.getStatusBarNotification().getKey()) == null) {
+                            remove.getEntry().getSbn().getKey()) == null) {
                         // We only want to add an animation if the view is completely removed
                         // otherwise it's just a transfer
                         mListContainer.notifyGroupChildRemoved(remove,

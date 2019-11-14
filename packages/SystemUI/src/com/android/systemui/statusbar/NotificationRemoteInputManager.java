@@ -216,7 +216,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         private StatusBarNotification getNotificationForParent(ViewParent parent) {
             while (parent != null) {
                 if (parent instanceof ExpandableNotificationRow) {
-                    return ((ExpandableNotificationRow) parent).getStatusBarNotification();
+                    return ((ExpandableNotificationRow) parent).getEntry().getSbn();
                 }
                 parent = parent.getParent();
             }
