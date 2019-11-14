@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package android.app.job;
+package android.app;
 
-import android.app.JobSchedulerImpl;
-import android.app.SystemServiceRegistry;
 import android.content.Context;
+import android.os.DeviceIdleManager;
+import android.os.IDeviceIdleController;
 
 /**
  * @hide
  */
-public class JobSchedulerFrameworkInitializer {
+public class DeviceIdleFrameworkInitializer {
+    private static IDeviceIdleController sIDeviceIdleController;
+
     public static void initialize() {
-        SystemServiceRegistry.registerStaticService(
-                Context.JOB_SCHEDULER_SERVICE, JobScheduler.class,
-                (b) -> new JobSchedulerImpl(IJobScheduler.Stub.asInterface(b)));
+        SystemServiceRegistry.registerCachedService(
+                Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
+                (context, b) -> new DeviceIdleManager(
+                        context, IDeviceIdleController.Stub.asInterface(b)));
     }
 }
