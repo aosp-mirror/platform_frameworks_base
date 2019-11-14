@@ -43,6 +43,7 @@ class PackageSettingBuilder {
     private String mVolumeUuid;
     private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
     private PackageParser.Package mPkg;
+    private int mAppId;
 
     public PackageSettingBuilder setPackage(PackageParser.Package pkg) {
         this.mPkg = pkg;
@@ -51,6 +52,11 @@ class PackageSettingBuilder {
 
     public PackageSettingBuilder setName(String name) {
         this.mName = name;
+        return this;
+    }
+
+    public PackageSettingBuilder setAppId(int appId) {
+        this.mAppId = appId;
         return this;
     }
 
@@ -152,6 +158,7 @@ class PackageSettingBuilder {
                 mChildPackageNames, mSharedUserId, mUsesStaticLibraries,
                 mUsesStaticLibrariesVersions);
         packageSetting.pkg = mPkg;
+        packageSetting.appId = mAppId;
         packageSetting.volumeUuid = this.mVolumeUuid;
         for (int i = 0; i < mUserStates.size(); i++) {
             packageSetting.setUserState(mUserStates.keyAt(i), mUserStates.valueAt(i));
