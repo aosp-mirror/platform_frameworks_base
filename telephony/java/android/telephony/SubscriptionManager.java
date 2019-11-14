@@ -3182,13 +3182,14 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get active data subscription id.
+     * Get active data subscription id. Active data subscription refers to the subscription
+     * currently chosen to provide cellular internet connection to the user. This may be
+     * different from getDefaultDataSubscriptionId(). Eg. Opportunistics data
+     *
      * See {@link PhoneStateListener#onActiveDataSubscriptionIdChanged(int)} for the details.
      *
-     * @return Active data subscription id
-     *
-     * //TODO: Refactor this API in b/134702460
-     * @hide
+     * @return Active data subscription id if any is chosen, or
+     * SubscriptionManager.INVALID_SUBSCRIPTION_ID if not.
      */
     public static int getActiveDataSubscriptionId() {
         try {
