@@ -21,6 +21,7 @@ import static android.content.DialogInterface.BUTTON_POSITIVE;
 import static android.os.UserManager.DISALLOW_ADD_USER;
 import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -266,7 +267,10 @@ public class UserGridRecyclerView extends RecyclerView {
 
                 if (userRecord.mIsStartGuestSession) {
                     notifyUserSelected(userRecord);
-                    mCarUserManagerHelper.startGuestSession(mGuestName);
+                    UserInfo guest = createNewOrFindExistingGuest(mContext);
+                    if (guest != null) {
+                        mCarUserManagerHelper.switchToUser(guest);
+                    }
                     return;
                 }
 
@@ -351,6 +355,24 @@ public class UserGridRecyclerView extends RecyclerView {
             }
 
             return circleIcon;
+        }
+
+        /**
+         * Finds the existing Guest user, or creates one if it doesn't exist.
+         * @param context App context
+         * @return UserInfo representing the Guest user
+         */
+        @Nullable
+        public UserInfo createNewOrFindExistingGuest(Context context) {
+            // CreateGuest will return null if a guest already exists.
+            UserInfo newGuest = mUserManager.createGuest(context, mGuestName);
+            if (newGuest != null) {
+                new UserIconProvider().assignDefaultIcon(
+                        mUserManager, context.getResources(), newGuest);
+                return newGuest;
+            }
+
+            return mUserManager.findCurrentGuestUser();
         }
 
         @Override

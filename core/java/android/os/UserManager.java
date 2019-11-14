@@ -2374,6 +2374,20 @@ public class UserManager {
     }
 
     /**
+     * Gets the existing guest user if it exists.  This does not include guest users that are dying.
+     * @return The existing guest user if it exists. Null otherwise.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public UserInfo findCurrentGuestUser() {
+        try {
+            return mService.findCurrentGuestUser();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates a user with the specified name and options as a profile of another user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * The type of profile must be specified using the given flags.

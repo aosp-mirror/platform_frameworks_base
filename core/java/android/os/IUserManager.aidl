@@ -87,6 +87,7 @@ interface IUserManager {
     void setDefaultGuestRestrictions(in Bundle restrictions);
     Bundle getDefaultGuestRestrictions();
     boolean markGuestForDeletion(int userId);
+    UserInfo findCurrentGuestUser();
     boolean isQuietModeEnabled(int userId);
     void setSeedAccountData(int userId, in String accountName,
             in String accountType, in PersistableBundle accountOptions, boolean persist);
