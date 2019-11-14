@@ -47,6 +47,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -81,6 +82,7 @@ import com.android.systemui.statusbar.notification.NotificationInterruptionState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -1006,8 +1008,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             Log.w(TAG, "Unable to create bubble -- no intent: " + entry.getKey());
             return false;
         }
+        PackageManager packageManager = StatusBar.getPackageManagerForUser(
+                context, entry.getSbn().getUser().getIdentifier());
         ActivityInfo info =
-                intent.getIntent().resolveActivityInfo(context.getPackageManager(), 0);
+                intent.getIntent().resolveActivityInfo(packageManager, 0);
         if (info == null) {
             Log.w(TAG, "Unable to send as bubble, "
                     + entry.getKey() + " couldn't find activity info for intent: "
