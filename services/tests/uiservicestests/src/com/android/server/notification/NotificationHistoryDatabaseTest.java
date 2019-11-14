@@ -18,6 +18,7 @@ package com.android.server.notification;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,7 +26,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AlarmManager;
 import android.app.NotificationHistory.HistoricalNotification;
+import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.util.AtomicFile;
@@ -42,8 +45,17 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RunWith(AndroidJUnit4.class)
 public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
@@ -51,6 +63,11 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     File mRootDir;
     @Mock
     Handler mFileWriteHandler;
+    @Mock
+    Context mContext;
+    @Mock
+    AlarmManager mAlarmManager;
+    TestFileAttrProvider mFileAttrProvider;
 
     NotificationHistoryDatabase mDataBase;
 
@@ -85,36 +102,56 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mContext.getSystemService(AlarmManager.class)).thenReturn(mAlarmManager);
+        when(mContext.getUser()).thenReturn(getContext().getUser());
+        when(mContext.getPackageName()).thenReturn(getContext().getPackageName());
 
+        mFileAttrProvider = new TestFileAttrProvider();
         mRootDir = new File(mContext.getFilesDir(), "NotificationHistoryDatabaseTest");
 
-        mDataBase = new NotificationHistoryDatabase(mRootDir);
+        mDataBase = new NotificationHistoryDatabase(mContext, mRootDir, mFileAttrProvider);
         mDataBase.init(mFileWriteHandler);
     }
 
     @Test
-    public void testPrune() {
+    public void testDeletionReceiver() {
+        verify(mContext, times(1)).registerReceiver(any(), any());
+    }
+
+    @Test
+    public void testPrune() throws Exception {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTimeInMillis(10);
         int retainDays = 1;
-        for (long i = 10; i >= 5; i--) {
+
+        List<AtomicFile> expectedFiles = new ArrayList<>();
+
+        // add 5 files with a creation date of "today"
+        for (long i = cal.getTimeInMillis(); i >= 5; i--) {
             File file = mock(File.class);
-            when(file.lastModified()).thenReturn(i);
+            mFileAttrProvider.creationDates.put(file, i);
             AtomicFile af = new AtomicFile(file);
+            expectedFiles.add(af);
             mDataBase.mHistoryFiles.addLast(af);
         }
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTimeInMillis(5);
+
         cal.add(Calendar.DATE, -1 * retainDays);
+        // Add 5 more files more than retainDays old
         for (int i = 5; i >= 0; i--) {
             File file = mock(File.class);
-            when(file.lastModified()).thenReturn(cal.getTimeInMillis() - i);
+            mFileAttrProvider.creationDates.put(file, cal.getTimeInMillis() - i);
             AtomicFile af = new AtomicFile(file);
             mDataBase.mHistoryFiles.addLast(af);
         }
-        mDataBase.prune(retainDays, 10);
 
-        for (AtomicFile file : mDataBase.mHistoryFiles) {
-            assertThat(file.getBaseFile().lastModified() > 0);
-        }
+        // back to today; trim everything a day + old
+        cal.add(Calendar.DATE, 1 * retainDays);
+        mDataBase.prune(retainDays, cal.getTimeInMillis());
+
+        assertThat(mDataBase.mHistoryFiles).containsExactlyElementsIn(expectedFiles);
+
+        verify(mAlarmManager, times(6)).setExactAndAllowWhileIdle(anyInt(), anyLong(), any());
+
     }
 
     @Test
@@ -181,4 +218,12 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         verify(af2, never()).openRead();
     }
 
+    private class TestFileAttrProvider implements NotificationHistoryDatabase.FileAttrProvider {
+        public Map<File, Long> creationDates = new HashMap<>();
+
+        @Override
+        public long getCreationTime(File file) {
+            return creationDates.get(file);
+        }
+    }
 }
