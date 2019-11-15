@@ -51,7 +51,7 @@ public class MockIContentProvider implements IContentProvider {
     @Override
     @SuppressWarnings("unused")
     public int delete(String callingPackage, @Nullable String featureId, Uri url,
-            String selection, String[] selectionArgs) throws RemoteException {
+            Bundle extras) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -63,7 +63,7 @@ public class MockIContentProvider implements IContentProvider {
     @Override
     @SuppressWarnings("unused")
     public Uri insert(String callingPackage, @Nullable String featureId, Uri url,
-            ContentValues initialValues) throws RemoteException {
+            ContentValues initialValues, Bundle extras) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -99,7 +99,7 @@ public class MockIContentProvider implements IContentProvider {
 
     @Override
     public int update(String callingPackage, @Nullable String featureId, Uri url,
-            ContentValues values, String selection, String[] selectionArgs) throws RemoteException {
+            ContentValues values, Bundle extras) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 

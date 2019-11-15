@@ -48,10 +48,10 @@ public interface IContentProvider extends IInterface {
             + "instead")
     public default Uri insert(String callingPkg, Uri url, ContentValues initialValues)
             throws RemoteException {
-        return insert(callingPkg, null, url, initialValues);
+        return insert(callingPkg, null, url, initialValues, null);
     }
-    public Uri insert(String callingPkg, String featureId, Uri url, ContentValues initialValues)
-            throws RemoteException;
+    public Uri insert(String callingPkg, String featureId, Uri url, ContentValues initialValues,
+            Bundle extras) throws RemoteException;
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
             + "ContentProviderClient#bulkInsert(android.net.Uri, android.content.ContentValues[])"
@@ -68,20 +68,22 @@ public interface IContentProvider extends IInterface {
             + ".String[])} instead")
     public default int delete(String callingPkg, Uri url, String selection, String[] selectionArgs)
             throws RemoteException {
-        return delete(callingPkg, null, url, selection, selectionArgs);
+        return delete(callingPkg, null, url,
+                ContentResolver.createSqlQueryBundle(selection, selectionArgs));
     }
-    public int delete(String callingPkg, String featureId, Uri url, String selection,
-            String[] selectionArgs) throws RemoteException;
+    public int delete(String callingPkg, String featureId, Uri url, Bundle extras)
+            throws RemoteException;
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
             + "ContentProviderClient#update(android.net.Uri, android.content.ContentValues, java"
             + ".lang.String, java.lang.String[])} instead")
     public default int update(String callingPkg, Uri url, ContentValues values, String selection,
             String[] selectionArgs) throws RemoteException {
-        return update(callingPkg, null, url, values, selection, selectionArgs);
+        return update(callingPkg, null, url, values,
+                ContentResolver.createSqlQueryBundle(selection, selectionArgs));
     }
     public int update(String callingPkg, String featureId, Uri url, ContentValues values,
-            String selection, String[] selectionArgs) throws RemoteException;
+            Bundle extras) throws RemoteException;
 
     public ParcelFileDescriptor openFile(String callingPkg, @Nullable String featureId, Uri url,
             String mode, ICancellationSignal signal, IBinder callerToken)
@@ -119,7 +121,7 @@ public interface IContentProvider extends IInterface {
             throws RemoteException;
 
     public boolean refresh(String callingPkg, @Nullable String featureId, Uri url,
-            @Nullable Bundle args, ICancellationSignal cancellationSignal) throws RemoteException;
+            @Nullable Bundle extras, ICancellationSignal cancellationSignal) throws RemoteException;
 
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;

@@ -299,7 +299,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
         @Override
         public Uri insert(String callingPkg, @Nullable String featureId, Uri uri,
-                ContentValues initialValues) {
+                ContentValues initialValues, Bundle extras) {
             uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
@@ -317,7 +317,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             final Pair<String, String> original = setCallingPackage(
                     new Pair<>(callingPkg, featureId));
             try {
-                return maybeAddUserId(mInterface.insert(uri, initialValues), userId);
+                return maybeAddUserId(mInterface.insert(uri, initialValues, extras), userId);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
@@ -403,8 +403,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public int delete(String callingPkg, @Nullable String featureId, Uri uri, String selection,
-                String[] selectionArgs) {
+        public int delete(String callingPkg, @Nullable String featureId, Uri uri, Bundle extras) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, featureId, uri, null)
@@ -415,7 +414,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             final Pair<String, String> original = setCallingPackage(
                     new Pair<>(callingPkg, featureId));
             try {
-                return mInterface.delete(uri, selection, selectionArgs);
+                return mInterface.delete(uri, extras);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
@@ -426,7 +425,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
         @Override
         public int update(String callingPkg, @Nullable String featureId, Uri uri,
-                ContentValues values, String selection, String[] selectionArgs) {
+                ContentValues values, Bundle extras) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             if (enforceWritePermission(callingPkg, featureId, uri, null)
@@ -437,7 +436,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             final Pair<String, String> original = setCallingPackage(
                     new Pair<>(callingPkg, featureId));
             try {
-                return mInterface.update(uri, values, selection, selectionArgs);
+                return mInterface.update(uri, values, extras);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             } finally {
@@ -593,7 +592,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public boolean refresh(String callingPkg, String featureId, Uri uri, Bundle args,
+        public boolean refresh(String callingPkg, String featureId, Uri uri, Bundle extras,
                 ICancellationSignal cancellationSignal) throws RemoteException {
             uri = validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
@@ -605,7 +604,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             final Pair<String, String> original = setCallingPackage(
                     new Pair<>(callingPkg, featureId));
             try {
-                return mInterface.refresh(uri, args,
+                return mInterface.refresh(uri, extras,
                         CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
@@ -1494,29 +1493,34 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /**
-     * Implement this to support refresh of content identified by {@code uri}. By default, this
-     * method returns false; providers who wish to implement this should return true to signal the
-     * client that the provider has tried refreshing with its own implementation.
+     * Implement this to support refresh of content identified by {@code uri}.
+     * By default, this method returns false; providers who wish to implement
+     * this should return true to signal the client that the provider has tried
+     * refreshing with its own implementation.
      * <p>
-     * This allows clients to request an explicit refresh of content identified by {@code uri}.
+     * This allows clients to request an explicit refresh of content identified
+     * by {@code uri}.
      * <p>
-     * Client code should only invoke this method when there is a strong indication (such as a user
-     * initiated pull to refresh gesture) that the content is stale.
+     * Client code should only invoke this method when there is a strong
+     * indication (such as a user initiated pull to refresh gesture) that the
+     * content is stale.
      * <p>
-     * Remember to send {@link ContentResolver#notifyChange(Uri, android.database.ContentObserver)}
+     * Remember to send
+     * {@link ContentResolver#notifyChange(Uri, android.database.ContentObserver)}
      * notifications when content changes.
      *
      * @param uri The Uri identifying the data to refresh.
-     * @param args Additional options from the client. The definitions of these are specific to the
-     *            content provider being called.
-     * @param cancellationSignal A signal to cancel the operation in progress, or {@code null} if
-     *            none. For example, if you called refresh on a particular uri, you should call
-     *            {@link CancellationSignal#throwIfCanceled()} to check whether the client has
-     *            canceled the refresh request.
+     * @param extras Additional options from the client. The definitions of
+     *            these are specific to the content provider being called.
+     * @param cancellationSignal A signal to cancel the operation in progress,
+     *            or {@code null} if none. For example, if you called refresh on
+     *            a particular uri, you should call
+     *            {@link CancellationSignal#throwIfCanceled()} to check whether
+     *            the client has canceled the refresh request.
      * @return true if the provider actually tried refreshing.
      */
     @Override
-    public boolean refresh(Uri uri, @Nullable Bundle args,
+    public boolean refresh(Uri uri, @Nullable Bundle extras,
             @Nullable CancellationSignal cancellationSignal) {
         return false;
     }
@@ -1545,18 +1549,40 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /**
-     * Implement this to handle requests to insert a new row.
-     * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
-     * after inserting.
-     * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * Implement this to handle requests to insert a new row. As a courtesy,
+     * call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after inserting. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
+     *
      * @param uri The content:// URI of the insertion request.
      * @param values A set of column_name/value pairs to add to the database.
      * @return The URI for the newly inserted item.
      */
-    @Override
     public abstract @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues values);
+
+    /**
+     * Implement this to handle requests to insert a new row. As a courtesy,
+     * call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after inserting. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     *
+     * @param uri The content:// URI of the insertion request.
+     * @param values A set of column_name/value pairs to add to the database.
+     * @param extras A Bundle containing all additional information necessary
+     *            for the insert.
+     * @return The URI for the newly inserted item.
+     */
+    @Override
+    public @Nullable Uri insert(@NonNull Uri uri, @Nullable ContentValues values,
+            @Nullable Bundle extras) {
+        return insert(uri, values);
+    }
 
     /**
      * Override this to handle requests to insert a set of new rows, or the
@@ -1583,48 +1609,109 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /**
-     * Implement this to handle requests to delete one or more rows.
-     * The implementation should apply the selection clause when performing
+     * Implement this to handle requests to delete one or more rows. The
+     * implementation should apply the selection clause when performing
      * deletion, allowing the operation to affect multiple rows in a directory.
-     * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
-     * after deleting.
-     * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * As a courtesy, call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after deleting. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
+     * <p>
+     * The implementation is responsible for parsing out a row ID at the end of
+     * the URI, if a specific row is being deleted. That is, the client would
+     * pass in <code>content://contacts/people/22</code> and the implementation
+     * is responsible for parsing the record number (22) when creating a SQL
+     * statement.
      *
-     * <p>The implementation is responsible for parsing out a row ID at the end
-     * of the URI, if a specific row is being deleted. That is, the client would
-     * pass in <code>content://contacts/people/22</code> and the implementation is
-     * responsible for parsing the record number (22) when creating a SQL statement.
-     *
-     * @param uri The full URI to query, including a row ID (if a specific record is requested).
+     * @param uri The full URI to query, including a row ID (if a specific
+     *            record is requested).
      * @param selection An optional restriction to apply to rows when deleting.
      * @return The number of rows affected.
      * @throws SQLException
      */
-    @Override
     public abstract int delete(@NonNull Uri uri, @Nullable String selection,
             @Nullable String[] selectionArgs);
 
     /**
-     * Implement this to handle requests to update one or more rows.
-     * The implementation should update all rows matching the selection
-     * to set the columns according to the provided values map.
-     * As a courtesy, call {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver) notifyChange()}
-     * after updating.
-     * This method can be called from multiple threads, as described in
-     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * Implement this to handle requests to delete one or more rows. The
+     * implementation should apply the selection clause when performing
+     * deletion, allowing the operation to affect multiple rows in a directory.
+     * As a courtesy, call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after deleting. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     * <p>
+     * The implementation is responsible for parsing out a row ID at the end of
+     * the URI, if a specific row is being deleted. That is, the client would
+     * pass in <code>content://contacts/people/22</code> and the implementation
+     * is responsible for parsing the record number (22) when creating a SQL
+     * statement.
+     *
+     * @param uri The full URI to query, including a row ID (if a specific
+     *            record is requested).
+     * @param extras A Bundle containing all additional information necessary
+     *            for the delete. Values in the Bundle may include SQL style
+     *            arguments.
+     * @return The number of rows affected.
+     * @throws SQLException
+     */
+    @Override
+    public int delete(@NonNull Uri uri, @Nullable Bundle extras) {
+        extras = (extras != null) ? extras : Bundle.EMPTY;
+        return delete(uri,
+                extras.getString(ContentResolver.QUERY_ARG_SQL_SELECTION),
+                extras.getStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS));
+    }
+
+    /**
+     * Implement this to handle requests to update one or more rows. The
+     * implementation should update all rows matching the selection to set the
+     * columns according to the provided values map. As a courtesy, call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after updating. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
      *
-     * @param uri The URI to query. This can potentially have a record ID if this
-     * is an update request for a specific record.
+     * @param uri The URI to query. This can potentially have a record ID if
+     *            this is an update request for a specific record.
      * @param values A set of column_name/value pairs to update in the database.
      * @param selection An optional filter to match rows to update.
      * @return the number of rows affected.
      */
-    @Override
     public abstract int update(@NonNull Uri uri, @Nullable ContentValues values,
             @Nullable String selection, @Nullable String[] selectionArgs);
+
+    /**
+     * Implement this to handle requests to update one or more rows. The
+     * implementation should update all rows matching the selection to set the
+     * columns according to the provided values map. As a courtesy, call
+     * {@link ContentResolver#notifyChange(android.net.Uri ,android.database.ContentObserver)
+     * notifyChange()} after updating. This method can be called from multiple
+     * threads, as described in <a href="
+     * {@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     *
+     * @param uri The URI to query. This can potentially have a record ID if
+     *            this is an update request for a specific record.
+     * @param values A set of column_name/value pairs to update in the database.
+     * @param extras A Bundle containing all additional information necessary
+     *            for the update. Values in the Bundle may include SQL style
+     *            arguments.
+     * @return the number of rows affected.
+     */
+    @Override
+    public int update(@NonNull Uri uri, @Nullable ContentValues values,
+            @Nullable Bundle extras) {
+        extras = (extras != null) ? extras : Bundle.EMPTY;
+        return update(uri, values,
+                extras.getString(ContentResolver.QUERY_ARG_SQL_SELECTION),
+                extras.getStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS));
+    }
 
     /**
      * Override this to handle requests to open a file blob.
