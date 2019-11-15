@@ -28,8 +28,11 @@
 using ::android::hardware::Void;
 using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterPesDataSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxMmtpPid;
 using ::android::hardware::tv::tuner::V1_0::DemuxTpid;
+using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSettings;
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSifStandard;
@@ -542,6 +545,56 @@ static jobject android_media_tv_Tuner_open_filter(
     return tuner->openFilter(filterType, bufferSize);
 }
 
+static DemuxFilterSettings getFilterSettings(
+        JNIEnv *env, int type, int subtype, jobject filterSettingsObj) {
+    DemuxFilterSettings filterSettings;
+    // TODO: more setting types
+    jobject settingsObj =
+            env->GetObjectField(
+                    filterSettingsObj,
+                    env->GetFieldID(
+                            env->FindClass("android/media/tv/tuner/FilterSettings"),
+                            "mSettings",
+                            "Landroid/media/tv/tuner/FilterSettings$Settings;"));
+    if (type == (int)DemuxFilterMainType::TS) {
+        // DemuxTsFilterSettings
+        jclass clazz = env->FindClass("android/media/tv/tuner/FilterSettings$TsFilterSettings");
+        int tpid = env->GetIntField(filterSettingsObj, env->GetFieldID(clazz, "mTpid", "I"));
+        if (subtype == (int)DemuxTsFilterType::PES) {
+            // DemuxFilterPesDataSettings
+            jclass settingClazz =
+                    env->FindClass("android/media/tv/tuner/FilterSettings$PesSettings");
+            int streamId = env->GetIntField(
+                    settingsObj, env->GetFieldID(settingClazz, "mStreamId", "I"));
+            bool isRaw = (bool)env->GetBooleanField(
+                    settingsObj, env->GetFieldID(settingClazz, "mIsRaw", "Z"));
+            DemuxFilterPesDataSettings filterPesDataSettings {
+                    .streamId = static_cast<uint16_t>(streamId),
+                    .isRaw = isRaw,
+            };
+            DemuxTsFilterSettings tsFilterSettings {
+                    .tpid = static_cast<uint16_t>(tpid),
+            };
+            tsFilterSettings.filterSettings.pesData(filterPesDataSettings);
+            filterSettings.ts(tsFilterSettings);
+        }
+    }
+    return filterSettings;
+}
+
+static int android_media_tv_Tuner_configure_filter(
+        JNIEnv *env, jobject filter, int type, int subtype, jobject settings) {
+    ALOGD("configure filter type=%d, subtype=%d", type, subtype);
+    sp<IFilter> filterSp = getFilter(env, filter);
+    if (filterSp == NULL) {
+        ALOGD("Failed to configure filter: filter not found");
+        return (int)Result::INVALID_STATE;
+    }
+    DemuxFilterSettings filterSettings = getFilterSettings(env, type, subtype, settings);
+    Result res = filterSp->configure(filterSettings);
+    return (int)res;
+}
+
 static bool android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
     sp<IFilter> filterSp = getFilter(env, filter);
     if (filterSp == NULL) {
@@ -670,6 +723,8 @@ static const JNINativeMethod gTunerMethods[] = {
 };
 
 static const JNINativeMethod gFilterMethods[] = {
+    { "nativeConfigureFilter", "(IILandroid/media/tv/tuner/FilterSettings;)I",
+            (void *)android_media_tv_Tuner_configure_filter },
     { "nativeStartFilter", "()Z", (void *)android_media_tv_Tuner_start_filter },
     { "nativeStopFilter", "()Z", (void *)android_media_tv_Tuner_stop_filter },
     { "nativeFlushFilter", "()Z", (void *)android_media_tv_Tuner_flush_filter },

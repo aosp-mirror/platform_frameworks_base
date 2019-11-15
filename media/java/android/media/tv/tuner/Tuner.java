@@ -243,6 +243,7 @@ public final class Tuner implements AutoCloseable  {
         private FilterCallback mCallback;
         int mId;
 
+        private native int nativeConfigureFilter(int type, int subType, FilterSettings settings);
         private native boolean nativeStartFilter();
         private native boolean nativeStopFilter();
         private native boolean nativeFlushFilter();
@@ -256,6 +257,14 @@ public final class Tuner implements AutoCloseable  {
                 mHandler.sendMessage(
                         mHandler.obtainMessage(MSG_ON_FILTER_STATUS, status, 0, this));
             }
+        }
+
+        public int configure(FilterSettings settings) {
+            int subType = -1;
+            if (settings.mSettings != null) {
+                subType = settings.mSettings.getType();
+            }
+            return nativeConfigureFilter(settings.getType(), subType, settings);
         }
 
         public boolean start() {
