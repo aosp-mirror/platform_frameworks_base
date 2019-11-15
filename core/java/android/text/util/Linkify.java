@@ -663,11 +663,8 @@ public class Linkify {
     private static void gatherTelLinks(ArrayList<LinkSpec> links, Spannable s,
             @Nullable Context context) {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        final TelephonyManager tm = (context == null)
-                ? TelephonyManager.getDefault()
-                : TelephonyManager.from(context);
         Iterable<PhoneNumberMatch> matches = phoneUtil.findNumbers(s.toString(),
-                tm.getSimCountryIso().toUpperCase(Locale.US),
+                TelephonyManager.getDefaultSimCountryIso().toUpperCase(Locale.US),
                 Leniency.POSSIBLE, Long.MAX_VALUE);
         for (PhoneNumberMatch match : matches) {
             LinkSpec spec = new LinkSpec();
