@@ -415,6 +415,11 @@ public class ViewDebug {
     private static final String REMOTE_COMMAND_CAPTURE = "CAPTURE";
     private static final String REMOTE_COMMAND_DUMP = "DUMP";
     private static final String REMOTE_COMMAND_DUMP_THEME = "DUMP_THEME";
+    /**
+     * Similar to REMOTE_COMMAND_DUMP but uses ViewHierarchyEncoder instead of flat text
+     * @hide
+     */
+    public static final String REMOTE_COMMAND_DUMP_ENCODED = "DUMP_ENCODED";
     private static final String REMOTE_COMMAND_INVALIDATE = "INVALIDATE";
     private static final String REMOTE_COMMAND_REQUEST_LAYOUT = "REQUEST_LAYOUT";
     private static final String REMOTE_PROFILE = "PROFILE";
@@ -527,7 +532,6 @@ public class ViewDebug {
     @UnsupportedAppUsage
     static void dispatchCommand(View view, String command, String parameters,
             OutputStream clientStream) throws IOException {
-
         // Paranoid but safe...
         view = view.getRootView();
 
@@ -535,6 +539,8 @@ public class ViewDebug {
             dump(view, false, true, clientStream);
         } else if (REMOTE_COMMAND_DUMP_THEME.equalsIgnoreCase(command)) {
             dumpTheme(view, clientStream);
+        } else if (REMOTE_COMMAND_DUMP_ENCODED.equalsIgnoreCase(command)) {
+            dumpEncoded(view, clientStream);
         } else if (REMOTE_COMMAND_CAPTURE_LAYERS.equalsIgnoreCase(command)) {
             captureLayers(view, new DataOutputStream(clientStream));
         } else {
@@ -1196,6 +1202,18 @@ public class ViewDebug {
 
         latch.await(2, TimeUnit.SECONDS);
         encoder.endStream();
+    }
+
+    private static void dumpEncoded(@NonNull final View view, @NonNull OutputStream out)
+            throws IOException {
+        ByteArrayOutputStream baOut = new ByteArrayOutputStream();
+
+        final ViewHierarchyEncoder encoder = new ViewHierarchyEncoder(baOut);
+        encoder.addProperty("window:left", view.mAttachInfo.mWindowLeft);
+        encoder.addProperty("window:top", view.mAttachInfo.mWindowTop);
+        view.encode(encoder);
+        encoder.endStream();
+        out.write(baOut.toByteArray());
     }
 
     /**
