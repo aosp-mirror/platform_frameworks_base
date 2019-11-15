@@ -18,12 +18,13 @@ package com.android.startop.test;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
-public class SystemServerBenchmarkActivity extends Activity implements BenchmarkRunner {
+public class InteractiveMicrobenchmarkActivity extends Activity implements BenchmarkRunner {
     protected GridLayout mBenchmarkList;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +33,29 @@ public class SystemServerBenchmarkActivity extends Activity implements Benchmark
 
         mBenchmarkList = findViewById(R.id.benchmark_list);
 
+        addBenchmark("Empty", () -> {
+        });
+        addHeader("Application Benchmarks");
+        CPUIntensiveBenchmarks.initializeBenchmarks(this, this);
+        addHeader("Init Check Overhead Benchmarks");
+        InitCheckOverheadBenchmarks.initializeBenchmarks(this, this);
+        addHeader("System Server Benchmarks");
         SystemServerBenchmarks.initializeBenchmarks(this, this);
+    }
+
+    /**
+     * Add a heading for a group of related benchmarks
+     *
+     * @param name The name of this group of benchmarks
+     */
+    public void addHeader(CharSequence name) {
+        Context context = mBenchmarkList.getContext();
+        TextView header = new TextView(context);
+        header.setText(name);
+        header.setTypeface(header.getTypeface(), Typeface.BOLD);
+        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+        params.columnSpec = GridLayout.spec(0, 3);
+        mBenchmarkList.addView(header, params);
     }
 
     /**

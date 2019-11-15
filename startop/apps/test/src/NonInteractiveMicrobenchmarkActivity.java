@@ -36,7 +36,7 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
-public class NonInteractiveSystemServerBenchmarkActivity extends Activity {
+public class NonInteractiveMicrobenchmarkActivity extends Activity {
     ArrayList<CharSequence> benchmarkNames = new ArrayList();
     ArrayList<Runnable> benchmarkThunks = new ArrayList();
 
