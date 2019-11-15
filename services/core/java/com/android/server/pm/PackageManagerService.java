@@ -11701,7 +11701,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ksms.addScannedPackageLPw(pkg);
 
             mComponentResolver.addAllComponents(pkg, chatty);
-            mAppsFilter.addPackage(pkg, mPackages);
+            mAppsFilter.addPackage(pkgSetting, mSettings.mPackages);
 
             // Don't allow ephemeral applications to define new permissions groups.
             if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
@@ -11889,31 +11889,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void removeInstalledPackageLI(PackageParser.Package pkg, boolean chatty) {
-        if (DEBUG_INSTALL) {
-            if (chatty)
-                Log.d(TAG, "Removing package " + pkg.applicationInfo.packageName);
-        }
-
-        // writer
-        synchronized (mLock) {
-            // Remove the parent package
-            mPackages.remove(pkg.applicationInfo.packageName);
-            cleanPackageDataStructuresLILPw(pkg, chatty);
-
-            // Remove the child packages
-            final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
-            for (int i = 0; i < childCount; i++) {
-                PackageParser.Package childPkg = pkg.childPackages.get(i);
-                mPackages.remove(childPkg.applicationInfo.packageName);
-                cleanPackageDataStructuresLILPw(childPkg, chatty);
-            }
-        }
-    }
-
     void cleanPackageDataStructuresLILPw(PackageParser.Package pkg, boolean chatty) {
         mComponentResolver.removeAllComponents(pkg, chatty);
-        mAppsFilter.removePackage(pkg.packageName);
+        mAppsFilter.removePackage((PackageSetting) pkg.mExtras,
+                mInjector.getUserManagerInternal().getUserIds(), mSettings.mPackages);
         mPermissionManager.removeAllPermissions(pkg, chatty);
 
         final int instrumentationSize = pkg.instrumentation.size();
@@ -20861,7 +20840,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             if (dumpState.isDumping(DumpState.DUMP_QUERIES)) {
-                mAppsFilter.dumpQueries(pw, packageName, dumpState, mUserManager.getUserIds());
+                final PackageSetting setting = mSettings.getPackageLPr(packageName);
+                Integer filteringAppId = setting == null ? null : setting.appId;
+                mAppsFilter.dumpQueries(
+                        pw, this, filteringAppId, dumpState,
+                        mUserManager.getUserIds());
             }
 
             if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
@@ -23195,8 +23178,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 int callingUid, int targetAppId) {
             synchronized (mLock) {
                 final PackageParser.Package callingPackage = getPackage(callingUid);
+                final int targetUid = UserHandle.getUid(userId, targetAppId);
                 final PackageParser.Package targetPackage =
-                        getPackage(UserHandle.getUid(userId, targetAppId));
+                        getPackage(targetUid);
                 if (callingPackage == null || targetPackage == null) {
                     return;
                 }
@@ -23207,8 +23191,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
                             UserHandle.getAppId(callingUid), targetAppId);
                 } else {
-                    mAppsFilter.grantImplicitAccess(
-                            callingPackage.packageName, targetPackage.packageName, userId);
+                    mAppsFilter.grantImplicitAccess(callingUid, targetUid);
                 }
             }
         }
