@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -53,7 +54,7 @@ public class BatteryControllerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mBatteryController = new BatteryControllerImpl(getContext(), mock(EnhancedEstimates.class),
-                mPowerManager, mBroadcastDispatcher);
+                mPowerManager, mBroadcastDispatcher, new Handler(), new Handler());
     }
 
     @Test
