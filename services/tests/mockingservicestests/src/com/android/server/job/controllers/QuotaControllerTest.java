@@ -78,6 +78,7 @@ import com.android.server.job.JobServiceContext;
 import com.android.server.job.JobStore;
 import com.android.server.job.controllers.QuotaController.ExecutionStats;
 import com.android.server.job.controllers.QuotaController.TimingSession;
+import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -150,6 +151,8 @@ public class QuotaControllerTest {
         when(mContext.getSystemService(Context.ALARM_SERVICE)).thenReturn(mAlarmManager);
         doReturn(mActivityMangerInternal)
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
+        doReturn(mock(AppStandbyInternal.class))
+                .when(() -> LocalServices.getService(AppStandbyInternal.class));
         doReturn(mock(BatteryManagerInternal.class))
                 .when(() -> LocalServices.getService(BatteryManagerInternal.class));
         doReturn(mUsageStatsManager)

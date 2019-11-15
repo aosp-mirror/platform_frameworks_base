@@ -56,6 +56,7 @@ import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
+import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,6 +101,8 @@ public class JobSchedulerServiceTest {
         when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
         doReturn(mActivityMangerInternal)
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
+        doReturn(mock(AppStandbyInternal.class))
+                .when(() -> LocalServices.getService(AppStandbyInternal.class));
         doReturn(mock(UsageStatsManagerInternal.class))
                 .when(() -> LocalServices.getService(UsageStatsManagerInternal.class));
         // Called in BackgroundJobsController constructor.
