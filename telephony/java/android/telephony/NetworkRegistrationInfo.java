@@ -323,9 +323,12 @@ public final class NetworkRegistrationInfo implements Parcelable {
     public @Domain int getDomain() { return mDomain; }
 
     /**
+     * Get the 5G NR connection state.
+     *
      * @return the 5G NR connection state.
      * @hide
      */
+    @SystemApi
     public @NRState int getNrState() {
         return mNrState;
     }

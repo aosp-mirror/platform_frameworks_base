@@ -7964,6 +7964,7 @@ package android.telephony {
   public final class DataSpecificRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
+    method public boolean isUsingCarrierAggregation();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationInfo> CREATOR;
   }
@@ -8102,6 +8103,7 @@ package android.telephony {
     method @Nullable public android.telephony.CellIdentity getCellIdentity();
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
     method public int getDomain();
+    method public int getNrState();
     method public int getRegistrationState();
     method public int getRejectCause();
     method public int getRoamingType();
@@ -8344,6 +8346,7 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoList();
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForTransportType(int);
+    method public int getNrFrequencyRange();
     method @Nullable public String getOperatorAlphaLongRaw();
     method @Nullable public String getOperatorAlphaShortRaw();
     field public static final int ROAMING_TYPE_DOMESTIC = 2; // 0x2

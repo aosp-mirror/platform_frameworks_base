@@ -1384,9 +1384,12 @@ public class ServiceState implements Parcelable {
     }
 
     /**
+     * Get the 5G NR frequency range the device is currently registered.
+     *
      * @return the frequency range of 5G NR.
      * @hide
      */
+    @SystemApi
     public @FrequencyRange int getNrFrequencyRange() {
         return mNrFrequencyRange;
     }
