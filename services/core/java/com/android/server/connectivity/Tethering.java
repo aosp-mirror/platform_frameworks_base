@@ -286,8 +286,8 @@ public class Tethering extends BaseNetworkObserver {
 
     private void startStateMachineUpdaters(Handler handler) {
         mCarrierConfigChange.startListening();
-        TelephonyManager.from(mContext).listen(mPhoneStateListener,
-                PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
+        mContext.getSystemService(TelephonyManager.class).listen(
+                mPhoneStateListener, PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_STATE);
