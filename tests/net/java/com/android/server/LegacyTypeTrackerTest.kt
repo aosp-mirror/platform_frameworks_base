@@ -18,6 +18,7 @@ package com.android.server
 
 import android.net.ConnectivityManager.TYPE_ETHERNET
 import android.net.ConnectivityManager.TYPE_MOBILE
+import android.net.ConnectivityManager.TYPE_MOBILE_SUPL
 import android.net.ConnectivityManager.TYPE_WIFI
 import android.net.ConnectivityManager.TYPE_WIMAX
 import android.net.NetworkInfo.DetailedState.CONNECTED
@@ -46,7 +47,7 @@ const val UNSUPPORTED_TYPE = TYPE_WIMAX
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class LegacyTypeTrackerTest {
-    private val supportedTypes = arrayOf(TYPE_MOBILE, TYPE_WIFI, TYPE_ETHERNET)
+    private val supportedTypes = arrayOf(TYPE_MOBILE, TYPE_WIFI, TYPE_ETHERNET, TYPE_MOBILE_SUPL)
 
     private val mMockService = mock(ConnectivityService::class.java).apply {
         doReturn(false).`when`(this).isDefaultNetwork(any())
@@ -67,6 +68,26 @@ class LegacyTypeTrackerTest {
             assertTrue(mTracker.isTypeSupported(it))
         }
         assertFalse(mTracker.isTypeSupported(UNSUPPORTED_TYPE))
+    }
+
+    @Test
+    fun testSupl() {
+        val mobileNai = mock(NetworkAgentInfo::class.java)
+        mTracker.add(TYPE_MOBILE, mobileNai)
+        verify(mMockService).sendLegacyNetworkBroadcast(mobileNai, CONNECTED, TYPE_MOBILE)
+        reset(mMockService)
+        mTracker.add(TYPE_MOBILE_SUPL, mobileNai)
+        verify(mMockService).sendLegacyNetworkBroadcast(mobileNai, CONNECTED, TYPE_MOBILE_SUPL)
+        reset(mMockService)
+        mTracker.remove(TYPE_MOBILE_SUPL, mobileNai, false /* wasDefault */)
+        verify(mMockService).sendLegacyNetworkBroadcast(mobileNai, DISCONNECTED, TYPE_MOBILE_SUPL)
+        reset(mMockService)
+        mTracker.add(TYPE_MOBILE_SUPL, mobileNai)
+        verify(mMockService).sendLegacyNetworkBroadcast(mobileNai, CONNECTED, TYPE_MOBILE_SUPL)
+        reset(mMockService)
+        mTracker.remove(mobileNai, false)
+        verify(mMockService).sendLegacyNetworkBroadcast(mobileNai, DISCONNECTED, TYPE_MOBILE_SUPL)
+        verify(mMockService).sendLegacyNetworkBroadcast(mobileNai, DISCONNECTED, TYPE_MOBILE)
     }
 
     @Test

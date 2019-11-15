@@ -20,6 +20,9 @@ import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.net.ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_SUPL;
+import static android.net.ConnectivityManager.EXTRA_NETWORK_INFO;
+import static android.net.ConnectivityManager.EXTRA_NETWORK_TYPE;
 import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
@@ -28,6 +31,7 @@ import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
 import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
+import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_DNS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_FALLBACK;
@@ -145,6 +149,7 @@ import android.net.MatchAllNetworkSpecifier;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkFactory;
+import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
@@ -244,6 +249,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 import kotlin.reflect.KClass;
 
@@ -330,6 +336,9 @@ public class ConnectivityServiceTest {
 
     private class MockContext extends BroadcastInterceptingContext {
         private final MockContentResolver mContentResolver;
+        // Contains all registered receivers since this object was created. Useful to clear
+        // them when needed, as BroadcastInterceptingContext does not provide this facility.
+        private final List<BroadcastReceiver> mRegisteredReceivers = new ArrayList<>();
 
         @Spy private Resources mResources;
         private final LinkedBlockingQueue<Intent> mStartedActivities = new LinkedBlockingQueue<>();
@@ -343,6 +352,7 @@ public class ConnectivityServiceTest {
                             "wifi,1,1,1,-1,true",
                             "mobile,0,0,0,-1,true",
                             "mobile_mms,2,0,2,60000,true",
+                            "mobile_supl,3,0,2,60000,true",
                     });
 
             when(mResources.getStringArray(
@@ -409,6 +419,19 @@ public class ConnectivityServiceTest {
             // All other permissions should be held by the test or unnecessary: check as normal to
             // make sure the code does not rely on unexpected permissions.
             super.enforceCallingOrSelfPermission(permission, message);
+        }
+
+        @Override
+        public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+            mRegisteredReceivers.add(receiver);
+            return super.registerReceiver(receiver, filter);
+        }
+
+        public void clearRegisteredReceivers() {
+            // super.unregisterReceiver is a no-op for receivers that are not registered (because
+            // they haven't been registered or because they have already been unregistered).
+            // For the same reason, don't bother clearing mRegisteredReceivers.
+            for (final BroadcastReceiver rcv : mRegisteredReceivers) unregisterReceiver(rcv);
         }
     }
 
@@ -1228,16 +1251,25 @@ public class ConnectivityServiceTest {
      * broadcasts are received.
      */
     private ConditionVariable waitForConnectivityBroadcasts(final int count) {
+        return waitForConnectivityBroadcasts(count, intent -> true);
+    }
+
+    private ConditionVariable waitForConnectivityBroadcasts(final int count,
+            @NonNull final Predicate<Intent> filter) {
         final ConditionVariable cv = new ConditionVariable();
-        mServiceContext.registerReceiver(new BroadcastReceiver() {
+        final IntentFilter intentFilter = new IntentFilter(CONNECTIVITY_ACTION);
+        intentFilter.addAction(CONNECTIVITY_ACTION_SUPL);
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
                     private int remaining = count;
                     public void onReceive(Context context, Intent intent) {
+                        if (!filter.test(intent)) return;
                         if (--remaining == 0) {
                             cv.open();
                             mServiceContext.unregisterReceiver(this);
                         }
                     }
-                }, new IntentFilter(CONNECTIVITY_ACTION));
+                };
+        mServiceContext.registerReceiver(receiver, intentFilter);
         return cv;
     }
 
@@ -1255,6 +1287,75 @@ public class ConnectivityServiceTest {
         // mocks, this assert exercises the ConnectivityService code path that ensures that
         // TYPE_ETHERNET is supported if the ethernet service is running.
         assertTrue(mCm.isNetworkSupported(TYPE_ETHERNET));
+    }
+
+    @Test
+    public void testNetworkFeature() throws Exception {
+        // Connect the cell agent and wait for the connected broadcast.
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_SUPL);
+        final ConditionVariable cv1 = waitForConnectivityBroadcasts(1,
+                intent -> intent.getIntExtra(EXTRA_NETWORK_TYPE, -1) == TYPE_MOBILE);
+        mCellNetworkAgent.connect(true);
+        waitFor(cv1);
+
+        // Build legacy request for SUPL.
+        final NetworkCapabilities legacyCaps = new NetworkCapabilities();
+        legacyCaps.addTransportType(TRANSPORT_CELLULAR);
+        legacyCaps.addCapability(NET_CAPABILITY_SUPL);
+        final NetworkRequest legacyRequest = new NetworkRequest(legacyCaps, TYPE_MOBILE_SUPL,
+                ConnectivityManager.REQUEST_ID_UNSET, NetworkRequest.Type.REQUEST);
+
+        // Send request and check that the legacy broadcast for SUPL is sent correctly.
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        final ConditionVariable cv2 = waitForConnectivityBroadcasts(1,
+                intent -> intent.getIntExtra(EXTRA_NETWORK_TYPE, -1) == TYPE_MOBILE_SUPL);
+        mCm.requestNetwork(legacyRequest, callback);
+        callback.expectCallback(CallbackEntry.AVAILABLE, mCellNetworkAgent);
+        waitFor(cv2);
+
+        // File another request, withdraw it and make sure no broadcast is sent
+        final ConditionVariable cv3 = waitForConnectivityBroadcasts(1);
+        final TestNetworkCallback callback2 = new TestNetworkCallback();
+        mCm.requestNetwork(legacyRequest, callback2);
+        callback2.expectCallback(CallbackEntry.AVAILABLE, mCellNetworkAgent);
+        mCm.unregisterNetworkCallback(callback2);
+        assertFalse(cv3.block(800)); // 800ms long enough to at least flake if this is sent
+        // As the broadcast did not fire, the receiver was not unregistered. Do this now.
+        mServiceContext.clearRegisteredReceivers();
+
+        // Withdraw the request and check that the broadcast for disconnection is sent.
+        final ConditionVariable cv4 = waitForConnectivityBroadcasts(1, intent ->
+                !((NetworkInfo) intent.getExtra(EXTRA_NETWORK_INFO, -1)).isConnected()
+                        && intent.getIntExtra(EXTRA_NETWORK_TYPE, -1) == TYPE_MOBILE_SUPL);
+        mCm.unregisterNetworkCallback(callback);
+        waitFor(cv4);
+
+        // Re-file the request and expect the connected broadcast again
+        final ConditionVariable cv5 = waitForConnectivityBroadcasts(1,
+                intent -> intent.getIntExtra(EXTRA_NETWORK_TYPE, -1) == TYPE_MOBILE_SUPL);
+        final TestNetworkCallback callback3 = new TestNetworkCallback();
+        mCm.requestNetwork(legacyRequest, callback3);
+        callback3.expectCallback(CallbackEntry.AVAILABLE, mCellNetworkAgent);
+        waitFor(cv5);
+
+        // Disconnect the network and expect two disconnected broadcasts, one for SUPL and one
+        // for mobile. Use a small hack to check that both have been sent, but the order is
+        // not contractual.
+        final AtomicBoolean vanillaAction = new AtomicBoolean(false);
+        final AtomicBoolean suplAction = new AtomicBoolean(false);
+        final ConditionVariable cv6 = waitForConnectivityBroadcasts(2, intent -> {
+            if (intent.getAction().equals(CONNECTIVITY_ACTION)) {
+                vanillaAction.set(true);
+            } else if (intent.getAction().equals(CONNECTIVITY_ACTION_SUPL)) {
+                suplAction.set(true);
+            }
+            return !((NetworkInfo) intent.getExtra(EXTRA_NETWORK_INFO, -1)).isConnected();
+        });
+        mCellNetworkAgent.disconnect();
+        waitFor(cv6);
+        assertTrue(vanillaAction.get());
+        assertTrue(suplAction.get());
     }
 
     @Test
