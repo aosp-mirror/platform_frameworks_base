@@ -80,6 +80,7 @@ import android.os.IBinder;
 import android.os.IStoraged;
 import android.os.IVold;
 import android.os.IVoldListener;
+import android.os.IVoldMountCallback;
 import android.os.IVoldTaskListener;
 import android.os.Looper;
 import android.os.Message;
@@ -348,10 +349,6 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mLock")
     private ArrayMap<String, CountDownLatch> mDiskScanLatches = new ArrayMap<>();
 
-    /** Map from volume ID to latches */
-    @GuardedBy("mLock")
-    private ArrayMap<String, CountDownLatch> mFuseVolumeReadyLatches = new ArrayMap<>();
-
     @GuardedBy("mLock")
     private IPackageMoveObserver mMoveCallback;
     @GuardedBy("mLock")
@@ -459,17 +456,6 @@ class StorageManagerService extends IStorageManager.Stub
             if (latch == null) {
                 latch = new CountDownLatch(1);
                 mDiskScanLatches.put(diskId, latch);
-            }
-            return latch;
-        }
-    }
-
-    private CountDownLatch findOrCreateFuseVolumeReadyLatch(String volId) {
-        synchronized (mLock) {
-            CountDownLatch latch = mFuseVolumeReadyLatches.get(volId);
-            if (latch == null) {
-                latch = new CountDownLatch(1);
-                mFuseVolumeReadyLatches.put(volId, latch);
             }
             return latch;
         }
@@ -612,7 +598,6 @@ class StorageManagerService extends IStorageManager.Stub
     private static final int H_ABORT_IDLE_MAINT = 12;
     private static final int H_BOOT_COMPLETED = 13;
     private static final int H_COMPLETE_UNLOCK_USER = 14;
-    private static final int H_VOLUME_READY = 15;
 
     class StorageManagerServiceHandler extends Handler {
         public StorageManagerServiceHandler(Looper looper) {
@@ -670,22 +655,6 @@ class StorageManagerService extends IStorageManager.Stub
                             obs.onShutDownComplete(success ? 0 : -1);
                         } catch (Exception ignored) {
                         }
-                    }
-                    break;
-                }
-                case H_VOLUME_READY: {
-                    final VolumeInfo vol = (VolumeInfo) msg.obj;
-                    try {
-                        mStorageSessionController.onVolumeReady(vol);
-
-                        synchronized (mLock) {
-                            CountDownLatch latch = mFuseVolumeReadyLatches.remove(vol.id);
-                            if (latch != null) {
-                                latch.countDown();
-                            }
-                        }
-                    } catch (IllegalStateException | ExternalStorageServiceException e) {
-                        Slog.i(TAG, "Failed to initialise volume " + vol, e);
                     }
                     break;
                 }
@@ -1431,13 +1400,6 @@ class StorageManagerService extends IStorageManager.Stub
             writeSettingsLocked();
         }
 
-        if (mIsFuseEnabled && newState == VolumeInfo.STATE_MOUNTED
-                && (vol.type == VolumeInfo.TYPE_PUBLIC || vol.type == VolumeInfo.TYPE_EMULATED)) {
-            Slog.i(TAG, "Initialising volume " + vol + " ...");
-            // TODO(b/144275217): Delay broadcasts till mount is really ready
-            mHandler.obtainMessage(H_VOLUME_READY, vol).sendToTarget();
-        }
-
         mCallbacks.notifyVolumeStateChanged(vol, oldState, newState);
 
         // Do not broadcast before boot has completed to avoid launching the
@@ -1912,33 +1874,29 @@ class StorageManagerService extends IStorageManager.Stub
             throw new SecurityException("Mounting " + volId + " restricted by policy");
         }
 
-        CountDownLatch latch = null;
-        if (mIsFuseEnabled && StorageSessionController.isEmulatedOrPublic(vol)) {
-            latch = findOrCreateFuseVolumeReadyLatch(volId);
-        }
-
         mount(vol);
-
-        if (latch != null) {
-            try {
-                waitForLatch(latch, "mount " + volId, 3 * DateUtils.MINUTE_IN_MILLIS);
-            } catch (TimeoutException e) {
-                Slog.wtf(TAG, e);
-            } finally {
-                synchronized (mLock) {
-                    mFuseVolumeReadyLatches.remove(volId);
-                }
-            }
-        }
     }
 
     private void mount(VolumeInfo vol) {
         try {
             // TODO(b/135341433): Remove paranoid logging when FUSE is stable
             Slog.i(TAG, "Mounting volume " + vol);
-            FileDescriptor fd = mVold.mount(vol.id, vol.mountFlags, vol.mountUserId);
+            mVold.mount(vol.id, vol.mountFlags, vol.mountUserId, new IVoldMountCallback.Stub() {
+                    @Override
+                    public boolean onVolumeChecking(FileDescriptor deviceFd, String path,
+                            String internalPath) {
+                        vol.path = path;
+                        vol.internalPath = internalPath;
+                        try {
+                            mStorageSessionController.onVolumeMount(deviceFd, vol);
+                            return true;
+                        } catch (ExternalStorageServiceException e) {
+                            Slog.i(TAG, "Failed to mount volume " + vol, e);
+                            return false;
+                        }
+                    }
+                });
             Slog.i(TAG, "Mounted volume " + vol);
-            mStorageSessionController.onVolumeMount(fd, vol);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -3648,7 +3606,7 @@ class StorageManagerService extends IStorageManager.Stub
             try {
                 mObbState.volId = mVold.createObb(mObbState.canonicalPath, binderKey,
                         mObbState.ownerGid);
-                mVold.mount(mObbState.volId, 0, -1);
+                mVold.mount(mObbState.volId, 0, -1, null);
 
                 if (DEBUG_OBB)
                     Slog.d(TAG, "Successfully mounted OBB " + mObbState.canonicalPath);
