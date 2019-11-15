@@ -60,13 +60,6 @@ interface IMms {
             in PendingIntent downloadedIntent);
 
     /**
-     * Get carrier-dependent configuration values.
-     *
-     * @param subId the SIM id
-     */
-    Bundle getCarrierConfigValues(int subId);
-
-    /**
      * Import a text message into system's SMS store
      *
      * @param callingPkg the calling app's package name
