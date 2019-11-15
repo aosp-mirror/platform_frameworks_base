@@ -20,7 +20,6 @@ import static android.net.wifi.aware.WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -337,7 +336,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * Configure the PSK Passphrase for the Wi-Fi Aware connection being requested. This method
          * is optional - if not called, then an Open (unencrypted) connection will be created.
          *
-         * @param pskPassphrase The (optional) passphrase to be used to encrypt the link.
+         * @param pskPassphrase The (optional) passphrase to be used to encrypt the link. Use the
+         *                      {@link #setPmk(byte[])} to specify a PMK.
          * @return the current {@link Builder} builder, enabling chaining of builder
          *         methods.
          */
@@ -358,9 +358,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          *            specify a Passphrase.
          * @return the current {@link Builder} builder, enabling chaining of builder
          *         methods.
-         * @hide
          */
-        @SystemApi
         public @NonNull Builder setPmk(@NonNull byte[] pmk) {
             if (!WifiAwareUtils.validatePmk(pmk)) {
                 throw new IllegalArgumentException("PMK must 32 bytes");
@@ -377,7 +375,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * <ul>
          *     <li>The server device must be the Publisher device!
          *     <li>The port information can only be specified on secure links, specified using
-         *     {@link #setPskPassphrase(String)}.
+         *     {@link #setPskPassphrase(String)} or {@link #setPmk(byte[])}.
          * </ul>
          *
          * @param port A positive integer indicating the port to be used for communication.
@@ -400,7 +398,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * <ul>
          *     <li>The server device must be the Publisher device!
          *     <li>The transport protocol information can only be specified on secure links,
-         *     specified using {@link #setPskPassphrase(String)}.
+         *     specified using {@link #setPskPassphrase(String)} or {@link #setPmk(byte[])}.
          * </ul>
          * The transport protocol number is assigned by the Internet Assigned Numbers Authority
          * (IANA) https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml.
@@ -426,7 +424,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
          * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
          * <p> The default builder constructor will initialize a NetworkSpecifier which requests an
          * open (non-encrypted) link. To request an encrypted link use the
-         * {@link #setPskPassphrase(String)} builder method.
+         * {@link #setPskPassphrase(String)} or {@link #setPmk(byte[])} builder methods.
          *
          * @return A {@link NetworkSpecifier} to be used to construct
          * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass
