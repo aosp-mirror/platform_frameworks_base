@@ -133,14 +133,15 @@ class TaskPositioner implements IBinder.DeathRecipient {
 
         @Override
         public void onInputEvent(InputEvent event) {
-            if (!(event instanceof MotionEvent)
-                    || (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
-                return;
-            }
-            final MotionEvent motionEvent = (MotionEvent) event;
             boolean handled = false;
-
             try {
+                // All returns need to be in the try block to make sure the finishInputEvent is
+                // called correctly.
+                if (!(event instanceof MotionEvent)
+                        || (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
+                    return;
+                }
+                final MotionEvent motionEvent = (MotionEvent) event;
                 if (mDragEnded) {
                     // The drag has ended but the clean-up message has not been processed by
                     // window manager. Drop events that occur after this until window manager
