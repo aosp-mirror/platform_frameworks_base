@@ -24,6 +24,10 @@ public final class MemInfoReader {
     final long[] mInfos = new long[Debug.MEMINFO_COUNT];
 
     @UnsupportedAppUsage
+    public MemInfoReader() {
+    }
+
+    @UnsupportedAppUsage
     public void readMemInfo() {
         // Permit disk reads here, as /proc/meminfo isn't really "on
         // disk" and should be fast.  TODO: make BlockGuard ignore

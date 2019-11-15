@@ -2026,6 +2026,11 @@ public class RelativeLayout extends ViewGroup {
          * A node with no dependent is considered a root of the graph.
          */
         static class Node {
+
+            @UnsupportedAppUsage
+            Node() {
+            }
+
             /**
              * The view representing this node in the layout.
              */

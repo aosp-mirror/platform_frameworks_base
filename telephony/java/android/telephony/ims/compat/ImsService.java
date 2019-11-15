@@ -113,6 +113,10 @@ public class ImsService extends Service {
         }
     };
 
+    @UnsupportedAppUsage
+    public ImsService() {
+    }
+
     /**
      * @hide
      */

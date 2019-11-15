@@ -26,6 +26,11 @@ import android.annotation.UnsupportedAppUsage;
  * @hide
  */
 public abstract class Singleton<T> {
+
+    @UnsupportedAppUsage
+    public Singleton() {
+    }
+
     @UnsupportedAppUsage
     private T mInstance;
 

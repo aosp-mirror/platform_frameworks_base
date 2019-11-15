@@ -79,6 +79,10 @@ public class MediaFile {
     @UnsupportedAppUsage
     private static final HashMap<Integer, String> sFormatToMimeTypeMap = new HashMap<>();
 
+    @UnsupportedAppUsage
+    public MediaFile() {
+    }
+
     /** @deprecated file types no longer exist */
     @Deprecated
     @UnsupportedAppUsage

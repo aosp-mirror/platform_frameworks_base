@@ -40,6 +40,8 @@ import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 import libcore.io.IoUtils;
 
 import java.io.FileInputStream;
@@ -86,6 +88,10 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     private boolean mIsShutdown;
 
     private int mOwningUid;
+
+    @UnsupportedAppUsage
+    public UiAutomationConnection() {
+    }
 
     @Override
     public void connect(IAccessibilityServiceClient client, int flags) {

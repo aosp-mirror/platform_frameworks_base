@@ -373,6 +373,11 @@ public final class Parcel {
      * @hide
      */
     public static class ReadWriteHelper {
+
+        @UnsupportedAppUsage
+        public ReadWriteHelper() {
+        }
+
         public static final ReadWriteHelper DEFAULT = new ReadWriteHelper();
 
         /**

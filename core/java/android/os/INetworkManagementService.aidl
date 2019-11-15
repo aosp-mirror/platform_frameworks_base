@@ -184,6 +184,7 @@ interface INetworkManagementService
     /**
      * Returns a list of currently tethered interfaces
      */
+    @UnsupportedAppUsage
     String[] listTetheredInterfaces();
 
     /**
