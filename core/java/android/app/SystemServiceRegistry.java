@@ -173,8 +173,6 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
-import android.telephony.ims.ImsManager;
-import android.telephony.ims.RcsMessageManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -622,22 +620,6 @@ final class SystemServiceRegistry {
             public SubscriptionManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new SubscriptionManager(ctx.getOuterContext());
             }});
-
-        registerService(Context.TELEPHONY_RCS_MESSAGE_SERVICE, RcsMessageManager.class,
-                new CachedServiceFetcher<RcsMessageManager>() {
-                    @Override
-                    public RcsMessageManager createService(ContextImpl ctx) {
-                        return new RcsMessageManager(ctx.getOuterContext());
-                    }
-                });
-
-        registerService(Context.TELEPHONY_IMS_SERVICE, ImsManager.class,
-                new CachedServiceFetcher<ImsManager>() {
-                    @Override
-                    public ImsManager createService(ContextImpl ctx) {
-                        return new ImsManager(ctx.getOuterContext());
-                    }
-                });
 
         registerService(Context.CARRIER_CONFIG_SERVICE, CarrierConfigManager.class,
                 new CachedServiceFetcher<CarrierConfigManager>() {
