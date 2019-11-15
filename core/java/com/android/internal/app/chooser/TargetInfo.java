@@ -122,7 +122,12 @@ public interface TargetInfo {
     List<Intent> getAllSourceIntents();
 
     /**
-     * @return true if this target can be selected by the user
+     * @return true if this target cannot be selected by the user
      */
     boolean isSuspended();
+
+    /**
+     * @return true if this target should be pinned to the front by the request of the user
+     */
+    boolean isPinned();
 }

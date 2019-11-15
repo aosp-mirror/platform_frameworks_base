@@ -51,6 +51,7 @@ public class DisplayResolveInfo implements TargetInfo {
     private final List<Intent> mSourceIntents = new ArrayList<>();
     private boolean mIsSuspended;
     private ResolveInfoPresentationGetter mResolveInfoPresentationGetter;
+    private boolean mPinned = false;
 
     public DisplayResolveInfo(Intent originalIntent, ResolveInfo pri, Intent pOrigIntent,
             ResolveInfoPresentationGetter resolveInfoPresentationGetter) {
@@ -178,5 +179,14 @@ public class DisplayResolveInfo implements TargetInfo {
 
     public boolean isSuspended() {
         return mIsSuspended;
+    }
+
+    @Override
+    public boolean isPinned() {
+        return mPinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        mPinned = pinned;
     }
 }

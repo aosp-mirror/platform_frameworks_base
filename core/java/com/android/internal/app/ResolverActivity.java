@@ -1247,6 +1247,7 @@ public class ResolverActivity extends Activity implements
         public final ComponentName name;
         private final List<Intent> mIntents = new ArrayList<>();
         private final List<ResolveInfo> mResolveInfos = new ArrayList<>();
+        private boolean mPinned;
 
         public ResolvedComponentInfo(ComponentName name, Intent intent, ResolveInfo info) {
             this.name = name;
@@ -1286,6 +1287,14 @@ public class ResolverActivity extends Activity implements
                 }
             }
             return -1;
+        }
+
+        public boolean isPinned() {
+            return mPinned;
+        }
+
+        public void setPinned(boolean pinned) {
+            mPinned = pinned;
         }
     }
 
