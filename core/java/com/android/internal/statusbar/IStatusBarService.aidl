@@ -113,4 +113,14 @@ interface IStatusBarService
     void onBiometricError(int modality, int error, int vendorCode);
     // Used to hide the authentication dialog, e.g. when the application cancels authentication
     void hideAuthenticationDialog();
+
+    /**
+     * Show a warning that the device is about to go to sleep due to user inactivity.
+     */
+    void showInattentiveSleepWarning();
+
+    /**
+     * Dismiss the warning that the device is about to go to sleep due to user inactivity.
+     */
+    void dismissInattentiveSleepWarning();
 }

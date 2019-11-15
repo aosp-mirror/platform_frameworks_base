@@ -426,9 +426,15 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_FORCE_SUSPEND = 8;
 
     /**
+     * Go to sleep reason code: Going to sleep due to user inattentiveness.
      * @hide
      */
-    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_FORCE_SUSPEND;
+    public static final int GO_TO_SLEEP_REASON_INATTENTIVE = 9;
+
+    /**
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_INATTENTIVE;
 
     /**
      * @hide
@@ -444,6 +450,7 @@ public final class PowerManager {
             case GO_TO_SLEEP_REASON_SLEEP_BUTTON: return "sleep_button";
             case GO_TO_SLEEP_REASON_ACCESSIBILITY: return "accessibility";
             case GO_TO_SLEEP_REASON_FORCE_SUSPEND: return "force_suspend";
+            case GO_TO_SLEEP_REASON_INATTENTIVE: return "inattentive";
             default: return Integer.toString(sleepReason);
         }
     }

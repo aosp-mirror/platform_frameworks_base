@@ -959,6 +959,14 @@
          The default is false. -->
     <bool name="config_suspendWhenScreenOffDueToProximity">false</bool>
 
+    <!-- The time in milliseconds of prolonged user inactivity after which device goes to sleep,
+         even if wakelocks are held. -->
+    <integer name="config_attentiveTimeout">-1</integer>
+
+    <!-- How long to show a warning message to user before the device goes to sleep after prolonged
+         user inactivity. -->
+    <integer name="config_attentiveWarningDuration">30000</integer>
+
     <!-- Control the behavior when the user long presses the power button.
             0 - Nothing
             1 - Global actions menu

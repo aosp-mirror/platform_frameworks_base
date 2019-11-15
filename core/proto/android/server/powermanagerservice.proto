@@ -172,6 +172,8 @@ message PowerManagerServiceDumpProto {
     repeated SuspendBlockerProto suspend_blockers = 48;
     optional WirelessChargerDetectorProto wireless_charger_detector = 49;
     optional BatterySaverStateMachineProto battery_saver_state_machine = 50;
+    // Attentive timeout in ms. The timeout is disabled if it is set to -1.
+    optional sint32 attentive_timeout_ms = 51;
 }
 
 // A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.
@@ -310,6 +312,12 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     optional bool is_vr_mode_enabled = 35;
     // True if Sidekick is controlling the display and we shouldn't change its power mode.
     optional bool draw_wake_lock_override_from_sidekick = 36;
+    // The attentive timeout setting value in milliseconds. Default value is -1.
+    optional sint32 attentive_timeout_setting_ms = 37;
+    // The attentive timeout config value in milliseconds.
+    optional sint32 attentive_timeout_config_ms = 38;
+    // The attentive warning duration config value in milliseconds.
+    optional sint32 attentive_warning_duration_config_ms = 39;
 }
 
 message BatterySaverStateMachineProto {
