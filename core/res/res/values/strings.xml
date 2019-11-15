@@ -720,8 +720,8 @@
     <!-- Message shown to the user when the apps requests permission to use the location while app is in foreground and background. If ever possible this should stay below 80 characters (assuming the parameters takes 20 characters). Don't abbreviate until the message reaches 120 characters though. [CHAR LIMIT=120] -->
     <string name="permgroupbackgroundrequest_location">Allow
         &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access this device\u2019s location &lt;b>all the time&lt;/b>?</string>
-    <!-- Subtitle of the message shown to the user when the apps requests permission to use the location while app is in foreground and background [CHAR LIMIT=150] -->
-    <string name="permgroupbackgroundrequestdetail_location">App currently can access location only while you\u2019re using the app</string>
+    <!-- Subtitle of the message shown to the user when the apps requests permission to use the location while app is in foreground and background. Try to keep the link annotation at the end of the string [CHAR LIMIT=150] -->
+    <string name="permgroupbackgroundrequestdetail_location">This app may want to access your location all the time, even when you\u2019re not using the app. Allow in <annotation id="link">settings</annotation>.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calendar">Calendar</string>
