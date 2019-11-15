@@ -319,7 +319,14 @@ public class QuickQSPanel extends QSPanel {
             } else{
                 mColumns = mCellWidth == 0 ? 1 :
                         Math.min(maxTiles, availableWidth / mCellWidth );
-                mCellMarginHorizontal = (availableWidth - mColumns * mCellWidth) / (mColumns - 1);
+                // If we can only fit one column, use mCellMarginHorizontal to center it.
+                if (mColumns == 1) {
+                    mCellMarginHorizontal = (availableWidth - mCellWidth) / 2;
+                } else {
+                    mCellMarginHorizontal =
+                            (availableWidth - mColumns * mCellWidth) / (mColumns - 1);
+                }
+
             }
             return mColumns != prevNumColumns;
         }
@@ -357,6 +364,10 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         protected int getColumnStart(int column) {
+            if (mColumns == 1) {
+                // Only one column/tile. Use the margin to center the tile.
+                return getPaddingStart() + mCellMarginHorizontal;
+            }
             return getPaddingStart() + column *  (mCellWidth + mCellMarginHorizontal);
         }
     }
