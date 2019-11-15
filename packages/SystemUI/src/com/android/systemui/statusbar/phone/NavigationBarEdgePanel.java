@@ -19,26 +19,23 @@ package com.android.systemui.statusbar.phone;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Canvas;;
+import android.content.res.Resources;
+import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
-import android.util.DisplayMetrics;
 import android.util.MathUtils;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
-
-import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
-import com.android.systemui.Interpolators;
-import com.android.systemui.R;
-import com.android.systemui.statusbar.VibratorHelper;
 
 import androidx.core.graphics.ColorUtils;
 import androidx.dynamicanimation.animation.DynamicAnimation;
@@ -46,7 +43,16 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
-public class NavigationBarEdgePanel extends View {
+import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
+import com.android.systemui.R;
+import com.android.systemui.plugins.NavigationEdgeBackPlugin;
+import com.android.systemui.statusbar.VibratorHelper;
+
+public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPlugin {
+
+    private static final String TAG = "NavigationBarEdgePanel";
 
     private static final long COLOR_ANIMATION_DURATION_MS = 120;
     private static final long DISAPPEAR_FADE_ANIMATION_DURATION_MS = 80;
@@ -114,6 +120,7 @@ public class NavigationBarEdgePanel extends View {
     private static final Interpolator RUBBER_BAND_INTERPOLATOR_APPEAR
             = new PathInterpolator(1.0f / RUBBER_BAND_AMOUNT_APPEAR, 1.0f, 1.0f, 1.0f);
 
+    private final WindowManager mWindowManager;
     private final VibratorHelper mVibratorHelper;
 
     /**
@@ -134,9 +141,14 @@ public class NavigationBarEdgePanel extends View {
      * The minimum delta needed in movement for the arrow to change direction / stop triggering back
      */
     private final float mMinDeltaForSwitch;
+    // The closest to y = 0 that the arrow will be displayed.
+    private int mMinArrowPosition;
+    // The amount the arrow is shifted to avoid the finger.
+    private int mFingerOffset;
 
     private final float mSwipeThreshold;
     private final Path mArrowPath = new Path();
+    private final Point mDisplaySize = new Point();
 
     private final SpringAnimation mAngleAnimation;
     private final SpringAnimation mTranslationAnimation;
@@ -158,6 +170,11 @@ public class NavigationBarEdgePanel extends View {
     private int mArrowColorDark;
     private int mProtectionColor;
     private int mArrowColor;
+    private RegionSamplingHelper mRegionSamplingHelper;
+    private final Rect mSamplingRect = new Rect();
+    private WindowManager.LayoutParams mLayoutParams;
+    private int mLeftInset;
+    private int mRightInset;
 
     /**
      * True if the panel is currently on the left of the screen
@@ -242,10 +259,12 @@ public class NavigationBarEdgePanel extends View {
                     return object.getVerticalTranslation();
                 }
             };
+    private BackCallback mBackCallback;
 
     public NavigationBarEdgePanel(Context context) {
         super(context);
 
+        mWindowManager = context.getSystemService(WindowManager.class);
         mVibratorHelper = Dependency.get(VibratorHelper.class);
 
         mDensity = context.getResources().getDisplayMetrics().density;
@@ -263,13 +282,10 @@ public class NavigationBarEdgePanel extends View {
 
         mArrowColorAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
         mArrowColorAnimator.setDuration(COLOR_ANIMATION_DURATION_MS);
-        mArrowColorAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int newColor = ColorUtils.blendARGB(mArrowStartColor, mArrowColor,
-                        animation.getAnimatedFraction());
-                setCurrentArrowColor(newColor);
-            }
+        mArrowColorAnimator.addUpdateListener(animation -> {
+            int newColor = ColorUtils.blendARGB(
+                    mArrowStartColor, mArrowColor, animation.getAnimatedFraction());
+            setCurrentArrowColor(newColor);
         });
 
         mArrowDisappearAnimation = ValueAnimator.ofFloat(0.0f, 1.0f);
@@ -317,6 +333,27 @@ public class NavigationBarEdgePanel extends View {
         mSwipeThreshold = context.getResources()
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
         setVisibility(GONE);
+
+        mRegionSamplingHelper = new RegionSamplingHelper(this,
+                new RegionSamplingHelper.SamplingCallback() {
+                    @Override
+                    public void onRegionDarknessChanged(boolean isRegionDark) {
+                        setIsDark(!isRegionDark, true /* animate */);
+                    }
+
+                    @Override
+                    public Rect getSampledRegion(View sampledView) {
+                        return mSamplingRect;
+                    }
+                });
+        mRegionSamplingHelper.setWindowVisible(true);
+    }
+
+    @Override
+    public void onDestroy() {
+        mWindowManager.removeView(this);
+        mRegionSamplingHelper.stop();
+        mRegionSamplingHelper = null;
     }
 
     @Override
@@ -324,30 +361,51 @@ public class NavigationBarEdgePanel extends View {
         return false;
     }
 
-    public boolean shouldTriggerBack() {
-        return mTriggerBack;
-    }
-
-    public void setIsDark(boolean isDark, boolean animate) {
+    private void setIsDark(boolean isDark, boolean animate) {
         mIsDark = isDark;
         updateIsDark(animate);
     }
 
-    public void setShowProtection(boolean showProtection) {
+    private void setShowProtection(boolean showProtection) {
         mShowProtection = showProtection;
         invalidate();
     }
 
+    @Override
     public void setIsLeftPanel(boolean isLeftPanel) {
         mIsLeftPanel = isLeftPanel;
+        mLayoutParams.gravity = mIsLeftPanel
+                ? (Gravity.LEFT | Gravity.TOP)
+                : (Gravity.RIGHT | Gravity.TOP);
+    }
+
+    @Override
+    public void setInsets(int leftInset, int rightInset) {
+        mLeftInset = leftInset;
+        mRightInset = rightInset;
+    }
+
+    @Override
+    public void setDisplaySize(Point displaySize) {
+        mDisplaySize.set(displaySize.x, displaySize.y);
+        mScreenSize = Math.min(mDisplaySize.x, mDisplaySize.y);
+    }
+
+    @Override
+    public void setBackCallback(BackCallback callback) {
+        mBackCallback = callback;
+    }
+
+    @Override
+    public void setLayoutParams(WindowManager.LayoutParams layoutParams) {
+        mLayoutParams = layoutParams;
+        mWindowManager.addView(this, mLayoutParams);
     }
 
     /**
-     * Adjust the rect to conform the the actual visible bounding box of the arrow.
-     *
-     * @param samplingRect the existing bounding box in screen coordinates, to be modified
+     * Adjusts the sampling rect to conform to the actual visible bounding box of the arrow.
      */
-    public void adjustRectToBoundingBox(Rect samplingRect) {
+    private void adjustSamplingRectToBoundingBox() {
         float translation = mDesiredTranslation;
         if (!mTriggerBack) {
             // Let's take the resting position and bounds as the sampling rect, since we are not
@@ -361,7 +419,7 @@ public class NavigationBarEdgePanel extends View {
             }
         }
         float left = translation - mArrowThickness / 2.0f;
-        left = mIsLeftPanel ? left : samplingRect.width() - left;
+        left = mIsLeftPanel ? left : mSamplingRect.width() - left;
 
         // Let's calculate the position of the end based on the angle
         float width = getStaticArrowWidth();
@@ -371,49 +429,49 @@ public class NavigationBarEdgePanel extends View {
         }
 
         float top = (getHeight() * 0.5f) + mDesiredVerticalTranslation - height / 2.0f;
-        samplingRect.offset((int) left, (int) top);
-        samplingRect.set(samplingRect.left, samplingRect.top,
-                (int) (samplingRect.left + width),
-                (int) (samplingRect.top + height));
+        mSamplingRect.offset((int) left, (int) top);
+        mSamplingRect.set(mSamplingRect.left, mSamplingRect.top,
+                (int) (mSamplingRect.left + width),
+                (int) (mSamplingRect.top + height));
+        mRegionSamplingHelper.updateSamplingRect();
     }
 
-    /**
-     * Updates the UI based on the motion events passed in device co-ordinates
-     */
-    public void handleTouch(MotionEvent event) {
+    @Override
+    public void onMotionEvent(MotionEvent event) {
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
         mVelocityTracker.addMovement(event);
         switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN : {
+            case MotionEvent.ACTION_DOWN:
                 mDragSlopPassed = false;
                 resetOnDown();
                 mStartX = event.getX();
                 mStartY = event.getY();
                 setVisibility(VISIBLE);
+                updatePosition(event.getY());
+                mRegionSamplingHelper.start(mSamplingRect);
+                mWindowManager.updateViewLayout(this, mLayoutParams);
                 break;
-            }
-            case MotionEvent.ACTION_MOVE: {
+            case MotionEvent.ACTION_MOVE:
                 handleMoveEvent(event);
                 break;
-            }
-            // Fall through
             case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL: {
                 if (mTriggerBack) {
                     triggerBack();
                 } else {
-                    if (mTranslationAnimation.isRunning()) {
-                        mTranslationAnimation.addEndListener(mSetGoneEndListener);
-                    } else {
-                        setVisibility(GONE);
-                    }
+                    cancelBack();
                 }
+                mRegionSamplingHelper.stop();
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
                 break;
-            }
+            case MotionEvent.ACTION_CANCEL:
+                cancelBack();
+                mRegionSamplingHelper.stop();
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
+                break;
         }
     }
 
@@ -452,10 +510,10 @@ public class NavigationBarEdgePanel extends View {
     }
 
     private void loadDimens() {
-        mArrowPaddingEnd = getContext().getResources().getDimensionPixelSize(
-                R.dimen.navigation_edge_panel_padding);
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mScreenSize = Math.min(metrics.widthPixels, metrics.heightPixels);
+        Resources res = getResources();
+        mArrowPaddingEnd = res.getDimensionPixelSize(R.dimen.navigation_edge_panel_padding);
+        mMinArrowPosition = res.getDimensionPixelSize(R.dimen.navigation_edge_arrow_min_y);
+        mFingerOffset = res.getDimensionPixelSize(R.dimen.navigation_edge_finger_offset);
     }
 
     private void updateArrowDirection() {
@@ -531,6 +589,11 @@ public class NavigationBarEdgePanel extends View {
     }
 
     private void triggerBack() {
+        mBackCallback.triggerBack();
+
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
         mVelocityTracker.computeCurrentVelocity(1000);
         // Only do the extra translation if we're not already flinging
         boolean isSlow = Math.abs(mVelocityTracker.getXVelocity()) < 500;
@@ -573,7 +636,16 @@ public class NavigationBarEdgePanel extends View {
         } else {
             translationEnd.run();
         }
+    }
 
+    private void cancelBack() {
+        mBackCallback.cancelBack();
+
+        if (mTranslationAnimation.isRunning()) {
+            mTranslationAnimation.addEndListener(mSetGoneEndListener);
+        } else {
+            setVisibility(GONE);
+        }
     }
 
     private void resetOnDown() {
@@ -680,6 +752,24 @@ public class NavigationBarEdgePanel extends View {
         float verticalTranslation = RUBBER_BAND_INTERPOLATOR.getInterpolation(progress)
                 * maxYOffset * Math.signum(yOffset);
         setDesiredVerticalTransition(verticalTranslation, true /* animated */);
+        updateSamplingRect();
+    }
+
+    private void updatePosition(float touchY) {
+        float position = touchY - mFingerOffset;
+        position = Math.max(position, mMinArrowPosition);
+        position -= mLayoutParams.height / 2.0f;
+        mLayoutParams.y = MathUtils.constrain((int) position, 0, mDisplaySize.y);
+        updateSamplingRect();
+    }
+
+    private void updateSamplingRect() {
+        int top = mLayoutParams.y;
+        int left = mIsLeftPanel ? mLeftInset : mDisplaySize.x - mRightInset - mLayoutParams.width;
+        int right = left + mLayoutParams.width;
+        int bottom = top + mLayoutParams.height;
+        mSamplingRect.set(left, top, right, bottom);
+        adjustSamplingRectToBoundingBox();
     }
 
     private void setDesiredVerticalTransition(float verticalTranslation, boolean animated) {
