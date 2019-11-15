@@ -23,11 +23,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 
@@ -391,8 +389,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     public boolean inMultiWindowMode() {
         /*@WindowConfiguration.WindowingMode*/ int windowingMode =
                 mFullConfiguration.windowConfiguration.getWindowingMode();
-        return windowingMode != WINDOWING_MODE_FULLSCREEN
-                && windowingMode != WINDOWING_MODE_UNDEFINED;
+        return WindowConfiguration.inMultiWindowMode(windowingMode);
     }
 
     /** Returns true if this container is currently in split-screen windowing mode. */

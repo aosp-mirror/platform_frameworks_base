@@ -153,34 +153,6 @@ public class TransactionParcelTests {
     }
 
     @Test
-    public void testPipModeChange() {
-        // Write to parcel
-        PipModeChangeItem item = PipModeChangeItem.obtain(true /* isInPipMode */, config());
-        writeAndPrepareForReading(item);
-
-        // Read from parcel and assert
-        PipModeChangeItem result = PipModeChangeItem.CREATOR.createFromParcel(mParcel);
-
-        assertEquals(item.hashCode(), result.hashCode());
-        assertTrue(item.equals(result));
-    }
-
-    @Test
-    public void testMultiWindowModeChange() {
-        // Write to parcel
-        MultiWindowModeChangeItem item = MultiWindowModeChangeItem.obtain(
-                true /* isInMultiWindowMode */, config());
-        writeAndPrepareForReading(item);
-
-        // Read from parcel and assert
-        MultiWindowModeChangeItem result =
-                MultiWindowModeChangeItem.CREATOR.createFromParcel(mParcel);
-
-        assertEquals(item.hashCode(), result.hashCode());
-        assertTrue(item.equals(result));
-    }
-
-    @Test
     public void testDestroy() {
         DestroyActivityItem item = DestroyActivityItem.obtain(true /* finished */,
                 135 /* configChanges */);

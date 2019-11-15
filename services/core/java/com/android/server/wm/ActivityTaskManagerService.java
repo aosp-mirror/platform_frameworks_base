@@ -4036,36 +4036,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    @Override
-    public boolean isInMultiWindowMode(IBinder token) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
-                if (r == null) {
-                    return false;
-                }
-                // An activity is consider to be in multi-window mode if its task isn't fullscreen.
-                return r.inMultiWindowMode();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @Override
-    public boolean isInPictureInPictureMode(IBinder token) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                return isInPictureInPictureMode(ActivityRecord.forTokenLocked(token));
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    private boolean isInPictureInPictureMode(ActivityRecord r) {
+    @VisibleForTesting
+    boolean isInPictureInPictureMode(ActivityRecord r) {
         return r != null
                 && r.getRootTask() != null
                 && r.inPinnedWindowingMode()
