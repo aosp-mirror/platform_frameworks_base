@@ -16,7 +16,11 @@
 
 package android.app.activity;
 
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+
 import android.app.ActivityManager;
+import android.app.ActivityManager.TaskDescription;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
@@ -110,7 +114,123 @@ public class ActivityManagerTest extends AndroidTestCase {
             assertNotNull(config.reqInputFeatures & ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD);
         }    
     }
-    
+
+    @SmallTest
+    public void testTaskDescriptionCopyFrom() {
+        TaskDescription td1 = new TaskDescription(
+                "test label",            // label
+                null,                    // bitmap
+                21,                      // iconRes
+                "dummy file",            // iconFilename
+                0x111111,                // colorPrimary
+                0x222222,                // colorBackground
+                0x333333,                // statusBarColor
+                0x444444,                // navigationBarColor
+                true,                    // ensureStatusBarContrastWhenTransparent
+                true,                    // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_RESIZEABLE,  // resizeMode
+                10,                      // minWidth
+                20                       // minHeight
+        );
+
+        TaskDescription td2 = new TaskDescription();
+        // Must overwrite all the fields
+        td2.copyFrom(td1);
+
+        assertEquals(td1.getLabel(), td2.getLabel());
+        assertEquals(td1.getInMemoryIcon(), td2.getInMemoryIcon());
+        assertEquals(td1.getIconFilename(), td2.getIconFilename());
+        assertEquals(td1.getIconResource(), td2.getIconResource());
+        assertEquals(td1.getPrimaryColor(), td2.getPrimaryColor());
+        assertEquals(td1.getBackgroundColor(), td2.getBackgroundColor());
+        assertEquals(td1.getStatusBarColor(), td2.getStatusBarColor());
+        assertEquals(td1.getNavigationBarColor(), td2.getNavigationBarColor());
+        assertEquals(td1.getEnsureStatusBarContrastWhenTransparent(),
+                td2.getEnsureStatusBarContrastWhenTransparent());
+        assertEquals(td1.getEnsureNavigationBarContrastWhenTransparent(),
+                td2.getEnsureNavigationBarContrastWhenTransparent());
+        assertEquals(td1.getResizeMode(), td2.getResizeMode());
+        assertEquals(td1.getMinWidth(), td2.getMinWidth());
+        assertEquals(td1.getMinHeight(), td2.getMinHeight());
+    }
+
+    @SmallTest
+    public void testTaskDescriptionCopyFromPreserveHiddenFields() {
+        TaskDescription td1 = new TaskDescription(
+                "test label",              // label
+                null,                      // bitmap
+                21,                        // iconRes
+                "dummy file",              // iconFilename
+                0x111111,                  // colorPrimary
+                0x222222,                  // colorBackground
+                0x333333,                  // statusBarColor
+                0x444444,                  // navigationBarColor
+                false,                     // ensureStatusBarContrastWhenTransparent
+                false,                     // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_UNRESIZEABLE,  // resizeMode
+                10,                        // minWidth
+                20                         // minHeight
+        );
+
+        TaskDescription td2 = new TaskDescription(
+                "test label2",           // label
+                null,                    // bitmap
+                212,                     // iconRes
+                "dummy file2",           // iconFilename
+                0x1111112,               // colorPrimary
+                0x2222222,               // colorBackground
+                0x3333332,               // statusBarColor
+                0x4444442,               // navigationBarColor
+                true,                    // ensureStatusBarContrastWhenTransparent
+                true,                    // ensureNavigationBarContrastWhenTransparent
+                RESIZE_MODE_RESIZEABLE,  // resizeMode
+                102,                     // minWidth
+                202                      // minHeight
+        );
+
+        // Must overwrite all public and hidden fields, since other has all fields set.
+        td2.copyFromPreserveHiddenFields(td1);
+
+        assertEquals(td1.getLabel(), td2.getLabel());
+        assertEquals(td1.getInMemoryIcon(), td2.getInMemoryIcon());
+        assertEquals(td1.getIconFilename(), td2.getIconFilename());
+        assertEquals(td1.getIconResource(), td2.getIconResource());
+        assertEquals(td1.getPrimaryColor(), td2.getPrimaryColor());
+        assertEquals(td1.getBackgroundColor(), td2.getBackgroundColor());
+        assertEquals(td1.getStatusBarColor(), td2.getStatusBarColor());
+        assertEquals(td1.getNavigationBarColor(), td2.getNavigationBarColor());
+        assertEquals(td1.getEnsureStatusBarContrastWhenTransparent(),
+                td2.getEnsureStatusBarContrastWhenTransparent());
+        assertEquals(td1.getEnsureNavigationBarContrastWhenTransparent(),
+                td2.getEnsureNavigationBarContrastWhenTransparent());
+        assertEquals(td1.getResizeMode(), td2.getResizeMode());
+        assertEquals(td1.getMinWidth(), td2.getMinWidth());
+        assertEquals(td1.getMinHeight(), td2.getMinHeight());
+
+        TaskDescription td3 = new TaskDescription();
+        // Must overwrite only public fields, and preserve hidden fields.
+        td2.copyFromPreserveHiddenFields(td3);
+
+        // Overwritten fields
+        assertEquals(td3.getLabel(), td2.getLabel());
+        assertEquals(td3.getInMemoryIcon(), td2.getInMemoryIcon());
+        assertEquals(td3.getIconFilename(), td2.getIconFilename());
+        assertEquals(td3.getIconResource(), td2.getIconResource());
+        assertEquals(td3.getPrimaryColor(), td2.getPrimaryColor());
+        assertEquals(td3.getEnsureStatusBarContrastWhenTransparent(),
+                td2.getEnsureStatusBarContrastWhenTransparent());
+        assertEquals(td3.getEnsureNavigationBarContrastWhenTransparent(),
+                td2.getEnsureNavigationBarContrastWhenTransparent());
+
+        // Preserved fields
+        assertEquals(td1.getBackgroundColor(), td2.getBackgroundColor());
+        assertEquals(td1.getStatusBarColor(), td2.getStatusBarColor());
+        assertEquals(td1.getNavigationBarColor(), td2.getNavigationBarColor());
+        assertEquals(td1.getResizeMode(), td2.getResizeMode());
+        assertEquals(td1.getMinWidth(), td2.getMinWidth());
+        assertEquals(td1.getMinHeight(), td2.getMinHeight());
+    }
+
     // If any entries in appear in the list, sanity check them against all running applications
     private void checkErrorListSanity(List<ActivityManager.ProcessErrorStateInfo> errList) {
         if (errList == null) return;

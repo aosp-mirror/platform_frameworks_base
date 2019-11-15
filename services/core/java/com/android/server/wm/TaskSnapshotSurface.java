@@ -202,7 +202,7 @@ class TaskSnapshotSurface implements StartingSurface {
 
             final TaskDescription td = task.getTaskDescription();
             if (td != null) {
-                taskDescription.copyFrom(td);
+                taskDescription.copyFromPreserveHiddenFields(td);
             }
             taskBounds = new Rect();
             task.getBounds(taskBounds);
