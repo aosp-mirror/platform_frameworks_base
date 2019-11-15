@@ -111,8 +111,8 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             if (mWifiManager != null) {
                 if (mListening) {
                     if (mCallbacks.size() == 1) {
-                        mWifiManager.registerSoftApCallback(this,
-                                new HandlerExecutor(mMainHandler));
+                        mWifiManager.registerSoftApCallback(new HandlerExecutor(mMainHandler),
+                                this);
                     } else {
                         // mWifiManager#registerSoftApCallback triggers a call to
                         // onConnectedClientsChanged on the Main Handler. In order to always update
@@ -146,7 +146,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (mListening || !listening) return;
         mListening = true;
         if (mCallbacks.size() >= 1) {
-            mWifiManager.registerSoftApCallback(this, new HandlerExecutor(mMainHandler));
+            mWifiManager.registerSoftApCallback(new HandlerExecutor(mMainHandler), this);
         }
     }
 
