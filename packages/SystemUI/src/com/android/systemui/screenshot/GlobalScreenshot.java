@@ -87,6 +87,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.inject.Inject;
@@ -107,7 +108,7 @@ public class GlobalScreenshot {
         public Context context;
         public Bitmap image;
         public Uri imageUri;
-        public Runnable finisher;
+        public Consumer<Uri> finisher;
         public Function<PendingIntent, Void> onEditReady;
         public int iconSize;
         public int previewWidth;
@@ -260,7 +261,7 @@ public class GlobalScreenshot {
      * Creates a new worker thread and saves the screenshot to the media store.
      */
     private void saveScreenshotInWorkerThread(
-            Runnable finisher, @Nullable Function<PendingIntent, Void> onEditReady) {
+            Consumer<Uri> finisher, @Nullable Function<PendingIntent, Void> onEditReady) {
         SaveImageInBackgroundData data = new SaveImageInBackgroundData();
         data.context = mContext;
         data.image = mScreenBitmap;
@@ -276,15 +277,15 @@ public class GlobalScreenshot {
                 .execute();
     }
 
-    private void saveScreenshotInWorkerThread(Runnable finisher) {
+    private void saveScreenshotInWorkerThread(Consumer<Uri> finisher) {
         saveScreenshotInWorkerThread(finisher, null);
     }
 
     /**
      * Takes a screenshot of the current display and shows an animation.
      */
-    private void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible,
-            Rect crop) {
+    private void takeScreenshot(Consumer<Uri> finisher, boolean statusBarVisible,
+            boolean navBarVisible, Rect crop) {
         int rot = mDisplay.getRotation();
         int width = crop.width();
         int height = crop.height();
@@ -294,7 +295,7 @@ public class GlobalScreenshot {
         if (mScreenBitmap == null) {
             notifyScreenshotError(mContext, mNotificationManager,
                     R.string.screenshot_failed_to_capture_text);
-            finisher.run();
+            finisher.accept(null);
             return;
         }
 
@@ -307,7 +308,7 @@ public class GlobalScreenshot {
                 statusBarVisible, navBarVisible);
     }
 
-    void takeScreenshot(Runnable finisher, boolean statusBarVisible, boolean navBarVisible) {
+    void takeScreenshot(Consumer<Uri> finisher, boolean statusBarVisible, boolean navBarVisible) {
         mDisplay.getRealMetrics(mDisplayMetrics);
         takeScreenshot(finisher, statusBarVisible, navBarVisible,
                 new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
@@ -316,7 +317,7 @@ public class GlobalScreenshot {
     /**
      * Displays a screenshot selector
      */
-    void takeScreenshotPartial(final Runnable finisher, final boolean statusBarVisible,
+    void takeScreenshotPartial(final Consumer<Uri> finisher, final boolean statusBarVisible,
             final boolean navBarVisible) {
         mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
         mScreenshotSelectorView.setOnTouchListener(new View.OnTouchListener() {
@@ -392,8 +393,8 @@ public class GlobalScreenshot {
     /**
      * Starts the animation after taking the screenshot
      */
-    private void startAnimation(final Runnable finisher, int w, int h, boolean statusBarVisible,
-            boolean navBarVisible) {
+    private void startAnimation(final Consumer<Uri> finisher, int w, int h,
+            boolean statusBarVisible, boolean navBarVisible) {
         // If power save is on, show a toast so there is some visual indication that a screenshot
         // has been taken.
         PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
