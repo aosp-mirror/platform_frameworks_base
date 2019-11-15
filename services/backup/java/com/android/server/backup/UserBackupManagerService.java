@@ -158,6 +158,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
@@ -331,6 +332,8 @@ public class UserBackupManagerService {
 
     // locking around the pending-backup management
     private final Object mQueueLock = new Object();
+
+    private final UserBackupPreferences mBackupPreferences;
 
     // The thread performing the sequence of queued backups binds to each app's agent
     // in succession.  Bind notifications are asynchronously delivered through the
@@ -631,6 +634,8 @@ public class UserBackupManagerService {
         // Now that we know about valid backup participants, parse any leftover journal files into
         // the pending backup set
         mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
+
+        mBackupPreferences = new UserBackupPreferences(mContext, mBaseStateDir);
 
         // Power management
         mWakelock = new BackupWakeLock(
@@ -1095,6 +1100,14 @@ public class UserBackupManagerService {
                 }
             }
         }
+    }
+
+    public Map<String, Set<String>> getExcludedRestoreKeys(String... packages) {
+        return mBackupPreferences.getExcludedRestoreKeysForPackages(packages);
+    }
+
+    public Map<String, Set<String>> getAllExcludedRestoreKeys() {
+        return mBackupPreferences.getAllExcludedRestoreKeys();
     }
 
     /** Used for generating random salts or passwords. */
@@ -2746,6 +2759,14 @@ public class UserBackupManagerService {
         }
     }
 
+    /**
+     * Excludes keys from KV restore for a given package. The keys won't be part of the data passed
+     * to the backup agent during restore.
+     */
+    public void excludeKeysFromRestore(String packageName, List<String> keys) {
+        mBackupPreferences.addExcludedKeys(packageName, keys);
+    }
+
     private boolean startConfirmationUi(int token, String action) {
         try {
             Intent confIntent = new Intent(action);
@@ -3341,7 +3362,8 @@ public class UserBackupManagerService {
                                 restoreSet,
                                 packageName,
                                 token,
-                                listener);
+                                listener,
+                                getExcludedRestoreKeys(packageName));
                 mBackupHandler.sendMessage(msg);
             } catch (Exception e) {
                 // Calling into the transport broke; back off and proceed with the installation.
