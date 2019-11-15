@@ -1586,6 +1586,7 @@ public class WifiManagerTest {
         assertTrue(mWifiManager.isP2pSupported());
         assertFalse(mWifiManager.isPortableHotspotSupported());
         assertFalse(mWifiManager.is5GHzBandSupported());
+        assertFalse(mWifiManager.is6GHzBandSupported());
         assertFalse(mWifiManager.isDeviceToDeviceRttSupported());
         assertFalse(mWifiManager.isDeviceToApRttSupported());
         assertFalse(mWifiManager.isPreferredNetworkOffloadSupported());

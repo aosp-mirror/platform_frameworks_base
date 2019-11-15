@@ -2257,6 +2257,8 @@ public class WifiManager {
     public static final long WIFI_FEATURE_MBO              = 0x800000000L; // MBO Support
     /** @hide */
     public static final long WIFI_FEATURE_OCE              = 0x1000000000L; // OCE Support
+    /** @hide */
+    public static final long WIFI_FEATURE_INFRA_6G         = 0x2000000000L; // Support 6 GHz band
 
     private long getSupportedFeatures() {
         try {
@@ -2271,11 +2273,20 @@ public class WifiManager {
     private boolean isFeatureSupported(long feature) {
         return (getSupportedFeatures() & feature) == feature;
     }
+
     /**
      * @return true if this adapter supports 5 GHz band
      */
     public boolean is5GHzBandSupported() {
         return isFeatureSupported(WIFI_FEATURE_INFRA_5G);
+    }
+
+    /**
+     * @return true if the device supports operating in the 6 GHz band and Wi-Fi is enabled,
+     *         false otherwise.
+     */
+    public boolean is6GHzBandSupported() {
+        return isFeatureSupported(WIFI_FEATURE_INFRA_6G);
     }
 
     /**
