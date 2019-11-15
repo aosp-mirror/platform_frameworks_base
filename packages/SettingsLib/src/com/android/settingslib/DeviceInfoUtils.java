@@ -29,6 +29,8 @@ import android.system.StructUtsname;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
+import android.text.BidiFormatter;
+import android.text.TextDirectionHeuristics;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -206,4 +208,15 @@ public class DeviceInfoUtils {
         return sb.toString();
     }
 
+    /**
+     * To get the formatting text for display in a potentially opposite-directionality context
+     * without garbling.
+     * @param subscriptionInfo {@link SubscriptionInfo} subscription information.
+     * @return Returns phone number with Bidi format.
+     */
+    public static String getBidiFormattedPhoneNumber(Context context,
+            SubscriptionInfo subscriptionInfo) {
+        final String phoneNumber = getFormattedPhoneNumber(context, subscriptionInfo);
+        return BidiFormatter.getInstance().unicodeWrap(phoneNumber, TextDirectionHeuristics.LTR);
+    }
 }
