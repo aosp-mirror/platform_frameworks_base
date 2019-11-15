@@ -560,13 +560,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         });
         CarNotificationListener carNotificationListener = new CarNotificationListener();
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
-        mCarServiceProvider.addListener(car -> {
-            CarUxRestrictionsManager carUxRestrictionsManager =
-                    (CarUxRestrictionsManager)
-                            car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
-            mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
-                    carUxRestrictionsManager);
-        });
 
         mNotificationDataManager = new NotificationDataManager();
         mNotificationDataManager.setOnUnseenCountUpdateListener(
@@ -681,14 +674,21 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 return handled || isTracking;
             }
         });
+        mCarServiceProvider.addListener(car -> {
+            CarUxRestrictionsManager carUxRestrictionsManager =
+                    (CarUxRestrictionsManager)
+                            car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
+            mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
+                    carUxRestrictionsManager);
 
-        mNotificationViewController = new NotificationViewController(
-                mNotificationView,
-                PreprocessingManager.getInstance(mContext),
-                carNotificationListener,
-                mCarUxRestrictionManagerWrapper,
-                mNotificationDataManager);
-        mNotificationViewController.enable();
+                    mNotificationViewController = new NotificationViewController(
+                            mNotificationView,
+                            PreprocessingManager.getInstance(mContext),
+                            carNotificationListener,
+                            mCarUxRestrictionManagerWrapper,
+                            mNotificationDataManager);
+                    mNotificationViewController.enable();
+        });
     }
 
     /**
