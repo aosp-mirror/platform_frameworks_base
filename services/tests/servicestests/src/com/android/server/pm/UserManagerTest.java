@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,6 +24,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -196,6 +198,62 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
+    /** Tests creating a FULL user via specifying userType. */
+    @MediumTest
+    public void testCreateUserViaTypes() throws Exception {
+        createUserWithTypeAndCheckFlags(UserManager.USER_TYPE_FULL_GUEST,
+                UserInfo.FLAG_GUEST | UserInfo.FLAG_FULL);
+
+        createUserWithTypeAndCheckFlags(UserManager.USER_TYPE_FULL_DEMO,
+                UserInfo.FLAG_DEMO | UserInfo.FLAG_FULL);
+
+        createUserWithTypeAndCheckFlags(UserManager.USER_TYPE_FULL_SECONDARY,
+                UserInfo.FLAG_FULL);
+    }
+
+    /** Tests creating a FULL user via specifying user flags. */
+    @MediumTest
+    public void testCreateUserViaFlags() throws Exception {
+        createUserWithFlagsAndCheckType(UserInfo.FLAG_GUEST, UserManager.USER_TYPE_FULL_GUEST,
+                UserInfo.FLAG_FULL);
+
+        createUserWithFlagsAndCheckType(0, UserManager.USER_TYPE_FULL_SECONDARY,
+                UserInfo.FLAG_FULL);
+
+        createUserWithFlagsAndCheckType(UserInfo.FLAG_FULL, UserManager.USER_TYPE_FULL_SECONDARY,
+                0);
+
+        createUserWithFlagsAndCheckType(UserInfo.FLAG_DEMO, UserManager.USER_TYPE_FULL_DEMO,
+                UserInfo.FLAG_FULL);
+    }
+
+    /** Creates a user of the given user type and checks that the result has the requiredFlags. */
+    private void createUserWithTypeAndCheckFlags(String userType,
+            @UserIdInt int requiredFlags) {
+        final UserInfo userInfo = createUser("Name", userType, 0);
+        assertEquals("Wrong user type", userType, userInfo.userType);
+        assertEquals(
+                "Flags " + userInfo.flags + " did not contain expected " + requiredFlags,
+                requiredFlags, userInfo.flags & requiredFlags);
+        removeUser(userInfo.id);
+    }
+
+    /**
+     * Creates a user of the given flags and checks that the result is of the expectedUserType type
+     * and that it has the expected flags (including both flags and any additionalRequiredFlags).
+     */
+    private void createUserWithFlagsAndCheckType(@UserIdInt int flags, String expectedUserType,
+            @UserIdInt int additionalRequiredFlags) {
+        final UserInfo userInfo = createUser("Name", flags);
+        assertEquals("Wrong user type", expectedUserType, userInfo.userType);
+        additionalRequiredFlags |= flags;
+        assertEquals(
+                "Flags " + userInfo.flags + " did not contain expected " + additionalRequiredFlags,
+                additionalRequiredFlags, userInfo.flags & additionalRequiredFlags);
+        removeUser(userInfo.id);
+    }
+
+
     @MediumTest
     public void testAddGuest() throws Exception {
         UserInfo userInfo1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
@@ -234,7 +292,7 @@ public class UserManagerTest extends AndroidTestCase {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
 
         UserInfo userInfo = createProfileForUser("Profile",
-                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
         assertNotNull(userInfo);
         assertNull(mUserManager.getProfileParent(primaryUserId));
         UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
@@ -244,17 +302,61 @@ public class UserManagerTest extends AndroidTestCase {
         assertNull(mUserManager.getProfileParent(primaryUserId));
     }
 
+    /** Test that UserManager returns the correct badge information for a managed profile. */
+    @MediumTest
+    public void testProfileTypeInformation() throws Exception {
+        final UserTypeDetails userTypeDetails =
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_PROFILE_MANAGED);
+        assertNotNull("No " + UserManager.USER_TYPE_PROFILE_MANAGED + " type on device",
+                userTypeDetails);
+        assertEquals(UserManager.USER_TYPE_PROFILE_MANAGED, userTypeDetails.getName());
+
+        final int primaryUserId = mUserManager.getPrimaryUser().id;
+        UserInfo userInfo = createProfileForUser("Managed",
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
+        assertNotNull(userInfo);
+        final int userId = userInfo.id;
+        final UserHandle userHandle = new UserHandle(userId);
+
+        assertEquals(userTypeDetails.hasBadge(),
+                mUserManager.hasBadge(userId));
+        assertEquals(userTypeDetails.getIconBadge(),
+                mUserManager.getUserIconBadgeResId(userId));
+        assertEquals(userTypeDetails.getBadgePlain(),
+                mUserManager.getUserBadgeResId(userId));
+        assertEquals(userTypeDetails.getBadgeNoBackground(),
+                mUserManager.getUserBadgeNoBackgroundResId(userId));
+        assertEquals(userTypeDetails.isProfile(),
+                mUserManager.isProfile(userId));
+        assertEquals(userTypeDetails.getName(),
+                mUserManager.getUserTypeForUser(userHandle));
+
+        final int badgeIndex = userInfo.profileBadge;
+        assertEquals(
+                Resources.getSystem().getColor(userTypeDetails.getBadgeColor(badgeIndex), null),
+                mUserManager.getUserBadgeColor(userId));
+        assertEquals(
+                Resources.getSystem().getString(userTypeDetails.getBadgeLabel(badgeIndex), "Test"),
+                mUserManager.getBadgedLabelForUser("Test", userHandle));
+    }
+
     // Make sure only one managed profile can be created
     @MediumTest
     public void testAddManagedProfile() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo userInfo1 = createProfileForUser("Managed 1",
-                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
         UserInfo userInfo2 = createProfileForUser("Managed 2",
-                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
 
         assertNotNull(userInfo1);
         assertNull(userInfo2);
+
+        assertEquals(userInfo1.userType, UserManager.USER_TYPE_PROFILE_MANAGED);
+        int requiredFlags = UserInfo.FLAG_MANAGED_PROFILE | UserInfo.FLAG_PROFILE;
+        assertEquals("Wrong flags " + userInfo1.flags, requiredFlags,
+                userInfo1.flags & requiredFlags);
+
         // Verify that current user is not a managed profile
         assertFalse(mUserManager.isManagedProfile());
     }
@@ -264,7 +366,7 @@ public class UserManagerTest extends AndroidTestCase {
     public void testAddManagedProfile_withDisallowedPackages() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo userInfo1 = createProfileForUser("Managed1",
-                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
         // Verify that the packagesToVerify are installed by default.
         for (String pkg : PACKAGES) {
             assertTrue("Package should be installed in managed profile: " + pkg,
@@ -273,7 +375,7 @@ public class UserManagerTest extends AndroidTestCase {
         removeUser(userInfo1.id);
 
         UserInfo userInfo2 = createProfileForUser("Managed2",
-                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId, PACKAGES);
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId, PACKAGES);
         // Verify that the packagesToVerify are not installed by default.
         for (String pkg : PACKAGES) {
             assertFalse("Package should not be installed in managed profile when disallowed: "
@@ -287,7 +389,7 @@ public class UserManagerTest extends AndroidTestCase {
     public void testAddManagedProfile_disallowedPackagesInstalledLater() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         UserInfo userInfo = createProfileForUser("Managed",
-                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId, PACKAGES);
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId, PACKAGES);
         // Verify that the packagesToVerify are not installed by default.
         for (String pkg : PACKAGES) {
             assertFalse("Package should not be installed in managed profile when disallowed: "
@@ -326,7 +428,7 @@ public class UserManagerTest extends AndroidTestCase {
                 primaryUserHandle);
         try {
             UserInfo userInfo = createProfileForUser("Managed",
-                    UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+                    UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
             assertNull(userInfo);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
@@ -343,7 +445,7 @@ public class UserManagerTest extends AndroidTestCase {
                 primaryUserHandle);
         try {
             UserInfo userInfo = createProfileEvenWhenDisallowedForUser("Managed",
-                    UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+                    UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
             assertNotNull(userInfo);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
@@ -359,7 +461,7 @@ public class UserManagerTest extends AndroidTestCase {
         mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, true, primaryUserHandle);
         try {
             UserInfo userInfo = createProfileForUser("Managed",
-                    UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+                    UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
             assertNotNull(userInfo);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_USER, false,
@@ -396,7 +498,7 @@ public class UserManagerTest extends AndroidTestCase {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
         final long startTime = System.currentTimeMillis();
         UserInfo profile = createProfileForUser("Managed 1",
-                UserInfo.FLAG_MANAGED_PROFILE, primaryUserId);
+                UserManager.USER_TYPE_PROFILE_MANAGED, primaryUserId);
         final long endTime = System.currentTimeMillis();
         assertNotNull(profile);
         if (System.currentTimeMillis() > EPOCH_PLUS_30_YEARS) {
@@ -663,24 +765,32 @@ public class UserManagerTest extends AndroidTestCase {
         return user;
     }
 
-    private UserInfo createProfileForUser(String name, int flags, int userHandle) {
-        return createProfileForUser(name, flags, userHandle, null);
+    private UserInfo createUser(String name, String userType, int flags) {
+        UserInfo user = mUserManager.createUser(name, userType, flags);
+        if (user != null) {
+            usersToRemove.add(user.id);
+        }
+        return user;
     }
 
-    private UserInfo createProfileForUser(String name, int flags, int userHandle,
+    private UserInfo createProfileForUser(String name, String userType, int userHandle) {
+        return createProfileForUser(name, userType, userHandle, null);
+    }
+
+    private UserInfo createProfileForUser(String name, String userType, int userHandle,
             String[] disallowedPackages) {
         UserInfo profile = mUserManager.createProfileForUser(
-                name, flags, userHandle, disallowedPackages);
+                name, userType, 0, userHandle, disallowedPackages);
         if (profile != null) {
             usersToRemove.add(profile.id);
         }
         return profile;
     }
 
-    private UserInfo createProfileEvenWhenDisallowedForUser(String name, int flags,
+    private UserInfo createProfileEvenWhenDisallowedForUser(String name, String userType,
             int userHandle) {
         UserInfo profile = mUserManager.createProfileForUserEvenWhenDisallowed(
-                name, flags, userHandle, null);
+                name, userType, 0, userHandle, null);
         if (profile != null) {
             usersToRemove.add(profile.id);
         }

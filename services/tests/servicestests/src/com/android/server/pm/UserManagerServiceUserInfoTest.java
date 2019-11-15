@@ -16,11 +16,29 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.UserInfo.FLAG_DEMO;
+import static android.content.pm.UserInfo.FLAG_EPHEMERAL;
+import static android.content.pm.UserInfo.FLAG_FULL;
+import static android.content.pm.UserInfo.FLAG_GUEST;
+import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
+import static android.content.pm.UserInfo.FLAG_PROFILE;
+import static android.content.pm.UserInfo.FLAG_RESTRICTED;
+import static android.content.pm.UserInfo.FLAG_SYSTEM;
+import static android.os.UserManager.USER_TYPE_FULL_DEMO;
+import static android.os.UserManager.USER_TYPE_FULL_GUEST;
+import static android.os.UserManager.USER_TYPE_FULL_RESTRICTED;
+import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
+import static android.os.UserManager.USER_TYPE_FULL_SYSTEM;
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
+import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.UserIdInt;
 import android.content.pm.UserInfo;
+import android.content.pm.UserInfo.UserInfoFlag;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.UserHandle;
@@ -121,8 +139,61 @@ public class UserManagerServiceUserInfoTest {
         assertEquals("A Name", mUserManagerService.getUserInfo(TEST_ID).name);
     }
 
+    /** Test UMS.getUserTypeForUser(). */
+    @Test
+    public void testGetUserTypeForUser() throws Exception {
+        final String typeSys = mUserManagerService.getUserTypeForUser(UserHandle.USER_SYSTEM);
+        assertTrue("System user was of invalid type " + typeSys,
+                typeSys.equals(USER_TYPE_SYSTEM_HEADLESS) || typeSys.equals(USER_TYPE_FULL_SYSTEM));
+
+        final int testId = 100;
+        final String typeName = "A type";
+        UserInfo userInfo = createUser(testId, 0, typeName);
+        mUserManagerService.putUserInfo(userInfo);
+        assertEquals(typeName, mUserManagerService.getUserTypeForUser(testId));
+    }
+
+    /** Tests upgradeIfNecessaryLP (but without locking) for upgrading from version 8 to 9+. */
+    @Test
+    public void testUpgradeIfNecessaryLP_9() {
+        final int versionToTest = 9;
+
+        mUserManagerService.putUserInfo(createUser(100, FLAG_MANAGED_PROFILE, null));
+        mUserManagerService.putUserInfo(createUser(101,
+                FLAG_GUEST | FLAG_EPHEMERAL | FLAG_FULL, null));
+        mUserManagerService.putUserInfo(createUser(102, FLAG_RESTRICTED | FLAG_FULL, null));
+        mUserManagerService.putUserInfo(createUser(103, FLAG_FULL, null));
+        mUserManagerService.putUserInfo(createUser(104, FLAG_SYSTEM, null));
+        mUserManagerService.putUserInfo(createUser(105, FLAG_SYSTEM | FLAG_FULL, null));
+        mUserManagerService.putUserInfo(createUser(106, FLAG_DEMO | FLAG_FULL, null));
+
+        mUserManagerService.upgradeIfNecessaryLP(null, versionToTest - 1);
+
+        assertEquals(USER_TYPE_PROFILE_MANAGED, mUserManagerService.getUserTypeForUser(100));
+        assertTrue((mUserManagerService.getUserInfo(100).flags & FLAG_PROFILE) != 0);
+
+        assertEquals(USER_TYPE_FULL_GUEST, mUserManagerService.getUserTypeForUser(101));
+
+        assertEquals(USER_TYPE_FULL_RESTRICTED, mUserManagerService.getUserTypeForUser(102));
+        assertTrue((mUserManagerService.getUserInfo(102).flags & FLAG_PROFILE) == 0);
+
+        assertEquals(USER_TYPE_FULL_SECONDARY, mUserManagerService.getUserTypeForUser(103));
+        assertTrue((mUserManagerService.getUserInfo(103).flags & FLAG_PROFILE) == 0);
+
+        assertEquals(USER_TYPE_SYSTEM_HEADLESS, mUserManagerService.getUserTypeForUser(104));
+
+        assertEquals(USER_TYPE_FULL_SYSTEM, mUserManagerService.getUserTypeForUser(105));
+
+        assertEquals(USER_TYPE_FULL_DEMO, mUserManagerService.getUserTypeForUser(106));
+    }
+
+    /** Creates a UserInfo with the given flags and userType. */
+    private UserInfo createUser(@UserIdInt int userId, @UserInfoFlag int flags, String userType) {
+        return new UserInfo(userId, "A Name", "A path", flags, userType);
+    }
+
     private UserInfo createUser() {
-        UserInfo user = new UserInfo(/*id*/ 21, "A Name", "A path", /*flags*/ 0x0ff0ff);
+        UserInfo user = new UserInfo(/*id*/ 21, "A Name", "A path", /*flags*/ 0x0ff0ff, "A type");
         user.serialNumber = 5;
         user.creationTime = 4L << 32;
         user.lastLoggedInTime = 5L << 32;
@@ -141,6 +212,7 @@ public class UserManagerServiceUserInfoTest {
         assertEquals("Name not preserved", one.name, two.name);
         assertEquals("Icon path not preserved", one.iconPath, two.iconPath);
         assertEquals("Flags not preserved", one.flags, two.flags);
+        assertEquals("UserType not preserved", one.userType, two.userType);
         assertEquals("profile group not preserved", one.profileGroupId,
                 two.profileGroupId);
         assertEquals("restricted profile parent not preseved", one.restrictedProfileParentId,

@@ -9724,13 +9724,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                 }
 
-                int userInfoFlags = 0;
-                if (ephemeral) {
-                    userInfoFlags |= UserInfo.FLAG_EPHEMERAL;
-                }
-                if (demo) {
-                    userInfoFlags |= UserInfo.FLAG_DEMO;
-                }
+                int userInfoFlags = ephemeral ? UserInfo.FLAG_EPHEMERAL : 0;
+                String userType = demo ? UserManager.USER_TYPE_FULL_DEMO
+                        : UserManager.USER_TYPE_FULL_SECONDARY;
                 String[] disallowedPackages = null;
                 if (!leaveAllSystemAppsEnabled) {
                     disallowedPackages = mOverlayPackagesProvider.getNonRequiredApps(admin,
@@ -9738,7 +9734,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             new String[0]);
                 }
                 UserInfo userInfo = mUserManagerInternal.createUserEvenWhenDisallowed(name,
-                        userInfoFlags, disallowedPackages);
+                        userType, userInfoFlags, disallowedPackages);
                 if (userInfo != null) {
                     user = userInfo.getUserHandle();
                 }
