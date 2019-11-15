@@ -28,7 +28,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
@@ -55,7 +54,7 @@ import org.junit.runner.RunWith;
 @RunWith(WindowTestRunner.class)
 public class AppChangeTransitionTests extends WindowTestsBase {
 
-    private TaskStack mStack;
+    private ActivityStack mStack;
     private Task mTask;
     private ActivityRecord mActivity;
 

@@ -68,8 +68,8 @@ public class TaskStackContainersTests extends WindowTestsBase {
     @Test
     public void testStackPositionChildAt() {
         // Test that always-on-top stack can't be moved to position other than top.
-        final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final TaskStack stack2 = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack2 = createTaskStackOnDisplay(mDisplayContent);
 
         final WindowContainer taskStackContainer = stack1.getParent();
 
@@ -93,7 +93,7 @@ public class TaskStackContainersTests extends WindowTestsBase {
     @Test
     public void testStackPositionBelowPinnedStack() {
         // Test that no stack can be above pinned stack.
-        final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityStack stack1 = createTaskStackOnDisplay(mDisplayContent);
 
         final WindowContainer taskStackContainer = stack1.getParent();
 

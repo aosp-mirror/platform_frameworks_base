@@ -366,7 +366,7 @@ public class RecentsAnimationController implements DeathRecipient {
         // Make leashes for each of the visible/target tasks and add it to the recents animation to
         // be started
         final ArrayList<Task> visibleTasks = mDisplayContent.getVisibleTasks();
-        final TaskStack targetStack = mDisplayContent.getStack(WINDOWING_MODE_UNDEFINED,
+        final ActivityStack targetStack = mDisplayContent.getStack(WINDOWING_MODE_UNDEFINED,
                 targetActivityType);
         if (targetStack != null) {
             for (int i = targetStack.getChildCount() - 1; i >= 0; i--) {
@@ -410,7 +410,8 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         // Save the minimized home height
-        final TaskStack dockedStack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
+        final ActivityStack dockedStack =
+                mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
         mDisplayContent.getDockedDividerController().getHomeStackBoundsInDockedMode(
                 mDisplayContent.getConfiguration(),
                 dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide(),

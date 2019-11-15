@@ -41,7 +41,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Tests for the {@link TaskStack} class.
+ * Tests for the {@link ActivityStack} class.
  *
  * Build/Install/Run:
  *  atest WmTests:TaskStackTests

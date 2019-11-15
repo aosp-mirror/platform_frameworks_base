@@ -1006,7 +1006,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            final TaskStack stack = getStack();
+            final ActivityStack stack = getStack();
             if (inPinnedWindowingMode() && stack != null
                     && stack.lastAnimatingBoundsWasToFullscreen()) {
                 // PIP edge case: When going from pinned to fullscreen, we apply a
@@ -1404,7 +1404,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null ? mActivityRecord.getTask() : null;
     }
 
-    TaskStack getStack() {
+    ActivityStack getStack() {
         Task task = getTask();
         if (task != null) {
             if (task.getTaskStack() != null) {
@@ -1427,7 +1427,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         bounds.setEmpty();
         mTmpRect.setEmpty();
         if (intersectWithStackBounds) {
-            final TaskStack stack = task.getTaskStack();
+            final ActivityStack stack = task.getTaskStack();
             if (stack != null) {
                 stack.getDimBounds(mTmpRect);
             } else {
@@ -2135,7 +2135,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        final TaskStack stack = getStack();
+        final ActivityStack stack = getStack();
         if (stack != null && stack.shouldIgnoreInput()) {
             // Ignore when the stack shouldn't receive input event.
             // (i.e. the minimized stack in split screen mode.)
@@ -2539,7 +2539,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             // just in case they have the divider at an unstable position. Better
                             // also reset drag resizing state, because the owner can't do it
                             // anymore.
-                            final TaskStack stack =
+                            final ActivityStack stack =
                                     dc.getSplitScreenPrimaryStackIgnoringVisibility();
                             if (stack != null) {
                                 stack.resetDockedStackToMiddle();
@@ -3136,7 +3136,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final TaskStack stack = task.getTaskStack();
+        final ActivityStack stack = task.getTaskStack();
         if (stack == null) {
             return;
         }
@@ -3150,7 +3150,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        final TaskStack stack = task.getTaskStack();
+        final ActivityStack stack = task.getTaskStack();
         if (stack == null) {
             return;
         }
@@ -3399,7 +3399,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private int getStackId() {
-        final TaskStack stack = getStack();
+        final ActivityStack stack = getStack();
         if (stack == null) {
             return INVALID_STACK_ID;
         }
@@ -3630,7 +3630,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        final TaskStack stack = getStack();
+        final ActivityStack stack = getStack();
         pw.print(prefix + "mDisplayId=" + getDisplayId());
         if (stack != null) {
             pw.print(" stackId=" + stack.mStackId);
@@ -5080,7 +5080,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 
-        TaskStack stack = getStack();
+        ActivityStack stack = getStack();
 
         // If we have stack outsets, that means the top-left
         // will be outset, and we need to inset ourselves
