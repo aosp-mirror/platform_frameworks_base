@@ -241,8 +241,6 @@ class FlagsDict:
             flags = csv[1:]
             if (FLAG_PUBLIC_API in flags) or (FLAG_SYSTEM_API in flags):
                 flags.append(FLAG_WHITELIST)
-            elif FLAG_TEST_API in flags:
-                flags.append(FLAG_GREYLIST)
             self._dict[csv[0]].update(flags)
 
     def assign_flag(self, flag, apis, source="<unknown>"):
