@@ -132,6 +132,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private static final int MSG_COMMIT = 1;
     private static final int MSG_ON_PACKAGE_INSTALLED = 2;
+    private static final int MSG_SEAL = 3;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -332,6 +333,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_SEAL:
+                    handleSeal((IntentSender) msg.obj);
+                    break;
                 case MSG_COMMIT:
                     handleCommit();
                     break;
@@ -848,7 +852,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     "Session " + sessionId + " is a child of multi-package session "
                             + mParentSessionId +  " and may not be committed directly.");
         }
-        if (!markAsCommitted(statusReceiver, forTransfer)) {
+
+        assertCanBeCommitted(forTransfer);
+
+        if (isMultiPackage()) {
+            for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
+                final int childSessionId = mChildSessionIds.keyAt(i);
+                mSessionProvider.getSession(childSessionId).assertCanBeCommitted(forTransfer);
+            }
+        }
+
+        mHandler.obtainMessage(MSG_SEAL, statusReceiver).sendToTarget();
+    }
+
+    private void handleSeal(@NonNull IntentSender statusReceiver) {
+        if (!markAsCommitted(statusReceiver)) {
             return;
         }
         if (isMultiPackage()) {
@@ -856,23 +874,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             final IntentSender childIntentSender =
                     new ChildStatusIntentReceiver(remainingSessions, statusReceiver)
                             .getIntentSender();
-            RuntimeException commitException = null;
             boolean commitFailed = false;
             for (int i = mChildSessionIds.size() - 1; i >= 0; --i) {
                 final int childSessionId = mChildSessionIds.keyAt(i);
-                try {
-                    // commit all children, regardless if any of them fail; we'll throw/return
-                    // as appropriate once all children have been processed
-                    if (!mSessionProvider.getSession(childSessionId)
-                            .markAsCommitted(childIntentSender, forTransfer)) {
-                        commitFailed = true;
-                    }
-                } catch (RuntimeException e) {
-                    commitException = e;
+                // commit all children, regardless if any of them fail; we'll throw/return
+                // as appropriate once all children have been processed
+                if (!mSessionProvider.getSession(childSessionId)
+                        .markAsCommitted(childIntentSender)) {
+                    commitFailed = true;
                 }
-            }
-            if (commitException != null) {
-                throw commitException;
             }
             if (commitFailed) {
                 return;
@@ -940,27 +950,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-
     /**
-     * Do everything but actually commit the session. If this was not already called, the session
-     * will be sealed and marked as committed. The caller of this method is responsible for
-     * subsequently submitting this session for processing.
-     *
-     * This method may be called multiple times to update the status receiver validate caller
-     * permissions.
+     * Sanity checks to make sure it's ok to commit the session.
      */
-    private boolean markAsCommitted(
-            @NonNull IntentSender statusReceiver, boolean forTransfer) {
-        Preconditions.checkNotNull(statusReceiver);
-
-        List<PackageInstallerSession> childSessions = getChildSessions();
-
-        final boolean wasSealed;
+    private void assertCanBeCommitted(boolean forTransfer) {
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotDestroyedLocked("commit");
-
-            mRemoteStatusReceiver = statusReceiver;
+            assertNoWriteFileTransfersOpenLocked();
 
             if (forTransfer) {
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, null);
@@ -973,6 +970,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     throw new IllegalArgumentException("Session has been transferred");
                 }
             }
+        }
+    }
+
+    /**
+     * Do everything but actually commit the session. If this was not already called, the session
+     * will be sealed and marked as committed. The caller of this method is responsible for
+     * subsequently submitting this session for processing.
+     *
+     * This method may be called multiple times to update the status receiver validate caller
+     * permissions.
+     */
+    private boolean markAsCommitted(@NonNull IntentSender statusReceiver) {
+        Preconditions.checkNotNull(statusReceiver);
+
+        List<PackageInstallerSession> childSessions = getChildSessions();
+
+        final boolean wasSealed;
+        synchronized (mLock) {
+            mRemoteStatusReceiver = statusReceiver;
 
             // After validations and updating the observer, we can skip re-sealing, etc. because we
             // have already marked ourselves as committed.
@@ -1095,26 +1111,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 assertMultiPackageConsistencyLocked(childSessions);
             }
 
-            // Read transfers from the original owner stay open, but as the session's data
-            // cannot be modified anymore, there is no leak of information. For staged sessions,
-            // further validation is performed by the staging manager.
+            // Read transfers from the original owner stay open, but as the session's data cannot
+            // be modified anymore, there is no leak of information. For staged sessions, further
+            // validation is performed by the staging manager.
             if (!params.isMultiPackage) {
                 final PackageInfo pkgInfo = mPm.getPackageInfo(
                         params.appPackageName, PackageManager.GET_SIGNATURES
                                 | PackageManager.MATCH_STATIC_SHARED_LIBRARIES /*flags*/, userId);
 
-                try {
-                    if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
-                        validateApexInstallLocked();
-                    } else {
-                        validateApkInstallLocked(pkgInfo);
-                    }
-                } catch (PackageManagerException e) {
-                    throw e;
-                } catch (Throwable e) {
-                    // Convert all exceptions into package manager exceptions as only those are
-                    // handled in the code above.
-                    throw new PackageManagerException(e);
+                if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+                    validateApexInstallLocked();
+                } else {
+                    validateApkInstallLocked(pkgInfo);
                 }
             }
 
@@ -1122,13 +1130,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mStagingManager.checkNonOverlappingWithStagedSessions(this);
             }
         } catch (PackageManagerException e) {
-            // Session is sealed but could not be verified, we need to destroy it.
-            destroyInternal();
-            // Dispatch message to remove session from PackageInstallerService
-            dispatchSessionFinished(
-                    e.error, ExceptionUtils.getCompleteMessage(e), null);
-            throw e;
+            throw onSessionVerificationFailure(e);
+        } catch (Throwable e) {
+            // Convert all exceptions into package manager exceptions as only those are handled
+            // in the code above.
+            throw onSessionVerificationFailure(new PackageManagerException(e));
         }
+    }
+
+    private PackageManagerException onSessionVerificationFailure(PackageManagerException e) {
+        // Session is sealed but could not be verified, we need to destroy it.
+        destroyInternal();
+        // Dispatch message to remove session from PackageInstallerService.
+        dispatchSessionFinished(e.error, ExceptionUtils.getCompleteMessage(e), null);
+
+        return e;
     }
 
     /**
