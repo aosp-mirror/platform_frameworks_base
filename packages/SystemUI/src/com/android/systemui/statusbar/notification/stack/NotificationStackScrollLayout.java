@@ -1454,8 +1454,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         ExpandableNotificationRow row = topEntry.getRow();
         if (row.isChildInGroup()) {
-            final NotificationEntry groupSummary
-                    = mGroupManager.getGroupSummary(row.getStatusBarNotification());
+            final NotificationEntry groupSummary =
+                    mGroupManager.getGroupSummary(row.getEntry().getSbn());
             if (groupSummary != null) {
                 row = groupSummary.getRow();
             }
@@ -2996,7 +2996,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean isChildInGroup(View child) {
         return child instanceof ExpandableNotificationRow
                 && mGroupManager.isChildInGroupWithSummary(
-                ((ExpandableNotificationRow) child).getStatusBarNotification());
+                ((ExpandableNotificationRow) child).getEntry().getSbn());
     }
 
     /**
@@ -3071,7 +3071,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             NotificationEntry groupSummary =
-                    mGroupManager.getGroupSummary(row.getStatusBarNotification());
+                    mGroupManager.getGroupSummary(row.getEntry().getSbn());
             if (groupSummary != null && groupSummary.getRow() != row) {
                 return row.getVisibility() == View.INVISIBLE;
             }
@@ -6134,7 +6134,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             if (view instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                mMetricsLogger.write(row.getStatusBarNotification().getLogMaker()
+                mMetricsLogger.write(row.getEntry().getSbn().getLogMaker()
                         .setCategory(MetricsEvent.ACTION_TOUCH_GEAR)
                         .setType(MetricsEvent.TYPE_ACTION)
                         );
@@ -6160,7 +6160,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         public void onMenuShown(View row) {
             if (row instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) row;
-                mMetricsLogger.write(notificationRow.getStatusBarNotification().getLogMaker()
+                mMetricsLogger.write(notificationRow.getEntry().getSbn().getLogMaker()
                         .setCategory(MetricsEvent.ACTION_REVEAL_GEAR)
                         .setType(MetricsEvent.TYPE_ACTION));
                 mHeadsUpManager.setMenuShown(notificationRow.getEntry(), true);
@@ -6256,7 +6256,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
                 if (row.isHeadsUp()) {
                     mHeadsUpManager.addSwipedOutNotification(
-                            row.getStatusBarNotification().getKey());
+                            row.getEntry().getSbn().getKey());
                 }
                 isBlockingHelperShown =
                         row.performDismissWithBlockingHelper(false /* fromAccessibility */);
@@ -6327,9 +6327,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             if (animView instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
                 if (row.isPinned() && !canChildBeDismissed(row)
-                        && row.getStatusBarNotification().getNotification().fullScreenIntent
+                        && row.getEntry().getSbn().getNotification().fullScreenIntent
                                 == null) {
-                    mHeadsUpManager.removeNotification(row.getStatusBarNotification().getKey(),
+                    mHeadsUpManager.removeNotification(row.getEntry().getSbn().getKey(),
                             true /* removeImmediately */);
                 }
             }

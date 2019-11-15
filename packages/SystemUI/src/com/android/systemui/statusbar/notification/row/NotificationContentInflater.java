@@ -512,7 +512,7 @@ public class NotificationContentInflater {
                     existingWrapper.onReinflated();
                 }
             } catch (Exception e) {
-                handleInflationError(runningInflations, e, row.getStatusBarNotification(), callback);
+                handleInflationError(runningInflations, e, row.getEntry().getSbn(), callback);
                 // Add a running inflation to make sure we don't trigger callbacks.
                 // Safe to do because only happens in tests.
                 runningInflations.put(inflationId, new CancellationSignal());
@@ -563,7 +563,7 @@ public class NotificationContentInflater {
                     onViewApplied(newView);
                 } catch (Exception anotherException) {
                     runningInflations.remove(inflationId);
-                    handleInflationError(runningInflations, e, row.getStatusBarNotification(),
+                    handleInflationError(runningInflations, e, row.getEntry().getSbn(),
                             callback);
                 }
             }
@@ -838,7 +838,7 @@ public class NotificationContentInflater {
 
         private void handleError(Exception e) {
             mRow.getEntry().onInflationTaskFinished();
-            StatusBarNotification sbn = mRow.getStatusBarNotification();
+            StatusBarNotification sbn = mRow.getEntry().getSbn();
             final String ident = sbn.getPackageName() + "/0x"
                     + Integer.toHexString(sbn.getId());
             Log.e(StatusBar.TAG, "couldn't inflate view for notification " + ident, e);

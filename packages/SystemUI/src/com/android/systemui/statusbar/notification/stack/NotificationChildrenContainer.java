@@ -299,7 +299,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     public void recreateNotificationHeader(OnClickListener listener) {
         mHeaderClickListener = listener;
-        StatusBarNotification notification = mContainingNotification.getStatusBarNotification();
+        StatusBarNotification notification = mContainingNotification.getEntry().getSbn();
         final Notification.Builder builder = Notification.Builder.recoverBuilder(getContext(),
                 notification.getNotification());
         RemoteViews header = builder.makeNotificationHeader();
@@ -329,7 +329,7 @@ public class NotificationChildrenContainer extends ViewGroup {
      */
     private void recreateLowPriorityHeader(Notification.Builder builder) {
         RemoteViews header;
-        StatusBarNotification notification = mContainingNotification.getStatusBarNotification();
+        StatusBarNotification notification = mContainingNotification.getEntry().getSbn();
         if (mIsLowPriority) {
             if (builder == null) {
                 builder = Notification.Builder.recoverBuilder(getContext(),

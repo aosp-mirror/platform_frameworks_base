@@ -183,7 +183,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
             QuickQSPanel panel = ctrl.getStatusBarView().findViewById(
                     com.android.systemui.R.id.quick_qs_panel);
             panel.getMediaPlayer().setMediaSession(token,
-                    mRow.getStatusBarNotification().getNotification().getSmallIcon(),
+                    mRow.getEntry().getSbn().getNotification().getSmallIcon(),
                     getNotificationHeader().getOriginalIconColor(),
                     mRow.getCurrentBackgroundTint(),
                     mActions,
@@ -191,11 +191,11 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
             QSPanel bigPanel = ctrl.getStatusBarView().findViewById(
                     com.android.systemui.R.id.quick_settings_panel);
             bigPanel.addMediaSession(token,
-                    mRow.getStatusBarNotification().getNotification().getSmallIcon(),
+                    mRow.getEntry().getSbn().getNotification().getSmallIcon(),
                     getNotificationHeader().getOriginalIconColor(),
                     mRow.getCurrentBackgroundTint(),
                     mActions,
-                    mRow.getStatusBarNotification());
+                    mRow.getEntry().getSbn());
         }
 
         boolean showCompactSeekbar = mMediaManager.getShowCompactMediaSeekbar();

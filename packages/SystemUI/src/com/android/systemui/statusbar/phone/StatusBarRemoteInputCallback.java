@@ -175,7 +175,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         } else {
             if (row.isChildInGroup() && !row.areChildrenExpanded()) {
                 // The group isn't expanded, let's make sure it's visible!
-                mGroupManager.toggleGroupExpansion(row.getStatusBarNotification());
+                mGroupManager.toggleGroupExpansion(row.getEntry().getSbn());
             }
             row.setUserExpanded(true);
             row.getPrivateLayout().setOnExpandedVisibleListener(clickedView::performClick);
