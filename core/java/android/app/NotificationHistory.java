@@ -311,6 +311,14 @@ public final class NotificationHistory implements Parcelable {
         mHistoryCount++;
     }
 
+    public void addNotificationsToWrite(@NonNull NotificationHistory notificationHistory) {
+        for (HistoricalNotification hn : notificationHistory.getNotificationsToWrite()) {
+            // TODO: consider merging by date
+            addNotificationToWrite(hn);
+        }
+        poolStringsFromNotifications();
+    }
+
     /**
      * Removes a package's historical notifications and regenerates the string pool
      */

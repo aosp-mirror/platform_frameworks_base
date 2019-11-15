@@ -45,11 +45,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
-import java.nio.file.FileSystem;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -109,8 +104,9 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         mFileAttrProvider = new TestFileAttrProvider();
         mRootDir = new File(mContext.getFilesDir(), "NotificationHistoryDatabaseTest");
 
-        mDataBase = new NotificationHistoryDatabase(mContext, mRootDir, mFileAttrProvider);
-        mDataBase.init(mFileWriteHandler);
+        mDataBase = new NotificationHistoryDatabase(
+                mContext, mFileWriteHandler, mRootDir, mFileAttrProvider);
+        mDataBase.init();
     }
 
     @Test
