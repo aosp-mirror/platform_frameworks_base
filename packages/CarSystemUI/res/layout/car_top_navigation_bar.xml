@@ -65,8 +65,6 @@
             />
         </FrameLayout>
 
-        <include layout="@layout/car_ongoing_privacy_chip"/>
-
         <FrameLayout
             android:id="@+id/clock_container"
             android:layout_width="wrap_content"
