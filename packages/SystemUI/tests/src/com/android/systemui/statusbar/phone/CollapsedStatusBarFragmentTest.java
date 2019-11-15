@@ -34,8 +34,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.tuner.TunerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,10 +56,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     @Before
     public void setup() {
-        mSysuiContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         StatusBar statusBar = mock(StatusBar.class);
         mDependency.injectTestDependency(StatusBar.class, statusBar);
-        mSysuiContext.putComponent(TunerService.class, mock(TunerService.class));
         mStatusBarStateController = mDependency
                 .injectMockDependency(StatusBarStateController.class);
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);

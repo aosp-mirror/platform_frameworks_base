@@ -53,7 +53,6 @@ import android.testing.TestableLooper.RunWithLooper;
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -88,8 +87,6 @@ public class AuthControllerTest extends SysuiTestCase {
 
         TestableContext context = spy(mContext);
 
-        mContext.putComponent(StatusBar.class, mock(StatusBar.class));
-
         when(context.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE))
                 .thenReturn(true);
@@ -104,7 +101,6 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mAuthController = new TestableAuthController(
                 context, mock(CommandQueue.class), new MockInjector());
-        mAuthController.mComponents = mContext.getComponents();
 
         mAuthController.start();
     }

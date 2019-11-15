@@ -17,13 +17,9 @@ package com.android.systemui;
 import android.content.Context;
 import android.testing.LeakCheck;
 import android.testing.TestableContext;
-import android.util.ArrayMap;
 import android.view.Display;
 
-public class SysuiTestableContext extends TestableContext implements SysUiServiceProvider {
-
-    private ArrayMap<Class<?>, Object> mComponents;
-
+public class SysuiTestableContext extends TestableContext {
     public SysuiTestableContext(Context base) {
         super(base);
         setTheme(R.style.Theme_SystemUI);
@@ -32,21 +28,6 @@ public class SysuiTestableContext extends TestableContext implements SysUiServic
     public SysuiTestableContext(Context base, LeakCheck check) {
         super(base, check);
         setTheme(R.style.Theme_SystemUI);
-    }
-
-    public ArrayMap<Class<?>, Object> getComponents() {
-        if (mComponents == null) mComponents = new ArrayMap<>();
-        return mComponents;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getComponent(Class<T> interfaceType) {
-        return (T) (mComponents != null ? mComponents.get(interfaceType) : null);
-    }
-
-    public <T, C extends T> void putComponent(Class<T> interfaceType, C component) {
-        if (mComponents == null) mComponents = new ArrayMap<>();
-        mComponents.put(interfaceType, component);
     }
 
     @Override
