@@ -36,6 +36,8 @@ public class InteractiveMicrobenchmarkActivity extends Activity implements Bench
         addBenchmark("Empty", () -> {
         });
         addHeader("Application Benchmarks");
+        ApplicationBenchmarks.initializeBenchmarks(this, this);
+        addHeader("CPU Intensive Benchmarks");
         CPUIntensiveBenchmarks.initializeBenchmarks(this, this);
         addHeader("Init Check Overhead Benchmarks");
         InitCheckOverheadBenchmarks.initializeBenchmarks(this, this);
