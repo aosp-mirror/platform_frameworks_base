@@ -508,7 +508,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.insert(resolveCallingPackage(), null, mUri, mContentValues);
+            provider.insert(resolveCallingPackage(), null, mUri, mContentValues, null);
         }
     }
 
@@ -522,7 +522,8 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.delete(resolveCallingPackage(), null, mUri, mWhere, null);
+            provider.delete(resolveCallingPackage(), null, mUri,
+                    ContentResolver.createSqlQueryBundle(mWhere, null));
         }
     }
 
@@ -679,7 +680,8 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.update(resolveCallingPackage(), null, mUri, mContentValues, mWhere, null);
+            provider.update(resolveCallingPackage(), null, mUri, mContentValues,
+                    ContentResolver.createSqlQueryBundle(mWhere, null));
         }
     }
 

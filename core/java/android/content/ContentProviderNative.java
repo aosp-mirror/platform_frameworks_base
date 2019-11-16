@@ -153,8 +153,9 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     ContentValues values = ContentValues.CREATOR.createFromParcel(data);
+                    Bundle extras = data.readBundle();
 
-                    Uri out = insert(callingPkg, featureId, url, values);
+                    Uri out = insert(callingPkg, featureId, url, values, extras);
                     reply.writeNoException();
                     Uri.writeToParcel(reply, out);
                     return true;
@@ -199,10 +200,9 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String callingPkg = data.readString();
                     String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
-                    String selection = data.readString();
-                    String[] selectionArgs = data.readStringArray();
+                    Bundle extras = data.readBundle();
 
-                    int count = delete(callingPkg, featureId, url, selection, selectionArgs);
+                    int count = delete(callingPkg, featureId, url, extras);
 
                     reply.writeNoException();
                     reply.writeInt(count);
@@ -216,11 +216,9 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
                     ContentValues values = ContentValues.CREATOR.createFromParcel(data);
-                    String selection = data.readString();
-                    String[] selectionArgs = data.readStringArray();
+                    Bundle extras = data.readBundle();
 
-                    int count = update(callingPkg, featureId, url, values, selection,
-                            selectionArgs);
+                    int count = update(callingPkg, featureId, url, values, extras);
 
                     reply.writeNoException();
                     reply.writeInt(count);
@@ -283,10 +281,10 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String authority = data.readString();
                     String method = data.readString();
                     String stringArg = data.readString();
-                    Bundle args = data.readBundle();
+                    Bundle extras = data.readBundle();
 
                     Bundle responseBundle = call(callingPkg, featureId, authority, method,
-                            stringArg, args);
+                            stringArg, extras);
 
                     reply.writeNoException();
                     reply.writeBundle(responseBundle);
@@ -370,11 +368,11 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     String callingPkg = data.readString();
                     String featureId = data.readString();
                     Uri url = Uri.CREATOR.createFromParcel(data);
-                    Bundle args = data.readBundle();
+                    Bundle extras = data.readBundle();
                     ICancellationSignal signal = ICancellationSignal.Stub.asInterface(
                             data.readStrongBinder());
 
-                    boolean out = refresh(callingPkg, featureId, url, args, signal);
+                    boolean out = refresh(callingPkg, featureId, url, extras, signal);
                     reply.writeNoException();
                     reply.writeInt(out ? 0 : -1);
                     return true;
@@ -498,7 +496,7 @@ final class ContentProviderProxy implements IContentProvider
 
     @Override
     public Uri insert(String callingPkg, @Nullable String featureId, Uri url,
-            ContentValues values) throws RemoteException
+            ContentValues values, Bundle extras) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -509,6 +507,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeString(featureId);
             url.writeToParcel(data, 0);
             values.writeToParcel(data, 0);
+            data.writeBundle(extras);
 
             mRemote.transact(IContentProvider.INSERT_TRANSACTION, data, reply, 0);
 
@@ -573,8 +572,8 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public int delete(String callingPkg, @Nullable String featureId, Uri url, String selection,
-            String[] selectionArgs) throws RemoteException {
+    public int delete(String callingPkg, @Nullable String featureId, Uri url, Bundle extras)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
@@ -583,8 +582,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeString(callingPkg);
             data.writeString(featureId);
             url.writeToParcel(data, 0);
-            data.writeString(selection);
-            data.writeStringArray(selectionArgs);
+            data.writeBundle(extras);
 
             mRemote.transact(IContentProvider.DELETE_TRANSACTION, data, reply, 0);
 
@@ -599,7 +597,7 @@ final class ContentProviderProxy implements IContentProvider
 
     @Override
     public int update(String callingPkg, @Nullable String featureId, Uri url,
-            ContentValues values, String selection, String[] selectionArgs) throws RemoteException {
+            ContentValues values, Bundle extras) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
@@ -609,8 +607,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeString(featureId);
             url.writeToParcel(data, 0);
             values.writeToParcel(data, 0);
-            data.writeString(selection);
-            data.writeStringArray(selectionArgs);
+            data.writeBundle(extras);
 
             mRemote.transact(IContentProvider.UPDATE_TRANSACTION, data, reply, 0);
 
@@ -682,7 +679,7 @@ final class ContentProviderProxy implements IContentProvider
 
     @Override
     public Bundle call(String callingPkg, @Nullable String featureId, String authority,
-            String method, String request, Bundle args) throws RemoteException {
+            String method, String request, Bundle extras) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         try {
@@ -693,7 +690,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeString(authority);
             data.writeString(method);
             data.writeString(request);
-            data.writeBundle(args);
+            data.writeBundle(extras);
 
             mRemote.transact(IContentProvider.CALL_TRANSACTION, data, reply, 0);
 
@@ -824,7 +821,7 @@ final class ContentProviderProxy implements IContentProvider
     }
 
     @Override
-    public boolean refresh(String callingPkg, @Nullable String featureId, Uri url, Bundle args,
+    public boolean refresh(String callingPkg, @Nullable String featureId, Uri url, Bundle extras,
             ICancellationSignal signal) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -834,7 +831,7 @@ final class ContentProviderProxy implements IContentProvider
             data.writeString(callingPkg);
             data.writeString(featureId);
             url.writeToParcel(data, 0);
-            data.writeBundle(args);
+            data.writeBundle(extras);
             data.writeStrongBinder(signal != null ? signal.asBinder() : null);
 
             mRemote.transact(IContentProvider.REFRESH_TRANSACTION, data, reply, 0);
