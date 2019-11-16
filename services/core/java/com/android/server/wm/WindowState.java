@@ -212,7 +212,6 @@ import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
-import com.android.server.wm.utils.InsetUtils;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
@@ -1215,11 +1214,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public WindowManager.LayoutParams getAttrs() {
         return mAttrs;
-    }
-
-    @Override
-    public boolean getNeedsMenuLw(WindowManagerPolicy.WindowState bottom) {
-        return getDisplayContent().getNeedsMenu(this, bottom);
     }
 
     @Override
