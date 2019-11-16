@@ -28,6 +28,7 @@ LOCAL_REQUIRED_MODULES := \
 	AccentColorDiscordOverlay \
 	AccentColorGoldenShowerOverlay \
 	AccentColorJollibeeOverlay \
+        AccentColorMoonshineOverlay \
         AccentColorNextbitOverlay \
 	AccentColorOnePlusOverlay \
 	AccentColorParanoidOverlay \
