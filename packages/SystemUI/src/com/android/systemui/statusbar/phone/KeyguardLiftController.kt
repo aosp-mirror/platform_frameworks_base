@@ -67,6 +67,9 @@ class KeyguardLiftController constructor(
     }
 
     private fun updateListeningState() {
+        if (pickupSensor == null) {
+            return
+        }
         val onKeyguard = keyguardUpdateMonitor.isKeyguardVisible &&
                 !statusBarStateController.isDozing
 

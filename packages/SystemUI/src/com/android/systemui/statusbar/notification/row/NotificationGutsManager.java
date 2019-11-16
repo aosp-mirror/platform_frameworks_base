@@ -100,6 +100,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     protected String mKeyToRemoveOnGutsClosed;
 
     private StatusBar mStatusBar;
+    private Runnable mOpenRunnable;
 
     @Inject
     public NotificationGutsManager(
@@ -343,6 +344,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     public void closeAndSaveGuts(boolean removeLeavebehinds, boolean force, boolean removeControls,
             int x, int y, boolean resetMenu) {
         if (mNotificationGutsExposed != null) {
+            mNotificationGutsExposed.removeCallbacks(mOpenRunnable);
             mNotificationGutsExposed.closeControls(removeLeavebehinds, removeControls, x, y, force);
         }
         if (resetMenu) {
@@ -445,7 +447,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         // ensure that it's laid but not visible until actually laid out
         guts.setVisibility(View.INVISIBLE);
         // Post to ensure the the guts are properly laid out.
-        guts.post(new Runnable() {
+        mOpenRunnable = new Runnable() {
             @Override
             public void run() {
                 if (row.getWindowToken() == null) {
@@ -470,7 +472,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mListContainer.onHeightChanged(row, true /* needsAnimation */);
                 mGutsMenuItem = menuItem;
             }
-        });
+        };
+        guts.post(mOpenRunnable);
         return true;
     }
 
