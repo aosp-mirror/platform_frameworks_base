@@ -188,6 +188,7 @@ public class StatusBarWindowViewController {
                 boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
                 boolean isCancel = ev.getActionMasked() == MotionEvent.ACTION_CANCEL;
 
+                boolean expandingBelowNotch = mExpandingBelowNotch;
                 if (isUp || isCancel) {
                     mExpandingBelowNotch = false;
                 }
@@ -236,8 +237,9 @@ public class StatusBarWindowViewController {
                 // regular view bounds.
                 if (isDown && ev.getY() >= mView.getBottom()) {
                     mExpandingBelowNotch = true;
+                    expandingBelowNotch = true;
                 }
-                if (mExpandingBelowNotch) {
+                if (expandingBelowNotch) {
                     return mStatusBarView.dispatchTouchEvent(ev);
                 }
 
