@@ -244,7 +244,8 @@ message AppWindowTokenProto {
     optional int32 num_drawn_windows = 15;
     optional bool all_drawn = 16;
     optional bool last_all_drawn = 17;
-    optional bool removed = 18;
+    // Will be removed soon
+    optional bool removed = 18 [deprecated=true];
     optional IdentifierProto starting_window = 19;
     optional bool starting_displayed = 20;
     optional bool starting_moved = 21;

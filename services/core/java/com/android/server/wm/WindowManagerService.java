@@ -1473,7 +1473,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     ProtoLog.w(WM_ERROR, "Attempted to add window with non-application token "
                             + ".%s Aborting.", token);
                     return WindowManagerGlobal.ADD_NOT_APP_TOKEN;
-                } else if (activity.removed) {
+                } else if (activity.getParent() == null) {
                     ProtoLog.w(WM_ERROR, "Attempted to add window with exiting application token "
                             + ".%s Aborting.", token);
                     return WindowManagerGlobal.ADD_APP_EXITING;

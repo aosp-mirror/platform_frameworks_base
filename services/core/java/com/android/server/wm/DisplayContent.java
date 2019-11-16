@@ -601,13 +601,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final ActivityRecord activity = w.mActivityRecord;
 
-        // If this window's application has been removed, just skip it.
-        if (activity!= null && (activity.removed || activity.sendingToBottom)) {
-            ProtoLog.v(WM_DEBUG_FOCUS, "Skipping %s because %s", activity,
-                    (activity.removed ? "removed" : "sendingToBottom"));
-            return false;
-        }
-
         if (focusedApp == null) {
             ProtoLog.v(WM_DEBUG_FOCUS_LIGHT,
                     "findFocusedWindow: focusedApp=null using new focus @ %s", w);

@@ -102,10 +102,7 @@ public class TaskStackTests extends WindowTestsBase {
                 WindowTestUtils.createTestActivityRecord(mDisplayContent);
         task2.addChild(activity2, 0);
         activity2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
-
         assertEquals(SCREEN_ORIENTATION_PORTRAIT, stack.getOrientation());
-        task2.setSendingToBottom(true);
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, stack.getOrientation());
     }
 
     @Test

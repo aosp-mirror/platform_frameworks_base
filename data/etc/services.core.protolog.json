@@ -169,12 +169,6 @@
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
-    "-1797409732": {
-      "message": "Skipping %s because %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "-1782453012": {
       "message": "Checking theme of starting window: 0x%x",
       "level": "VERBOSE",
@@ -1453,12 +1447,6 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
-    "789829331": {
-      "message": "Aborted starting %s: removed=%b startingData=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "791468751": {
       "message": "Pausing rotation during re-position",
       "level": "DEBUG",
@@ -1926,6 +1914,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1822843721": {
+      "message": "Aborted starting %s: startingData=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STARTING_WINDOW",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1831008694": {
       "message": "Loading animation for app transition. transit=%s enter=%b frame=%s insets=%s surfaceInsets=%s",

@@ -2896,7 +2896,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         Task task = null;
         if (!newTask) {
             // If starting in an existing task, find where that is...
-            boolean startIt = true;
+            boolean isOccluded = false;
             for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
                 task = getChildAt(taskNdx);
                 if (task.getTopNonFinishingActivity() == null) {
@@ -2904,10 +2904,10 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                     continue;
                 }
                 if (task == rTask) {
-                    // Here it is!  Now, if this is not yet visible to the
-                    // user, then just add it without starting; it will
-                    // get started when the user navigates back to it.
-                    if (!startIt) {
+                    // Here it is!  Now, if this is not yet visible (occluded by another task) to
+                    // the user, then just add it without starting; it will get started when the
+                    // user navigates back to it.
+                    if (isOccluded) {
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to task "
                                 + task, new RuntimeException("here").fillInStackTrace());
                         rTask.positionChildAtTop(r);
@@ -2915,8 +2915,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         return;
                     }
                     break;
-                } else if (task.numFullscreen > 0) {
-                    startIt = false;
+                } else if (!isOccluded) {
+                    isOccluded = task.forAllActivities(ActivityRecord::occludesParent);
                 }
             }
         }
@@ -4670,9 +4670,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         }
         positionChildAt(position, task, includingParents);
         task.updateTaskMovement(toTop);
-        if (getDisplayContent().mAppTransition.isTransitionSet()) {
-            task.setSendingToBottom(!toTop);
-        }
         getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
 
 
@@ -5214,9 +5211,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         child.updateTaskMovement(true);
 
         final DisplayContent displayContent = getDisplayContent();
-        if (displayContent.mAppTransition.isTransitionSet()) {
-            child.setSendingToBottom(false);
-        }
         displayContent.layoutAndAssignWindowLayersIfNeeded();
     }
 
@@ -5238,10 +5232,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         }
 
         positionChildAt(POSITION_BOTTOM, child, includingParents);
-
-        if (getDisplayContent().mAppTransition.isTransitionSet()) {
-            child.setSendingToBottom(true);
-        }
         getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
@@ -5284,9 +5274,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         task.updateTaskMovement(isTop);
         if (isTop) {
             final DisplayContent displayContent = getDisplayContent();
-            if (displayContent.mAppTransition.isTransitionSet()) {
-                task.setSendingToBottom(false);
-            }
             displayContent.layoutAndAssignWindowLayersIfNeeded();
         }
     }
