@@ -702,7 +702,7 @@ public class CachedBluetoothDeviceTest {
 
     @Test
     public void deviceName_testAliasNameAvailable() {
-        when(mDevice.getAliasName()).thenReturn(DEVICE_ALIAS);
+        when(mDevice.getAlias()).thenReturn(DEVICE_ALIAS);
         when(mDevice.getName()).thenReturn(DEVICE_NAME);
         CachedBluetoothDevice cachedBluetoothDevice =
                 new CachedBluetoothDevice(mContext, mProfileManager, mDevice);
@@ -725,7 +725,7 @@ public class CachedBluetoothDeviceTest {
     @Test
     public void deviceName_testRenameDevice() {
         final String[] alias = {DEVICE_ALIAS};
-        doAnswer(invocation -> alias[0]).when(mDevice).getAliasName();
+        doAnswer(invocation -> alias[0]).when(mDevice).getAlias();
         doAnswer(invocation -> {
             alias[0] = (String) invocation.getArguments()[0];
             return true;
@@ -842,14 +842,14 @@ public class CachedBluetoothDeviceTest {
 
     @Test
     public void getName_aliasNameNotNull_returnAliasName() {
-        when(mDevice.getAliasName()).thenReturn(DEVICE_NAME);
+        when(mDevice.getAlias()).thenReturn(DEVICE_NAME);
 
         assertThat(mCachedDevice.getName()).isEqualTo(DEVICE_NAME);
     }
 
     @Test
     public void getName_aliasNameIsNull_returnAddress() {
-        when(mDevice.getAliasName()).thenReturn(null);
+        when(mDevice.getAlias()).thenReturn(null);
 
         assertThat(mCachedDevice.getName()).isEqualTo(DEVICE_ADDRESS);
     }
@@ -857,7 +857,7 @@ public class CachedBluetoothDeviceTest {
     @Test
     public void setName_setDeviceNameIsNotNull() {
         final String name = "test name";
-        when(mDevice.getAliasName()).thenReturn(DEVICE_NAME);
+        when(mDevice.getAlias()).thenReturn(DEVICE_NAME);
 
         mCachedDevice.setName(name);
 
