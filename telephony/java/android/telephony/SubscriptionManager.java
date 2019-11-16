@@ -1297,7 +1297,7 @@ public class SubscriptionManager {
      *
      * @return Sorted list of the currently available {@link SubscriptionInfo}
      * records on the device.
-     * This is similar to {@link getActiveSubscriptionInfoList} except that it will return
+     * This is similar to {@link #getActiveSubscriptionInfoList} except that it will return
      * both active and hidden SubscriptionInfos.
      *
      */
