@@ -242,7 +242,7 @@ public class TelephonyRegistryManager {
     public void notifyCallStateChanged(int subId, int slotIndex, @CallState int state,
         String incomingNumer) {
         try {
-          sRegistry.notifyCallState(slotIndex, subId, state, incomingNumer);
+            sRegistry.notifyCallState(slotIndex, subId, state, incomingNumer);
         } catch (RemoteException ex) {
             // system server crash
         }
