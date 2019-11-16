@@ -791,7 +791,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
 
     @Override
     public ICameraOfflineSession switchToOffline(ICameraDeviceCallbacks cbs,
-            Surface[] offlineOutputs) {
+            int[] offlineOutputIds) {
         throw new UnsupportedOperationException("Legacy device does not support switchToOffline");
     }
 

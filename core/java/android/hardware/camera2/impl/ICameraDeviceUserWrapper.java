@@ -251,10 +251,9 @@ public class ICameraDeviceUserWrapper {
     }
 
     public ICameraOfflineSession switchToOffline(ICameraDeviceCallbacks cbs,
-            Surface[] offlineOutputs)
-            throws CameraAccessException {
+            int[] offlineOutputIds) throws CameraAccessException {
         try {
-            return mRemoteDevice.switchToOffline(cbs, offlineOutputs);
+            return mRemoteDevice.switchToOffline(cbs, offlineOutputIds);
         } catch (Throwable t) {
             CameraManager.throwAsPublicException(t);
             throw new UnsupportedOperationException("Unexpected exception", t);
