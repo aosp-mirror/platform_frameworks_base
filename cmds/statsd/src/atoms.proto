@@ -50,6 +50,7 @@ import "frameworks/base/core/proto/android/stats/intelligence/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/stats/location/location_enums.proto";
 import "frameworks/base/core/proto/android/stats/mediametrics/mediametrics.proto";
+import "frameworks/base/core/proto/android/stats/mediaprovider/mediaprovider_enums.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
@@ -342,6 +343,16 @@ message Atom {
         VmsClientConnectionStateChanged vms_client_connection_state_changed = 230;
         GpsLocationStatusReported gps_location_status_reported = 231;
         GpsTimeToFirstFixReported gps_time_to_first_fix_reported = 232;
+        MediaProviderScanEvent media_provider_scan_event =
+            233 [(log_from_module) = "mediaprovider"];
+        MediaProviderDeletionEvent media_provider_deletion_event =
+            234 [(log_from_module) = "mediaprovider"];
+        MediaProviderPermissionEvent media_provider_permission_event =
+            235 [(log_from_module) = "mediaprovider"];
+        MediaProviderSchemaChange media_provider_schema_change =
+            236 [(log_from_module) = "mediaprovider"];
+        MediaProviderIdleMaintenance media_provider_idle_maintenance =
+            237 [(log_from_module) = "mediaprovider"];
     }
 
     // Pulled events will start at field 10000.
@@ -3797,6 +3808,124 @@ message VmsClientConnectionStateChanged {
     }
 
     optional State state  = 2;
+}
+
+/**
+ * Logs when MediaProvider has successfully finished scanning a storage volume.
+ *
+ * Logged from:
+ *   packages/providers/MediaProvider/src/com/android/providers/media/scan/ModernMediaScanner.java
+ */
+message MediaProviderScanEvent {
+    enum Reason {
+        // Scan triggered due to unknown reason
+        UNKNOWN = 0;
+        // Scan triggered due to storage volume being mounted
+        MOUNTED = 1;
+        // Scan triggered due to explicit user action or app request
+        DEMAND = 2;
+        // Scan triggered due to idle maintenance
+        IDLE = 3;
+    }
+
+    // Volume type that this event pertains to
+    optional android.stats.mediaprovider.VolumeType volume_type = 1;
+    // Reason why this scan was triggered
+    optional Reason reason = 2;
+    // Total number of files scanned
+    optional int64 item_count = 3;
+    // Duration of scan, normalized per file
+    optional float normalized_duration_millis = 4;
+    // Number of database inserts, normalized per file
+    optional float normalized_insert_count = 5;
+    // Number of database updates, normalized per file
+    optional float normalized_update_count = 6;
+    // Number of database deletes, normalized per file
+    optional float normalized_delete_count = 7;
+}
+
+/**
+ * Logs when an app has asked MediaProvider to delete media belonging to the user.
+ *
+ * Logged from:
+ *   packages/providers/MediaProvider/src/com/android/providers/media/MediaProvider.java
+ */
+message MediaProviderDeletionEvent {
+    // Volume type that this event pertains to
+    optional android.stats.mediaprovider.VolumeType volume_type = 1;
+    // Device timestamp when this deletion event occurred
+    optional int64 timestamp_millis = 2;
+    // App that requested deletion
+    optional string package_name = 3;
+    // Number of items that were deleted
+    optional int32 item_count = 4;
+}
+
+/**
+ * Logs when an app has asked MediaProvider to grant them access to media belonging to the user.
+ *
+ * Logged from:
+ *   packages/providers/MediaProvider/src/com/android/providers/media/PermissionActivity.java
+ */
+message MediaProviderPermissionEvent {
+    enum Result {
+        UNKNOWN = 0;
+        USER_GRANTED = 1;
+        AUTO_GRANTED = 2;
+        USER_DENIED = 3;
+        USER_DENIED_WITH_PREJUDICE = 4;
+        AUTO_DENIED = 5;
+    }
+
+    // Volume type that this event pertains to
+    optional android.stats.mediaprovider.VolumeType volume_type = 1;
+    // Device timestamp when this permission event occurred
+    optional int64 timestamp_millis = 2;
+    // App that requested permission
+    optional string package_name = 3;
+    // Number of items that were requested
+    optional int32 item_count = 4;
+    // Result of this request
+    optional Result result = 5;
+}
+
+/**
+ * Logs when MediaProvider has finished upgrading or downgrading its database schema.
+ *
+ * Logged from:
+ *   packages/providers/MediaProvider/src/com/android/providers/media/DatabaseHelper.java
+ */
+message MediaProviderSchemaChange {
+    // Volume type that this event pertains to
+    optional android.stats.mediaprovider.VolumeType volume_type = 1;
+    // Old database version code
+    optional int32 version_from = 2;
+    // New database version code
+    optional int32 version_to = 3;
+    // Total number of files in database
+    optional int64 item_count = 4;
+    // Duration of schema change, normalized per file
+    optional float normalized_duration_millis = 5;
+}
+
+/**
+ * Logs when MediaProvider has finished an idle maintenance job.
+ *
+ * Logged from:
+ *   packages/providers/MediaProvider/src/com/android/providers/media/MediaProvider.java
+ */
+message MediaProviderIdleMaintenance {
+    // Volume type that this event pertains to
+    optional android.stats.mediaprovider.VolumeType volume_type = 1;
+
+    // Total number of files in database
+    optional int64 item_count = 2;
+    // Duration of idle maintenance, normalized per file
+    optional float normalized_duration_millis = 3;
+    // Number of thumbnails found to be stale, normalized per file
+    optional float normalized_stale_thumbnails = 4;
+    // Number of items found to be expired, normalized per file
+    optional float normalized_expired_media = 5;
 }
 
 //////////////////////////////////////////////////////////////////////
