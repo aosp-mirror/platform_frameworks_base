@@ -4609,12 +4609,11 @@
     <permission android:name="android.permission.PREVENT_POWER_KEY"
                 android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows an application to manage ADB Root
+    <!-- Allows an application to manage ADB Root
          @hide <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.ADBROOT"
                 android:protectionLevel="signature|privileged" />
-
 
     <application android:process="system"
                  android:persistent="true"

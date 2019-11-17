@@ -25,7 +25,6 @@ import android.os.ServiceManager;
 /**
  * {@hide}
  */
-@SystemApi
 public class ADBRootService {
     private static final String TAG = "ADBRootService";
 
