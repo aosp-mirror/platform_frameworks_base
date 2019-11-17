@@ -3981,6 +3981,8 @@ public class UserManagerService extends IUserManager.Stub {
                         pw.print(" <pre-created>");
                     }
                     pw.println();
+                    pw.print("    Flags: "); pw.print(userInfo.flags); pw.print(" (");
+                    pw.print(UserInfo.flagsToString(userInfo.flags)); pw.println(")");
                     pw.print("    State: ");
                     final int state;
                     synchronized (mUserStates) {
