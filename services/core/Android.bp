@@ -1,24 +1,21 @@
+filegroup {
+    name: "services.core-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.core.unboosted",
-
-    aidl: {
-        include_dirs: [
-            "frameworks/base/cmds/idmap2/idmap2d/aidl",
-            "frameworks/native/aidl/binder",
-            "frameworks/native/cmds/dumpstate/binder",
-            "system/core/storaged/binder",
-            "system/vold/binder",
-            "system/gsid/aidl",
-        ],
-    },
     srcs: [
         "java/**/*.java",
         ":dumpstate_aidl",
+        ":framework_native_aidl",
+        ":gsiservice_aidl",
         ":idmap2_aidl",
         ":installd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
-        ":gsiservice_aidl",
         ":platform-compat-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
