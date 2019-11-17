@@ -1874,8 +1874,14 @@ public final class Debug
     public static final int MEMINFO_PAGE_TABLES = 13;
     /** @hide */
     public static final int MEMINFO_KERNEL_STACK = 14;
+    /**
+     * Note: MEMINFO_KRECLAIMABLE includes MEMINFO_SLAB_RECLAIMABLE (see KReclaimable field
+     * description in kernel documentation).
+     * @hide
+     */
+    public static final int MEMINFO_KRECLAIMABLE = 15;
     /** @hide */
-    public static final int MEMINFO_COUNT = 15;
+    public static final int MEMINFO_COUNT = 16;
 
     /**
      * Retrieves /proc/meminfo.  outSizes is filled with fields
