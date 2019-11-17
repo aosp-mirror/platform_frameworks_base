@@ -10932,7 +10932,7 @@ public class DevicePolicyManager {
         return false;
     }
 
-    /*
+    /**
      * Lineage: check if secure keyguard is required
      * @hide
      */
