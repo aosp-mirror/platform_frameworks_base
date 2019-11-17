@@ -1808,10 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Uitgevee deur jou administrateur"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donker-tema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle\n\n"<annotation id="url">"Kom meer te wete"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Batterybespaarder doen die volgende om die batterylewe te verleng:\n·Skakel Donker-tema aan\n·Skakel agtergrondaktiwiteit, sommige visuele effekte en ander kenmerke, soos \"Hey Google\", af of beperk hulle"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys totdat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Skakel aan"</string>

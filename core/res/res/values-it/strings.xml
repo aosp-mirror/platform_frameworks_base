@@ -1808,10 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminato dall\'amministratore"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Per estendere la durata della batteria, Risparmio energetico:\n·Attiva il Tema scuro\n·Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\"\n\n"<annotation id="url">"Ulteriori informazioni"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Per estendere la durata della batteria, Risparmio energetico:\n·Attiva il Tema scuro\n·Disattiva o limita le attività in background, alcuni effetti visivi e altre funzionalità come \"Ok Google\""</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Attiva"</string>
