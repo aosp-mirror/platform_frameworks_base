@@ -172,15 +172,10 @@ class ThemeOverlayManager {
     private void setEnabledAsync(String pkg, UserHandle userHandle, boolean enabled) {
         mExecutor.execute(() -> {
             if (DEBUG) Log.d(TAG, String.format("setEnabled: %s %s %b", pkg, userHandle, enabled));
-            try {
-                if (enabled) {
-                    mOverlayManager.setEnabledExclusiveInCategory(pkg, userHandle);
-                } else {
-                    mOverlayManager.setEnabled(pkg, false, userHandle);
-                }
-            } catch (IllegalStateException e) {
-                Log.e(TAG,
-                        String.format("setEnabled failed: %s %s %b", pkg, userHandle, enabled), e);
+            if (enabled) {
+                mOverlayManager.setEnabledExclusiveInCategory(pkg, userHandle);
+            } else {
+                mOverlayManager.setEnabled(pkg, false, userHandle);
             }
         });
     }
