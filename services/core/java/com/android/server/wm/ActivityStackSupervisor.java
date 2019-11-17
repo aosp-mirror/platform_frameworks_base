@@ -1709,15 +1709,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return;
         }
 
-        // It is possible for the bounds animation from the WM to call this but be delayed by
-        // another AM call that is holding the AMS lock. In such a case, the pinnedBounds may be
-        // incorrect if AMS.resizeStackWithBoundsFromWindowManager() is already called while waiting
-        // for the AMS lock to be freed. So check and make sure these bounds are still good.
-        // TODO(stack-merge): Is this still relevant?
-        if (stack.pinnedStackResizeDisallowed()) {
-            return;
-        }
-
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "resizePinnedStack");
         mService.deferWindowLayout();
         try {

@@ -71,8 +71,8 @@ public class MockContentProvider extends ContentProvider {
 
         @Override
         public int delete(String callingPackage, @Nullable String featureId, Uri url,
-                String selection, String[] selectionArgs) throws RemoteException {
-            return MockContentProvider.this.delete(url, selection, selectionArgs);
+                Bundle extras) throws RemoteException {
+            return MockContentProvider.this.delete(url, extras);
         }
 
         @Override
@@ -82,8 +82,8 @@ public class MockContentProvider extends ContentProvider {
 
         @Override
         public Uri insert(String callingPackage, @Nullable String featureId, Uri url,
-                ContentValues initialValues) throws RemoteException {
-            return MockContentProvider.this.insert(url, initialValues);
+                ContentValues initialValues, Bundle extras) throws RemoteException {
+            return MockContentProvider.this.insert(url, initialValues, extras);
         }
 
         @Override
@@ -109,9 +109,8 @@ public class MockContentProvider extends ContentProvider {
 
         @Override
         public int update(String callingPackage, @Nullable String featureId, Uri url,
-                ContentValues values, String selection, String[] selectionArgs)
-                throws RemoteException {
-            return MockContentProvider.this.update(url, values, selection, selectionArgs);
+                ContentValues values, Bundle extras) throws RemoteException {
+            return MockContentProvider.this.update(url, values, extras);
         }
 
         @Override

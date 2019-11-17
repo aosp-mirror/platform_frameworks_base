@@ -4590,10 +4590,6 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param label The label for the new AccessibilityAction.
          */
         public AccessibilityAction(int actionId, @Nullable CharSequence label) {
-            if ((actionId & ACTION_TYPE_MASK) == 0 && Integer.bitCount(actionId) != 1) {
-                throw new IllegalArgumentException("Invalid standard action id");
-            }
-
             mActionId = actionId;
             mLabel = label;
         }

@@ -17,6 +17,7 @@
 android_app {
     name: "startop_test_app",
     srcs: [
+        "src/ApplicationBenchmarks.java",
         "src/ComplexLayoutInflationActivity.java",
         "src/CPUIntensiveBenchmarkActivity.java",
         "src/CPUIntensiveBenchmarks.java",
@@ -25,8 +26,8 @@ android_app {
         "src/InitCheckOverheadBenchmarkActivity.java",
         "src/InitCheckOverheadBenchmarks.java",
         "src/LayoutInflationActivity.java",
-        "src/NonInteractiveSystemServerBenchmarkActivity.java",
-        "src/SystemServerBenchmarkActivity.java",
+        "src/NonInteractiveMicrobenchmarkActivity.java",
+        "src/InteractiveMicrobenchmarkActivity.java",
         "src/SystemServerBenchmarks.java",
         "src/TextViewInflationActivity.java",
     ],

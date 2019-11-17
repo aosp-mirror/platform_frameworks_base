@@ -140,7 +140,7 @@ class PinnedStackController {
         public void startAnimation(Rect destinationBounds, Rect sourceRectHint,
                 int animationDuration) {
             synchronized (mService.mGlobalLock) {
-                final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
+                final ActivityStack pinnedStack = mDisplayContent.getPinnedStack();
                 pinnedStack.animateResizePinnedStack(destinationBounds,
                         sourceRectHint, animationDuration, true /* fromFullscreen */);
             }
@@ -468,7 +468,7 @@ class PinnedStackController {
             }
             try {
                 final Rect animatingBounds = new Rect();
-                final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
+                final ActivityStack pinnedStack = mDisplayContent.getPinnedStack();
                 if (pinnedStack != null) {
                     pinnedStack.getAnimationOrCurrentBounds(animatingBounds);
                 }

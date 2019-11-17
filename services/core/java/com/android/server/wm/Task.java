@@ -932,7 +932,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     @Override
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        // TODO(stack-merge): Remove casts after object merge.
         final ActivityStack oldStack = ((ActivityStack) oldParent);
         final ActivityStack newStack = ((ActivityStack) newParent);
 
@@ -2235,8 +2234,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         return getTaskStack() != null ? getTaskStack().getDisplayContent() : null;
     }
 
-    TaskStack getTaskStack() {
-        return (TaskStack) getParent();
+    ActivityStack getTaskStack() {
+        return (ActivityStack) getParent();
     }
 
     int getAdjustedAddPosition(ActivityRecord r, int suggestedPosition) {
@@ -2302,13 +2301,12 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     // TODO: Consolidate this with Task.reparent()
-    void reparent(TaskStack stack, int position, boolean moveParents, String reason) {
+    void reparent(ActivityStack stack, int position, boolean moveParents, String reason) {
         if (DEBUG_STACK) Slog.i(TAG, "reParentTask: removing taskId=" + mTaskId
                 + " from stack=" + getTaskStack());
         EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "reParentTask");
 
-        // TODO(stack-merge): Remove cast.
-        final ActivityStack prevStack = (ActivityStack) getTaskStack();
+        final ActivityStack prevStack = getTaskStack();
         final boolean wasTopFocusedStack =
                 mAtmService.mRootActivityContainer.isTopDisplayFocusedStack(prevStack);
         final ActivityDisplay prevStackDisplay = prevStack.getDisplay();

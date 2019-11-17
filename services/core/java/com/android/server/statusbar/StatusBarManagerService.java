@@ -1375,6 +1375,28 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 this, in, out, err, args, callback, resultReceiver);
     }
 
+    @Override
+    public void showInattentiveSleepWarning() {
+        enforceStatusBarService();
+        if (mBar != null) {
+            try {
+                mBar.showInattentiveSleepWarning();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void dismissInattentiveSleepWarning() {
+        enforceStatusBarService();
+        if (mBar != null) {
+            try {
+                mBar.dismissInattentiveSleepWarning();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
     public String[] getStatusBarIcons() {
         return mContext.getResources().getStringArray(R.array.config_statusBarIcons);
     }

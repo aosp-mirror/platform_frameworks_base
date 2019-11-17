@@ -148,7 +148,6 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.doze.DozeHost;
 import com.android.systemui.fragments.ExtensionFragmentListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -198,7 +197,6 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
@@ -210,6 +208,7 @@ import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.collection.init.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -222,7 +221,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -795,7 +793,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 R.bool.config_vibrateOnIconAnimation);
 
         DateTimeView.setReceiverHandler(Dependency.get(Dependency.TIME_TICK_HANDLER));
-        putComponent(StatusBar.class, this);
 
         // start old BaseStatusBar.start().
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -897,7 +894,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDozeServiceHost.initialize(this, mNotificationIconAreaController,
                 mStatusBarWindowViewController, mStatusBarWindow, mStatusBarKeyguardViewManager,
                 mNotificationPanel, mAmbientIndicationContainer);
-        putComponent(DozeHost.class, mDozeServiceHost);
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
@@ -1053,7 +1049,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
         mNotificationLogger.setHeadsUpManager(mHeadsUpManager);
-        putComponent(HeadsUpManager.class, mHeadsUpManager);
 
         createNavigationBar(result);
 
@@ -1228,7 +1223,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mContext,
                         mAllowNotificationLongPress,
                         mKeyguardBypassController,
-                        mStatusBarStateController);
+                        mStatusBarStateController,
+                        mNotificationLogger);
 
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
@@ -2494,8 +2490,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         if (DUMPTRUCK) {
-            synchronized (mEntryManager.getNotificationData()) {
-                mEntryManager.getNotificationData().dump(pw, "  ");
+            synchronized (mEntryManager) {
+                mEntryManager.dump(pw, "  ");
             }
 
             if (false) {
@@ -2753,11 +2749,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     };
 
     public void resetUserExpandedStates() {
-        ArrayList<NotificationEntry> activeNotifications = mEntryManager.getNotificationData()
-                .getActiveNotifications();
-        final int notificationCount = activeNotifications.size();
-        for (int i = 0; i < notificationCount; i++) {
-            NotificationEntry entry = activeNotifications.get(i);
+        for (NotificationEntry entry : mEntryManager.getVisibleNotifications()) {
             entry.resetUserExpansion();
         }
     }
@@ -2857,8 +2849,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         try {
             // consider the transition from peek to expanded to be a panel open,
             // but not one that clears notification effects.
-            int notificationLoad = mEntryManager.getNotificationData()
-                    .getActiveNotifications().size();
+            int notificationLoad = mEntryManager.getActiveNotificationsCount();
             mBarService.onPanelRevealed(false, notificationLoad);
         } catch (RemoteException ex) {
             // Won't fail unless the world has ended.
@@ -2876,8 +2867,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     !mPresenter.isPresenterFullyCollapsed() &&
                             (mState == StatusBarState.SHADE
                                     || mState == StatusBarState.SHADE_LOCKED);
-            int notificationLoad = mEntryManager.getNotificationData().getActiveNotifications()
-                    .size();
+            int notificationLoad = mEntryManager.getActiveNotificationsCount();
             if (pinnedHeadsUp && mPresenter.isPresenterFullyCollapsed()) {
                 notificationLoad = 1;
             }
@@ -3860,10 +3850,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void showScreenPinningRequest(int taskId, boolean allowCancel) {
         mScreenPinningRequest.showPrompt(taskId, allowCancel);
-    }
-
-    public boolean hasActiveNotifications() {
-        return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
     }
 
     @Override

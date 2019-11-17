@@ -40,6 +40,7 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.RemoteAnimationAdapter;
+import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -75,7 +76,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
  */
 public class StatusBarNotificationActivityStarter implements NotificationActivityStarter {
 
-    private static final String TAG = "NotificationClickHandler";
+    private static final String TAG = "NotifActivityStarter";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final AssistManager mAssistManager;
@@ -197,8 +198,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             return;
         }
 
-        final String notificationKey = sbn.getKey();
-
         boolean isActivityIntent = intent != null && intent.isActivity() && !isBubble;
         final boolean afterKeyguardGone = isActivityIntent
                 && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
@@ -209,7 +208,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 mLockscreenUserManager.getCurrentUserId());
         ActivityStarter.OnDismissAction postKeyguardAction =
                 () -> handleNotificationClickAfterKeyguardDismissed(
-                        sbn, row, controller, intent, notificationKey,
+                        sbn, row, controller, intent,
                         isActivityIntent, wasOccluded, showOverLockscreen);
         if (showOverLockscreen) {
             mIsCollapsingToShowActivityOverLockscreen = true;
@@ -225,12 +224,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             ExpandableNotificationRow row,
             RemoteInputController controller,
             PendingIntent intent,
-            String notificationKey,
             boolean isActivityIntent,
             boolean wasOccluded,
             boolean showOverLockscreen) {
         // TODO: Some of this code may be able to move to NotificationEntryManager.
-        if (mHeadsUpManager != null && mHeadsUpManager.isAlerting(notificationKey)) {
+        if (mHeadsUpManager != null && mHeadsUpManager.isAlerting(sbn.getKey())) {
             // Release the HUN notification to the shade.
 
             if (mPresenter.isPresenterFullyCollapsed()) {
@@ -252,7 +250,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
         final StatusBarNotification parentToCancelFinal = parentToCancel;
         final Runnable runnable = () -> handleNotificationClickAfterPanelCollapsed(
-                sbn, row, controller, intent, notificationKey,
+                sbn, row, controller, intent,
                 isActivityIntent, wasOccluded, parentToCancelFinal);
 
         if (showOverLockscreen) {
@@ -273,10 +271,10 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             ExpandableNotificationRow row,
             RemoteInputController controller,
             PendingIntent intent,
-            String notificationKey,
             boolean isActivityIntent,
             boolean wasOccluded,
             StatusBarNotification parentToCancelFinal) {
+        String notificationKey = sbn.getKey();
         try {
             // The intent we are sending is for the application, which
             // won't have permission to immediately start an activity after
@@ -310,7 +308,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         if (!TextUtils.isEmpty(entry.remoteInputText)) {
             remoteInputText = entry.remoteInputText;
         }
-        if (!TextUtils.isEmpty(remoteInputText) && !controller.isSpinning(entry.getKey())) {
+        if (!TextUtils.isEmpty(remoteInputText) && !controller.isSpinning(notificationKey)) {
             fillInIntent = new Intent().putExtra(Notification.EXTRA_REMOTE_INPUT_DRAFT,
                     remoteInputText.toString());
         }
@@ -326,12 +324,10 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             collapseOnMainThread();
         }
 
-        final int count =
-                mEntryManager.getNotificationData().getActiveNotifications().size();
-        final int rank = mEntryManager.getNotificationData().getRank(notificationKey);
+        final int count = mEntryManager.getActiveNotificationsCount();
+        final int rank = entry.getRanking().getRank();
         NotificationVisibility.NotificationLocation location =
-                NotificationLogger.getNotificationLocation(
-                        mEntryManager.getNotificationData().get(notificationKey));
+                NotificationLogger.getNotificationLocation(entry);
         final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
                 rank, count, true, location);
         try {
@@ -363,7 +359,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     }
 
     private void startNotificationIntent(PendingIntent intent, Intent fillInIntent,
-            ExpandableNotificationRow row, boolean wasOccluded, boolean isActivityIntent) {
+            View row, boolean wasOccluded, boolean isActivityIntent) {
         RemoteAnimationAdapter adapter = mActivityLaunchAnimator.getLaunchAnimation(row,
                 wasOccluded);
         try {

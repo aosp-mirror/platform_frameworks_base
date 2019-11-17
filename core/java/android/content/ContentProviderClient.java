@@ -286,7 +286,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
 
     /** See {@link ContentProvider#refresh} */
     @Override
-    public boolean refresh(Uri url, @Nullable Bundle args,
+    public boolean refresh(Uri url, @Nullable Bundle extras,
             @Nullable CancellationSignal cancellationSignal) throws RemoteException {
         Preconditions.checkNotNull(url, "url");
 
@@ -298,7 +298,7 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
                 remoteCancellationSignal = mContentProvider.createCancellationSignal();
                 cancellationSignal.setRemote(remoteCancellationSignal);
             }
-            return mContentProvider.refresh(mPackageName, mFeatureId, url, args,
+            return mContentProvider.refresh(mPackageName, mFeatureId, url, extras,
                     remoteCancellationSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
@@ -331,14 +331,20 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     }
 
     /** See {@link ContentProvider#insert ContentProvider.insert} */
-    @Override
     public @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues initialValues)
             throws RemoteException {
+        return insert(url, initialValues, null);
+    }
+
+    /** See {@link ContentProvider#insert ContentProvider.insert} */
+    @Override
+    public @Nullable Uri insert(@NonNull Uri url, @Nullable ContentValues initialValues,
+            @Nullable Bundle extras) throws RemoteException {
         Preconditions.checkNotNull(url, "url");
 
         beforeRemote();
         try {
-            return mContentProvider.insert(mPackageName, mFeatureId, url, initialValues);
+            return mContentProvider.insert(mPackageName, mFeatureId, url, initialValues, extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -370,15 +376,19 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     }
 
     /** See {@link ContentProvider#delete ContentProvider.delete} */
-    @Override
     public int delete(@NonNull Uri url, @Nullable String selection,
             @Nullable String[] selectionArgs) throws RemoteException {
+        return delete(url, ContentResolver.createSqlQueryBundle(selection, selectionArgs));
+    }
+
+    /** See {@link ContentProvider#delete ContentProvider.delete} */
+    @Override
+    public int delete(@NonNull Uri url, @Nullable Bundle extras) throws RemoteException {
         Preconditions.checkNotNull(url, "url");
 
         beforeRemote();
         try {
-            return mContentProvider.delete(mPackageName, mFeatureId, url, selection,
-                    selectionArgs);
+            return mContentProvider.delete(mPackageName, mFeatureId, url, extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -390,15 +400,20 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
     }
 
     /** See {@link ContentProvider#update ContentProvider.update} */
-    @Override
     public int update(@NonNull Uri url, @Nullable ContentValues values, @Nullable String selection,
             @Nullable String[] selectionArgs) throws RemoteException {
+        return update(url, values, ContentResolver.createSqlQueryBundle(selection, selectionArgs));
+    }
+
+    /** See {@link ContentProvider#update ContentProvider.update} */
+    @Override
+    public int update(@NonNull Uri url, @Nullable ContentValues values, @Nullable Bundle extras)
+            throws RemoteException {
         Preconditions.checkNotNull(url, "url");
 
         beforeRemote();
         try {
-            return mContentProvider.update(mPackageName, mFeatureId, url, values, selection,
-                    selectionArgs);
+            return mContentProvider.update(mPackageName, mFeatureId, url, values, extras);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);

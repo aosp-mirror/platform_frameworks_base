@@ -1491,9 +1491,17 @@ public final class AssetManager implements AutoCloseable {
      */
     @UnsupportedAppUsage
     public SparseArray<String> getAssignedPackageIdentifiers() {
+        return getAssignedPackageIdentifiers(true, true);
+    }
+
+    /**
+     * @hide
+     */
+    public SparseArray<String> getAssignedPackageIdentifiers(boolean includeOverlays,
+            boolean includeLoaders) {
         synchronized (this) {
             ensureValidLocked();
-            return nativeGetAssignedPackageIdentifiers(mObject);
+            return nativeGetAssignedPackageIdentifiers(mObject, includeOverlays, includeLoaders);
         }
     }
 
@@ -1557,7 +1565,7 @@ public final class AssetManager implements AutoCloseable {
             int smallestScreenWidthDp, int screenWidthDp, int screenHeightDp, int screenLayout,
             int uiMode, int colorMode, int majorVersion);
     private static native @NonNull SparseArray<String> nativeGetAssignedPackageIdentifiers(
-            long ptr);
+            long ptr, boolean includeOverlays, boolean includeLoaders);
 
     // File native methods.
     private static native @Nullable String[] nativeList(long ptr, @NonNull String path)

@@ -389,7 +389,7 @@ class UserSystemPackageInstaller {
         final ArrayMap<String, Integer> result = new ArrayMap<>(whitelist.size() + 1);
         // First, do the whitelisted user types.
         for (int i = 0; i < whitelist.size(); i++) {
-            final String pkgName = whitelist.keyAt(i);
+            final String pkgName = whitelist.keyAt(i).intern();
             final int flags = getFlagsFromUserTypes(whitelist.valueAt(i));
             if (flags != 0) {
                 result.put(pkgName, flags);
@@ -402,7 +402,7 @@ class UserSystemPackageInstaller {
         final ArrayMap<String, Set<String>> blacklist =
                 sysConfig.getAndClearPackageToUserTypeBlacklist();
         for (int i = 0; i < blacklist.size(); i++) {
-            final String pkgName = blacklist.keyAt(i);
+            final String pkgName = blacklist.keyAt(i).intern();
             final int nonFlags = getFlagsFromUserTypes(blacklist.valueAt(i));
             final Integer flags = result.get(pkgName);
             if (flags != null) {
@@ -411,12 +411,13 @@ class UserSystemPackageInstaller {
         }
         // Regardless of the whitelists/blacklists, ensure mandatory packages.
         result.put("android",
-                UserInfo.FLAG_SYSTEM | UserInfo.FLAG_FULL | UserInfo.PROFILE_FLAGS_MASK);
+                UserInfo.FLAG_SYSTEM | UserInfo.FLAG_FULL | UserInfo.FLAG_PROFILE);
         return result;
     }
 
     /** Converts a user types, as used in SystemConfig, to a UserInfo flag. */
     private static int getFlagsFromUserTypes(Iterable<String> userTypes) {
+        // TODO(b/142482943): Update all this for the new UserTypes.
         int flags = 0;
         for (String type : userTypes) {
             switch (type) {
@@ -442,7 +443,7 @@ class UserSystemPackageInstaller {
                     flags |= UserInfo.FLAG_SYSTEM;
                     break;
                 case "PROFILE":
-                    flags |= UserInfo.PROFILE_FLAGS_MASK;
+                    flags |= UserInfo.FLAG_PROFILE;
                     break;
                 default:
                     Slog.w(TAG, "SystemConfig contained an invalid user type: " + type);

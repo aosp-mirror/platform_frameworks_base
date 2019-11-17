@@ -556,7 +556,9 @@ static void NativeSetConfiguration(JNIEnv* env, jclass /*clazz*/, jlong ptr, jin
   assetmanager->SetConfiguration(configuration);
 }
 
-static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/, jlong ptr,
+                                                   jboolean includeOverlays,
+                                                   jboolean includeLoaders) {
   ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
 
   jobject sparse_array =
@@ -566,6 +568,10 @@ static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/
     // An exception is pending.
     return nullptr;
   }
+
+  // Optionally exclude overlays and loaders.
+  uint64_t exclusion_flags = ((includeOverlays) ? 0U : PROPERTY_OVERLAY)
+      | ((includeLoaders) ? 0U : PROPERTY_LOADER);
 
   assetmanager->ForEachPackage([&](const std::string& package_name, uint8_t package_id) -> bool {
     jstring jpackage_name = env->NewStringUTF(package_name.c_str());
@@ -577,7 +583,8 @@ static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/
     env->CallVoidMethod(sparse_array, gSparseArrayOffsets.put, static_cast<jint>(package_id),
                         jpackage_name);
     return true;
-  });
+  }, exclusion_flags);
+
   return sparse_array;
 }
 
@@ -1591,7 +1598,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeSetApkAssets", "(J[Landroid/content/res/ApkAssets;Z)V", (void*)NativeSetApkAssets},
     {"nativeSetConfiguration", "(JIILjava/lang/String;IIIIIIIIIIIIIII)V",
      (void*)NativeSetConfiguration},
-    {"nativeGetAssignedPackageIdentifiers", "(J)Landroid/util/SparseArray;",
+    {"nativeGetAssignedPackageIdentifiers", "(JZZ)Landroid/util/SparseArray;",
      (void*)NativeGetAssignedPackageIdentifiers},
 
     // AssetManager file methods.

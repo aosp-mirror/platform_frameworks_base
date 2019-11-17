@@ -90,7 +90,8 @@ public final class SurfaceControl implements Parcelable {
             Rect sourceCrop, int width, int height, boolean useIdentityTransform, int rotation,
             boolean captureSecureLayers);
     private static native ScreenshotGraphicBuffer nativeCaptureLayers(IBinder displayToken,
-            long layerObject, Rect sourceCrop, float frameScale, long[] excludeLayerObjects);
+            long layerObject, Rect sourceCrop, float frameScale, long[] excludeLayerObjects,
+            int format);
     private static native long nativeMirrorSurface(long mirrorOfObject);
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
@@ -1869,8 +1870,27 @@ public final class SurfaceControl implements Parcelable {
      */
     public static ScreenshotGraphicBuffer captureLayers(SurfaceControl layer, Rect sourceCrop,
             float frameScale) {
+        return captureLayers(layer, sourceCrop, frameScale, PixelFormat.RGBA_8888);
+    }
+
+    /**
+     * Captures a layer and its children and returns a {@link GraphicBuffer} with the content.
+     *
+     * @param layer            The root layer to capture.
+     * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
+     *                         Rect()' or null if no cropping is desired.
+     * @param frameScale       The desired scale of the returned buffer; the raw
+     *                         screen will be scaled up/down.
+     * @param format           The desired pixel format of the returned buffer.
+     *
+     * @return Returns a GraphicBuffer that contains the layer capture.
+     * @hide
+     */
+    public static ScreenshotGraphicBuffer captureLayers(SurfaceControl layer, Rect sourceCrop,
+            float frameScale, int format) {
         final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        return nativeCaptureLayers(displayToken, layer.mNativeObject, sourceCrop, frameScale, null);
+        return nativeCaptureLayers(displayToken, layer.mNativeObject, sourceCrop, frameScale, null,
+                format);
     }
 
     /**
@@ -1885,7 +1905,7 @@ public final class SurfaceControl implements Parcelable {
             nativeExcludeObjects[i] = exclude[i].mNativeObject;
         }
         return nativeCaptureLayers(displayToken, layer.mNativeObject, sourceCrop, frameScale,
-                nativeExcludeObjects);
+                nativeExcludeObjects, PixelFormat.RGBA_8888);
     }
 
     /**

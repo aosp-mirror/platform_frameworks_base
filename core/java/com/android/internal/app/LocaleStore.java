@@ -194,7 +194,7 @@ public class LocaleStore {
     private static Set<String> getSimCountries(Context context) {
         Set<String> result = new HashSet<>();
 
-        TelephonyManager tm = TelephonyManager.from(context);
+        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
 
         if (tm != null) {
             String iso = tm.getSimCountryIso().toUpperCase(Locale.US);

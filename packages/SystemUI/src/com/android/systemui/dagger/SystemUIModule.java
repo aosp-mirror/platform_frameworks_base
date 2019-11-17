@@ -28,10 +28,15 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+import com.android.systemui.statusbar.notification.collection.listbuilder.NotifListBuilder;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.util.time.SystemClock;
+import com.android.systemui.util.time.SystemClockImpl;
 
 import javax.inject.Singleton;
 
@@ -80,8 +85,19 @@ public abstract class SystemUIModule {
     abstract Divider optionalDivider();
 
     @BindsOptionalOf
+    abstract HeadsUpManager optionalHeadsUpManager();
+
+    @BindsOptionalOf
     abstract Recents optionalRecents();
 
     @BindsOptionalOf
     abstract StatusBar optionalStatusBar();
+
+    @Singleton
+    @Binds
+    abstract SystemClock bindSystemClock(SystemClockImpl systemClock);
+
+    @Singleton
+    @Binds
+    abstract NotifListBuilder bindNotifListBuilder(NotifListBuilderImpl impl);
 }

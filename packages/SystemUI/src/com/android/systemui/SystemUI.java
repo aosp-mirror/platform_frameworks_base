@@ -23,11 +23,9 @@ import android.os.Bundle;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Map;
 
-public abstract class SystemUI implements SysUiServiceProvider {
+public abstract class SystemUI {
     protected final Context mContext;
-    public Map<Class<?>, Object> mComponents;
 
     public SystemUI(Context context) {
         mContext = context;
@@ -42,17 +40,6 @@ public abstract class SystemUI implements SysUiServiceProvider {
     }
 
     protected void onBootCompleted() {
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getComponent(Class<T> interfaceType) {
-        return (T) (mComponents != null ? mComponents.get(interfaceType) : null);
-    }
-
-    public <T, C extends T> void putComponent(Class<T> interfaceType, C component) {
-        if (mComponents != null) {
-            mComponents.put(interfaceType, component);
-        }
     }
 
     public static void overrideNotificationAppName(Context context, Notification.Builder n,

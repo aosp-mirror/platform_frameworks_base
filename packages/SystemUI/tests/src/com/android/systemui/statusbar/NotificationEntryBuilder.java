@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Importance;
+import android.content.Context;
 import android.os.UserHandle;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
@@ -90,6 +91,10 @@ public class NotificationEntryBuilder {
     public NotificationEntryBuilder setNotification(Notification notification) {
         mSbnBuilder.setNotification(notification);
         return this;
+    }
+
+    public Notification.Builder modifyNotification(Context context) {
+        return mSbnBuilder.modifyNotification(context);
     }
 
     public NotificationEntryBuilder setUser(UserHandle user) {

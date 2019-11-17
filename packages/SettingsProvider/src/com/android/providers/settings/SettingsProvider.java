@@ -154,7 +154,6 @@ public class SettingsProvider extends ContentProvider {
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
     private static final String TABLE_GLOBAL = "global";
-    private static final String TABLE_CONFIG = "config";
 
     // Old tables no longer exist.
     private static final String TABLE_FAVORITES = "favorites";

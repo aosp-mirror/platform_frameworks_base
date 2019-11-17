@@ -64,7 +64,8 @@ public class FakeSensorManager extends SensorManager {
                 .getDefaultSensor(Sensor.TYPE_PROXIMITY);
         if (proxSensor == null) {
             // No prox? Let's create a fake one!
-            proxSensor = createSensor(Sensor.TYPE_PROXIMITY, null);
+            proxSensor =
+                    createSensor(Sensor.TYPE_PROXIMITY, null, 1 /* SENSOR_FLAG_WAKE_UP_SENSOR */);
         }
 
         mSensors = new FakeGenericSensor[]{
@@ -91,18 +92,6 @@ public class FakeSensorManager extends SensorManager {
         Sensor s = super.getDefaultSensor(type);
         if (s != null) {
             return s;
-        }
-        switch(type) {
-            case Sensor.TYPE_PROXIMITY:
-                try {
-                    return createSensor(Sensor.TYPE_PROXIMITY, null);
-                } catch (Exception e) {
-                    // fall through
-                }
-                break;
-            default:
-                break;
-
         }
         // Our mock sensors aren't wakeup, and it's a pain to create them that way. Instead, just
         // return non-wakeup sensors if we can't find a wakeup sensor.
@@ -208,6 +197,10 @@ public class FakeSensorManager extends SensorManager {
     }
 
     private Sensor createSensor(int type, @Nullable String stringType) throws Exception {
+        return createSensor(type, stringType, 0 /* flags */);
+    }
+
+    private Sensor createSensor(int type, @Nullable String stringType, int flags) throws Exception {
         Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
         constr.setAccessible(true);
         Sensor sensor = constr.newInstance();
@@ -225,7 +218,7 @@ public class FakeSensorManager extends SensorManager {
         setSensorField(sensor, "mPower", 1);
         setSensorField(sensor, "mMinDelay", 1000);
         setSensorField(sensor, "mMaxDelay", 1000000000);
-        setSensorField(sensor, "mFlags", 0);
+        setSensorField(sensor, "mFlags", flags);
         setSensorField(sensor, "mId", -1);
 
         return sensor;

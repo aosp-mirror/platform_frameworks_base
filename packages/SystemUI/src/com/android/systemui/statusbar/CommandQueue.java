@@ -70,53 +70,55 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     private static final int OP_SET_ICON    = 1;
     private static final int OP_REMOVE_ICON = 2;
 
-    private static final int MSG_ICON                          = 1 << MSG_SHIFT;
-    private static final int MSG_DISABLE                       = 2 << MSG_SHIFT;
-    private static final int MSG_EXPAND_NOTIFICATIONS          = 3 << MSG_SHIFT;
-    private static final int MSG_COLLAPSE_PANELS               = 4 << MSG_SHIFT;
-    private static final int MSG_EXPAND_SETTINGS               = 5 << MSG_SHIFT;
-    private static final int MSG_SYSTEM_BAR_APPEARANCE_CHANGED = 6 << MSG_SHIFT;
-    private static final int MSG_DISPLAY_READY                 = 7 << MSG_SHIFT;
-    private static final int MSG_SHOW_IME_BUTTON               = 8 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_RECENT_APPS            = 9 << MSG_SHIFT;
-    private static final int MSG_PRELOAD_RECENT_APPS           = 10 << MSG_SHIFT;
-    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS    = 11 << MSG_SHIFT;
-    private static final int MSG_SET_WINDOW_STATE              = 12 << MSG_SHIFT;
-    private static final int MSG_SHOW_RECENT_APPS              = 13 << MSG_SHIFT;
-    private static final int MSG_HIDE_RECENT_APPS              = 14 << MSG_SHIFT;
-    private static final int MSG_SHOW_SCREEN_PIN_REQUEST       = 18 << MSG_SHIFT;
-    private static final int MSG_APP_TRANSITION_PENDING        = 19 << MSG_SHIFT;
-    private static final int MSG_APP_TRANSITION_CANCELLED      = 20 << MSG_SHIFT;
-    private static final int MSG_APP_TRANSITION_STARTING       = 21 << MSG_SHIFT;
-    private static final int MSG_ASSIST_DISCLOSURE             = 22 << MSG_SHIFT;
-    private static final int MSG_START_ASSIST                  = 23 << MSG_SHIFT;
-    private static final int MSG_CAMERA_LAUNCH_GESTURE         = 24 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS     = 25 << MSG_SHIFT;
-    private static final int MSG_SHOW_PICTURE_IN_PICTURE_MENU  = 26 << MSG_SHIFT;
-    private static final int MSG_ADD_QS_TILE                   = 27 << MSG_SHIFT;
-    private static final int MSG_REMOVE_QS_TILE                = 28 << MSG_SHIFT;
-    private static final int MSG_CLICK_QS_TILE                 = 29 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_APP_SPLIT_SCREEN       = 30 << MSG_SHIFT;
-    private static final int MSG_APP_TRANSITION_FINISHED       = 31 << MSG_SHIFT;
-    private static final int MSG_DISMISS_KEYBOARD_SHORTCUTS    = 32 << MSG_SHIFT;
-    private static final int MSG_HANDLE_SYSTEM_KEY             = 33 << MSG_SHIFT;
-    private static final int MSG_SHOW_GLOBAL_ACTIONS           = 34 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_PANEL                  = 35 << MSG_SHIFT;
-    private static final int MSG_SHOW_SHUTDOWN_UI              = 36 << MSG_SHIFT;
-    private static final int MSG_SET_TOP_APP_HIDES_STATUS_BAR  = 37 << MSG_SHIFT;
-    private static final int MSG_ROTATION_PROPOSAL             = 38 << MSG_SHIFT;
-    private static final int MSG_BIOMETRIC_SHOW                = 39 << MSG_SHIFT;
-    private static final int MSG_BIOMETRIC_AUTHENTICATED       = 40 << MSG_SHIFT;
-    private static final int MSG_BIOMETRIC_HELP                = 41 << MSG_SHIFT;
-    private static final int MSG_BIOMETRIC_ERROR               = 42 << MSG_SHIFT;
-    private static final int MSG_BIOMETRIC_HIDE                = 43 << MSG_SHIFT;
-    private static final int MSG_SHOW_CHARGING_ANIMATION       = 44 << MSG_SHIFT;
-    private static final int MSG_SHOW_PINNING_TOAST_ENTER_EXIT = 45 << MSG_SHIFT;
-    private static final int MSG_SHOW_PINNING_TOAST_ESCAPE     = 46 << MSG_SHIFT;
-    private static final int MSG_RECENTS_ANIMATION_STATE_CHANGED = 47 << MSG_SHIFT;
-    private static final int MSG_SHOW_TRANSIENT                = 48 << MSG_SHIFT;
-    private static final int MSG_ABORT_TRANSIENT               = 49 << MSG_SHIFT;
-    private static final int MSG_TOP_APP_WINDOW_CHANGED        = 50 << MSG_SHIFT;
+    private static final int MSG_ICON                              = 1 << MSG_SHIFT;
+    private static final int MSG_DISABLE                           = 2 << MSG_SHIFT;
+    private static final int MSG_EXPAND_NOTIFICATIONS              = 3 << MSG_SHIFT;
+    private static final int MSG_COLLAPSE_PANELS                   = 4 << MSG_SHIFT;
+    private static final int MSG_EXPAND_SETTINGS                   = 5 << MSG_SHIFT;
+    private static final int MSG_SYSTEM_BAR_APPEARANCE_CHANGED     = 6 << MSG_SHIFT;
+    private static final int MSG_DISPLAY_READY                     = 7 << MSG_SHIFT;
+    private static final int MSG_SHOW_IME_BUTTON                   = 8 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_RECENT_APPS                = 9 << MSG_SHIFT;
+    private static final int MSG_PRELOAD_RECENT_APPS               = 10 << MSG_SHIFT;
+    private static final int MSG_CANCEL_PRELOAD_RECENT_APPS        = 11 << MSG_SHIFT;
+    private static final int MSG_SET_WINDOW_STATE                  = 12 << MSG_SHIFT;
+    private static final int MSG_SHOW_RECENT_APPS                  = 13 << MSG_SHIFT;
+    private static final int MSG_HIDE_RECENT_APPS                  = 14 << MSG_SHIFT;
+    private static final int MSG_SHOW_SCREEN_PIN_REQUEST           = 18 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_PENDING            = 19 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_CANCELLED          = 20 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_STARTING           = 21 << MSG_SHIFT;
+    private static final int MSG_ASSIST_DISCLOSURE                 = 22 << MSG_SHIFT;
+    private static final int MSG_START_ASSIST                      = 23 << MSG_SHIFT;
+    private static final int MSG_CAMERA_LAUNCH_GESTURE             = 24 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS         = 25 << MSG_SHIFT;
+    private static final int MSG_SHOW_PICTURE_IN_PICTURE_MENU      = 26 << MSG_SHIFT;
+    private static final int MSG_ADD_QS_TILE                       = 27 << MSG_SHIFT;
+    private static final int MSG_REMOVE_QS_TILE                    = 28 << MSG_SHIFT;
+    private static final int MSG_CLICK_QS_TILE                     = 29 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_APP_SPLIT_SCREEN           = 30 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_FINISHED           = 31 << MSG_SHIFT;
+    private static final int MSG_DISMISS_KEYBOARD_SHORTCUTS        = 32 << MSG_SHIFT;
+    private static final int MSG_HANDLE_SYSTEM_KEY                 = 33 << MSG_SHIFT;
+    private static final int MSG_SHOW_GLOBAL_ACTIONS               = 34 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_PANEL                      = 35 << MSG_SHIFT;
+    private static final int MSG_SHOW_SHUTDOWN_UI                  = 36 << MSG_SHIFT;
+    private static final int MSG_SET_TOP_APP_HIDES_STATUS_BAR      = 37 << MSG_SHIFT;
+    private static final int MSG_ROTATION_PROPOSAL                 = 38 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_SHOW                    = 39 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_AUTHENTICATED           = 40 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_HELP                    = 41 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_ERROR                   = 42 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_HIDE                    = 43 << MSG_SHIFT;
+    private static final int MSG_SHOW_CHARGING_ANIMATION           = 44 << MSG_SHIFT;
+    private static final int MSG_SHOW_PINNING_TOAST_ENTER_EXIT     = 45 << MSG_SHIFT;
+    private static final int MSG_SHOW_PINNING_TOAST_ESCAPE         = 46 << MSG_SHIFT;
+    private static final int MSG_RECENTS_ANIMATION_STATE_CHANGED   = 47 << MSG_SHIFT;
+    private static final int MSG_SHOW_TRANSIENT                    = 48 << MSG_SHIFT;
+    private static final int MSG_ABORT_TRANSIENT                   = 49 << MSG_SHIFT;
+    private static final int MSG_TOP_APP_WINDOW_CHANGED            = 50 << MSG_SHIFT;
+    private static final int MSG_SHOW_INATTENTIVE_SLEEP_WARNING    = 51 << MSG_SHIFT;
+    private static final int MSG_DISMISS_INATTENTIVE_SLEEP_WARNING = 52 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -294,6 +296,18 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
          */
         default void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive) {
         }
+
+        /**
+         * Called to notify System UI that a warning about the device going to sleep
+         * due to prolonged user inactivity should be shown.
+         */
+        default void showInattentiveSleepWarning() { }
+
+        /**
+         * Called to notify System UI that the warning about the device going to sleep
+         * due to prolonged user inactivity should be dismissed.
+         */
+        default void dismissInattentiveSleepWarning() { }
     }
 
     public CommandQueue(Context context) {
@@ -793,6 +807,22 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         }
     }
 
+    @Override
+    public void showInattentiveSleepWarning() {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SHOW_INATTENTIVE_SLEEP_WARNING)
+                    .sendToTarget();
+        }
+    }
+
+    @Override
+    public void dismissInattentiveSleepWarning() {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_DISMISS_INATTENTIVE_SLEEP_WARNING)
+                    .sendToTarget();
+        }
+    }
+
     private void handleShowImeButton(int displayId, IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher, boolean isMultiClientImeEnabled) {
         if (displayId == INVALID_DISPLAY) return;
@@ -1138,6 +1168,16 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     args.recycle();
                     break;
                 }
+                case MSG_SHOW_INATTENTIVE_SLEEP_WARNING:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showInattentiveSleepWarning();
+                    }
+                    break;
+                case MSG_DISMISS_INATTENTIVE_SLEEP_WARNING:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).dismissInattentiveSleepWarning();
+                    }
+                    break;
             }
         }
     }

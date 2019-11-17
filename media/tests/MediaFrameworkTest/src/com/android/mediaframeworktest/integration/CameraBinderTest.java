@@ -284,11 +284,12 @@ public class CameraBinderTest extends AndroidTestCase {
             ICameraDeviceCallbacks dummyCallbacks = new DummyCameraDeviceCallbacks();
 
             String clientPackageName = getContext().getPackageName();
+            String clientFeatureId = getContext().getFeatureId();
 
             ICameraDeviceUser cameraUser =
                     mUtils.getCameraService().connectDevice(
                         dummyCallbacks, String.valueOf(cameraId),
-                        clientPackageName,
+                        clientPackageName, clientFeatureId,
                         ICameraService.USE_CALLING_UID);
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 

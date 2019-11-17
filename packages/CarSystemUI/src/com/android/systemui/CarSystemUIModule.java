@@ -26,6 +26,7 @@ import com.android.systemui.car.CarNotificationInterruptionStateProvider;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.recents.Recents;
@@ -38,11 +39,13 @@ import com.android.systemui.statusbar.car.CarStatusBar;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.volume.CarVolumeDialogComponent;
 import com.android.systemui.volume.VolumeDialogComponent;
 
@@ -85,6 +88,17 @@ abstract class CarSystemUIModule {
 
     @Singleton
     @Provides
+    static HeadsUpManagerPhone provideHeadsUpManagerPhone(Context context,
+            StatusBarStateController statusBarStateController,
+            KeyguardBypassController bypassController) {
+        return new HeadsUpManagerPhone(context, statusBarStateController, bypassController);
+    }
+
+    @Binds
+    abstract HeadsUpManager bindHeadsUpManagerPhone(HeadsUpManagerPhone headsUpManagerPhone);
+
+    @Singleton
+    @Provides
     @Named(LEAK_REPORT_EMAIL_NAME)
     static String provideLeakReportEmail() {
         return "buganizer-system+181579@google.com";
@@ -101,7 +115,7 @@ abstract class CarSystemUIModule {
     abstract DockManager bindDockManager(DockManagerImpl dockManager);
 
     @Binds
-    abstract NotificationData.KeyguardEnvironment bindKeyguardEnvironment(
+    abstract NotificationEntryManager.KeyguardEnvironment bindKeyguardEnvironment(
             KeyguardEnvironmentImpl keyguardEnvironment);
 
     @Binds

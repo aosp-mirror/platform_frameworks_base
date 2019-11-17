@@ -41,7 +41,6 @@ import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -314,7 +313,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
-    /** Creates a {@link TaskStack} and adds it to the specified {@link DisplayContent}. */
+    /** Creates a {@link ActivityStack} and adds it to the specified {@link DisplayContent}. */
     ActivityStack createTaskStackOnDisplay(DisplayContent dc) {
         return createTaskStackOnDisplay(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, dc);
     }

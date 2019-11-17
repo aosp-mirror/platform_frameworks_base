@@ -83,7 +83,7 @@ interface IOns {
      * subscription id
      *
      */
-    int getPreferredDataSubscriptionId(String callingPackage);
+    int getPreferredDataSubscriptionId(String callingPackage, String callingFeatureId);
 
     /**
      * Update availability of a list of networks in the current location.

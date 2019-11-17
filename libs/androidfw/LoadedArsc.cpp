@@ -397,9 +397,7 @@ const LoadedPackage* LoadedArsc::GetPackageById(uint8_t package_id) const {
 }
 
 std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
-                                                         bool system,
-                                                         bool load_as_shared_library,
-                                                         bool for_loader) {
+                                                         package_property_t property_flags) {
   ATRACE_NAME("LoadedPackage::Load");
   std::unique_ptr<LoadedPackage> loaded_package(new LoadedPackage());
 
@@ -413,17 +411,24 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
     return {};
   }
 
-  loaded_package->system_ = system;
+  if ((property_flags & PROPERTY_SYSTEM) != 0) {
+    loaded_package->property_flags_ |= PROPERTY_SYSTEM;
+  }
+
+  if ((property_flags & PROPERTY_LOADER) != 0) {
+    loaded_package->property_flags_ |= PROPERTY_LOADER;
+  }
+
+  if ((property_flags & PROPERTY_OVERLAY) != 0) {
+    // Overlay resources must have an exclusive resource id space for referencing internal
+    // resources.
+    loaded_package->property_flags_ |= PROPERTY_OVERLAY | PROPERTY_DYNAMIC;
+  }
 
   loaded_package->package_id_ = dtohl(header->id);
   if (loaded_package->package_id_ == 0 ||
-      (loaded_package->package_id_ == kAppPackageId && load_as_shared_library)) {
-    // Package ID of 0 means this is a shared library.
-    loaded_package->dynamic_ = true;
-  }
-
-  if (for_loader) {
-    loaded_package->custom_loader_ = true;
+      (loaded_package->package_id_ == kAppPackageId && (property_flags & PROPERTY_DYNAMIC) != 0)) {
+    loaded_package->property_flags_ |= PROPERTY_DYNAMIC;
   }
 
   if (header->header.headerSize >= sizeof(ResTable_package)) {
@@ -677,7 +682,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 }
 
 bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
-                           bool load_as_shared_library, bool for_loader) {
+                           package_property_t property_flags) {
   const ResTable_header* header = chunk.header<ResTable_header>();
   if (header == nullptr) {
     LOG(ERROR) << "RES_TABLE_TYPE too small.";
@@ -720,7 +725,7 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
         packages_seen++;
 
         std::unique_ptr<const LoadedPackage> loaded_package =
-            LoadedPackage::Load(child_chunk, system_, load_as_shared_library, for_loader);
+            LoadedPackage::Load(child_chunk, property_flags);
         if (!loaded_package) {
           return false;
         }
@@ -744,24 +749,18 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
 
 std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const StringPiece& data,
                                                    const LoadedIdmap* loaded_idmap,
-                                                   bool system,
-                                                   bool load_as_shared_library,
-                                                   bool for_loader) {
+                                                   package_property_t property_flags) {
   ATRACE_NAME("LoadedArsc::Load");
 
   // Not using make_unique because the constructor is private.
   std::unique_ptr<LoadedArsc> loaded_arsc(new LoadedArsc());
-  loaded_arsc->system_ = system;
 
   ChunkIterator iter(data.data(), data.size());
   while (iter.HasNext()) {
     const Chunk chunk = iter.Next();
     switch (chunk.type()) {
       case RES_TABLE_TYPE:
-        if (!loaded_arsc->LoadTable(chunk,
-                                    loaded_idmap,
-                                    load_as_shared_library,
-                                    for_loader)) {
+        if (!loaded_arsc->LoadTable(chunk, loaded_idmap, property_flags)) {
           return {};
         }
         break;

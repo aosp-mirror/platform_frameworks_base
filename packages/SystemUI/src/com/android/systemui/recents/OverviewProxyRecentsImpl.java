@@ -35,7 +35,6 @@ import android.widget.Toast;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
@@ -73,7 +72,7 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
     }
 
     @Override
-    public void onStart(Context context, SysUiServiceProvider sysUiServiceProvider) {
+    public void onStart(Context context) {
         mContext = context;
         mHandler = new Handler();
         mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);

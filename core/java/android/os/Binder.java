@@ -932,8 +932,14 @@ public class Binder implements IBinder {
         }
 
         int result = -1;
-        try {
-            result = handleShellCommand(in, out, err, args);
+        try (ParcelFileDescriptor inPfd = ParcelFileDescriptor.dup(in);
+                ParcelFileDescriptor outPfd = ParcelFileDescriptor.dup(out);
+                ParcelFileDescriptor errPfd = ParcelFileDescriptor.dup(err)) {
+            result = handleShellCommand(inPfd, outPfd, errPfd, args);
+        } catch (IOException e) {
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(err));
+            pw.println("dup() failed: " + e.getMessage());
+            pw.flush();
         } finally {
             resultReceiver.send(result, null);
         }
@@ -954,9 +960,10 @@ public class Binder implements IBinder {
      * @hide
      */
     // @SystemApi TODO Make it a system API.
-    protected int handleShellCommand(@NonNull FileDescriptor in, @NonNull FileDescriptor out,
-            @NonNull FileDescriptor err, @NonNull String[] args) {
-        FileOutputStream ferr = new FileOutputStream(err);
+    protected int handleShellCommand(@NonNull ParcelFileDescriptor in,
+            @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+            @NonNull String[] args) {
+        FileOutputStream ferr = new FileOutputStream(err.getFileDescriptor());
         PrintWriter pw = new FastPrintWriter(ferr);
         pw.println("No shell command implementation.");
         pw.flush();

@@ -52,13 +52,9 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Stack;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * A implementation of HeadsUpManager for phone and car.
  */
-@Singleton
 public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         VisualStabilityManager.Callback, OnHeadsUpChangedListener,
         ConfigurationController.ConfigurationListener, StateListener {
@@ -113,7 +109,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     ///////////////////////////////////////////////////////////////////////////////////////////////
     //  Constructor:
 
-    @Inject
     public HeadsUpManagerPhone(@NonNull final Context context,
             StatusBarStateController statusBarStateController,
             KeyguardBypassController bypassController) {

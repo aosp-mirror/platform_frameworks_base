@@ -43,20 +43,22 @@ static const std::string kResourcesArsc("resources.arsc");
 ApkAssets::ApkAssets(ZipArchiveHandle unmanaged_handle,
                      const std::string& path,
                      time_t last_mod_time,
-                     bool for_loader)
+                     package_property_t property_flags)
     : zip_handle_(unmanaged_handle, ::CloseArchive), path_(path), last_mod_time_(last_mod_time),
-      for_loader_(for_loader) {
+      property_flags_(property_flags) {
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path, bool system,
                                                  bool for_loader) {
-  return LoadImpl({} /*fd*/, path, nullptr, nullptr, system, false /*load_as_shared_library*/,
-                  for_loader);
+  package_property_t flags = (system ? PROPERTY_SYSTEM : 0U) |
+                             (for_loader ? PROPERTY_LOADER : 0U);
+  return LoadImpl({} /*fd*/, path, nullptr, nullptr, flags);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadAsSharedLibrary(const std::string& path,
                                                                 bool system) {
-  return LoadImpl({} /*fd*/, path, nullptr, nullptr, system, true /*load_as_shared_library*/);
+  package_property_t flags = PROPERTY_DYNAMIC | (system ? PROPERTY_SYSTEM : 0U);
+  return LoadImpl({} /*fd*/, path, nullptr, nullptr, flags);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
@@ -74,27 +76,33 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap
     LOG(ERROR) << "failed to load IDMAP " << idmap_path;
     return {};
   }
-  return LoadImpl({} /*fd*/, loaded_idmap->OverlayApkPath(), std::move(idmap_asset),
-                  std::move(loaded_idmap), system, true /*load_as_shared_library*/);
+
+  return LoadImpl({} /*fd*/, loaded_idmap->OverlayApkPath(),
+                  std::move(idmap_asset),
+                  std::move(loaded_idmap),
+                  PROPERTY_OVERLAY | (system ? PROPERTY_SYSTEM : 0U));
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(unique_fd fd,
                                                        const std::string& friendly_name,
                                                        bool system, bool force_shared_lib,
                                                        bool for_loader) {
+  package_property_t flags = (system ? PROPERTY_SYSTEM : 0U) |
+                             (force_shared_lib ? PROPERTY_DYNAMIC : 0U) |
+                             (for_loader ? PROPERTY_LOADER : 0U);
   return LoadImpl(std::move(fd), friendly_name, nullptr /*idmap_asset*/, nullptr /*loaded_idmap*/,
-                  system, force_shared_lib, for_loader);
+                  flags);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadArsc(const std::string& path,
                                                      bool for_loader) {
-  return LoadArscImpl({} /*fd*/, path, for_loader);
+  return LoadArscImpl({} /*fd*/, path, for_loader ? PROPERTY_LOADER : 0U);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadArsc(unique_fd fd,
                                                      const std::string& friendly_name,
                                                      bool for_loader) {
-  return LoadArscImpl(std::move(fd), friendly_name, for_loader);
+  return LoadArscImpl(std::move(fd), friendly_name, for_loader ? PROPERTY_LOADER : 0U);
 }
 
 std::unique_ptr<Asset> ApkAssets::CreateAssetFromFile(const std::string& path) {
@@ -120,8 +128,7 @@ std::unique_ptr<Asset> ApkAssets::CreateAssetFromFile(const std::string& path) {
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
     unique_fd fd, const std::string& path, std::unique_ptr<Asset> idmap_asset,
-    std::unique_ptr<const LoadedIdmap> loaded_idmap, bool system, bool load_as_shared_library,
-    bool for_loader) {
+    std::unique_ptr<const LoadedIdmap> loaded_idmap, package_property_t property_flags) {
   ::ZipArchiveHandle unmanaged_handle;
   int32_t result;
   if (fd >= 0) {
@@ -141,7 +148,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
 
   // Wrap the handle in a unique_ptr so it gets automatically closed.
   std::unique_ptr<ApkAssets>
-      loaded_apk(new ApkAssets(unmanaged_handle, path, last_mod_time, for_loader));
+      loaded_apk(new ApkAssets(unmanaged_handle, path, last_mod_time, property_flags));
 
   // Find the resource table.
   ::ZipEntry entry;
@@ -170,9 +177,8 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
   const StringPiece data(
       reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
       loaded_apk->resources_asset_->getLength());
-  loaded_apk->loaded_arsc_ =
-      LoadedArsc::Load(data, loaded_apk->loaded_idmap_.get(), system, load_as_shared_library,
-                       for_loader);
+  loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, loaded_apk->loaded_idmap_.get(),
+                                              property_flags);
   if (loaded_apk->loaded_arsc_ == nullptr) {
     LOG(ERROR) << "Failed to load '" << kResourcesArsc << "' in APK '" << path << "'.";
     return {};
@@ -184,7 +190,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadArscImpl(unique_fd fd,
                                                          const std::string& path,
-                                                         bool for_loader) {
+                                                         package_property_t property_flags) {
   std::unique_ptr<Asset> resources_asset;
 
   if (fd >= 0) {
@@ -201,13 +207,14 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadArscImpl(unique_fd fd,
 
   time_t last_mod_time = getFileModDate(path.c_str());
 
-  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(nullptr, path, last_mod_time, for_loader));
+  std::unique_ptr<ApkAssets> loaded_apk(
+      new ApkAssets(nullptr, path, last_mod_time, property_flags));
   loaded_apk->resources_asset_ = std::move(resources_asset);
 
   const StringPiece data(
       reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
       loaded_apk->resources_asset_->getLength());
-  loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, nullptr, false, false, for_loader);
+  loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, nullptr, property_flags);
   if (loaded_apk->loaded_arsc_ == nullptr) {
     LOG(ERROR) << "Failed to load '" << kResourcesArsc << path;
     return {};
@@ -320,8 +327,8 @@ bool ApkAssets::ForEachFile(const std::string& root_path,
 }
 
 bool ApkAssets::IsUpToDate() const {
-  // Loaders are invalidated by the app, not the system, so assume up to date
-  if (for_loader_) {
+  if (IsLoader()) {
+    // Loaders are invalidated by the app, not the system, so assume up to date.
     return true;
   }
 

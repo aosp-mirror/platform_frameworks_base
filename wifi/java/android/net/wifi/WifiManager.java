@@ -2257,6 +2257,8 @@ public class WifiManager {
     public static final long WIFI_FEATURE_MBO              = 0x800000000L; // MBO Support
     /** @hide */
     public static final long WIFI_FEATURE_OCE              = 0x1000000000L; // OCE Support
+    /** @hide */
+    public static final long WIFI_FEATURE_INFRA_6G         = 0x2000000000L; // Support 6 GHz band
 
     private long getSupportedFeatures() {
         try {
@@ -2271,11 +2273,20 @@ public class WifiManager {
     private boolean isFeatureSupported(long feature) {
         return (getSupportedFeatures() & feature) == feature;
     }
+
     /**
      * @return true if this adapter supports 5 GHz band
      */
     public boolean is5GHzBandSupported() {
         return isFeatureSupported(WIFI_FEATURE_INFRA_5G);
+    }
+
+    /**
+     * @return true if the device supports operating in the 6 GHz band and Wi-Fi is enabled,
+     *         false otherwise.
+     */
+    public boolean is6GHzBandSupported() {
+        return isFeatureSupported(WIFI_FEATURE_INFRA_6G);
     }
 
     /**
@@ -3351,7 +3362,7 @@ public class WifiManager {
 
     /**
      * Base class for soft AP callback. Should be extended by applications and set when calling
-     * {@link WifiManager#registerSoftApCallback(SoftApCallback, Handler)}.
+     * {@link WifiManager#registerSoftApCallback(Executor, SoftApCallback)}.
      *
      * @hide
      */
@@ -3452,16 +3463,16 @@ public class WifiManager {
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
-     * @param callback Callback for soft AP events
      * @param executor The executor to execute the callbacks of the {@code executor}
      *                 object. If null, then the application's main executor will be used.
+     * @param callback Callback for soft AP events
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerSoftApCallback(@NonNull SoftApCallback callback,
-                                       @Nullable @CallbackExecutor Executor executor) {
+    public void registerSoftApCallback(@Nullable @CallbackExecutor Executor executor,
+                                       @NonNull SoftApCallback callback) {
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
         Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", executor=" + executor);
 

@@ -15,7 +15,6 @@
  */
 package android.telephony;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -23,8 +22,6 @@ import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Annotation.ApnType;
@@ -37,19 +34,12 @@ import android.telephony.Annotation.PreciseCallStates;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
-import android.telephony.CallQuality;
-import android.telephony.CellInfo;
-import android.telephony.DisconnectCause;
-import android.telephony.PhoneCapability;
-import android.telephony.ServiceState;
-import android.telephony.SignalStrength;
-import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.telephony.ims.ImsReasonInfo;
 import android.util.Log;
 
-import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
+import com.android.internal.telephony.ITelephonyRegistry;
 
 import java.util.HashMap;
 import java.util.List;
@@ -120,7 +110,8 @@ public class TelephonyRegistryManager {
         };
         mSubscriptionChangedListenerMap.put(listener, callback);
         try {
-            sRegistry.addOnSubscriptionsChangedListener(mContext.getOpPackageName(), callback);
+            sRegistry.addOnSubscriptionsChangedListener(mContext.getOpPackageName(),
+                    mContext.getFeatureId(), callback);
         } catch (RemoteException ex) {
             // system server crash
         }
@@ -179,7 +170,7 @@ public class TelephonyRegistryManager {
         mOpportunisticSubscriptionChangedListenerMap.put(listener, callback);
         try {
             sRegistry.addOnOpportunisticSubscriptionsChangedListener(mContext.getOpPackageName(),
-                    callback);
+                    mContext.getFeatureId(), callback);
         } catch (RemoteException ex) {
             // system server crash
         }

@@ -147,7 +147,7 @@ public class UserSystemPackageInstallerTest {
 
         final ArrayMap<String, Integer> expectedOutput = getNewPackageToWhitelistedFlagsMap();
         expectedOutput.put("com.android.package1",
-                UserInfo.PROFILE_FLAGS_MASK | FLAG_SYSTEM | FLAG_GUEST);
+                UserInfo.FLAG_PROFILE | FLAG_SYSTEM | FLAG_GUEST);
         expectedOutput.put("com.android.package2",
                 UserInfo.FLAG_MANAGED_PROFILE);
 
@@ -376,9 +376,9 @@ public class UserSystemPackageInstallerTest {
 
     /** Sets the whitelist mode to the desired value via adb's setprop. */
     private void setUserTypePackageWhitelistMode(int mode) {
-        UiDevice mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         try {
-            String result = mUiDevice.executeShellCommand(String.format("setprop %s %d",
+            String result = uiDevice.executeShellCommand(String.format("setprop %s %d",
                     PACKAGE_WHITELIST_MODE_PROP, mode));
             assertFalse("Failed to set sysprop " + PACKAGE_WHITELIST_MODE_PROP + ": " + result,
                     result != null && result.contains("Failed"));
@@ -390,7 +390,7 @@ public class UserSystemPackageInstallerTest {
     private ArrayMap<String, Integer> getNewPackageToWhitelistedFlagsMap() {
         final ArrayMap<String, Integer> pkgFlagMap = new ArrayMap<>();
         // "android" is always treated as whitelisted, regardless of the xml file.
-        pkgFlagMap.put("android", FLAG_SYSTEM | UserInfo.FLAG_FULL | UserInfo.PROFILE_FLAGS_MASK);
+        pkgFlagMap.put("android", FLAG_SYSTEM | UserInfo.FLAG_FULL | UserInfo.FLAG_PROFILE);
         return pkgFlagMap;
     }
 }

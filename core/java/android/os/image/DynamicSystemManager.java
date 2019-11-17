@@ -101,6 +101,19 @@ public class DynamicSystemManager {
         }
     }
     /**
+     * Start DynamicSystem installation.
+     *
+     * @return true if the call succeeds
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public boolean startInstallation() {
+        try {
+            return mService.startInstallation();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
+    /**
      * Start DynamicSystem installation. This call may take an unbounded amount of time. The caller
      * may use another thread to call the getStartProgress() to get the progress.
      *
@@ -112,9 +125,9 @@ public class DynamicSystemManager {
      *     true.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
-    public Session startInstallation(String name, long size, boolean readOnly) {
+    public Session createPartition(String name, long size, boolean readOnly) {
         try {
-            if (mService.startInstallation(name, size, readOnly)) {
+            if (mService.createPartition(name, size, readOnly)) {
                 return new Session();
             } else {
                 return null;
@@ -123,7 +136,18 @@ public class DynamicSystemManager {
             throw new RuntimeException(e.toString());
         }
     }
-
+    /**
+     * Finish a previously started installation. Installations without a cooresponding
+     * finishInstallation() will be cleaned up during device boot.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public boolean finishInstallation() {
+        try {
+            return mService.finishInstallation();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
     /**
      * Query the progress of the current installation operation. This can be called while the
      * installation is in progress.

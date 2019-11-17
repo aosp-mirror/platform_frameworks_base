@@ -18,7 +18,6 @@ package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.net.Uri;
-import android.os.Bundle;
 
 import java.util.List;
 
@@ -197,8 +196,8 @@ public class ISmsImplBase extends ISms.Stub {
     }
 
     @Override
-    public int checkSmsShortCodeDestination(
-            int subid, String callingApk, String destAddress, String countryIso) {
+    public int checkSmsShortCodeDestination(int subid, String callingPackage,
+            String callingFeatureId, String destAddress, String countryIso) {
         throw new UnsupportedOperationException();
     }
 

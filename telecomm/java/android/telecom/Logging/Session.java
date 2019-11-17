@@ -237,7 +237,10 @@ public class Session {
     // keep track of calls and bail if we hit the recursion limit
     private String getFullSessionId(int parentCount) {
         if (parentCount >= SESSION_RECURSION_LIMIT) {
-            Log.w(LOG_TAG, "getFullSessionId: Hit recursion limit!");
+            // Don't use Telecom's Log.w here or it will cause infinite recursion because it will
+            // try to add session information to this logging statement, which will cause it to hit
+            // this condition again and so on...
+            android.util.Slog.w(LOG_TAG, "getFullSessionId: Hit recursion limit!");
             return TRUNCATE_STRING + mSessionId;
         }
         // Cache mParentSession locally to prevent a concurrency problem where
@@ -265,7 +268,11 @@ public class Session {
         Session topNode = this;
         while (topNode.getParentSession() != null) {
             if (currParentCount >= SESSION_RECURSION_LIMIT) {
-                Log.w(LOG_TAG, "getRootSession: Hit recursion limit from " + callingMethod);
+                // Don't use Telecom's Log.w here or it will cause infinite recursion because it
+                // will try to add session information to this logging statement, which will cause
+                // it to hit this condition again and so on...
+                android.util.Slog.w(LOG_TAG, "getRootSession: Hit recursion limit from "
+                        + callingMethod);
                 break;
             }
             topNode = topNode.getParentSession();
@@ -289,7 +296,10 @@ public class Session {
     private void printSessionTree(int tabI, StringBuilder sb, int currChildCount) {
         // Prevent infinite recursion.
         if (currChildCount >= SESSION_RECURSION_LIMIT) {
-            Log.w(LOG_TAG, "printSessionTree: Hit recursion limit!");
+            // Don't use Telecom's Log.w here or it will cause infinite recursion because it will
+            // try to add session information to this logging statement, which will cause it to hit
+            // this condition again and so on...
+            android.util.Slog.w(LOG_TAG, "printSessionTree: Hit recursion limit!");
             sb.append(TRUNCATE_STRING);
             return;
         }
@@ -315,7 +325,10 @@ public class Session {
     private synchronized void getFullMethodPath(StringBuilder sb, boolean truncatePath,
             int parentCount) {
         if (parentCount >= SESSION_RECURSION_LIMIT) {
-            Log.w(LOG_TAG, "getFullMethodPath: Hit recursion limit!");
+            // Don't use Telecom's Log.w here or it will cause infinite recursion because it will
+            // try to add session information to this logging statement, which will cause it to hit
+            // this condition again and so on...
+            android.util.Slog.w(LOG_TAG, "getFullMethodPath: Hit recursion limit!");
             sb.append(TRUNCATE_STRING);
             return;
         }

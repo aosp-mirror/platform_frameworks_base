@@ -47,6 +47,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -78,10 +79,10 @@ import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -352,14 +353,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param userId the id of the user
      */
     private void restoreBubbles(@UserIdInt int userId) {
-        NotificationData notificationData =
-                mNotificationEntryManager.getNotificationData();
         ArraySet<String> savedBubbleKeys = mSavedBubbleKeysPerUser.get(userId);
         if (savedBubbleKeys == null) {
             // There were no bubbles saved for this used.
             return;
         }
-        for (NotificationEntry e : notificationData.getNotificationsForCurrentUser()) {
+        for (NotificationEntry e :
+                mNotificationEntryManager.getActiveNotificationsForCurrentUser()) {
             if (savedBubbleKeys.contains(e.getKey())
                     && mNotificationInterruptionStateProvider.shouldBubbleUp(e)
                     && canLaunchInActivityView(mContext, e)) {
@@ -458,7 +458,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     public boolean isBubbleNotificationSuppressedFromShade(String key) {
         boolean isBubbleAndSuppressed = mBubbleData.hasBubbleWithKey(key)
                 && !mBubbleData.getBubbleWithKey(key).showInShadeWhenBubble();
-        NotificationEntry entry = mNotificationEntryManager.getNotificationData().get(key);
+        NotificationEntry entry = mNotificationEntryManager.getActiveNotificationUnfiltered(key);
         String groupKey = entry != null ? entry.getSbn().getGroupKey() : null;
         boolean isSuppressedSummary = mBubbleData.isSummarySuppressed(groupKey);
         boolean isSummary = key.equals(mBubbleData.getSummaryKey(groupKey));
@@ -571,7 +571,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             new NotificationRemoveInterceptor() {
             @Override
             public boolean onNotificationRemoveRequested(String key, int reason) {
-                NotificationEntry entry = mNotificationEntryManager.getNotificationData().get(key);
+                NotificationEntry entry =
+                        mNotificationEntryManager.getActiveNotificationUnfiltered(key);
                 String groupKey = entry != null ? entry.getSbn().getGroupKey() : null;
                 ArrayList<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(groupKey);
 
@@ -768,7 +769,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         String notifKey = mBubbleData.getSummaryKey(groupKey);
                         mBubbleData.removeSuppressedSummary(groupKey);
                         NotificationEntry entry =
-                                mNotificationEntryManager.getNotificationData().get(notifKey);
+                                mNotificationEntryManager.getActiveNotificationUnfiltered(notifKey);
                         mNotificationEntryManager.performRemoveNotification(
                                 entry.getSbn(), UNDEFINED_DISMISS_REASON);
                     }
@@ -1007,8 +1008,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             Log.w(TAG, "Unable to create bubble -- no intent: " + entry.getKey());
             return false;
         }
+        PackageManager packageManager = StatusBar.getPackageManagerForUser(
+                context, entry.getSbn().getUser().getIdentifier());
         ActivityInfo info =
-                intent.getIntent().resolveActivityInfo(context.getPackageManager(), 0);
+                intent.getIntent().resolveActivityInfo(packageManager, 0);
         if (info == null) {
             Log.w(TAG, "Unable to send as bubble, "
                     + entry.getKey() + " couldn't find activity info for intent: "

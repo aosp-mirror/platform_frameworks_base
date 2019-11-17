@@ -47,7 +47,7 @@ public:
                         const ListenerArgs *args) = 0;
 };
 
-struct JDrm : public BnDrmClient {
+struct JDrm : public IDrmClient {
     static status_t IsCryptoSchemeSupported(const uint8_t uuid[16],
                                             const String8 &mimeType,
                                             DrmPlugin::SecurityLevel level,

@@ -74,6 +74,7 @@ class TaskSnapshotPersister {
     private final Object mLock = new Object();
     private final DirectoryResolver mDirectoryResolver;
     private final float mReducedScale;
+    private final boolean mUse16BitFormat;
 
     /**
      * The list of ids of the tasks that have been persisted since {@link #removeObsoleteFiles} was
@@ -92,6 +93,8 @@ class TaskSnapshotPersister {
             mReducedScale = ActivityManager.isLowRamDeviceStatic()
                     ? LOW_RAM_REDUCED_SCALE : REDUCED_SCALE;
         }
+        mUse16BitFormat = service.mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_use16BitTaskSnapshotPixelFormat);
     }
 
     /**
@@ -162,6 +165,15 @@ class TaskSnapshotPersister {
      */
     float getReducedScale() {
         return mReducedScale;
+    }
+
+    /**
+     * Return if task snapshots are stored in 16 bit pixel format.
+     *
+     * @return true if task snapshots are stored in 16 bit pixel format.
+     */
+    boolean use16BitFormat() {
+        return mUse16BitFormat;
     }
 
     @TestApi

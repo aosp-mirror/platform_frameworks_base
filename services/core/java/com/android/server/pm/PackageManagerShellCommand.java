@@ -2453,26 +2453,39 @@ class PackageManagerShellCommand extends ShellCommand {
         String name;
         int userId = -1;
         int flags = 0;
+        String userType = null;
         String opt;
         boolean preCreateOnly = false;
         while ((opt = getNextOption()) != null) {
+            String newUserType = null;
             if ("--profileOf".equals(opt)) {
                 userId = UserHandle.parseUserArg(getNextArgRequired());
             } else if ("--managed".equals(opt)) {
-                flags |= UserInfo.FLAG_MANAGED_PROFILE;
+                newUserType = UserManager.USER_TYPE_PROFILE_MANAGED;
             } else if ("--restricted".equals(opt)) {
-                flags |= UserInfo.FLAG_RESTRICTED;
+                newUserType = UserManager.USER_TYPE_FULL_RESTRICTED;
+            } else if ("--guest".equals(opt)) {
+                newUserType = UserManager.USER_TYPE_FULL_GUEST;
+            } else if ("--demo".equals(opt)) {
+                newUserType = UserManager.USER_TYPE_FULL_DEMO;
             } else if ("--ephemeral".equals(opt)) {
                 flags |= UserInfo.FLAG_EPHEMERAL;
-            } else if ("--guest".equals(opt)) {
-                flags |= UserInfo.FLAG_GUEST;
-            } else if ("--demo".equals(opt)) {
-                flags |= UserInfo.FLAG_DEMO;
             } else if ("--pre-create-only".equals(opt)) {
                 preCreateOnly = true;
+            } else if ("--user-type".equals(opt)) {
+                newUserType = getNextArgRequired();
             } else {
                 getErrPrintWriter().println("Error: unknown option " + opt);
                 return 1;
+            }
+            // Ensure only one user-type was specified.
+            if (newUserType != null) {
+                if (userType != null && !userType.equals(newUserType)) {
+                    getErrPrintWriter().println("Error: more than one user type was specified ("
+                            + userType + " and " + newUserType + ")");
+                    return 1;
+                }
+                userType = newUserType;
             }
         }
         String arg = getNextArg();
@@ -2490,16 +2503,20 @@ class PackageManagerShellCommand extends ShellCommand {
                 ServiceManager.getService(Context.USER_SERVICE));
         IAccountManager accm = IAccountManager.Stub.asInterface(
                 ServiceManager.getService(Context.ACCOUNT_SERVICE));
-        if ((flags & UserInfo.FLAG_RESTRICTED) != 0) {
+        if (userType == null) {
+            userType = UserInfo.getDefaultUserType(flags);
+        }
+        if (UserManager.isUserTypeRestricted(userType)) {
             // In non-split user mode, userId can only be SYSTEM
             int parentUserId = userId >= 0 ? userId : UserHandle.USER_SYSTEM;
             info = um.createRestrictedProfile(name, parentUserId);
             accm.addSharedAccountsFromParentUser(parentUserId, userId,
                     (Process.myUid() == Process.ROOT_UID) ? "root" : "com.android.shell");
         } else if (userId < 0) {
-            info = preCreateOnly ? um.preCreateUser(flags) : um.createUser(name, flags);
+            info = preCreateOnly ?
+                    um.preCreateUser(userType) : um.createUser(name, userType, flags);
         } else {
-            info = um.createProfileForUser(name, flags, userId, null);
+            info = um.createProfileForUser(name, userType, flags, userId, null);
         }
 
         if (info != null) {
@@ -3421,9 +3438,15 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("    Lists the current users.");
         pw.println("");
         pw.println("  create-user [--profileOf USER_ID] [--managed] [--restricted] [--ephemeral]");
-        pw.println("      [--guest] [--pre-create-only] USER_NAME");
+        pw.println("      [--guest] [--pre-create-only] [--user-type USER_TYPE] USER_NAME");
         pw.println("    Create a new user with the given USER_NAME, printing the new user identifier");
         pw.println("    of the user.");
+        // TODO(b/142482943): Consider fetching the list of user types from UMS.
+        pw.println("    USER_TYPE is the name of a user type, e.g. android.os.usertype.profile.MANAGED.");
+        pw.println("      If not specified, the default user type is android.os.usertype.full.SECONDARY.");
+        pw.println("      --managed is shorthand for '--user-type android.os.usertype.profile.MANAGED'.");
+        pw.println("      --restricted is shorthand for '--user-type android.os.usertype.full.RESTRICTED'.");
+        pw.println("      --guest is shorthand for '--user-type android.os.usertype.full.GUEST'.");
         pw.println("");
         pw.println("  remove-user USER_ID");
         pw.println("    Remove the user with the given USER_IDENTIFIER, deleting all data");

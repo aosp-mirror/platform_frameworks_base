@@ -1818,15 +1818,14 @@ public class LocationManager {
             Log.w(TAG, ex);
         }
 
-        if (status == null) {
-            status = new GpsStatus();
-        }
-        // When mGnssStatus is null, that means that this method is called outside
-        // onGpsStatusChanged().  Return an empty status to maintain backwards compatibility.
         GnssStatus gnssStatus = mGnssStatusListenerManager.getGnssStatus();
         int ttff = mGnssStatusListenerManager.getTtff();
         if (gnssStatus != null) {
-            status.setStatus(gnssStatus, ttff);
+            if (status == null) {
+                status = GpsStatus.create(gnssStatus, ttff);
+            } else {
+                status.setStatus(gnssStatus, ttff);
+            }
         }
         return status;
     }
@@ -2642,10 +2641,47 @@ public class LocationManager {
 
         @Override
         public void onRemoved() {
-            unregister();
-            synchronized (mListeners) {
-                mListeners.remove(mListener, this);
+            // TODO: onRemoved is necessary to GC hanging listeners, but introduces some interesting
+            //  broken edge cases. luckily these edge cases are quite unlikely. consider the
+            //  following interleaving for instance:
+            //    1) client adds single shot location request (A)
+            //    2) client gets removal callback, and schedules it for execution
+            //    3) client replaces single shot request with a different location request (B)
+            //    4) prior removal callback is executed, removing location request (B) incorrectly
+            //  what's needed is a way to identify which listener a callback belongs to. currently
+            //  we reuse the same transport object for the same listeners (so that we don't leak
+            //  transport objects on the server side). there seem to be two solutions:
+            //    1) when reregistering a request, first unregister the current transport, then
+            //       register with a new transport object (never reuse transport objects) - the
+            //       downside is that this breaks the server's knowledge that the request is the
+            //       same object, and thus breaks optimizations such as reusing the same transport
+            //       state.
+            //    2) pass some other type of marker in addition to the transport (for example an
+            //       incrementing integer representing the transport "version"), and pass this
+            //       marker back into callbacks so that each callback knows which transport
+            //       "version" it belongs to and can not execute itself if the version does not
+            //       match.
+            //  (1) seems like the preferred solution as it's simpler to implement and the above
+            //  mentioned server optimizations are not terribly important (they can be bypassed by
+            //  clients that use a new listener every time anyways).
+
+            Executor currentExecutor = mExecutor;
+            if (currentExecutor == null) {
+                // we've already been unregistered, no work to do anyways
+                return;
             }
+
+            // must be executed on the same executor so callback execution cannot be reordered
+            currentExecutor.execute(() -> {
+                if (currentExecutor != mExecutor) {
+                    return;
+                }
+
+                unregister();
+                synchronized (mListeners) {
+                    mListeners.remove(mListener, this);
+                }
+            });
         }
 
         private void locationCallbackFinished() {
@@ -2783,8 +2819,8 @@ public class LocationManager {
             @Override
             public void onSvStatusChanged(int svCount, int[] svidWithFlags, float[] cn0s,
                     float[] elevations, float[] azimuths, float[] carrierFreqs) {
-                GnssStatus localStatus = new GnssStatus(svCount, svidWithFlags, cn0s, elevations,
-                        azimuths, carrierFreqs);
+                GnssStatus localStatus = GnssStatus.wrap(svCount, svidWithFlags, cn0s,
+                        elevations, azimuths, carrierFreqs);
                 mGnssStatus = localStatus;
                 execute((callback) -> callback.onSatelliteStatusChanged(localStatus));
             }

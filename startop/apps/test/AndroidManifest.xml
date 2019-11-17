@@ -97,8 +97,8 @@
         </activity>
 
         <activity
-            android:label="SystemServer Benchmark"
-            android:name=".SystemServerBenchmarkActivity"
+            android:label="Interactive Microbenchmarks"
+            android:name=".InteractiveMicrobenchmarkActivity"
             android:exported="true" >
 
             <intent-filter>
@@ -109,8 +109,8 @@
         </activity>
 
         <activity
-            android:label="Non-interactive SystemServer Benchmark"
-            android:name=".NonInteractiveSystemServerBenchmarkActivity"
+            android:label="Non-interactive Microbenchmarks"
+            android:name=".NonInteractiveMicrobenchmarkActivity"
             android:exported="true" />
 
     </application>

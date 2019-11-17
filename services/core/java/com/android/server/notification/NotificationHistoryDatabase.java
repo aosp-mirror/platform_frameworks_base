@@ -16,8 +16,15 @@
 
 package com.android.server.notification;
 
+import android.app.AlarmManager;
 import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Handler;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -33,11 +40,15 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides an interface to write and query for notification history data for a user from a Protocol
@@ -52,32 +63,48 @@ public class NotificationHistoryDatabase {
     private static final String TAG = "NotiHistoryDatabase";
     private static final boolean DEBUG = NotificationManagerService.DBG;
     private static final int HISTORY_RETENTION_DAYS = 2;
+    private static final int HISTORY_RETENTION_MS = 24 * 60 * 60 * 1000;
     private static final long WRITE_BUFFER_INTERVAL_MS = 1000 * 60 * 20;
 
+    private static final String ACTION_HISTORY_DELETION =
+            NotificationHistoryDatabase.class.getSimpleName() + ".CLEANUP";
+    private static final int REQUEST_CODE_DELETION = 1;
+    private static final String SCHEME_DELETION = "delete";
+    private static final String EXTRA_KEY = "key";
+
+    private final Context mContext;
+    private final AlarmManager mAlarmManager;
     private final Object mLock = new Object();
     private Handler mFileWriteHandler;
     @VisibleForTesting
     // List of files holding history information, sorted newest to oldest
     final LinkedList<AtomicFile> mHistoryFiles;
-    private final GregorianCalendar mCal;
     private final File mHistoryDir;
     private final File mVersionFile;
     // Current version of the database files schema
     private int mCurrentVersion;
     private final WriteBufferRunnable mWriteBufferRunnable;
+    private final FileAttrProvider mFileAttrProvider;
 
     // Object containing posted notifications that have not yet been written to disk
     @VisibleForTesting
     NotificationHistory mBuffer;
 
-    public NotificationHistoryDatabase(File dir) {
+    public NotificationHistoryDatabase(Context context, File dir,
+            FileAttrProvider fileAttrProvider) {
+        mContext = context;
+        mAlarmManager = context.getSystemService(AlarmManager.class);
         mCurrentVersion = DEFAULT_CURRENT_VERSION;
         mVersionFile = new File(dir, "version");
         mHistoryDir = new File(dir, "history");
         mHistoryFiles = new LinkedList<>();
-        mCal = new GregorianCalendar();
         mBuffer = new NotificationHistory();
         mWriteBufferRunnable = new WriteBufferRunnable();
+        mFileAttrProvider = fileAttrProvider;
+
+        IntentFilter deletionFilter = new IntentFilter(ACTION_HISTORY_DELETION);
+        deletionFilter.addDataScheme(SCHEME_DELETION);
+        mContext.registerReceiver(mFileCleaupReceiver, deletionFilter);
     }
 
     public void init(Handler fileWriteHandler) {
@@ -105,7 +132,8 @@ public class NotificationHistoryDatabase {
         }
 
         // Sort with newest files first
-        Arrays.sort(files, (lhs, rhs) -> Long.compare(rhs.lastModified(), lhs.lastModified()));
+        Arrays.sort(files, (lhs, rhs) -> Long.compare(mFileAttrProvider.getCreationTime(rhs),
+                mFileAttrProvider.getCreationTime(lhs)));
 
         for (File file : files) {
             mHistoryFiles.addLast(new AtomicFile(file));
@@ -197,29 +225,46 @@ public class NotificationHistoryDatabase {
     }
 
     /**
-     * Remove any files that are too old.
+     * Remove any files that are too old and schedule jobs to clean up the rest
      */
     public void prune(final int retentionDays, final long currentTimeMillis) {
         synchronized (mLock) {
-            mCal.setTimeInMillis(currentTimeMillis);
-            mCal.add(Calendar.DATE, -1 * retentionDays);
+            GregorianCalendar retentionBoundary = new GregorianCalendar();
+            retentionBoundary.setTimeInMillis(currentTimeMillis);
+            retentionBoundary.add(Calendar.DATE, -1 * retentionDays);
 
-            while (!mHistoryFiles.isEmpty()) {
-                final AtomicFile currentOldestFile = mHistoryFiles.getLast();
-                final long age = currentTimeMillis
-                        - currentOldestFile.getBaseFile().lastModified();
-                if (age > mCal.getTimeInMillis()) {
+            for (int i = mHistoryFiles.size() - 1; i >= 0; i--) {
+                final AtomicFile currentOldestFile = mHistoryFiles.get(i);
+                final long creationTime =
+                        mFileAttrProvider.getCreationTime(currentOldestFile.getBaseFile());
+                if (creationTime <= retentionBoundary.getTimeInMillis()) {
                     if (DEBUG) {
                         Slog.d(TAG, "Removed " + currentOldestFile.getBaseFile().getName());
                     }
                     currentOldestFile.delete();
                     mHistoryFiles.removeLast();
                 } else {
-                    // all remaining files are newer than the cut off
-                    return;
+                    // all remaining files are newer than the cut off; schedule jobs to delete
+                    final long deletionTime = creationTime + (retentionDays * HISTORY_RETENTION_MS);
+                    scheduleDeletion(currentOldestFile.getBaseFile(), deletionTime);
                 }
             }
         }
+    }
+
+    void scheduleDeletion(File file, long deletionTime) {
+        if (DEBUG) {
+            Slog.d(TAG, "Scheduling deletion for " + file.getName() + " at " + deletionTime);
+        }
+        final PendingIntent pi = PendingIntent.getBroadcast(mContext,
+                REQUEST_CODE_DELETION,
+                new Intent(ACTION_HISTORY_DELETION)
+                        .setData(new Uri.Builder().scheme(SCHEME_DELETION)
+                                .appendPath(file.getAbsolutePath()).build())
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                        .putExtra(EXTRA_KEY, file.getAbsolutePath()),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, deletionTime, pi);
     }
 
     private void writeLocked(AtomicFile file, NotificationHistory notifications)
@@ -244,6 +289,25 @@ public class NotificationHistoryDatabase {
             throw e;
         }
     }
+
+    private final BroadcastReceiver mFileCleaupReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+            if (ACTION_HISTORY_DELETION.equals(action)) {
+                try {
+                    final String filePath = intent.getStringExtra(EXTRA_KEY);
+                    AtomicFile fileToDelete = new AtomicFile(new File(filePath));
+                    fileToDelete.delete();
+                } catch (Exception e) {
+                    Slog.e(TAG, "Failed to delete notification history file", e);
+                }
+            }
+        }
+    };
 
     private final class WriteBufferRunnable implements Runnable {
         @Override
@@ -277,10 +341,7 @@ public class NotificationHistoryDatabase {
                 // Remove packageName entries from pending history
                 mBuffer.removeNotificationsFromWrite(mPkg);
 
-                // Remove packageName entries from files on disk, and rewrite them to disk
-                // Since we sort by modified date, we have to update the files oldest to newest to
-                // maintain the original ordering
-                Iterator<AtomicFile> historyFileItr = mHistoryFiles.descendingIterator();
+                Iterator<AtomicFile> historyFileItr = mHistoryFiles.iterator();
                 while (historyFileItr.hasNext()) {
                     final AtomicFile af = historyFileItr.next();
                     try {
@@ -296,5 +357,25 @@ public class NotificationHistoryDatabase {
                 }
             }
         }
+    }
+
+    public static final class NotificationHistoryFileAttrProvider implements
+            NotificationHistoryDatabase.FileAttrProvider {
+        final static String TAG = "NotifHistoryFileDate";
+
+        public long getCreationTime(File file) {
+            try {
+                BasicFileAttributes attr = Files.readAttributes(FileSystems.getDefault().getPath(
+                        file.getAbsolutePath()), BasicFileAttributes.class);
+                return attr.creationTime().to(TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                Slog.w(TAG, "Cannot read creation data for file; using file name");
+                return Long.valueOf(file.getName());
+            }
+        }
+    }
+
+    interface FileAttrProvider {
+        long getCreationTime(File file);
     }
 }

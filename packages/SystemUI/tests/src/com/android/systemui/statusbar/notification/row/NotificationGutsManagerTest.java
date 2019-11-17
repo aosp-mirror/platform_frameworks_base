@@ -320,7 +320,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
                 .build();
         when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
         NotificationEntry entry = row.getEntry();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
@@ -352,7 +352,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
                 .build();
         when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
         NotificationEntry entry = row.getEntry();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
@@ -386,7 +386,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .build();
         row.getEntry().setIsHighPriority(true);
         when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
         NotificationEntry entry = row.getEntry();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
@@ -418,7 +418,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
                 .build();
         when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
         NotificationEntry entry = row.getEntry();
 
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
@@ -452,7 +452,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 .setUserSentiment(USER_SENTIMENT_NEGATIVE)
                 .build();
         when(row.getIsNonblockable()).thenReturn(false);
-        StatusBarNotification statusBarNotification = row.getStatusBarNotification();
+        StatusBarNotification statusBarNotification = row.getEntry().getSbn();
         NotificationEntry entry = row.getEntry();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
@@ -530,7 +530,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
     private NotificationMenuRowPlugin.MenuItem createTestMenuItem(ExpandableNotificationRow row) {
         NotificationMenuRowPlugin menuRow = new NotificationMenuRow(mContext);
-        menuRow.createMenu(row, row.getStatusBarNotification());
+        menuRow.createMenu(row, row.getEntry().getSbn());
 
         NotificationMenuRowPlugin.MenuItem menuItem = menuRow.getLongpressMenuItem(mContext);
         assertNotNull(menuItem);

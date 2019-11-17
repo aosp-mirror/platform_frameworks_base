@@ -357,11 +357,22 @@ public class ContentProviderOperation implements Parcelable {
             ContentProviderResult[] backRefs, int numBackRefs)
             throws OperationApplicationException {
         final ContentValues values = resolveValueBackReferences(backRefs, numBackRefs);
-        final Bundle extras = resolveExtrasBackReferences(backRefs, numBackRefs);
-        final String[] selectionArgs = resolveSelectionArgsBackReferences(backRefs, numBackRefs);
+
+        // If the creator requested explicit selection or selectionArgs, it
+        // should take precedence over similar values they defined in extras
+        Bundle extras = resolveExtrasBackReferences(backRefs, numBackRefs);
+        if (mSelection != null) {
+            extras = (extras != null) ? extras : new Bundle();
+            extras.putString(ContentResolver.QUERY_ARG_SQL_SELECTION, mSelection);
+        }
+        if (mSelectionArgs != null) {
+            extras = (extras != null) ? extras : new Bundle();
+            extras.putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS,
+                    resolveSelectionArgsBackReferences(backRefs, numBackRefs));
+        }
 
         if (mType == TYPE_INSERT) {
-            final Uri newUri = provider.insert(mUri, values);
+            final Uri newUri = provider.insert(mUri, values, extras);
             if (newUri != null) {
                 return new ContentProviderResult(newUri);
             } else {
@@ -375,9 +386,9 @@ public class ContentProviderOperation implements Parcelable {
 
         final int numRows;
         if (mType == TYPE_DELETE) {
-            numRows = provider.delete(mUri, mSelection, selectionArgs);
+            numRows = provider.delete(mUri, extras);
         } else if (mType == TYPE_UPDATE) {
-            numRows = provider.update(mUri, values, mSelection, selectionArgs);
+            numRows = provider.update(mUri, values, extras);
         } else if (mType == TYPE_ASSERT) {
             // Assert that all rows match expected values
             String[] projection =  null;
@@ -389,7 +400,7 @@ public class ContentProviderOperation implements Parcelable {
                 }
                 projection = projectionList.toArray(new String[projectionList.size()]);
             }
-            final Cursor cursor = provider.query(mUri, projection, mSelection, selectionArgs, null);
+            final Cursor cursor = provider.query(mUri, projection, extras, null);
             try {
                 numRows = cursor.getCount();
                 if (projection != null) {
@@ -1013,6 +1024,10 @@ public class ContentProviderOperation implements Parcelable {
 
         private void assertExtrasAllowed() {
             switch (mType) {
+                case TYPE_INSERT:
+                case TYPE_UPDATE:
+                case TYPE_DELETE:
+                case TYPE_ASSERT:
                 case TYPE_CALL:
                     break;
                 default:

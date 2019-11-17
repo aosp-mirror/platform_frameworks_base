@@ -18,7 +18,7 @@ package com.android.startop.test;
 
 import android.os.Bundle;
 
-public class InitCheckOverheadBenchmarkActivity extends SystemServerBenchmarkActivity {
+public class InitCheckOverheadBenchmarkActivity extends InteractiveMicrobenchmarkActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.system_server_benchmark_page);

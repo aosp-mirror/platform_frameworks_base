@@ -49,6 +49,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private static final String TAG = "ChooserListAdapter";
     private static final boolean DEBUG = false;
 
+    public static final int NO_POSITION = -1;
     public static final int TARGET_BAD = -1;
     public static final int TARGET_CALLER = 0;
     public static final int TARGET_SERVICE = 1;
@@ -189,7 +190,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     @Override
-    public View onCreateView(ViewGroup parent) {
+    View onCreateView(ViewGroup parent) {
         return mInflater.inflate(
                 com.android.internal.R.layout.resolve_grid_item, parent, false);
     }
@@ -321,6 +322,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
      */
     @Override
     public TargetInfo targetInfoForPosition(int position, boolean filtered) {
+        if (position == NO_POSITION) {
+            return null;
+        }
+
         int offset = 0;
 
         // Direct share targets

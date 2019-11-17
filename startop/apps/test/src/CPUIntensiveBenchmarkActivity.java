@@ -18,7 +18,7 @@ package com.android.startop.test;
 
 import android.os.Bundle;
 
-public class CPUIntensiveBenchmarkActivity extends SystemServerBenchmarkActivity {
+public class CPUIntensiveBenchmarkActivity extends InteractiveMicrobenchmarkActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.system_server_benchmark_page);

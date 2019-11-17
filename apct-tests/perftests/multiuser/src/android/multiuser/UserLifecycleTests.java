@@ -516,7 +516,7 @@ public class UserLifecycleTests {
     /** Creates a managed (work) profile under the current user, returning its userId. */
     private int createManagedProfile() {
         final UserInfo userInfo = mUm.createProfileForUser("TestProfile",
-                UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
+                UserManager.USER_TYPE_PROFILE_MANAGED, /* flags */ 0, mAm.getCurrentUser());
         if (userInfo == null) {
             throw new IllegalStateException("Creating managed profile failed. Most likely there is "
                     + "already a pre-existing profile on the device.");

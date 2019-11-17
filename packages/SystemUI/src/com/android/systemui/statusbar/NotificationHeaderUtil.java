@@ -44,7 +44,7 @@ public class NotificationHeaderUtil {
     private static  final DataExtractor sIconExtractor = new DataExtractor() {
         @Override
         public Object extractData(ExpandableNotificationRow row) {
-            return row.getStatusBarNotification().getNotification();
+            return row.getEntry().getSbn().getNotification();
         }
     };
     private static final IconComparator sIconVisibilityComparator = new IconComparator() {
@@ -207,7 +207,7 @@ public class NotificationHeaderUtil {
         }
         // in case no view is visible we make sure the time is visible
         int timeVisibility = !hasVisibleText
-                || mRow.getStatusBarNotification().getNotification().showsTime()
+                || mRow.getEntry().getSbn().getNotification().showsTime()
                 ? View.VISIBLE : View.GONE;
         time.setVisibility(timeVisibility);
         View left = null;

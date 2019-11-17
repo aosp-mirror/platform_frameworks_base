@@ -71,7 +71,7 @@ public class MediaTransferManager {
 
             ViewParent parent = view.getParent();
             StatusBarNotification statusBarNotification =
-                    getRowForParent(parent).getStatusBarNotification();
+                    getRowForParent(parent).getEntry().getSbn();
             final Intent intent = new Intent()
                     .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
                     .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,

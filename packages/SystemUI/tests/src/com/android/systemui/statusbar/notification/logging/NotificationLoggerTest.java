@@ -44,7 +44,6 @@ import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -71,7 +70,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     @Mock private NotificationListContainer mListContainer;
     @Mock private IStatusBarService mBarService;
-    @Mock private NotificationData mNotificationData;
     @Mock private ExpandableNotificationRow mRow;
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
 
@@ -90,8 +88,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(NotificationListener.class, mListener);
-
-        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
@@ -131,7 +127,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
                 any(NotificationVisibility[].class));
 
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
-        when(mNotificationData.getActiveNotifications()).thenReturn(Lists.newArrayList(mEntry));
+        when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         waitForUiOffloadThread();
@@ -153,7 +149,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     public void testStoppingNotificationLoggingReportsCurrentNotifications()
             throws Exception {
         when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
-        when(mNotificationData.getActiveNotifications()).thenReturn(Lists.newArrayList(mEntry));
+        when(mEntryManager.getVisibleNotifications()).thenReturn(Lists.newArrayList(mEntry));
         mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         TestableLooper.get(this).processAllMessages();
         waitForUiOffloadThread();

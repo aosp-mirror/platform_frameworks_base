@@ -57,9 +57,6 @@ class SystemServerBenchmarks {
     static void initializeBenchmarks(Activity parent, BenchmarkRunner benchmarks) {
         final String packageName = parent.getPackageName();
 
-        benchmarks.addBenchmark("Empty", () -> {
-        });
-
         PackageManager pm = parent.getPackageManager();
         benchmarks.addBenchmark("getInstalledApplications", () -> {
             pm.getInstalledApplications(PackageManager.MATCH_SYSTEM_ONLY);

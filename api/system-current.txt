@@ -1306,6 +1306,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isEncrypted();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInSilenceMode();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean removeBond();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean setAlias(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, @NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPhonebookAccessPermission(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setSilenceMode(boolean);
@@ -1414,6 +1415,7 @@ package android.content {
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.content.Intent registerReceiverForAllUsers(@Nullable android.content.BroadcastReceiver, @NonNull android.content.IntentFilter, @Nullable String, @Nullable android.os.Handler);
     method public abstract void sendBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
+    method public void sendBroadcastMultiplePermissions(@NonNull android.content.Intent, @NonNull String[]);
     method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
@@ -4845,7 +4847,7 @@ package android.net.wifi {
     method public boolean isPortableHotspotSupported();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
-    method @RequiresPermission("android.permission.NETWORK_SETTINGS") public void registerSoftApCallback(@NonNull android.net.wifi.WifiManager.SoftApCallback, @Nullable java.util.concurrent.Executor);
+    method @RequiresPermission("android.permission.NETWORK_SETTINGS") public void registerSoftApCallback(@Nullable java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.SoftApCallback);
     method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void removeOnWifiUsabilityStatsListener(@NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission("android.permission.WIFI_SET_DEVICE_MOBILITY_STATE") public void setDeviceMobilityState(int);
@@ -5089,10 +5091,6 @@ package android.net.wifi.aware {
 
   public class DiscoverySession implements java.lang.AutoCloseable {
     method @Deprecated public android.net.NetworkSpecifier createNetworkSpecifierPmk(@NonNull android.net.wifi.aware.PeerHandle, @NonNull byte[]);
-  }
-
-  public static final class WifiAwareNetworkSpecifier.Builder {
-    method @NonNull public android.net.wifi.aware.WifiAwareNetworkSpecifier.Builder setPmk(@NonNull byte[]);
   }
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
@@ -7967,6 +7965,7 @@ package android.telephony {
   public final class DataSpecificRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
+    method public boolean isUsingCarrierAggregation();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationInfo> CREATOR;
   }
@@ -8105,6 +8104,7 @@ package android.telephony {
     method @Nullable public android.telephony.CellIdentity getCellIdentity();
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
     method public int getDomain();
+    method public int getNrState();
     method public int getRegistrationState();
     method public int getRejectCause();
     method public int getRoamingType();
@@ -8347,6 +8347,9 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoList();
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForTransportType(int);
+    method public int getNrFrequencyRange();
+    method @Nullable public String getOperatorAlphaLongRaw();
+    method @Nullable public String getOperatorAlphaShortRaw();
     field public static final int ROAMING_TYPE_DOMESTIC = 2; // 0x2
     field public static final int ROAMING_TYPE_INTERNATIONAL = 3; // 0x3
     field public static final int ROAMING_TYPE_NOT_ROAMING = 0; // 0x0
@@ -8483,6 +8486,7 @@ package android.telephony {
   public class SubscriptionInfo implements android.os.Parcelable {
     method @Nullable public java.util.List<android.telephony.UiccAccessRule> getAccessRules();
     method public int getProfileClass();
+    method public boolean isGroupDisabled();
   }
 
   public class SubscriptionManager {
@@ -8565,6 +8569,7 @@ package android.telephony {
     method @Deprecated public boolean getDataEnabled();
     method @Deprecated public boolean getDataEnabled(int);
     method @Nullable public static android.content.ComponentName getDefaultRespondViaMessageApplication(@NonNull android.content.Context, boolean);
+    method @NonNull public static String getDefaultSimCountryIso();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
@@ -8596,7 +8601,9 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
+    method public boolean isModemEnabledForSlot(int);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isOpportunisticNetworkEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isPotentialEmergencyNumber(@NonNull String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRadioOn();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
@@ -8617,6 +8624,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataRoamingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunisticNetworkState(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setPreferredNetworkTypeBitmask(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadio(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadioPower(boolean);

@@ -17,6 +17,7 @@
 package android.media.tv.tuner;
 
 import android.annotation.Nullable;
+import android.media.tv.tuner.TunerConstants.DemuxPidType;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -83,6 +84,10 @@ public final class Tuner implements AutoCloseable  {
     private native List<Integer> nativeGetLnbIds();
     private native Lnb nativeOpenLnbById(int id);
 
+    private native Descrambler nativeOpenDescrambler();
+
+    private native Dvr nativeOpenDvr(int type, int bufferSize);
+
     /**
      * Frontend Callback.
      */
@@ -112,6 +117,20 @@ public final class Tuner implements AutoCloseable  {
          * Invoked when filter status changed.
          */
         void onFilterStatus(int status);
+    }
+
+    /**
+     * DVR Callback.
+     */
+    public interface DvrCallback {
+        /**
+         * Invoked when record status changed.
+         */
+        void onRecordStatus(int status);
+        /**
+         * Invoked when playback status changed.
+         */
+        void onPlaybackStatus(int status);
     }
 
     @Nullable
@@ -293,5 +312,63 @@ public final class Tuner implements AutoCloseable  {
         if (mHandler != null) {
             mHandler.sendMessage(mHandler.obtainMessage(MSG_ON_LNB_EVENT, eventType, 0));
         }
+    }
+
+    protected class Descrambler {
+        private long mNativeContext;
+
+        private native boolean nativeAddPid(int pidType, int pid, Filter filter);
+        private native boolean nativeRemovePid(int pidType, int pid, Filter filter);
+
+        private Descrambler() {}
+
+        private boolean addPid(@DemuxPidType int pidType, int pid, Filter filter) {
+            return nativeAddPid(pidType, pid, filter);
+        }
+
+        private boolean removePid(@DemuxPidType int pidType, int pid, Filter filter) {
+            return nativeRemovePid(pidType, pid, filter);
+        }
+
+    }
+
+    private Descrambler openDescrambler() {
+        Descrambler descrambler = nativeOpenDescrambler();
+        return descrambler;
+    }
+
+    // TODO: consider splitting Dvr to Playback and Recording
+    protected class Dvr {
+        private long mNativeContext;
+        private DvrCallback mCallback;
+
+        private native boolean nativeAttachFilter(Filter filter);
+        private native boolean nativeDetachFilter(Filter filter);
+        private native boolean nativeStartDvr();
+        private native boolean nativeStopDvr();
+        private native boolean nativeFlushDvr();
+
+        private Dvr() {}
+
+        public boolean attachFilter(Filter filter) {
+            return nativeAttachFilter(filter);
+        }
+        public boolean detachFilter(Filter filter) {
+            return nativeDetachFilter(filter);
+        }
+        public boolean start() {
+            return nativeStartDvr();
+        }
+        public boolean stop() {
+            return nativeStopDvr();
+        }
+        public boolean flush() {
+            return nativeFlushDvr();
+        }
+    }
+
+    private Dvr openDvr(int type, int bufferSize) {
+        Dvr dvr = nativeOpenDvr(type, bufferSize);
+        return dvr;
     }
 }

@@ -3243,7 +3243,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private void sanitizeAndApplyConfigChange(ConfigurationContainer container,
             WindowContainerTransaction.Change change) {
-        if (!(container instanceof Task)) {
+        if (!(container instanceof Task || container instanceof ActivityStack)) {
             throw new RuntimeException("Invalid token in task transaction");
         }
         // The "client"-facing API should prevent bad changes; however, just in case, sanitize

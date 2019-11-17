@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.recents.Recents;
@@ -33,10 +34,13 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.util.Optional;
 
@@ -74,7 +78,7 @@ abstract class SystemUIDefaultModule {
     abstract DockManager bindDockManager(DockManagerImpl dockManager);
 
     @Binds
-    abstract NotificationData.KeyguardEnvironment bindKeyguardEnvironment(
+    abstract NotificationEntryManager.KeyguardEnvironment bindKeyguardEnvironment(
             KeyguardEnvironmentImpl keyguardEnvironment);
 
     @Binds
@@ -92,6 +96,17 @@ abstract class SystemUIDefaultModule {
     static Divider provideDivider(Context context, Optional<Lazy<Recents>> recentsOptionalLazy) {
         return new Divider(context, recentsOptionalLazy);
     }
+
+    @Singleton
+    @Provides
+    static HeadsUpManagerPhone provideHeadsUpManagerPhone(Context context,
+            StatusBarStateController statusBarStateController,
+            KeyguardBypassController bypassController) {
+        return new HeadsUpManagerPhone(context, statusBarStateController, bypassController);
+    }
+
+    @Binds
+    abstract HeadsUpManager bindHeadsUpManagerPhone(HeadsUpManagerPhone headsUpManagerPhone);
 
     @Provides
     @Singleton

@@ -28,7 +28,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -44,7 +43,7 @@ public class NotificationFilter {
     private final NotificationGroupManager mGroupManager = Dependency.get(
             NotificationGroupManager.class);
 
-    private NotificationData.KeyguardEnvironment mEnvironment;
+    private NotificationEntryManager.KeyguardEnvironment mEnvironment;
     private ShadeController mShadeController;
     private ForegroundServiceController mFsc;
     private NotificationLockscreenUserManager mUserManager;
@@ -52,9 +51,9 @@ public class NotificationFilter {
     @Inject
     public NotificationFilter() {}
 
-    private NotificationData.KeyguardEnvironment getEnvironment() {
+    private NotificationEntryManager.KeyguardEnvironment getEnvironment() {
         if (mEnvironment == null) {
-            mEnvironment = Dependency.get(NotificationData.KeyguardEnvironment.class);
+            mEnvironment = Dependency.get(NotificationEntryManager.KeyguardEnvironment.class);
         }
         return mEnvironment;
     }

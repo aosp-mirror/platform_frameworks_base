@@ -696,8 +696,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateFooter() {
         boolean showDismissView = mClearAllEnabled && hasActiveClearableNotifications(ROWS_ALL);
-        boolean showFooterView = (showDismissView ||
-                mEntryManager.getNotificationData().getActiveNotifications().size() != 0)
+        boolean showFooterView = (showDismissView || mEntryManager.hasActiveNotifications())
                 && mStatusBarState != StatusBarState.KEYGUARD
                 && !mRemoteInputManager.getController().isRemoteInputActive();
 
@@ -1455,8 +1454,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         ExpandableNotificationRow row = topEntry.getRow();
         if (row.isChildInGroup()) {
-            final NotificationEntry groupSummary
-                    = mGroupManager.getGroupSummary(row.getStatusBarNotification());
+            final NotificationEntry groupSummary =
+                    mGroupManager.getGroupSummary(row.getEntry().getSbn());
             if (groupSummary != null) {
                 row = groupSummary.getRow();
             }
@@ -2997,7 +2996,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean isChildInGroup(View child) {
         return child instanceof ExpandableNotificationRow
                 && mGroupManager.isChildInGroupWithSummary(
-                ((ExpandableNotificationRow) child).getStatusBarNotification());
+                ((ExpandableNotificationRow) child).getEntry().getSbn());
     }
 
     /**
@@ -3072,7 +3071,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             NotificationEntry groupSummary =
-                    mGroupManager.getGroupSummary(row.getStatusBarNotification());
+                    mGroupManager.getGroupSummary(row.getEntry().getSbn());
             if (groupSummary != null && groupSummary.getRow() != row) {
                 return row.getVisibility() == View.INVISIBLE;
             }
@@ -5787,11 +5786,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
   }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public boolean hasActiveNotifications() {
-        return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateSpeedBumpIndex() {
         int speedBumpIndex = 0;
         int currentIndex = 0;
@@ -6140,7 +6134,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
             if (view instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                mMetricsLogger.write(row.getStatusBarNotification().getLogMaker()
+                mMetricsLogger.write(row.getEntry().getSbn().getLogMaker()
                         .setCategory(MetricsEvent.ACTION_TOUCH_GEAR)
                         .setType(MetricsEvent.TYPE_ACTION)
                         );
@@ -6166,7 +6160,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         public void onMenuShown(View row) {
             if (row instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow notificationRow = (ExpandableNotificationRow) row;
-                mMetricsLogger.write(notificationRow.getStatusBarNotification().getLogMaker()
+                mMetricsLogger.write(notificationRow.getEntry().getSbn().getLogMaker()
                         .setCategory(MetricsEvent.ACTION_REVEAL_GEAR)
                         .setType(MetricsEvent.TYPE_ACTION));
                 mHeadsUpManager.setMenuShown(notificationRow.getEntry(), true);
@@ -6262,7 +6256,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
                 if (row.isHeadsUp()) {
                     mHeadsUpManager.addSwipedOutNotification(
-                            row.getStatusBarNotification().getKey());
+                            row.getEntry().getSbn().getKey());
                 }
                 isBlockingHelperShown =
                         row.performDismissWithBlockingHelper(false /* fromAccessibility */);
@@ -6333,9 +6327,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             if (animView instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) animView;
                 if (row.isPinned() && !canChildBeDismissed(row)
-                        && row.getStatusBarNotification().getNotification().fullScreenIntent
+                        && row.getEntry().getSbn().getNotification().fullScreenIntent
                                 == null) {
-                    mHeadsUpManager.removeNotification(row.getStatusBarNotification().getKey(),
+                    mHeadsUpManager.removeNotification(row.getEntry().getSbn().getKey(),
                             true /* removeImmediately */);
                 }
             }
@@ -6400,7 +6394,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         @Override
         public boolean onDraggedDown(View startingChild, int dragLengthY) {
             if (mStatusBarState == StatusBarState.KEYGUARD
-                    && hasActiveNotifications()) {
+                    && mEntryManager.hasActiveNotifications()) {
                 mLockscreenGestureLogger.write(
                         MetricsEvent.ACTION_LS_SHADE,
                         (int) (dragLengthY / mDisplayMetrics.density),

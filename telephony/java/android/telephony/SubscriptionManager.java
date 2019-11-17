@@ -1154,7 +1154,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subInfo = iSub.getActiveSubscriptionInfo(subId, mContext.getOpPackageName());
+                subInfo = iSub.getActiveSubscriptionInfo(subId, mContext.getOpPackageName(),
+                        mContext.getFeatureId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1182,7 +1183,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getActiveSubscriptionInfoForIccId(iccId, mContext.getOpPackageName());
+                result = iSub.getActiveSubscriptionInfoForIccId(iccId, mContext.getOpPackageName(),
+                        mContext.getFeatureId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1216,7 +1218,7 @@ public class SubscriptionManager {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
                 result = iSub.getActiveSubscriptionInfoForSimSlotIndex(slotIndex,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), mContext.getFeatureId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1239,7 +1241,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getAllSubInfoList(mContext.getOpPackageName());
+                result = iSub.getAllSubInfoList(mContext.getOpPackageName(),
+                        mContext.getFeatureId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1283,18 +1286,39 @@ public class SubscriptionManager {
     }
 
     /**
-     * This is similar to {@link #getActiveSubscriptionInfoList()}, but if userVisibleOnly
-     * is true, it will filter out the hidden subscriptions.
+     * Get both hidden and visible SubscriptionInfo(s) of the currently active SIM(s).
+     * The records will be sorted by {@link SubscriptionInfo#getSimSlotIndex}
+     * then by {@link SubscriptionInfo#getSubscriptionId}.
      *
-     * @hide
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}). In the latter case, only records accessible
+     * to the calling app are returned.
+     *
+     * @return Sorted list of the currently available {@link SubscriptionInfo}
+     * records on the device.
+     * This is similar to {@link #getActiveSubscriptionInfoList} except that it will return
+     * both active and hidden SubscriptionInfos.
+     *
      */
-    public List<SubscriptionInfo> getActiveSubscriptionInfoList(boolean userVisibleOnly) {
+    public @Nullable List<SubscriptionInfo> getActiveAndHiddenSubscriptionInfoList() {
+        return getActiveSubscriptionInfoList(/* userVisibleonly */false);
+    }
+
+    /**
+    * This is similar to {@link #getActiveSubscriptionInfoList()}, but if userVisibleOnly
+    * is true, it will filter out the hidden subscriptions.
+    *
+    * @hide
+    */
+    public @Nullable List<SubscriptionInfo> getActiveSubscriptionInfoList(boolean userVisibleOnly) {
         List<SubscriptionInfo> activeList = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                activeList = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName());
+                activeList = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName(),
+                        mContext.getFeatureId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1344,7 +1368,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getAvailableSubscriptionInfoList(mContext.getOpPackageName());
+                result = iSub.getAvailableSubscriptionInfoList(mContext.getOpPackageName(),
+                        mContext.getFeatureId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1461,7 +1486,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getAllSubInfoCount(mContext.getOpPackageName());
+                result = iSub.getAllSubInfoCount(mContext.getOpPackageName(),
+                        mContext.getFeatureId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1489,7 +1515,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getActiveSubInfoCount(mContext.getOpPackageName());
+                result = iSub.getActiveSubInfoCount(mContext.getOpPackageName(),
+                        mContext.getFeatureId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2227,7 +2254,7 @@ public class SubscriptionManager {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
                 resultValue = iSub.getSubscriptionProperty(subId, propKey,
-                        context.getOpPackageName());
+                        context.getOpPackageName(), context.getFeatureId());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2350,7 +2377,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                return iSub.isActiveSubId(subId, mContext.getOpPackageName());
+                return iSub.isActiveSubId(subId, mContext.getOpPackageName(),
+                        mContext.getFeatureId());
             }
         } catch (RemoteException ex) {
         }
@@ -2715,13 +2743,14 @@ public class SubscriptionManager {
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NonNull List<SubscriptionInfo> getOpportunisticSubscriptions() {
-        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String contextPkg = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String contextFeature = mContext != null ? mContext.getFeatureId() : null;
         List<SubscriptionInfo> subInfoList = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subInfoList = iSub.getOpportunisticSubscriptions(pkgForDebug);
+                subInfoList = iSub.getOpportunisticSubscriptions(contextPkg, contextFeature);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2959,7 +2988,8 @@ public class SubscriptionManager {
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public @NonNull List<SubscriptionInfo> getSubscriptionsInGroup(@NonNull ParcelUuid groupUuid) {
         Preconditions.checkNotNull(groupUuid, "groupUuid can't be null");
-        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String contextPkg = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        String contextFeature = mContext != null ? mContext.getFeatureId() : null;
         if (VDBG) {
             logd("[getSubscriptionsInGroup]+ groupUuid:" + groupUuid);
         }
@@ -2968,7 +2998,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getSubscriptionsInGroup(groupUuid, pkgForDebug);
+                result = iSub.getSubscriptionsInGroup(groupUuid, contextPkg, contextFeature);
             } else {
                 if (!isSystemProcess()) {
                     throw new IllegalStateException("telephony service is null.");
@@ -3182,13 +3212,14 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get active data subscription id.
+     * Get active data subscription id. Active data subscription refers to the subscription
+     * currently chosen to provide cellular internet connection to the user. This may be
+     * different from getDefaultDataSubscriptionId(). Eg. Opportunistics data
+     *
      * See {@link PhoneStateListener#onActiveDataSubscriptionIdChanged(int)} for the details.
      *
-     * @return Active data subscription id
-     *
-     * //TODO: Refactor this API in b/134702460
-     * @hide
+     * @return Active data subscription id if any is chosen, or
+     * SubscriptionManager.INVALID_SUBSCRIPTION_ID if not.
      */
     public static int getActiveDataSubscriptionId() {
         try {

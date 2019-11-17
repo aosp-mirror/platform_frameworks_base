@@ -67,6 +67,14 @@ final class TunerConstants {
     public static final int DATA_FORMAT_ES = Constants.DataFormat.ES;
     public static final int DATA_FORMAT_SHV_TLV = Constants.DataFormat.SHV_TLV;
 
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({DEMUX_T_PID, DEMUX_MMPT_PID})
+    public @interface DemuxPidType {}
+
+    public static final int DEMUX_T_PID = 1;
+    public static final int DEMUX_MMPT_PID = 2;
+
     private TunerConstants() {
     }
 }

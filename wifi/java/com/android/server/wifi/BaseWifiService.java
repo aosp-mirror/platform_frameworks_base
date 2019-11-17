@@ -289,18 +289,6 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    /** @deprecated replaced by {@link #startLocalOnlyHotspot(ILocalOnlyHotspotCallback, String)} */
-    @Deprecated
-    public int startLocalOnlyHotspot(Messenger messenger, IBinder binder, String packageName) {
-        throw new UnsupportedOperationException();
-    }
-
-    /** @deprecated replaced by newer signature */
-    @Deprecated
-    public int startLocalOnlyHotspot(ILocalOnlyHotspotCallback callback, String packageName) {
-        return startLocalOnlyHotspot(callback, packageName, null, null);
-    }
-
     @Override
     public int startLocalOnlyHotspot(ILocalOnlyHotspotCallback callback, String packageName,
             String featureId, SoftApConfiguration customConfig) {
@@ -309,12 +297,6 @@ public class BaseWifiService extends IWifiManager.Stub {
 
     @Override
     public void stopLocalOnlyHotspot() {
-        throw new UnsupportedOperationException();
-    }
-
-    /** @deprecated replaced by {@link #startWatchLocalOnlyHotspot(ILocalOnlyHotspotCallback)} */
-    @Deprecated
-    public void startWatchLocalOnlyHotspot(Messenger messenger, IBinder binder) {
         throw new UnsupportedOperationException();
     }
 

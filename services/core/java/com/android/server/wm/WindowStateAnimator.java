@@ -1016,7 +1016,7 @@ class WindowStateAnimator {
                         mSurfaceController.deferTransactionUntil(mSurfaceController.mSurfaceControl,
                                 mWin.getFrameNumber());
                     } else {
-                        final TaskStack stack = mWin.getStack();
+                        final ActivityStack stack = mWin.getStack();
                         mTmpPos.x = 0;
                         mTmpPos.y = 0;
                         if (stack != null) {

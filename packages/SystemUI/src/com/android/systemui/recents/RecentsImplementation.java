@@ -19,15 +19,13 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
-import com.android.systemui.SysUiServiceProvider;
-
 import java.io.PrintWriter;
 
 /**
  * API for creating a Recents view.
  */
 public interface RecentsImplementation {
-    default void onStart(Context context, SysUiServiceProvider sysUiServiceProvider) {}
+    default void onStart(Context context) {}
     default void onBootCompleted() {}
     default void onAppTransitionFinished() {}
     default void onConfigurationChanged(Configuration newConfig) {}
