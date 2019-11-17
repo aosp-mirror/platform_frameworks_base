@@ -1814,10 +1814,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"तपाईंका प्रशासकले अद्यावधिक गर्नुभएको"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"तपाईंका प्रशासकले मेट्नुभएको"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ठिक छ"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"ब्याट्रीको आयु लामो बनाउन ब्याट्री सेभरले:\n·अँध्यारो विषयवस्तु सक्रिय गर्छ\n·पृष्ठभूमिका गतिविधि, कतिपय भिजुअल प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ।\n\n"<annotation id="url">"थप जान्नुहोस्"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"ब्याट्रीको आयु लामो बनाउन ब्याट्री सेभरले:\n·अँध्यारो विषयवस्तु सक्रिय गर्छ\n·पृष्ठभूमिका गतिविधि, कतिपय भिजुअल प्रभाव तथा “Hey Google” जस्ता अन्य सुविधाहरू निष्क्रिय वा सीमित पार्छ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटाको प्रयोगलाई कम गर्नमा मद्दतका लागि डेटा सर्भरले केही अनुप्रयोगहरूलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्नबाट रोक्दछ। तपाईँले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटामाथि पहुँच राख्न सक्छ, तर त्यसले यो काम थोरै पटक गर्न सक्छ। उदाहरणका लागि यसको मतलब यो हुन सक्छ: तपाईँले छविहरूलाई ट्याप नगरेसम्म ती प्रदर्शन हुँदैनन्।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेभरलाई सक्रिय गर्ने हो?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"सक्रिय गर्नुहोस्"</string>

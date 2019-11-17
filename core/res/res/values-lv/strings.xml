@@ -1833,10 +1833,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dzēsa administrators"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Labi"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Lai pagarinātu akumulatora darbības ilgumu, akumulatora jaudas taupīšanas režīmā tiek veiktas tālāk norādītās darbības.\n·Tiek ieslēgts tumšais motīvs.\n·Tiek izslēgtas vai ierobežotas darbības fonā, daži vizuālie efekti un citas funkcijas, piemēram, “Hey Google”.\n\n"<annotation id="url">"Uzzināt vairāk"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Lai pagarinātu akumulatora darbības ilgumu, akumulatora jaudas taupīšanas režīmā tiek veiktas tālāk norādītās darbības.\n·Tiek ieslēgts tumšais motīvs.\n·Tiek izslēgtas vai ierobežotas darbības fonā, daži vizuālie efekti un citas funkcijas, piemēram, “Hey Google”."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Lai samazinātu datu lietojumu, datu lietojuma samazinātājs neļauj dažām lietotnēm fonā nosūtīt vai saņemt datus. Lietotne, kuru pašlaik izmantojat, var piekļūt datiem, bet, iespējams, piekļūs tiem retāk (piemēram, attēli tiks parādīti tikai tad, kad tiem pieskarsieties)."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vai ieslēgt datu lietojuma samazinātāju?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ieslēgt"</string>

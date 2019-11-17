@@ -1378,9 +1378,9 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"इतर अ‍ॅप्सवर दाखवा"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> इतर ॲप्सवर प्रदर्शित करत आहे"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> अन्‍य ॲप्सवर प्रदर्शित करत आहे"</string>
-    <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ने हे वैशिष्ट्य वापरू नये असे तुम्ही इच्छित असल्यास, सेटिंग्ज उघडण्यासाठी टॅप करा आणि ते बंद करा."</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"अन्‍य ॲप्सवर <xliff:g id="NAME">%s</xliff:g> दाखवत आहे"</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"अन्‍य ॲप्सवर <xliff:g id="NAME">%s</xliff:g> दाखवत आहे"</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ने हे वैशिष्ट्य वापरू नये असे तुम्हाला वाटत असल्यास, टॅप करून सेटिंग्ज उघडा आणि ते बंद करा."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"बंद करा"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> तपासत आहे…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"सध्याच्या आशयाचे पुनरावलोकन करत आहे"</string>
@@ -1809,10 +1809,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ओके"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"बॅटरी सेव्‍हर हे बॅटरीचे आयुष्य वाढवते:\n·गडद थीम सुरू करते \n· बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि \"Ok Google\" यासारखी वैशिष्ट्ये बंद किंवा मर्यादित करते.\n\n"<annotation id="url">"अधिक जाणून घ्या"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"बॅटरी सेव्‍हर हे बॅटरीचे आयुष्य वाढवते:\n·गडद थीम सुरू करते \n· बॅकग्राउंड अ‍ॅक्टिव्हिटी, काही व्हिज्युअल इफेक्ट आणि \"Ok Google\" यासारखी वैशिष्ट्ये बंद किंवा मर्यादित करते."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा सर्व्हर डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना पार्श्वभूमीमध्ये डेटा पाठवण्यास किंवा  मिळवण्यास प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेव्हर चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>

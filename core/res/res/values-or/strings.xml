@@ -1808,10 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ଠିକ୍ ଅଛି"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"ବ୍ୟାଟେରୀ ଜୀବନ ବଢ଼ାଇବାକୁ ବ୍ୟାଟେରୀ ସେଭର୍:\n·ଗାଢା ଥିମ୍‌ ଚାଲୁ କରେ\n·ପୃଷ୍ଟପଟ କାର୍ଯ୍ୟକଳାପକୁ, କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବଗୁଡ଼ିକୁ ଏବଂ “ହେ Google” ପରି ଅନ୍ୟ ଫିଚର୍‌କୁ ବନ୍ଦ ରଖେ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ\n\n"<annotation id="url">"ଅଧିକ ଜାଣନ୍ତୁ"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"ବ୍ୟାଟେରୀ ଜୀବନ ବଢ଼ାଇବାକୁ ବ୍ୟାଟେରୀ ସେଭର୍:\n·ଗାଢା ଥିମ୍‌ ଚାଲୁ କରେ\n·ପୃଷ୍ଟପଟ କାର୍ଯ୍ୟକଳାପକୁ, କିଛି ଭିଜୁଆଲ୍ ପ୍ରଭାବଗୁଡ଼ିକୁ ଏବଂ “ହେ Google” ପରି ଅନ୍ୟ ଫିଚର୍‌କୁ ବନ୍ଦ ରଖେ କିମ୍ବା ପ୍ରତିବନ୍ଧିତ କରିଥାଏ"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବାରଣ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ଥର କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ, ଯେପରି, ଆପଣ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଯେଉଁ ଇମେଜ୍‍ ଦେଖାଯାଏ ନାହିଁ।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ଡାଟା ସେଭର୍‌ ଅନ୍ କରିବେ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ଅନ୍ କରନ୍ତୁ"</string>
