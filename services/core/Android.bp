@@ -1,3 +1,10 @@
+filegroup {
+    name: "services.core-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library {
     name: "protolog-common",
     srcs: [
@@ -16,7 +23,10 @@ java_library {
 
 genrule {
     name: "services.core.protologsrc",
-    srcs: [":services.core.wm.protologgroups", "java/**/*.java"],
+    srcs: [
+        ":services.core.wm.protologgroups",
+        ":services.core-sources",
+    ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
       "--protolog-class com.android.server.protolog.common.ProtoLog " +
@@ -25,20 +35,23 @@ genrule {
       "--loggroups-class com.android.server.wm.ProtoLogGroup " +
       "--loggroups-jar $(location :services.core.wm.protologgroups) " +
       "--output-srcjar $(out) " +
-      "$(locations java/**/*.java)",
+      "$(locations :services.core-sources)",
     out: ["services.core.protolog.srcjar"],
 }
 
 genrule {
     name: "generate-protolog.json",
-    srcs: [":services.core.wm.protologgroups", "java/**/*.java"],
+    srcs: [
+        ":services.core.wm.protologgroups",
+        ":services.core-sources",
+    ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
       "--protolog-class com.android.server.protolog.common.ProtoLog " +
       "--loggroups-class com.android.server.wm.ProtoLogGroup " +
       "--loggroups-jar $(location :services.core.wm.protologgroups) " +
       "--viewer-conf $(out) " +
-      "$(locations java/**/*.java)",
+      "$(locations :services.core-sources)",
     out: ["services.core.protolog.json"],
 }
 
@@ -60,25 +73,15 @@ genrule {
 
 java_library_static {
     name: "services.core.unboosted",
-
-    aidl: {
-        include_dirs: [
-            "frameworks/base/cmds/idmap2/idmap2d/aidl",
-            "frameworks/native/aidl/binder",
-            "frameworks/native/cmds/dumpstate/binder",
-            "system/core/storaged/binder",
-            "system/vold/binder",
-            "system/gsid/aidl",
-        ],
-    },
     srcs: [
         ":services.core.protologsrc",
         ":dumpstate_aidl",
+        ":framework_native_aidl",
+        ":gsiservice_aidl",
         ":idmap2_aidl",
         ":installd_aidl",
         ":storaged_aidl",
         ":vold_aidl",
-        ":gsiservice_aidl",
         ":platform-compat-config",
         ":tethering-servicescore-srcs",
         "java/com/android/server/EventLogTags.logtags",

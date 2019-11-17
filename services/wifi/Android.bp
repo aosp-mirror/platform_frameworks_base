@@ -1,14 +1,16 @@
-// Interfaces between the core system and the wifi mainline module.
-java_library_static {
-    name: "services.wifi",
+filegroup {
+    name: "services.wifi-sources",
     srcs: [
         "java/**/*.java",
         "java/**/*.aidl",
     ],
-    aidl: {
-        local_include_dirs: ["java"]
-    },
-    libs: [
-        "services.net",
-    ],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
+// Interfaces between the core system and the wifi mainline module.
+java_library_static {
+    name: "services.wifi",
+    srcs: [":services.wifi-sources"],
+    libs: ["services.net"],
 }
