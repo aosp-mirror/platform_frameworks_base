@@ -139,4 +139,8 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
     public IBinder getOverlayWindowToken(int displayId) {
         return null;
     }
+
+    public int getWindowIdForLeashToken(IBinder token) {
+        return -1;
+    }
 }

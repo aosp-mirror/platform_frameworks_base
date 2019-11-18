@@ -100,4 +100,6 @@ interface IAccessibilityServiceConnection {
     boolean isFingerprintGestureDetectionAvailable();
 
     IBinder getOverlayWindowToken(int displayid);
+
+    int getWindowIdForLeashToken(IBinder token);
 }

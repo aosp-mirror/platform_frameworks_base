@@ -42,6 +42,7 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl.Transaction;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.view.SurfaceCallbackHelper;
 
@@ -200,6 +201,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private SurfaceControl.Transaction mRtTransaction = new SurfaceControl.Transaction();
     private SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
     private int mParentSurfaceGenerationId;
+
+    // The token of embedded windowless view hierarchy.
+    private IBinder mEmbeddedViewHierarchy;
 
     public SurfaceView(Context context) {
         this(context, null);
@@ -1530,5 +1534,28 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         final ViewRootImpl viewRoot = getViewRootImpl();
         if (viewRoot == null) return;
         viewRoot.setUseBLASTSyncTransaction();
+    }
+
+    /**
+     * Add the token of embedded view hierarchy. Set {@code null} to clear the embedded view
+     * hierarchy.
+     *
+     * @param token IBinder token.
+     * @hide
+     */
+    public void setEmbeddedViewHierarchy(IBinder token) {
+        mEmbeddedViewHierarchy = token;
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        if (mEmbeddedViewHierarchy == null) {
+            return;
+        }
+        // Add a leashed child when this SurfaceView embeds another view hierarchy. Getting this
+        // leashed child would return the root node in the embedded hierarchy
+        info.addChild(mEmbeddedViewHierarchy);
     }
 }
