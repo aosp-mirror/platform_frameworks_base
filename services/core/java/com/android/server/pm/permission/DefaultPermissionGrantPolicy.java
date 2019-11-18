@@ -437,17 +437,20 @@ public final class DefaultPermissionGrantPolicy {
 
         // Installer
         grantSystemFixedPermissionsToSystemPackage(
-                getKnownPackage(PackageManagerInternal.PACKAGE_INSTALLER, userId),
+                ArrayUtils.firstOrNull(getKnownPackages(
+                        PackageManagerInternal.PACKAGE_INSTALLER, userId)),
                 userId, STORAGE_PERMISSIONS);
 
         // Verifier
-        final String verifier = getKnownPackage(PackageManagerInternal.PACKAGE_VERIFIER, userId);
+        final String verifier = ArrayUtils.firstOrNull(getKnownPackages(
+                PackageManagerInternal.PACKAGE_VERIFIER, userId));
         grantSystemFixedPermissionsToSystemPackage(verifier, userId, STORAGE_PERMISSIONS);
         grantPermissionsToSystemPackage(verifier, userId, PHONE_PERMISSIONS, SMS_PERMISSIONS);
 
         // SetupWizard
         grantPermissionsToSystemPackage(
-                getKnownPackage(PackageManagerInternal.PACKAGE_SETUP_WIZARD, userId), userId,
+                ArrayUtils.firstOrNull(getKnownPackages(
+                        PackageManagerInternal.PACKAGE_SETUP_WIZARD, userId)), userId,
                 PHONE_PERMISSIONS, CONTACTS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
                 CAMERA_PERMISSIONS);
 
@@ -596,7 +599,8 @@ public final class DefaultPermissionGrantPolicy {
                 userId, CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS);
 
         // Browser
-        String browserPackage = getKnownPackage(PackageManagerInternal.PACKAGE_BROWSER, userId);
+        String browserPackage = ArrayUtils.firstOrNull(getKnownPackages(
+                PackageManagerInternal.PACKAGE_BROWSER, userId));
         if (browserPackage == null) {
             browserPackage = getDefaultSystemHandlerActivityPackageForCategory(
                     Intent.CATEGORY_APP_BROWSER, userId);
@@ -761,8 +765,8 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private String getKnownPackage(int knownPkgId, int userId) {
-        return mServiceInternal.getKnownPackageName(knownPkgId, userId);
+    private @NonNull String[] getKnownPackages(int knownPkgId, int userId) {
+        return mServiceInternal.getKnownPackageNames(knownPkgId, userId);
     }
 
     private void grantDefaultPermissionsToDefaultSystemDialerApp(

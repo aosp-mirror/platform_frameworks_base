@@ -276,6 +276,9 @@ public final class BasePermission {
     public boolean isAppPredictor() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR) != 0;
     }
+    public boolean isTelephony() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_TELEPHONY) != 0;
+    }
 
     public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {
         if (!origPackageName.equals(sourcePackageName)) {
