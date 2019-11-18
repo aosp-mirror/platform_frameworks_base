@@ -3056,9 +3056,9 @@
     <string name="ok">OK</string>
     <!-- Preference framework strings. -->
     <string name="cancel">Cancel</string>
-    <!-- Preference framework strings. -->
+    <!-- Preference framework strings. {@deprecated Do not use. Incorrectly matches android.R.string.ok rather than "yes".} -->
     <string name="yes">OK</string>
-    <!-- Preference framework strings. -->
+    <!-- Preference framework strings. {@deprecated Do not use. Incorrectly matches android.R.string.cancel rather than "no".} -->
     <string name="no">Cancel</string>
     <!-- This is the generic "attention" string to be used in attention dialogs.  Typically
          combined with setIconAttribute(android.R.attr.alertDialogIcon)
