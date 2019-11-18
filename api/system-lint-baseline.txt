@@ -1,6 +1,8 @@
 // Baseline format: 1.0
 ActionValue: android.location.Location#EXTRA_NO_GPS_LOCATION:
     
+ActionValue: android.net.wifi.WifiManager#ACTION_LINK_CONFIGURATION_CHANGED:
+    Inconsistent action value; expected `android.net.wifi.action.LINK_CONFIGURATION_CHANGED`, was `android.net.wifi.LINK_CONFIGURATION_CHANGED`
 
 
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
@@ -347,7 +349,7 @@ SamShouldBeLast: android.telephony.TelephonyManager#requestNetworkScan(android.t
 SamShouldBeLast: android.telephony.TelephonyManager#setPreferredOpportunisticDataSubscription(int, boolean, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
     
 SamShouldBeLast: android.telephony.TelephonyManager#updateAvailableNetworks(java.util.List<android.telephony.AvailableNetworkInfo>, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
-    
+
 SamShouldBeLast: android.view.View#postDelayed(Runnable, long):
     
 SamShouldBeLast: android.view.View#postOnAnimationDelayed(Runnable, long):
