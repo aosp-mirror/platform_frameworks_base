@@ -142,7 +142,7 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
 
     private void updateRssi(int newRssi) {
         rssi = newRssi;
-        level = WifiManager.calculateSignalLevel(rssi, WifiManager.RSSI_LEVELS);
+        level = mWifiManager.calculateSignalLevel(rssi);
     }
 
     private void maybeRequestNetworkScore() {
