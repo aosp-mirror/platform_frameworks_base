@@ -27,7 +27,6 @@ import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardSliceView;
 import com.android.systemui.dagger.SystemUIRootComponent;
-import com.android.systemui.qs.QSCarrierGroup;
 import com.android.systemui.qs.QSFooterImpl;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
@@ -133,11 +132,6 @@ public class InjectionInflationController {
          * Creates the NotificationPanelView.
          */
         NotificationPanelView createPanelView();
-
-        /**
-         * Creates the QSCarrierGroup
-         */
-        QSCarrierGroup createQSCarrierGroup();
 
         /**
          * Creates the Shelf.

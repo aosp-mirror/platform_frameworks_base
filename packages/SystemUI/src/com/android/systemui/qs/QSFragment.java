@@ -18,7 +18,6 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -81,6 +80,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final InjectionInflationController mInjectionInflater;
+    private final QSContainerImplController.Builder mQSContainerImplControllerBuilder;
     private final QSTileHost mHost;
     private boolean mShowCollapsedOnKeyguard;
     private boolean mLastKeyguardAndExpanded;
@@ -90,15 +90,16 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      * during state transitions which often call into us.
      */
     private int mState;
+    private QSContainerImplController mQSContainerImplController;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
-            InjectionInflationController injectionInflater,
-            Context context,
-            QSTileHost qsTileHost,
-            StatusBarStateController statusBarStateController, CommandQueue commandQueue) {
+            InjectionInflationController injectionInflater, QSTileHost qsTileHost,
+            StatusBarStateController statusBarStateController, CommandQueue commandQueue,
+            QSContainerImplController.Builder qsContainerImplControllerBuilder) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mInjectionInflater = injectionInflater;
+        mQSContainerImplControllerBuilder = qsContainerImplControllerBuilder;
         commandQueue.observe(getLifecycle(), this);
         mHost = qsTileHost;
         mStatusBarStateController = statusBarStateController;
@@ -120,6 +121,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mHeader = view.findViewById(R.id.header);
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
+
+        mQSContainerImplController = mQSContainerImplControllerBuilder
+                .setQSContainerImpl((QSContainerImpl) view)
+                .build();
+
 
         mQSDetail.setQsPanel(mQSPanel, mHeader, (View) mFooter);
         mQSAnimator = new QSAnimator(this,
@@ -340,6 +346,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void setListening(boolean listening) {
         if (DEBUG) Log.d(TAG, "setListening " + listening);
         mListening = listening;
+        mQSContainerImplController.setListening(listening);
         mHeader.setListening(listening);
         mFooter.setListening(listening);
         mQSPanel.setListening(mListening, mQsExpanded);
