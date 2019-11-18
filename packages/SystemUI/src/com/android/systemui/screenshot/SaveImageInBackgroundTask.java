@@ -453,7 +453,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         mNotificationBuilder.build());
             }
         }
-        mParams.finisher.run();
+        mParams.finisher.accept(mParams.imageUri);
         mParams.clearContext();
     }
 
@@ -462,7 +462,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         // If we are cancelled while the task is running in the background, we may get null
         // params. The finisher is expected to always be called back, so just use the baked-in
         // params from the ctor in any case.
-        mParams.finisher.run();
+        mParams.finisher.accept(null);
         mParams.clearImage();
         mParams.clearContext();
 
