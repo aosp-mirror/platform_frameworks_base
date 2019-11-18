@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2019 Magma
+     Copyright (C) 2019 ion-OS
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,20 +14,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="5dp"
+    android:height="17dp"
+    android:viewportWidth="7.1"
+    android:viewportHeight="24.0">
 
-    <!-- Screenrecord dot size -->
-    <dimen name="screenrecord_dot_size">48dp</dimen>
-
-    <!-- QS tile height -->	
-    <dimen name="qs_tile_height_wo_label">48dp</dimen>
-	
-    <!-- Network traffic monitor -->
-    <dimen name="net_traffic_multi_text_size">8dp</dimen>
-    <dimen name="net_traffic_txt_img_padding">4dp</dimen>
-	
-    <!-- Burn-in protection -->
-    <dimen name="horizontal_max_swift">3.0dp</dimen>
-    <dimen name="vertical_max_swift">1.0dp</dimen>
-	
-</resources>
+    <path
+        android:fillColor="#4DFFFFFF"
+        android:pathData="M3.6000004,10.8l3.5,0.0 -3.5,-7.3 0.0,0.0 0.0,0.0 0.0,0.0 0.0,0.0 -3.6,7.3z"/>
+    <path
+        android:fillColor="#4DFFFFFF"
+        android:pathData="M3.6000004,13.2l-3.6,0.0 3.6,7.3 0.0,0.0 0.0,0.0 0.0,0.0 0.0,0.0 3.5,-7.3z"/>
+</vector>

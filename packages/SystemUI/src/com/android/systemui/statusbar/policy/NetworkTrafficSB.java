@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2019 The PixelDust Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.statusbar.policy;
 
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
@@ -50,6 +66,8 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
     private static final int BOTH = 0;
     private static final int UP = 1;
     private static final int DOWN = 2;
+    private static final int COMBINED = 3;
+    private static final int DYNAMIC = 4;
     private static final int KB = 1024;
     private static final int MB = KB * KB;
     private static final int GB = MB * KB;
@@ -79,6 +97,8 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
     private boolean mShowArrow;
 
     private boolean mScreenOn = true;
+    private boolean iBytes;
+    private boolean oBytes;
 
     private Handler mTrafficHandler = new Handler() {
         @Override
@@ -103,24 +123,65 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
             long rxData = newTotalRxBytes - totalRxBytes;
             long txData = newTotalTxBytes - totalTxBytes;
 
+            iBytes = (rxData <= (mAutoHideThreshold * 1024));
+            oBytes = (txData <= (mAutoHideThreshold * 1024));
+
             if (shouldHide(rxData, txData, timeDelta)) {
                 setText("");
                 mTrafficVisible = false;
             } else {
-                     String output;
-
-                   if (mTrafficType == UP){
-                     output = formatOutput(timeDelta, txData, symbol);
-                   } else if (mTrafficType == DOWN){
-                     output = formatOutput(timeDelta, rxData, symbol);
-                   } else {
-                     // Get information for uplink ready so the line return can be added
-                     output = formatOutput(timeDelta, txData, symbol);
-                     // Ensure text size is where it needs to be
-                     output += "\n";
-                     // Add information for downlink if it's called for
-                     output += formatOutput(timeDelta, rxData, symbol);
-                   }
+                String output;
+                if (mTrafficType == UP){
+                    output = formatOutput(timeDelta, txData, symbol);
+                } else if (mTrafficType == DOWN){
+                    output = formatOutput(timeDelta, rxData, symbol);
+                } else if (mTrafficType == BOTH) {
+                    // Get information for uplink ready so the line return can be added
+                    output = formatOutput(timeDelta, txData, symbol);
+                    // Ensure text size is where it needs to be
+                    output += "\n";
+                    // Add information for downlink if it's called for
+                    output += formatOutput(timeDelta, rxData, symbol);
+                } else if (mTrafficType == DYNAMIC) {
+                    if (txData > rxData) {
+                        output = formatOutput(timeDelta, txData, symbol);
+                        if (!oBytes) {
+                            oBytes = false;
+                            iBytes = true;
+                        } else {
+                            oBytes = true;
+                            iBytes = true;
+                        }
+                    } else {
+                        output = formatOutput(timeDelta, rxData, symbol);
+                        if (!iBytes) {
+                            iBytes = false;
+                            oBytes = true;
+                        } else {
+                            iBytes = true;
+                            oBytes = true;
+                        }
+                    }
+                } else {
+                    output = formatOutput(timeDelta, rxData + txData, symbol);
+                    if (txData > rxData) {
+                        if (!oBytes) {
+                            oBytes = false;
+                            iBytes = true;
+                        } else {
+                            oBytes = true;
+                            iBytes = true;
+                        }
+                    } else {
+                        if (!iBytes) {
+                            iBytes = false;
+                            oBytes = true;
+                        } else {
+                            iBytes = true;
+                            oBytes = true;
+                        }
+                    }
+                }
                 // Update view if there's anything new to show
                 if (!output.contentEquals(getText())) {
                     setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
@@ -156,11 +217,11 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
             long speedTxKB = (long)(txData / (timeDelta / 1000f)) / KB;
             long speedRxKB = (long)(rxData / (timeDelta / 1000f)) / KB;
            if (mTrafficType == UP) {
-            return !getConnectAvailable() || speedTxKB < mAutoHideThreshold;
+             return !getConnectAvailable() || speedTxKB < mAutoHideThreshold;
            } else if (mTrafficType == DOWN) {
-            return !getConnectAvailable() || speedRxKB < mAutoHideThreshold;
+             return !getConnectAvailable() || speedRxKB < mAutoHideThreshold;
            } else {
-            return !getConnectAvailable() ||
+             return !getConnectAvailable() ||
                     (speedRxKB < mAutoHideThreshold &&
                     speedTxKB < mAutoHideThreshold);
            }
@@ -344,13 +405,37 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
     private void updateTrafficDrawable() {
         int intTrafficDrawable;
         if (mIsEnabled && mShowArrow) {
-              if (mTrafficType == UP) {
-            intTrafficDrawable = R.drawable.stat_sys_network_traffic_up;
-          } else if (mTrafficType == DOWN) {
-            intTrafficDrawable = R.drawable.stat_sys_network_traffic_down;
-          } else {
-            intTrafficDrawable = R.drawable.stat_sys_network_traffic_updown;
-          }
+            if (mTrafficType == UP) {
+                if (oBytes) {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic;
+                } else {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic_up;
+                }
+            } else if (mTrafficType == DOWN) {
+                if (iBytes) {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic;
+                } else {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic_down;
+                }
+            } else if (mTrafficType == DYNAMIC || mTrafficType == COMBINED) {
+                if (iBytes && !oBytes) {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic_up;
+                } else if (!iBytes && oBytes) {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic_down;
+                } else {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic;
+                }
+            } else {
+                if (!iBytes && !oBytes) {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic_updown;
+                } else if (!oBytes) {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic_up;
+                } else if (!iBytes) {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic_down;
+                } else {
+                    intTrafficDrawable = R.drawable.stat_sys_network_traffic;
+                }
+            }
         } else {
             intTrafficDrawable = 0;
         }
@@ -432,6 +517,7 @@ public class NetworkTrafficSB extends TextView implements StatusIconDisplayable 
         if (mIsEnabled && mTrafficVisible && mSystemIconVisible && !mTrafficInHeaderView) {
             setVisibility(View.VISIBLE);
         } else {
+            setText("");
             setVisibility(View.GONE);
         }
     }
