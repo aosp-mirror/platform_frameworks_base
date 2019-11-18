@@ -1734,6 +1734,56 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Connects all enabled and supported bluetooth profiles between the local and remote device
+     *
+     * @param device is the remote device with which to connect these profiles
+     * @return true if all profiles successfully connected, false if an error occurred
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean connectAllEnabledProfiles(@NonNull BluetoothDevice device) {
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.connectAllEnabledProfiles(device);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
+        return false;
+    }
+
+    /**
+     * Disconnects all enabled and supported bluetooth profiles between the local and remote device
+     *
+     * @param device is the remote device with which to disconnect these profiles
+     * @return true if all profiles successfully disconnected, false if an error occurred
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean disconnectAllEnabledProfiles(@NonNull BluetoothDevice device) {
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.disconnectAllEnabledProfiles(device);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+
+        return false;
+    }
+
+    /**
      * Return true if the multi advertisement is supported by the chipset
      *
      * @return true if Multiple Advertisement feature is supported
