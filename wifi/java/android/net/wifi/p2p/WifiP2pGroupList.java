@@ -15,13 +15,15 @@
  */
 package android.net.wifi.p2p;
 
-import java.util.Collection;
-import java.util.Map;
-
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.LruCache;
+
+import java.util.Collection;
+import java.util.Map;
 
 
 /**
@@ -30,7 +32,8 @@ import android.util.LruCache;
  * {@see WifiP2pManager}
  * @hide
  */
-public class WifiP2pGroupList implements Parcelable {
+@SystemApi
+public final class WifiP2pGroupList implements Parcelable {
 
     private static final int CREDENTIAL_MAX_NUM             =   32;
 
@@ -40,6 +43,7 @@ public class WifiP2pGroupList implements Parcelable {
 
     private boolean isClearCalled = false;
 
+    /** @hide */
     public interface GroupDeleteListener {
         public void onDeleteGroup(int netId);
     }
@@ -71,11 +75,9 @@ public class WifiP2pGroupList implements Parcelable {
     }
 
     /**
-     * Return the list of p2p group.
-     *
-     * @return the list of p2p group.
+     * Get the list of P2P groups.
      */
-    @UnsupportedAppUsage
+    @NonNull
     public Collection<WifiP2pGroup> getGroupList() {
         return mGroups.snapshot().values();
     }
@@ -206,6 +208,7 @@ public class WifiP2pGroupList implements Parcelable {
         return false;
     }
 
+    @Override
     public String toString() {
         StringBuffer sbuf = new StringBuffer();
 
@@ -217,12 +220,14 @@ public class WifiP2pGroupList implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
+    @Override
     public int describeContents() {
         return 0;
     }
 
     /** Implement the Parcelable interface */
-    public void writeToParcel(Parcel dest, int flags) {
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         final Collection<WifiP2pGroup> groups = mGroups.snapshot().values();
         dest.writeInt(groups.size());
         for(WifiP2pGroup group : groups) {
@@ -231,7 +236,7 @@ public class WifiP2pGroupList implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final @android.annotation.NonNull Creator<WifiP2pGroupList> CREATOR =
+    public static final @NonNull Creator<WifiP2pGroupList> CREATOR =
         new Creator<WifiP2pGroupList>() {
             public WifiP2pGroupList createFromParcel(Parcel in) {
                 WifiP2pGroupList grpList = new WifiP2pGroupList();
