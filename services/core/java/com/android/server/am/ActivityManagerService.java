@@ -346,7 +346,6 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.appop.AppOpsService;
-import com.android.server.compat.CompatConfig;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
@@ -5032,8 +5031,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
-            long[] disabledCompatChanges = CompatConfig.get().getDisabledChanges(app.info);
+            long[] disabledCompatChanges = {};
             if (mPlatformCompat != null) {
+                disabledCompatChanges = mPlatformCompat.getDisabledChanges(app.info);
                 mPlatformCompat.resetReporting(app.info);
             }
             if (app.isolatedEntryPoint != null) {
