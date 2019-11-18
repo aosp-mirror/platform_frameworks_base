@@ -794,7 +794,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             return;
         }
 
-        final ActivityRecord topActivity = getTopActivity();
+        final ActivityRecord topActivity = getTopNonFinishingActivity();
 
         // For now, assume that the Stack's windowing mode is what will actually be used
         // by it's activities. In the future, there may be situations where this doesn't
@@ -1041,9 +1041,9 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         return null;
     }
 
-    ActivityRecord getTopActivity() {
+    ActivityRecord getTopNonFinishingActivity() {
         for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
-            final ActivityRecord r = getChildAt(taskNdx).getTopActivity();
+            final ActivityRecord r = getChildAt(taskNdx).getTopNonFinishingActivity();
             if (r != null) {
                 return r;
             }
@@ -1264,7 +1264,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             }
 
             // Overlays should not be considered as the task's logical top activity.
-            final ActivityRecord r = task.getTopActivity(false /* includeOverlays */);
+            final ActivityRecord r = task.getTopNonFinishingActivity(false /* includeOverlays */);
             if (r == null || r.finishing || r.mUserId != userId ||
                     r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": mismatch root " + r);
@@ -1823,7 +1823,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
     }
 
     boolean isTopActivityVisible() {
-        final ActivityRecord topActivity = getTopActivity();
+        final ActivityRecord topActivity = getTopNonFinishingActivity();
         return topActivity != null && topActivity.visible;
     }
 
@@ -2899,7 +2899,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             boolean startIt = true;
             for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
                 task = getChildAt(taskNdx);
-                if (task.getTopActivity() == null) {
+                if (task.getTopNonFinishingActivity() == null) {
                     // All activities in task are finishing.
                     continue;
                 }
@@ -3380,7 +3380,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
         int taskNdx = mChildren.indexOf(task);
         if (taskNdx >= 0) {
-            ActivityRecord newTop = getChildAt(taskNdx).getTopActivity();
+            ActivityRecord newTop = getChildAt(taskNdx).getTopNonFinishingActivity();
             if (newTop != null) {
                 taskTop = newTop;
             }
@@ -4002,7 +4002,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
         final ActivityStack topStack = getDisplay().getTopStack();
-        final ActivityRecord topActivity = topStack != null ? topStack.getTopActivity() : null;
+        final ActivityRecord topActivity = topStack != null
+                ? topStack.getTopNonFinishingActivity() : null;
         final int numTasks = getChildCount();
         final int index = mChildren.indexOf(tr);
         if (numTasks == 0 || index < 0)  {
@@ -4033,7 +4034,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             positionChildAtTop(tr);
 
             // Don't refocus if invisible to current user
-            final ActivityRecord top = tr.getTopActivity();
+            final ActivityRecord top = tr.getTopNonFinishingActivity();
             if (top == null || !top.okToShowLocked()) {
                 if (top != null) {
                     mStackSupervisor.mRecentTasks.add(top.getTask());
@@ -4352,7 +4353,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         int userId = UserHandle.getUserId(callingUid);
         for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = getChildAt(taskNdx);
-            if (task.getTopActivity() == null) {
+            if (task.getTopNonFinishingActivity() == null) {
                 // Skip if there are no activities in the task
                 continue;
             }

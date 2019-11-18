@@ -554,7 +554,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             if (task == null) {
                 continue;
             }
-            ActivityRecord topActivity = task.getTopActivity();
+            ActivityRecord topActivity = task.getTopNonFinishingActivity();
             if (topActivity != null && topActivity.visible) {
                 return true;
             }

@@ -281,7 +281,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
         Task task = stack.getChildAt(0);
-        ActivityRecord root = task.getTopActivity();
+        ActivityRecord root = task.getTopNonFinishingActivity();
 
         assertEquals(fullScreenBounds, task.getBounds());
 
@@ -294,7 +294,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         // Top activity gets used
         ActivityRecord top = new ActivityBuilder(mService).setTask(task).setStack(stack).build();
-        assertEquals(top, task.getTopActivity());
+        assertEquals(top, task.getTopNonFinishingActivity());
         top.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         assertThat(task.getBounds().width()).isGreaterThan(task.getBounds().height());
         assertEquals(task.getBounds().width(), fullScreenBounds.width());
@@ -345,7 +345,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         ActivityStack stack = new StackBuilder(mRootActivityContainer)
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
         Task task = stack.getChildAt(0);
-        ActivityRecord root = task.getTopActivity();
+        ActivityRecord root = task.getTopNonFinishingActivity();
 
         final WindowContainer parentWindowContainer =
                 new WindowContainer(mSystemServicesTestRule.getWindowManagerService());
