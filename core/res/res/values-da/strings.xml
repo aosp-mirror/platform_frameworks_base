@@ -1074,7 +1074,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="6876518925844129331">"Markér alt"</string>
     <string name="cut" msgid="3092569408438626261">"Klip"</string>
-    <string name="copy" msgid="2681946229533511987">"Kopier"</string>
+    <string name="copy" msgid="2681946229533511987">"Kopiér"</string>
     <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Der kunne ikke kopieres til udklipsholderen"</string>
     <string name="paste" msgid="5629880836805036433">"Indsæt"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Indsæt som almindelig tekst"</string>
@@ -1808,10 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Opdateret af din administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet af din administrator"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Batterisparefunktionen gør følgende for at spare på batteriet:\n·Aktiverer Mørkt tema\n·Deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og andre funktioner som f.eks. \"Hey Google\"\n\n"<annotation id="url">"Få flere oplysninger"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Batterisparefunktionen gør følgende for at spare på batteriet:\n·Aktiverer Mørkt tema\n·Deaktiverer eller begrænser aktivitet i baggrunden, visse visuelle effekter og andre funktioner som f.eks. \"Hey Google\""</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå Datasparefunktion til?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå til"</string>

@@ -784,7 +784,7 @@
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Elukaaslane"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Isa"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Sõber"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Haldur"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Juht"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Ema"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Vanem"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
@@ -1808,10 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administraator on seda värskendanud"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administraator on selle kustutanud"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Aku tööea pikendamiseks teeb akusäästja järgmist.\n·Lülitab sisse tumeda teema.\n·Lülitab välja akusäästja taustategevused, mõned visuaalsed efektid ja muud funktsioonid (nt „Hei Google”) või piirab neid.\n\n"<annotation id="url">"Lisateave"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Aku tööea pikendamiseks teeb akusäästja järgmist.\n·Lülitab sisse tumeda teema.\n·Lülitab välja akusäästja taustategevused, mõned visuaalsed efektid ja muud funktsioonid (nt „Hei Google”) või piirab neid."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmemahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks pildid kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Lülita sisse"</string>

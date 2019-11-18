@@ -1858,10 +1858,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"עודכנה על ידי מנהל המערכת"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"נמחקה על ידי מנהל המערכת"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"אישור"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"‏התכונה \'חיסכון בסוללה\':\n·מפעילה עיצוב כהה\n·מכבה או מגבילה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות כמו \"Ok Google\", כדי להאריך את חיי הסוללה\n\n"<annotation id="url">"מידע נוסף"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"‏התכונה \'חיסכון בסוללה\':\n·מפעילה עיצוב כהה\n·מכבה או מגבילה פעילות ברקע, חלק מהאפקטים החזותיים ותכונות אחרות כמו \"Ok Google\", כדי להאריך את חיי הסוללה"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות שליחה או קבלה של נתונים ברקע. אפליקציה שבה נעשה שימוש כרגע יכולה לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"‏האם להפעיל את חוסך הנתונים (Data Saver)?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"הפעל"</string>
