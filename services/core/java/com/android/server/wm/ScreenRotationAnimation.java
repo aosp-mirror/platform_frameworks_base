@@ -172,7 +172,7 @@ class ScreenRotationAnimation {
                     .setContainerLayer()
                     .build();
 
-            mSurfaceControl = displayContent.makeSurface(null)
+            mSurfaceControl = mService.makeSurfaceBuilder(null)
                     .setName("ScreenshotSurface")
                     .setParent(mRotationLayer)
                     .setBufferSize(mWidth, mHeight)

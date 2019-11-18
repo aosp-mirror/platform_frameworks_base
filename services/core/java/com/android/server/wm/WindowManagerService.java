@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.Manifest.permission.ACCESS_SURFACE_FLINGER;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
@@ -7815,8 +7814,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean mirrorDisplay(int displayId, SurfaceControl outSurfaceControl) {
-        if (!checkCallingPermission(ACCESS_SURFACE_FLINGER, "mirrorDisplay()")) {
-            throw new SecurityException("Requires ACCESS_SURFACE_FLINGER permission");
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "mirrorDisplay()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
         }
 
         final SurfaceControl displaySc;
@@ -7827,7 +7826,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return false;
             }
 
-            displaySc = displayContent.getSurfaceControl();
+            displaySc = displayContent.getWindowingLayer();
         }
 
         final SurfaceControl mirror = SurfaceControl.mirrorSurface(displaySc);

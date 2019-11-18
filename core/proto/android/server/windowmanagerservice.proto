@@ -163,6 +163,7 @@ message DisplayContentProto {
     repeated IdentifierProto opening_apps = 17;
     repeated IdentifierProto closing_apps = 18;
     repeated IdentifierProto changing_apps = 19;
+    repeated WindowTokenProto overlay_windows = 20;
 }
 
 /* represents DisplayFrames */
