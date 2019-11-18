@@ -19,6 +19,7 @@ package android.app;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
@@ -193,6 +194,7 @@ import java.util.Map;
  *
  * @hide
  */
+@SystemApi
 public final class SystemServiceRegistry {
     private static final String TAG = "SystemServiceRegistry";
 
@@ -1191,7 +1193,6 @@ public final class SystemServiceRegistry {
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline
             // modules.
-
             JobSchedulerFrameworkInitializer.registerServiceWrappers();
             BlobStoreManagerFrameworkInitializer.initialize();
             TelephonyFrameworkInitializer.registerServiceWrappers();
@@ -1246,18 +1247,20 @@ public final class SystemServiceRegistry {
 
     /**
      * Callback interface used as a parameter to {@link #registerStaticService(
-     * String, Class, StaticServiceProducerNoBinder)}, which generates a service wrapper instance
-     * that's not tied to any context and does not take a service binder object in the constructor.
+     * String, Class, StaticServiceProducerWithoutBinder)}, which generates a service wrapper
+     * instance that's not tied to any context and does not take a service binder object in the
+     * constructor.
      *
      * @param <TServiceClass> type of the service wrapper class.
      *
      * @hide
      */
-    //@SystemApi TODO Make it a system API.
-    public interface StaticServiceProducerNoBinder<TServiceClass> {
+    @SystemApi
+    public interface StaticServiceProducerWithoutBinder<TServiceClass> {
         /**
          * Return a new service wrapper of type {@code TServiceClass}.
          */
+        @NonNull
         TServiceClass createService();
     }
 
@@ -1270,18 +1273,19 @@ public final class SystemServiceRegistry {
      *
      * @hide
      */
-    //@SystemApi TODO Make it a system API.
+    @SystemApi
     public interface StaticServiceProducerWithBinder<TServiceClass> {
         /**
          * Return a new service wrapper of type {@code TServiceClass} backed by a given
          * service binder object.
          */
-        TServiceClass createService(IBinder serviceBinder);
+        @NonNull
+        TServiceClass createService(@NonNull IBinder serviceBinder);
     }
 
     /**
      * Callback interface used as a parameter to {@link #registerContextAwareService(
-     * String, Class, ContextAwareServiceProducerNoBinder)},
+     * String, Class, ContextAwareServiceProducerWithoutBinder)},
      * which generates a service wrapper instance
      * that's tied to a specific context and does not take a service binder object in the
      * constructor.
@@ -1290,15 +1294,15 @@ public final class SystemServiceRegistry {
      *
      * @hide
      */
-    //@SystemApi TODO Make it a system API.
-    public interface ContextAwareServiceProducerNoBinder<TServiceClass> {
+    @SystemApi
+    public interface ContextAwareServiceProducerWithoutBinder<TServiceClass> {
         /**
          * Return a new service wrapper of type {@code TServiceClass} tied to a given
          * {@code context}.
-         *
-         * TODO Do we need to pass the "base context" too?
          */
-        TServiceClass createService(Context context);
+        @NonNull
+        //TODO Do we need to pass the "base context" too?
+        TServiceClass createService(@NonNull Context context);
     }
 
     /**
@@ -1311,15 +1315,15 @@ public final class SystemServiceRegistry {
      *
      * @hide
      */
-    //@SystemApi TODO Make it a system API.
+    @SystemApi
     public interface ContextAwareServiceProducerWithBinder<TServiceClass> {
         /**
          * Return a new service wrapper of type {@code TServiceClass} backed by a given
          * service binder object that's tied to a given {@code context}.
-         *
-         * TODO Do we need to pass the "base context" too?
          */
-        TServiceClass createService(Context context, IBinder serviceBinder);
+        @NonNull
+        //TODO Do we need to pass the "base context" too?
+        TServiceClass createService(@NonNull Context context, @NonNull IBinder serviceBinder);
     }
 
     /**
@@ -1337,7 +1341,7 @@ public final class SystemServiceRegistry {
      *
      * @hide
      */
-    //@SystemApi TODO Make it a system API.
+    @SystemApi
     public static <TServiceClass> void registerStaticService(
             @NonNull String serviceName, @NonNull Class<TServiceClass> serviceWrapperClass,
             @NonNull StaticServiceProducerWithBinder<TServiceClass> serviceProducer) {
@@ -1361,10 +1365,10 @@ public final class SystemServiceRegistry {
      *
      * @hide
      */
-    //@SystemApi TODO Make it a system API.
+    @SystemApi
     public static <TServiceClass> void registerStaticService(
             @NonNull String serviceName, @NonNull Class<TServiceClass> serviceWrapperClass,
-            @NonNull StaticServiceProducerNoBinder<TServiceClass> serviceProducer) {
+            @NonNull StaticServiceProducerWithoutBinder<TServiceClass> serviceProducer) {
         ensureInitializing("registerStaticService");
         Preconditions.checkStringNotEmpty(serviceName);
         Preconditions.checkNotNull(serviceWrapperClass);
@@ -1394,7 +1398,7 @@ public final class SystemServiceRegistry {
      *
      * @hide
      */
-    //@SystemApi TODO Make it a system API.
+    @SystemApi
     public static <TServiceClass> void registerContextAwareService(
             @NonNull String serviceName, @NonNull Class<TServiceClass> serviceWrapperClass,
             @NonNull ContextAwareServiceProducerWithBinder<TServiceClass> serviceProducer) {
@@ -1422,10 +1426,10 @@ public final class SystemServiceRegistry {
      *
      * @hide
      */
-    //@SystemApi TODO Make it a system API.
+    @SystemApi
     public static <TServiceClass> void registerContextAwareService(
             @NonNull String serviceName, @NonNull Class<TServiceClass> serviceWrapperClass,
-            @NonNull ContextAwareServiceProducerNoBinder<TServiceClass> serviceProducer) {
+            @NonNull ContextAwareServiceProducerWithoutBinder<TServiceClass> serviceProducer) {
         ensureInitializing("registerContextAwareService");
         Preconditions.checkStringNotEmpty(serviceName);
         Preconditions.checkNotNull(serviceWrapperClass);

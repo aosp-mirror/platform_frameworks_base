@@ -652,6 +652,29 @@ package android.app {
     method public boolean isStatusBarExpansionDisabled();
   }
 
+  public final class SystemServiceRegistry {
+    method public static <TServiceClass> void registerContextAwareService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.ContextAwareServiceProducerWithBinder<TServiceClass>);
+    method public static <TServiceClass> void registerContextAwareService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.ContextAwareServiceProducerWithoutBinder<TServiceClass>);
+    method public static <TServiceClass> void registerStaticService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.StaticServiceProducerWithBinder<TServiceClass>);
+    method public static <TServiceClass> void registerStaticService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.StaticServiceProducerWithoutBinder<TServiceClass>);
+  }
+
+  public static interface SystemServiceRegistry.ContextAwareServiceProducerWithBinder<TServiceClass> {
+    method @NonNull public TServiceClass createService(@NonNull android.content.Context, @NonNull android.os.IBinder);
+  }
+
+  public static interface SystemServiceRegistry.ContextAwareServiceProducerWithoutBinder<TServiceClass> {
+    method @NonNull public TServiceClass createService(@NonNull android.content.Context);
+  }
+
+  public static interface SystemServiceRegistry.StaticServiceProducerWithBinder<TServiceClass> {
+    method @NonNull public TServiceClass createService(@NonNull android.os.IBinder);
+  }
+
+  public static interface SystemServiceRegistry.StaticServiceProducerWithoutBinder<TServiceClass> {
+    method @NonNull public TServiceClass createService();
+  }
+
   public class UiModeManager {
     method @RequiresPermission(android.Manifest.permission.ENTER_CAR_MODE_PRIORITIZED) public void enableCarMode(@IntRange(from=0) int, int);
     field public static final String ACTION_ENTER_CAR_MODE_PRIORITIZED = "android.app.action.ENTER_CAR_MODE_PRIORITIZED";
@@ -1089,6 +1112,10 @@ package android.app.job {
 
   public abstract class JobScheduler {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public abstract int scheduleAsPackage(@NonNull android.app.job.JobInfo, @NonNull String, int, String);
+  }
+
+  public class JobSchedulerFrameworkInitializer {
+    method public static void registerServiceWrappers();
   }
 
 }

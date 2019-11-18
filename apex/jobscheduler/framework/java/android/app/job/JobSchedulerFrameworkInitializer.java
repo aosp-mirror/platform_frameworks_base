@@ -16,6 +16,7 @@
 
 package android.app.job;
 
+import android.annotation.SystemApi;
 import android.app.JobSchedulerImpl;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.os.PowerWhitelistManager;
  *
  * @hide
  */
+@SystemApi
 public class JobSchedulerFrameworkInitializer {
     private JobSchedulerFrameworkInitializer() {
     }
@@ -38,8 +40,6 @@ public class JobSchedulerFrameworkInitializer {
      * {@link Context#getSystemService} can return them.
      *
      * <p>If this is called from other places, it throws a {@link IllegalStateException).
-     *
-     * TODO Make it a system API
      */
     public static void registerServiceWrappers() {
         SystemServiceRegistry.registerStaticService(
