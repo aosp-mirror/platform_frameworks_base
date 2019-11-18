@@ -105,8 +105,10 @@ class HighRefreshRateBlacklist {
 
     private class OnPropertiesChangedListener implements DeviceConfig.OnPropertiesChangedListener {
         public void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {
-            updateBlacklist(
-                    properties.getString(KEY_HIGH_REFRESH_RATE_BLACKLIST, null /*default*/));
+            if (properties.getKeyset().contains(KEY_HIGH_REFRESH_RATE_BLACKLIST)) {
+                updateBlacklist(
+                        properties.getString(KEY_HIGH_REFRESH_RATE_BLACKLIST, null /*default*/));
+            }
         }
     }
 }

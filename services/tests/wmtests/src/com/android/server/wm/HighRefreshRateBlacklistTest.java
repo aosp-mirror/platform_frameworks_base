@@ -120,6 +120,23 @@ public class HighRefreshRateBlacklistTest {
         assertFalse(mBlacklist.isBlacklisted(APP3));
     }
 
+    @Test
+    public void testOverriddenByDeviceConfigUnrelatedFlagChanged() {
+        final Resources r = createResources(APP1);
+        final FakeDeviceConfig config = new FakeDeviceConfig();
+        mBlacklist = new HighRefreshRateBlacklist(r, config);
+        config.setBlacklist(APP2 + "," + APP3);
+        assertFalse(mBlacklist.isBlacklisted(APP1));
+        assertTrue(mBlacklist.isBlacklisted(APP2));
+        assertTrue(mBlacklist.isBlacklisted(APP3));
+
+        //  Change an unrelated flag in our namespace and verify that the blacklist is intact
+        config.putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER, "someKey", "someValue");
+        assertFalse(mBlacklist.isBlacklisted(APP1));
+        assertTrue(mBlacklist.isBlacklisted(APP2));
+        assertTrue(mBlacklist.isBlacklisted(APP3));
+    }
+
     private Resources createResources(String... defaultBlacklist) {
         Resources r = mock(Resources.class);
         when(r.getStringArray(R.array.config_highRefreshRateBlacklist))
