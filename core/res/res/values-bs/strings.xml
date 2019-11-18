@@ -289,7 +289,7 @@
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi lokaciji ovog uređaja?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Aplikacija će imati pristup lokaciji isključivo dok je koristite"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup lokaciji uređaja &lt;b&gt;sve vrijeme&lt;/b&gt;?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Aplikacija trenutno može pristupati lokaciji isključivo dok je koristite"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="6969122401786527350">"Moguće je da će aplikacija željeti pristup vašoj lokaciji sve vrijeme, čak i kada je ne budete koristili. Dozvolite u "<annotation id="link">"postavkama"</annotation>"."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pristupa vašem kalendaru"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi vašem kalendaru?"</string>
@@ -1796,8 +1796,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao je vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao je vaš administrator"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Uredu"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·Uključuje Tamnu temu.\n·Isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\".\n\n"<annotation id="url">"Saznajte više"</annotation></string>
-    <string name="battery_saver_description" msgid="2307555792915978653">"Da bi se produljilo trajanje baterije, Štednja baterije:\n·Uključuje Tamnu temu.\n·Isključuje ili ograničava aktivnosti u pozadini, neke vizualne efekte i druge značajke kao što je \"Hey Google\"."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Radi produženja vijeka trajanja baterije, Ušteda baterije:\n·Uključuje Tamnu temu\n·Isključuje ili ograničava aktivnosti u pozadini, određene vizuelne efekte i druge funkcije kao što je \"Hej Google\"\n\n"<annotation id="url">"Saznajte više"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Radi produženja vijeka trajanja baterije, Ušteda baterije:\n·Uključuje Tamnu temu\n·Isključuje ili ograničava aktivnosti u pozadini, određene vizuelne efekte i druge funkcije kao što je \"Hej Google\""</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio prijenos podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. To može značiti, naprimjer, da se slike ne prikazuju sve dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>
@@ -1998,9 +1998,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Dodirnite da provjerite šta je blokirano."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Postavke"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"Stanje mirovanja"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV uređaj će se uskoro isključiti. Pritisnite dugme da ostane uključen."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Uređaj će se uskoro isključiti. Pritisnite da ostane uključen."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"prikazivanje preko drugih aplikacija na ekranu"</string>
@@ -2042,22 +2039,13 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Direktno dijeljenje nije dostupno"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Spisak aplikacija"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Ovoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
-    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
-    <skip />
+    <string name="accessibility_system_action_home_label" msgid="6089400419441597916">"Početna stranica"</string>
+    <string name="accessibility_system_action_back_label" msgid="8986628898117178971">"Nazad"</string>
+    <string name="accessibility_system_action_recents_label" msgid="7607601657790855723">"Nedavne aplikacije"</string>
+    <string name="accessibility_system_action_notifications_label" msgid="1578681904050072545">"Obavještenja"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="3885565587471448947">"Brze postavke"</string>
+    <string name="accessibility_system_action_power_dialog_label" msgid="2299530700682199873">"Dijaloški okvir za napajanje"</string>
+    <string name="accessibility_system_action_toggle_split_screen_label" msgid="2853334443686935668">"Uključi/isključi podijeljeni ekran"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="2377933717780192594">"Zaključavanje ekrana"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="1933564892301816480">"Snimak ekrana"</string>
 </resources>
