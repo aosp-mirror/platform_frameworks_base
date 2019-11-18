@@ -26,7 +26,7 @@ import android.content.Context;
 public class BlobStoreManagerFrameworkInitializer {
     /** Register the BlobStoreManager wrapper class */
     public static void initialize() {
-        SystemServiceRegistry.registerCachedService(
+        SystemServiceRegistry.registerContextAwareService(
                 Context.BLOB_STORE_SERVICE, BlobStoreManager.class,
                 (context, service) ->
                         new BlobStoreManager(context, IBlobStoreManager.Stub.asInterface(service)));
