@@ -24,7 +24,6 @@ import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.car.Car;
-import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
 import android.content.Context;
@@ -179,10 +178,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private final CarServiceProvider mCarServiceProvider;
 
     private DeviceProvisionedController mDeviceProvisionedController;
-    private DrivingStateHelper mDrivingStateHelper;
     private PowerManagerHelper mPowerManagerHelper;
     private FlingAnimationUtils mFlingAnimationUtils;
-    private SwitchToGuestTimer mSwitchToGuestTimer;
     private NotificationDataManager mNotificationDataManager;
     private NotificationClickHandlerFactory mNotificationClickHandlerFactory;
     private ScreenLifecycle mScreenLifecycle;
@@ -439,15 +436,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         createBatteryController();
         mCarBatteryController.startListening();
-
-        // Used by onDrivingStateChanged and it can be called inside
-        // DrivingStateHelper.connectToCarService()
-        mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
-
-        // Register a listener for driving state changes.
-        mDrivingStateHelper = mDrivingStateHelperLazy.get();
-        mDrivingStateHelper.setCarDrivingStateEventListener(this::onDrivingStateChanged);
-        mDrivingStateHelper.connectToCarService();
 
         mPowerManagerHelper = mPowerManagerHelperLazy.get();
         mPowerManagerHelper.setCarPowerStateListener(mCarPowerStateListener);
@@ -914,20 +902,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         }
     }
 
-    private void onDrivingStateChanged(CarDrivingStateEvent notUsed) {
-        // Check if we need to start the timer every time driving state changes.
-        startSwitchToGuestTimerIfDrivingOnKeyguard();
-    }
-
-    private void startSwitchToGuestTimerIfDrivingOnKeyguard() {
-        if (mDrivingStateHelper.isCurrentlyDriving() && mState != StatusBarState.SHADE) {
-            // We're driving while keyguard is up.
-            mSwitchToGuestTimer.start();
-        } else {
-            mSwitchToGuestTimer.cancel();
-        }
-    }
-
     @Override
     protected void createUserSwitcher() {
         UserSwitcherController userSwitcherController =
@@ -952,8 +926,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     @Override
     public void onStateChanged(int newState) {
         super.onStateChanged(newState);
-
-        startSwitchToGuestTimerIfDrivingOnKeyguard();
 
         if (newState != StatusBarState.FULLSCREEN_USER_SWITCHER) {
             hideUserSwitcher();
