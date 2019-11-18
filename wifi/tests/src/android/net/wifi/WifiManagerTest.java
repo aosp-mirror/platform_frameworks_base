@@ -1899,8 +1899,25 @@ public class WifiManagerTest {
      */
     @Test
     public void testRemoveSuggestionConnectionListener() throws Exception {
-
         mWifiManager.removeSuggestionConnectionStatusListener(mListener);
         verify(mWifiService).unregisterSuggestionConnectionStatusListener(anyInt(), anyString());
+    }
+
+    /** Test {@link WifiManager#calculateSignalLevel(int)} */
+    @Test
+    public void testCalculateSignalLevel() throws Exception {
+        when(mWifiService.calculateSignalLevel(anyInt())).thenReturn(3);
+        int actual = mWifiManager.calculateSignalLevel(-60);
+        verify(mWifiService).calculateSignalLevel(-60);
+        assertEquals(3, actual);
+    }
+
+    /** Test {@link WifiManager#getMaxSignalLevel()} */
+    @Test
+    public void testGetMaxSignalLevel() throws Exception {
+        when(mWifiService.calculateSignalLevel(anyInt())).thenReturn(4);
+        int actual = mWifiManager.getMaxSignalLevel();
+        verify(mWifiService).calculateSignalLevel(Integer.MAX_VALUE);
+        assertEquals(4, actual);
     }
 }

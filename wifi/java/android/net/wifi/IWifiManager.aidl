@@ -242,4 +242,6 @@ interface IWifiManager
     void registerSuggestionConnectionStatusListener(in IBinder binder, in ISuggestionConnectionStatusListener listener, int listenerIdentifier, String packageName, String featureId);
 
     void unregisterSuggestionConnectionStatusListener(int listenerIdentifier, String packageName);
+
+    int calculateSignalLevel(int rssi);
 }

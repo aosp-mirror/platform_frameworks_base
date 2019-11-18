@@ -1153,8 +1153,6 @@ public class WifiManager {
      * @hide
      */
     @UnsupportedAppUsage
-    // TODO(b/140781184): need to support custom number of RSSI levels, as well as levels that are
-    //  not evenly spaced
     public static final int RSSI_LEVELS = 5;
 
     /**
@@ -2782,11 +2780,13 @@ public class WifiManager {
      * is being shown.
      *
      * @param rssi The power of the signal measured in RSSI.
-     * @param numLevels The number of levels to consider in the calculated
-     *            level.
-     * @return A level of the signal, given in the range of 0 to numLevels-1
-     *         (both inclusive).
+     * @param numLevels The number of levels to consider in the calculated level.
+     * @return A level of the signal, given in the range of 0 to numLevels-1 (both inclusive).
+     * @deprecated Callers should use {@link #calculateSignalLevel(int)} instead to get the
+     * signal level using the system default RSSI thresholds, or otherwise compute the RSSI level
+     * themselves using their own formula.
      */
+    @Deprecated
     public static int calculateSignalLevel(int rssi, int numLevels) {
         if (rssi <= MIN_RSSI) {
             return 0;
@@ -2797,6 +2797,34 @@ public class WifiManager {
             float outputRange = (numLevels - 1);
             return (int)((float)(rssi - MIN_RSSI) * outputRange / inputRange);
         }
+    }
+
+    /**
+     * Given a raw RSSI, return the RSSI signal quality rating using the system default RSSI
+     * quality rating thresholds.
+     * @param rssi a raw RSSI value, in dBm, usually between -55 and -90
+     * @return the RSSI signal quality rating, in the range
+     * [0, {@link #getMaxSignalLevel()}], where 0 is the lowest (worst signal) RSSI
+     * rating and {@link #getMaxSignalLevel()} is the highest (best signal) RSSI rating.
+     */
+    public int calculateSignalLevel(int rssi) {
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            return iWifiManager.calculateSignalLevel(rssi);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the system default maximum signal level.
+     * This is the maximum RSSI level returned by {@link #calculateSignalLevel(int)}.
+     */
+    public int getMaxSignalLevel() {
+        return calculateSignalLevel(Integer.MAX_VALUE);
     }
 
     /**
