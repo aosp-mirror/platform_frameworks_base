@@ -133,7 +133,7 @@ interface IPlatformCompat
     boolean isChangeEnabledByUid(long changeId, int uid);
 
     /**
-     * Add overrides to compatibility changes.
+     * Add overrides to compatibility changes. Kills the app to allow the changes to take effect.
      *
      * @param overrides Parcelable containing the compat change overrides to be applied.
      * @param packageName The package name of the app whose changes will be overridden.
@@ -142,7 +142,28 @@ interface IPlatformCompat
     void setOverrides(in CompatibilityChangeConfig overrides, in String packageName);
 
     /**
-     * Revert overrides to compatibility changes.
+     * Add overrides to compatibility changes. Doesn't kill the app, to be only used in tests.
+     *
+     * @param overrides Parcelable containing the compat change overrides to be applied.
+     * @param packageName The package name of the app whose changes will be overridden.
+     *
+     */
+    void setOverridesForTest(in CompatibilityChangeConfig overrides, in String packageName);
+
+    /**
+     * Removes an override previously added via {@link #setOverrides(CompatibilityChangeConfig,
+     * String)}. This restores the default behaviour for the given change and app, once any app
+     * processes have been restarted.
+     * Kills the app to allow the changes to take effect.
+     *
+     * @param changeId    The ID of the change that was overridden.
+     * @param packageName The app package name that was overridden.
+     * @return {@code true} if an override existed;
+     */
+    boolean clearOverride(long changeId, String packageName);
+
+    /**
+     * Revert overrides to compatibility changes. Kills the app to allow the changes to take effect.
      *
      * @param packageName The package name of the app whose overrides will be cleared.
      *
