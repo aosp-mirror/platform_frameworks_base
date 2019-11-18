@@ -23,9 +23,20 @@ import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_APP_THE
 import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_REAL;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
+import android.app.ActivityManager;
+import android.app.WindowConfiguration;
+import android.content.ComponentName;
+import android.content.res.Configuration;
+import android.graphics.ColorSpace;
+import android.graphics.GraphicBuffer;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
@@ -33,6 +44,7 @@ import com.google.android.collect.Sets;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 /**
  * Test class for {@link TaskSnapshotController}.
@@ -109,5 +121,58 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         secureWindow.mAttrs.flags |= FLAG_SECURE;
         assertEquals(SNAPSHOT_MODE_APP_THEME,
                 mWm.mTaskSnapshotController.getSnapshotMode(secureWindow.getTask()));
+    }
+
+    @Test
+    public void testSnapshotBuilder() {
+        final GraphicBuffer buffer = Mockito.mock(GraphicBuffer.class);
+        final ColorSpace sRGB = ColorSpace.get(ColorSpace.Named.SRGB);
+        final long id = 1234L;
+        final ComponentName activityComponent = new ComponentName("package", ".Class");
+        final int windowingMode = WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+        final int systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        final int pixelFormat = PixelFormat.RGBA_8888;
+        final int orientation = Configuration.ORIENTATION_PORTRAIT;
+        final float scaleFraction = 0.25f;
+        final Rect contentInsets = new Rect(1, 2, 3, 4);
+
+        try {
+            ActivityManager.TaskSnapshot.Builder builder =
+                    new ActivityManager.TaskSnapshot.Builder();
+            builder.setId(id);
+            builder.setTopActivityComponent(activityComponent);
+            builder.setSystemUiVisibility(systemUiVisibility);
+            builder.setWindowingMode(windowingMode);
+            builder.setColorSpace(sRGB);
+            builder.setReducedResolution(true);
+            builder.setOrientation(orientation);
+            builder.setContentInsets(contentInsets);
+            builder.setIsTranslucent(true);
+            builder.setScaleFraction(0.25f);
+            builder.setSnapshot(buffer);
+            builder.setIsRealSnapshot(true);
+            builder.setPixelFormat(pixelFormat);
+
+            // Not part of TaskSnapshot itself, used in screenshot process
+            assertEquals(pixelFormat, builder.getPixelFormat());
+
+            ActivityManager.TaskSnapshot snapshot = builder.build();
+            assertEquals(id, snapshot.getId());
+            assertEquals(activityComponent, snapshot.getTopActivityComponent());
+            assertEquals(systemUiVisibility, snapshot.getSystemUiVisibility());
+            assertEquals(windowingMode, snapshot.getWindowingMode());
+            assertEquals(sRGB, snapshot.getColorSpace());
+            assertTrue(snapshot.isReducedResolution());
+            assertEquals(orientation, snapshot.getOrientation());
+            assertEquals(contentInsets, snapshot.getContentInsets());
+            assertTrue(snapshot.isTranslucent());
+            assertEquals(scaleFraction, builder.getScaleFraction(), 0.001f);
+            assertSame(buffer, snapshot.getSnapshot());
+            assertTrue(snapshot.isRealSnapshot());
+        } finally {
+            if (buffer != null) {
+                buffer.destroy();
+            }
+        }
     }
 }

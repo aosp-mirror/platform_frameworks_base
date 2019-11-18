@@ -2097,6 +2097,113 @@ public class ActivityManager {
                 return new TaskSnapshot[size];
             }
         };
+
+        /** Builder for a {@link TaskSnapshot} object */
+        public static final class Builder {
+            private long mId;
+            private ComponentName mTopActivity;
+            private GraphicBuffer mSnapshot;
+            private ColorSpace mColorSpace;
+            private int mOrientation;
+            private Rect mContentInsets;
+            private boolean mReducedResolution;
+            private float mScaleFraction;
+            private boolean mIsRealSnapshot;
+            private int mWindowingMode;
+            private int mSystemUiVisibility;
+            private boolean mIsTranslucent;
+            private int mPixelFormat;
+
+            public Builder setId(long id) {
+                mId = id;
+                return this;
+            }
+
+            public Builder setTopActivityComponent(ComponentName name) {
+                mTopActivity = name;
+                return this;
+            }
+
+            public Builder setSnapshot(GraphicBuffer buffer) {
+                mSnapshot = buffer;
+                return this;
+            }
+
+            public Builder setColorSpace(ColorSpace colorSpace) {
+                mColorSpace = colorSpace;
+                return this;
+            }
+
+            public Builder setOrientation(int orientation) {
+                mOrientation = orientation;
+                return this;
+            }
+
+            public Builder setContentInsets(Rect contentInsets) {
+                mContentInsets = contentInsets;
+                return this;
+            }
+
+            public Builder setReducedResolution(boolean reducedResolution) {
+                mReducedResolution = reducedResolution;
+                return this;
+            }
+
+            public float getScaleFraction() {
+                return mScaleFraction;
+            }
+
+            public Builder setScaleFraction(float scaleFraction) {
+                mScaleFraction = scaleFraction;
+                return this;
+            }
+
+            public Builder setIsRealSnapshot(boolean realSnapshot) {
+                mIsRealSnapshot = realSnapshot;
+                return this;
+            }
+
+            public Builder setWindowingMode(int windowingMode) {
+                mWindowingMode = windowingMode;
+                return this;
+            }
+
+            public Builder setSystemUiVisibility(int systemUiVisibility) {
+                mSystemUiVisibility = systemUiVisibility;
+                return this;
+            }
+
+            public Builder setIsTranslucent(boolean isTranslucent) {
+                mIsTranslucent = isTranslucent;
+                return this;
+            }
+
+            public int getPixelFormat() {
+                return mPixelFormat;
+            }
+
+            public Builder setPixelFormat(int pixelFormat) {
+                mPixelFormat = pixelFormat;
+                return this;
+            }
+
+            public TaskSnapshot build() {
+                return new TaskSnapshot(
+                        mId,
+                        mTopActivity,
+                        mSnapshot,
+                        mColorSpace,
+                        mOrientation,
+                        mContentInsets,
+                        mReducedResolution,
+                        mScaleFraction,
+                        mIsRealSnapshot,
+                        mWindowingMode,
+                        mSystemUiVisibility,
+                        mIsTranslucent);
+
+            }
+        }
     }
 
     /** @hide */
