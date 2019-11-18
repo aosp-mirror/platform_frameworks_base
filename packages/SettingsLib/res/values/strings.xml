@@ -609,6 +609,9 @@
     <string name="bluetooth_select_a2dp_codec_sample_rate">Bluetooth Audio Sample Rate</string>
     <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection: Sample Rate -->
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection: Sample Rate</string>
+    <!-- UI debug setting: Label for unsupported Bluetooth Audio Codec. [CHAR LIMIT=none] -->
+    <string name="bluetooth_select_a2dp_codec_type_help_info">Gray-out means not supported by phone
+        or headset</string>
 
     <!-- UI debug setting: Trigger Bluetooth Audio Bits Per Sample Selection -->
     <string name="bluetooth_select_a2dp_codec_bits_per_sample">Bluetooth Audio Bits Per Sample</string>
