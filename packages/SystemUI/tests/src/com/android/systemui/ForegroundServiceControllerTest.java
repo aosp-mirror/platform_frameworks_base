@@ -18,6 +18,7 @@ package com.android.systemui;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.TestCase.fail;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -34,12 +35,14 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.widget.RemoteViews;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.appops.AppOpsController;
@@ -58,7 +61,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class ForegroundServiceControllerTest extends SysuiTestCase {
     private ForegroundServiceController mFsc;
     private ForegroundServiceNotificationListener mListener;
@@ -69,6 +73,9 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        // assume the TestLooper is the main looper for these tests
+        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+
         MockitoAnnotations.initMocks(this);
         mFsc = new ForegroundServiceController(mEntryManager, mAppOpsController, mMainHandler);
         mListener = new ForegroundServiceNotificationListener(
@@ -78,6 +85,26 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         verify(mEntryManager).addNotificationEntryListener(
                 entryListenerCaptor.capture());
         mEntryListener = entryListenerCaptor.getValue();
+    }
+
+    @Test
+    public void testAppOpsChangedCalledFromBgThread() {
+        try {
+            // WHEN onAppOpChanged is called from a different thread than the MainLooper
+            com.android.systemui.util.Assert.sMainLooper = Looper.getMainLooper();
+            NotificationEntry entry = createFgEntry();
+            mFsc.onAppOpChanged(
+                    AppOpsManager.OP_CAMERA,
+                    entry.getSbn().getUid(),
+                    entry.getSbn().getPackageName(),
+                    true);
+
+            // This test is run on the TestableLooper, which is not the MainLooper, so
+            // we expect an exception to be thrown
+            fail("onAppOpChanged shouldn't be allowed to be called from a bg thread.");
+        } catch (IllegalStateException e) {
+            // THEN expect an exception
+        }
     }
 
     @Test
