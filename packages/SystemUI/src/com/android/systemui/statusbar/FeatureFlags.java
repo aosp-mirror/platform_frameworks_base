@@ -57,7 +57,7 @@ public class FeatureFlags {
     }
 
     public boolean isNewNotifPipelineEnabled() {
-        return getDeviceConfigFlag("notification.newpipeline.enabled", false);
+        return getDeviceConfigFlag("notification.newpipeline.enabled", true);
     }
 
     private void onPropertiesChanged(@NonNull DeviceConfig.Properties properties) {

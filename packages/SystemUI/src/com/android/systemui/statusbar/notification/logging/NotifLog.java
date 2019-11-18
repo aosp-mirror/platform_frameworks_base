@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.logging;
 
+import android.os.SystemProperties;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 
@@ -33,10 +34,17 @@ import javax.inject.Singleton;
  *      dependency DumpController NotifLog
  */
 @Singleton
-public class NotifLog extends SysuiLog {
+public class NotifLog extends SysuiLog<NotifEvent> {
     private static final String TAG = "NotifLog";
+    private static final boolean SHOW_NEM_LOGS =
+            SystemProperties.getBoolean("persist.sysui.log.notif.nem", true);
+    private static final boolean SHOW_LIST_BUILDER_LOGS =
+            SystemProperties.getBoolean("persist.sysui.log.notif.listbuilder", true);
+
     private static final int MAX_DOZE_DEBUG_LOGS = 400;
     private static final int MAX_DOZE_LOGS = 50;
+
+    private NotifEvent mRecycledEvent;
 
     @Inject
     public NotifLog(DumpController dumpController) {
@@ -44,82 +52,64 @@ public class NotifLog extends SysuiLog {
     }
 
     /**
-     * Logs a {@link NotifEvent} with a notification, ranking and message
+     * Logs a {@link NotifEvent} with a notification, ranking and message.
+     * Uses the last recycled event if available.
      * @return true if successfully logged, else false
      */
-    public boolean log(@NotifEvent.EventType int eventType, StatusBarNotification sbn,
-            Ranking ranking, String msg) {
-        return log(new NotifEvent.NotifEventBuilder()
-                .setType(eventType)
-                .setSbn(sbn)
-                .setRanking(ranking)
-                .setReason(msg)
-                .build());
+    public void log(@NotifEvent.EventType int eventType,
+            StatusBarNotification sbn, Ranking ranking, String msg) {
+        if (!mEnabled
+                || (NotifEvent.isListBuilderEvent(eventType) && !SHOW_LIST_BUILDER_LOGS)
+                || (NotifEvent.isNemEvent(eventType) && !SHOW_NEM_LOGS)) {
+            return;
+        }
+
+        if (mRecycledEvent != null) {
+            mRecycledEvent = log(mRecycledEvent.init(eventType, sbn, ranking, msg));
+        } else {
+            mRecycledEvent = log(new NotifEvent().init(eventType, sbn, ranking, msg));
+        }
     }
 
     /**
-     * Logs a {@link NotifEvent}
-     * @return true if successfully logged, else false
+     * Logs a {@link NotifEvent} with no extra information aside from the event type
      */
-    public boolean log(@NotifEvent.EventType int eventType) {
-        return log(eventType, null, null, null);
+    public void log(@NotifEvent.EventType int eventType) {
+        log(eventType, null, null, "");
     }
 
     /**
      * Logs a {@link NotifEvent} with a message
-     * @return true if successfully logged, else false
      */
-    public boolean log(@NotifEvent.EventType int eventType, String msg) {
-        return log(eventType, null, null, msg);
+    public void log(@NotifEvent.EventType int eventType, String msg) {
+        log(eventType, null, null, msg);
     }
 
     /**
-     * Logs a {@link NotifEvent} with a notification
-     * @return true if successfully logged, else false
+     * Logs a {@link NotifEvent} with a entry
      */
-    public boolean log(@NotifEvent.EventType int eventType, StatusBarNotification sbn) {
-        return log(eventType, sbn, null, "");
+    public void log(@NotifEvent.EventType int eventType, NotificationEntry entry) {
+        log(eventType, entry.getSbn(), entry.getRanking(), "");
     }
 
     /**
-     * Logs a {@link NotifEvent} with a notification
-     * @return true if successfully logged, else false
+     * Logs a {@link NotifEvent} with a NotificationEntry and message
      */
-    public boolean log(@NotifEvent.EventType int eventType, StatusBarNotification sbn, String msg) {
-        return log(eventType, sbn, null, msg);
+    public void log(@NotifEvent.EventType int eventType, NotificationEntry entry, String msg) {
+        log(eventType, entry.getSbn(), entry.getRanking(), msg);
     }
 
     /**
-     * Logs a {@link NotifEvent} with a ranking
-     * @return true if successfully logged, else false
+     * Logs a {@link NotifEvent} with a notification and message
      */
-    public boolean log(@NotifEvent.EventType int eventType, Ranking ranking) {
-        return log(eventType, null, ranking, "");
+    public void log(@NotifEvent.EventType int eventType, StatusBarNotification sbn, String msg) {
+        log(eventType, sbn, null, msg);
     }
 
     /**
-     * Logs a {@link NotifEvent} with a notification and ranking
-     * @return true if successfully logged, else false
+     * Logs a {@link NotifEvent} with a ranking and message
      */
-    public boolean log(@NotifEvent.EventType int eventType, StatusBarNotification sbn,
-            Ranking ranking) {
-        return log(eventType, sbn, ranking, "");
-    }
-
-    /**
-     * Logs a {@link NotifEvent} with a notification entry
-     * @return true if successfully logged, else false
-     */
-    public boolean log(@NotifEvent.EventType int eventType, NotificationEntry entry) {
-        return log(eventType, entry.getSbn(), entry.getRanking(), "");
-    }
-
-    /**
-     * Logs a {@link NotifEvent} with a notification entry
-     * @return true if successfully logged, else false
-     */
-    public boolean log(@NotifEvent.EventType int eventType, NotificationEntry entry,
-            String msg) {
-        return log(eventType, entry.getSbn(), entry.getRanking(), msg);
+    public void log(@NotifEvent.EventType int eventType, Ranking ranking, String msg) {
+        log(eventType, null, ranking, msg);
     }
 }
