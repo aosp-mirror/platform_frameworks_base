@@ -1390,8 +1390,10 @@ public class DeviceIdleController extends SystemService
     private static final int MSG_FINISH_IDLE_OP = 8;
     private static final int MSG_REPORT_TEMP_APP_WHITELIST_CHANGED = 9;
     private static final int MSG_SEND_CONSTRAINT_MONITORING = 10;
-    private static final int MSG_UPDATE_PRE_IDLE_TIMEOUT_FACTOR = 11;
-    private static final int MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR = 12;
+    @VisibleForTesting
+    static final int MSG_UPDATE_PRE_IDLE_TIMEOUT_FACTOR = 11;
+    @VisibleForTesting
+    static final int MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR = 12;
 
     final class MyHandler extends Handler {
         MyHandler(Looper looper) {
@@ -3327,8 +3329,7 @@ public class DeviceIdleController extends SystemService
         mHandler.sendEmptyMessage(MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR);
     }
 
-    @VisibleForTesting
-    void updatePreIdleFactor() {
+    private void updatePreIdleFactor() {
         synchronized (this) {
             if (!shouldUseIdleTimeoutFactorLocked()) {
                 return;
@@ -3350,8 +3351,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    @VisibleForTesting
-    void maybeDoImmediateMaintenance() {
+    private void maybeDoImmediateMaintenance() {
         synchronized (this) {
             if (mState == STATE_IDLE) {
                 long duration = SystemClock.elapsedRealtime() - mIdleStartTime;
@@ -3377,6 +3377,7 @@ public class DeviceIdleController extends SystemService
     void setIdleStartTimeForTest(long idleStartTime) {
         synchronized (this) {
             mIdleStartTime = idleStartTime;
+            maybeDoImmediateMaintenance();
         }
     }
 
