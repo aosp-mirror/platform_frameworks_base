@@ -284,7 +284,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                     && outParams.mBounds.isEmpty()
                     && source.getDisplayId() == display.mDisplayId) {
                 // Set bounds to be not very far from source activity.
-                cascadeBounds(source.getBounds(), display, outParams.mBounds);
+                cascadeBounds(source.getConfiguration().windowConfiguration.getBounds(),
+                        display, outParams.mBounds);
             }
             getTaskBounds(root, display, layout, resolvedMode, hasInitialBounds, outParams.mBounds);
         }

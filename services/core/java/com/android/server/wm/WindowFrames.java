@@ -106,6 +106,16 @@ public class WindowFrames {
      */
     final Rect mLastFrame = new Rect();
 
+    /**
+     * mFrame but relative to the parent container.
+     */
+    final Rect mRelFrame = new Rect();
+
+    /**
+     * mLastFrame but relative to the parent container
+     */
+    final Rect mLastRelFrame = new Rect();
+
     private boolean mFrameSizeChanged = false;
 
     // Frame that is scaled to the application's coordinate space when in

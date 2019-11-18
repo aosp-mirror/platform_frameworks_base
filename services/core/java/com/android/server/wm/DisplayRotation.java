@@ -541,8 +541,8 @@ public class DisplayRotation {
             }
             mService.mH.removeCallbacks(mDisplayRotationHandlerTimeout);
             mIsWaitingForRemoteRotation = false;
-            mService.mAtmService.applyContainerTransaction(t);
             mDisplayContent.sendNewConfiguration();
+            mService.mAtmService.applyContainerTransaction(t);
         }
     }
 
