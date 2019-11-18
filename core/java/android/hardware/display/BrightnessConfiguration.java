@@ -49,26 +49,31 @@ public final class BrightnessConfiguration implements Parcelable {
     private static final String TAG_BRIGHTNESS_POINT = "brightness-point";
     private static final String TAG_BRIGHTNESS_CORRECTIONS = "brightness-corrections";
     private static final String TAG_BRIGHTNESS_CORRECTION = "brightness-correction";
+    private static final String TAG_BRIGHTNESS_PARAMS = "brightness-params";
     private static final String ATTR_LUX = "lux";
     private static final String ATTR_NITS = "nits";
     private static final String ATTR_DESCRIPTION = "description";
     private static final String ATTR_PACKAGE_NAME = "package-name";
     private static final String ATTR_CATEGORY = "category";
+    private static final String ATTR_COLLECT_COLOR = "collect-color";
 
     private final float[] mLux;
     private final float[] mNits;
     private final Map<String, BrightnessCorrection> mCorrectionsByPackageName;
     private final Map<Integer, BrightnessCorrection> mCorrectionsByCategory;
     private final String mDescription;
+    private final boolean mShouldCollectColorSamples;
 
     private BrightnessConfiguration(float[] lux, float[] nits,
             Map<String, BrightnessCorrection> correctionsByPackageName,
-            Map<Integer, BrightnessCorrection> correctionsByCategory, String description) {
+            Map<Integer, BrightnessCorrection> correctionsByCategory, String description,
+            boolean shouldCollectColorSamples) {
         mLux = lux;
         mNits = nits;
         mCorrectionsByPackageName = correctionsByPackageName;
         mCorrectionsByCategory = correctionsByCategory;
         mDescription = description;
+        mShouldCollectColorSamples = shouldCollectColorSamples;
     }
 
     /**
@@ -119,6 +124,14 @@ public final class BrightnessConfiguration implements Parcelable {
         return mDescription;
     }
 
+    /**
+     * Returns whether color samples should be collected in
+     * {@link BrightnessChangeEvent#colorValueBuckets}.
+     */
+    public boolean shouldCollectColorSamples() {
+        return mShouldCollectColorSamples;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeFloatArray(mLux);
@@ -138,6 +151,7 @@ public final class BrightnessConfiguration implements Parcelable {
             correction.writeToParcel(dest, flags);
         }
         dest.writeString(mDescription);
+        dest.writeBoolean(mShouldCollectColorSamples);
     }
 
     @Override
@@ -167,6 +181,7 @@ public final class BrightnessConfiguration implements Parcelable {
         if (mDescription != null) {
             sb.append(mDescription);
         }
+        sb.append(", shouldCollectColorSamples = " + mShouldCollectColorSamples);
         sb.append("'}");
         return sb.toString();
     }
@@ -181,6 +196,7 @@ public final class BrightnessConfiguration implements Parcelable {
         if (mDescription != null) {
             result = result * 31 + mDescription.hashCode();
         }
+        result = result * 31 + Boolean.hashCode(mShouldCollectColorSamples);
         return result;
     }
 
@@ -196,7 +212,8 @@ public final class BrightnessConfiguration implements Parcelable {
         return Arrays.equals(mLux, other.mLux) && Arrays.equals(mNits, other.mNits)
                 && mCorrectionsByPackageName.equals(other.mCorrectionsByPackageName)
                 && mCorrectionsByCategory.equals(other.mCorrectionsByCategory)
-                && Objects.equals(mDescription, other.mDescription);
+                && Objects.equals(mDescription, other.mDescription)
+                && mShouldCollectColorSamples == other.mShouldCollectColorSamples;
     }
 
     public static final @android.annotation.NonNull Creator<BrightnessConfiguration> CREATOR =
@@ -224,6 +241,8 @@ public final class BrightnessConfiguration implements Parcelable {
 
             final String description = in.readString();
             builder.setDescription(description);
+            final boolean shouldCollectColorSamples = in.readBoolean();
+            builder.setShouldCollectColorSamples(shouldCollectColorSamples);
             return builder.build();
         }
 
@@ -252,6 +271,7 @@ public final class BrightnessConfiguration implements Parcelable {
             serializer.endTag(null, TAG_BRIGHTNESS_POINT);
         }
         serializer.endTag(null, TAG_BRIGHTNESS_CURVE);
+
         serializer.startTag(null, TAG_BRIGHTNESS_CORRECTIONS);
         for (Map.Entry<String, BrightnessCorrection> entry :
                 mCorrectionsByPackageName.entrySet()) {
@@ -271,6 +291,12 @@ public final class BrightnessConfiguration implements Parcelable {
             serializer.endTag(null, TAG_BRIGHTNESS_CORRECTION);
         }
         serializer.endTag(null, TAG_BRIGHTNESS_CORRECTIONS);
+
+        serializer.startTag(null, TAG_BRIGHTNESS_PARAMS);
+        if (mShouldCollectColorSamples) {
+            serializer.attribute(null, ATTR_COLLECT_COLOR, Boolean.toString(true));
+        }
+        serializer.endTag(null, TAG_BRIGHTNESS_PARAMS);
     }
 
     /**
@@ -293,6 +319,7 @@ public final class BrightnessConfiguration implements Parcelable {
         List<Float> nitsList = new ArrayList<>();
         Map<String, BrightnessCorrection> correctionsByPackageName = new HashMap<>();
         Map<Integer, BrightnessCorrection> correctionsByCategory = new HashMap<>();
+        boolean shouldCollectColorSamples = false;
         final int configDepth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, configDepth)) {
             if (TAG_BRIGHTNESS_CURVE.equals(parser.getName())) {
@@ -307,8 +334,7 @@ public final class BrightnessConfiguration implements Parcelable {
                     luxList.add(lux);
                     nitsList.add(nits);
                 }
-            }
-            if (TAG_BRIGHTNESS_CORRECTIONS.equals(parser.getName())) {
+            } else if (TAG_BRIGHTNESS_CORRECTIONS.equals(parser.getName())) {
                 final int correctionsDepth = parser.getDepth();
                 while (XmlUtils.nextElementWithin(parser, correctionsDepth)) {
                     if (!TAG_BRIGHTNESS_CORRECTION.equals(parser.getName())) {
@@ -328,6 +354,9 @@ public final class BrightnessConfiguration implements Parcelable {
                         }
                     }
                 }
+            } else if (TAG_BRIGHTNESS_PARAMS.equals(parser.getName())) {
+                shouldCollectColorSamples =
+                        Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_COLLECT_COLOR));
             }
         }
         final int n = luxList.size();
@@ -350,6 +379,7 @@ public final class BrightnessConfiguration implements Parcelable {
             final BrightnessCorrection correction = entry.getValue();
             builder.addCorrectionByCategory(category, correction);
         }
+        builder.setShouldCollectColorSamples(shouldCollectColorSamples);
         return builder.build();
     }
 
@@ -374,6 +404,7 @@ public final class BrightnessConfiguration implements Parcelable {
         private Map<String, BrightnessCorrection> mCorrectionsByPackageName;
         private Map<Integer, BrightnessCorrection> mCorrectionsByCategory;
         private String mDescription;
+        private boolean mShouldCollectColorSamples;
 
         /**
          * Constructs the builder with the control points for the brightness curve.
@@ -498,6 +529,19 @@ public final class BrightnessConfiguration implements Parcelable {
         }
 
         /**
+         * Control whether screen color samples should be returned in
+         * {@link BrightnessChangeEvent#colorValueBuckets} if supported by the device.
+         *
+         * @param shouldCollectColorSamples true if color samples should be collected.
+         * @return
+         */
+        @NonNull
+        public Builder setShouldCollectColorSamples(boolean shouldCollectColorSamples) {
+            mShouldCollectColorSamples = shouldCollectColorSamples;
+            return this;
+        }
+
+        /**
          * Builds the {@link BrightnessConfiguration}.
          */
         @NonNull
@@ -506,7 +550,7 @@ public final class BrightnessConfiguration implements Parcelable {
                 throw new IllegalStateException("A curve must be set!");
             }
             return new BrightnessConfiguration(mCurveLux, mCurveNits, mCorrectionsByPackageName,
-                    mCorrectionsByCategory, mDescription);
+                    mCorrectionsByCategory, mDescription, mShouldCollectColorSamples);
         }
 
         private static void checkMonotonic(float[] vals, boolean strictlyIncreasing, String name) {

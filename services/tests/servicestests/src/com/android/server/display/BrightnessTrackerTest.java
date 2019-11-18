@@ -37,6 +37,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
+import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
@@ -78,6 +79,7 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 public class BrightnessTrackerTest {
     private static final float DEFAULT_INITIAL_BRIGHTNESS = 2.5f;
+    private static final boolean DEFAULT_COLOR_SAMPLING_ENABLED = true;
     private static final float FLOAT_DELTA = 0.01f;
 
     private BrightnessTracker mTracker;
@@ -147,6 +149,40 @@ public class BrightnessTrackerTest {
         assertNull(mInjector.mSensorListener);
         assertNull(mInjector.mBroadcastReceiver);
         assertFalse(mInjector.mIdleScheduled);
+        assertFalse(mInjector.mColorSamplingEnabled);
+    }
+
+    @Test
+    public void testModifyBrightnessConfiguration() {
+        mInjector.mInteractive = true;
+        // Start with tracker not listening for color samples.
+        startTracker(mTracker, DEFAULT_INITIAL_BRIGHTNESS, /* collectColorSamples= */ false);
+        assertFalse(mInjector.mColorSamplingEnabled);
+
+        // Update brightness config to enabled color sampling.
+        mTracker.setBrightnessConfiguration(buildBrightnessConfiguration(
+                /* collectColorSamples= */ true));
+        mInjector.waitForHandler();
+        assertTrue(mInjector.mColorSamplingEnabled);
+
+        // Update brightness config to disable color sampling.
+        mTracker.setBrightnessConfiguration(buildBrightnessConfiguration(
+                /* collectColorSamples= */ false));
+        mInjector.waitForHandler();
+        assertFalse(mInjector.mColorSamplingEnabled);
+
+        // Pretend screen is off, update config to turn on color sampling.
+        mInjector.sendScreenChange(/*screen on */ false);
+        mTracker.setBrightnessConfiguration(buildBrightnessConfiguration(
+                /* collectColorSamples= */ true));
+        mInjector.waitForHandler();
+        assertFalse(mInjector.mColorSamplingEnabled);
+
+        // Pretend screen is on.
+        mInjector.sendScreenChange(/*screen on */ true);
+        assertTrue(mInjector.mColorSamplingEnabled);
+
+        mTracker.stop();
         assertFalse(mInjector.mColorSamplingEnabled);
     }
 
@@ -278,7 +314,7 @@ public class BrightnessTrackerTest {
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_ACTIVATED, 1);
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, 3333);
 
-        startTracker(mTracker, initialBrightness);
+        startTracker(mTracker, initialBrightness, DEFAULT_COLOR_SAMPLING_ENABLED);
         mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
                 batteryChangeEvent(30, 60));
         mInjector.mSensorListener.onSensorChanged(createSensorEvent(1000.0f));
@@ -311,7 +347,7 @@ public class BrightnessTrackerTest {
     @Test
     public void testIgnoreAutomaticBrightnessChange() {
         final int initialBrightness = 30;
-        startTracker(mTracker, initialBrightness);
+        startTracker(mTracker, initialBrightness, DEFAULT_COLOR_SAMPLING_ENABLED);
         mInjector.mSensorListener.onSensorChanged(createSensorEvent(1.0f));
         mInjector.incrementTime(TimeUnit.SECONDS.toMillis(1));
 
@@ -750,11 +786,13 @@ public class BrightnessTrackerTest {
     }
 
     private void startTracker(BrightnessTracker tracker) {
-        startTracker(tracker, DEFAULT_INITIAL_BRIGHTNESS);
+        startTracker(tracker, DEFAULT_INITIAL_BRIGHTNESS,  DEFAULT_COLOR_SAMPLING_ENABLED);
     }
 
-    private void startTracker(BrightnessTracker tracker, float initialBrightness) {
+    private void startTracker(BrightnessTracker tracker, float initialBrightness,
+            boolean collectColorSamples) {
         tracker.start(initialBrightness);
+        tracker.setBrightnessConfiguration(buildBrightnessConfiguration(collectColorSamples));
         mInjector.waitForHandler();
     }
 
@@ -770,6 +808,14 @@ public class BrightnessTrackerTest {
         tracker.notifyBrightnessChanged(brightness, userInitiated, powerBrightnessFactor,
                 isUserSetBrightness, isDefaultBrightnessConfig);
         mInjector.waitForHandler();
+    }
+
+    private BrightnessConfiguration buildBrightnessConfiguration(boolean collectColorSamples) {
+        BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder(
+                /* lux = */ new float[] {0f, 10f, 100f},
+                /* nits = */ new float[] {1f, 90f, 100f});
+        builder.setShouldCollectColorSamples(collectColorSamples);
+        return builder.build();
     }
 
     private static final class Idle implements MessageQueue.IdleHandler {
