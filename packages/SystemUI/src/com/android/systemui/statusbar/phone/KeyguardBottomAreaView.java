@@ -64,6 +64,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.custom.FodUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -172,8 +173,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private int mBurnInXOffset;
     private int mBurnInYOffset;
     private ActivityIntentHelper mActivityIntentHelper;
-
-    private static final String FOD = "vendor.pa.biometrics.fingerprint.inscreen";
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -417,8 +416,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private boolean hasInDisplayFingerprint() {
-        return mContext.getPackageManager().hasSystemFeature(FOD)
-                && mIsFingerprintRunning;
+        return FodUtils.hasFodSupport(mContext) && mIsFingerprintRunning;
     }
 
     public boolean isLeftVoiceAssist() {
