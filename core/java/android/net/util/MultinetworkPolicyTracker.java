@@ -94,7 +94,8 @@ public class MultinetworkPolicyTracker {
             }
         };
 
-        TelephonyManager.from(ctx).listen(new PhoneStateListener(handler.getLooper()) {
+        ctx.getSystemService(TelephonyManager.class).listen(
+                new PhoneStateListener(handler.getLooper()) {
             @Override
             public void onActiveDataSubscriptionIdChanged(int subId) {
                 mActiveSubId = subId;
