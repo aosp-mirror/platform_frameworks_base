@@ -138,6 +138,7 @@ import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.UserState;
@@ -825,7 +826,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         task.mTaskId, r.shortComponentName);
                 if (r.isActivityTypeHome()) {
                     // Home process is the root process of the task.
-                    updateHomeProcess(task.getChildAt(0).app);
+                    updateHomeProcess(task.getBottomMostActivity().app);
                 }
                 mService.getPackageManagerInternalLocked().notifyPackageUse(
                         r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
@@ -1688,7 +1689,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 }
             }
             if (!deferResume) {
-                stack.ensureVisibleActivitiesConfigurationLocked(r, preserveWindows);
+                stack.ensureVisibleActivitiesConfiguration(r, preserveWindows);
             }
         } finally {
             mAllowDockedStackResize = true;
@@ -2485,15 +2486,20 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return;
         }
 
-        for (int i = task.getChildCount() - 1; i >= 0; i--) {
-            final ActivityRecord r = task.getChildAt(i);
-            if (r.attachedToProcess()) {
-                mMultiWindowModeChangedActivities.add(r);
-            }
-        }
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                ActivityStackSupervisor::addToMultiWindowModeChangedList, this,
+                PooledLambda.__(ActivityRecord.class));
+        task.forAllActivities(c);
+        c.recycle();
 
         if (!mHandler.hasMessages(REPORT_MULTI_WINDOW_MODE_CHANGED_MSG)) {
             mHandler.sendEmptyMessage(REPORT_MULTI_WINDOW_MODE_CHANGED_MSG);
+        }
+    }
+
+    private void addToMultiWindowModeChangedList(ActivityRecord r) {
+        if (r.attachedToProcess()) {
+            mMultiWindowModeChangedActivities.add(r);
         }
     }
 
@@ -2507,17 +2513,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         scheduleUpdatePictureInPictureModeIfNeeded(task, stack.getRequestedOverrideBounds());
     }
 
-    void scheduleUpdatePictureInPictureModeIfNeeded(Task task, Rect targetStackBounds) {
-        for (int i = task.getChildCount() - 1; i >= 0; i--) {
-            final ActivityRecord r = task.getChildAt(i);
-            if (r.attachedToProcess()) {
-                mPipModeChangedActivities.add(r);
-                // If we are scheduling pip change, then remove this activity from multi-window
-                // change list as the processing of pip change will make sure multi-window changed
-                // message is processed in the right order relative to pip changed.
-                mMultiWindowModeChangedActivities.remove(r);
-            }
-        }
+    private void scheduleUpdatePictureInPictureModeIfNeeded(Task task, Rect targetStackBounds) {
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                ActivityStackSupervisor::addToPipModeChangedList, this,
+                PooledLambda.__(ActivityRecord.class));
+        task.forAllActivities(c);
+        c.recycle();
+
         mPipModeChangedTargetStackBounds = targetStackBounds;
 
         if (!mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
@@ -2525,14 +2527,23 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         }
     }
 
+    private void addToPipModeChangedList(ActivityRecord r) {
+        if (!r.attachedToProcess()) return;
+
+        mPipModeChangedActivities.add(r);
+        // If we are scheduling pip change, then remove this activity from multi-window
+        // change list as the processing of pip change will make sure multi-window changed
+        // message is processed in the right order relative to pip changed.
+        mMultiWindowModeChangedActivities.remove(r);
+    }
+
     void updatePictureInPictureMode(Task task, Rect targetStackBounds, boolean forceUpdate) {
         mHandler.removeMessages(REPORT_PIP_MODE_CHANGED_MSG);
-        for (int i = task.getChildCount() - 1; i >= 0; i--) {
-            final ActivityRecord r = task.getChildAt(i);
-            if (r.attachedToProcess()) {
-                r.updatePictureInPictureMode(targetStackBounds, forceUpdate);
-            }
-        }
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                ActivityRecord::updatePictureInPictureMode,
+                PooledLambda.__(ActivityRecord.class), targetStackBounds, forceUpdate);
+        task.forAllActivities(c);
+        c.recycle();
     }
 
     void wakeUp(String reason) {

@@ -196,8 +196,7 @@ class KeyguardController {
             // Some stack visibility might change (e.g. docked stack)
             mRootActivityContainer.resumeFocusedStacksTopActivities();
             mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-            mRootActivityContainer.addStartingWindowsForVisibleActivities(
-                    true /* taskSwitch */);
+            mRootActivityContainer.addStartingWindowsForVisibleActivities();
             mWindowManager.executeAppTransition();
         } finally {
             mService.continueWindowLayout();

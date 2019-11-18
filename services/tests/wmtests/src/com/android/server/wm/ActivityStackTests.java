@@ -241,7 +241,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         final RootActivityContainer.FindTaskResult result =
                 new RootActivityContainer.FindTaskResult();
-        mStack.findTaskLocked(r, result);
+        result.process(r, mStack);
 
         assertEquals(r, task.getTopNonFinishingActivity(false /* includeOverlays */));
         assertEquals(taskOverlay, task.getTopNonFinishingActivity(true /* includeOverlays */));
@@ -266,14 +266,14 @@ public class ActivityStackTests extends ActivityTestsBase {
         final ActivityRecord r1 = new ActivityBuilder(mService).setComponent(
                 target).setTargetActivity(targetActivity).build();
         RootActivityContainer.FindTaskResult result = new RootActivityContainer.FindTaskResult();
-        mStack.findTaskLocked(r1, result);
+        result.process(r1, mStack);
         assertThat(result.mRecord).isNotNull();
 
         // Using alias activity to find task.
         final ActivityRecord r2 = new ActivityBuilder(mService).setComponent(
                 alias).setTargetActivity(targetActivity).build();
         result = new RootActivityContainer.FindTaskResult();
-        mStack.findTaskLocked(r2, result);
+        result.process(r2, mStack);
         assertThat(result.mRecord).isNotNull();
     }
 
@@ -846,9 +846,9 @@ public class ActivityStackTests extends ActivityTestsBase {
         mStack.mResumedActivity = secondActivity;
 
         // Note the activities have non-null ActivityRecord.app, so it won't remove directly.
-        mStack.finishDisabledPackageActivitiesLocked(firstActivity.packageName,
-                null /* filterByClasses */, true /* doit */, true /* evenPersistent */,
-                UserHandle.USER_ALL);
+        mRootActivityContainer.mFinishDisabledPackageActivitiesHelper.process(
+                firstActivity.packageName, null /* filterByClasses */, true /* doit */,
+                true /* evenPersistent */, UserHandle.USER_ALL);
 
         // If the activity is disabled with {@link android.content.pm.PackageManager#DONT_KILL_APP}
         // the activity should still follow the normal flow to finish and destroy.
@@ -875,9 +875,9 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         assertEquals(2, mTask.getChildCount());
 
-        mStack.finishDisabledPackageActivitiesLocked(activity.packageName,
-                null  /* filterByClasses */, true /* doit */, true /* evenPersistent */,
-                UserHandle.USER_ALL);
+        mRootActivityContainer.mFinishDisabledPackageActivitiesHelper.process(
+                activity.packageName, null  /* filterByClasses */, true /* doit */,
+                true /* evenPersistent */, UserHandle.USER_ALL);
 
         // Although the overlay activity is in another package, the non-overlay activities are
         // removed from the task. Since the overlay activity should be removed as well, the task

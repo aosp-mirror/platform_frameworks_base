@@ -914,7 +914,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Add another stack to become focused and make the activity there visible. This way it
         // simulates finishing in non-focused stack in split-screen.
         final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
-        final ActivityRecord focusedActivity = stack.getChildAt(0).getChildAt(0);
+        final ActivityRecord focusedActivity = stack.getTopMostActivity();
         focusedActivity.nowVisible = true;
         focusedActivity.mVisibleRequested = true;
         focusedActivity.setState(RESUMED, "test");

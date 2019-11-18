@@ -48,9 +48,9 @@ class TaskSnapshotCache {
         if (entry != null) {
             mAppTaskMap.remove(entry.topApp);
         }
-        final ActivityRecord top = task.getTopChild();
+        final ActivityRecord top = task.getTopMostActivity();
         mAppTaskMap.put(top, task.mTaskId);
-        mRunningCache.put(task.mTaskId, new CacheEntry(snapshot, task.getTopChild()));
+        mRunningCache.put(task.mTaskId, new CacheEntry(snapshot, top));
     }
 
     /**

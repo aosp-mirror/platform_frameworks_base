@@ -125,8 +125,7 @@ class ResetTargetTaskHelper {
                     // TODO: We should probably look for other stacks also, since corresponding
                     //  task with the same affinity is unlikely to be in the same stack.
                     final Task targetTask;
-                    final ActivityRecord bottom = mParent.getActivity(
-                            (ar) -> true, false /*traverseTopToBottom*/);
+                    final ActivityRecord bottom = mParent.getBottomMostActivity();
 
                     if (bottom != null && r.taskAffinity.equals(bottom.getTask().affinity)) {
                         // If the activity currently at the bottom has the same task affinity as
@@ -210,10 +209,8 @@ class ResetTargetTaskHelper {
                 // we have put it on top of another instance of the same activity? Then we drop
                 // the instance below so it remains singleTop.
                 if (r.info.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP) {
-                    final ArrayList<ActivityRecord> taskActivities = mTargetTask.mChildren;
-                    final int targetNdx = taskActivities.indexOf(r);
-                    if (targetNdx > 0) {
-                        final ActivityRecord p = taskActivities.get(targetNdx - 1);
+                    final ActivityRecord p = mTargetTask.getActivityBelow(r);
+                    if (p != null) {
                         if (p.intent.getComponent().equals(r.intent.getComponent())) {
                             p.finishIfPossible("replace", false /* oomAdj */);
                         }

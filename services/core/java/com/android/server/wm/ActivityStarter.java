@@ -1444,7 +1444,7 @@ class ActivityStarter {
 
         // Stack should also be detached from display and be removed if it's empty.
         if (startedActivityStack != null && startedActivityStack.isAttached()
-                && startedActivityStack.numActivities() == 0
+                && !startedActivityStack.hasActivity()
                 && !startedActivityStack.isActivityTypeHome()) {
             startedActivityStack.removeIfPossible();
             startedActivityStack = null;
@@ -1638,7 +1638,7 @@ class ActivityStarter {
             return START_CANCELED;
         }
 
-        if (mRestrictedBgActivity && (newTask || !targetTask.containsAppUid(mCallingUid))
+        if (mRestrictedBgActivity && (newTask || !targetTask.isUidPresent(mCallingUid))
                 && handleBackgroundActivityAbort(mStartActivity)) {
             Slog.e(TAG, "Abort background activity starts from " + mCallingUid);
             return START_ABORTED;
@@ -1869,8 +1869,8 @@ class ActivityStarter {
             // In this case, we are launching an activity in our own task that may
             // already be running somewhere in the history, and we want to shuffle it to
             // the front of the stack if so.
-            final ActivityRecord act = targetTask.findActivityInHistoryLocked(
-                    mStartActivity);
+            final ActivityRecord act =
+                    targetTask.findActivityInHistory(mStartActivity.mActivityComponent);
             if (act != null) {
                 final Task task = act.getTask();
                 task.moveActivityToFrontLocked(act);

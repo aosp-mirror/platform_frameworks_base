@@ -235,23 +235,18 @@ class TaskSnapshotController {
      * children, which should be ignored.
      */
     @Nullable private ActivityRecord findAppTokenForSnapshot(Task task) {
-        for (int i = task.getChildCount() - 1; i >= 0; --i) {
-            final ActivityRecord activity = task.getChildAt(i);
-            if (activity == null || !activity.isSurfaceShowing()
-                    || activity.findMainWindow() == null) {
-                continue;
+        return task.getActivity((r) -> {
+            if (r == null || !r.isSurfaceShowing() || r.findMainWindow() == null) {
+                return false;
             }
-            final boolean hasVisibleChild = activity.forAllWindows(
+            return r.forAllWindows(
                     // Ensure at least one window for the top app is visible before attempting to
                     // take a screenshot. Visible here means that the WSA surface is shown and has
                     // an alpha greater than 0.
                     ws -> ws.mWinAnimator != null && ws.mWinAnimator.getShown()
                             && ws.mWinAnimator.mLastAlpha > 0f, true  /* traverseTopToBottom */);
-            if (hasVisibleChild) {
-                return activity;
-            }
-        }
-        return null;
+
+        });
     }
 
     @Nullable
@@ -380,7 +375,7 @@ class TaskSnapshotController {
 
     @VisibleForTesting
     int getSnapshotMode(Task task) {
-        final ActivityRecord topChild = task.getTopChild();
+        final ActivityRecord topChild = task.getTopMostActivity();
         if (!task.isActivityTypeStandardOrUndefined() && !task.isActivityTypeAssistant()) {
             return SNAPSHOT_MODE_NONE;
         } else if (topChild != null && topChild.shouldUseAppThemeSnapshot()) {
@@ -395,7 +390,7 @@ class TaskSnapshotController {
      * as possible by using the theme's window background.
      */
     private TaskSnapshot drawAppThemeSnapshot(Task task) {
-        final ActivityRecord topChild = task.getTopChild();
+        final ActivityRecord topChild = task.getTopMostActivity();
         if (topChild == null) {
             return null;
         }

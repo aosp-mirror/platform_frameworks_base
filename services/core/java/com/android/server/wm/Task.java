@@ -67,7 +67,6 @@ import static com.android.server.am.TaskRecordProto.REAL_ACTIVITY;
 import static com.android.server.am.TaskRecordProto.RESIZE_MODE;
 import static com.android.server.am.TaskRecordProto.STACK_ID;
 import static com.android.server.am.TaskRecordProto.TASK;
-import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -138,6 +137,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.util.function.pooled.PooledConsumer;
+import com.android.internal.util.function.pooled.PooledFunction;
+import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.ActivityStack.ActivityState;
 
@@ -152,8 +155,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
-class Task extends WindowContainer<ActivityRecord> implements ConfigurationContainerListener {
+class Task extends WindowContainer<WindowContainer> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_ATM;
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -382,6 +386,44 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     /** @see #setCanAffectSystemUiFlags */
     private boolean mCanAffectSystemUiFlags = true;
 
+    private static Exception sTmpException;
+
+    private final FindRootHelper mFindRootHelper = new FindRootHelper();
+    private class FindRootHelper {
+        private ActivityRecord mRoot;
+
+        private void clear() {
+            mRoot = null;
+        }
+
+        ActivityRecord findRoot(boolean ignoreRelinquishIdentity, boolean setToBottomIfNone) {
+            final PooledFunction f = PooledLambda.obtainFunction(FindRootHelper::processActivity,
+                    this, PooledLambda.__(ActivityRecord.class), ignoreRelinquishIdentity,
+                    setToBottomIfNone);
+            clear();
+            forAllActivities(f, false /*traverseTopToBottom*/);
+            f.recycle();
+            return mRoot;
+        }
+
+        private boolean processActivity(ActivityRecord r,
+                boolean ignoreRelinquishIdentity, boolean setToBottomIfNone) {
+            if (mRoot == null && setToBottomIfNone) {
+                // This is the first activity we are process. Set it as the candidate root in case
+                // we don't find a better one.
+                mRoot = r;
+            }
+
+            if (r.finishing) return false;
+
+            // Set this as the candidate root since it isn't finishing.
+            mRoot = r;
+
+            // Only end search if we are ignore relinquishing identity or we are not relinquishing.
+            return ignoreRelinquishIdentity || (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
+        }
+    }
+
     /**
      * Don't use constructor directly. Use {@link #create(ActivityTaskManagerService, int,
      * ActivityInfo, Intent, TaskDescription)} instead.
@@ -464,7 +506,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         mAtmService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
-    void cleanUpResourcesForDestroy() {
+    private void cleanUpResourcesForDestroy() {
         if (hasChild()) {
             return;
         }
@@ -931,10 +973,11 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         super.onParentChanged(newParent, oldParent);
 
         if (oldStack != null) {
-            for (int i = getChildCount() - 1; i >= 0; --i) {
-                final ActivityRecord activity = getChildAt(i);
-                oldStack.onActivityRemovedFromStack(activity);
-            }
+            final PooledConsumer c = PooledLambda.obtainConsumer(
+                    ActivityStack::onActivityRemovedFromStack, oldStack,
+                    PooledLambda.__(ActivityRecord.class));
+            forAllActivities(c);
+            c.recycle();
 
             if (oldStack.inPinnedWindowingMode()
                     && (newStack == null || !newStack.inPinnedWindowingMode())) {
@@ -945,10 +988,11 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         }
 
         if (newStack != null) {
-            for (int i = getChildCount() - 1; i >= 0; --i) {
-                final ActivityRecord activity = getChildAt(i);
-                newStack.onActivityAddedToStack(activity);
-            }
+            final PooledConsumer c = PooledLambda.obtainConsumer(
+                    ActivityStack::onActivityAddedToStack, newStack,
+                    PooledLambda.__(ActivityRecord.class));
+            forAllActivities(c);
+            c.recycle();
 
             // TODO: Ensure that this is actually necessary here
             // Notify the voice session if required
@@ -1068,25 +1112,11 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     ActivityRecord getRootActivity(boolean setToBottomIfNone) {
-        return getRootActivity(false /*ignoreRelinquishIdentity*/, false /*setToBottomIfNone*/);
+        return getRootActivity(false /*ignoreRelinquishIdentity*/, setToBottomIfNone);
     }
 
     ActivityRecord getRootActivity(boolean ignoreRelinquishIdentity, boolean setToBottomIfNone) {
-        ActivityRecord root;
-        if (ignoreRelinquishIdentity) {
-            root = getActivity((r) -> !r.finishing, false /*traverseTopToBottom*/);
-        } else {
-            root = getActivity((r) ->
-                            !r.finishing && (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0,
-                    false /*traverseTopToBottom*/);
-        }
-
-        if (root == null && setToBottomIfNone) {
-            // All activities in the task are either finishing or relinquish task identity.
-            // But we still want to update the intent, so let's use the bottom activity.
-            root = getActivity((r) -> true, false /*traverseTopToBottom*/);
-        }
-        return root;
+        return mFindRootHelper.findRoot(ignoreRelinquishIdentity, setToBottomIfNone);
     }
 
     ActivityRecord getTopNonFinishingActivity() {
@@ -1094,101 +1124,42 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     ActivityRecord getTopNonFinishingActivity(boolean includeOverlays) {
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final ActivityRecord r = getChildAt(i);
-            if (r.finishing || (!includeOverlays && r.mTaskOverlay)) {
-                continue;
-            }
-            return r;
-        }
-        return null;
+        return getTopActivity(false /*includeFinishing*/, includeOverlays);
     }
 
     ActivityRecord topRunningActivityLocked() {
-        if (mStack != null) {
-            for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = getChildAt(activityNdx);
-                if (!r.finishing && r.okToShowLocked()) {
-                    return r;
-                }
-            }
+        if (getParent() == null) {
+            return null;
         }
-        return null;
+        return getActivity(ActivityRecord::canBeTopRunning);
     }
 
     /**
      * Return true if any activities in this task belongs to input uid.
      */
-    boolean containsAppUid(int uid) {
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final ActivityRecord r = getChildAt(i);
-            if (r.getUid() == uid) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void getAllRunningVisibleActivitiesLocked(ArrayList<ActivityRecord> outActivities) {
-        if (mStack != null) {
-            for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = getChildAt(activityNdx);
-                if (!r.finishing && r.okToShowLocked() && r.visibleIgnoringKeyguard) {
-                    outActivities.add(r);
-                }
-            }
-        }
+    boolean isUidPresent(int uid) {
+        final PooledPredicate p = PooledLambda.obtainPredicate(
+                ActivityRecord::isUid, PooledLambda.__(ActivityRecord.class), uid);
+        final boolean isUidPresent = getActivity(p) != null;
+        p.recycle();
+        return isUidPresent;
     }
 
     ActivityRecord topRunningActivityWithStartingWindowLocked() {
-        if (mStack != null) {
-            for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = getChildAt(activityNdx);
-                if (r.mStartingWindowState != STARTING_WINDOW_SHOWN
-                        || r.finishing || !r.okToShowLocked()) {
-                    continue;
-                }
-                return r;
-            }
+        if (getParent() == null) {
+            return null;
         }
-        return null;
+        return getActivity((r) -> r.mStartingWindowState == STARTING_WINDOW_SHOWN
+                && r.canBeTopRunning());
     }
 
     /**
      * Return the number of running activities, and the number of non-finishing/initializing
      * activities in the provided {@param reportOut} respectively.
      */
-    void getNumRunningActivities(TaskActivitiesReport reportOut) {
+    private void getNumRunningActivities(TaskActivitiesReport reportOut) {
         reportOut.reset();
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final ActivityRecord r = getChildAt(i);
-            if (r.finishing) {
-                continue;
-            }
-
-            reportOut.base = r;
-
-            // Increment the total number of non-finishing activities
-            reportOut.numActivities++;
-
-            if (reportOut.top == null || (reportOut.top.isState(ActivityState.INITIALIZING))) {
-                reportOut.top = r;
-                // Reset the number of running activities until we hit the first non-initializing
-                // activity
-                reportOut.numRunning = 0;
-            }
-            if (r.attachedToProcess()) {
-                // Increment the number of actually running activities
-                reportOut.numRunning++;
-            }
-        }
-    }
-
-    boolean okToShowLocked() {
-        // NOTE: If {@link Task#topRunningActivity} return is not null then it is
-        // okay to show the activity when locked.
-        return mAtmService.mStackSupervisor.isCurrentProfileLocked(mUserId)
-                || topRunningActivityLocked() != null;
+        forAllActivities(reportOut);
     }
 
     /**
@@ -1212,10 +1183,11 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     @Override
-    void addChild(ActivityRecord r, int index) {
+    void addChild(WindowContainer child, int index) {
         // If this task had any child before we added this one.
         boolean hadChild = hasChild();
 
+        final ActivityRecord r = (ActivityRecord) child;
         index = getAdjustedAddPosition(r, index);
         super.addChild(r, index);
 
@@ -1244,9 +1216,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         }
 
         updateEffectiveIntent();
-        if (r.isPersistable()) {
-            mAtmService.notifyTaskPersisterLocked(this, false);
-        }
 
         // Make sure the list of display UID whitelists is updated
         // now that this record is in a new task.
@@ -1258,16 +1227,13 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     @Override
-    void removeChild(ActivityRecord r) {
+    void removeChild(WindowContainer r) {
         if (!mChildren.contains(r)) {
             Slog.e(TAG, "removeChild: r=" + r + " not found in t=" + this);
             return;
         }
 
         super.removeChild(r);
-        if (r.isPersistable()) {
-            mAtmService.notifyTaskPersisterLocked(this, false);
-        }
 
         if (inPinnedWindowingMode()) {
             // We normally notify listeners of task stack changes on pause, however pinned stack
@@ -1283,7 +1249,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             // The following block can be executed multiple times if there is more than one overlay.
             // {@link ActivityStackSupervisor#removeTaskByIdLocked} handles this by reverse lookup
             // of the task by id and exiting early if not found.
-            if (onlyHasTaskOverlayActivities(false /* excludingFinishing */)) {
+            if (onlyHasTaskOverlayActivities(true /*includeFinishing*/)) {
                 // When destroying a task, tell the supervisor to remove it so that any activity it
                 // has can be cleaned up correctly. This is currently the only place where we remove
                 // a task with the DESTROYING mode, so instead of passing the onlyHasTaskOverlays
@@ -1305,25 +1271,20 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     /**
      * @return whether or not there are ONLY task overlay activities in the stack.
-     *         If {@param excludeFinishing} is set, then ignore finishing activities in the check.
-     *         If there are no task overlay activities, this call returns false.
+     *         If {@param includeFinishing} is set, then don't ignore finishing activities in the
+     *         check. If there are no task overlay activities, this call returns false.
      */
-    boolean onlyHasTaskOverlayActivities(boolean excludeFinishing) {
-        int count = 0;
-        for (int i = getChildCount() - 1; i >= 0; i--) {
-            final ActivityRecord r = getChildAt(i);
-            if (excludeFinishing && r.finishing) {
-                continue;
-            }
-            if (!r.mTaskOverlay) {
-                return false;
-            }
-            count++;
+    boolean onlyHasTaskOverlayActivities(boolean includeFinishing) {
+        if (getChildCount() == 0) {
+            return false;
         }
-        return count > 0;
+        if (includeFinishing) {
+            return getActivity((r) -> r.mTaskOverlay) != null;
+        }
+        return getActivity((r) -> !r.finishing && r.mTaskOverlay) != null;
     }
 
-    boolean autoRemoveFromRecents() {
+    private boolean autoRemoveFromRecents() {
         // We will automatically remove the task either if it has explicitly asked for
         // this, or it is empty and has never contained an activity that got shown to
         // the user.
@@ -1335,24 +1296,21 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
      * task starting at a specified index.
      */
     private void performClearTaskAtIndexLocked(String reason) {
-        int numActivities = getChildCount();
-        for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-            final ActivityRecord r = getChildAt(activityNdx);
-            if (r.finishing) {
-                continue;
-            }
-            if (mStack == null) {
+        // Broken down into to cases to avoid object create due to capturing mStack.
+        if (mStack == null) {
+            forAllActivities((r) -> {
+                if (r.finishing) return;
                 // Task was restored from persistent storage.
                 r.takeFromHistory();
                 removeChild(r);
-                --activityNdx;
-                --numActivities;
-            } else if (r.finishIfPossible(Activity.RESULT_CANCELED, null /* resultData */, reason,
-                    false /* oomAdj */)
-                    == FINISH_RESULT_REMOVED) {
-                --activityNdx;
-                --numActivities;
-            }
+            });
+        } else {
+            forAllActivities((r) -> {
+                if (r.finishing) return;
+                // TODO: figure-out how to avoid object creation due to capture of reason variable.
+                r.finishIfPossible(Activity.RESULT_CANCELED, null /* resultData */, reason,
+                        false /* oomAdj */);
+            });
         }
     }
 
@@ -1383,50 +1341,43 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
      * @return Returns the old activity that should be continued to be used,
      * or {@code null} if none was found.
      */
-    final ActivityRecord performClearTaskLocked(ActivityRecord newR, int launchFlags) {
-        int numActivities = getChildCount();
-        for (int activityNdx = numActivities - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord r = getChildAt(activityNdx);
-            if (r.finishing) {
-                continue;
-            }
-            if (r.mActivityComponent.equals(newR.mActivityComponent)) {
-                // Here it is!  Now finish everything in front...
-                final ActivityRecord ret = r;
+    private ActivityRecord performClearTaskLocked(ActivityRecord newR, int launchFlags) {
+        final ActivityRecord r = findActivityInHistory(newR.mActivityComponent);
+        if (r == null) return null;
 
-                for (++activityNdx; activityNdx < numActivities; ++activityNdx) {
-                    r = getChildAt(activityNdx);
-                    if (r.finishing) {
-                        continue;
-                    }
-                    ActivityOptions opts = r.takeOptionsLocked(false /* fromClient */);
-                    if (opts != null) {
-                        ret.updateOptionsLocked(opts);
-                    }
-                    if (r.finishIfPossible("clear-task-stack", false /* oomAdj */)
-                            == FINISH_RESULT_REMOVED) {
-                        --activityNdx;
-                        --numActivities;
-                    }
-                }
+        final PooledFunction f = PooledLambda.obtainFunction(Task::finishActivityAbove,
+                PooledLambda.__(ActivityRecord.class), r);
+        forAllActivities(f);
+        f.recycle();
 
-                // Finally, if this is a normal launch mode (that is, not
-                // expecting onNewIntent()), then we will finish the current
-                // instance of the activity so a new fresh one can be started.
-                if (ret.launchMode == ActivityInfo.LAUNCH_MULTIPLE
-                        && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0
-                        && !ActivityStarter.isDocumentLaunchesIntoExisting(launchFlags)) {
-                    if (!ret.finishing) {
-                        ret.finishIfPossible("clear-task-top", false /* oomAdj */);
-                        return null;
-                    }
-                }
-
-                return ret;
+        // Finally, if this is a normal launch mode (that is, not expecting onNewIntent()), then we
+        // will finish the current instance of the activity so a new fresh one can be started.
+        if (r.launchMode == ActivityInfo.LAUNCH_MULTIPLE
+                && (launchFlags & Intent.FLAG_ACTIVITY_SINGLE_TOP) == 0
+                && !ActivityStarter.isDocumentLaunchesIntoExisting(launchFlags)) {
+            if (!r.finishing) {
+                r.finishIfPossible("clear-task-top", false /* oomAdj */);
+                return null;
             }
         }
 
-        return null;
+        return r;
+    }
+
+    private static boolean finishActivityAbove(ActivityRecord r, ActivityRecord boundaryActivity) {
+        // Stop operation once we reach the boundary activity.
+        if (r == boundaryActivity) return true;
+
+        if (!r.finishing) {
+            final ActivityOptions opts = r.takeOptionsLocked(false /* fromClient */);
+            if (opts != null) {
+                // TODO: Why is this updating the boundary activity vs. the current activity???
+                boundaryActivity.updateOptionsLocked(opts);
+            }
+            r.finishIfPossible("clear-task-stack", false /* oomAdj */);
+        }
+
+        return false;
     }
 
     void removeTaskActivitiesLocked(String reason) {
@@ -1537,140 +1488,83 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
      * Find the activity in the history stack within the given task.  Returns
      * the index within the history at which it's found, or < 0 if not found.
      */
-    final ActivityRecord findActivityInHistoryLocked(ActivityRecord r) {
-        final ComponentName realActivity = r.mActivityComponent;
-        for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord candidate = getChildAt(activityNdx);
-            if (candidate.finishing) {
-                continue;
-            }
-            if (candidate.mActivityComponent.equals(realActivity)) {
-                return candidate;
-            }
-        }
-        return null;
+    ActivityRecord findActivityInHistory(ComponentName component) {
+        final PooledPredicate p = PooledLambda.obtainPredicate(Task::matchesActivityInHistory,
+                PooledLambda.__(ActivityRecord.class), component);
+        final ActivityRecord r = getActivity(p);
+        p.recycle();
+        return r;
+    }
+
+    private static boolean matchesActivityInHistory(
+            ActivityRecord r, ComponentName activityComponent) {
+        return !r.finishing && r.mActivityComponent.equals(activityComponent);
     }
 
     /** Updates the last task description values. */
     void updateTaskDescription() {
-        // TODO(AM refactor): Cleanup to use findRootIndex()
-        // Traverse upwards looking for any break between main task activities and
-        // utility activities.
-        int activityNdx;
-        final int numActivities = getChildCount();
-        final boolean relinquish = numActivities != 0
-                && (getChildAt(0).info.flags & FLAG_RELINQUISH_TASK_IDENTITY) != 0;
-        for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities; ++activityNdx) {
-            final ActivityRecord r = getChildAt(activityNdx);
-            if (relinquish && (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
-                // This will be the top activity for determining taskDescription. Pre-inc to
-                // overcome initial decrement below.
-                ++activityNdx;
-                break;
-            }
-            if (r.intent != null
-                    && (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
-                break;
-            }
+        final ActivityRecord root = getRootActivity(true);
+        if (root == null) return;
+
+        final TaskDescription taskDescription = new TaskDescription();
+        final PooledFunction f = PooledLambda.obtainFunction(
+                Task::setTaskDescriptionFromActivityAboveRoot,
+                PooledLambda.__(ActivityRecord.class), root, taskDescription);
+        forAllActivities(f);
+        f.recycle();
+        taskDescription.setResizeMode(mResizeMode);
+        taskDescription.setMinWidth(mMinWidth);
+        taskDescription.setMinHeight(mMinHeight);
+        setTaskDescription(taskDescription);
+        // Update the task affiliation color if we are the parent of the group
+        if (mTaskId == mAffiliatedTaskId) {
+            mAffiliatedTaskColor = taskDescription.getPrimaryColor();
         }
-        if (activityNdx > 0) {
-            // Traverse downwards starting below break looking for set label, icon.
-            // Note that if there are activities in the task but none of them set the
-            // recent activity values, then we do not fall back to the last set
-            // values in the Task.
-            String label = null;
-            String iconFilename = null;
-            int iconResource = -1;
-            int colorPrimary = 0;
-            int colorBackground = 0;
-            int statusBarColor = 0;
-            int navigationBarColor = 0;
-            boolean statusBarContrastWhenTransparent = false;
-            boolean navigationBarContrastWhenTransparent = false;
-            boolean topActivity = true;
-            for (--activityNdx; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = getChildAt(activityNdx);
-                if (r.mTaskOverlay) {
-                    continue;
-                }
-                if (r.taskDescription != null) {
-                    if (label == null) {
-                        label = r.taskDescription.getLabel();
-                    }
-                    if (iconResource == -1) {
-                        iconResource = r.taskDescription.getIconResource();
-                    }
-                    if (iconFilename == null) {
-                        iconFilename = r.taskDescription.getIconFilename();
-                    }
-                    if (colorPrimary == 0) {
-                        colorPrimary = r.taskDescription.getPrimaryColor();
-                    }
-                    if (topActivity) {
-                        colorBackground = r.taskDescription.getBackgroundColor();
-                        statusBarColor = r.taskDescription.getStatusBarColor();
-                        navigationBarColor = r.taskDescription.getNavigationBarColor();
-                        statusBarContrastWhenTransparent =
-                                r.taskDescription.getEnsureStatusBarContrastWhenTransparent();
-                        navigationBarContrastWhenTransparent =
-                                r.taskDescription.getEnsureNavigationBarContrastWhenTransparent();
-                    }
-                }
-                topActivity = false;
-            }
-            final TaskDescription taskDescription = new TaskDescription(label, null, iconResource,
-                    iconFilename, colorPrimary, colorBackground, statusBarColor, navigationBarColor,
-                    statusBarContrastWhenTransparent, navigationBarContrastWhenTransparent,
-                    mResizeMode, mMinWidth, mMinHeight);
-            setTaskDescription(taskDescription);
-            // Update the task affiliation color if we are the parent of the group
-            if (mTaskId == mAffiliatedTaskId) {
-                mAffiliatedTaskColor = taskDescription.getPrimaryColor();
-            }
-            mAtmService.getTaskChangeNotificationController().notifyTaskDescriptionChanged(
-                    getTaskInfo());
-        }
+        mAtmService.getTaskChangeNotificationController().notifyTaskDescriptionChanged(
+                getTaskInfo());
     }
 
-    /**
-     * Find the index of the root activity in the task. It will be the first activity from the
-     * bottom that is not finishing.
-     *
-     * @param effectiveRoot Flag indicating whether 'effective root' should be returned - an
-     *                      activity that defines the task identity (its base intent). It's the
-     *                      first one that does not have
-     *                      {@link ActivityInfo#FLAG_RELINQUISH_TASK_IDENTITY}.
-     * @return index of the 'root' or 'effective' root in the list of activities, -1 if no eligible
-     *         activity was found.
-     */
-    int findRootIndex(boolean effectiveRoot) {
-        int effectiveNdx = -1;
-        final int topActivityNdx = getChildCount() - 1;
-        for (int activityNdx = 0; activityNdx <= topActivityNdx; ++activityNdx) {
-            final ActivityRecord r = getChildAt(activityNdx);
-            if (r.finishing) {
-                continue;
+    private static boolean setTaskDescriptionFromActivityAboveRoot(
+            ActivityRecord r, ActivityRecord root, TaskDescription td) {
+        if (!r.mTaskOverlay && r.taskDescription != null) {
+            final TaskDescription atd = r.taskDescription;
+            if (td.getLabel() == null) {
+                td.setLabel(atd.getLabel());
             }
-            effectiveNdx = activityNdx;
-            if (!effectiveRoot || (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
-                break;
+            if (td.getIconResource() == 0) {
+                td.setIcon(atd.getIconResource());
             }
+            if (td.getIconFilename() == null) {
+                td.setIconFilename(atd.getIconFilename());
+            }
+            if (td.getPrimaryColor() == 0) {
+                td.setPrimaryColor(atd.getPrimaryColor());
+            }
+            if (td.getBackgroundColor() == 0) {
+                td.setBackgroundColor(atd.getBackgroundColor());
+            }
+            if (td.getStatusBarColor() == 0) {
+                td.setStatusBarColor(atd.getStatusBarColor());
+                td.setEnsureStatusBarContrastWhenTransparent(
+                        atd.getEnsureStatusBarContrastWhenTransparent());
+            }
+            if (td.getNavigationBarColor() == 0) {
+                td.setNavigationBarColor(atd.getNavigationBarColor());
+                td.setEnsureNavigationBarContrastWhenTransparent(
+                        atd.getEnsureNavigationBarContrastWhenTransparent());
+            }
+
         }
-        return effectiveNdx;
+
+        // End search once we get to root.
+        return r == root;
     }
 
     // TODO (AM refactor): Invoke automatically when there is a change in children
     @VisibleForTesting
     void updateEffectiveIntent() {
-        int effectiveRootIndex = findRootIndex(true /* effectiveRoot */);
-        if (effectiveRootIndex == -1) {
-            // All activities in the task are either finishing or relinquish task identity.
-            // But we still want to update the intent, so let's use the bottom activity.
-            effectiveRootIndex = 0;
-        }
-        final ActivityRecord r = getChildAt(effectiveRootIndex);
-        setIntent(r);
-
+        final ActivityRecord root = getRootActivity(true /*setToBottomIfNone*/);
+        setIntent(root);
         // Update the task description when the activities change
         updateTaskDescription();
     }
@@ -2220,15 +2114,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         return mLastNonFullscreenBounds;
     }
 
-    void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
-        for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
-            final ActivityRecord r = getChildAt(activityNdx);
-            if (r.mVisibleRequested) {
-                r.showStartingWindow(null /* prev */, false /* newTask */, taskSwitch);
-            }
-        }
-    }
-
     void setRootProcess(WindowProcessController proc) {
         clearRootProcess();
         if (intent != null
@@ -2245,12 +2130,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         }
     }
 
-    void clearAllPendingOptions() {
-        for (int i = getChildCount() - 1; i >= 0; i--) {
-            getChildAt(i).clearOptionsLocked(false /* withAbort */);
-        }
-    }
-
     @Override
     DisplayContent getDisplayContent() {
         return getTaskStack() != null ? getTaskStack().getDisplayContent() : null;
@@ -2260,20 +2139,14 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         return (ActivityStack) getParent();
     }
 
+    // TODO(task-hierarchy): Needs to take a generic WindowManager when task contains other tasks.
     int getAdjustedAddPosition(ActivityRecord r, int suggestedPosition) {
         int maxPosition = mChildren.size();
         if (!r.mTaskOverlay) {
             // We want to place all non-overlay activities below overlays.
-            while (maxPosition > 0) {
-                final ActivityRecord current = mChildren.get(maxPosition - 1);
-                if (current.mTaskOverlay) {
-                    --maxPosition;
-                    continue;
-                }
-                break;
-            }
-            if (maxPosition < 0) {
-                maxPosition = 0;
+            final ActivityRecord bottomMostOverlay = getActivity((ar) -> ar.mTaskOverlay, false);
+            if (bottomMostOverlay != null) {
+                maxPosition = Math.max(mChildren.indexOf(bottomMostOverlay) - 1, 0);
             }
         }
 
@@ -2281,18 +2154,13 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     @Override
-    void positionChildAt(int position, ActivityRecord child, boolean includingParents) {
-        position = getAdjustedAddPosition(child, position);
+    void positionChildAt(int position, WindowContainer child, boolean includingParents) {
+        position = getAdjustedAddPosition((ActivityRecord) child, position);
         super.positionChildAt(position, child, includingParents);
     }
 
     private boolean hasWindowsAlive() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            if (mChildren.get(i).hasWindowsAlive()) {
-                return true;
-            }
-        }
-        return false;
+        return getActivity(ActivityRecord::hasWindowsAlive) != null;
     }
 
     @VisibleForTesting
@@ -2522,26 +2390,21 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
      * @param out Rect containing the max visible bounds.
      * @return true if the task has some visible app windows; false otherwise.
      */
-    private boolean getMaxVisibleBounds(Rect out) {
-        boolean foundTop = false;
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final ActivityRecord token = mChildren.get(i);
-            // skip hidden (or about to hide) apps
-            if (token.mIsExiting || !token.isClientVisible() || !token.mVisibleRequested) {
-                continue;
-            }
-            final WindowState win = token.findMainWindow();
-            if (win == null) {
-                continue;
-            }
-            if (!foundTop) {
-                foundTop = true;
-                out.setEmpty();
-            }
-
-            win.getMaxVisibleBounds(out);
+    private static void getMaxVisibleBounds(ActivityRecord token, Rect out, boolean[] foundTop) {
+        // skip hidden (or about to hide) apps
+        if (token.mIsExiting || !token.isClientVisible() || !token.mVisibleRequested) {
+            return;
         }
-        return foundTop;
+        final WindowState win = token.findMainWindow();
+        if (win == null) {
+            return;
+        }
+        if (!foundTop[0]) {
+            foundTop[0] = true;
+            out.setEmpty();
+        }
+
+        win.getMaxVisibleBounds(out);
     }
 
     /** Bounds of the task to be used for dimming, as well as touch related tests. */
@@ -2551,8 +2414,14 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         // a DimLayer anyway if we weren't visible.
         final boolean dockedResizing = displayContent != null
                 && displayContent.mDividerControllerLocked.isResizing();
-        if (inFreeformWindowingMode() && getMaxVisibleBounds(out)) {
-            return;
+        if (inFreeformWindowingMode()) {
+            boolean[] foundTop = { false };
+            final PooledConsumer c = PooledLambda.obtainConsumer(Task::getMaxVisibleBounds,
+                    PooledLambda.__(ActivityRecord.class), out, foundTop);
+            c.recycle();
+            if (foundTop[0]) {
+                return;
+            }
         }
 
         if (!matchParentBounds()) {
@@ -2658,8 +2527,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     boolean showForAllUsers() {
-        final int tokensCount = mChildren.size();
-        return (tokensCount != 0) && mChildren.get(tokensCount - 1).mShowForAllUsers;
+        if (mChildren.isEmpty()) return false;
+        final ActivityRecord r = getTopNonFinishingActivity();
+        return r != null && r.mShowForAllUsers;
     }
 
     /**
@@ -2733,24 +2603,17 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     ActivityRecord getTopFullscreenActivity() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final ActivityRecord activity = mChildren.get(i);
-            final WindowState win = activity.findMainWindow();
-            if (win != null && win.mAttrs.isFullscreen()) {
-                return activity;
-            }
-        }
-        return null;
+        return getActivity((r) -> {
+            final WindowState win = r.findMainWindow();
+            return (win != null && win.mAttrs.isFullscreen());
+        });
     }
 
     ActivityRecord getTopVisibleActivity() {
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final ActivityRecord activity = mChildren.get(i);
-            if (!activity.mIsExiting && activity.isClientVisible() && activity.mVisibleRequested) {
-                return activity;
-            }
-        }
-        return null;
+        return getActivity((r) -> {
+            // skip hidden (or about to hide) apps
+            return !r.mIsExiting && r.isClientVisible() && r.mVisibleRequested;
+        });
     }
 
     void positionChildAtTop(ActivityRecord child) {
@@ -2804,6 +2667,13 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     @Override
     boolean forAllTasks(ToBooleanFunction<Task> callback) {
         return callback.apply(this);
+    }
+
+    @Override
+    Task getTask(Predicate<Task> callback, boolean traverseTopToBottom) {
+        // I'm a task!
+        // TODO(task-hierarchy): Change to traverse children when tasks can contain other tasks.
+        return callback.test(this) ? this : null;
     }
 
     /**
@@ -2861,10 +2731,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         final long token = proto.start(fieldId);
         super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
         proto.write(TaskProto.ID, mTaskId);
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final ActivityRecord activity = mChildren.get(i);
-            activity.writeToProto(proto, APP_WINDOW_TOKENS, logLevel);
-        }
+        forAllActivities((r) -> {
+            r.writeToProto(proto, APP_WINDOW_TOKENS, logLevel);
+        });
         proto.write(FILLS_PARENT, matchParentBounds());
         getBounds().writeToProto(proto, TaskProto.BOUNDS);
         mOverrideDisplayedBounds.writeToProto(proto, DISPLAYED_BOUNDS);
@@ -2888,11 +2757,11 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         final String triplePrefix = doublePrefix + "  ";
         final String quadruplePrefix = triplePrefix + "  ";
 
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final ActivityRecord activity = mChildren.get(i);
-            pw.println(triplePrefix + "Activity #" + i + " " + activity);
-            activity.dump(pw, quadruplePrefix, dumpAll);
-        }
+        int[] index = { 0 };
+        forAllActivities((r) -> {
+            pw.println(triplePrefix + "Activity #" + index[0]++ + " " + r);
+            r.dump(pw, quadruplePrefix, dumpAll);
+        });
     }
 
     /**
@@ -3071,10 +2940,10 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         final long token = proto.start(fieldId);
         writeToProtoInnerTaskOnly(proto, TASK, logLevel);
         proto.write(com.android.server.am.TaskRecordProto.ID, mTaskId);
-        for (int i = getChildCount() - 1; i >= 0; i--) {
-            final ActivityRecord activity = getChildAt(i);
-            activity.writeToProto(proto, ACTIVITIES);
-        }
+
+        forAllActivities((r) -> {
+            r.writeToProto(proto, ACTIVITIES);
+        });
         proto.write(STACK_ID, getStackId());
         if (mLastNonFullscreenBounds != null) {
             mLastNonFullscreenBounds.writeToProto(proto, LAST_NON_FULLSCREEN_BOUNDS);
@@ -3100,7 +2969,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     /** @see #getNumRunningActivities(TaskActivitiesReport) */
-    static class TaskActivitiesReport {
+    static class TaskActivitiesReport implements Consumer<ActivityRecord> {
         int numRunning;
         int numActivities;
         ActivityRecord top;
@@ -3110,12 +2979,35 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             numRunning = numActivities = 0;
             top = base = null;
         }
+
+        @Override
+        public void accept(ActivityRecord r) {
+            if (r.finishing) {
+                return;
+            }
+
+            base = r;
+
+            // Increment the total number of non-finishing activities
+            numActivities++;
+
+            if (top == null || (top.isState(ActivityState.INITIALIZING))) {
+                top = r;
+                // Reset the number of running activities until we hit the first non-initializing
+                // activity
+                numRunning = 0;
+            }
+            if (r.attachedToProcess()) {
+                // Increment the number of actually running activities
+                numRunning++;
+            }
+        }
     }
 
     /**
      * Saves this {@link Task} to XML using given serializer.
      */
-    void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
+    void saveToXml(XmlSerializer out) throws Exception {
         if (DEBUG_RECENTS) Slog.i(TAG_RECENTS, "Saving task=" + this);
 
         out.attribute(null, ATTR_TASKID, String.valueOf(mTaskId));
@@ -3181,19 +3073,33 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             out.endTag(null, TAG_INTENT);
         }
 
-        final int numActivities = getChildCount();
-        for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-            final ActivityRecord r = getChildAt(activityNdx);
-            if (r.info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY || !r.isPersistable()
-                    || ((r.intent.getFlags() & FLAG_ACTIVITY_NEW_DOCUMENT
-                            | FLAG_ACTIVITY_RETAIN_IN_RECENTS) == FLAG_ACTIVITY_NEW_DOCUMENT)
-                    && activityNdx > 0) {
-                // Stop at first non-persistable or first break in task (CLEAR_WHEN_TASK_RESET).
-                break;
-            }
+        sTmpException = null;
+        final PooledFunction f = PooledLambda.obtainFunction(Task::saveActivityToXml,
+                PooledLambda.__(ActivityRecord.class), getBottomMostActivity(), out);
+        forAllActivities(f);
+        f.recycle();
+        if (sTmpException != null) {
+            throw sTmpException;
+        }
+    }
+
+    private static boolean saveActivityToXml(
+            ActivityRecord r, ActivityRecord first, XmlSerializer out) {
+        if (r.info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY || !r.isPersistable()
+                || ((r.intent.getFlags() & FLAG_ACTIVITY_NEW_DOCUMENT
+                | FLAG_ACTIVITY_RETAIN_IN_RECENTS) == FLAG_ACTIVITY_NEW_DOCUMENT)
+                && r != first) {
+            // Stop at first non-persistable or first break in task (CLEAR_WHEN_TASK_RESET).
+            return true;
+        }
+        try {
             out.startTag(null, TAG_ACTIVITY);
             r.saveToXml(out);
             out.endTag(null, TAG_ACTIVITY);
+            return false;
+        } catch (Exception e) {
+            sTmpException = e;
+            return true;
         }
     }
 
