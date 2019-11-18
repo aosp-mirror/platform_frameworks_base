@@ -1858,10 +1858,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Odstránil správca"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hej Google“.\n\n"<annotation id="url">"Ďalšie informácie"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Šetrič batérie predlžuje výdrž batérie:\n·zapnutím tmavého motívu;\n·vypnutím alebo obmedzením aktivity na pozadí, niektorých vizuálnych efektov a ďalších funkcií, ako napríklad „Hej Google“."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"S cieľom znížiť spotrebu dát bráni šetrič dát niektorým aplikáciám odosielať alebo prijímať dáta na pozadí. Aplikácia, ktorú práve používate, môže využívať dáta, ale možno to bude robiť menej často. Znamená to napríklad, že sa nezobrazia obrázky, kým na ne neklepnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Chcete zapnúť šetrič dát?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnúť"</string>

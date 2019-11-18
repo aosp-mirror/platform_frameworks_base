@@ -1082,7 +1082,7 @@
     <string name="delete" msgid="6098684844021697789">"मिटाएं"</string>
     <string name="copyUrl" msgid="2538211579596067402">"यूआरएल को कॉपी करें"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"लेख को चुनें"</string>
-    <string name="undo" msgid="7905788502491742328">"वापस लाएं"</string>
+    <string name="undo" msgid="7905788502491742328">"पहले जैसा करें"</string>
     <string name="redo" msgid="7759464876566803888">"फिर से करें"</string>
     <string name="autofill" msgid="3035779615680565188">"ऑटोमैटिक भरना"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"टेक्स्ट चुनें"</string>
@@ -1808,10 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपके व्यवस्थापक ने अपडेट किया है"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपके व्यवस्थापक ने हटा दिया है"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ठीक है"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"बैटरी लाइफ़ बढ़ाने के लिए बैटरी सेवर:\n·गहरे रंग वाली थीम चालू करता है\n·बैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और \"Hey Google\" जैसी दूसरी सुविधाएं इस्तेमाल करने से रोकता है या बंद करता है\n\n"<annotation id="url">"ज़्यादा जानें"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"बैटरी लाइफ़ बढ़ाने के लिए, बैटरी सेवर:\n गहरे रंग वाली थीम चालू करता है\nबैकग्राउंड की गतिविधि, कुछ विज़ुअल इफ़ेक्ट, और \"Hey Google\" जैसी दूसरी सुविधाएं इस्तेमाल करने से रोकता है या बंद करता है"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा खर्च, कम करने के लिए डेटा सेवर कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकता है. आप फ़िलहाल जिस ऐप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा तक पहुंच सकता है लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी जब तक कि आप उन्हें टैप नहीं करते."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचाने की सेटिंग चालू करें?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करें"</string>
@@ -1927,7 +1925,7 @@
     <string name="app_category_image" msgid="4867854544519846048">"फ़ोटो और तस्वीरें"</string>
     <string name="app_category_social" msgid="5842783057834965912">"सामाजिक और संचार"</string>
     <string name="app_category_news" msgid="7496506240743986873">"समाचार और पत्रिकाएं"</string>
-    <string name="app_category_maps" msgid="5878491404538024367">"मैप और मार्गदर्शक"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Maps और नेविगेशन ऐप्लिकेशन"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"उत्पादकता"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"डिवाइस में जगह"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB डीबग करना"</string>

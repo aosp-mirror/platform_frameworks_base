@@ -1808,10 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"تأیید"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n «طرح زمینه تیره» را روشن می‌کند\n فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند\n\n"<annotation id="url">"بیشتر بدانید"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"‏برای افزایش عمر باتری، «بهینه‌سازی باتری»:\n «طرح زمینه تیره» را روشن می‌کند\n فعالیت پس‌زمینه، برخی جلوه‌های بصری، و دیگر ویژگی‌ها مانند «Ok Google» را خاموش یا محدود می‌کند"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>

@@ -70,7 +70,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Hiru hizlaritako deiak"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Nahigabeko dei gogaikarriak ukatzea"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Deitzailearen zenbakia ematea"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Ez molestatu"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Ez molestatzeko modua"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Deien identifikazio-zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenekin"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Deien identifikazio-zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenik gabe"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Deien identifikazio-zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenekin"</string>
@@ -648,8 +648,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Operadore baten mezularitza-zerbitzuaren goi-mailako interfazeari lotzea baimentzen die erabiltzaileei. Aplikazio normalek ez lukete inoiz beharko."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"lotu operadorearen zerbitzuei"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Operadorearen zerbitzuei lotzea baimentzen die titularrei. Aplikazio normalek ez dute baimen hau behar."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"atzitu \"Ez molestatu\" egoera"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"\"Ez molestatu\" konfigurazioa irakurtzeko eta bertan idazteko baimena ematen die aplikazioei."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"atzitu ez molestatzeko modua"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ez molestatzeko moduaren konfigurazioa irakurtzeko eta bertan idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"hasi ikusteko baimena erabiltzen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Aplikazioaren baimena erabiltzen hasteko baimena ematen die titularrei. Aplikazio normalek ez lukete beharko."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ezarri pasahitzen arauak"</string>
@@ -1809,10 +1809,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Ados"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Bateriaren iraupena luzatzeko, erabili Bateria-aurrezlea:\n·Gai iluna aktibatzen du\n Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\"\n\n"<annotation id="url">"Lortu informazio gehiago"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Bateriaren iraupena luzatzeko, erabili Bateria-aurrezlea:\n·Gai iluna aktibatzen du\n Desaktibatu edo murriztu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual eta beste eginbide batzuk, hala nola \"Ok Google\""</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzitu egin ahal izango ditu datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>
@@ -1851,10 +1849,10 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> arte"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> arte (hurrengo alarma)"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"Zuk desaktibatu arte"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"\"Ez molestatu\" desaktibatzen duzun arte"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Ez molestatzeko modua desaktibatzen duzun arte"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Tolestu"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ez molestatu"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ez molestatzeko modua"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Jarduerarik gabeko denbora"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Lanegunetako gaua"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Asteburua"</string>
@@ -1992,10 +1990,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Dar-dar egingo du deiak eta jakinarazpenak jasotzean"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Ez da joko tonurik deiak eta jakinarazpenak jasotzean"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Sistema-aldaketak"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ez molestatu"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Berria: \"Ez molestatu\" modua jakinarazpenak ezkutatzen ari da"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ez molestatzeko modua"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Berria: Ez molestatzeko modua jakinarazpenak ezkutatzen ari da"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Sakatu informazio gehiago lortzeko eta portaera aldatzeko."</string>
-    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Ez molestatu\" modua aldatu da"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Ez molestatzeko modua aldatu da"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Sakatu zer dagoen blokeatuta ikusteko."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Ezarpenak"</string>

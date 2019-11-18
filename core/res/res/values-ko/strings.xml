@@ -1808,10 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"관리자에 의해 삭제되었습니다."</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"확인"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다.\n\n"<annotation id="url">"자세히 알아보기"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"배터리 수명을 늘리기 위해 절전 모드가 다음과 같이 작동합니다.\n·어두운 테마를 사용 설정합니다.\n·백그라운드 활동, 일부 시각 효과 및 \'Hey Google\'과 같은 기타 기능을 사용 중지하거나 제한합니다."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 절약 모드를 사용할까요?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"사용 설정"</string>

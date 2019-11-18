@@ -561,7 +561,7 @@
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Zezwala na aktywowanie przez aplikację metody dodawania i usuwania szablonów twarzy."</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"używanie sprzętu do rozpoznawania twarzy"</string>
     <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Zezwala na używanie przez aplikację sprzętu do rozpoznawania twarzy w uwierzytelniania"</string>
-    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Rozpoznanie twarzy"</string>
+    <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Rozpoznawanie twarzy"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Zarejestruj swoją twarz ponownie"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"Aby poprawić rozpoznawanie, ponownie zarejestruj swoją twarz"</string>
     <string name="face_acquired_insufficient" msgid="2767330364802375742">"Nie udało się zarejestrować danych twarzy. Spróbuj ponownie."</string>
@@ -590,12 +590,12 @@
     <string name="face_error_timeout" msgid="981512090365729465">"Spróbuj rozpoznania twarzy ponownie."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Nie można przechowywać nowych danych twarzy. Usuń stare."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Analiza twarzy została anulowana."</string>
-    <string name="face_error_user_canceled" msgid="5317030072349668946">"Użytkownik anulował rozpoznanie twarzy."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Użytkownik anulował rozpoznawanie twarzy."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Zbyt wiele prób. Spróbuj ponownie później."</string>
-    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Zbyt wiele prób. Rozpoznanie twarzy zostało wyłączone."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Zbyt wiele prób. Rozpoznawanie twarzy zostało wyłączone."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Nie można zweryfikować twarzy. Spróbuj ponownie."</string>
-    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Rozpoznanie twarzy nie jest skonfigurowane."</string>
-    <string name="face_error_hw_not_present" msgid="8302690289757559738">"To urządzenie nie obsługuje rozpoznania twarzy."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"Rozpoznawanie twarzy nie jest skonfigurowane."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"To urządzenie nie obsługuje rozpoznawania twarzy."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Twarz <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -894,7 +894,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Rozwiń obszar odblokowania."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Odblokowanie przesunięciem."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Odblokowanie wzorem."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Rozpoznanie twarzy"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Rozpoznawanie twarzy"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Odblokowanie kodem PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Odblokowanie kodu PIN karty SIM."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Odblokowanie kodu PUK karty SIM."</string>
@@ -927,7 +927,7 @@
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
-    <string name="autofill_province" msgid="2231806553863422300">"Województwo"</string>
+    <string name="autofill_province" msgid="2231806553863422300">"Region"</string>
     <string name="autofill_postal_code" msgid="4696430407689377108">"Kod pocztowy"</string>
     <string name="autofill_state" msgid="6988894195520044613">"Stan"</string>
     <string name="autofill_zip_code" msgid="8697544592627322946">"Kod pocztowy"</string>
@@ -1858,10 +1858,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Usunięty przez administratora"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"OK"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny, \nwyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”.\n\n"<annotation id="url">"Więcej informacji"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Aby wydłużyć czas pracy na baterii, Oszczędzanie baterii:\n włącza tryb ciemny,\n wyłącza lub ogranicza aktywność w tle, niektóre efekty wizualne oraz inne funkcje, np. „OK Google”."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>

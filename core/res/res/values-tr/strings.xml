@@ -1808,10 +1808,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Yöneticiniz tarafından güncellendi"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Yöneticiniz tarafından silindi"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"Tamam"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"Pil ömrünü uzatmak için Pil Tasarrufu:\n·Koyu temayı açar\n·Arka plan etkinliğini, bazı görsel efektleri ve \"Hey Google\" gibi diğer özellikleri kapatır veya kısıtlar\n\n"<annotation id="url">"Daha fazla bilgi"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"Pil ömrünü uzatmak için Pil Tasarrufu:\n·Koyu temayı açar\n·Arka plan etkinliğini, bazı görsel efektleri ve \"Hey Google\" gibi diğer özellikleri kapatır veya kısıtlar"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Veri kullanımını azaltmaya yardımcı olması için Veri Tasarrufu, bazı uygulamaların arka planda veri göndermesini veya almasını engeller. Şu anda kullandığınız bir uygulama veri bağlantısına erişebilir, ancak bunu daha seyrek yapabilir. Bu durumda örneğin, siz resimlere dokunmadan resimler görüntülenmez."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Veri Tasarrufu açılsın mı?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aç"</string>

@@ -1378,9 +1378,9 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"ఇతర యాప్‌ల ఎగువన ప్రదర్శన"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ఇతర అనువర్తనాలలో చూపబడుతోంది"</string>
-    <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి నొక్కి, దీన్ని ఆఫ్ చేయండి."</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> ఇతర యాప్‌లలో చూపబడుతోంది"</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ఇతర యాప్‌లలో చూపబడుతోంది"</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి ట్యాప్ చేసి, దీన్ని ఆఫ్ చేయండి."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ఆఫ్ చేయి"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g>ని తనిఖీ చేస్తోంది…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"ప్రస్తుత కంటెంట్ సమీక్షించబడుతోంది"</string>
@@ -1809,10 +1809,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"మీ నిర్వాహకులు తొలగించారు"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"సరే"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్:\n ముదురు రంగు·థీమ్‌ను ఆన్ చేస్తుంది\n·నేపథ్య కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్ మరియు “Hey Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది\n\n"<annotation id="url">"మరింత తెలుసుకోండి"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి, బ్యాటరీ సేవర్:\n ముదురు రంగు·థీమ్‌ను ఆన్ చేస్తుంది\n·నేపథ్య కార్యకలాపం, కొన్ని విజువల్ ఎఫెక్ట్స్ మరియు “Hey Google” వంటి ఇతర ఫీచర్‌లను ఆపివేస్తుంది లేదా పరిమితం చేస్తుంది"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు. కానీ అలా అరుదుగా చేయవచ్చు. ఉదాహరణకు, మీరు చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ఆన్ చేయి"</string>
@@ -1928,7 +1926,7 @@
     <string name="app_category_image" msgid="4867854544519846048">"ఫోటోలు &amp; చిత్రాలు"</string>
     <string name="app_category_social" msgid="5842783057834965912">"సామాజికం &amp; కమ్యూనికేషన్"</string>
     <string name="app_category_news" msgid="7496506240743986873">"వార్తలు &amp; వార్తాపత్రికలు"</string>
-    <string name="app_category_maps" msgid="5878491404538024367">"మ్యాప్స్ &amp; నావిగేషన్"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Maps &amp; నావిగేషన్"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ఉత్పాదకత"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"పరికర నిల్వ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB డీబగ్గింగ్"</string>

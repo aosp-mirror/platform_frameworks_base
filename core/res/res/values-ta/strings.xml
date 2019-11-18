@@ -1380,7 +1380,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"பிற ஆப்ஸின் மேலே காட்டு"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> பிற ஆப்ஸின் மீது தோன்றுகிறது"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> பிற ஆப்ஸின் மீது தோன்றுகிறது"</string>
-    <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால், அமைப்புகளைத் திறந்து அதை முடக்க, தட்டவும்."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால் இங்கு தட்டி அமைப்புகளைத் திறந்து இதை முடக்கவும்."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ஆஃப் செய்"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g>ஐச் சரிபார்க்கிறது…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"தற்போதைய உள்ளடக்கத்தை மதிப்பாய்வு செய்கிறது"</string>
@@ -1809,10 +1809,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"சரி"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n·டார்க் தீமினை ஆன் செய்யும்\n·“Hey Google” போன்ற பிற அம்சங்கள், பின்னணி செயல்பாடுகள், சில விஷுவல் எஃபெக்ட்கள், ஆகியவற்றை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்\n\n"<annotation id="url">"மேலும் அறிக"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"பேட்டரி நிலையை நீட்டிப்பதற்காக, பேட்டரி சேமிப்பான்:\n·டார்க் தீமினை ஆன் செய்யும்\n·“Hey Google” போன்ற பிற அம்சங்கள், பின்னணி செயல்பாடுகள், சில விஷுவல் எஃபெக்ட்கள், ஆகியவற்றை ஆஃப் செய்யும் அல்லது கட்டுப்படுத்தும்"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா உபயோகத்தைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில ஆப்ஸை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் ஆப்ஸானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"இயக்கு"</string>

@@ -1380,7 +1380,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"અન્ય ઍપથી ઉપર બતાવો"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનોની ઉપર પ્રદર્શિત થઈ રહ્યું છે"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનો પર દેખાઈ છે"</string>
-    <string name="alert_windows_notification_message" msgid="8917232109522912560">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"બંધ કરો"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> તપાસી રહ્યાં છીએ…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"હાલના કન્ટેન્ટને રિવ્યૂ કરવું"</string>
@@ -1809,10 +1809,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"ઓકે"</string>
-    <!-- no translation found for battery_saver_description_with_learn_more (1002571337088673987) -->
-    <skip />
-    <!-- no translation found for battery_saver_description (2307555792915978653) -->
-    <skip />
+    <string name="battery_saver_description_with_learn_more" msgid="1002571337088673987">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n·ઘેરી થીમ ચાલુ કરે છે\n·બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “હેય Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે\n\n"<annotation id="url">"વધુ જાણો"</annotation></string>
+    <string name="battery_saver_description" msgid="2307555792915978653">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર:\n·ઘેરી થીમ ચાલુ કરે છે\n·બૅકગ્રાઉન્ડ પ્રવૃત્તિ, અમુક વિઝ્યુઅલ ઇફેક્ટ અને “હેય Google” જેવી અન્ય સુવિધાઓ બંધ અથવા પ્રતિબંધિત કરે છે"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપ્લિકેશનોને પૃષ્ઠભૂમિમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ્લિકેશન ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ચાલુ કરો"</string>
@@ -1928,7 +1926,7 @@
     <string name="app_category_image" msgid="4867854544519846048">"ફોટો અને છબીઓ"</string>
     <string name="app_category_social" msgid="5842783057834965912">"સામાજિક અને સંચાર"</string>
     <string name="app_category_news" msgid="7496506240743986873">"સમાચાર અને સામાયિકો"</string>
-    <string name="app_category_maps" msgid="5878491404538024367">"નકશા અને નેવિગેશન"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"Maps અને નેવિગેશન"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ઉત્પાદકતા"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ડિવાઇસ સ્ટૉરેજ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ડિબગિંગ"</string>
