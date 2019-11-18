@@ -44,13 +44,19 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.RemoteInput;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -69,6 +75,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -86,6 +93,7 @@ import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.FileDescriptor;
@@ -93,8 +101,10 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -138,6 +148,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
     private final NotificationGroupManager mNotificationGroupManager;
     private final Lazy<ShadeController> mShadeController;
+    private final RemoteInputUriController mRemoteInputUriController;
+    private Handler mHandler = new Handler() {};
 
     private BubbleData mBubbleData;
     @Nullable private BubbleStackView mStackView;
@@ -155,6 +167,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final StatusBarWindowController mStatusBarWindowController;
     private final ZenModeController mZenModeController;
     private StatusBarStateListener mStatusBarStateListener;
+    private final ScreenshotHelper mScreenshotHelper;
+
 
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private IStatusBarService mBarService;
@@ -192,6 +206,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /**
+     * Listener for handling bubble screenshot events.
+     */
+    public interface BubbleScreenshotListener {
+        /**
+         * Called to trigger taking a screenshot and sending the result to a bubble.
+         */
+        void onBubbleScreenshot(Bubble bubble);
+    }
+
+    /**
      * Listens for the current state of the status bar and updates the visibility state
      * of bubbles as needed.
      */
@@ -226,10 +250,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManager groupManager,
-            NotificationEntryManager entryManager) {
+            NotificationEntryManager entryManager,
+            RemoteInputUriController remoteInputUriController) {
         this(context, statusBarWindowController, statusBarStateController, shadeController,
                 data, null /* synchronizer */, configurationController, interruptionStateProvider,
-                zenModeController, notifUserManager, groupManager, entryManager);
+                zenModeController, notifUserManager, groupManager, entryManager,
+                remoteInputUriController);
     }
 
     public BubbleController(Context context,
@@ -243,11 +269,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManager groupManager,
-            NotificationEntryManager entryManager) {
+            NotificationEntryManager entryManager,
+            RemoteInputUriController remoteInputUriController) {
         mContext = context;
         mNotificationInterruptionStateProvider = interruptionStateProvider;
         mNotifUserManager = notifUserManager;
         mZenModeController = zenModeController;
+        mRemoteInputUriController = remoteInputUriController;
         mZenModeController.addCallback(new ZenModeController.Callback() {
             @Override
             public void onZenChanged(int zen) {
@@ -320,6 +348,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 });
 
         mUserCreatedBubbles = new HashSet<>();
+
+        mScreenshotHelper = new ScreenshotHelper(context);
     }
 
     /**
@@ -336,6 +366,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
+            }
+            if (mBubbleScreenshotListener != null) {
+                mStackView.setBubbleScreenshotListener(mBubbleScreenshotListener);
             }
         }
     }
@@ -1058,4 +1091,71 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             }
         }
     }
+
+    // TODO: Copied from RemoteInputView. Consolidate RemoteInput intent logic.
+    private Intent prepareRemoteInputFromData(String contentType, Uri data,
+            RemoteInput remoteInput, NotificationEntry entry) {
+        HashMap<String, Uri> results = new HashMap<>();
+        results.put(contentType, data);
+        mRemoteInputUriController.grantInlineReplyUriPermission(entry.getSbn(), data);
+        Intent fillInIntent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        RemoteInput.addDataResultToIntent(remoteInput, fillInIntent, results);
+
+        return fillInIntent;
+    }
+
+    // TODO: Copied from RemoteInputView. Consolidate RemoteInput intent logic.
+    private void sendRemoteInput(Intent intent, NotificationEntry entry,
+            PendingIntent pendingIntent) {
+        // Tell ShortcutManager that this package has been "activated".  ShortcutManager
+        // will reset the throttling for this package.
+        // Strictly speaking, the intent receiver may be different from the notification publisher,
+        // but that's an edge case, and also because we can't always know which package will receive
+        // an intent, so we just reset for the publisher.
+        mContext.getSystemService(ShortcutManager.class).onApplicationActive(
+                entry.getSbn().getPackageName(),
+                entry.getSbn().getUser().getIdentifier());
+
+        try {
+            pendingIntent.send(mContext, 0, intent);
+        } catch (PendingIntent.CanceledException e) {
+            Log.i(TAG, "Unable to send remote input result", e);
+        }
+    }
+
+    private void sendScreenshotToBubble(Bubble bubble) {
+        // delay allows the bubble menu to disappear before the screenshot
+        // done here because we already have a Handler to delay with.
+        // TODO: Hide bubble + menu UI from screenshots entirely instead of just delaying.
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mScreenshotHelper.takeScreenshot(
+                        android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+                        true /* hasStatus */,
+                        true /* hasNav */,
+                        mHandler,
+                        new Consumer<Uri>() {
+                            @Override
+                            public void accept(Uri uri) {
+                                if (uri != null) {
+                                    NotificationEntry entry = bubble.getEntry();
+                                    Pair<RemoteInput, Notification.Action> pair = entry.getSbn()
+                                            .getNotification().findRemoteInputActionPair(false);
+                                    RemoteInput remoteInput = pair.first;
+                                    Notification.Action action = pair.second;
+                                    Intent dataIntent = prepareRemoteInputFromData("image/png", uri,
+                                            remoteInput, entry);
+                                    sendRemoteInput(dataIntent, entry, action.actionIntent);
+                                    mBubbleData.setSelectedBubble(bubble);
+                                    mBubbleData.setExpanded(true);
+                                }
+                            }
+                        });
+            }
+        }, 200);
+    }
+
+    private final BubbleScreenshotListener mBubbleScreenshotListener =
+            bubble -> sendScreenshotToBubble(bubble);
 }
