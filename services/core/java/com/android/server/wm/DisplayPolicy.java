@@ -3122,12 +3122,13 @@ public class DisplayPolicy {
                 : new AppearanceRegion[]{
                         new AppearanceRegion(fullscreenAppearance, fullscreenStackBounds)};
         final boolean isNavbarColorManagedByIme = result.second;
+        String cause = win.toString();
         mHandler.post(() -> {
             StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
             if (statusBar != null) {
                 final int displayId = getDisplayId();
                 statusBar.setDisableFlags(displayId, visibility & StatusBarManager.DISABLE_MASK,
-                        win.toString());
+                        cause);
                 if (transientState.first.length > 0) {
                     statusBar.showTransient(displayId, transientState.first);
                 }
@@ -3139,8 +3140,10 @@ public class DisplayPolicy {
                 statusBar.topAppWindowChanged(displayId, isFullscreen, isImmersive);
 
                 // TODO(b/118118435): Remove this after removing system UI visibilities.
-                mDisplayContent.statusBarVisibilityChanged(
-                        visibility & ~(View.STATUS_BAR_UNHIDE | View.NAVIGATION_BAR_UNHIDE));
+                synchronized (mLock) {
+                    mDisplayContent.statusBarVisibilityChanged(
+                            visibility & ~(View.STATUS_BAR_UNHIDE | View.NAVIGATION_BAR_UNHIDE));
+                }
             }
         });
         return diff;
