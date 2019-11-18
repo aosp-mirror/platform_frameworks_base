@@ -123,6 +123,8 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     private void init(Context context) {
         mDragSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mGestureDetector = new GestureDetector(context, this);
+        setContentDescription(context.getString(R.string.accessibility_freeform_caption,
+                context.getPackageManager().getApplicationLabel(context.getApplicationInfo())));
     }
 
     @Override
