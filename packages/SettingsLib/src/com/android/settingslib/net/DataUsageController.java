@@ -222,7 +222,8 @@ public class DataUsageController {
             }
         }
 
-        return TelephonyManager.from(mContext).createForSubscriptionId(subscriptionId);
+        return mContext.getSystemService(
+                TelephonyManager.class).createForSubscriptionId(subscriptionId);
     }
 
     public void setMobileDataEnabled(boolean enabled) {
