@@ -286,7 +286,8 @@
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Autoriser l\'appli &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à la position de cet appareil ?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"L\'application n\'a accès à la position de l\'appareil que lorsqu\'elle est ouverte"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder &lt;b&gt;en permanence&lt;/b&gt; à la position de cet appareil ?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"L\'application peut actuellement accéder à la position uniquement pendant que vous l\'utilisez"</string>
+    <!-- no translation found for permgroupbackgroundrequestdetail_location (6969122401786527350) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accéder à votre agenda"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder à votre agenda ?"</string>
@@ -1965,9 +1966,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Appuyez pour vérifier les contenus bloqués."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Système"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Paramètres"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"Mode Veille imminent"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"L\'appareil Android TV va bientôt passer en mode Veille. Appuyez sur un bouton pour qu\'il reste allumé."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"L\'appareil va bientôt passer en mode Veille. Appuyez dessus pour qu\'il reste allumé."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Caméra"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Micro"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"se superpose aux autres applications sur l\'écran"</string>
@@ -2008,22 +2006,13 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"Le partage direct n\'est pas disponible"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"Liste des applications"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"Cette application n\'a pas reçu l\'autorisation d\'enregistrer des contenus audio, mais peut le faire via ce périphérique USB."</string>
-    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
-    <skip />
+    <string name="accessibility_system_action_home_label" msgid="6089400419441597916">"Accueil"</string>
+    <string name="accessibility_system_action_back_label" msgid="8986628898117178971">"Retour"</string>
+    <string name="accessibility_system_action_recents_label" msgid="7607601657790855723">"Applications récentes"</string>
+    <string name="accessibility_system_action_notifications_label" msgid="1578681904050072545">"Notifications"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="3885565587471448947">"Configuration rapide"</string>
+    <string name="accessibility_system_action_power_dialog_label" msgid="2299530700682199873">"Boîte de dialogue Marche/Arrêt"</string>
+    <string name="accessibility_system_action_toggle_split_screen_label" msgid="2853334443686935668">"Activer/Désactiver l\'écran partagé"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="2377933717780192594">"Verrouiller l\'écran"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="1933564892301816480">"Capture d\'écran"</string>
 </resources>
