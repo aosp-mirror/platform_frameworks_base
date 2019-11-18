@@ -66,6 +66,7 @@ import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PauseActivityItem;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -398,6 +399,20 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         doReturn(STACK_VISIBILITY_INVISIBLE).when(mStack).getVisibility(null);
         assertEquals(false, mActivity.shouldResumeActivity(null /* activeActivity */));
+    }
+
+    @Test
+    public void testShouldResumeOrPauseWithResults() {
+        mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
+        spyOn(mStack);
+
+        ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        mActivity.addResultLocked(topActivity, "resultWho", 0, 0, new Intent());
+        topActivity.finishing = true;
+
+        doReturn(STACK_VISIBILITY_VISIBLE).when(mStack).getVisibility(null);
+        assertEquals(true, mActivity.shouldResumeActivity(null /* activeActivity */));
+        assertEquals(false, mActivity.shouldPauseActivity(null /*activeActivity */));
     }
 
     @Test
