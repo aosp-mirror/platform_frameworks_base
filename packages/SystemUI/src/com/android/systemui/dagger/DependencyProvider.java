@@ -103,14 +103,12 @@ public class DependencyProvider {
         return Looper.getMainLooper();
     }
 
-    @Singleton
     @Provides
     @BgHandler
     public Handler provideBgHandler(@BgLooper Looper bgLooper) {
         return new Handler(bgLooper);
     }
 
-    @Singleton
     @Provides
     @MainHandler
     public Handler provideMainHandler(@MainLooper Looper mainLooper) {
