@@ -14099,6 +14099,77 @@ public final class Settings {
                 "android.settings.panel.action.VOLUME";
     }
 
+    /**
+     * Activity Action: Show setting page to process the addition of Wi-Fi networks to the user's
+     * saved network list. The app should send a new intent with an extra that holds a maximum of
+     * five {@link android.net.wifi.WifiConfiguration} that specify credentials for the networks to
+     * be added to the user's database. The Intent should be sent via the {@link
+     * android.app.Activity#startActivityForResult(Intent, int)} API.
+     * <p>
+     * Note: The app sending the Intent to add the credentials doesn't get any ownership over the
+     * newly added network(s). For the Wi-Fi stack, these networks will look like the user
+     * manually added them from the Settings UI.
+     * <p>
+     * Input: The app should put parcelable array list to
+     * {@link android.net.wifi.WifiConfiguration} into the
+     * {@link #EXTRA_WIFI_CONFIGURATION_LIST} extra.
+     * <p>
+     * Output: After {@link android.app.Activity#startActivityForResult(Intent, int)}, the
+     * callback {@link android.app.Activity#onActivityResult(int, int, Intent)} will have a
+     * result code {@link android.app.Activity#RESULT_OK} to indicate user pressed the save
+     * button to save the networks or {@link android.app.Activity#RESULT_CANCELED} to indicate
+     * that the user rejected the request. Additionally, an integer array list, stored in
+     * {@link #EXTRA_WIFI_CONFIGURATION_RESULT_LIST}, will indicate the process result of
+     * each network.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_WIFI_ADD_NETWORKS =
+            "android.settings.WIFI_ADD_NETWORKS";
+
+    /**
+     * A bundle extra of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that indicates all the
+     * {@link android.net.wifi.WifiConfiguration} that would be saved.
+     */
+    public static final String EXTRA_WIFI_CONFIGURATION_LIST =
+            "android.provider.extra.WIFI_CONFIGURATION_LIST";
+
+    /**
+     * A bundle extra of the result of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that
+     * indicates the action result of the saved {@link android.net.wifi.WifiConfiguration}. It's
+     * value of AddWifiResult interface, and will be 1:1 mapping to the element in {@link
+     * #EXTRA_WIFI_CONFIGURATION_LIST}.
+     */
+    public static final String EXTRA_WIFI_CONFIGURATION_RESULT_LIST =
+            "android.provider.extra.WIFI_CONFIGURATION_RESULT_LIST";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"ADD_WIFI_RESULT_"}, value = {
+            ADD_WIFI_RESULT_SUCCESS,
+            ADD_WIFI_RESULT_ADD_OR_UPDATE_FAILED,
+            ADD_WIFI_RESULT_ALREADY_EXISTS
+    })
+    public @interface AddWifiResult {
+    }
+
+    /**
+     * A result of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that saving or updating the
+     * corresponding Wi-Fi network was successful.
+     */
+    public static final int ADD_WIFI_RESULT_SUCCESS = 0;
+
+    /**
+     * A result of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that saving the corresponding
+     * Wi-Fi network failed.
+     */
+    public static final int ADD_WIFI_RESULT_ADD_OR_UPDATE_FAILED = 1;
+
+    /**
+     * A result of {@link #ACTION_WIFI_ADD_NETWORKS} intent action that indicates the Wi-Fi network
+     * already exists.
+     */
+    public static final int ADD_WIFI_RESULT_ALREADY_EXISTS = 2;
+
     private static final String[] PM_WRITE_SETTINGS = {
         android.Manifest.permission.WRITE_SETTINGS
     };
