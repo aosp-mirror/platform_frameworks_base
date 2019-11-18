@@ -88,8 +88,9 @@ public final class DozeServiceHost implements DozeHost {
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final StatusBarWindowController mStatusBarWindowController;
     private final NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
+    private final StatusBarWindowViewController mStatusBarWindowViewController;
+    private final LockscreenLockIconController mLockscreenLockIconController;
     private NotificationIconAreaController mNotificationIconAreaController;
-    private StatusBarWindowViewController mStatusBarWindowViewController;
     private StatusBarWindowView mStatusBarWindow;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private NotificationPanelView mNotificationPanel;
@@ -110,7 +111,9 @@ public final class DozeServiceHost implements DozeHost {
             VisualStabilityManager visualStabilityManager,
             PulseExpansionHandler pulseExpansionHandler,
             StatusBarWindowController statusBarWindowController,
-            NotificationWakeUpCoordinator notificationWakeUpCoordinator) {
+            NotificationWakeUpCoordinator notificationWakeUpCoordinator,
+            StatusBarWindowViewController statusBarWindowViewController,
+            LockscreenLockIconController lockscreenLockIconController) {
         super();
         mDozeLog = dozeLog;
         mPowerManager = powerManager;
@@ -129,6 +132,8 @@ public final class DozeServiceHost implements DozeHost {
         mPulseExpansionHandler = pulseExpansionHandler;
         mStatusBarWindowController = statusBarWindowController;
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
+        mStatusBarWindowViewController = statusBarWindowViewController;
+        mLockscreenLockIconController = lockscreenLockIconController;
     }
 
     // TODO: we should try to not pass status bar in here if we can avoid it.
@@ -138,13 +143,11 @@ public final class DozeServiceHost implements DozeHost {
      */
     public void initialize(StatusBar statusBar,
             NotificationIconAreaController notificationIconAreaController,
-            StatusBarWindowViewController statusBarWindowViewController,
             StatusBarWindowView statusBarWindow,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             NotificationPanelView notificationPanel, View ambientIndicationContainer) {
         mStatusBar = statusBar;
         mNotificationIconAreaController = notificationIconAreaController;
-        mStatusBarWindowViewController = statusBarWindowViewController;
         mStatusBarWindow = statusBarWindow;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mNotificationPanel = notificationPanel;
@@ -262,7 +265,7 @@ public final class DozeServiceHost implements DozeHost {
                 mKeyguardViewMediator.setPulsing(pulsing);
                 mNotificationPanel.setPulsing(pulsing);
                 mVisualStabilityManager.setPulsing(pulsing);
-                mStatusBarWindowViewController.setPulsing(pulsing);
+                mLockscreenLockIconController.setPulsing(pulsing);
                 mIgnoreTouchWhilePulsing = false;
                 if (mKeyguardUpdateMonitor != null && passiveAuthInterrupt) {
                     mKeyguardUpdateMonitor.onAuthInterruptDetected(pulsing /* active */);

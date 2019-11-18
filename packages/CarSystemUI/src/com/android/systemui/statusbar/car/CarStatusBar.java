@@ -114,6 +114,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
+import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -153,7 +154,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private static final float FLING_ANIMATION_MAX_TIME = 0.5f;
     // acceleration rate for the fling animation
     private static final float FLING_SPEED_UP_FACTOR = 0.6f;
+
     private final ScrimController mScrimController;
+    private final StatusBarWindowViewController mStatusBarWindowViewController;
+    private final LockscreenLockIconController mLockscreenLockIconController;
 
     private float mOpeningVelocity = DEFAULT_FLING_VELOCITY;
     private float mClosingVelocity = DEFAULT_FLING_VELOCITY;
@@ -287,7 +291,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
-            StatusBarWindowViewController.Builder statusBarWindowViewControllerBuild,
+            StatusBarWindowViewController statusBarWindowViewController,
+            LockscreenLockIconController lockscreenLockIconController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
@@ -363,7 +368,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notificationListener,
                 configurationController,
                 statusBarWindowController,
-                statusBarWindowViewControllerBuild,
+                statusBarWindowViewController,
+                lockscreenLockIconController,
                 dozeParameters,
                 scrimController,
                 null /* keyguardLiftController */,
@@ -385,6 +391,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 viewMediatorCallback,
                 dismissCallbackRegistry);
         mScrimController = scrimController;
+        mStatusBarWindowViewController = statusBarWindowViewController;
+        mLockscreenLockIconController = lockscreenLockIconController;
         mDeviceProvisionedController = deviceProvisionedController;
         mCarServiceProvider = carServiceProvider;
         mDrivingStateHelperLazy = drivingStateHelperLazy;
@@ -400,22 +408,22 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
         mScreenLifecycle.addObserver(mScreenObserver);
 
-      	// Notification bar related setup.
+        // Notification bar related setup.
         mInitialBackgroundAlpha = (float) mContext.getResources().getInteger(
-            R.integer.config_initialNotificationBackgroundAlpha) / 100;
+                R.integer.config_initialNotificationBackgroundAlpha) / 100;
         if (mInitialBackgroundAlpha < 0 || mInitialBackgroundAlpha > 100) {
             throw new RuntimeException(
-              "Unable to setup notification bar due to incorrect initial background alpha"
-                      + " percentage");
+                    "Unable to setup notification bar due to incorrect initial background alpha"
+                            + " percentage");
         }
         float finalBackgroundAlpha = Math.max(
-            mInitialBackgroundAlpha,
-            (float) mContext.getResources().getInteger(
-                R.integer.config_finalNotificationBackgroundAlpha) / 100);
+                mInitialBackgroundAlpha,
+                (float) mContext.getResources().getInteger(
+                        R.integer.config_finalNotificationBackgroundAlpha) / 100);
         if (finalBackgroundAlpha < 0 || finalBackgroundAlpha > 100) {
             throw new RuntimeException(
-              "Unable to setup notification bar due to incorrect final background alpha"
-                      + " percentage");
+                    "Unable to setup notification bar due to incorrect final background alpha"
+                            + " percentage");
         }
         mBackgroundAlphaDiff = finalBackgroundAlpha - mInitialBackgroundAlpha;
 

@@ -353,12 +353,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final Point mCurrentDisplaySize = new Point();
 
-    protected StatusBarWindowViewController mStatusBarWindowViewController;
     protected StatusBarWindowView mStatusBarWindow;
     protected PhoneStatusBarView mStatusBarView;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected StatusBarWindowController mStatusBarWindowController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final LockscreenLockIconController mLockscreenLockIconController;
     @VisibleForTesting
     DozeServiceHost mDozeServiceHost;
     private boolean mWakeUpComingFromTouch;
@@ -380,7 +380,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ConfigurationController mConfigurationController;
-    private final StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
+    private final StatusBarWindowViewController mStatusBarWindowViewController;
     private final DozeParameters mDozeParameters;
     private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     private final PluginManager mPluginManager;
@@ -660,7 +660,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
-            StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
+            StatusBarWindowViewController statusBarWindowViewController,
+            LockscreenLockIconController lockscreenLockIconController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             @Nullable KeyguardLiftController keyguardLiftController,
@@ -730,7 +731,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationListener = notificationListener;
         mConfigurationController = configurationController;
         mStatusBarWindowController = statusBarWindowController;
-        mStatusBarWindowViewControllerBuilder = statusBarWindowViewControllerBuilder;
+        mStatusBarWindowViewController = statusBarWindowViewController;
+        mLockscreenLockIconController = lockscreenLockIconController;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
@@ -892,7 +894,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mKeyguardUpdateMonitor.registerCallback(mUpdateCallback);
         mDozeServiceHost.initialize(this, mNotificationIconAreaController,
-                mStatusBarWindowViewController, mStatusBarWindow, mStatusBarKeyguardViewManager,
+                mStatusBarWindow, mStatusBarKeyguardViewManager,
                 mNotificationPanel, mAmbientIndicationContainer);
 
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
@@ -1091,7 +1093,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScrimController.setScrimVisibleListener(scrimsVisible -> {
             mStatusBarWindowController.setScrimsVisibility(scrimsVisible);
             if (mStatusBarWindow != null) {
-                mStatusBarWindowViewController.onScrimVisibilityChanged(scrimsVisible);
+                mLockscreenLockIconController.onScrimVisibilityChanged(scrimsVisible);
             }
         });
         mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
@@ -1109,7 +1111,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         mNotificationPanel.setLaunchAffordanceListener(
-                mStatusBarWindowViewController::onShowingLaunchAffordanceChanged);
+                mLockscreenLockIconController::onShowingLaunchAffordanceChanged);
 
         // Set up the quick settings tile panel
         View container = mStatusBarWindow.findViewById(R.id.qs_frame);
@@ -1386,9 +1388,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void inflateStatusBarWindow(Context context) {
         mStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
-        mStatusBarWindowViewController = mStatusBarWindowViewControllerBuilder
-                .setShadeController(this)
-                .build();
+        mStatusBarWindowViewController.setupExpandedStatusBar();
     }
 
     protected void startKeyguard() {
@@ -3693,7 +3693,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBouncerShowing = bouncerShowing;
         mKeyguardBypassController.setBouncerShowing(bouncerShowing);
         mPulseExpansionHandler.setBouncerShowing(bouncerShowing);
-        mStatusBarWindowViewController.setBouncerShowingScrimmed(isBouncerShowingScrimmed());
+        mLockscreenLockIconController.setBouncerShowingScrimmed(isBouncerShowingScrimmed());
         if (mStatusBarView != null) mStatusBarView.setBouncerShowing(bouncerShowing);
         updateHideIconsForBouncer(true /* animate */);
         mCommandQueue.recomputeDisableFlags(mDisplayId, true /* animate */);
@@ -3944,7 +3944,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void notifyBiometricAuthModeChanged() {
         mDozeServiceHost.updateDozing();
         updateScrimController();
-        mStatusBarWindowViewController.onBiometricAuthModeChanged(
+        mLockscreenLockIconController.onBiometricAuthModeChanged(
                 mBiometricUnlockController.isWakeAndUnlock(),
                 mBiometricUnlockController.isBiometricUnlock());
     }
@@ -4341,7 +4341,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     public void onBouncerPreHideAnimation() {
         mNotificationPanel.onBouncerPreHideAnimation();
-        mStatusBarWindowViewController.onBouncerPreHideAnimation();
+        mLockscreenLockIconController.onBouncerPreHideAnimation();
     }
 
     /**

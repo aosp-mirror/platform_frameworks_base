@@ -88,7 +88,7 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
         when(mSuperStatusBarViewFactory.getStatusBarWindowView()).thenReturn(mView);
         when(mDockManager.isDocked()).thenReturn(false);
 
-        mController = new StatusBarWindowViewController.Builder(
+        mController = new StatusBarWindowViewController(
                 new InjectionInflationController(
                         SystemUIFactory.getInstance().getRootComponent()),
                 mCoordinator,
@@ -106,9 +106,9 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
                 mDozeParameters,
                 new CommandQueue(mContext),
                 mSuperStatusBarViewFactory,
-                mDockManager)
-                .setShadeController(mShadeController)
-                .build();
+                () -> mShadeController,
+                mDockManager);
+        mController.setupExpandedStatusBar();
         mController.setService(mStatusBar);
         mController.setDragDownHelper(mDragDownHelper);
 
