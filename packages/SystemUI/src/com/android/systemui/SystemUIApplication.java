@@ -176,9 +176,11 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
 
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
+
         TimingsTraceLog log = new TimingsTraceLog("SystemUIBootTiming",
                 Trace.TRACE_TAG_APP);
         log.traceBegin(metricsPrefix);
+
         final int N = services.length;
         for (int i = 0; i < N; i++) {
             String clsName = services[i];
