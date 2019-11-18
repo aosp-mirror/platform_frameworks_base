@@ -61,6 +61,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.util.SparseBooleanArray;
@@ -92,7 +93,9 @@ public class RecentTasksTest extends ActivityTestsBase {
     private static final int TEST_USER_1_ID = 10;
     private static final int TEST_QUIET_USER_ID = 20;
     private static final UserInfo DEFAULT_USER_INFO = new UserInfo();
-    private static final UserInfo QUIET_USER_INFO = new UserInfo();
+    private static final UserInfo QUIET_PROFILE_USER_INFO = new UserInfo(TEST_QUIET_USER_ID,
+            "quiet_profile", null /* iconPath */, UserInfo.FLAG_QUIET_MODE,
+            UserManager.USER_TYPE_PROFILE_MANAGED);
     private static final int INVALID_STACK_ID = 999;
 
     private ActivityDisplay mDisplay;
@@ -125,7 +128,6 @@ public class RecentTasksTest extends ActivityTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         mCallbacksRecorder = new CallbacksRecorder();
         mRecentTasks.registerCallback(mCallbacksRecorder);
-        QUIET_USER_INFO.flags = UserInfo.FLAG_MANAGED_PROFILE | UserInfo.FLAG_QUIET_MODE;
 
         mTasks = new ArrayList<>();
         mTasks.add(createTaskBuilder(".Task1").build());
@@ -1220,7 +1222,7 @@ public class RecentTasksTest extends ActivityTestsBase {
                 case TEST_USER_1_ID:
                     return DEFAULT_USER_INFO;
                 case TEST_QUIET_USER_ID:
-                    return QUIET_USER_INFO;
+                    return QUIET_PROFILE_USER_INFO;
             }
             return null;
         }
