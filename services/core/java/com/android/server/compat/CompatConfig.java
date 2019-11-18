@@ -43,13 +43,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
+
 /**
  * This class maintains state relating to platform compatibility changes.
  *
  * <p>It stores the default configuration for each change, and any per-package overrides that have
  * been configured.
  */
-public final class CompatConfig {
+final class CompatConfig {
 
     private static final String TAG = "CompatConfig";
 
@@ -61,13 +62,13 @@ public final class CompatConfig {
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
 
     @VisibleForTesting
-    public CompatConfig() {
+    CompatConfig() {
     }
 
     /**
      * @return The static instance of this class to be used within the system server.
      */
-    public static CompatConfig get() {
+    static CompatConfig get() {
         return sInstance;
     }
 
@@ -77,7 +78,7 @@ public final class CompatConfig {
      *
      * @param change The change to add. Any change with the same ID will be overwritten.
      */
-    public void addChange(CompatChange change) {
+    void addChange(CompatChange change) {
         synchronized (mChanges) {
             mChanges.put(change.getId(), change);
         }
@@ -89,10 +90,10 @@ public final class CompatConfig {
      *
      * @param app The app in question
      * @return A sorted long array of change IDs. We use a primitive array to minimize memory
-     *      footprint: Every app process will store this array statically so we aim to reduce
-     *      overhead as much as possible.
+     * footprint: Every app process will store this array statically so we aim to reduce
+     * overhead as much as possible.
      */
-    public long[] getDisabledChanges(ApplicationInfo app) {
+    long[] getDisabledChanges(ApplicationInfo app) {
         LongArray disabled = new LongArray();
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
@@ -113,7 +114,7 @@ public final class CompatConfig {
      * @param name Name of the change to look up
      * @return The change ID, or {@code -1} if no change with that name exists.
      */
-    public long lookupChangeId(String name) {
+    long lookupChangeId(String name) {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 if (TextUtils.equals(mChanges.valueAt(i).getName(), name)) {
@@ -128,11 +129,11 @@ public final class CompatConfig {
      * Find if a given change is enabled for a given application.
      *
      * @param changeId The ID of the change in question
-     * @param app App to check for
+     * @param app      App to check for
      * @return {@code true} if the change is enabled for this app. Also returns {@code true} if the
-     *      change ID is not known, as unknown changes are enabled by default.
+     * change ID is not known, as unknown changes are enabled by default.
      */
-    public boolean isChangeEnabled(long changeId, ApplicationInfo app) {
+    boolean isChangeEnabled(long changeId, ApplicationInfo app) {
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
             if (c == null) {
@@ -150,14 +151,15 @@ public final class CompatConfig {
      *
      * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
      *
-     * @param changeId The ID of the change to be overridden. Note, this call will succeed even if
-     *                 this change is not known; it will only have any effect if any code in the
-     *                 platform is gated on the ID given.
+     * @param changeId    The ID of the change to be overridden. Note, this call will succeed even
+     *                    if
+     *                    this change is not known; it will only have any effect if any code in the
+     *                    platform is gated on the ID given.
      * @param packageName The app package name to override the change for.
-     * @param enabled If the change should be enabled or disabled.
+     * @param enabled     If the change should be enabled or disabled.
      * @return {@code true} if the change existed before adding the override.
      */
-    public boolean addOverride(long changeId, String packageName, boolean enabled) {
+    boolean addOverride(long changeId, String packageName, boolean enabled) {
         boolean alreadyKnown = true;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
@@ -172,15 +174,27 @@ public final class CompatConfig {
     }
 
     /**
+     * Check whether the change is known to the compat config.
+     *
+     * @return {@code true} if the change is known.
+     */
+    boolean isKnownChangeId(long changeId) {
+        synchronized (mChanges) {
+            CompatChange c = mChanges.get(changeId);
+            return c != null;
+        }
+    }
+
+    /**
      * Removes an override previously added via {@link #addOverride(long, String, boolean)}. This
      * restores the default behaviour for the given change and app, once any app processes have been
      * restarted.
      *
-     * @param changeId The ID of the change that was overridden.
+     * @param changeId    The ID of the change that was overridden.
      * @param packageName The app package name that was overridden.
      * @return {@code true} if an override existed;
      */
-    public boolean removeOverride(long changeId, String packageName) {
+    boolean removeOverride(long changeId, String packageName) {
         boolean overrideExists = false;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
@@ -191,22 +205,22 @@ public final class CompatConfig {
         }
         return overrideExists;
     }
+
     /**
      * Overrides the enabled state for a given change and app. This method is intended to be used
      * *only* for debugging purposes.
      *
      * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
      *
-     * @param overrides list of overrides to default changes config.
+     * @param overrides   list of overrides to default changes config.
      * @param packageName app for which the overrides will be applied.
      */
-    public void addOverrides(
-            CompatibilityChangeConfig overrides, String packageName) {
+    void addOverrides(CompatibilityChangeConfig overrides, String packageName) {
         synchronized (mChanges) {
-            for (Long changeId: overrides.enabledChanges()) {
+            for (Long changeId : overrides.enabledChanges()) {
                 addOverride(changeId, packageName, true);
             }
-            for (Long changeId: overrides.disabledChanges()) {
+            for (Long changeId : overrides.disabledChanges()) {
                 addOverride(changeId, packageName, false);
             }
         }
@@ -221,7 +235,7 @@ public final class CompatConfig {
      *
      * @param packageName The package for which the overrides should be purged.
      */
-    public void removePackageOverrides(String packageName) {
+    void removePackageOverrides(String packageName) {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 mChanges.valueAt(i).removePackageOverride(packageName);
@@ -230,11 +244,11 @@ public final class CompatConfig {
     }
 
     /**
-    * Dumps the current list of compatibility config information.
-    *
-    * @param pw The {@link PrintWriter} instance to which the information will be dumped.
-    */
-    public void dumpConfig(PrintWriter pw) {
+     * Dumps the current list of compatibility config information.
+     *
+     * @param pw The {@link PrintWriter} instance to which the information will be dumped.
+     */
+    void dumpConfig(PrintWriter pw) {
         synchronized (mChanges) {
             if (mChanges.size() == 0) {
                 pw.println("No compat overrides.");
@@ -252,10 +266,10 @@ public final class CompatConfig {
      *
      * @param applicationInfo the {@link ApplicationInfo} for which the info should be dumped.
      * @return A {@link CompatibilityChangeConfig} which contains the compat config info for the
-     *         given app.
+     * given app.
      */
 
-    public CompatibilityChangeConfig getAppConfig(ApplicationInfo applicationInfo) {
+    CompatibilityChangeConfig getAppConfig(ApplicationInfo applicationInfo) {
         Set<Long> enabled = new HashSet<>();
         Set<Long> disabled = new HashSet<>();
         synchronized (mChanges) {
@@ -276,15 +290,15 @@ public final class CompatConfig {
      *
      * @return An array of {@link CompatibilityChangeInfo} with the current changes.
      */
-    public CompatibilityChangeInfo[] dumpChanges() {
+    CompatibilityChangeInfo[] dumpChanges() {
         synchronized (mChanges) {
             CompatibilityChangeInfo[] changeInfos = new CompatibilityChangeInfo[mChanges.size()];
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange change = mChanges.valueAt(i);
                 changeInfos[i] = new CompatibilityChangeInfo(change.getId(),
-                                                      change.getName(),
-                                                      change.getEnableAfterTargetSdk(),
-                                                      change.getDisabled());
+                        change.getName(),
+                        change.getEnableAfterTargetSdk(),
+                        change.getDisabled());
             }
             return changeInfos;
         }
