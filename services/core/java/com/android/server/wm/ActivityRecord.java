@@ -6171,8 +6171,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The rest of the condition is that only one side is smaller than the parent, but it still
         // needs to exclude the cases where the size is limited by the fixed aspect ratio.
         if (info.maxAspectRatio > 0) {
-            final float aspectRatio = (0.5f + Math.max(appWidth, appHeight))
-                    / Math.min(appWidth, appHeight);
+            final float aspectRatio = Math.max(appWidth, appHeight) / Math.min(appWidth, appHeight);
             if (aspectRatio >= info.maxAspectRatio) {
                 // The current size has reached the max aspect ratio.
                 return false;
