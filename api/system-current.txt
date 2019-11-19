@@ -7314,6 +7314,21 @@ package android.telephony {
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setMultiSimPolicy(int);
   }
 
+  public class CbGeoUtils {
+  }
+
+  public static interface CbGeoUtils.Geometry {
+    method public boolean contains(@NonNull android.telephony.CbGeoUtils.LatLng);
+  }
+
+  public static class CbGeoUtils.LatLng {
+    ctor public CbGeoUtils.LatLng(double, double);
+    method public double distance(@NonNull android.telephony.CbGeoUtils.LatLng);
+    method @NonNull public android.telephony.CbGeoUtils.LatLng subtract(@NonNull android.telephony.CbGeoUtils.LatLng);
+    field public final double lat;
+    field public final double lng;
+  }
+
   public abstract class CellBroadcastService extends android.app.Service {
     ctor public CellBroadcastService();
     method @CallSuper @NonNull public android.os.IBinder onBind(@Nullable android.content.Intent);
@@ -8126,6 +8141,7 @@ package android.telephony {
     method public int getGeographicalScope();
     method @Nullable public String getLanguageCode();
     method @NonNull public android.telephony.SmsCbLocation getLocation();
+    method public int getMaximumWaitingDuration();
     method @Nullable public String getMessageBody();
     method public int getMessageFormat();
     method public int getMessagePriority();
