@@ -62,7 +62,7 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
          * Returns the result of the KeyStore {@code finish} operation or null if keystore couldn't
          * be reached.
          */
-        OperationResult finish(byte[] siganture, byte[] additionalEntropy);
+        OperationResult finish(byte[] input, byte[] siganture, byte[] additionalEntropy);
     }
 
     // Binder buffer is about 1MB, but it's shared between all active transactions of the process.
@@ -217,7 +217,8 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
         byte[] output = update(input, inputOffset, inputLength);
         output = ArrayUtils.concat(output, flush());
 
-        OperationResult opResult = mKeyStoreStream.finish(signature, additionalEntropy);
+        OperationResult opResult = mKeyStoreStream.finish(EmptyArray.BYTE, signature,
+                                                          additionalEntropy);
         if (opResult == null) {
             throw new KeyStoreConnectException();
         } else if (opResult.resultCode != KeyStore.NO_ERROR) {
@@ -334,8 +335,8 @@ class KeyStoreCryptoOperationChunkedStreamer implements KeyStoreCryptoOperationS
         }
 
         @Override
-        public OperationResult finish(byte[] signature, byte[] additionalEntropy) {
-            return mKeyStore.finish(mOperationToken, null, signature, additionalEntropy);
+        public OperationResult finish(byte[] input, byte[] signature, byte[] additionalEntropy) {
+            return mKeyStore.finish(mOperationToken, null, input, signature, additionalEntropy);
         }
     }
 }
