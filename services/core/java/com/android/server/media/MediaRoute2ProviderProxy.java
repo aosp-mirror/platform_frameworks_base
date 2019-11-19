@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -41,13 +42,19 @@ import java.util.Objects;
 /**
  * Maintains a connection to a particular media route provider service.
  */
-final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements ServiceConnection {
+final class MediaRoute2ProviderProxy implements ServiceConnection {
     private static final String TAG = "MR2ProviderProxy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
+    private final ComponentName mComponentName;
+    private final String mUniqueId;
     private final int mUserId;
     private final Handler mHandler;
+
+    private Callback mCallback;
+
+    private MediaRoute2ProviderInfo mProviderInfo;
 
     // Connection state
     private boolean mRunning;
@@ -57,8 +64,9 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
 
     MediaRoute2ProviderProxy(@NonNull Context context, @NonNull ComponentName componentName,
             int userId) {
-        super(componentName);
         mContext = Objects.requireNonNull(context, "Context must not be null.");
+        mComponentName = Objects.requireNonNull(componentName, "Component name must not be null.");
+        mUniqueId = componentName.flattenToShortString();
         mUserId = userId;
         mHandler = new Handler();
     }
@@ -72,7 +80,10 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         pw.println(prefix + "  mConnectionReady=" + mConnectionReady);
     }
 
-    @Override
+    public void setCallback(Callback callback) {
+        mCallback = callback;
+    }
+
     public void requestSelectRoute(String packageName, String routeId, int seq) {
         if (mConnectionReady) {
             mActiveConnection.requestSelectRoute(packageName, routeId, seq);
@@ -80,7 +91,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
     }
 
-    @Override
     public void unselectRoute(String packageName, String routeId) {
         if (mConnectionReady) {
             mActiveConnection.unselectRoute(packageName, routeId);
@@ -88,7 +98,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
     }
 
-    @Override
     public void sendControlRequest(MediaRoute2Info route, Intent request) {
         if (mConnectionReady) {
             mActiveConnection.sendControlRequest(route.getId(), request);
@@ -96,7 +105,6 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
     }
 
-    @Override
     public void requestSetVolume(MediaRoute2Info route, int volume) {
         if (mConnectionReady) {
             mActiveConnection.requestSetVolume(route.getId(), volume);
@@ -104,12 +112,21 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         }
     }
 
-    @Override
     public void requestUpdateVolume(MediaRoute2Info route, int delta) {
         if (mConnectionReady) {
             mActiveConnection.requestUpdateVolume(route.getId(), delta);
             updateBinding();
         }
+    }
+
+    @NonNull
+    public String getUniqueId() {
+        return mUniqueId;
+    }
+
+    @Nullable
+    public MediaRoute2ProviderInfo getProviderInfo() {
+        return mProviderInfo;
     }
 
     public boolean hasComponentName(String packageName, String className) {
@@ -253,6 +270,20 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
         setAndNotifyProviderInfo(info);
     }
 
+    private void setAndNotifyProviderInfo(MediaRoute2ProviderInfo info) {
+        //TODO: check if info is not updated
+        if (info == null) {
+            mProviderInfo = null;
+        } else {
+            mProviderInfo = new MediaRoute2ProviderInfo.Builder(info)
+                .setUniqueId(mUniqueId)
+                .build();
+        }
+        if (mCallback != null) {
+            mCallback.onProviderStateChanged(MediaRoute2ProviderProxy.this);
+        }
+    }
+
     private void disconnect() {
         if (mActiveConnection != null) {
             mConnectionReady = false;
@@ -265,6 +296,10 @@ final class MediaRoute2ProviderProxy extends MediaRoute2Provider implements Serv
     @Override
     public String toString() {
         return "Service connection " + mComponentName.flattenToShortString();
+    }
+
+    public interface Callback {
+        void onProviderStateChanged(@NonNull MediaRoute2ProviderProxy provider);
     }
 
     private final class Connection implements DeathRecipient {
