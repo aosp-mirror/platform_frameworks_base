@@ -20,8 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Pair;
 import android.util.SparseArray;
+
+import com.google.android.icing.proto.DocumentProto;
+import com.google.android.icing.proto.PropertyProto;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,18 +44,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FakeIcing {
     private final AtomicInteger mNextDocId = new AtomicInteger();
     private final Map<String, Integer> mUriToDocIdMap = new ArrayMap<>();
-    /** Array of Documents (pair of uri and content) where index into the array is the docId. */
-    private final SparseArray<Pair<String, String>> mDocStore = new SparseArray<>();
+    /** Array of Documents where index into the array is the docId. */
+    private final SparseArray<DocumentProto> mDocStore = new SparseArray<>();
     /** Map of term to posting-list (the set of DocIds containing that term). */
     private final Map<String, Set<Integer>> mIndex = new ArrayMap<>();
 
     /**
      * Inserts a document into the index.
      *
-     * @param uri The globally unique identifier of the document.
-     * @param doc The contents of the document.
+     * @param document The document to insert.
      */
-    public void put(@NonNull String uri, @NonNull String doc) {
+    public void put(@NonNull DocumentProto document) {
+        String uri = document.getUri();
+
         // Update mDocIdMap
         Integer docId = mUriToDocIdMap.get(uri);
         if (docId != null) {
@@ -66,18 +69,10 @@ public class FakeIcing {
         mUriToDocIdMap.put(uri, docId);
 
         // Update mDocStore
-        mDocStore.put(docId, Pair.create(uri, doc));
+        mDocStore.put(docId, document);
 
         // Update mIndex
-        String[] words = normalizeString(doc).split("\\s+");
-        for (String word : words) {
-            Set<Integer> postingList = mIndex.get(word);
-            if (postingList == null) {
-                postingList = new ArraySet<>();
-                mIndex.put(word, postingList);
-            }
-            postingList.add(docId);
-        }
+        indexDocument(docId, document);
     }
 
     /**
@@ -87,39 +82,35 @@ public class FakeIcing {
      * @return The body of the document, or {@code null} if no such document exists.
      */
     @Nullable
-    public String get(@NonNull String uri) {
+    public DocumentProto get(@NonNull String uri) {
         Integer docId = mUriToDocIdMap.get(uri);
         if (docId == null) {
             return null;
         }
-        Pair<String, String> record = mDocStore.get(docId);
-        if (record == null) {
-            return null;
-        }
-        return record.second;
+        return mDocStore.get(docId);
     }
 
     /**
      * Returns documents containing the given term.
      *
      * @param term A single exact term to look up in the index.
-     * @return The URIs of the matching documents, or an empty {@code List} if no documents match.
+     * @return The matching documents, or an empty {@code List} if no documents match.
      */
     @NonNull
-    public List<String> query(@NonNull String term) {
+    public List<DocumentProto> query(@NonNull String term) {
         String normTerm = normalizeString(term);
         Set<Integer> docIds = mIndex.get(normTerm);
         if (docIds == null || docIds.isEmpty()) {
             return Collections.emptyList();
         }
-        List<String> uris = new ArrayList<>(docIds.size());
+        List<DocumentProto> matches = new ArrayList<>(docIds.size());
         for (int docId : docIds) {
-            Pair<String, String> record = mDocStore.get(docId);
-            if (record != null) {
-                uris.add(record.first);
+            DocumentProto document = mDocStore.get(docId);
+            if (document != null) {
+                matches.add(document);
             }
         }
-        return uris;
+        return matches;
     }
 
     /**
@@ -135,6 +126,39 @@ public class FakeIcing {
             mDocStore.remove(docId);
             mUriToDocIdMap.remove(uri);
         }
+    }
+
+    private void indexDocument(int docId, DocumentProto document) {
+        for (PropertyProto property : document.getPropertiesList()) {
+            for (String stringValue : property.getStringValuesList()) {
+                String[] words = normalizeString(stringValue).split("\\s+");
+                for (String word : words) {
+                    indexTerm(docId, word);
+                }
+            }
+            for (Long longValue : property.getInt64ValuesList()) {
+                indexTerm(docId, longValue.toString());
+            }
+            for (Double doubleValue : property.getDoubleValuesList()) {
+                indexTerm(docId, doubleValue.toString());
+            }
+            for (Boolean booleanValue : property.getBooleanValuesList()) {
+                indexTerm(docId, booleanValue.toString());
+            }
+            // Intentionally skipping bytes values
+            for (DocumentProto documentValue : property.getDocumentValuesList()) {
+                indexDocument(docId, documentValue);
+            }
+        }
+    }
+
+    private void indexTerm(int docId, String term) {
+        Set<Integer> postingList = mIndex.get(term);
+        if (postingList == null) {
+            postingList = new ArraySet<>();
+            mIndex.put(term, postingList);
+        }
+        postingList.add(docId);
     }
 
     /** Strips out punctuation and converts to lowercase. */
