@@ -270,7 +270,7 @@ public final class ImageDecoder implements AutoCloseable {
         public ImageDecoder createImageDecoder(boolean preferAnimation) throws IOException {
             AssetFileDescriptor assetFd = null;
             try {
-                if (mUri.getScheme() == ContentResolver.SCHEME_CONTENT) {
+                if (mUri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
                     assetFd = mResolver.openTypedAssetFileDescriptor(mUri,
                             "image/*", null);
                 } else {
