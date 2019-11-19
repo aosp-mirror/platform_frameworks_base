@@ -661,8 +661,10 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ఈ యాప్ నుండి నోటిఫికేషన్‌లను చూపిస్తూ ఉండాలా?"</string>
     <string name="notification_silence_title" msgid="5763240612242137433">"నిశ్శబ్దం"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"హెచ్చరించడం"</string>
+    <string name="notification_bubble_title" msgid="6826478461954949364">"బబుల్"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"శబ్దం లేదా వైబ్రేషన్ లేకుండా దృష్టి కేంద్రీకరించడానికి మీకు సహాయపడుతుంది."</string>
     <string name="notification_channel_summary_default" msgid="5994062840431965586">"శబ్దం లేదా వైబ్రేషన్‌తో మీరు దృష్టి సారించేలా చేస్తుంది."</string>
+    <string name="notification_channel_summary_bubble" msgid="4269580628050629291">"ఫ్లోటింగ్ షార్ట్‌కట్‌తో మీ దృష్టిని ఈ కంటెంట్‌పై నిలిపి ఉంచుతుంది."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
@@ -846,7 +848,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"తీసివేయడానికి కిందికి లాగండి"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"మెను"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> చిత్రంలో చిత్రం రూపంలో ఉంది"</string>
-    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి నొక్కి, దీన్ని ఆఫ్ చేయండి."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g> ఈ లక్షణాన్ని ఉపయోగించకూడదు అని మీరు అనుకుంటే, సెట్టింగ్‌లను తెరవడానికి ట్యాప్ చేసి, దీన్ని ఆఫ్ చేయండి."</string>
     <string name="pip_play" msgid="1417176722760265888">"ప్లే చేయి"</string>
     <string name="pip_pause" msgid="8881063404466476571">"పాజ్ చేయి"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"దాటవేసి తర్వాత దానికి వెళ్లు"</string>
@@ -946,4 +948,7 @@
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"విస్మరించు"</string>
     <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"సిస్టమ్ నావిగేషన్ అప్‌డేట్ చేయబడింది. మార్పులు చేయడానికి, సెట్టింగ్‌లకు వెళ్లండి."</string>
     <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"సిస్టమ్ నావిగేషన్‌ను అప్‌డేట్ చేయడానికి సెట్టింగ్‌లకు వెళ్లండి"</string>
+    <string name="inattentive_sleep_warning_title" msgid="7695119731872371794">"స్టాండ్‌బై"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="4279125516592217099">"Android TV పరికరం త్వరలో ఆఫ్ అయిపోతుంది; దాన్ని ఆన్‌లో ఉంచడానికి బటన్‌ను నొక్కండి."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="3128565462954884260">"పరికరం త్వరలో ఆఫ్ అయిపోతుంది; దీన్ని ఆన్‌లో ఉంచడానికి నొక్కండి."</string>
 </resources>
