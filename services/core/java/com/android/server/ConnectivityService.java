@@ -6453,6 +6453,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                    newNetwork.name(), score, newNetwork.getCurrentScore()));
         }
 
+        // Notify requested networks are available after the default net is switched, but
+        // before LegacyTypeTracker sends legacy broadcasts
+        for (NetworkRequestInfo nri : addedRequests) notifyNetworkAvailable(newNetwork, nri);
+
         // Second pass: process all listens.
         if (wasBackgroundNetwork != newNetwork.isBackgroundNetwork()) {
             // If the network went from background to foreground or vice versa, we need to update
@@ -6463,10 +6467,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else {
             processListenRequests(newNetwork, false);
         }
-
-        // do this after the default net is switched, but
-        // before LegacyTypeTracker sends legacy broadcasts
-        for (NetworkRequestInfo nri : addedRequests) notifyNetworkAvailable(newNetwork, nri);
     }
 
     /**
