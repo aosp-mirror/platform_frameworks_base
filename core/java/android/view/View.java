@@ -10353,6 +10353,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the user. It is a supplement to the boolean states (for example, checked/unchecked) and
      * it is used for customized state description (for example, "wifi, connected, three bars").
      * State description changes frequently while content description should change less often.
+     * State description should be localized. For android widgets which have default state
+     * descriptions, app developers can call this method to override the state descriptions.
+     * Setting state description to null restores the default behavior.
      *
      * @param stateDescription The state description.
      * @see #getStateDescription()
