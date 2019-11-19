@@ -809,7 +809,9 @@ public class CarrierConfigManager {
     /**
      * The default flag specifying whether ETWS/CMAS test setting is forcibly disabled in
      * Settings->More->Emergency broadcasts menu even though developer options is turned on.
+     * @deprecated moved to cellbroadcastreceiver resource show_test_settings
      */
+    @Deprecated
     public static final String KEY_CARRIER_FORCE_DISABLE_ETWS_CMAS_TEST_BOOL =
             "carrier_force_disable_etws_cmas_test_bool";
 
