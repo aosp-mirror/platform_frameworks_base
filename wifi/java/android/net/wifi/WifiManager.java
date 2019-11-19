@@ -450,7 +450,11 @@ public class WifiManager {
     /**
      * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
      * enabling, disabling, or unknown. One extra provides this state as an int.
-     * Another extra provides the previous state, if available.
+     * Another extra provides the previous state, if available.  No network-related
+     * permissions are required to subscribe to this broadcast.
+     *
+     * <p class="note">This broadcast is not delivered to manifest receivers in
+     * applications that target API version 26 or later.
      *
      * @see #EXTRA_WIFI_STATE
      * @see #EXTRA_PREVIOUS_WIFI_STATE
@@ -753,7 +757,11 @@ public class WifiManager {
     /**
      * Broadcast intent action indicating that the state of Wi-Fi connectivity
      * has changed. An extra provides the new state
-     * in the form of a {@link android.net.NetworkInfo} object.
+     * in the form of a {@link android.net.NetworkInfo} object.  No network-related
+     * permissions are required to subscribe to this broadcast.
+     *
+     * <p class="note">This broadcast is not delivered to manifest receivers in
+     * applications that target API version 26 or later.
      * @see #EXTRA_NETWORK_INFO
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
