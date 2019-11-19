@@ -1327,7 +1327,7 @@ public final class SystemServer {
             if (!isWatch) {
                 t.traceBegin("StartStatusBarManagerService");
                 try {
-                    statusBar = new StatusBarManagerService(context, wm);
+                    statusBar = new StatusBarManagerService(context);
                     ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar);
                 } catch (Throwable e) {
                     reportWtf("starting StatusBarManagerService", e);

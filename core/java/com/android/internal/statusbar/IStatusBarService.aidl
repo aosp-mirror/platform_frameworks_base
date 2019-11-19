@@ -123,4 +123,19 @@ interface IStatusBarService
      * Dismiss the warning that the device is about to go to sleep due to user inactivity.
      */
     void dismissInattentiveSleepWarning(boolean animated);
+
+    /**
+     * Notifies SystemUI to start tracing.
+     */
+    void startTracing();
+
+    /**
+     * Notifies SystemUI to stop tracing.
+     */
+    void stopTracing();
+
+    /**
+     * Returns whether SystemUI tracing is enabled.
+     */
+    boolean isTracing();
 }
