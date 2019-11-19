@@ -1290,7 +1290,7 @@ public class LockSettingsService extends ILockSettings.Stub {
          */
        if (checkCryptKeeperPermissions())
             mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.MANAGE_DEVICE_ADMINS,
+                    android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE,
                     "no crypt_keeper or admin permission to get the password");
 
        return mSavePassword;
