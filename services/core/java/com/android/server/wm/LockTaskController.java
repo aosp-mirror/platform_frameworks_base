@@ -239,7 +239,7 @@ public class LockTaskController {
     boolean activityBlockedFromFinish(ActivityRecord activity) {
         final Task task = activity.getTask();
         if (activity == task.getRootActivity()
-                && activity == task.getTopActivity()
+                && activity == task.getTopNonFinishingActivity()
                 && task.mLockTaskAuth != LOCK_TASK_AUTH_LAUNCHABLE_PRIV
                 && isRootTask(task)) {
             Slog.i(TAG, "Not finishing task in lock task mode");

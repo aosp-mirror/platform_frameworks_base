@@ -107,7 +107,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         mStack = new StackBuilder(mRootActivityContainer).build();
         mTask = mStack.getChildAt(0);
-        mActivity = mTask.getTopActivity();
+        mActivity = mTask.getTopNonFinishingActivity();
 
         doReturn(false).when(mService).isBooting();
         doReturn(true).when(mService).isBooted();
@@ -777,7 +777,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Simulates that {@code currentTop} starts an existing activity from background (so its
         // state is stopped) and the starting flow just goes to place it at top.
         final ActivityStack nextStack = new StackBuilder(mRootActivityContainer).build();
-        final ActivityRecord nextTop = nextStack.getTopActivity();
+        final ActivityRecord nextTop = nextStack.getTopNonFinishingActivity();
         nextTop.setState(STOPPED, "test");
 
         mStack.mPausingActivity = currentTop;

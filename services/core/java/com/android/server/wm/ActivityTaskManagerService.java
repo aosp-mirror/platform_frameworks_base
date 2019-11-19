@@ -2410,7 +2410,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mStackSupervisor.findTaskToMoveToFront(task, flags, realOptions, "moveTaskToFront",
                     false /* forceNonResizable */);
 
-            final ActivityRecord topActivity = task.getTopActivity();
+            final ActivityRecord topActivity = task.getTopNonFinishingActivity();
             if (topActivity != null) {
 
                 // We are reshowing a task, use a starting window to hide the initial draw delay
@@ -2999,7 +2999,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isTopOfTask(IBinder token) {
         synchronized (mGlobalLock) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            return r != null && r.getTask().getTopActivity() == r;
+            return r != null && r.getTask().getTopNonFinishingActivity() == r;
         }
     }
 
@@ -3589,7 +3589,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "enqueueAssistContext()");
 
         synchronized (mGlobalLock) {
-            ActivityRecord activity = getTopDisplayFocusedStack().getTopActivity();
+            ActivityRecord activity = getTopDisplayFocusedStack().getTopNonFinishingActivity();
             if (activity == null) {
                 Slog.w(TAG, "getAssistContextExtras failed: no top activity");
                 return null;
@@ -3722,7 +3722,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return false;
             }
 
-            final ActivityRecord activity = focusedStack.getTopActivity();
+            final ActivityRecord activity = focusedStack.getTopNonFinishingActivity();
             if (activity == null) {
                 return false;
             }
@@ -3737,7 +3737,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 ActivityRecord caller = ActivityRecord.forTokenLocked(token);
-                ActivityRecord top = getTopDisplayFocusedStack().getTopActivity();
+                ActivityRecord top = getTopDisplayFocusedStack().getTopNonFinishingActivity();
                 if (top != caller) {
                     Slog.w(TAG, "showAssistFromActivity failed: caller " + caller
                             + " is not current top " + top);
@@ -4355,7 +4355,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options) {
         Slog.i(TAG, "Activity tried to startLocalVoiceInteraction");
         synchronized (mGlobalLock) {
-            ActivityRecord activity = getTopDisplayFocusedStack().getTopActivity();
+            ActivityRecord activity = getTopDisplayFocusedStack().getTopNonFinishingActivity();
             if (ActivityRecord.forTokenLocked(callingActivity) != activity) {
                 throw new SecurityException("Only focused activity can call startVoiceInteraction");
             }
@@ -6576,7 +6576,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + " Requested task not found");
                     return null;
                 }
-                final ActivityRecord activity = task.getTopActivity();
+                final ActivityRecord activity = task.getTopNonFinishingActivity();
                 if (activity == null) {
                     Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
                             + " Requested activity not found");

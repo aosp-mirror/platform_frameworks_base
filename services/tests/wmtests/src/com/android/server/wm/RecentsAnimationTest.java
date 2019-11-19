@@ -154,7 +154,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 ACTIVITY_TYPE_RECENTS);
         assertThat(recentsStack).isNotNull();
 
-        ActivityRecord recentsActivity = recentsStack.getTopActivity();
+        ActivityRecord recentsActivity = recentsStack.getTopNonFinishingActivity();
         // The activity is started in background so it should be invisible and will be stopped.
         assertThat(recentsActivity).isNotNull();
         assertThat(mSupervisor.mStoppingActivities).contains(recentsActivity);
@@ -211,7 +211,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         display.mDisplayContent.mBoundsAnimationController = mock(BoundsAnimationController.class);
         ActivityStack homeStack = display.getHomeStack();
         // Assume the home activity support recents.
-        ActivityRecord targetActivity = homeStack.getTopActivity();
+        ActivityRecord targetActivity = homeStack.getTopNonFinishingActivity();
         if (targetActivity == null) {
             targetActivity = new ActivityBuilder(mService)
                     .setCreateTask(true)

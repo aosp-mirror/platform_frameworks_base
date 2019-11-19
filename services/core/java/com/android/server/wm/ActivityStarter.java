@@ -1502,7 +1502,8 @@ class ActivityStarter {
             return startResult;
         }
 
-        final ActivityRecord targetTaskTop = newTask ? null : targetTask.getTopActivity();
+        final ActivityRecord targetTaskTop = newTask
+                ? null : targetTask.getTopNonFinishingActivity();
         if (targetTaskTop != null) {
             // Recycle the target task for this launch.
             startResult = recycleTask(targetTask, targetTaskTop, reusedTask);
@@ -1559,8 +1560,8 @@ class ActivityStarter {
         mRootActivityContainer.sendPowerHintForLaunchStartIfNeeded(
                 false /* forceSend */, mStartActivity);
 
-        mTargetStack.startActivityLocked(mStartActivity, topStack.getTopActivity(), newTask,
-                mKeepCurTransition, mOptions);
+        mTargetStack.startActivityLocked(mStartActivity, topStack.getTopNonFinishingActivity(),
+                newTask, mKeepCurTransition, mOptions);
         if (mDoResume) {
             final ActivityRecord topTaskActivity =
                     mStartActivity.getTask().topRunningActivityLocked();
@@ -1612,7 +1613,7 @@ class ActivityStarter {
             return mInTask;
         } else {
             final ActivityRecord top = computeStackFocus(mStartActivity, false /* newTask */,
-                    mLaunchFlags, mOptions).getTopActivity();
+                    mLaunchFlags, mOptions).getTopNonFinishingActivity();
             if (top != null) {
                 return top.getTask();
             }
@@ -1727,7 +1728,8 @@ class ActivityStarter {
             return START_RETURN_INTENT_TO_CALLER;
         }
 
-        complyActivityFlags(targetTask, reusedTask != null ? reusedTask.getTopActivity() : null);
+        complyActivityFlags(targetTask,
+                reusedTask != null ? reusedTask.getTopNonFinishingActivity() : null);
 
         if (clearTaskForReuse) {
             // Clear task for re-use so later code to methods
@@ -1755,7 +1757,7 @@ class ActivityStarter {
         // FLAG_ACTIVITY_CLEAR_TOP flag. In that case, return the top running activity in the
         // task instead.
         mLastStartActivityRecord =
-                targetTaskTop.finishing ? targetTask.getTopActivity() : targetTaskTop;
+                targetTaskTop.finishing ? targetTask.getTopNonFinishingActivity() : targetTaskTop;
         return mMovedToFront ? START_TASK_TO_FRONT : START_DELIVERED_TO_TOP;
     }
 
@@ -1806,7 +1808,7 @@ class ActivityStarter {
      * task.
      */
     private void complyActivityFlags(Task targetTask, ActivityRecord reusedActivity) {
-        ActivityRecord targetTaskTop = targetTask.getTopActivity();
+        ActivityRecord targetTaskTop = targetTask.getTopNonFinishingActivity();
         final boolean resetTask =
                 reusedActivity != null && (mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0;
         if (resetTask) {
@@ -2037,7 +2039,8 @@ class ActivityStarter {
                 if (!mOptions.canTaskOverlayResume()) {
                     final Task task = mRootActivityContainer.anyTaskForId(
                             mOptions.getLaunchTaskId());
-                    final ActivityRecord top = task != null ? task.getTopActivity() : null;
+                    final ActivityRecord top = task != null
+                            ? task.getTopNonFinishingActivity() : null;
                     if (top != null && !top.isState(RESUMED)) {
 
                         // The caller specifies that we'd like to be avoided to be moved to the
@@ -2295,8 +2298,8 @@ class ActivityStarter {
 
         if (differentTopTask && !mAvoidMoveToFront) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            if (mSourceRecord == null || (mSourceStack.getTopActivity() != null &&
-                    mSourceStack.getTopActivity().getTask()
+            if (mSourceRecord == null || (mSourceStack.getTopNonFinishingActivity() != null &&
+                    mSourceStack.getTopNonFinishingActivity().getTask()
                             == mSourceRecord.getTask())) {
                 // We really do want to push this one into the user's face, right now.
                 if (mLaunchTaskBehind && mSourceRecord != null) {

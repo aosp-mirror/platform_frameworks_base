@@ -429,7 +429,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         // 1) The next launching task is not being animated by the recents animation
         // 2) The next task is home activity. (i.e. pressing home key to back home in recents).
         if ((!controller.isAnimatingTask(stack.getTopChild())
-                || controller.isTargetApp(stack.getTopActivity()))
+                || controller.isTargetApp(stack.getTopNonFinishingActivity()))
                 && controller.shouldDeferCancelUntilNextTransition()) {
             // Always prepare an app transition since we rely on the transition callbacks to cleanup
             mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
@@ -494,7 +494,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             final Task task = targetStack.getChildAt(i);
             if (task.mUserId == mUserId
                     && task.getBaseIntent().getComponent().equals(mTargetIntent.getComponent())) {
-                return task.getTopActivity();
+                return task.getTopNonFinishingActivity();
             }
         }
         return null;
