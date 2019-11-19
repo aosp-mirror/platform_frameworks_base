@@ -559,13 +559,6 @@ public class NotificationManagerService extends SystemService {
 
 
         ArraySet<String> assistants = new ArraySet<>();
-        String deviceAssistant = DeviceConfig.getProperty(
-                DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE);
-        if (deviceAssistant != null) {
-            assistants.addAll(Arrays.asList(deviceAssistant.split(
-                    ManagedServices.ENABLED_SERVICES_SEPARATOR)));
-        }
         assistants.addAll(Arrays.asList(getContext().getResources().getString(
                 com.android.internal.R.string.config_defaultAssistantAccessComponent)
                 .split(ManagedServices.ENABLED_SERVICES_SEPARATOR)));
@@ -594,6 +587,13 @@ public class NotificationManagerService extends SystemService {
     }
 
     protected void setDefaultAssistantForUser(int userId) {
+        String overrideDefaultAssistantString = DeviceConfig.getProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE);
+        ComponentName overrideDefaultAssistant =
+                ComponentName.unflattenFromString(overrideDefaultAssistantString);
+        if (allowAssistant(userId, overrideDefaultAssistant)) return;
+
         ArraySet<ComponentName> defaults = mAssistants.getDefaultComponents();
         // We should have only one default assistant by default
         // allowAssistant should execute once in practice
