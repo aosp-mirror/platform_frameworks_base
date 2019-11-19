@@ -6486,15 +6486,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // do this after the default net is switched, but
         // before LegacyTypeTracker sends legacy broadcasts
         for (NetworkRequestInfo nri : addedRequests) notifyNetworkAvailable(newNetwork, nri);
-
-        // Linger any networks that are no longer needed. This should be done after sending the
-        // available callback for newNetwork.
-        for (NetworkAgentInfo nai : removedRequests) {
-            updateLingerState(nai, now);
-        }
-        // Possibly unlinger newNetwork. Unlingering a network does not send any callbacks so it
-        // does not need to be done in any particular order.
-        updateLingerState(newNetwork, now);
     }
 
     /**
@@ -6514,13 +6505,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 new NetworkAgentInfo[mNetworkAgentInfos.size()]);
         // Rematch higher scoring networks first to prevent requests first matching a lower
         // scoring network and then a higher scoring network, which could produce multiple
-        // callbacks and inadvertently unlinger networks.
+        // callbacks.
         Arrays.sort(nais);
-        for (NetworkAgentInfo nai : nais) {
+        for (final NetworkAgentInfo nai : nais) {
             rematchNetworkAndRequests(nai, now);
         }
 
         final NetworkAgentInfo newDefaultNetwork = getDefaultNetwork();
+
+        for (final NetworkAgentInfo nai : nais) {
+            // Rematching may have altered the linger state of some networks, so update all linger
+            // timers. updateLingerState reads the state from the network agent and does nothing
+            // if the state has not changed : the source of truth is controlled with
+            // NetworkAgentInfo#lingerRequest and NetworkAgentInfo#unlingerRequest, which have been
+            // called while rematching the individual networks above.
+            updateLingerState(nai, now);
+        }
 
         updateLegacyTypeTrackerAndVpnLockdownForRematch(oldDefaultNetwork, newDefaultNetwork, nais);
 
