@@ -51,8 +51,8 @@ import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionD
 
 import java.io.PrintWriter;
 import java.util.BitSet;
-import java.util.Objects;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -556,8 +556,8 @@ public class MobileSignalController extends SignalController<
         // If this is the data subscription, update the currentState data name
         if (mCurrentState.networkNameData.equals(mNetworkNameDefault) && mServiceState != null
                 && mCurrentState.dataSim
-                && !TextUtils.isEmpty(mServiceState.getDataOperatorAlphaShort())) {
-            mCurrentState.networkNameData = mServiceState.getDataOperatorAlphaShort();
+                && !TextUtils.isEmpty(mServiceState.getOperatorAlphaShort())) {
+            mCurrentState.networkNameData = mServiceState.getOperatorAlphaShort();
         }
 
         notifyListenersIfNecessary();
