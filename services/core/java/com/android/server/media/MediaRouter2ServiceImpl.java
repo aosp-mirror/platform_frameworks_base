@@ -728,15 +728,14 @@ class MediaRouter2ServiceImpl {
 
     static final class UserHandler extends Handler implements
             MediaRoute2ProviderWatcher.Callback,
-            MediaRoute2Provider.Callback {
+            MediaRoute2ProviderProxy.Callback {
 
         private final WeakReference<MediaRouter2ServiceImpl> mServiceRef;
         private final UserRecord mUserRecord;
         private final MediaRoute2ProviderWatcher mWatcher;
 
         //TODO: Make this thread-safe.
-        private final SystemMediaRoute2Provider mSystemProvider;
-        private final ArrayList<MediaRoute2Provider> mMediaProviders =
+        private final ArrayList<MediaRoute2ProviderProxy> mMediaProviders =
                 new ArrayList<>();
         private final List<MediaRoute2ProviderInfo> mProviderInfos = new ArrayList<>();
 
@@ -747,8 +746,6 @@ class MediaRouter2ServiceImpl {
             super(Looper.getMainLooper(), null, true);
             mServiceRef = new WeakReference<>(service);
             mUserRecord = userRecord;
-            mSystemProvider = new SystemMediaRoute2Provider(service.mContext, this);
-            mMediaProviders.add(mSystemProvider);
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,
                     this, mUserRecord.mUserId);
         }
@@ -780,7 +777,7 @@ class MediaRouter2ServiceImpl {
         }
 
         @Override
-        public void onProviderStateChanged(@NonNull MediaRoute2Provider provider) {
+        public void onProviderStateChanged(@NonNull MediaRoute2ProviderProxy provider) {
             sendMessage(PooledLambda.obtainMessage(UserHandler::updateProvider, this, provider));
         }
 
@@ -793,7 +790,7 @@ class MediaRouter2ServiceImpl {
                     controlHints, seq));
         }
 
-        private void updateProvider(MediaRoute2Provider provider) {
+        private void updateProvider(MediaRoute2ProviderProxy provider) {
             int providerIndex = getProviderInfoIndex(provider.getUniqueId());
             MediaRoute2ProviderInfo providerInfo = provider.getProviderInfo();
             MediaRoute2ProviderInfo prevInfo =
@@ -957,7 +954,7 @@ class MediaRouter2ServiceImpl {
 
         private void requestSelectRoute(String clientPackageName, MediaRoute2Info route, int seq) {
             if (route != null) {
-                MediaRoute2Provider provider = findProvider(route.getProviderId());
+                MediaRoute2ProviderProxy provider = findProvider(route.getProviderId());
                 if (provider == null) {
                     Slog.w(TAG, "Ignoring to select route of unknown provider " + route);
                 } else {
@@ -968,7 +965,7 @@ class MediaRouter2ServiceImpl {
 
         private void unselectRoute(String clientPackageName, MediaRoute2Info route) {
             if (route != null) {
-                MediaRoute2Provider provider = findProvider(route.getProviderId());
+                MediaRoute2ProviderProxy provider = findProvider(route.getProviderId());
                 if (provider == null) {
                     Slog.w(TAG, "Ignoring to unselect route of unknown provider " + route);
                 } else {
@@ -978,21 +975,21 @@ class MediaRouter2ServiceImpl {
         }
 
         private void sendControlRequest(MediaRoute2Info route, Intent request) {
-            final MediaRoute2Provider provider = findProvider(route.getProviderId());
+            final MediaRoute2ProviderProxy provider = findProvider(route.getProviderId());
             if (provider != null) {
                 provider.sendControlRequest(route, request);
             }
         }
 
         private void requestSetVolume(MediaRoute2Info route, int volume) {
-            final MediaRoute2Provider provider = findProvider(route.getProviderId());
+            final MediaRoute2ProviderProxy provider = findProvider(route.getProviderId());
             if (provider != null) {
                 provider.requestSetVolume(route, volume);
             }
         }
 
         private void requestUpdateVolume(MediaRoute2Info route, int delta) {
-            final MediaRoute2Provider provider = findProvider(route.getProviderId());
+            final MediaRoute2ProviderProxy provider = findProvider(route.getProviderId());
             if (provider != null) {
                 provider.requestUpdateVolume(route, delta);
             }
@@ -1156,8 +1153,8 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private MediaRoute2Provider findProvider(String providerId) {
-            for (MediaRoute2Provider provider : mMediaProviders) {
+        private MediaRoute2ProviderProxy findProvider(String providerId) {
+            for (MediaRoute2ProviderProxy provider : mMediaProviders) {
                 if (TextUtils.equals(provider.getUniqueId(), providerId)) {
                     return provider;
                 }

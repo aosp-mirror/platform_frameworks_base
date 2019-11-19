@@ -82,11 +82,6 @@ public class MediaRouterManagerTest {
     public static final String CATEGORY_SPECIAL =
             "com.android.mediarouteprovider.CATEGORY_SPECIAL";
 
-    // system routes
-    private static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
-    private static final String CATEGORY_LIVE_AUDIO = "android.media.intent.category.LIVE_AUDIO";
-    private static final String CATEGORY_LIVE_VIDEO = "android.media.intent.category.LIVE_VIDEO";
-
     private static final int TIMEOUT_MS = 5000;
 
     private Context mContext;
@@ -95,17 +90,13 @@ public class MediaRouterManagerTest {
     private Executor mExecutor;
     private String mPackageName;
 
-    private static final List<String> CATEGORIES_ALL = new ArrayList();
-    private static final List<String> CATEGORIES_SPECIAL = new ArrayList();
-    private static final List<String> CATEGORIES_LIVE_AUDIO = new ArrayList<>();
+    private static final List<String> CONTROL_CATEGORIES_ALL = new ArrayList();
+    private static final List<String> CONTROL_CATEGORIES_SPECIAL = new ArrayList();
     static {
-        CATEGORIES_ALL.add(CATEGORY_SAMPLE);
-        CATEGORIES_ALL.add(CATEGORY_SPECIAL);
-        CATEGORIES_ALL.add(CATEGORY_LIVE_AUDIO);
+        CONTROL_CATEGORIES_ALL.add(CATEGORY_SAMPLE);
+        CONTROL_CATEGORIES_ALL.add(CATEGORY_SPECIAL);
 
-        CATEGORIES_SPECIAL.add(CATEGORY_SPECIAL);
-
-        CATEGORIES_LIVE_AUDIO.add(CATEGORY_LIVE_AUDIO);
+        CONTROL_CATEGORIES_SPECIAL.add(CATEGORY_SPECIAL);
     }
 
     @Before
@@ -162,7 +153,7 @@ public class MediaRouterManagerTest {
         mRouter2.registerCallback(mExecutor, routerCallback);
 
         Map<String, MediaRoute2Info> routes =
-                waitAndGetRoutesWithManager(CATEGORIES_ALL);
+                waitAndGetRoutesWithManager(CONTROL_CATEGORIES_ALL);
 
         CountDownLatch latch = new CountDownLatch(1);
         MediaRouter2Manager.Callback callback = new MediaRouter2Manager.Callback() {
@@ -196,7 +187,7 @@ public class MediaRouterManagerTest {
         mManager.registerCallback(mExecutor, mockCallback);
 
         Map<String, MediaRoute2Info> routes =
-                waitAndGetRoutesWithManager(CATEGORIES_SPECIAL);
+                waitAndGetRoutesWithManager(CONTROL_CATEGORIES_SPECIAL);
 
         Assert.assertEquals(1, routes.size());
         Assert.assertNotNull(routes.get(ROUTE_ID_SPECIAL_CATEGORY));
@@ -212,7 +203,7 @@ public class MediaRouterManagerTest {
         MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
         mRouter2.registerCallback(mExecutor, mockCallback);
 
-        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CATEGORIES_SPECIAL);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CONTROL_CATEGORIES_SPECIAL);
 
         Assert.assertEquals(1, routes.size());
         Assert.assertNotNull(routes.get(ROUTE_ID_SPECIAL_CATEGORY));
@@ -228,7 +219,7 @@ public class MediaRouterManagerTest {
         mManager.registerCallback(mExecutor, managerCallback);
         mRouter2.registerCallback(mExecutor, routerCallback);
 
-        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CATEGORIES_ALL);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CONTROL_CATEGORIES_ALL);
 
         MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
         assertNotNull(routeToSelect);
@@ -251,7 +242,7 @@ public class MediaRouterManagerTest {
 
         mRouter2.registerCallback(mExecutor, routerCallback);
 
-        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CATEGORIES_ALL);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CONTROL_CATEGORIES_ALL);
 
         awaitOnRouteChangedManager(
                 () -> mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1)),
@@ -273,7 +264,7 @@ public class MediaRouterManagerTest {
 
     @Test
     public void testControlVolumeWithRouter() throws Exception {
-        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CATEGORIES_ALL);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CONTROL_CATEGORIES_ALL);
 
         MediaRoute2Info volRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
         int originalVolume = volRoute.getVolume();
@@ -295,7 +286,7 @@ public class MediaRouterManagerTest {
         MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
 
         mRouter2.registerCallback(mExecutor, mockCallback);
-        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CATEGORIES_ALL);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CONTROL_CATEGORIES_ALL);
 
         MediaRoute2Info volRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
         int originalVolume = volRoute.getVolume();
@@ -318,7 +309,7 @@ public class MediaRouterManagerTest {
     public void testVolumeHandling() throws Exception {
         MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
         mRouter2.registerCallback(mExecutor, mockCallback);
-        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CATEGORIES_ALL);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CONTROL_CATEGORIES_ALL);
 
         MediaRoute2Info fixedVolumeRoute = routes.get(ROUTE_ID_FIXED_VOLUME);
         MediaRoute2Info variableVolumeRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
@@ -328,13 +319,6 @@ public class MediaRouterManagerTest {
         assertEquals(VOLUME_MAX, variableVolumeRoute.getVolumeMax());
 
         mRouter2.unregisterCallback(mockCallback);
-    }
-
-    @Test
-    public void testDefaultRoute() throws Exception {
-        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CATEGORIES_LIVE_AUDIO);
-
-        assertNotNull(routes.get(DEFAULT_ROUTE_ID));
     }
 
     Map<String, MediaRoute2Info> waitAndGetRoutes(List<String> controlCategories) throws Exception {
@@ -433,7 +417,6 @@ public class MediaRouterManagerTest {
     static Map<String, MediaRoute2Info> createRouteMap(List<MediaRoute2Info> routes) {
         Map<String, MediaRoute2Info> routeMap = new HashMap<>();
         for (MediaRoute2Info route : routes) {
-            // intentionally not route.getUniqueId() for convenience.
             routeMap.put(route.getId(), route);
         }
         return routeMap;
