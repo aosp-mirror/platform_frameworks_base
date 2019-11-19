@@ -424,8 +424,9 @@ public final class DeviceConfig {
      * Look up the values of multiple properties for a particular namespace. The lookup is atomic,
      * such that the values of these properties cannot change between the time when the first is
      * fetched and the time when the last is fetched.
-     *
-     * TODO: reference setProperties when it is added.
+     * <p>
+     * Each call to {@link #setProperties(Properties)} is also atomic and ensures that either none
+     * or all of the change is picked up here, but never only part of it.
      *
      * @param namespace The namespace containing the properties to look up.
      * @param names     The names of properties to look up, or empty to fetch all properties for the
@@ -593,6 +594,27 @@ public final class DeviceConfig {
     }
 
     /**
+     * Set all of the properties for a specific namespace. Pre-existing properties will be updated
+     * and new properties will be added if necessary. Any pre-existing properties for the specific
+     * namespace which are not part of the provided {@link Properties} object will be deleted from
+     * the namespace. These changes are all applied atomically, such that no calls to read or reset
+     * these properties can happen in the middle of this update.
+     * <p>
+     * Each call to {@link #getProperties(String, String...)} is also atomic and ensures that either
+     * none or all of this update is picked up, but never only part of it.
+     *
+     * @param properties the complete set of properties to set for a specific namespace.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(WRITE_DEVICE_CONFIG)
+    public static boolean setProperties(@NonNull Properties properties) {
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+        return Settings.Config.setStrings(contentResolver, properties.getNamespace(),
+                properties.mMap);
+    }
+
+    /**
      * Reset properties to their default values.
      * <p>
      * The method accepts an optional namespace parameter. If provided, only properties set within
@@ -736,23 +758,26 @@ public final class DeviceConfig {
         List<String> pathSegments = uri.getPathSegments();
         // pathSegments(0) is "config"
         final String namespace = pathSegments.get(1);
-        final String name = pathSegments.get(2);
-        final String value;
+        Map<String, String> propertyMap = new ArrayMap<>();
         try {
-            value = getProperty(namespace, name);
+            Properties allProperties = getProperties(namespace);
+            for (int i = 2; i < pathSegments.size(); ++i) {
+                String key = pathSegments.get(i);
+                propertyMap.put(key, allProperties.getString(key, null));
+            }
         } catch (SecurityException e) {
             // Silently failing to not crash binder or listener threads.
             Log.e(TAG, "OnPropertyChangedListener update failed: permission violation.");
             return;
         }
+        Properties properties = new Properties(namespace, propertyMap);
+
         synchronized (sLock) {
             for (int i = 0; i < sListeners.size(); i++) {
                 if (namespace.equals(sListeners.valueAt(i).first)) {
                     final OnPropertiesChangedListener listener = sListeners.keyAt(i);
                     sListeners.valueAt(i).second.execute(() -> {
-                        Map<String, String> propertyMap = new ArrayMap<>(1);
-                        propertyMap.put(name, value);
-                        listener.onPropertiesChanged(new Properties(namespace, propertyMap));
+                        listener.onPropertiesChanged(properties);
                     });
                 }
             }
@@ -774,7 +799,11 @@ public final class DeviceConfig {
     }
 
     /**
-     * Interface for monitoring changes to properties.
+     * Interface for monitoring changes to properties. Implementations will receive callbacks when
+     * properties change, including a {@link Properties} object which contains a single namespace
+     * and all of the properties which changed for that namespace. This includes properties which
+     * were added, updated, or deleted. This is not necessarily a complete list of all properties
+     * belonging to the namespace, as properties which don't change are omitted.
      * <p>
      * Override {@link #onPropertiesChanged(Properties)} to handle callbacks for changes.
      *
@@ -784,10 +813,13 @@ public final class DeviceConfig {
     @TestApi
     public interface OnPropertiesChangedListener {
         /**
-         * Called when one or more properties have changed.
+         * Called when one or more properties have changed, providing a Properties object with all
+         * of the changed properties. This object will contain only properties which have changed,
+         * not the complete set of all properties belonging to the namespace.
          *
          * @param properties Contains the complete collection of properties which have changed for a
-         *                   single namespace.
+         *                   single namespace. This includes only those which were added, updated,
+         *                   or deleted.
          */
         void onPropertiesChanged(@NonNull Properties properties);
     }

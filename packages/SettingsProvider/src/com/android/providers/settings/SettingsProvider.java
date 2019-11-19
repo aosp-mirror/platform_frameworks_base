@@ -101,6 +101,7 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -380,6 +381,13 @@ public class SettingsProvider extends ContentProvider {
             case Settings.CALL_METHOD_PUT_SYSTEM: {
                 String value = getSettingValue(args);
                 insertSystemSetting(name, value, requestingUserId);
+                break;
+            }
+
+            case Settings.CALL_METHOD_SET_ALL_CONFIG: {
+                String prefix = getSettingPrefix(args);
+                Map<String, String> flags = getSettingFlags(args);
+                setAllConfigSettings(prefix, flags);
                 break;
             }
 
@@ -1028,6 +1036,19 @@ public class SettingsProvider extends ContentProvider {
         }
         return mutateConfigSetting(name, value, null, makeDefault,
                 MUTATION_OPERATION_INSERT, 0);
+    }
+
+    private boolean setAllConfigSettings(String prefix, Map<String, String> keyValues) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "setAllConfigSettings for prefix: " + prefix);
+        }
+
+        enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
+
+        synchronized (mLock) {
+            return mSettingsRegistry.setSettingsLocked(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM,
+                    prefix, keyValues, resolveCallingPackage());
+        }
     }
 
     private boolean deleteConfigSetting(String name) {
@@ -2117,6 +2138,11 @@ public class SettingsProvider extends ContentProvider {
         return (args != null) ? args.getString(Settings.CALL_METHOD_PREFIX_KEY) : null;
     }
 
+    private static Map<String, String> getSettingFlags(Bundle args) {
+        return (args != null) ? (HashMap) args.getSerializable(Settings.CALL_METHOD_FLAGS_KEY)
+                : Collections.emptyMap();
+    }
+
     private static boolean getSettingMakeDefault(Bundle args) {
         return (args != null) && args.getBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY);
     }
@@ -2485,7 +2511,7 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState == null) {
-                return new ArrayList<String>();
+                return new ArrayList<>();
             }
             return settingsState.getSettingNamesLocked();
         }
@@ -2643,6 +2669,22 @@ public class SettingsProvider extends ContentProvider {
                 notifyForSettingsChange(key, name);
             }
             return success;
+        }
+
+        public boolean setSettingsLocked(int type, int userId, String prefix,
+                Map<String, String> keyValues, String packageName) {
+            final int key = makeKey(type, userId);
+
+            SettingsState settingsState = peekSettingsStateLocked(key);
+            if (settingsState != null) {
+                List<String> changedSettings =
+                        settingsState.setSettingsLocked(prefix, keyValues, packageName);
+                if (!changedSettings.isEmpty()) {
+                    notifyForConfigSettingsChangeLocked(key, prefix, changedSettings);
+                }
+            }
+
+            return settingsState != null;
         }
 
         public boolean deleteSettingLocked(int type, int userId, String name, boolean forceNotify,
@@ -3037,6 +3079,28 @@ public class SettingsProvider extends ContentProvider {
                     maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
                             sSystemCloneToManagedSettings);
                 }
+            }
+
+            // Always notify that our data changed
+            mHandler.obtainMessage(MyHandler.MSG_NOTIFY_DATA_CHANGED).sendToTarget();
+        }
+
+        private void notifyForConfigSettingsChangeLocked(int key, String prefix,
+                List<String> changedSettings) {
+
+            // Increment the generation first, so observers always see the new value
+            mGenerationRegistry.incrementGeneration(key);
+
+            StringBuilder stringBuilder = new StringBuilder(prefix);
+            for (int i = 0; i < changedSettings.size(); ++i) {
+                stringBuilder.append(changedSettings.get(i).split("/")[1]).append("/");
+            }
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                notifySettingChangeForRunningUsers(key, stringBuilder.toString());
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
 
             // Always notify that our data changed
