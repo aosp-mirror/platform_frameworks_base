@@ -49,6 +49,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 
@@ -126,6 +127,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private final RollbackPackageHealthObserver mPackageHealthObserver;
     private final AppDataRollbackHelper mAppDataRollbackHelper;
 
+    // The # of milli-seconds to sleep for each received ACTION_PACKAGE_ENABLE_ROLLBACK.
+    // Used by #blockRollbackManager to test timeout in enabling rollbacks.
+    // Accessed on the handler thread only.
+    private final LongArrayQueue mSleepDuration = new LongArrayQueue();
+
     // This field stores the difference in Millis between the uptime (millis since device
     // has booted) and current time (device wall clock) - it's used to update rollback
     // timestamps when the time is changed, by the user or by change of timezone.
@@ -181,6 +187,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER, 0);
 
                     File newPackageCodePath = new File(intent.getData().getPath());
+
+                    queueSleepIfNeeded();
 
                     getHandler().post(() -> {
                         boolean success =
@@ -413,6 +421,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "blockRollbackManager");
+        getHandler().post(() -> {
+            mSleepDuration.addLast(millis);
+        });
+    }
+
+    private void queueSleepIfNeeded() {
+        if (mSleepDuration.size() == 0) {
+            return;
+        }
+        long millis = mSleepDuration.removeFirst();
+        if (millis <= 0) {
+            return;
+        }
         getHandler().post(() -> {
             try {
                 Thread.sleep(millis);
@@ -1034,6 +1055,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     makeRollbackAvailable(rollback);
                 }
             }
+
+            // Clear the queue so it will never be leaked to next tests.
+            mSleepDuration.clear();
         }
     }
 
