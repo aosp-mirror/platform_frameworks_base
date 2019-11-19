@@ -66,12 +66,17 @@ public abstract class ContentSuggestionsService extends Service {
                 int colorSpaceId, Bundle imageContextRequestExtras) {
 
             Bitmap wrappedBuffer = null;
-            if (contextImage != null) {
-                ColorSpace colorSpace = null;
-                if (colorSpaceId >= 0 && colorSpaceId < ColorSpace.Named.values().length) {
-                    colorSpace = ColorSpace.get(ColorSpace.Named.values()[colorSpaceId]);
+            if (imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)) {
+                wrappedBuffer = imageContextRequestExtras.getParcelable(
+                        ContentSuggestionsManager.EXTRA_BITMAP);
+            } else {
+                if (contextImage != null) {
+                    ColorSpace colorSpace = null;
+                    if (colorSpaceId >= 0 && colorSpaceId < ColorSpace.Named.values().length) {
+                        colorSpace = ColorSpace.get(ColorSpace.Named.values()[colorSpaceId]);
+                    }
+                    wrappedBuffer = Bitmap.wrapHardwareBuffer(contextImage, colorSpace);
                 }
-                wrappedBuffer = Bitmap.wrapHardwareBuffer(contextImage, colorSpace);
             }
 
             mHandler.sendMessage(
