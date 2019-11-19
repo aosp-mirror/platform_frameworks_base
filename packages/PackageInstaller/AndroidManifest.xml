@@ -118,6 +118,7 @@
         </receiver>
 
         <activity android:name=".UninstallUninstalling"
+            android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
             android:excludeFromRecents="true"
             android:exported="false" />
 
