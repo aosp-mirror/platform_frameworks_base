@@ -83,6 +83,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.appbinding.AppBindingService;
 import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
+import com.android.server.biometrics.AuthService;
 import com.android.server.biometrics.BiometricService;
 import com.android.server.biometrics.face.FaceService;
 import com.android.server.biometrics.fingerprint.FingerprintService;
@@ -1775,7 +1776,12 @@ public final class SystemServer {
                 t.traceBegin("StartBiometricService");
                 mSystemServiceManager.startService(BiometricService.class);
                 t.traceEnd();
+
+                t.traceBegin("StartAuthService");
+                mSystemServiceManager.startService(AuthService.class);
+                t.traceEnd();
             }
+
 
             t.traceBegin("StartBackgroundDexOptService");
             try {
