@@ -69,7 +69,7 @@ public class AppsFilter {
     // Logs all filtering instead of enforcing
     private static final boolean DEBUG_ALLOW_ALL = false;
     private static final boolean DEBUG_LOGGING = false;
-    private static final boolean FEATURE_ENABLED_BY_DEFAULT = false;
+    private static final boolean FEATURE_ENABLED_BY_DEFAULT = true;
 
     /**
      * This contains a list of app UIDs that are implicitly queryable because another app explicitly
