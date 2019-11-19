@@ -35,8 +35,8 @@ import android.telephony.Annotation.SrvccState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
+import com.android.internal.annotations.VisibleForTesting;
 
 import dalvik.system.VMRuntime;
 
