@@ -291,10 +291,17 @@ final class SaveUi {
         }
 
         final TextView noButton = view.findViewById(R.id.autofill_save_no);
-        if (info.getNegativeActionStyle() == SaveInfo.NEGATIVE_BUTTON_STYLE_REJECT) {
-            noButton.setText(R.string.save_password_notnow);
-        } else {
-            noButton.setText(R.string.autofill_save_no);
+        final int negativeActionStyle = info.getNegativeActionStyle();
+        switch (negativeActionStyle) {
+            case SaveInfo.NEGATIVE_BUTTON_STYLE_REJECT:
+                noButton.setText(R.string.autofill_save_notnow);
+                break;
+            case SaveInfo.NEGATIVE_BUTTON_STYLE_NEVER:
+                noButton.setText(R.string.autofill_save_never);
+                break;
+            case SaveInfo.NEGATIVE_BUTTON_STYLE_CANCEL:
+            default:
+                noButton.setText(R.string.autofill_save_no);
         }
         noButton.setOnClickListener((v) -> mListener.onCancel(info.getNegativeActionListener()));
 

@@ -3246,6 +3246,8 @@
   <java-symbol type="string" name="autofill_save_title_with_3types" />
   <java-symbol type="string" name="autofill_save_yes" />
   <java-symbol type="string" name="autofill_save_no" />
+  <java-symbol type="string" name="autofill_save_notnow" />
+  <java-symbol type="string" name="autofill_save_never" />
   <java-symbol type="string" name="autofill_save_type_password" />
   <java-symbol type="string" name="autofill_save_type_address" />
   <java-symbol type="string" name="autofill_save_type_credit_card" />
