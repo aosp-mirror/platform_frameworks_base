@@ -8727,7 +8727,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             structure.setContextClickable(true);
         }
         structure.setClassName(getAccessibilityClassName().toString());
-        structure.setContentDescription(mContentDescription);
+        structure.setContentDescription(getContentDescription());
     }
 
     /**
@@ -9934,8 +9934,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setImportantForAccessibility(isImportantForAccessibility());
         info.setPackageName(mContext.getPackageName());
         info.setClassName(getAccessibilityClassName());
-        info.setStateDescription(mStateDescription);
-        info.setContentDescription(mContentDescription);
+        info.setStateDescription(getStateDescription());
+        info.setContentDescription(getContentDescription());
 
         info.setEnabled(isEnabled());
         info.setClickable(isClickable());
@@ -10318,7 +10318,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setStateDescription(CharSequence)
      */
     @ViewDebug.ExportedProperty(category = "accessibility")
-    public @Nullable CharSequence getStateDescription() {
+    public final @Nullable CharSequence getStateDescription() {
         return mStateDescription;
     }
 
@@ -13724,7 +13724,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @UnsupportedAppUsage
     public CharSequence getIterableTextForAccessibility() {
-        return mContentDescription;
+        return getContentDescription();
     }
 
     /**
@@ -29514,10 +29514,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         stream.addProperty("text:textAlignment", getTextAlignment());
 
         // accessibility
+        CharSequence contentDescription = getContentDescription();
         stream.addProperty("accessibility:contentDescription",
-                mContentDescription == null ? "" : mContentDescription.toString());
-        stream.addProperty("accessibility:stateDescription",
-                mStateDescription == null ? "" : mStateDescription.toString());
+                contentDescription == null ? "" : contentDescription.toString());
         stream.addProperty("accessibility:labelFor", getLabelFor());
         stream.addProperty("accessibility:importantForAccessibility", getImportantForAccessibility());
     }
