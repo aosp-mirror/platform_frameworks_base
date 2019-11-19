@@ -118,6 +118,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.DataUnit;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -819,7 +820,6 @@ class StorageManagerService extends IStorageManager.Stub
                     refreshFuseSettings();
                 });
         refreshIsolatedStorageSettings();
-        refreshFuseSettings();
     }
 
     /**
@@ -883,16 +883,25 @@ class StorageManagerService extends IStorageManager.Stub
         SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE, Boolean.toString(res));
     }
 
+    /**
+     * The most recent flag change takes precedence. Change fuse Settings flag if Device Config is
+     * changed. Settings flag change will in turn change fuse system property (persist.sys.fuse)
+     * whenever the user reboots.
+     */
     private void refreshFuseSettings() {
         int isFuseEnabled = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
                 FUSE_ENABLED, 0);
         if (isFuseEnabled == 1) {
-            SystemProperties.set(StorageManager.PROP_FUSE, "true");
+            Slog.d(TAG, "Device Config flag for FUSE is enabled, turn Settings fuse flag on");
+            SystemProperties.set(FeatureFlagUtils.PERSIST_PREFIX
+                    + FeatureFlagUtils.SETTINGS_FUSE_FLAG, "true");
         } else if (isFuseEnabled == -1) {
-            SystemProperties.set(StorageManager.PROP_FUSE, "false");
+            Slog.d(TAG, "Device Config flag for FUSE is disabled, turn Settings fuse flag off");
+            SystemProperties.set(FeatureFlagUtils.PERSIST_PREFIX
+                    + FeatureFlagUtils.SETTINGS_FUSE_FLAG, "false");
         }
         // else, keep the build config.
-        // This can be overridden be direct adjustment of persist.sys.prop
+        // This can be overridden by direct adjustment of persist.sys.fflag.override.settings_fuse
     }
 
     /**
@@ -1548,6 +1557,8 @@ class StorageManagerService extends IStorageManager.Stub
     public StorageManagerService(Context context) {
         sSelf = this;
 
+        updateFusePropFromSettings();
+
         // Snapshot feature flag used for this boot
         SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT, Boolean.toString(
                 SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, true)));
@@ -1606,6 +1617,23 @@ class StorageManagerService extends IStorageManager.Stub
         // Add ourself to the Watchdog monitors if enabled.
         if (WATCHDOG_ENABLE) {
             Watchdog.getInstance().addMonitor(this);
+        }
+    }
+
+    /**
+     *  Checks if user changed the persistent settings_fuse flag from Settings UI
+     *  and updates PROP_FUSE (reboots if changed).
+     */
+    private void updateFusePropFromSettings() {
+        Boolean settingsFuseFlag = SystemProperties.getBoolean((FeatureFlagUtils.PERSIST_PREFIX
+                + FeatureFlagUtils.SETTINGS_FUSE_FLAG), false);
+        Slog.d(TAG, "The value of Settings Fuse Flag is " + settingsFuseFlag);
+        if (SystemProperties.getBoolean(StorageManager.PROP_FUSE, false) != settingsFuseFlag) {
+            Slog.d(TAG, "Set persist.sys.fuse to " + settingsFuseFlag);
+            SystemProperties.set(StorageManager.PROP_FUSE, Boolean.toString(settingsFuseFlag));
+            // Perform hard reboot to kick policy into place
+            mContext.getSystemService(PowerManager.class).reboot("Reboot device for FUSE system"
+                    + "property change to take effect");
         }
     }
 

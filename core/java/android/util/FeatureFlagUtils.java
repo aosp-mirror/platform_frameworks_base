@@ -41,6 +41,7 @@ public class FeatureFlagUtils {
     public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     public static final String DYNAMIC_SYSTEM = "settings_dynamic_system";
     public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
+    public static final String SETTINGS_FUSE_FLAG = "settings_fuse";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -48,6 +49,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
+        DEFAULT_FLAGS.put(SETTINGS_FUSE_FLAG, "false");
         DEFAULT_FLAGS.put(DYNAMIC_SYSTEM, "false");
         DEFAULT_FLAGS.put(SEAMLESS_TRANSFER, "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
