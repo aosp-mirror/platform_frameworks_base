@@ -171,6 +171,15 @@ interface IPlatformCompat
     void clearOverrides(in String packageName);
 
     /**
+     * Revert overrides to compatibility changes. Doesn't kill the app, to be only used in tests.
+     *
+     * @param packageName The package name of the app whose overrides will be cleared.
+     *
+     */
+    void clearOverridesForTest(in String packageName);
+
+
+    /**
      * Get configs for an application.
      *
      * @param appInfo The application whose config will be returned.

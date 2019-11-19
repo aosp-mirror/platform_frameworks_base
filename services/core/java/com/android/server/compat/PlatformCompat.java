@@ -126,6 +126,12 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
+    public void clearOverridesForTest(String packageName) {
+        CompatConfig config = CompatConfig.get();
+        config.removePackageOverrides(packageName);
+    }
+
+    @Override
     public boolean clearOverride(long changeId, String packageName) {
         boolean existed = CompatConfig.get().removeOverride(changeId, packageName);
         killPackage(packageName);
