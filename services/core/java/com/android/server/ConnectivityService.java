@@ -6495,20 +6495,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Possibly unlinger newNetwork. Unlingering a network does not send any callbacks so it
         // does not need to be done in any particular order.
         updateLingerState(newNetwork, now);
-
-        if (isNewDefault) {
-            // Maintain the illusion: since the legacy API only
-            // understands one network at a time, we must pretend
-            // that the current default network disconnected before
-            // the new one connected.
-            if (oldDefaultNetwork != null) {
-                mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
-                                          oldDefaultNetwork, true);
-            }
-            mDefaultInetConditionPublished = newNetwork.lastValidated ? 100 : 0;
-            mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
-            notifyLockdownVpn(newNetwork);
-        }
     }
 
     /**
@@ -6522,6 +6508,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // requests. Once the code has switched to a request-major iteration style, this can
         // be optimized to only do the processing needed.
         final long now = SystemClock.elapsedRealtime();
+        final NetworkAgentInfo oldDefaultNetwork = getDefaultNetwork();
+
         final NetworkAgentInfo[] nais = mNetworkAgentInfos.values().toArray(
                 new NetworkAgentInfo[mNetworkAgentInfos.size()]);
         // Rematch higher scoring networks first to prevent requests first matching a lower
@@ -6530,6 +6518,27 @@ public class ConnectivityService extends IConnectivityManager.Stub
         Arrays.sort(nais);
         for (NetworkAgentInfo nai : nais) {
             rematchNetworkAndRequests(nai, now);
+        }
+
+        final NetworkAgentInfo newDefaultNetwork = getDefaultNetwork();
+
+        // TODO : move the LegacyTypeTracker-related code to a separate function.
+        if (oldDefaultNetwork != newDefaultNetwork) {
+            // Maintain the illusion : since the legacy API only understands one network at a time,
+            // if the default network changed, apps should see a disconnected broadcast for the
+            // old default network before they see a connected broadcast for the new one.
+            if (oldDefaultNetwork != null) {
+                mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
+                        oldDefaultNetwork, true);
+            }
+            if (newDefaultNetwork != null) {
+                // The new default network can be newly null if and only if the old default
+                // network doesn't satisfy the default request any more because it lost a
+                // capability.
+                mDefaultInetConditionPublished = newDefaultNetwork.lastValidated ? 100 : 0;
+                mLegacyTypeTracker.add(newDefaultNetwork.networkInfo.getType(), newDefaultNetwork);
+                notifyLockdownVpn(newDefaultNetwork);
+            }
         }
 
         // Now that all the callbacks have been sent, send the legacy network broadcasts
