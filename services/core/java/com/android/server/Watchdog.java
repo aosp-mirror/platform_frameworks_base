@@ -89,6 +89,7 @@ public class Watchdog extends Thread {
         "/system/bin/drmserver",
         "/system/bin/mediadrmserver",
         "/system/bin/mediaserver",
+        "/system/bin/netd",
         "/system/bin/sdcard",
         "/system/bin/surfaceflinger",
         "/system/bin/vold",
