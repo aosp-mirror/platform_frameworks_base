@@ -50,6 +50,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
@@ -95,6 +96,7 @@ public class KeyguardIndicationController implements StateListener,
     private final IBatteryStats mBatteryInfo;
     private final SettableWakeLock mWakeLock;
     private final LockPatternUtils mLockPatternUtils;
+    private final DockManager mDockManager;
 
     private final int mSlowThreshold;
     private final int mFastThreshold;
@@ -103,6 +105,7 @@ public class KeyguardIndicationController implements StateListener,
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
 
     private String mRestingIndication;
+    private String mAlignmentIndication;
     private CharSequence mTransientIndication;
     private ColorStateList mTransientTextColorState;
     private ColorStateList mInitialTextColorState;
@@ -140,7 +143,8 @@ public class KeyguardIndicationController implements StateListener,
                 Dependency.get(AccessibilityController.class),
                 Dependency.get(KeyguardStateController.class),
                 Dependency.get(StatusBarStateController.class),
-                Dependency.get(KeyguardUpdateMonitor.class));
+                Dependency.get(KeyguardUpdateMonitor.class),
+                Dependency.get(DockManager.class));
     }
 
     /**
@@ -152,7 +156,8 @@ public class KeyguardIndicationController implements StateListener,
             AccessibilityController accessibilityController,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DockManager dockManager) {
         mContext = context;
         mLockIcon = lockIcon;
         mShadeController = shadeController;
@@ -160,6 +165,8 @@ public class KeyguardIndicationController implements StateListener,
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mDockManager = dockManager;
+        mDockManager.addAlignmentStateListener(this::handleAlignStateChanged);
         // lock icon is not used on all form factors.
         if (mLockIcon != null) {
             mLockIcon.setOnLongClickListener(this::handleLockLongClick);
@@ -211,6 +218,21 @@ public class KeyguardIndicationController implements StateListener,
         mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
     }
 
+    private void handleAlignStateChanged(int alignState) {
+        String alignmentIndication = "";
+        if (alignState == DockManager.ALIGN_STATE_POOR) {
+            alignmentIndication =
+                    mContext.getResources().getString(R.string.dock_alignment_slow_charging);
+        } else if (alignState == DockManager.ALIGN_STATE_TERRIBLE) {
+            alignmentIndication =
+                    mContext.getResources().getString(R.string.dock_alignment_not_charging);
+        }
+        if (!alignmentIndication.equals(mAlignmentIndication)) {
+            mAlignmentIndication = alignmentIndication;
+            updateIndication(false);
+        }
+    }
+
     /**
      * Gets the {@link KeyguardUpdateMonitorCallback} instance associated with this
      * {@link KeyguardIndicationController}.
@@ -234,7 +256,7 @@ public class KeyguardIndicationController implements StateListener,
         if (visible) {
             // If this is called after an error message was already shown, we should not clear it.
             // Otherwise the error message won't be shown
-            if  (!mHandler.hasMessages(MSG_HIDE_TRANSIENT)) {
+            if (!mHandler.hasMessages(MSG_HIDE_TRANSIENT)) {
                 hideTransientIndication();
             }
             updateIndication(false);
@@ -345,6 +367,9 @@ public class KeyguardIndicationController implements StateListener,
                 mTextView.setTextColor(Color.WHITE);
                 if (!TextUtils.isEmpty(mTransientIndication)) {
                     mTextView.switchIndication(mTransientIndication);
+                } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
+                    mTextView.switchIndication(mAlignmentIndication);
+                    mTextView.setTextColor(Utils.getColorError(mContext));
                 } else if (mPowerPluggedIn) {
                     String indication = computePowerIndication();
                     if (animate) {
@@ -373,6 +398,9 @@ public class KeyguardIndicationController implements StateListener,
                     && mKeyguardUpdateMonitor.getUserHasTrust(userId)) {
                 mTextView.switchIndication(trustGrantedIndication);
                 mTextView.setTextColor(mInitialTextColorState);
+            } else if (!TextUtils.isEmpty(mAlignmentIndication)) {
+                mTextView.switchIndication(mAlignmentIndication);
+                mTextView.setTextColor(Utils.getColorError(mContext));
             } else if (mPowerPluggedIn) {
                 String indication = computePowerIndication();
                 if (DEBUG_CHARGING_SPEED) {
