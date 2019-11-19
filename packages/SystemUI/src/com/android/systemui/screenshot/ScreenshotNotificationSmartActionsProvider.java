@@ -18,41 +18,84 @@ package com.android.systemui.screenshot;
 
 import android.app.Notification;
 import android.content.ComponentName;
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Handler;
 import android.util.Log;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 /**
  * This class can be overridden by a vendor-specific sys UI implementation,
  * in order to provide smart actions in the screenshot notification.
  */
 public class ScreenshotNotificationSmartActionsProvider {
+    /* Key provided in the notification action to get the type of smart action. */
+    public static final String ACTION_TYPE = "action_type";
+    public static final String DEFAULT_ACTION_TYPE = "Smart Action";
+
+    /* Define phases of screenshot execution. */
+    protected enum ScreenshotOp {
+        OP_UNKNOWN,
+        RETRIEVE_SMART_ACTIONS,
+        REQUEST_SMART_ACTIONS,
+        WAIT_FOR_SMART_ACTIONS
+    }
+
+    /* Enum to report success or failure for screenshot execution phases. */
+    protected enum ScreenshotOpStatus {
+        OP_STATUS_UNKNOWN,
+        SUCCESS,
+        ERROR,
+        TIMEOUT
+    }
+
     private static final String TAG = "ScreenshotActions";
 
     /**
      * Default implementation that returns an empty list.
      * This method is overridden in vendor-specific Sys UI implementation.
      *
+     * @param screenshotId     A generated random unique id for the screenshot.
      * @param bitmap           The bitmap of the screenshot. The bitmap config must be {@link
      *                         HARDWARE}.
-     * @param context          The current app {@link Context}.
-     * @param executor         A {@link Executor} that can be used to execute tasks in parallel.
-     * @param handler          A {@link Handler} to possibly run UI-thread code.
      * @param componentName    Contains package and activity class names where the screenshot was
      *                         taken. This is used as an additional signal to generate and rank more
      *                         relevant actions.
      * @param isManagedProfile The screenshot was taken for a work profile app.
      */
-    public CompletableFuture<List<Notification.Action>> getActions(Bitmap bitmap, Context context,
-            Executor executor, Handler handler, ComponentName componentName,
+    public CompletableFuture<List<Notification.Action>> getActions(
+            String screenshotId,
+            Bitmap bitmap,
+            ComponentName componentName,
             boolean isManagedProfile) {
         Log.d(TAG, "Returning empty smart action list.");
         return CompletableFuture.completedFuture(Collections.emptyList());
+    }
+
+    /**
+     * Notify exceptions and latency encountered during generating smart actions.
+     * This method is overridden in vendor-specific Sys UI implementation.
+     *
+     * @param screenshotId Unique id of the screenshot.
+     * @param op           screenshot execution phase defined in {@link ScreenshotOp}
+     * @param status       {@link ScreenshotOpStatus} to report success or failure.
+     * @param durationMs   latency experienced in different phases of screenshots.
+     */
+    public void notifyOp(String screenshotId, ScreenshotOp op, ScreenshotOpStatus status,
+            long durationMs) {
+        Log.d(TAG, "Return without notify.");
+    }
+
+    /**
+     * Notify screenshot notification action invoked.
+     * This method is overridden in vendor-specific Sys UI implementation.
+     *
+     * @param screenshotId  Unique id of the screenshot.
+     * @param action        type of notification action invoked.
+     * @param isSmartAction whether action invoked was a smart action.
+     */
+    public void notifyAction(String screenshotId, String action, boolean isSmartAction) {
+        Log.d(TAG, "Return without notify.");
     }
 }
