@@ -5651,7 +5651,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // are accurate.
         networkAgent.clatd.fixupLinkProperties(oldLp, newLp);
 
-        updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities);
+        updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities,
+                networkAgent.networkInfo.getType());
 
         // update filtering rules, need to happen after the interface update so netd knows about the
         // new interface (the interface name -> index map becomes initialized)
@@ -5730,21 +5731,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     }
 
-    private void updateInterfaces(LinkProperties newLp, LinkProperties oldLp, int netId,
-                                  NetworkCapabilities caps) {
-        CompareResult<String> interfaceDiff = new CompareResult<>(
+    private void updateInterfaces(final @Nullable LinkProperties newLp,
+            final @Nullable LinkProperties oldLp, final int netId,
+            final @Nullable NetworkCapabilities caps, final int legacyType) {
+        final CompareResult<String> interfaceDiff = new CompareResult<>(
                 oldLp != null ? oldLp.getAllInterfaceNames() : null,
                 newLp != null ? newLp.getAllInterfaceNames() : null);
-        for (String iface : interfaceDiff.added) {
-            try {
-                if (DBG) log("Adding iface " + iface + " to network " + netId);
-                mNMS.addInterfaceToNetwork(iface, netId);
-                wakeupModifyInterface(iface, caps, true);
-            } catch (Exception e) {
-                loge("Exception adding interface: " + e);
+        if (!interfaceDiff.added.isEmpty()) {
+            final IBatteryStats bs = mDeps.getBatteryStatsService();
+            for (final String iface : interfaceDiff.added) {
+                try {
+                    if (DBG) log("Adding iface " + iface + " to network " + netId);
+                    mNMS.addInterfaceToNetwork(iface, netId);
+                    wakeupModifyInterface(iface, caps, true);
+                    bs.noteNetworkInterfaceType(iface, legacyType);
+                } catch (Exception e) {
+                    loge("Exception adding interface: " + e);
+                }
             }
         }
-        for (String iface : interfaceDiff.removed) {
+        for (final String iface : interfaceDiff.removed) {
             try {
                 if (DBG) log("Removing iface " + iface + " from network " + netId);
                 wakeupModifyInterface(iface, caps, false);
@@ -6502,24 +6508,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mDefaultInetConditionPublished = newNetwork.lastValidated ? 100 : 0;
             mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
             notifyLockdownVpn(newNetwork);
-        }
-
-        if (reassignedRequests.containsValue(newNetwork) || newNetwork.isVPN()) {
-            // Notify battery stats service about this network, both the normal
-            // interface and any stacked links.
-            // TODO: Avoid redoing this; this must only be done once when a network comes online.
-            try {
-                final IBatteryStats bs = mDeps.getBatteryStatsService();
-                final int type = newNetwork.networkInfo.getType();
-
-                final String baseIface = newNetwork.linkProperties.getInterfaceName();
-                bs.noteNetworkInterfaceType(baseIface, type);
-                for (LinkProperties stacked : newNetwork.linkProperties.getStackedLinks()) {
-                    final String stackedIface = stacked.getInterfaceName();
-                    bs.noteNetworkInterfaceType(stackedIface, type);
-                }
-            } catch (RemoteException ignored) {
-            }
         }
     }
 
