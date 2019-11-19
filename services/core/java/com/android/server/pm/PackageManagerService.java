@@ -1439,6 +1439,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int ENABLE_ROLLBACK_TIMEOUT = 22;
     static final int DEFERRED_NO_KILL_POST_DELETE = 23;
     static final int DEFERRED_NO_KILL_INSTALL_OBSERVER = 24;
+    static final int INTEGRITY_VERIFICATION_COMPLETE = 25;
 
     static final int DEFERRED_NO_KILL_POST_DELETE_DELAY_MS = 3 * 1000;
     static final int DEFERRED_NO_KILL_INSTALL_OBSERVER_DELAY_MS = 500;
@@ -1761,6 +1762,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         params.handleVerificationFinished();
                     }
 
+                    break;
+                }
+                case INTEGRITY_VERIFICATION_COMPLETE: {
+                    // TODO: implement this case.
                     break;
                 }
                 case START_INTENT_FILTER_VERIFICATIONS: {
@@ -23198,6 +23203,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.mReadExternalStorageEnforced = enforced ? Boolean.TRUE : Boolean.FALSE;
                 mSettings.writeLPr();
             }
+        }
+
+        @Override
+        public void setIntegrityVerificationResult(int verificationId, int verificationResult) {
+            final Message msg = mHandler.obtainMessage(INTEGRITY_VERIFICATION_COMPLETE);
+            msg.arg1 = verificationId;
+            msg.obj = verificationResult;
+            mHandler.sendMessage(msg);
         }
     }
 
