@@ -6459,11 +6459,68 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // Second pass: process all listens.
         if (wasBackgroundNetwork != newNetwork.isBackgroundNetwork()) {
-            // If the network went from background to foreground or vice versa, we need to update
-            // its foreground state. It is safe to do this after rematching the requests because
-            // NET_CAPABILITY_FOREGROUND does not affect requests, as is not a requestable
-            // capability and does not affect the network's score (see the Slog.wtf call above).
-            updateCapabilities(score, newNetwork, newNetwork.networkCapabilities);
+            // TODO : most of the following is useless because the only thing that changed
+            // here is whether the network is a background network. Clean this up.
+
+            NetworkCapabilities newNc = mixInCapabilities(newNetwork,
+                    newNetwork.networkCapabilities);
+
+            if (Objects.equals(newNetwork.networkCapabilities, newNc)) return;
+
+            final int oldPermission = getNetworkPermission(newNetwork.networkCapabilities);
+            final int newPermission = getNetworkPermission(newNc);
+            if (oldPermission != newPermission && newNetwork.created && !newNetwork.isVPN()) {
+                try {
+                    mNMS.setNetworkPermission(newNetwork.network.netId, newPermission);
+                } catch (RemoteException e) {
+                    loge("Exception in setNetworkPermission: " + e);
+                }
+            }
+
+            final NetworkCapabilities prevNc;
+            synchronized (newNetwork) {
+                prevNc = newNetwork.networkCapabilities;
+                newNetwork.setNetworkCapabilities(newNc);
+            }
+
+            updateUids(newNetwork, prevNc, newNc);
+
+            if (newNetwork.getCurrentScore() == score
+                    && newNc.equalRequestableCapabilities(prevNc)) {
+                // If the requestable capabilities haven't changed, and the score hasn't changed,
+                // then the change we're processing can't affect any requests, it can only affect
+                // the listens on this network.
+                processListenRequests(newNetwork, true);
+            } else {
+                rematchAllNetworksAndRequests();
+                notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_CAP_CHANGED);
+            }
+
+            if (prevNc != null) {
+                final boolean oldMetered = prevNc.isMetered();
+                final boolean newMetered = newNc.isMetered();
+                final boolean meteredChanged = oldMetered != newMetered;
+
+                if (meteredChanged) {
+                    maybeNotifyNetworkBlocked(newNetwork, oldMetered, newMetered,
+                            mRestrictBackground, mRestrictBackground);
+                }
+
+                final boolean roamingChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING)
+                        != newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+
+                // Report changes that are interesting for network statistics tracking.
+                if (meteredChanged || roamingChanged) {
+                    notifyIfacesChangedForNetworkStats();
+                }
+            }
+
+            if (!newNc.hasTransport(TRANSPORT_VPN)) {
+                // Tell VPNs about updated capabilities, since they may need to
+                // bubble those changes through.
+                updateAllVpnsCapabilities();
+            }
+
         } else {
             processListenRequests(newNetwork, false);
         }
