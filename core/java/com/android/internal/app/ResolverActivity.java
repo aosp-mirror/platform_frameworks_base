@@ -95,6 +95,10 @@ public class ResolverActivity extends Activity implements
         ResolverListAdapter.ResolverListCommunicator {
 
     @UnsupportedAppUsage
+    public ResolverActivity() {
+    }
+
+    @UnsupportedAppUsage
     protected ResolverListAdapter mAdapter;
     private boolean mSafeForwardingMode;
     private AbsListView mAdapterView;

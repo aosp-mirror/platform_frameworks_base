@@ -72,6 +72,10 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     String[] mTempArray = new String[1];
 
     @UnsupportedAppUsage
+    public PackageMonitor() {
+    }
+
+    @UnsupportedAppUsage
     public void register(Context context, Looper thread, boolean externalStorage) {
         register(context, thread, null, externalStorage);
     }

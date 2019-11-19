@@ -26,6 +26,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.prediction.AppPredictionContext;
@@ -148,7 +149,9 @@ public class ChooserActivity extends ResolverActivity implements
         SelectableTargetInfoCommunicator {
     private static final String TAG = "ChooserActivity";
 
-
+    @UnsupportedAppUsage
+    public ChooserActivity() {
+    }
     /**
      * Boolean extra to change the following behavior: Normally, ChooserActivity finishes itself
      * in onStop when launched in a new task. If this extra is set to true, we do not finish
