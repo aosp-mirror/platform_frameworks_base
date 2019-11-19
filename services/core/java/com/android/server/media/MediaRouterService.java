@@ -443,6 +443,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
+    public List<MediaRoute2Info> getSystemRoutes() {
+        return mService2.getSystemRoutes();
+    }
+
+    // Binder call
+    @Override
     public void registerClient2(IMediaRouter2Client client, String packageName) {
         final int uid = Binder.getCallingUid();
         if (!validatePackageName(uid, packageName)) {

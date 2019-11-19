@@ -83,6 +83,24 @@ class MediaRouter2ServiceImpl {
         mContext = context;
     }
 
+    @NonNull
+    public List<MediaRoute2Info> getSystemRoutes() {
+        final int uid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(uid);
+
+        Collection<MediaRoute2Info> systemRoutes;
+        synchronized (mLock) {
+            UserRecord userRecord = mUserRecords.get(userId);
+            if (userRecord == null) {
+                userRecord = new UserRecord(userId);
+                mUserRecords.put(userId, userRecord);
+                initializeUserLocked(userRecord);
+            }
+            systemRoutes = userRecord.mHandler.mSystemProvider.getProviderInfo().getRoutes();
+        }
+        return new ArrayList<>(systemRoutes);
+    }
+
     public void registerClient(@NonNull IMediaRouter2Client client,
             @NonNull String packageName) {
         Objects.requireNonNull(client, "client must not be null");
