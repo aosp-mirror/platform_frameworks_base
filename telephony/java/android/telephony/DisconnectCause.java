@@ -354,6 +354,12 @@ public final class DisconnectCause {
      */
     public static final int WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION = 79;
 
+    /**
+     * Indicates that an emergency call was placed, which caused the existing connection to be
+     * hung up.
+     */
+    public static final int OUTGOING_EMERGENCY_CALL_PLACED = 80;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -528,6 +534,8 @@ public final class DisconnectCause {
             return "EMERGENCY_CALL_OVER_WFC_NOT_AVAILABLE";
         case WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION:
             return "WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION";
+        case OUTGOING_EMERGENCY_CALL_PLACED:
+            return "OUTGOING_EMERGENCY_CALL_PLACED";
         default:
             return "INVALID: " + cause;
         }

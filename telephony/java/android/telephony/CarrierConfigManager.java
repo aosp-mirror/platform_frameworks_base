@@ -1752,6 +1752,15 @@ public class CarrierConfigManager {
             "allow_emergency_video_calls_bool";
 
     /**
+     * Flag indicating whether or not an ongoing call will be held when an outgoing emergency call
+     * is placed. If true, ongoing calls will be put on hold when an emergency call is placed. If
+     * false, placing an emergency call will trigger the disconnect of all ongoing calls before
+     * the emergency call is placed.
+     */
+    public static final String KEY_ALLOW_HOLD_CALL_DURING_EMERGENCY_BOOL =
+            "allow_hold_call_during_emergency_bool";
+
+    /**
      * Flag indicating whether the carrier supports RCS presence indication for
      * User Capability Exchange (UCE).  When presence is supported, the device should use the
      * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE} bit mask and set the
@@ -3550,6 +3559,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_MMS_USER_AGENT_STRING, "");
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
         sDefaults.putInt(KEY_EMERGENCY_SMS_MODE_TIMER_MS_INT, 0);
+        sDefaults.putBoolean(KEY_ALLOW_HOLD_CALL_DURING_EMERGENCY_BOOL, true);
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
         sDefaults.putBoolean(KEY_USE_RCS_SIP_OPTIONS_BOOL, false);
         sDefaults.putBoolean(KEY_FORCE_IMEI_BOOL, false);
