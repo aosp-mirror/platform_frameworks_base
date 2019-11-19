@@ -114,6 +114,33 @@ public class NotificationHistoryTest {
     }
 
     @Test
+    public void testAddNotificationsToWrite() {
+        NotificationHistory history = new NotificationHistory();
+        HistoricalNotification n = getHistoricalNotification(0);
+        HistoricalNotification n2 = getHistoricalNotification(1);
+        history.addNotificationToWrite(n2);
+        history.addNotificationToWrite(n);
+
+        NotificationHistory secondHistory = new NotificationHistory();
+        HistoricalNotification n3 = getHistoricalNotification(2);
+        HistoricalNotification n4 = getHistoricalNotification(3);
+        secondHistory.addNotificationToWrite(n4);
+        secondHistory.addNotificationToWrite(n3);
+
+        history.addNotificationsToWrite(secondHistory);
+
+        assertThat(history.getNotificationsToWrite().size()).isEqualTo(4);
+        assertThat(history.getNotificationsToWrite().get(0)).isSameAs(n2);
+        assertThat(history.getNotificationsToWrite().get(1)).isSameAs(n);
+        assertThat(history.getNotificationsToWrite().get(2)).isSameAs(n4);
+        assertThat(history.getNotificationsToWrite().get(3)).isSameAs(n3);
+        assertThat(history.getHistoryCount()).isEqualTo(4);
+
+        assertThat(history.getPooledStringsToWrite()).asList().contains(n2.getChannelName());
+        assertThat(history.getPooledStringsToWrite()).asList().contains(n4.getPackage());
+    }
+
+    @Test
     public void testPoolStringsFromNotifications() {
         NotificationHistory history = new NotificationHistory();
 
