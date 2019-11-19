@@ -65,6 +65,7 @@ public final class Tile implements Parcelable {
     private CharSequence mLabel;
     private CharSequence mSubtitle;
     private CharSequence mContentDescription;
+    private CharSequence mStateDescription;
     // Default to inactive until clients of the new API can update.
     private int mState = STATE_INACTIVE;
 
@@ -177,6 +178,14 @@ public final class Tile implements Parcelable {
     }
 
     /**
+     * Gets the current state description for the tile.
+     */
+    @Nullable
+    public CharSequence getStateDescription() {
+        return mStateDescription;
+    }
+
+    /**
      * Sets the current content description for the tile.
      *
      * Does not take effect until {@link #updateTile()} is called.
@@ -185,6 +194,17 @@ public final class Tile implements Parcelable {
      */
     public void setContentDescription(CharSequence contentDescription) {
         this.mContentDescription = contentDescription;
+    }
+
+    /**
+     * Sets the current state description for the tile.
+     *
+     * Does not take effect until {@link #updateTile()} is called.
+     *
+     * @param stateDescription New state description to use.
+     */
+    public void setStateDescription(@Nullable CharSequence stateDescription) {
+        this.mStateDescription = stateDescription;
     }
 
     @Override
@@ -215,6 +235,7 @@ public final class Tile implements Parcelable {
         TextUtils.writeToParcel(mLabel, dest, flags);
         TextUtils.writeToParcel(mSubtitle, dest, flags);
         TextUtils.writeToParcel(mContentDescription, dest, flags);
+        TextUtils.writeToParcel(mStateDescription, dest, flags);
     }
 
     private void readFromParcel(Parcel source) {
@@ -227,6 +248,7 @@ public final class Tile implements Parcelable {
         mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
+        mStateDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
     }
 
     public static final @android.annotation.NonNull Creator<Tile> CREATOR = new Creator<Tile>() {

@@ -2549,4 +2549,7 @@
 
     <!-- Quick Controls strings [CHAR LIMIT=30] -->
     <string name="quick_controls_title">Quick Controls</string>
+
+    <!-- The tile in quick settings is unavailable. [CHAR LIMIT=32] -->
+    <string name="tile_unavailable">Unvailable</string>
 </resources>
