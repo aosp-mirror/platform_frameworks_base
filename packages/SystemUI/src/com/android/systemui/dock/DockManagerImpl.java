@@ -35,14 +35,6 @@ public class DockManagerImpl implements DockManager {
     }
 
     @Override
-    public void addAlignmentStateListener(AlignmentStateListener listener) {
-    }
-
-    @Override
-    public void removeAlignmentStateListener(AlignmentStateListener listener) {
-    }
-
-    @Override
     public boolean isDocked() {
         return false;
     }
