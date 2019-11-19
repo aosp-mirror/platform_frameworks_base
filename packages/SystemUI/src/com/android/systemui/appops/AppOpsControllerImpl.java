@@ -52,6 +52,9 @@ public class AppOpsControllerImpl implements AppOpsController,
         AppOpsManager.OnOpActiveChangedInternalListener,
         AppOpsManager.OnOpNotedListener, Dumpable {
 
+    // This is the minimum time that we will keep AppOps that are noted on record. If multiple
+    // occurrences of the same (op, package, uid) happen in a shorter interval, they will not be
+    // notified to listeners.
     private static final long NOTED_OP_TIME_DELAY_MS = 5000;
     private static final String TAG = "AppOpsControllerImpl";
     private static final boolean DEBUG = false;
@@ -167,7 +170,8 @@ public class AppOpsControllerImpl implements AppOpsController,
         if (mCallbacks.isEmpty()) setListening(false);
     }
 
-    private AppOpItem getAppOpItem(List<AppOpItem> appOpList, int code, int uid,
+    // Find item number in list, only call if the list passed is locked
+    private AppOpItem getAppOpItemLocked(List<AppOpItem> appOpList, int code, int uid,
             String packageName) {
         final int itemsQ = appOpList.size();
         for (int i = 0; i < itemsQ; i++) {
@@ -182,7 +186,7 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     private boolean updateActives(int code, int uid, String packageName, boolean active) {
         synchronized (mActiveItems) {
-            AppOpItem item = getAppOpItem(mActiveItems, code, uid, packageName);
+            AppOpItem item = getAppOpItemLocked(mActiveItems, code, uid, packageName);
             if (item == null && active) {
                 item = new AppOpItem(code, uid, packageName, System.currentTimeMillis());
                 mActiveItems.add(item);
@@ -200,7 +204,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     private void removeNoted(int code, int uid, String packageName) {
         AppOpItem item;
         synchronized (mNotedItems) {
-            item = getAppOpItem(mNotedItems, code, uid, packageName);
+            item = getAppOpItemLocked(mNotedItems, code, uid, packageName);
             if (item == null) return;
             mNotedItems.remove(item);
             if (DEBUG) Log.w(TAG, "Removed item: " + item.toString());
@@ -208,17 +212,20 @@ public class AppOpsControllerImpl implements AppOpsController,
         notifySuscribers(code, uid, packageName, false);
     }
 
-    private void addNoted(int code, int uid, String packageName) {
+    private boolean addNoted(int code, int uid, String packageName) {
         AppOpItem item;
+        boolean createdNew = false;
         synchronized (mNotedItems) {
-            item = getAppOpItem(mNotedItems, code, uid, packageName);
+            item = getAppOpItemLocked(mNotedItems, code, uid, packageName);
             if (item == null) {
                 item = new AppOpItem(code, uid, packageName, System.currentTimeMillis());
                 mNotedItems.add(item);
                 if (DEBUG) Log.w(TAG, "Added item: " + item.toString());
+                createdNew = true;
             }
         }
         mBGHandler.scheduleRemoval(item, NOTED_OP_TIME_DELAY_MS);
+        return createdNew;
     }
 
     /**
@@ -329,13 +336,15 @@ public class AppOpsControllerImpl implements AppOpsController,
             Log.w(TAG, "Op: " + code + " with result " + AppOpsManager.MODE_NAMES[result]);
         }
         if (result != AppOpsManager.MODE_ALLOWED) return;
-        addNoted(code, uid, packageName);
-        mBGHandler.post(() -> notifySuscribers(code, uid, packageName, true));
+        if (addNoted(code, uid, packageName)) {
+            mBGHandler.post(() -> notifySuscribers(code, uid, packageName, true));
+        }
     }
 
     private void notifySuscribers(int code, int uid, String packageName, boolean active) {
         if (mCallbacksByCode.containsKey(code)
                 && isUserVisible(code, uid, packageName)) {
+            if (DEBUG) Log.d(TAG, "Notifying of change in package " + packageName);
             for (Callback cb: mCallbacksByCode.get(code)) {
                 cb.onActiveStateChanged(code, uid, packageName, active);
             }

@@ -48,6 +48,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -219,5 +221,34 @@ public class AppOpsControllerTest extends SysuiTestCase {
 
         verify(mMockHandler).removeCallbacksAndMessages(null);
         assertTrue(mController.getActiveAppOps().isEmpty());
+    }
+
+    @Test
+    public void noDoubleUpdateOnOpNoted() {
+        mController.setBGHandler(mMockHandler);
+
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+                AppOpsManager.MODE_ALLOWED);
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+                AppOpsManager.MODE_ALLOWED);
+
+        // Only one post to notify subscribers
+        verify(mMockHandler, times(1)).post(any());
+
+        List<AppOpItem> list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    public void onDoubleOPNoted_scheduleTwiceForRemoval() {
+        mController.setBGHandler(mMockHandler);
+
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+                AppOpsManager.MODE_ALLOWED);
+        mController.onOpNoted(AppOpsManager.OP_FINE_LOCATION, TEST_UID, TEST_PACKAGE_NAME,
+                AppOpsManager.MODE_ALLOWED);
+
+        // Only one post to notify subscribers
+        verify(mMockHandler, times(2)).scheduleRemoval(any(), anyLong());
     }
 }
