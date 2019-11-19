@@ -661,8 +661,10 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vols continuar rebent notificacions d\'aquesta aplicació?"</string>
     <string name="notification_silence_title" msgid="5763240612242137433">"Silenci"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"Alertes"</string>
+    <string name="notification_bubble_title" msgid="6826478461954949364">"Bombolla"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"T\'ajuda a concentrar-te sense so ni vibració."</string>
     <string name="notification_channel_summary_default" msgid="5994062840431965586">"Atrau la teva atenció amb so i vibració."</string>
+    <string name="notification_channel_summary_bubble" msgid="4269580628050629291">"Atrau la teva atenció amb una drecera flotant a aquest contingut."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Aquestes notificacions no es poden modificar."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Aquest grup de notificacions no es pot configurar aquí"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Notificació mitjançant aplicació intermediària"</string>
@@ -946,4 +948,7 @@
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Omet"</string>
     <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"S\'ha actualitzat el sistema de navegació. Per fer canvis, ves a Configuració."</string>
     <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"Ves a Configuració per actualitzar el sistema de navegació"</string>
+    <string name="inattentive_sleep_warning_title" msgid="7695119731872371794">"En espera"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="4279125516592217099">"El dispositiu Android TV s\'apagarà aviat; prem un botó per mantenir-lo encès."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="3128565462954884260">"El dispositiu s\'apagarà aviat; prem per mantenir-lo encès."</string>
 </resources>
