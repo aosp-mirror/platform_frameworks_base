@@ -6468,8 +6468,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // before LegacyTypeTracker sends legacy broadcasts
         for (NetworkRequestInfo nri : addedRequests) notifyNetworkAvailable(newNetwork, nri);
 
-        // Second pass: process all listens.
-        if (wasBackgroundNetwork != newNetwork.isBackgroundNetwork()) {
+        // Maybe the network changed background states. Update its capabilities.
+        final boolean backgroundChanged = wasBackgroundNetwork != newNetwork.isBackgroundNetwork();
+        if (backgroundChanged) {
             final NetworkCapabilities newNc = mixInCapabilities(newNetwork,
                     newNetwork.networkCapabilities);
 
@@ -6486,13 +6487,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (newNetwork) {
                 newNetwork.setNetworkCapabilities(newNc);
             }
-
-            // The requestable capabilities and the score can't have changed, therefore the change
-            // in background can't affect any requests. Only processing the listens is fine.
-            processListenRequests(newNetwork, true);
-        } else {
-            processListenRequests(newNetwork, false);
         }
+
+        // Finally, process listen requests.
+        processListenRequests(newNetwork, backgroundChanged);
     }
 
     /**
