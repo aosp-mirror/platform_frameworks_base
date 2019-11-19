@@ -64,12 +64,13 @@ public class WifiNetworkSuggestionTest {
         assertEquals(WifiConfiguration.METERED_OVERRIDE_NONE,
                 suggestion.wifiConfiguration.meteredOverride);
         assertEquals(-1, suggestion.wifiConfiguration.priority);
+        assertEquals(false, suggestion.isUserAllowedToManuallyConnect);
     }
 
     /**
      * Validate correctness of WifiNetworkSuggestion object created by
      * {@link WifiNetworkSuggestion.Builder#build()} for WPA_EAP network which requires
-     * app interaction and has a priority of zero set.
+     * app interaction, not share credential and has a priority of zero set.
      */
     @Test
     public void
@@ -78,6 +79,7 @@ public class WifiNetworkSuggestionTest {
                 .setSsid(TEST_SSID)
                 .setWpa2Passphrase(TEST_PRESHARED_KEY)
                 .setIsAppInteractionRequired(true)
+                .setIsUserAllowedToManuallyConnect(false)
                 .setPriority(0)
                 .build();
 
@@ -91,6 +93,7 @@ public class WifiNetworkSuggestionTest {
         assertEquals(WifiConfiguration.METERED_OVERRIDE_NONE,
                 suggestion.wifiConfiguration.meteredOverride);
         assertEquals(0, suggestion.wifiConfiguration.priority);
+        assertEquals(false, suggestion.isUserAllowedToManuallyConnect);
     }
 
     /**
@@ -118,6 +121,7 @@ public class WifiNetworkSuggestionTest {
         assertEquals(WifiConfiguration.METERED_OVERRIDE_METERED,
                 suggestion.wifiConfiguration.meteredOverride);
         assertEquals(-1, suggestion.wifiConfiguration.priority);
+        assertTrue(suggestion.isUserAllowedToManuallyConnect);
     }
 
     /**
@@ -138,6 +142,7 @@ public class WifiNetworkSuggestionTest {
                 .get(WifiConfiguration.KeyMgmt.OWE));
         assertNull(suggestion.wifiConfiguration.preSharedKey);
         assertTrue(suggestion.wifiConfiguration.requirePMF);
+        assertFalse(suggestion.isUserAllowedToManuallyConnect);
     }
 
     /**
@@ -149,6 +154,7 @@ public class WifiNetworkSuggestionTest {
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .setWpa3Passphrase(TEST_PRESHARED_KEY)
+                .setIsUserAllowedToManuallyConnect(true)
                 .build();
 
         assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
@@ -157,6 +163,7 @@ public class WifiNetworkSuggestionTest {
         assertEquals("\"" + TEST_PRESHARED_KEY + "\"",
                 suggestion.wifiConfiguration.preSharedKey);
         assertTrue(suggestion.wifiConfiguration.requirePMF);
+        assertTrue(suggestion.isUserAllowedToManuallyConnect);
     }
 
 
@@ -186,6 +193,7 @@ public class WifiNetworkSuggestionTest {
         assertNull(suggestion.wifiConfiguration.preSharedKey);
         // allowedSuiteBCiphers are set according to the loaded certificate and cannot be tested
         // here.
+        assertTrue(suggestion.isUserAllowedToManuallyConnect);
     }
 
     /**
@@ -205,6 +213,7 @@ public class WifiNetworkSuggestionTest {
         assertTrue(suggestion.isAppInteractionRequired);
         assertEquals(suggestion.wifiConfiguration.meteredOverride,
                 WifiConfiguration.METERED_OVERRIDE_METERED);
+        assertTrue(suggestion.isUserAllowedToManuallyConnect);
     }
 
     /**
@@ -439,7 +448,7 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion(
-                configuration, null, false, true, TEST_UID, TEST_PACKAGE_NAME);
+                configuration, null, false, true, true, TEST_UID, TEST_PACKAGE_NAME);
 
         Parcel parcelW = Parcel.obtain();
         suggestion.writeToParcel(parcelW, 0);
@@ -506,7 +515,7 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, null, true, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null, true, false, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
@@ -514,7 +523,7 @@ public class WifiNetworkSuggestionTest {
         configuration1.BSSID = TEST_BSSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, null, false, true, TEST_UID,
+                new WifiNetworkSuggestion(configuration1, null, false, true, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         assertEquals(suggestion, suggestion1);
@@ -531,14 +540,14 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, null, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null, false, false, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID_1;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, null, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration1, null, false, false, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
@@ -555,14 +564,14 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, null,  false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null,  false, false, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, null, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration1, null, false, false, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
@@ -578,14 +587,14 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, null, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null, false, false, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, null, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration1, null, false, false, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
@@ -601,11 +610,11 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, null, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null, false, false, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration, null, false, false, TEST_UID_OTHER,
+                new WifiNetworkSuggestion(configuration, null, false, false, true, TEST_UID_OTHER,
                         TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
@@ -621,10 +630,10 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion(
-                configuration, null, false, false, TEST_UID, TEST_PACKAGE_NAME);
+                configuration, null, false, false, true, TEST_UID, TEST_PACKAGE_NAME);
 
         WifiNetworkSuggestion suggestion1 = new WifiNetworkSuggestion(
-                configuration, null, false, false, TEST_UID, TEST_PACKAGE_NAME_OTHER);
+                configuration, null, false, false, true, TEST_UID, TEST_PACKAGE_NAME_OTHER);
 
         assertNotEquals(suggestion, suggestion1);
     }
@@ -663,5 +672,18 @@ public class WifiNetworkSuggestionTest {
                 .setPasspointConfig(passpointConfiguration1)
                 .build();
         assertNotEquals(suggestion, suggestion1);
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when {@link WifiNetworkSuggestion.Builder#setIsUserAllowedToManuallyConnect(boolean)} to
+     * true on a open network suggestion.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testSetIsUserAllowedToManuallyConnectToWithOpenNetwork() {
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setIsUserAllowedToManuallyConnect(true)
+                .build();
     }
 }
