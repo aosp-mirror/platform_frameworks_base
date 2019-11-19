@@ -199,6 +199,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeWriteTransactionToParcel(long nativeObject, Parcel out);
     private static native void nativeSetShadowRadius(long transactionObj, long nativeObject,
             float shadowRadius);
+    private static native void nativeSetGlobalShadowSettings(@Size(4) float[] ambientColor,
+            @Size(4) float[] spotColor, float lightPosY, float lightPosZ, float lightRadius);
 
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
@@ -1977,6 +1979,42 @@ public final class SurfaceControl implements Parcelable {
         SurfaceControl sc = new SurfaceControl();
         sc.assignNativeObject(nativeObj);
         return sc;
+    }
+
+    private static void validateColorArg(@Size(4) float[] color) {
+        final String msg = "Color must be specified as a float array with"
+                + " four values to represent r, g, b, a in range [0..1]";
+        if (color.length != 4) {
+            throw new IllegalArgumentException(msg);
+        }
+        for (float c:color) {
+            if ((c < 0.f) || (c > 1.f)) {
+                throw new IllegalArgumentException(msg);
+            }
+        }
+    }
+
+    /**
+     * Sets the global configuration for all the shadows drawn by SurfaceFlinger. Shadow follows
+     * material design guidelines.
+     *
+     * @param ambientColor Color applied to the ambient shadow. The alpha is premultiplied. A
+     *                     float array with four values to represent r, g, b, a in range [0..1]
+     * @param spotColor Color applied to the spot shadow. The alpha is premultiplied. The position
+     *                  of the spot shadow depends on the light position. A float array with
+     *                  four values to represent r, g, b, a in range [0..1]
+     * @param lightPosY Y axis position of the light used to cast the spot shadow in pixels.
+     * @param lightPosZ Z axis position of the light used to cast the spot shadow in pixels. The X
+     *                  axis position is set to the display width / 2.
+     * @param lightRadius Radius of the light casting the shadow in pixels.
+     *[
+     * @hide
+     */
+    public static void setGlobalShadowSettings(@Size(4) float[] ambientColor,
+            @Size(4) float[] spotColor, float lightPosY, float lightPosZ, float lightRadius) {
+        validateColorArg(ambientColor);
+        validateColorArg(spotColor);
+        nativeSetGlobalShadowSettings(ambientColor, spotColor, lightPosY, lightPosZ, lightRadius);
     }
 
      /**

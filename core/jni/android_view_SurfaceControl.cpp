@@ -491,6 +491,7 @@ static void nativeSetColor(JNIEnv* env, jclass clazz, jlong transactionObj,
     float* floatColors = env->GetFloatArrayElements(fColor, 0);
     half3 color(floatColors[0], floatColors[1], floatColors[2]);
     transaction->setColor(ctrl, color);
+    env->ReleaseFloatArrayElements(fColor, floatColors, 0);
 }
 
 static void nativeSetMatrix(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -508,8 +509,12 @@ static void nativeSetColorTransform(JNIEnv* env, jclass clazz, jlong transaction
     SurfaceControl* const surfaceControl = reinterpret_cast<SurfaceControl*>(nativeObject);
     float* floatMatrix = env->GetFloatArrayElements(fMatrix, 0);
     mat3 matrix(static_cast<float const*>(floatMatrix));
+    env->ReleaseFloatArrayElements(fMatrix, floatMatrix, 0);
+
     float* floatTranslation = env->GetFloatArrayElements(fTranslation, 0);
     vec3 translation(floatTranslation[0], floatTranslation[1], floatTranslation[2]);
+    env->ReleaseFloatArrayElements(fTranslation, floatTranslation, 0);
+
     transaction->setColorTransform(surfaceControl, matrix, translation);
 }
 
@@ -1262,6 +1267,22 @@ static jlong nativeMirrorSurface(JNIEnv* env, jclass clazz, jlong mirrorOfObj) {
     return reinterpret_cast<jlong>(surface.get());
 }
 
+static void nativeSetGlobalShadowSettings(JNIEnv* env, jclass clazz, jfloatArray jAmbientColor,
+        jfloatArray jSpotColor, jfloat lightPosY, jfloat lightPosZ, jfloat lightRadius) {
+    sp<SurfaceComposerClient> client = SurfaceComposerClient::getDefault();
+
+    float* floatAmbientColor = env->GetFloatArrayElements(jAmbientColor, 0);
+    half4 ambientColor = half4(floatAmbientColor[0], floatAmbientColor[1], floatAmbientColor[2],
+            floatAmbientColor[3]);
+    env->ReleaseFloatArrayElements(jAmbientColor, floatAmbientColor, 0);
+
+    float* floatSpotColor = env->GetFloatArrayElements(jSpotColor, 0);
+    half4 spotColor = half4(floatSpotColor[0], floatSpotColor[1], floatSpotColor[2],
+            floatSpotColor[3]);
+    env->ReleaseFloatArrayElements(jSpotColor, floatSpotColor, 0);
+
+    client->setGlobalShadowSettings(ambientColor, spotColor, lightPosY, lightPosZ, lightRadius);
+}
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
@@ -1416,6 +1437,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeWriteTransactionToParcel },
     {"nativeMirrorSurface", "(J)J",
             (void*)nativeMirrorSurface },
+    {"nativeSetGlobalShadowSettings", "([F[FFFF)V",
+            (void*)nativeSetGlobalShadowSettings },
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)

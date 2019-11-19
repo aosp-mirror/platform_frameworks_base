@@ -146,6 +146,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
@@ -1296,6 +1297,20 @@ public class WindowManagerService extends IWindowManager.Stub
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
         mEmbeddedWindowController = new EmbeddedWindowController(mGlobalLock);
+        setGlobalShadowSettings();
+    }
+
+    private void setGlobalShadowSettings() {
+        final TypedArray a = mContext.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
+        float lightY = a.getDimension(R.styleable.Lighting_lightY, 0);
+        float lightZ = a.getDimension(R.styleable.Lighting_lightZ, 0);
+        float lightRadius = a.getDimension(R.styleable.Lighting_lightRadius, 0);
+        float ambientShadowAlpha = a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0);
+        float spotShadowAlpha = a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0);
+        float[] ambientColor = {0.f, 0.f, 0.f, ambientShadowAlpha};
+        float[] spotColor = {0.f, 0.f, 0.f, spotShadowAlpha};
+        SurfaceControl.setGlobalShadowSettings(ambientColor, spotColor, lightY, lightZ,
+                lightRadius);
     }
 
     /**
