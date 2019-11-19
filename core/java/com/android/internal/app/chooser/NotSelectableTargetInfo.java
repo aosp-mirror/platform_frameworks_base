@@ -85,4 +85,8 @@ public abstract class NotSelectableTargetInfo implements ChooserTargetInfo {
     public boolean isSuspended() {
         return false;
     }
+
+    public boolean isPinned() {
+        return false;
+    }
 }
