@@ -48,6 +48,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test class to for {@link android.app.WindowConfiguration}.
@@ -57,6 +58,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class WindowConfigurationTests extends WindowTestsBase {
     private Rect mParentBounds;
 

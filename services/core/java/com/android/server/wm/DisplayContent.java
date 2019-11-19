@@ -138,7 +138,6 @@ import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
 
 import android.animation.AnimationHandler;
-import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -221,7 +220,7 @@ import java.util.function.Predicate;
  * particular Display.
  */
 class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowContainer>
-        implements WindowManagerPolicy.DisplayContentInfo, ConfigurationContainerListener {
+        implements WindowManagerPolicy.DisplayContentInfo {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
 
     /** The default scaling mode that scales content automatically. */
@@ -236,11 +235,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Retention(RetentionPolicy.SOURCE)
     @interface ForceScalingMode {}
 
-    /** Unique identifier of this stack. */
-    private final int mDisplayId;
+    ActivityTaskManagerService mAtmService;
 
-    // TODO: Remove once unification is complete.
-    ActivityDisplay mActivityDisplay;
+    /** Unique identifier of this display. */
+    private final int mDisplayId;
 
     /** The containers below are the only child containers the display can have. */
     // Contains all window containers that are related to apps (Activities)
@@ -842,16 +840,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param service You know.
      * @param activityDisplay The ActivityDisplay for the display container.
      */
-    DisplayContent(Display display, WindowManagerService service,
-            ActivityDisplay activityDisplay) {
+    DisplayContent(Display display, WindowManagerService service) {
         super(service);
-        mActivityDisplay = activityDisplay;
         if (service.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
                     + " already exists=" + service.mRoot.getDisplayContent(display.getDisplayId())
                     + " new=" + display);
         }
 
+        mAtmService = mWmService.mAtmService;
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         mWallpaperController = new WallpaperController(mWmService, this);
@@ -1125,20 +1122,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mAppTransitionController.registerRemoteAnimations(definition);
     }
 
-    /**
-     * The display content may have configuration set from {@link #DisplayWindowSettings}. This
-     * callback let the owner of container know there is existing configuration to prevent the
-     * values from being replaced by the initializing {@link #ActivityDisplay}.
-     */
-    void initializeDisplayOverrideConfiguration() {
-        if (mActivityDisplay == null) {
-            return;
-        }
-        mActivityDisplay.onRequestedOverrideConfigurationChanged(
-                getResolvedOverrideConfiguration());
-        mActivityDisplay.registerConfigurationChangeListener(this);
-    }
-
     void reconfigureDisplayLocked() {
         if (!isReady()) {
             return;
@@ -1162,13 +1145,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void sendNewConfiguration() {
-        if (!isReady() || mActivityDisplay == null) {
+        if (!isReady()) {
             return;
         }
         if (mDisplayRotation.isWaitingForRemoteRotation()) {
             return;
         }
-        final boolean configUpdated = mActivityDisplay.updateDisplayOverrideConfigurationLocked();
+        // TODO(display-merge): Remove cast
+        final boolean configUpdated =
+                ((ActivityDisplay) this).updateDisplayOverrideConfigurationLocked();
         if (configUpdated) {
             return;
         }
@@ -1199,7 +1184,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (handled && requestingContainer instanceof ActivityRecord) {
             final ActivityRecord activityRecord = (ActivityRecord) requestingContainer;
-            final boolean kept = mActivityDisplay.updateDisplayOverrideConfigurationLocked(
+            // TODO(display-merge): Remove cast
+            final boolean kept = ((ActivityDisplay) this).updateDisplayOverrideConfigurationLocked(
                     config, activityRecord, false /* deferResume */, null /* result */);
             activityRecord.frozenBeforeDestroy = true;
             if (!kept) {
@@ -1208,7 +1194,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } else {
             // We have a new configuration to push so we need to update ATMS for now.
             // TODO: Clean up display configuration push between ATMS and WMS after unification.
-            mActivityDisplay.updateDisplayOverrideConfigurationLocked(
+            // TODO(display-merge): Remove cast
+            ((ActivityDisplay) this.mDisplayContent).updateDisplayOverrideConfigurationLocked(
                     config, null /* starting */, false /* deferResume */, null);
         }
         return handled;
@@ -1797,12 +1784,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mTaskStackContainers.getHomeStack();
     }
 
+    ActivityStack getRecentsStack() {
+        return mTaskStackContainers.getRecentsStack();
+    }
+
     /**
-     * @return The primary split-screen stack, but only if it is visible, and {@code null} otherwise.
+     * @return The primary split-screen stack, and {@code null} otherwise.
      */
     ActivityStack getSplitScreenPrimaryStack() {
-        ActivityStack stack = mTaskStackContainers.getSplitScreenPrimaryStack();
-        return (stack != null && stack.isVisible()) ? stack : null;
+        return mTaskStackContainers.getSplitScreenPrimaryStack();
     }
 
     boolean hasSplitScreenPrimaryStack() {
@@ -1839,6 +1829,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     ActivityStack getStack(int windowingMode, int activityType) {
         return mTaskStackContainers.getStack(windowingMode, activityType);
+    }
+
+    protected int getStackCount() {
+        return mTaskStackContainers.mChildren.size();
+    }
+
+    protected ActivityStack getStackAt(int index) {
+        return mTaskStackContainers.mChildren.get(index);
+    }
+
+    int getIndexOf(ActivityStack stack) {
+        return mTaskStackContainers.getIndexOf(stack);
+    }
+
+    void removeStack(ActivityStack stack) {
+        mTaskStackContainers.removeChild(stack);
     }
 
     @VisibleForTesting
@@ -2208,11 +2214,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         stack.reparent(mTaskStackContainers, onTop ? POSITION_TOP: POSITION_BOTTOM);
     }
 
-    // TODO(display-unify): No longer needed then.
-    void removeStackFromDisplay(ActivityStack stack) {
-        mTaskStackContainers.removeChild(stack);
-    }
-
     @Override
     protected void addChild(DisplayChildWindowContainer child,
             Comparator<DisplayChildWindowContainer> comparator) {
@@ -2364,9 +2365,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void removeImmediately() {
         mRemovingDisplay = true;
         try {
-            if (mActivityDisplay != null) {
-                mActivityDisplay.unregisterConfigurationChangeListener(this);
-            }
             if (mParentWindow != null) {
                 mParentWindow.removeEmbeddedDisplayContent(this);
             }
@@ -2386,7 +2384,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWindowingLayer.release();
             mOverlayLayer.release();
             mInputMonitor.onDisplayRemoved();
-            mWmService.mDisplayNotificationController.dispatchDisplayRemoved(mActivityDisplay);
+            // TODO(display-merge): Remove cast
+            mWmService.mDisplayNotificationController
+                .dispatchDisplayRemoved((ActivityDisplay) this);
         } finally {
             mDisplayReady = false;
             mRemovingDisplay = false;
@@ -2599,9 +2599,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
-    @CallSuper
-    @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId,
+    // TODO(proto-merge): Remove once protos for ActivityDisplay and DisplayContent are merged.
+    public void writeToProtoInner(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         // Critical log level logs only visible elements to mitigate performance overheard
         if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
@@ -3929,17 +3928,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // Cached reference to some special stacks we tend to get a lot so we don't need to loop
         // through the list to find them.
         private ActivityStack mHomeStack = null;
+        private ActivityStack mRecentsStack = null;
         private ActivityStack mPinnedStack = null;
         private ActivityStack mSplitScreenPrimaryStack = null;
 
         TaskStackContainers(WindowManagerService service) {
             super(service);
-        }
-
-        @Override
-        public void onConfigurationChanged(Configuration newParentConfig) {
-            // TODO(display-unify): Remove after unification.
-            onConfigurationChanged(newParentConfig, mActivityDisplay == null /*forwardToChildren*/);
         }
 
         /**
@@ -3976,11 +3970,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     ? mTaskStackContainers.getChildAt(mTaskStackContainers.getChildCount() - 1) : null;
         }
 
+        int getIndexOf(ActivityStack stack) {
+            return mTaskStackContainers.mChildren.indexOf(stack);
+        }
+
         ActivityStack getHomeStack() {
             if (mHomeStack == null && mDisplayId == DEFAULT_DISPLAY) {
                 Slog.e(TAG_WM, "getHomeStack: Returning null from this=" + this);
             }
             return mHomeStack;
+        }
+
+        ActivityStack getRecentsStack() {
+            return mRecentsStack;
         }
 
         ActivityStack getPinnedStack() {
@@ -4018,6 +4020,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
                 }
                 mHomeStack = stack;
+            } else if (stack.isActivityTypeRecents()) {
+                if (mRecentsStack != null && mRecentsStack != stack) {
+                    throw new IllegalArgumentException(
+                        "addStackReferenceIfNeeded: recents stack=" + mRecentsStack
+                            + " already exist on display=" + this + " stack=" + stack);
+                }
+                mRecentsStack = stack;
             }
             final int windowingMode = stack.getWindowingMode();
             if (windowingMode == WINDOWING_MODE_PINNED) {
@@ -4034,17 +4043,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                             + " already exist on display=" + this + " stack=" + stack);
                 }
                 mSplitScreenPrimaryStack = stack;
+                // TODO(display-merge): Remove cast
+                ((ActivityDisplay) this.mDisplayContent).onSplitScreenModeActivated();
                 mDividerControllerLocked.notifyDockedStackExistsChanged(true);
             }
         }
 
-        private void removeStackReferenceIfNeeded(ActivityStack stack) {
+        void removeStackReferenceIfNeeded(ActivityStack stack) {
             if (stack == mHomeStack) {
                 mHomeStack = null;
+            } else if (stack == mRecentsStack) {
+                mRecentsStack = null;
             } else if (stack == mPinnedStack) {
                 mPinnedStack = null;
             } else if (stack == mSplitScreenPrimaryStack) {
                 mSplitScreenPrimaryStack = null;
+                // TODO(display-merge): Remove cast
+                ((ActivityDisplay) this.mDisplayContent).onSplitScreenModeDismissed();
                 // Re-set the split-screen create mode whenever the split-screen stack is removed.
                 mWmService.setDockedStackCreateStateLocked(
                         SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT, null /* initialBounds */);
@@ -4058,9 +4073,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             position = findPositionForStack(position, stack, true /* adding */);
 
             super.addChild(stack, position);
-            if (mActivityDisplay != null) {
-                mActivityDisplay.addChild(stack, position, true /*fromDc*/);
-            }
 
             // The reparenting case is handled in WindowContainer.
             if (!stack.mReparenting) {
@@ -4072,9 +4084,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         @Override
         protected void removeChild(ActivityStack stack) {
             super.removeChild(stack);
-            if (mActivityDisplay != null) {
-                mActivityDisplay.onChildRemoved(stack);
-            }
+            // TODO(display-merge): Remove cast
+            ((ActivityDisplay) this.mDisplayContent).onStackRemoved(stack);
             removeStackReferenceIfNeeded(stack);
         }
 
@@ -4087,7 +4098,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         @Override
         void positionChildAt(int position, ActivityStack child, boolean includingParents) {
             if (child.getWindowConfiguration().isAlwaysOnTop()
-                    && position != POSITION_TOP) {
+                    && position != POSITION_TOP && position != mChildren.size()) {
                 // This stack is always-on-top, override the default behavior.
                 Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + this + " to bottom");
 
@@ -4133,7 +4144,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             final int topChildPosition = mChildren.size() - 1;
             int belowAlwaysOnTopPosition = POSITION_BOTTOM;
             for (int i = topChildPosition; i >= 0; --i) {
-                if (getStacks().get(i) != stack && !getStacks().get(i).isAlwaysOnTop()) {
+                // Since a stack could be repositioned while being one of the child, return
+                // current index if that's the same stack we are positioning and it is always on
+                // top.
+                final boolean sameStack = getStacks().get(i) == stack;
+                if ((sameStack && stack.isAlwaysOnTop())
+                        || (!sameStack && !getStacks().get(i).isAlwaysOnTop())) {
                     belowAlwaysOnTopPosition = i;
                     break;
                 }
@@ -4158,10 +4174,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         POSITION_BOTTOM ? belowAlwaysOnTopPosition : 0;
             }
 
-            int targetPosition = requestedPosition;
-            targetPosition = Math.min(targetPosition, maxPosition);
-            targetPosition = Math.max(targetPosition, minPosition);
-
             // Cap the requested position to something reasonable for the previous position check
             // below.
             if (requestedPosition == POSITION_TOP) {
@@ -4169,6 +4181,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             } else if (requestedPosition == POSITION_BOTTOM) {
                 requestedPosition = 0;
             }
+
+            int targetPosition = requestedPosition;
+            targetPosition = Math.min(targetPosition, maxPosition);
+            targetPosition = Math.max(targetPosition, minPosition);
 
             int prevPosition = getStacks().indexOf(stack);
             // The positions we calculated above (maxPosition, minPosition) do not take into

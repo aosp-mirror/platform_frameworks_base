@@ -36,12 +36,14 @@ import android.view.SurfaceSession;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
  *  atest FrameworksServicesTests:DimmerTests
  */
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class DimmerTests extends WindowTestsBase {
 
     private static class TestWindowContainer extends WindowContainer<TestWindowContainer> {

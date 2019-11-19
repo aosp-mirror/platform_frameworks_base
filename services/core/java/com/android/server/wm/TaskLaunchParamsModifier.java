@@ -705,8 +705,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     private void adjustBoundsToAvoidConflictInDisplay(@NonNull ActivityDisplay display,
             @NonNull Rect inOutBounds) {
         final List<Rect> taskBoundsToCheck = new ArrayList<>();
-        for (int i = 0; i < display.getChildCount(); ++i) {
-            final ActivityStack stack = display.getChildAt(i);
+        for (int i = 0; i < display.getStackCount(); ++i) {
+            final ActivityStack stack = display.getStackAt(i);
             if (!stack.inFreeformWindowingMode()) {
                 continue;
             }

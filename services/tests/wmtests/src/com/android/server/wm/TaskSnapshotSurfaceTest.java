@@ -47,6 +47,7 @@ import androidx.test.filters.SmallTest;
 import com.android.server.wm.TaskSnapshotSurface.Window;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link TaskSnapshotSurface}.
@@ -56,6 +57,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskSnapshotSurfaceTest extends WindowTestsBase {
 
     private TaskSnapshotSurface mSurface;

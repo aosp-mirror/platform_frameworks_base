@@ -203,6 +203,15 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         }
 
         ActivityRecord build() {
+            try {
+                mService.deferWindowLayout();
+                return buildInner();
+            } finally {
+                mService.continueWindowLayout();
+            }
+        }
+
+        ActivityRecord buildInner() {
             if (mComponent == null) {
                 final int id = sCurrentActivityId++;
                 mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
@@ -236,7 +245,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
             ActivityOptions options = null;
             if (mLaunchTaskBehind) {
-                options =  ActivityOptions.makeTaskLaunchBehind();
+                options = ActivityOptions.makeTaskLaunchBehind();
             }
 
             final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
@@ -399,8 +408,15 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        // TODO(display-merge): Remove
         StackBuilder setDisplay(ActivityDisplay display) {
             mDisplay = display;
+            return this;
+        }
+
+        StackBuilder setDisplay(DisplayContent display) {
+            // TODO(display-merge): Remove cast
+            mDisplay = (ActivityDisplay) display;
             return this;
         }
 

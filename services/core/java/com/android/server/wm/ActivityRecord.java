@@ -2237,7 +2237,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
         return (getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable())
-                && getParent() != null;
+                && getDisplay() != null;
     }
 
     /** Move activity with its stack to front and make the stack focused. */
@@ -2420,7 +2420,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     final ActivityDisplay display = stack.getDisplay();
                     next = display.topRunningActivity();
                     if (next != null) {
-                        display.positionChildAtTop(next.getActivityStack(),
+                        display.positionStackAtTop(next.getActivityStack(),
                                 false /* includingParents */, "finish-display-top");
                     }
                 }
@@ -5694,8 +5694,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     boolean isWaitingForTransitionStart() {
         final DisplayContent dc = getDisplayContent();
-        // TODO(display-unify): Test for null can be removed once unification is done.
-        if (dc == null) return false;
         return dc.mAppTransition.isTransitionSet()
                 && (dc.mOpeningApps.contains(this)
                 || dc.mClosingApps.contains(this)

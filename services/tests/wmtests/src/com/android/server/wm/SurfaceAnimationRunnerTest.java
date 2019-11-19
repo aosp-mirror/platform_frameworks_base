@@ -50,6 +50,7 @@ import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -63,6 +64,7 @@ import java.util.concurrent.CountDownLatch;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class SurfaceAnimationRunnerTest extends WindowTestsBase {
 
     @Mock SurfaceControl mMockSurface;
@@ -98,6 +100,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         verify(mMockTransaction, atLeastOnce()).setMatrix(eq(mMockSurface), eq(m), any());
         verify(mMockTransaction, atLeastOnce()).setAlpha(eq(mMockSurface), eq(1.0f));
 
+        waitHandlerIdle(SurfaceAnimationThread.getHandler());
         mFinishCallbackLatch.await(1, SECONDS);
         assertFinishCallbackCalled();
 
@@ -176,6 +179,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         assertTrue(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
         mSurfaceAnimationRunner.continueStartingAnimations();
         waitUntilNextFrame();
+        waitHandlerIdle(SurfaceAnimationThread.getHandler());
         assertFalse(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
         mFinishCallbackLatch.await(1, SECONDS);
         assertFinishCallbackCalled();

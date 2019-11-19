@@ -1501,13 +1501,11 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     mRootActivityContainer.getActivityDisplay(toDisplayId);
 
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                // Tell the display we are exiting split-screen mode.
-                toDisplay.onExitingSplitScreenMode();
                 // We are moving all tasks from the docked stack to the fullscreen stack,
                 // which is dismissing the docked stack, so resize all other stacks to
                 // fullscreen here already so we don't end up with resize trashing.
-                for (int i = toDisplay.getChildCount() - 1; i >= 0; --i) {
-                    final ActivityStack otherStack = toDisplay.getChildAt(i);
+                for (int i = toDisplay.getStackCount() - 1; i >= 0; --i) {
+                    final ActivityStack otherStack = toDisplay.getStackAt(i);
                     if (!otherStack.inSplitScreenSecondaryWindowingMode()) {
                         continue;
                     }
@@ -1655,8 +1653,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // screen controls and is also the same for all stacks.
                 final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
                 final Rect otherTaskRect = new Rect();
-                for (int i = display.getChildCount() - 1; i >= 0; --i) {
-                    final ActivityStack current = display.getChildAt(i);
+                for (int i = display.getStackCount() - 1; i >= 0; --i) {
+                    final ActivityStack current = display.getStackAt(i);
                     if (!current.inSplitScreenSecondaryWindowingMode()) {
                         continue;
                     }
@@ -1741,7 +1739,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
              * to the fullscreen stack.  This is to guarantee that when we are removing a stack,
              * that the client receives onStop() before it is reparented.  We do this by detaching
              * the stack from the display so that it will be considered invisible when
-             * ensureActivitiesVisible() is called, and all of its activitys will be marked
+             * ensureActivitiesVisible() is called, and all of its activities will be marked
              * invisible as well and added to the stopping list.  After which we process the
              * stopping list by handling the idle.
              */

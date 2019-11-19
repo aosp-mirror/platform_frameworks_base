@@ -119,7 +119,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         final ActivityDisplay defaultDisplay = mRootActivityContainer.getDefaultDisplay();
         final ActivityStack homeStack =
                 defaultDisplay.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
-        defaultDisplay.positionChildAtTop(homeStack, false /* includingParents */);
+        defaultDisplay.positionStackAtTop(homeStack, false /* includingParents */);
         ActivityRecord topRunningHomeActivity = homeStack.topRunningActivityLocked();
         if (topRunningHomeActivity == null) {
             topRunningHomeActivity = new ActivityBuilder(mService)

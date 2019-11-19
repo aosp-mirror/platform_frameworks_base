@@ -750,7 +750,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         // stacks on a wrong display.
         mDisplayId = display.mDisplayId;
         setActivityType(activityType);
-        display.addChild(this, onTop ? POSITION_TOP : POSITION_BOTTOM);
+        display.addStack(this, onTop ? POSITION_TOP : POSITION_BOTTOM);
         setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */, false /* deferEnsuringVisibility */,
                 true /* creating */);
@@ -879,7 +879,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         newBounds /* outStackBounds */, mTmpRect2 /* outTempTaskBounds */);
                 hasNewOverrideBounds = true;
             }
-            display.onStackWindowingModeChanged(this);
         }
         if (hasNewOverrideBounds) {
             if (inSplitScreenPrimaryWindowingMode()) {
@@ -896,7 +895,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             // Since always on top is only on when the stack is freeform or pinned, the state
             // can be toggled when the windowing mode changes. We must make sure the stack is
             // placed properly when always on top state changes.
-            display.positionChildAtTop(this, false /* includingParents */);
+            display.positionStackAtTop(this, false /* includingParents */);
         }
     }
 
@@ -1337,7 +1336,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         }
 
         final boolean movingTask = task != null;
-        display.positionChildAtTop(this, !movingTask /* includingParents */, reason);
+        display.positionStackAtTop(this, !movingTask /* includingParents */, reason);
         if (movingTask) {
             // This also moves the entire hierarchy branch to top, including parents
             positionChildAtTop(task);
@@ -1353,7 +1352,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             return;
         }
 
-        getDisplay().positionChildAtBottom(this, reason);
+        getDisplay().positionStackAtBottom(this, reason);
         if (task != null) {
             positionChildAtBottom(task);
         }
@@ -1848,8 +1847,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         boolean shouldBeVisible = true;
         final int windowingMode = getWindowingMode();
         final boolean isAssistantType = isActivityTypeAssistant();
-        for (int i = display.getChildCount() - 1; i >= 0; --i) {
-            final ActivityStack other = display.getChildAt(i);
+        for (int i = display.getStackCount() - 1; i >= 0; --i) {
+            final ActivityStack other = display.getStackAt(i);
             final boolean hasRunningActivities = other.topRunningActivityLocked() != null;
             if (other == this) {
                 // Should be visible if there is no other stack occluding it, unless it doesn't
@@ -3010,7 +3009,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         if (index == 0) {
             return false;
         }
-        final ActivityStack stackBehind = display.getChildAt(index - 1);
+        final ActivityStack stackBehind = display.getStackAt(index - 1);
         return stackBehind.isActivityTypeStandard();
     }
 
@@ -3768,7 +3767,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
         if (!hasChild()) {
             // Stack is now empty...
-          removeIfPossible();
+            removeIfPossible();
         }
 
         moveHomeStackToFrontIfNeeded(topFocused, display, reason);
@@ -3887,7 +3886,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         // always on top windows. Since the position the stack should be inserted into is calculated
         // properly in {@link ActivityDisplay#getTopInsertPosition()} in both cases, we can just
         // request that the stack is put at top here.
-        display.positionChildAtTop(this, false /* includingParents */);
+        display.positionStackAtTop(this, false /* includingParents */);
     }
 
     /** NOTE: Should only be called from {@link Task#reparent}. */
@@ -4019,7 +4018,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             final Task task = mChildren.get(0);
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
 
-            getDisplay().positionChildAtTop(this, false /* includingParents */);
+            getDisplay().positionStackAtTop(this, false /* includingParents */);
 
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
             MetricsLoggerWrapper.logPictureInPictureFullScreen(mService.mContext,
@@ -4456,20 +4455,14 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         }
     }
 
-    // TODO(display-unify): Remove after display unification.
-    protected void onParentChanged(ActivityDisplay newParent, ActivityDisplay oldParent) {
-        onParentChanged(
-                newParent != null ? newParent.mDisplayContent : null,
-                oldParent != null ? oldParent.mDisplayContent : null);
-    }
-
     @Override
     protected void onParentChanged(
             ConfigurationContainer newParent, ConfigurationContainer oldParent) {
+        // TODO(display-merge): Remove cast
         final ActivityDisplay display = newParent != null
-                ? ((WindowContainer) newParent).getDisplayContent().mActivityDisplay : null;
+                ? (ActivityDisplay) ((WindowContainer) newParent).getDisplayContent() : null;
         final ActivityDisplay oldDisplay = oldParent != null
-                ? ((WindowContainer) oldParent).getDisplayContent().mActivityDisplay : null;
+                ? (ActivityDisplay) ((WindowContainer) oldParent).getDisplayContent() : null;
 
         mDisplayId = (display != null) ? display.mDisplayId : INVALID_DISPLAY;
         mPrevDisplayId = (oldDisplay != null) ? oldDisplay.mDisplayId : INVALID_DISPLAY;
