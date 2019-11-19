@@ -2551,6 +2551,18 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Zen.SETTINGS_SUGGESTION_VIEWED);
         p.end(zenToken);
 
+        dumpSetting(s, p,
+                Settings.Secure.ONE_HANDED_MODE_ENABLED,
+                SecureSettingsProto.OneHanded.ONE_HANDED_MODE_ENABLED);
+
+        dumpSetting(s, p,
+                Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
+                SecureSettingsProto.OneHanded.ONE_HANDED_MODE_TIMEOUT);
+
+        dumpSetting(s, p,
+                Settings.Secure.TAPS_APP_TO_EXIT,
+                SecureSettingsProto.OneHanded.TAPS_APP_TO_EXIT);
+
         // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);
 
