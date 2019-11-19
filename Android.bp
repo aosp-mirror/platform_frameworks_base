@@ -390,7 +390,7 @@ java_defaults {
 
 filegroup {
     name: "framework-jarjar-rules",
-    srcs: ["jarjar_rules_hidl.txt"],
+    srcs: ["framework_jarjar_rules.txt"],
 }
 
 filegroup {
@@ -467,6 +467,7 @@ java_library {
     srcs: [":framework-all-sources"],
     installable: false,
     libs: ["app-compat-annotations"],
+    static_libs: ["exoplayer2-core"]
 }
 
 java_library {
@@ -479,6 +480,9 @@ java_library {
         "unsupportedappusage-annotation-processor",
         "compat-changeid-annotation-processor",
     ],
+    static_libs: [
+        "exoplayer2-core"
+    ]
 }
 
 platform_compat_config {

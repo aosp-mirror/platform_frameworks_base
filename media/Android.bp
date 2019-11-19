@@ -34,6 +34,11 @@ java_library {
         "android_system_stubs_current",
     ],
 
+    static_libs: [
+        "exoplayer2-core"
+    ],
+    jarjar_rules: "jarjar_rules.txt",
+
     plugins: ["java_api_finder"],
 }
 
@@ -41,6 +46,7 @@ filegroup {
     name: "updatable-media-srcs",
     srcs: [
         ":mediasession2-srcs",
+        ":mediaparser-srcs",
     ],
 }
 
@@ -61,6 +67,13 @@ filegroup {
         "apex/java/android/media/Session2Token.java",
     ],
     path: "apex/java",
+}
+
+filegroup {
+    name: "mediaparser-srcs",
+    srcs: [
+        "apex/java/android/media/MediaParser.java"
+    ]
 }
 
 metalava_updatable_media_args = " --error UnhiddenSystemApi " +
