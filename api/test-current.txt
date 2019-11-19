@@ -4245,6 +4245,25 @@ package android.util {
     field public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
   }
 
+  public class SparseArrayMap<T> {
+    ctor public SparseArrayMap();
+    method public void add(int, @NonNull String, @Nullable T);
+    method public void clear();
+    method public boolean contains(int, @NonNull String);
+    method public void delete(int);
+    method @Nullable public T delete(int, @NonNull String);
+    method public void forEach(@NonNull java.util.function.Consumer<T>);
+    method @Nullable public T get(int, @NonNull String);
+    method @Nullable public T getOrDefault(int, @NonNull String, T);
+    method public int indexOfKey(int);
+    method public int indexOfKey(int, @NonNull String);
+    method public int keyAt(int);
+    method @NonNull public String keyAt(int, int);
+    method public int numElementsForKey(int);
+    method public int numMaps();
+    method @Nullable public T valueAt(int, int);
+  }
+
   public class TimeUtils {
     method public static String formatDuration(long);
   }

@@ -104,6 +104,14 @@ public class SparseArray<E> implements Cloneable {
     }
 
     /**
+     * Returns true if the key exists in the array. This is equivalent to
+     * {@link #indexOfKey(int)} >= 0.
+     */
+    public boolean contains(int key) {
+        return indexOfKey(key) >= 0;
+    }
+
+    /**
      * Gets the Object mapped from the specified key, or <code>null</code>
      * if no such mapping has been made.
      */
