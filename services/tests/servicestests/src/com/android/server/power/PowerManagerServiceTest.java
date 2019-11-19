@@ -668,11 +668,11 @@ public class PowerManagerServiceTest {
         startSystem();
 
         verify(mInattentiveSleepWarningControllerMock, times(1)).show();
-        verify(mInattentiveSleepWarningControllerMock, never()).dismiss();
+        verify(mInattentiveSleepWarningControllerMock, never()).dismiss(anyBoolean());
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
 
         setPluggedIn(true);
-        verify(mInattentiveSleepWarningControllerMock, atLeastOnce()).dismiss();
+        verify(mInattentiveSleepWarningControllerMock, atLeastOnce()).dismiss(true);
     }
 
     @Test
@@ -690,12 +690,12 @@ public class PowerManagerServiceTest {
 
         SystemClock.sleep(70);
         verify(mInattentiveSleepWarningControllerMock, times(1)).show();
-        verify(mInattentiveSleepWarningControllerMock, never()).dismiss();
+        verify(mInattentiveSleepWarningControllerMock, never()).dismiss(anyBoolean());
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
 
         mService.getBinderServiceInstance().userActivity(SystemClock.uptimeMillis(),
                 PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-        verify(mInattentiveSleepWarningControllerMock, times(1)).dismiss();
+        verify(mInattentiveSleepWarningControllerMock, times(1)).dismiss(true);
     }
 
     @Test
@@ -711,7 +711,7 @@ public class PowerManagerServiceTest {
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
         SystemClock.sleep(30);
         forceAwake();
-        verify(mInattentiveSleepWarningControllerMock, atLeastOnce()).dismiss();
+        verify(mInattentiveSleepWarningControllerMock, atLeastOnce()).dismiss(false);
     }
 
     @Test

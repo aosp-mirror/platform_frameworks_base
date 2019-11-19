@@ -54,9 +54,9 @@ public class InattentiveSleepWarningController extends SystemUI implements Comma
     }
 
     @Override
-    public void dismissInattentiveSleepWarning() {
+    public void dismissInattentiveSleepWarning(boolean animated) {
         if (mOverlayView != null) {
-            mOverlayView.dismiss();
+            mOverlayView.dismiss(animated);
         }
     }
 }
