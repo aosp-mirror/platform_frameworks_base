@@ -308,33 +308,6 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     }
 
     /**
-     * Verify split-screen primary stack & task can resized by
-     * {@link android.app.IActivityTaskManager#resizeDockedStack} as expect.
-     */
-    @Test
-    public void testResizeDockedStackForSplitScreenPrimary() {
-        final Rect configSize = new Rect(0, 0, 1000, 1000);
-        final Rect displayedSize = new Rect(0, 0, 300, 300);
-
-        // Create primary split-screen stack with a task.
-        final ActivityStack primaryStack = new StackBuilder(mRootWindowContainer)
-                .setActivityType(ACTIVITY_TYPE_STANDARD)
-                .setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
-                .setOnTop(true)
-                .build();
-        final Task task = primaryStack.getTopMostTask();
-
-        // Resize dock stack.
-        mService.resizeDockedStack(displayedSize, configSize, null, null, null);
-
-        // Verify dock stack & its task bounds if is equal as resized result.
-        assertEquals(displayedSize, primaryStack.getDisplayedBounds());
-        assertEquals(displayedSize, primaryStack.getDisplayedBounds());
-        assertEquals(configSize, primaryStack.getBounds());
-        assertEquals(configSize, task.getBounds());
-    }
-
-    /**
      * Verify that home stack would be moved to front when the top activity is Recents.
      */
     @Test

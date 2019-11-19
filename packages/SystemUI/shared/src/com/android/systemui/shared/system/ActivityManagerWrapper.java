@@ -370,8 +370,7 @@ public class ActivityManagerWrapper {
             Rect initialBounds) {
         try {
             return ActivityTaskManager.getService().setTaskWindowingModeSplitScreenPrimary(taskId,
-                    createMode, true /* onTop */, false /* animate */, initialBounds,
-                    true /* showRecents */);
+                    true /* onTop */);
         } catch (RemoteException e) {
             return false;
         }

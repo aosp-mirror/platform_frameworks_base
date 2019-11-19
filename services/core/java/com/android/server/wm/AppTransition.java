@@ -446,8 +446,6 @@ public class AppTransition implements Dump {
                         ? topOpeningAnim.getStatusBarTransitionsStartTime()
                         : SystemClock.uptimeMillis(),
                 AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
-        mDisplayContent.getDockedDividerController()
-                .notifyAppTransitionStarting(openingApps, transit);
 
         if (mRemoteAnimationController != null) {
             mRemoteAnimationController.goodToGo();

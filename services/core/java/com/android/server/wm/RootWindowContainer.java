@@ -1011,9 +1011,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Send any pending task-info changes that were queued-up during a layout deferment
         mWmService.mAtmService.mTaskOrganizerController.dispatchPendingTaskInfoChanges();
 
-        if (DEBUG_WINDOW_TRACE) Slog.e(TAG,
-                "performSurfacePlacementInner exit: animating="
-                        + mWmService.mAnimator.isAnimating());
+        if (DEBUG_WINDOW_TRACE) Slog.e(TAG, "performSurfacePlacementInner exit");
     }
 
     private void checkAppTransitionReady(WindowSurfacePlacer surfacePlacer) {
@@ -1989,8 +1987,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // We dismiss the docked stack whenever we switch users.
         final ActivityStack dockedStack = getDefaultDisplay().getRootSplitScreenPrimaryTask();
         if (dockedStack != null) {
-            mStackSupervisor.moveTasksToFullscreenStackLocked(
-                    dockedStack, dockedStack.isFocusedStackOnDisplay());
+            getDefaultDisplay().onSplitScreenModeDismissed();
         }
         // Also dismiss the pinned stack whenever we switch users. Removing the pinned stack will
         // also cause all tasks to be moved to the fullscreen stack at a position that is
