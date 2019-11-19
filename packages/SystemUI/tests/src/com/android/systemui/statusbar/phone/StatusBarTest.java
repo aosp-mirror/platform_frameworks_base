@@ -216,7 +216,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
     @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
-    @Mock private StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
     @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
     @Mock private DozeParameters mDozeParameters;
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
@@ -236,6 +235,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DismissCallbackRegistry mDismissCallbackRegistry;
     @Mock private ScreenPinningRequest mScreenPinningRequest;
     @Mock private NotificationEntryManager mEntryManager;
+    @Mock private LockscreenLockIconController mLockscreenLockIconController;
 
     @Before
     public void setup() throws Exception {
@@ -295,9 +295,6 @@ public class StatusBarTest extends SysuiTestCase {
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
         ConfigurationController configurationController = new ConfigurationControllerImpl(mContext);
 
-        when(mStatusBarWindowViewControllerBuilder.build())
-                .thenReturn(mStatusBarWindowViewController);
-
         when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
 
@@ -355,7 +352,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationListener,
                 configurationController,
                 mStatusBarWindowController,
-                mStatusBarWindowViewControllerBuilder,
+                mStatusBarWindowViewController,
+                mLockscreenLockIconController,
                 mDozeParameters,
                 mScrimController,
                 mKeyguardLiftController,
@@ -397,7 +395,6 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mKeyguardIndicationController = mKeyguardIndicationController;
         mStatusBar.mBarService = mBarService;
         mStatusBar.mStackScroller = mStackScroller;
-        mStatusBar.mStatusBarWindowViewController = mStatusBarWindowViewController;
         mStatusBar.startKeyguard();
         Dependency.get(InitController.class).executePostInitTasks();
         notificationLogger.setUpWithContainer(mStackScroller);

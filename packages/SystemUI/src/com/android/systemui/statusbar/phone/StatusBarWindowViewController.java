@@ -38,7 +38,6 @@ import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -58,21 +57,40 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Controller for {@link StatusBarWindowView}.
  */
+@Singleton
 public class StatusBarWindowViewController {
-    private final StatusBarWindowView mView;
+    private final InjectionInflationController mInjectionInflationController;
+    private final NotificationWakeUpCoordinator mCoordinator;
+    private final PulseExpansionHandler mPulseExpansionHandler;
+    private final DynamicPrivacyController mDynamicPrivacyController;
+    private final KeyguardBypassController mBypassController;
+    private final PluginManager mPluginManager;
     private final FalsingManager mFalsingManager;
-    private final GestureDetector mGestureDetector;
+    private final TunerService mTunerService;
+    private final NotificationLockscreenUserManager mNotificationLockscreenUserManager;
+    private final NotificationEntryManager mNotificationEntryManager;
+    private final KeyguardStateController mKeyguardStateController;
+    private final SysuiStatusBarStateController mStatusBarStateController;
+    private final DozeLog mDozeLog;
+    private final DozeParameters mDozeParameters;
+    private final CommandQueue mCommandQueue;
+    private final StatusBarWindowView mView;
+    private final Lazy<ShadeController> mShadeControllerLazy;
+
+    private GestureDetector mGestureDetector;
     private View mBrightnessMirror;
     private boolean mTouchActive;
     private boolean mTouchCancelled;
     private boolean mExpandAnimationPending;
     private boolean mExpandAnimationRunning;
     private NotificationStackScrollLayout mStackScrollLayout;
-    private LockIcon mLockIcon;
     private PhoneStatusBarView mStatusBarView;
     private StatusBar mService;
     private DragDownHelper mDragDownHelper;
@@ -81,8 +99,8 @@ public class StatusBarWindowViewController {
     private boolean mExpandingBelowNotch;
     private final DockManager mDockManager;
 
-    private StatusBarWindowViewController(
-            StatusBarWindowView view,
+    @Inject
+    public StatusBarWindowViewController(
             InjectionInflationController injectionInflationController,
             NotificationWakeUpCoordinator coordinator,
             PulseExpansionHandler pulseExpansionHandler,
@@ -91,7 +109,6 @@ public class StatusBarWindowViewController {
             FalsingManager falsingManager,
             PluginManager pluginManager,
             TunerService tunerService,
-            ShadeController shadeController,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationEntryManager notificationEntryManager,
             KeyguardStateController keyguardStateController,
@@ -99,47 +116,68 @@ public class StatusBarWindowViewController {
             DozeLog dozeLog,
             DozeParameters dozeParameters,
             CommandQueue commandQueue,
+            SuperStatusBarViewFactory superStatusBarViewFactory,
+            Lazy<ShadeController> shadeControllerLazy,
             DockManager dockManager) {
-        mView = view;
+        mInjectionInflationController = injectionInflationController;
+        mCoordinator = coordinator;
+        mPulseExpansionHandler = pulseExpansionHandler;
+        mDynamicPrivacyController = dynamicPrivacyController;
+        mBypassController = bypassController;
         mFalsingManager = falsingManager;
+        mPluginManager = pluginManager;
+        mTunerService = tunerService;
+        mNotificationLockscreenUserManager = notificationLockscreenUserManager;
+        mNotificationEntryManager = notificationEntryManager;
+        mKeyguardStateController = keyguardStateController;
+        mStatusBarStateController = statusBarStateController;
+        mDozeLog = dozeLog;
+        mDozeParameters = dozeParameters;
+        mCommandQueue = commandQueue;
+        mView = superStatusBarViewFactory.getStatusBarWindowView();
+        mShadeControllerLazy = shadeControllerLazy;
         mDockManager = dockManager;
 
+        // This view is not part of the newly inflated expanded status bar.
+        mBrightnessMirror = mView.findViewById(R.id.brightness_mirror);
+    }
+
+    /** Inflates the {@link R.layout#status_bar_expanded} layout and sets it up. */
+    public void setupExpandedStatusBar() {
         // TODO: create controller for NotificationPanelView
         NotificationPanelView notificationPanelView = new NotificationPanelView(
-                view.getContext(),
+                mView.getContext(),
                 null,
-                injectionInflationController,
-                coordinator,
-                pulseExpansionHandler,
-                dynamicPrivacyController,
-                bypassController,
-                falsingManager,
-                pluginManager,
-                shadeController,
-                notificationLockscreenUserManager,
-                notificationEntryManager,
-                keyguardStateController,
-                statusBarStateController,
-                dozeLog,
-                dozeParameters,
-                commandQueue);
+                mInjectionInflationController,
+                mCoordinator,
+                mPulseExpansionHandler,
+                mDynamicPrivacyController,
+                mBypassController,
+                mFalsingManager,
+                mPluginManager,
+                mShadeControllerLazy.get(),
+                mNotificationLockscreenUserManager,
+                mNotificationEntryManager,
+                mKeyguardStateController,
+                mStatusBarStateController,
+                mDozeLog,
+                mDozeParameters,
+                mCommandQueue);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         notificationPanelView.setVisibility(View.INVISIBLE);
         notificationPanelView.setId(R.id.notification_panel);
-        LayoutInflater li = injectionInflationController.injectable(
+        LayoutInflater li = mInjectionInflationController.injectable(
                 LayoutInflater.from(mView.getContext()));
 
         li.inflate(R.layout.status_bar_expanded, notificationPanelView);
         notificationPanelView.onChildrenAttached();
 
-        ViewStub statusBarExpanded = view.findViewById(R.id.status_bar_expanded);
+        ViewStub statusBarExpanded = mView.findViewById(R.id.status_bar_expanded);
         mView.addView(notificationPanelView, mView.indexOfChild(statusBarExpanded), lp);
         mView.removeView(statusBarExpanded);
 
         mStackScrollLayout = mView.findViewById(R.id.notification_stack_scroller);
-        mLockIcon = mView.findViewById(R.id.lock_icon);
-        mBrightnessMirror = mView.findViewById(R.id.brightness_mirror);
 
         TunerService.Tunable tunable = (key, newValue) -> {
             AmbientDisplayConfiguration configuration =
@@ -153,7 +191,7 @@ public class StatusBarWindowViewController {
                     mSingleTapEnabled = configuration.tapGestureEnabled(UserHandle.USER_CURRENT);
             }
         };
-        tunerService.addTunable(tunable,
+        mTunerService.addTunable(tunable,
                 Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
                 Settings.Secure.DOZE_TAP_SCREEN_GESTURE);
 
@@ -225,7 +263,7 @@ public class StatusBarWindowViewController {
                     }
                 }
                 if (isDown) {
-                    getStackScrollLayout().closeControlsIfOutsideTouch(ev);
+                    mStackScrollLayout.closeControlsIfOutsideTouch(ev);
                 }
                 if (mService.isDozing()) {
                     mService.mDozeScrimController.extendPulse();
@@ -266,10 +304,9 @@ public class StatusBarWindowViewController {
 
             @Override
             public void didIntercept(MotionEvent ev) {
-                NotificationStackScrollLayout stackScrollLayout = getStackScrollLayout();
                 MotionEvent cancellation = MotionEvent.obtain(ev);
                 cancellation.setAction(MotionEvent.ACTION_CANCEL);
-                stackScrollLayout.onInterceptTouchEvent(cancellation);
+                mStackScrollLayout.onInterceptTouchEvent(cancellation);
                 notificationPanelView.onInterceptTouchEvent(cancellation);
                 cancellation.recycle();
             }
@@ -347,6 +384,13 @@ public class StatusBarWindowViewController {
             public void onChildViewRemoved(View parent, View child) {
             }
         });
+
+        ExpandHelper.Callback expandHelperCallback = mStackScrollLayout.getExpandHelperCallback();
+        DragDownHelper.DragDownCallback dragDownCallback = mStackScrollLayout.getDragDownCallback();
+        setDragDownHelper(
+                new DragDownHelper(
+                        mView.getContext(), mView, expandHelperCallback,
+                        dragDownCallback, mFalsingManager));
     }
 
     public StatusBarWindowView getView() {
@@ -389,44 +433,8 @@ public class StatusBarWindowViewController {
     }
 
     public void cancelExpandHelper() {
-        NotificationStackScrollLayout stackScrollLayout = getStackScrollLayout();
-        if (stackScrollLayout != null) {
-            stackScrollLayout.cancelExpandHelper();
-        }
-    }
-
-    @VisibleForTesting
-    protected NotificationStackScrollLayout getStackScrollLayout() {
-        return mStackScrollLayout;
-    }
-
-    /**
-     * Called whenever the scrims become opaque, transparent or semi-transparent.
-     */
-    public void onScrimVisibilityChanged(Integer scrimsVisible) {
-        if (mLockIcon != null) {
-            mLockIcon.onScrimVisibilityChanged(scrimsVisible);
-        }
-    }
-
-    /**
-     * Propagate {@link StatusBar} pulsing state.
-     */
-    public void setPulsing(boolean pulsing) {
-        if (mLockIcon != null) {
-            mLockIcon.setPulsing(pulsing);
-        }
-    }
-
-    /**
-     * Called when the biometric authentication mode changes.
-     *
-     * @param wakeAndUnlock If the type is {@link BiometricUnlockController#isWakeAndUnlock()}
-     * @param isUnlock      If the type is {@link BiometricUnlockController#isBiometricUnlock()} ()
-     */
-    public void onBiometricAuthModeChanged(boolean wakeAndUnlock, boolean isUnlock) {
-        if (mLockIcon != null) {
-            mLockIcon.onBiometricAuthModeChanged(wakeAndUnlock, isUnlock);
+        if (mStackScrollLayout != null) {
+            mStackScrollLayout.cancelExpandHelper();
         }
     }
 
@@ -436,138 +444,10 @@ public class StatusBarWindowViewController {
 
     public void setService(StatusBar statusBar) {
         mService = statusBar;
-        NotificationStackScrollLayout stackScrollLayout = getStackScrollLayout();
-        ExpandHelper.Callback expandHelperCallback = stackScrollLayout.getExpandHelperCallback();
-        DragDownHelper.DragDownCallback dragDownCallback = stackScrollLayout.getDragDownCallback();
-        setDragDownHelper(
-                new DragDownHelper(
-                        mView.getContext(), mView, expandHelperCallback,
-                        dragDownCallback, mFalsingManager));
     }
 
     @VisibleForTesting
     void setDragDownHelper(DragDownHelper dragDownHelper) {
         mDragDownHelper = dragDownHelper;
-    }
-
-    /**
-     * When we're launching an affordance, like double pressing power to open camera.
-     */
-    public void onShowingLaunchAffordanceChanged(Boolean showing) {
-        if (mLockIcon != null) {
-            mLockIcon.onShowingLaunchAffordanceChanged(showing);
-        }
-    }
-
-    public void setBouncerShowingScrimmed(boolean bouncerShowing) {
-        if (mLockIcon != null) {
-            mLockIcon.setBouncerShowingScrimmed(bouncerShowing);
-        }
-    }
-
-    /**
-     * When {@link KeyguardBouncer} starts to be dismissed and starts to play its animation.
-     */
-    public void onBouncerPreHideAnimation() {
-        if (mLockIcon != null) {
-            mLockIcon.onBouncerPreHideAnimation();
-        }
-    }
-
-    /**
-     * Builder for {@link StatusBarWindowViewController}.
-     */
-    public static class Builder {
-        private final InjectionInflationController mInjectionInflationController;
-        private final NotificationWakeUpCoordinator mCoordinator;
-        private final PulseExpansionHandler mPulseExpansionHandler;
-        private final DynamicPrivacyController mDynamicPrivacyController;
-        private final KeyguardBypassController mBypassController;
-        private final FalsingManager mFalsingManager;
-        private final PluginManager mPluginManager;
-        private final TunerService mTunerService;
-        private final KeyguardStateController mKeyguardStateController;
-        private final SysuiStatusBarStateController mStatusBarStateController;
-        private ShadeController mShadeController;
-        private final NotificationLockscreenUserManager mNotificationLockScreenUserManager;
-        private final NotificationEntryManager mNotificationEntryManager;
-        private final DozeLog mDozeLog;
-        private final DozeParameters mDozeParameters;
-        private final CommandQueue mCommandQueue;
-        private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
-        private final StatusBarWindowView mView;
-        private final DockManager mDockManager;
-
-        @Inject
-        public Builder(
-                InjectionInflationController injectionInflationController,
-                NotificationWakeUpCoordinator coordinator,
-                PulseExpansionHandler pulseExpansionHandler,
-                DynamicPrivacyController dynamicPrivacyController,
-                KeyguardBypassController bypassController,
-                FalsingManager falsingManager,
-                PluginManager pluginManager,
-                TunerService tunerService,
-                NotificationLockscreenUserManager notificationLockscreenUserManager,
-                NotificationEntryManager notificationEntryManager,
-                KeyguardStateController keyguardStateController,
-                StatusBarStateController statusBarStateController,
-                DozeLog dozeLog,
-                DozeParameters dozeParameters,
-                CommandQueue commandQueue,
-                SuperStatusBarViewFactory superStatusBarViewFactory,
-                DockManager dockManager) {
-            mInjectionInflationController = injectionInflationController;
-            mCoordinator = coordinator;
-            mPulseExpansionHandler = pulseExpansionHandler;
-            mDynamicPrivacyController = dynamicPrivacyController;
-            mBypassController = bypassController;
-            mFalsingManager = falsingManager;
-            mPluginManager = pluginManager;
-            mTunerService = tunerService;
-            mNotificationLockScreenUserManager = notificationLockscreenUserManager;
-            mNotificationEntryManager = notificationEntryManager;
-            mKeyguardStateController = keyguardStateController;
-            mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
-            mDozeLog = dozeLog;
-            mDozeParameters = dozeParameters;
-            mCommandQueue = commandQueue;
-            mSuperStatusBarViewFactory = superStatusBarViewFactory;
-            mView = mSuperStatusBarViewFactory.getStatusBarWindowView();
-            mDockManager = dockManager;
-        }
-
-        /**
-         * Provide {@link ShadeController} that this view needs.
-         */
-        public Builder setShadeController(ShadeController shadeController) {
-            mShadeController = shadeController;
-            return this;
-        }
-
-        /**
-         * Build a {@link StatusBarWindowView}.
-         */
-        public StatusBarWindowViewController build() {
-            return new StatusBarWindowViewController(
-                    mView,
-                    mInjectionInflationController,
-                    mCoordinator,
-                    mPulseExpansionHandler,
-                    mDynamicPrivacyController,
-                    mBypassController,
-                    mFalsingManager,
-                    mPluginManager,
-                    mTunerService,
-                    mShadeController,
-                    mNotificationLockScreenUserManager,
-                    mNotificationEntryManager,
-                    mKeyguardStateController,
-                    mStatusBarStateController,
-                    mDozeLog,
-                    mDozeParameters,
-                    mCommandQueue,
-                    mDockManager);
-        }
     }
 }

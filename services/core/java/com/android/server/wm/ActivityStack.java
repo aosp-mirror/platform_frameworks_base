@@ -421,8 +421,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
     /** Stores the override windowing-mode from before a transient mode change (eg. split) */
     private int mRestoreOverrideWindowingMode = WINDOWING_MODE_UNDEFINED;
 
-    private final ActivityOptions mTmpOptions = ActivityOptions.makeBasic();
-
     /** List for processing through a set of activities */
     private final ArrayList<ActivityRecord> mTmpActivities = new ArrayList<>();
 
@@ -750,7 +748,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             // Leaving a transient mode. Interpret UNDEFINED as "restore"
             windowingMode = mRestoreOverrideWindowingMode;
         }
-        mTmpOptions.setLaunchWindowingMode(windowingMode);
 
         // Need to make sure windowing mode is supported. If we in the process of creating the stack
         // no need to resolve the windowing mode again as it is already resolved to the right mode.

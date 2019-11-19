@@ -286,7 +286,7 @@
     <string name="permgrouprequest_location" msgid="3788275734953323491">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງສະຖານທີ່ຂອງອຸປະກອນບໍ?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"ແອັບຈະມີສິດເຂົ້າເຖິງສະຖານທີ່ໃນເວລາທີ່ທ່ານກຳລັງໃຊ້ແອັບຢູ່ເທົ່ານັ້ນ"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"ອະນຸຍາດໃຫ້ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ເຂົ້າເຖິງສະຖານທີ່ຂອງອຸປະກອນໄດ້ &lt;b&gt;ຕະຫຼອດເວລາ&lt;/b&gt; ບໍ?"</string>
-    <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"ຕອນນີ້ແອັບສາມາດເຂົ້າເຖິງສະຖານທີ່ໄດ້ສະເພາະເວລາທີ່ທ່ານໃຊ້ແອັບເທົ່ານັ້ນ"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="6969122401786527350">"ແອັບນີ້ອາດຕ້ອງການເຂົ້າເຖິງສະຖານທີ່ຂອງທ່ານຕະຫຼອດເວລາ, ເຖິງແມ່ນວ່າທ່ານຈະບໍ່ໄດ້ໃຊ້ແອັບຢູ່ກໍຕາມ. ອະນຸຍາດໃນ "<annotation id="link">"ການຕັ້ງຄ່າ"</annotation>"."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ປະຕິທິນ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງປະຕິທິນຂອງທ່ານບໍ?"</string>
@@ -1963,9 +1963,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ແຕະເພື່ອກວດສອບວ່າມີຫຍັງຖືກບລັອກໄວ້ແດ່."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ລະບົບ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"ການຕັ້ງຄ່າ"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"ສະແຕນບາຍ"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"ອຸປະກອນ Android TV ຈະປິດໃນອີກບໍ່ດົນ, ກົດປຸ່ມໃດໜຶ່ງເພື່ອເປີດມັນໄວ້ຕໍ່."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"ອຸປະກອນຈະປິດໃນອີກບໍ່ດົນ, ກົດເພື່ອເປີດມັນໄວ້ຕໍ່."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"ກ້ອງ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"ໄມໂຄຣໂຟນ"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"ສະແດງຜົນບັງແອັບອື່ນຢູ່ໜ້າຈໍຂອງທ່ານ"</string>
@@ -2006,22 +2003,13 @@
     <string name="chooser_no_direct_share_targets" msgid="997970693708458895">"ບໍ່ສາມາດແບ່ງປັນໂດຍກົງໄດ້"</string>
     <string name="chooser_all_apps_button_label" msgid="3631524352936289457">"ລາຍຊື່ແອັບ"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="5701272284724577469">"ແອັບນີ້ບໍ່ໄດ້ຮັບສິດອະນຸຍາດໃນການບັນທຶກ ແຕ່ສາມາດບັນທຶກສຽງໄດ້ຜ່ານອຸປະກອນ USB ນີ້."</string>
-    <!-- no translation found for accessibility_system_action_home_label (6089400419441597916) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_back_label (8986628898117178971) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_recents_label (7607601657790855723) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_notifications_label (1578681904050072545) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_quick_settings_label (3885565587471448947) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_power_dialog_label (2299530700682199873) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_toggle_split_screen_label (2853334443686935668) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_lock_screen_label (2377933717780192594) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_screenshot_label (1933564892301816480) -->
-    <skip />
+    <string name="accessibility_system_action_home_label" msgid="6089400419441597916">"ເຮືອນ"</string>
+    <string name="accessibility_system_action_back_label" msgid="8986628898117178971">"ກັບຄືນ"</string>
+    <string name="accessibility_system_action_recents_label" msgid="7607601657790855723">"ແອັບຫຼ້າສຸດ"</string>
+    <string name="accessibility_system_action_notifications_label" msgid="1578681904050072545">"ການແຈ້ງເຕືອນ"</string>
+    <string name="accessibility_system_action_quick_settings_label" msgid="3885565587471448947">"ການຕັ້ງຄ່າດ່ວນ"</string>
+    <string name="accessibility_system_action_power_dialog_label" msgid="2299530700682199873">"ກ່ອງໂຕ້ຕອບການເປີດປິດ"</string>
+    <string name="accessibility_system_action_toggle_split_screen_label" msgid="2853334443686935668">"ເປີດ/ປິດການແບ່ງໜ້າຈໍ"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="2377933717780192594">"ໜ້າຈໍລັອກ"</string>
+    <string name="accessibility_system_action_screenshot_label" msgid="1933564892301816480">"ຮູບໜ້າຈໍ"</string>
 </resources>

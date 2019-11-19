@@ -1645,10 +1645,10 @@ public class StorageManager {
      * Check that given app holds both permission and appop.
      * @hide
      */
-    public static boolean checkPermissionAndAppOp(Context context, boolean enforce,
-            int pid, int uid, String packageName, String permission, int op) {
-        return checkPermissionAndAppOp(context, enforce, pid, uid, packageName, permission, op,
-                true);
+    public static boolean checkPermissionAndAppOp(Context context, boolean enforce, int pid,
+            int uid, String packageName, @NonNull String featureId, String permission, int op) {
+        return checkPermissionAndAppOp(context, enforce, pid, uid, packageName, featureId,
+                permission, op, true);
     }
 
     /**
@@ -1657,16 +1657,17 @@ public class StorageManager {
      */
     public static boolean checkPermissionAndCheckOp(Context context, boolean enforce,
             int pid, int uid, String packageName, String permission, int op) {
-        return checkPermissionAndAppOp(context, enforce, pid, uid, packageName, permission, op,
-                false);
+        return checkPermissionAndAppOp(context, enforce, pid, uid, packageName,
+                null /* featureId is not needed when not noting */, permission, op, false);
     }
 
     /**
      * Check that given app holds both permission and appop.
      * @hide
      */
-    private static boolean checkPermissionAndAppOp(Context context, boolean enforce,
-            int pid, int uid, String packageName, String permission, int op, boolean note) {
+    private static boolean checkPermissionAndAppOp(Context context, boolean enforce, int pid,
+            int uid, String packageName, @Nullable String featureId, String permission, int op,
+            boolean note) {
         if (context.checkPermission(permission, pid, uid) != PERMISSION_GRANTED) {
             if (enforce) {
                 throw new SecurityException(
@@ -1679,7 +1680,7 @@ public class StorageManager {
         AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
         final int mode;
         if (note) {
-            mode = appOps.noteOpNoThrow(op, uid, packageName);
+            mode = appOps.noteOpNoThrow(op, uid, packageName, featureId, null);
         } else {
             try {
                 appOps.checkPackage(uid, packageName);
@@ -1711,14 +1712,15 @@ public class StorageManager {
         }
     }
 
-    private boolean checkPermissionAndAppOp(boolean enforce,
-            int pid, int uid, String packageName, String permission, int op) {
-        return checkPermissionAndAppOp(mContext, enforce, pid, uid, packageName, permission, op);
+    private boolean checkPermissionAndAppOp(boolean enforce, int pid, int uid, String packageName,
+            @Nullable String featureId, String permission, int op) {
+        return checkPermissionAndAppOp(mContext, enforce, pid, uid, packageName, featureId,
+                permission, op);
     }
 
     private boolean noteAppOpAllowingLegacy(boolean enforce,
-            int pid, int uid, String packageName, int op) {
-        final int mode = mAppOps.noteOpNoThrow(op, uid, packageName);
+            int pid, int uid, String packageName, @Nullable String featureId, int op) {
+        final int mode = mAppOps.noteOpNoThrow(op, uid, packageName, featureId, null);
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
                 return true;
@@ -1749,50 +1751,68 @@ public class StorageManager {
 
     /** {@hide} */
     public boolean checkPermissionReadAudio(boolean enforce,
-            int pid, int uid, String packageName) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, OP_READ_MEDIA_AUDIO);
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_READ_MEDIA_AUDIO);
     }
 
     /** {@hide} */
     public boolean checkPermissionWriteAudio(boolean enforce,
-            int pid, int uid, String packageName) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, OP_WRITE_MEDIA_AUDIO);
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_WRITE_MEDIA_AUDIO);
     }
 
     /** {@hide} */
     public boolean checkPermissionReadVideo(boolean enforce,
-            int pid, int uid, String packageName) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, OP_READ_MEDIA_VIDEO);
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_READ_MEDIA_VIDEO);
     }
 
     /** {@hide} */
     public boolean checkPermissionWriteVideo(boolean enforce,
-            int pid, int uid, String packageName) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, OP_WRITE_MEDIA_VIDEO);
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_WRITE_MEDIA_VIDEO);
     }
 
     /** {@hide} */
     public boolean checkPermissionReadImages(boolean enforce,
-            int pid, int uid, String packageName) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) return false;
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, OP_READ_MEDIA_IMAGES);
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                READ_EXTERNAL_STORAGE, OP_READ_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_READ_MEDIA_IMAGES);
     }
 
     /** {@hide} */
     public boolean checkPermissionWriteImages(boolean enforce,
-            int pid, int uid, String packageName) {
-        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName,
-                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) return false;
-        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, OP_WRITE_MEDIA_IMAGES);
+            int pid, int uid, String packageName, @Nullable String featureId) {
+        if (!checkPermissionAndAppOp(enforce, pid, uid, packageName, featureId,
+                WRITE_EXTERNAL_STORAGE, OP_WRITE_EXTERNAL_STORAGE)) {
+            return false;
+        }
+        return noteAppOpAllowingLegacy(enforce, pid, uid, packageName, featureId,
+                OP_WRITE_MEDIA_IMAGES);
     }
 
     /** {@hide} */

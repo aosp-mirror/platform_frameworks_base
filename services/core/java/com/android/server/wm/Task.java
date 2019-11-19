@@ -60,9 +60,7 @@ import static com.android.server.EventLogTags.WM_TASK_CREATED;
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.am.TaskRecordProto.ACTIVITIES;
 import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
-import static com.android.server.am.TaskRecordProto.BOUNDS;
 import static com.android.server.am.TaskRecordProto.FULLSCREEN;
-import static com.android.server.am.TaskRecordProto.ID;
 import static com.android.server.am.TaskRecordProto.LAST_NON_FULLSCREEN_BOUNDS;
 import static com.android.server.am.TaskRecordProto.MIN_HEIGHT;
 import static com.android.server.am.TaskRecordProto.MIN_WIDTH;
@@ -89,10 +87,8 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.TaskProto.APP_WINDOW_TOKENS;
-import static com.android.server.wm.TaskProto.BOUNDS;
 import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
-import static com.android.server.wm.TaskProto.ID;
 import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
 import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
 import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
@@ -314,6 +310,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     private final Rect mTmpNonDecorBounds = new Rect();
     private final Rect mTmpBounds = new Rect();
     private final Rect mTmpInsets = new Rect();
+    private final Rect mTmpFullBounds = new Rect();
 
     // Last non-fullscreen bounds the task was launched in or resized to.
     // The information is persisted and used to determine the appropriate stack to launch the
@@ -1673,7 +1670,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     void adjustForMinimalTaskDimensions(Rect bounds, Rect previousBounds) {
-        if (bounds == null) {
+        final Rect parentBounds = getParent() != null ? getParent().getBounds() : null;
+        if (bounds == null
+                || (bounds.isEmpty() && (parentBounds == null || parentBounds.isEmpty()))) {
             return;
         }
         int minWidth = mMinWidth;
@@ -1696,6 +1695,14 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             if (minHeight == INVALID_MIN_SIZE) {
                 minHeight = defaultMinSize;
             }
+        }
+        if (bounds.isEmpty()) {
+            // If inheriting parent bounds, check if parent bounds adhere to minimum size. If they
+            // do, we can just skip.
+            if (parentBounds.width() >= minWidth && parentBounds.height() >= minHeight) {
+                return;
+            }
+            bounds.set(parentBounds);
         }
         final boolean adjustWidth = minWidth > bounds.width();
         final boolean adjustHeight = minHeight > bounds.height();
@@ -1948,10 +1955,19 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         }
         density *= DisplayMetrics.DENSITY_DEFAULT_SCALE;
 
-        final Rect bounds = inOutConfig.windowConfiguration.getBounds();
+        final Rect resolvedBounds = inOutConfig.windowConfiguration.getBounds();
+        if (resolvedBounds == null) {
+            mTmpFullBounds.setEmpty();
+        } else {
+            mTmpFullBounds.set(resolvedBounds);
+        }
+        if (mTmpFullBounds.isEmpty()) {
+            mTmpFullBounds.set(parentConfig.windowConfiguration.getBounds());
+        }
+
         Rect outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
         if (outAppBounds == null || outAppBounds.isEmpty()) {
-            inOutConfig.windowConfiguration.setAppBounds(bounds);
+            inOutConfig.windowConfiguration.setAppBounds(mTmpFullBounds);
             outAppBounds = inOutConfig.windowConfiguration.getAppBounds();
         }
         // Non-null compatibility insets means the activity prefers to keep its original size, so
@@ -1974,7 +1990,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
                 // area, i.e. the screen area without the system bars.
                 // The non decor inset are areas that could never be removed in Honeycomb. See
                 // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
-                calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, bounds, di);
+                calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, mTmpFullBounds, di);
             } else {
                 // Apply the given non-decor and stable insets to calculate the corresponding bounds
                 // for screen size of configuration.
@@ -1983,8 +1999,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
                     rotation = parentConfig.windowConfiguration.getRotation();
                 }
                 if (rotation != ROTATION_UNDEFINED && compatInsets != null) {
-                    mTmpNonDecorBounds.set(bounds);
-                    mTmpStableBounds.set(bounds);
+                    mTmpNonDecorBounds.set(mTmpFullBounds);
+                    mTmpStableBounds.set(mTmpFullBounds);
                     compatInsets.getDisplayBoundsByRotation(mTmpBounds, rotation);
                     intersectWithInsetsIfFits(mTmpNonDecorBounds, mTmpBounds,
                             compatInsets.mNonDecorInsets[rotation]);
@@ -2016,13 +2032,13 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
                 if (WindowConfiguration.isFloating(windowingMode)) {
                     // For floating tasks, calculate the smallest width from the bounds of the task
                     inOutConfig.smallestScreenWidthDp = (int) (
-                            Math.min(bounds.width(), bounds.height()) / density);
+                            Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
                 } else if (WindowConfiguration.isSplitScreenWindowingMode(windowingMode)) {
                     // Iterating across all screen orientations, and return the minimum of the task
                     // width taking into account that the bounds might change because the snap
                     // algorithm snaps to a different value
                     inOutConfig.smallestScreenWidthDp =
-                            getSmallestScreenWidthDpForDockedBounds(bounds);
+                            getSmallestScreenWidthDpForDockedBounds(mTmpFullBounds);
                 }
                 // otherwise, it will just inherit
             }
@@ -2065,11 +2081,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             computeFullscreenBounds(outOverrideBounds, null /* refActivity */,
                     newParentConfig.windowConfiguration.getBounds(),
                     newParentConfig.orientation);
-        }
-
-        if (outOverrideBounds.isEmpty()) {
-            // If the task fills the parent, just inherit all the other configs from parent.
-            return;
         }
 
         adjustForMinimalTaskDimensions(outOverrideBounds, mTmpBounds);

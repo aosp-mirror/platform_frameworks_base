@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -64,6 +65,11 @@ public class SuperStatusBarViewFactory {
                     "R.layout.super_status_bar could not be properly inflated");
         }
         return mStatusBarWindowView;
+    }
+
+    /** Gets the {@link LockIcon} inside of {@link R.layout#super_status_bar}. */
+    public LockIcon getLockIcon() {
+        return getStatusBarWindowView().findViewById(R.id.lock_icon);
     }
 
     /**

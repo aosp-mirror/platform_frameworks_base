@@ -26,7 +26,6 @@
 #include <nativehelper/JNIHelp.h>
 
 #include <binder/MemoryDealer.h>
-#include <drm/drm_framework_common.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/ScopedLocalRef.h>
 
@@ -159,10 +158,6 @@ uint32_t JMediaDataSource::getFlags() {
 
 String8 JMediaDataSource::toString() {
     return String8::format("JMediaDataSource(pid %d, uid %d)", getpid(), getuid());
-}
-
-sp<DecryptHandle> JMediaDataSource::DrmInitialization(const char * /* mime */) {
-    return NULL;
 }
 
 }  // namespace android

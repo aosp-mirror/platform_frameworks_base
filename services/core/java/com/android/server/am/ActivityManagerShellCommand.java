@@ -37,11 +37,13 @@ import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
+import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageStatsManager;
+import android.compat.Compatibility;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
@@ -80,15 +82,17 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
+import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.server.compat.CompatConfig;
+import com.android.server.compat.PlatformCompat;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -1729,6 +1733,30 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private void switchUserAndWaitForComplete(int userId) throws RemoteException {
+        // Register switch observer.
+        final CountDownLatch switchLatch = new CountDownLatch(1);
+        mInterface.registerUserSwitchObserver(
+                new UserSwitchObserver() {
+                    @Override
+                    public void onUserSwitchComplete(int newUserId) {
+                        if (userId == newUserId) {
+                            switchLatch.countDown();
+                        }
+                    }
+                }, ActivityManagerShellCommand.class.getName());
+
+        // Switch.
+        mInterface.switchUser(userId);
+
+        // Wait.
+        try {
+            switchLatch.await(USER_OPERATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            getErrPrintWriter().println("Thread interrupted unexpectedly.");
+        }
+    }
+
     int runSwitchUser(PrintWriter pw) throws RemoteException {
         UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
         final int userSwitchable = userManager.getUserSwitchability();
@@ -1736,8 +1764,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: " + userSwitchable);
             return -1;
         }
-        String user = getNextArgRequired();
-        mInterface.switchUser(Integer.parseInt(user));
+        boolean wait = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if ("-w".equals(opt)) {
+                wait = true;
+            } else {
+                getErrPrintWriter().println("Error: unknown option: " + opt);
+                return -1;
+            }
+        }
+
+        int userId = Integer.parseInt(getNextArgRequired());
+        if (wait) {
+            switchUserAndWaitForComplete(userId);
+        } else {
+            mInterface.switchUser(userId);
+        }
         return 0;
     }
 
@@ -2862,56 +2905,49 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private void killPackage(String packageName, PrintWriter pw) throws RemoteException {
-        int uid = mPm.getPackageUid(packageName, 0, mUserId);
-        if (uid < 0) {
-            // uid is negative if the package wasn't found.
-            pw.println("Didn't find package " + packageName + " on device.");
-        } else {
-            pw.println("Killing package " + packageName + " (UID " + uid + ").");
-            final long origId = Binder.clearCallingIdentity();
-            mInterface.killUid(UserHandle.getAppId(uid),
-                    UserHandle.USER_ALL, "killPackage");
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
     private int runCompat(PrintWriter pw) throws RemoteException {
-        final CompatConfig config = CompatConfig.get();
+        final PlatformCompat platformCompat = (PlatformCompat)
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         String toggleValue = getNextArgRequired();
         long changeId;
         String changeIdString = getNextArgRequired();
         try {
             changeId = Long.parseLong(changeIdString);
         } catch (NumberFormatException e) {
-            changeId = config.lookupChangeId(changeIdString);
+            changeId = platformCompat.lookupChangeId(changeIdString);
         }
         if (changeId == -1) {
             pw.println("Unknown or invalid change: '" + changeIdString + "'.");
+            return -1;
         }
         String packageName = getNextArgRequired();
+        if (!platformCompat.isKnownChangeId(changeId)) {
+            pw.println("Warning! Change " + changeId + " is not known yet. Enabling/disabling it"
+                    + " could have no effect.");
+        }
+        ArraySet<Long> enabled = new ArraySet<>();
+        ArraySet<Long> disabled = new ArraySet<>();
         switch (toggleValue) {
             case "enable":
-                if (!config.addOverride(changeId, packageName, true)) {
-                    pw.println("Warning! Change " + changeId + " is not known yet. Enabling it"
-                            + " could have no effect.");
-                }
+                enabled.add(changeId);
                 pw.println("Enabled change " + changeId + " for " + packageName + ".");
-                killPackage(packageName, pw);
+                CompatibilityChangeConfig overrides =
+                        new CompatibilityChangeConfig(
+                                new Compatibility.ChangeConfig(enabled, disabled));
+                platformCompat.setOverrides(overrides, packageName);
                 return 0;
             case "disable":
-                if (!config.addOverride(changeId, packageName, false)) {
-                    pw.println("Warning! Change " + changeId + " is not known yet. Disabling it"
-                            + " could have no effect.");
-                }
+                disabled.add(changeId);
                 pw.println("Disabled change " + changeId + " for " + packageName + ".");
-                killPackage(packageName, pw);
+                overrides =
+                        new CompatibilityChangeConfig(
+                                new Compatibility.ChangeConfig(enabled, disabled));
+                platformCompat.setOverrides(overrides, packageName);
                 return 0;
             case "reset":
-                if (config.removeOverride(changeId, packageName)) {
+                if (platformCompat.clearOverride(changeId, packageName)) {
                     pw.println("Reset change " + changeId + " for " + packageName
                             + " to default value.");
-                    killPackage(packageName, pw);
                 } else {
                     pw.println("No override exists for changeId " + changeId + ".");
                 }

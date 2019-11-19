@@ -180,7 +180,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         filter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
         filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION);
-        filter.addAction(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
+        filter.addAction(WifiManager.ACTION_LINK_CONFIGURATION_CHANGED);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
 
@@ -866,7 +866,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
                 fetchScansAndConfigsAndUpdateAccessPoints();
             } else if (WifiManager.CONFIGURED_NETWORKS_CHANGED_ACTION.equals(action)
-                    || WifiManager.LINK_CONFIGURATION_CHANGED_ACTION.equals(action)) {
+                    || WifiManager.ACTION_LINK_CONFIGURATION_CHANGED.equals(action)) {
                 fetchScansAndConfigsAndUpdateAccessPoints();
             } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                 // TODO(sghuman): Refactor these methods so they cannot result in duplicate

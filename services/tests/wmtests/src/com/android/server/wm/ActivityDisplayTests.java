@@ -38,22 +38,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
 
-import android.app.TaskStackListener;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the {@link ActivityDisplay} class.
@@ -330,51 +321,5 @@ public class ActivityDisplayTests extends ActivityTestsBase {
                 any());
         verify(mSupervisor).removeTaskByIdLocked(eq(task1.mTaskId), anyBoolean(), anyBoolean(),
                 any());
-    }
-
-    /**
-     * Ensures that {@link TaskStackListener} can receive callback about the activity in size
-     * compatibility mode.
-     */
-    @Test
-    public void testHandleActivitySizeCompatMode() throws Exception {
-        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
-        final ActivityRecord activity = createFullscreenStackWithSimpleActivityAt(
-                display).topRunningActivityLocked();
-        activity.setState(ActivityStack.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
-        when(activity.getRequestedOrientation()).thenReturn(
-                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        activity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-        activity.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        activity.visible = true;
-        activity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
-
-        final ArrayList<CompletableFuture<IBinder>> resultWrapper = new ArrayList<>();
-        mService.getTaskChangeNotificationController().registerTaskStackListener(
-                new TaskStackListener() {
-                    @Override
-                    public void onSizeCompatModeActivityChanged(int displayId,
-                            IBinder activityToken) {
-                        resultWrapper.get(0).complete(activityToken);
-                    }
-                });
-
-        resultWrapper.add(new CompletableFuture<>());
-
-        // resize the display to exercise size-compat mode
-        final DisplayContent displayContent = display.mDisplayContent;
-        displayContent.mBaseDisplayHeight = (int) (0.8f * displayContent.mBaseDisplayHeight);
-        Configuration c = new Configuration();
-        displayContent.computeScreenConfiguration(c);
-        display.onRequestedOverrideConfigurationChanged(c);
-
-        assertEquals(activity.appToken, resultWrapper.get(0).get(2, TimeUnit.SECONDS));
-
-        // Expect null token when switching to non-size-compat mode activity.
-        activity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
-        resultWrapper.set(0, new CompletableFuture<>());
-        display.handleActivitySizeCompatModeIfNeeded(activity);
-
-        assertNull(resultWrapper.get(0).get(2, TimeUnit.SECONDS));
     }
 }

@@ -61,8 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Średnia"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Szybka"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Bardzo szybka"</string>
-    <!-- no translation found for wifi_passpoint_expired (6540867261754427561) -->
-    <skip />
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Ważność wygasła"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Rozłączona"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Rozłączanie..."</string>

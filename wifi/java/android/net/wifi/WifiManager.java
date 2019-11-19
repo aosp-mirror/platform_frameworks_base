@@ -380,14 +380,6 @@ public class WifiManager {
      * @hide
      */
     public static final String EXTRA_DELAY = "android.net.wifi.extra.DELAY";
-    /**
-     * String representation of an URL.
-     *
-     * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_URL = "android.net.wifi.extra.URL";
 
     /**
      * Broadcast intent action indicating a Passpoint subscription remediation frame has been
@@ -420,29 +412,40 @@ public class WifiManager {
             "android.net.wifi.extra.SUBSCRIPTION_REMEDIATION_METHOD";
 
     /**
-     * Activity Action: lunch OSU (Online Sign Up) view.
+     * Activity Action: Receiver should launch Passpoint OSU (Online Sign Up) view.
      * Included extras:
      *
      * {@link #EXTRA_OSU_NETWORK}: {@link Network} instance associated with OSU AP.
      * {@link #EXTRA_URL}: String representation of a server URL used for OSU process.
      *
-     * <p>Note: The broadcast is only delivered to registered receivers - no manifest registered
-     * components will be launched.
-     *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PASSPOINT_LAUNCH_OSU_VIEW =
             "android.net.wifi.action.PASSPOINT_LAUNCH_OSU_VIEW";
 
     /**
-     * The lookup key for a {@link android.net.Network} associated with OSU server.
+     * The lookup key for a {@link android.net.Network} associated with a Passpoint OSU server.
+     * Included in the {@link #ACTION_PASSPOINT_LAUNCH_OSU_VIEW} broadcast.
      *
      * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
      *
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_OSU_NETWORK = "android.net.wifi.extra.OSU_NETWORK";
+
+    /**
+     * String representation of an URL for Passpoint OSU.
+     * Included in the {@link #ACTION_PASSPOINT_LAUNCH_OSU_VIEW} broadcast.
+     *
+     * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_URL = "android.net.wifi.extra.URL";
 
     /**
      * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
@@ -656,6 +659,7 @@ public class WifiManager {
      *
      *  @hide
      */
+    @SystemApi
     public static final int SAP_START_FAILURE_GENERAL= 0;
 
     /**
@@ -664,6 +668,7 @@ public class WifiManager {
      *
      *  @hide
      */
+    @SystemApi
     public static final int SAP_START_FAILURE_NO_CHANNEL = 1;
 
     /** @hide */
@@ -917,7 +922,7 @@ public class WifiManager {
      * The RSSI (signal strength) has changed.
      *
      * Receiver Required Permission: android.Manifest.permission.ACCESS_WIFI_STATE
-     * @see {@link #EXTRA_NEW_RSSI}
+     * @see #EXTRA_NEW_RSSI
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String RSSI_CHANGED_ACTION = "android.net.wifi.RSSI_CHANGED";
@@ -927,21 +932,37 @@ public class WifiManager {
     public static final String EXTRA_NEW_RSSI = "newRssi";
 
     /**
-     * Broadcast intent action indicating that the link configuration
-     * changed on wifi.
+     * @see #ACTION_LINK_CONFIGURATION_CHANGED
      * @hide
      */
     @UnsupportedAppUsage
     public static final String LINK_CONFIGURATION_CHANGED_ACTION =
-        "android.net.wifi.LINK_CONFIGURATION_CHANGED";
+            "android.net.wifi.LINK_CONFIGURATION_CHANGED";
+
+    /**
+     * Broadcast intent action indicating that the link configuration changed on wifi.
+     * <br />Included Extras:
+     * <br />{@link #EXTRA_LINK_PROPERTIES}: {@link android.net.LinkProperties} object associated
+     * with the Wi-Fi network.
+     * <br /> No permissions are required to listen to this broadcast.
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_LINK_CONFIGURATION_CHANGED =
+            // should be android.net.wifi.action.LINK_CONFIGURATION_CHANGED, but due to
+            // @UnsupportedAppUsage leaving it as android.net.wifi.LINK_CONFIGURATION_CHANGED.
+            LINK_CONFIGURATION_CHANGED_ACTION;
 
     /**
      * The lookup key for a {@link android.net.LinkProperties} object associated with the
-     * Wi-Fi network. Retrieve with
-     * {@link android.content.Intent#getParcelableExtra(String)}.
+     * Wi-Fi network.
+     * Included in the {@link #ACTION_LINK_CONFIGURATION_CHANGED} broadcast.
+     *
+     * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
      * @hide
      */
-    public static final String EXTRA_LINK_PROPERTIES = "linkProperties";
+    @SystemApi
+    public static final String EXTRA_LINK_PROPERTIES = "android.net.wifi.extra.LINK_PROPERTIES";
 
     /**
      * The lookup key for a {@link android.net.NetworkCapabilities} object associated with the
@@ -981,24 +1002,26 @@ public class WifiManager {
     public static final String ACTION_PICK_WIFI_NETWORK = "android.net.wifi.PICK_WIFI_NETWORK";
 
     /**
-     * Activity Action: Show UI to get user approval to enable WiFi.
+     * Activity Action: Receiver should show UI to get user approval to enable WiFi.
      * <p>Input: {@link android.content.Intent#EXTRA_PACKAGE_NAME} string extra with
      *           the name of the app requesting the action.
      * <p>Output: Nothing.
-     *
+     * <p>No permissions are required to send this action.
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_ENABLE = "android.net.wifi.action.REQUEST_ENABLE";
 
     /**
-     * Activity Action: Show UI to get user approval to disable WiFi.
+     * Activity Action: Receiver should show UI to get user approval to disable WiFi.
      * <p>Input: {@link android.content.Intent#EXTRA_PACKAGE_NAME} string extra with
      *           the name of the app requesting the action.
      * <p>Output: Nothing.
-     *
+     * <p>No permissions are required to send this action.
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_DISABLE = "android.net.wifi.action.REQUEST_DISABLE";
 
@@ -1115,11 +1138,15 @@ public class WifiManager {
     private static final int MAX_RSSI = -55;
 
     /**
-     * Number of RSSI levels used in the framework to initiate
-     * {@link #RSSI_CHANGED_ACTION} broadcast
+     * Number of RSSI levels used in the framework to initiate {@link #RSSI_CHANGED_ACTION}
+     * broadcast, where each level corresponds to a range of RSSI values.
+     * The {@link #RSSI_CHANGED_ACTION} broadcast will only fire if the RSSI
+     * change is significant enough to change the RSSI signal level.
      * @hide
      */
     @UnsupportedAppUsage
+    // TODO(b/140781184): need to support custom number of RSSI levels, as well as levels that are
+    //  not evenly spaced
     public static final int RSSI_LEVELS = 5;
 
     /**
@@ -1147,7 +1174,8 @@ public class WifiManager {
     /** @hide */
     public static final boolean DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED = false;
 
-    /* Maximum number of active locks we allow.
+    /**
+     * Maximum number of active locks we allow.
      * This limit was added to prevent apps from creating a ridiculous number
      * of locks and crashing the system by overflowing the global ref table.
      */
@@ -1487,40 +1515,43 @@ public class WifiManager {
      * {@link #reject()} to return the user's selection back to the platform via this callback.
      * @hide
      */
+    @SystemApi
     public interface NetworkRequestUserSelectionCallback {
         /**
          * User selected this network to connect to.
          * @param wifiConfiguration WifiConfiguration object corresponding to the network
          *                          user selected.
          */
-        void select(@NonNull WifiConfiguration wifiConfiguration);
+        default void select(@NonNull WifiConfiguration wifiConfiguration) {}
 
         /**
          * User rejected the app's request.
          */
-        void reject();
+        default void reject() {}
     }
 
     /**
      * Interface for network request callback. Should be implemented by applications and passed when
-     * calling {@link #registerNetworkRequestMatchCallback(NetworkRequestMatchCallback, Handler)}.
+     * calling {@link #registerNetworkRequestMatchCallback(Executor,
+     * WifiManager.NetworkRequestMatchCallback)}.
      *
      * This is meant to be implemented by a UI component to present the user with a list of networks
      * matching the app's request. The user is allowed to pick one of these networks to connect to
      * or reject the request by the app.
      * @hide
      */
+    @SystemApi
     public interface NetworkRequestMatchCallback {
         /**
          * Invoked to register a callback to be invoked to convey user selection. The callback
-         * object paased in this method is to be invoked by the UI component after the service sends
+         * object passed in this method is to be invoked by the UI component after the service sends
          * a list of matching scan networks using {@link #onMatch(List)} and user picks a network
          * from that list.
          *
          * @param userSelectionCallback Callback object to send back the user selection.
          */
-        void onUserSelectionCallbackRegistration(
-                @NonNull NetworkRequestUserSelectionCallback userSelectionCallback);
+        default void onUserSelectionCallbackRegistration(
+                @NonNull NetworkRequestUserSelectionCallback userSelectionCallback) {}
 
         /**
          * Invoked when the active network request is aborted, either because
@@ -1529,7 +1560,7 @@ public class WifiManager {
          * This signals the end of processing for the current request and should stop the UI
          * component. No subsequent calls from the UI component will be handled by the platform.
          */
-        void onAbort();
+        default void onAbort() {}
 
         /**
          * Invoked when a network request initiated by an app matches some networks in scan results.
@@ -1539,7 +1570,7 @@ public class WifiManager {
          * @param scanResults List of {@link ScanResult} objects corresponding to the networks
          *                    matching the request.
          */
-        void onMatch(@NonNull List<ScanResult> scanResults);
+        default void onMatch(@NonNull List<ScanResult> scanResults) {}
 
         /**
          * Invoked on a successful connection with the network that the user selected
@@ -1548,7 +1579,7 @@ public class WifiManager {
          * @param wifiConfiguration WifiConfiguration object corresponding to the network that the
          *                          user selected.
          */
-        void onUserSelectionConnectSuccess(@NonNull WifiConfiguration wifiConfiguration);
+        default void onUserSelectionConnectSuccess(@NonNull WifiConfiguration wifiConfiguration) {}
 
         /**
          * Invoked on failure to establish connection with the network that the user selected
@@ -1557,7 +1588,7 @@ public class WifiManager {
          * @param wifiConfiguration WifiConfiguration object corresponding to the network
          *                          user selected.
          */
-        void onUserSelectionConnectFailure(@NonNull WifiConfiguration wifiConfiguration);
+        default void onUserSelectionConnectFailure(@NonNull WifiConfiguration wifiConfiguration) {}
     }
 
     /**
@@ -1606,11 +1637,11 @@ public class WifiManager {
      * @hide
      */
     private class NetworkRequestMatchCallbackProxy extends INetworkRequestMatchCallback.Stub {
-        private final Handler mHandler;
+        private final Executor mExecutor;
         private final NetworkRequestMatchCallback mCallback;
 
-        NetworkRequestMatchCallbackProxy(Looper looper, NetworkRequestMatchCallback callback) {
-            mHandler = new Handler(looper);
+        NetworkRequestMatchCallbackProxy(Executor executor, NetworkRequestMatchCallback callback) {
+            mExecutor = executor;
             mCallback = callback;
         }
 
@@ -1621,7 +1652,8 @@ public class WifiManager {
                 Log.v(TAG, "NetworkRequestMatchCallbackProxy: "
                         + "onUserSelectionCallbackRegistration callback: " + userSelectionCallback);
             }
-            mHandler.post(() -> {
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onUserSelectionCallbackRegistration(
                         new NetworkRequestUserSelectionCallbackProxy(userSelectionCallback));
             });
@@ -1632,7 +1664,8 @@ public class WifiManager {
             if (mVerboseLoggingEnabled) {
                 Log.v(TAG, "NetworkRequestMatchCallbackProxy: onAbort");
             }
-            mHandler.post(() -> {
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onAbort();
             });
         }
@@ -1643,7 +1676,8 @@ public class WifiManager {
                 Log.v(TAG, "NetworkRequestMatchCallbackProxy: onMatch scanResults: "
                         + scanResults);
             }
-            mHandler.post(() -> {
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onMatch(scanResults);
             });
         }
@@ -1654,7 +1688,8 @@ public class WifiManager {
                 Log.v(TAG, "NetworkRequestMatchCallbackProxy: onUserSelectionConnectSuccess "
                         + " wificonfiguration: " + wifiConfiguration);
             }
-            mHandler.post(() -> {
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onUserSelectionConnectSuccess(wifiConfiguration);
             });
         }
@@ -1665,10 +1700,23 @@ public class WifiManager {
                 Log.v(TAG, "NetworkRequestMatchCallbackProxy: onUserSelectionConnectFailure"
                         + " wificonfiguration: " + wifiConfiguration);
             }
-            mHandler.post(() -> {
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onUserSelectionConnectFailure(wifiConfiguration);
             });
         }
+    }
+
+    /**
+     * Same as {@link #registerNetworkRequestMatchCallback(Executor, NetworkRequestMatchCallback)},
+     * except that the callback will be executed on the application's main thread.
+     * @param callback Callback for network match events to register.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void registerNetworkRequestMatchCallback(@NonNull NetworkRequestMatchCallback callback) {
+        registerNetworkRequestMatchCallback(mContext.getMainExecutor(), callback);
     }
 
     /**
@@ -1681,19 +1729,20 @@ public class WifiManager {
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
-     * @param callback Callback for network match events
-     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
-     *                 object. If null, then the application's main thread will be used.
+     * @param executor The Executor on whose thread to execute the callbacks of the {@code callback}
+     *                 object.
+     * @param callback Callback for network match events to register.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerNetworkRequestMatchCallback(@NonNull NetworkRequestMatchCallback callback,
-                                                    @Nullable Handler handler) {
+    public void registerNetworkRequestMatchCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull NetworkRequestMatchCallback callback) {
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
         Log.v(TAG, "registerNetworkRequestMatchCallback: callback=" + callback
-                + ", handler=" + handler);
+                + ", executor=" + executor);
 
-        Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
         Binder binder = new Binder();
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -1701,7 +1750,7 @@ public class WifiManager {
                 throw new RemoteException("Wifi service is not running");
             }
             iWifiManager.registerNetworkRequestMatchCallback(
-                    binder, new NetworkRequestMatchCallbackProxy(looper, callback),
+                    binder, new NetworkRequestMatchCallbackProxy(executor, callback),
                     callback.hashCode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1716,9 +1765,10 @@ public class WifiManager {
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
-     * @param callback Callback for network match events
+     * @param callback Callback for network match events to unregister.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void unregisterNetworkRequestMatchCallback(
             @NonNull NetworkRequestMatchCallback callback) {
@@ -2561,29 +2611,30 @@ public class WifiManager {
     }
 
     /**
-    * get the country code.
-    * @return the country code in ISO 3166 format.
-    *
-    * @hide
-    */
-    @UnsupportedAppUsage
+     * Get the country code.
+     * @return the country code in ISO 3166 format, or null if there is no country code configured.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
     public String getCountryCode() {
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return null;
-            String country = iWifiManager.getCountryCode();
-            return country;
+            return iWifiManager.getCountryCode();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Check if the chipset supports dual frequency band (2.4 GHz and 5 GHz)
+     * Check if the chipset supports dual frequency band (2.4 GHz and 5 GHz).
+     * No permissions are required to call this method.
      * @return {@code true} if supported, {@code false} otherwise.
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public boolean isDualBandSupported() {
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -2595,10 +2646,20 @@ public class WifiManager {
     }
 
     /**
-     * Check if the chipset requires conversion of 5GHz Only apBand to ANY.
-     * @return {@code true} if required, {@code false} otherwise.
+     * Check if the device is dual mode capable i.e. supports concurrent STA + Soft AP.
+     *
+     * If the device is dual mode capable, it may require conversion of the user's Soft AP band
+     * selection {@link WifiConfiguration#apBand} from {@link WifiConfiguration#AP_BAND_5GHZ} to
+     * {@link WifiConfiguration#AP_BAND_ANY}, since if the device is connected to a 5GHz DFS
+     * channel as a STA, it may be unable to honor a request to start Soft AP on the same DFS
+     * channel.
+     *
+     * @return {@code true} if dual mode STA + AP is supported by this device, {@code false}
+     * otherwise.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public boolean isDualModeSupported() {
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -2685,6 +2746,7 @@ public class WifiManager {
      *
      * @hide for CTS test only
      */
+    // TODO(b/144036594): add @TestApi
     public void getTxPacketCount(@NonNull TxPacketCountListener listener) {
         if (listener == null) throw new IllegalArgumentException("listener cannot be null");
         Binder binder = new Binder();
@@ -3134,10 +3196,12 @@ public class WifiManager {
     }
 
     /**
-     * Method that triggers a notification to the user about a conversion to their saved AP config.
+     * Method that triggers a notification to the user about a band conversion
+     * (e.g. 5 GHz to 2.4 GHz) to their saved AP config.
      *
      * @hide
      */
+    // TODO(b/144218444): move the notification to Settings instead of making this @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void notifyUserOfApBandConversion() {
         Log.d(TAG, "apBand was converted, notify the user");
@@ -3371,22 +3435,21 @@ public class WifiManager {
         /**
          * Called when soft AP state changes.
          *
-         * @param state         new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
+         * @param state         the new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
          *                      {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
          *                      {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
          * @param failureReason reason when in failed state. One of
          *                      {@link #SAP_START_FAILURE_GENERAL},
          *                      {@link #SAP_START_FAILURE_NO_CHANNEL}
          */
-        void onStateChanged(@WifiApState int state,
-                @SapStartFailure int failureReason);
+        default void onStateChanged(@WifiApState int state, @SapStartFailure int failureReason) {}
 
         /**
          * Called when the connected clients to soft AP changes.
          *
          * @param clients the currently connected clients
          */
-        void onConnectedClientsChanged(@NonNull List<WifiClient> clients);
+        default void onConnectedClientsChanged(@NonNull List<WifiClient> clients) {}
 
         /**
          * Called when information of softap changes.
@@ -3452,31 +3515,42 @@ public class WifiManager {
     }
 
     /**
+     * Same as {@link #registerSoftApCallback(Executor, SoftApCallback)},
+     * except that the callback will be executed on the application's main thread.
+     * @param callback Callback for soft AP events
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void registerSoftApCallback(@NonNull SoftApCallback callback) {
+        registerSoftApCallback(mContext.getMainExecutor(), callback);
+    }
+
+    /**
      * Registers a callback for Soft AP. See {@link SoftApCallback}. Caller will receive the current
      * soft AP state and number of connected devices immediately after a successful call to this API
      * via callback. Note that receiving an immediate WIFI_AP_STATE_FAILED value for soft AP state
      * indicates that the latest attempt to start soft AP has failed. Caller can unregister a
-     * previously registered callback using {@link unregisterSoftApCallback}
+     * previously registered callback using {@link #unregisterSoftApCallback}
      * <p>
      * Applications should have the
      * {@link android.Manifest.permission#NETWORK_SETTINGS NETWORK_SETTINGS} permission. Callers
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
-     * @param executor The executor to execute the callbacks of the {@code executor}
-     *                 object. If null, then the application's main executor will be used.
+     * @param executor The Executor on whose thread to execute the callbacks of the {@code callback}
+     *                 object.
      * @param callback Callback for soft AP events
-     *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerSoftApCallback(@Nullable @CallbackExecutor Executor executor,
-                                       @NonNull SoftApCallback callback) {
+    public void registerSoftApCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull SoftApCallback callback) {
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
         Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", executor=" + executor);
 
-        executor = (executor == null) ? mContext.getMainExecutor() : executor;
         Binder binder = new Binder();
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -3498,6 +3572,7 @@ public class WifiManager {
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void unregisterSoftApCallback(@NonNull SoftApCallback callback) {
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
@@ -4042,23 +4117,27 @@ public class WifiManager {
     }
 
     /**
-     * Disable ephemeral Network
+     * Disable an ephemeral network.
      *
-     * @param SSID, in the format of WifiConfiguration's SSID.
+     * @param ssid in the format of WifiConfiguration's SSID.
+     *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_STACK
     })
-    public void disableEphemeralNetwork(String SSID) {
-        if (TextUtils.isEmpty(SSID)) throw new IllegalArgumentException("SSID cannot be null");
+    public void disableEphemeralNetwork(@NonNull String ssid) {
+        if (TextUtils.isEmpty(ssid)) {
+            throw new IllegalArgumentException("SSID cannot be null or empty!");
+        }
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) {
                 throw new RemoteException("Wifi service is not running");
             }
-            iWifiManager.disableEphemeralNetwork(SSID, mContext.getOpPackageName());
+            iWifiManager.disableEphemeralNetwork(ssid, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4554,11 +4633,15 @@ public class WifiManager {
     }
 
     /**
-     * Set wifi verbose log. Called from developer settings.
+     * Set Wi-Fi verbose logging level from developer settings.
+     *
+     * @param verbose the verbose logging level to set. 0 will disable verbose logging, a positive
+     *                integer will enable verbose logging.
+     *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    @UnsupportedAppUsage
     public void enableVerboseLogging (int verbose) {
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -4574,11 +4657,15 @@ public class WifiManager {
     }
 
     /**
-     * Get the WiFi verbose logging level.This is used by settings
-     * to decide what to show within the picker.
+     * Get the persisted WiFi verbose logging level, set by {@link #enableVerboseLogging(int)}.
+     * No permissions are required to call this method.
+     *
+     * @return 0 to indicate that verbose logging is disabled, a positive integer to indicate that
+     * verbose logging is enabled.
+     *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public int getVerboseLoggingLevel() {
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -4590,10 +4677,13 @@ public class WifiManager {
     }
 
     /**
-     * Removes all saved wifi networks.
+     * Removes all saved Wi-Fi networks, Passpoint configurations, ephemeral networks, Network
+     * Requests, and Network Suggestions.
      *
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
     public void factoryReset() {
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -4607,11 +4697,12 @@ public class WifiManager {
     }
 
     /**
-     * Get Network object of current wifi network
-     * @return Get Network object of current wifi network
+     * Get {@link Network} object of current wifi network, or null if not connected.
      * @hide
      */
-    @UnsupportedAppUsage
+    @Nullable
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE)
     public Network getCurrentNetwork() {
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -4660,13 +4751,18 @@ public class WifiManager {
     }
 
     /**
-     * Retrieve the data to be backed to save the current state.
+     * Returns a byte stream representing the data that needs to be backed up to save the
+     * current Wifi state.
+     * This Wifi state can be restored by calling {@link #restoreBackupData(byte[])}.
      * @hide
      */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public byte[] retrieveBackupData() {
         try {
             IWifiManager iWifiManager = getIWifiManager();
-            if (iWifiManager == null) return null;
+            if (iWifiManager == null) return new byte[0];
             return iWifiManager.retrieveBackupData();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -4675,9 +4771,12 @@ public class WifiManager {
 
     /**
      * Restore state from the backed up data.
+     * @param data byte stream in the same format produced by {@link #retrieveBackupData()}
      * @hide
      */
-    public void restoreBackupData(byte[] data) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void restoreBackupData(@NonNull byte[] data) {
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) {
@@ -4694,11 +4793,16 @@ public class WifiManager {
      * Restore state from the older version of back up data.
      * The old backup data was essentially a backup of wpa_supplicant.conf
      * and ipconfig.txt file.
+     * @param supplicantData bytes representing wpa_supplicant.conf
+     * @param ipConfigData bytes representing ipconfig.txt
      * @deprecated this is no longer supported.
      * @hide
      */
     @Deprecated
-    public void restoreSupplicantBackupData(byte[] supplicantData, byte[] ipConfigData) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void restoreSupplicantBackupData(
+            @NonNull byte[] supplicantData, @NonNull byte[] ipConfigData) {
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) {
@@ -4774,22 +4878,29 @@ public class WifiManager {
     }
 
     /**
-     * Base class for Traffic state callback. Should be extended by applications and set when
-     * calling {@link WifiManager#registerTrafficStateCallback(TrafficStateCallback, Handler)}.
+     * Interface for Traffic state callback. Should be extended by applications and set when
+     * calling {@link #registerTrafficStateCallback(Executor, WifiManager.TrafficStateCallback)}.
      * @hide
      */
+    @SystemApi
     public interface TrafficStateCallback {
-        /**
-         * Lowest bit indicates data reception and the second lowest
-         * bit indicates data transmitted
-         */
         /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = {"DATA_ACTIVITY_"}, value = {
+                DATA_ACTIVITY_NONE,
+                DATA_ACTIVITY_IN,
+                DATA_ACTIVITY_OUT,
+                DATA_ACTIVITY_INOUT})
+        @interface DataActivity {}
+
+        // Lowest bit indicates data reception and the second lowest bit indicates data transmitted
+        /** No data in or out */
         int DATA_ACTIVITY_NONE         = 0x00;
-        /** @hide */
+        /** Data in, no data out */
         int DATA_ACTIVITY_IN           = 0x01;
-        /** @hide */
+        /** Data out, no data in */
         int DATA_ACTIVITY_OUT          = 0x02;
-        /** @hide */
+        /** Data in and out */
         int DATA_ACTIVITY_INOUT        = 0x03;
 
         /**
@@ -4797,9 +4908,8 @@ public class WifiManager {
          *
          * @param state One of the values: {@link #DATA_ACTIVITY_NONE}, {@link #DATA_ACTIVITY_IN},
          * {@link #DATA_ACTIVITY_OUT} & {@link #DATA_ACTIVITY_INOUT}.
-         * @hide
          */
-        void onStateChanged(int state);
+        void onStateChanged(@DataActivity int state);
     }
 
     /**
@@ -4808,11 +4918,11 @@ public class WifiManager {
      * @hide
      */
     private class TrafficStateCallbackProxy extends ITrafficStateCallback.Stub {
-        private final Handler mHandler;
+        private final Executor mExecutor;
         private final TrafficStateCallback mCallback;
 
-        TrafficStateCallbackProxy(Looper looper, TrafficStateCallback callback) {
-            mHandler = new Handler(looper);
+        TrafficStateCallbackProxy(Executor executor, TrafficStateCallback callback) {
+            mExecutor = executor;
             mCallback = callback;
         }
 
@@ -4821,10 +4931,23 @@ public class WifiManager {
             if (mVerboseLoggingEnabled) {
                 Log.v(TAG, "TrafficStateCallbackProxy: onStateChanged state=" + state);
             }
-            mHandler.post(() -> {
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onStateChanged(state);
             });
         }
+    }
+
+    /**
+     * Same as {@link #registerTrafficStateCallback(Executor, TrafficStateCallback)},
+     * except that the callback will be executed on the application's main thread.
+     * @param callback Callback for traffic state events
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void registerTrafficStateCallback(@NonNull TrafficStateCallback callback) {
+        registerTrafficStateCallback(mContext.getMainExecutor(), callback);
     }
 
     /**
@@ -4838,18 +4961,19 @@ public class WifiManager {
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
+     * @param executor The Executor on whose thread to execute the callbacks of the {@code callback}
+     *                 object.
      * @param callback Callback for traffic state events
-     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
-     *                 object. If null, then the application's main thread will be used.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerTrafficStateCallback(@NonNull TrafficStateCallback callback,
-                                             @Nullable Handler handler) {
+    public void registerTrafficStateCallback(@NonNull @CallbackExecutor Executor executor,
+                                             @NonNull TrafficStateCallback callback) {
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
-        Log.v(TAG, "registerTrafficStateCallback: callback=" + callback + ", handler=" + handler);
+        Log.v(TAG, "registerTrafficStateCallback: callback=" + callback + ", executor=" + executor);
 
-        Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
         Binder binder = new Binder();
         try {
             IWifiManager iWifiManager = getIWifiManager();
@@ -4857,7 +4981,7 @@ public class WifiManager {
                 throw new RemoteException("Wifi service is not running");
             }
             iWifiManager.registerTrafficStateCallback(
-                    binder, new TrafficStateCallbackProxy(looper, callback), callback.hashCode());
+                    binder, new TrafficStateCallbackProxy(executor, callback), callback.hashCode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4870,6 +4994,7 @@ public class WifiManager {
      * @param callback Callback to unregister for traffic state events
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void unregisterTrafficStateCallback(@NonNull TrafficStateCallback callback) {
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
@@ -4933,11 +5058,13 @@ public class WifiManager {
      * if failed.
      * @hide
      */
+    @NonNull
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public String[] getFactoryMacAddresses() {
         try {
             IWifiManager iWifiManager = getIWifiManager();
-            if (iWifiManager == null) return null;
+            if (iWifiManager == null) return new String[0];
             return iWifiManager.getFactoryMacAddresses();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

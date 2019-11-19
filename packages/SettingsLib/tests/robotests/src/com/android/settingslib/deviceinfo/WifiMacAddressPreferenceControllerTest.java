@@ -84,7 +84,7 @@ public class WifiMacAddressPreferenceControllerTest {
     public void testHasIntentFilters() {
         final List<String> expectedIntents = Arrays.asList(
                 ConnectivityManager.CONNECTIVITY_ACTION,
-                WifiManager.LINK_CONFIGURATION_CHANGED_ACTION,
+                WifiManager.ACTION_LINK_CONFIGURATION_CHANGED,
                 WifiManager.NETWORK_STATE_CHANGED_ACTION);
 
 

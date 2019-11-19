@@ -2170,14 +2170,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    @Deprecated
     @Override
     public ParcelFileDescriptor getWallpaper(String callingPkg, IWallpaperManagerCallback cb,
             final int which, Bundle outParams, int wallpaperUserId) {
+        return getWallpaperWithFeature(callingPkg, null, cb, which, outParams, wallpaperUserId);
+    }
+
+    @Override
+    public ParcelFileDescriptor getWallpaperWithFeature(String callingPkg, String callingFeatureId,
+            IWallpaperManagerCallback cb, final int which, Bundle outParams, int wallpaperUserId) {
         final int hasPrivilege = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.READ_WALLPAPER_INTERNAL);
         if (hasPrivilege != PackageManager.PERMISSION_GRANTED) {
             mContext.getSystemService(StorageManager.class).checkPermissionReadImages(true,
-                    Binder.getCallingPid(), Binder.getCallingUid(), callingPkg);
+                    Binder.getCallingPid(), Binder.getCallingUid(), callingPkg, callingFeatureId);
         }
 
         wallpaperUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),

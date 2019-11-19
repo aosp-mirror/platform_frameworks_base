@@ -1179,7 +1179,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long token = Binder.clearCallingIdentity();
         synchronized (this) {
             if (mTelephony == null) {
-                mTelephony = TelephonyManager.from(mContext);
+                mTelephony = mContext.getSystemService(TelephonyManager.class);
             }
         }
         if (mTelephony != null) {

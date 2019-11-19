@@ -458,8 +458,9 @@ public class WallpaperManager {
 
             try {
                 Bundle params = new Bundle();
-                ParcelFileDescriptor fd = mService.getWallpaper(context.getOpPackageName(),
-                        this, FLAG_SYSTEM, params, userId);
+                ParcelFileDescriptor fd = mService.getWallpaperWithFeature(
+                        context.getOpPackageName(), context.getFeatureId(), this, FLAG_SYSTEM,
+                        params, userId);
                 if (fd != null) {
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -985,8 +986,8 @@ public class WallpaperManager {
         } else {
             try {
                 Bundle outParams = new Bundle();
-                return sGlobals.mService.getWallpaper(mContext.getOpPackageName(), null, which,
-                        outParams, userId);
+                return sGlobals.mService.getWallpaperWithFeature(mContext.getOpPackageName(),
+                        mContext.getFeatureId(), null, which, outParams, userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             } catch (SecurityException e) {

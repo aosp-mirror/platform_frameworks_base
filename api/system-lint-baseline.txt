@@ -1,10 +1,28 @@
 // Baseline format: 1.0
 ActionValue: android.location.Location#EXTRA_NO_GPS_LOCATION:
     
+ActionValue: android.net.wifi.WifiManager#ACTION_LINK_CONFIGURATION_CHANGED:
+    Inconsistent action value; expected `android.net.wifi.action.LINK_CONFIGURATION_CHANGED`, was `android.net.wifi.LINK_CONFIGURATION_CHANGED`
 
 
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
     
+
+
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#deletePersistentGroup(android.net.wifi.p2p.WifiP2pManager.Channel, int, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    Registration methods should have overload that accepts delivery Executor: `deletePersistentGroup`
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#factoryReset(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    Registration methods should have overload that accepts delivery Executor: `factoryReset`
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#listen(android.net.wifi.p2p.WifiP2pManager.Channel, boolean, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    Registration methods should have overload that accepts delivery Executor: `listen`
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#requestPersistentGroupInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.PersistentGroupInfoListener):
+    Registration methods should have overload that accepts delivery Executor: `requestPersistentGroupInfo`
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setDeviceName(android.net.wifi.p2p.WifiP2pManager.Channel, String, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    Registration methods should have overload that accepts delivery Executor: `setDeviceName`
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setWfdInfo(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pWfdInfo, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    Registration methods should have overload that accepts delivery Executor: `setWfdInfo`
+ExecutorRegistration: android.net.wifi.p2p.WifiP2pManager#setWifiP2pChannels(android.net.wifi.p2p.WifiP2pManager.Channel, int, int, android.net.wifi.p2p.WifiP2pManager.ActionListener):
+    Registration methods should have overload that accepts delivery Executor: `setWifiP2pChannels`
 
 
 GenericException: android.app.prediction.AppPredictor#finalize():
@@ -17,8 +35,7 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
     
 
 
-InterfaceConstant: android.service.storage.ExternalStorageService#SERVICE_INTERFACE:
-    
+
 
 
 KotlinKeyword: android.app.Notification#when:
@@ -198,9 +215,9 @@ SamShouldBeLast: android.app.AlarmManager#setExact(int, long, String, android.ap
 SamShouldBeLast: android.app.AlarmManager#setWindow(int, long, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
     
 SamShouldBeLast: android.app.WallpaperInfo#dump(android.util.Printer, String):
-    
+
 SamShouldBeLast: android.app.admin.DevicePolicyManager#installSystemUpdate(android.content.ComponentName, android.net.Uri, java.util.concurrent.Executor, android.app.admin.DevicePolicyManager.InstallSystemUpdateCallback):
-    
+
 SamShouldBeLast: android.content.Context#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection):
     
 SamShouldBeLast: android.content.Context#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection):
@@ -332,7 +349,7 @@ SamShouldBeLast: android.telephony.TelephonyManager#requestNetworkScan(android.t
 SamShouldBeLast: android.telephony.TelephonyManager#setPreferredOpportunisticDataSubscription(int, boolean, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
     
 SamShouldBeLast: android.telephony.TelephonyManager#updateAvailableNetworks(java.util.List<android.telephony.AvailableNetworkInfo>, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>):
-    
+
 SamShouldBeLast: android.view.View#postDelayed(Runnable, long):
     
 SamShouldBeLast: android.view.View#postOnAnimationDelayed(Runnable, long):

@@ -514,7 +514,6 @@ public final class SmsManager {
             throw new IllegalArgumentException("Invalid message body");
         }
 
-        final Context context = ActivityThread.currentApplication().getApplicationContext();
         // We will only show the SMS disambiguation dialog in the case that the message is being
         // persisted. This is for two reasons:
         // 1) Messages that are not persisted are sent by carrier/OEM apps for a specific
@@ -623,7 +622,6 @@ public final class SmsManager {
 
         final int finalPriority = priority;
         final int finalValidity = validityPeriod;
-        final Context context = ActivityThread.currentApplication().getApplicationContext();
         // We will only show the SMS disambiguation dialog in the case that the message is being
         // persisted. This is for two reasons:
         // 1) Messages that are not persisted are sent by carrier/OEM apps for a specific
@@ -927,7 +925,6 @@ public final class SmsManager {
         }
 
         if (parts.size() > 1) {
-            final Context context = ActivityThread.currentApplication().getApplicationContext();
             // We will only show the SMS disambiguation dialog in the case that the message is being
             // persisted. This is for two reasons:
             // 1) Messages that are not persisted are sent by carrier/OEM apps for a specific
@@ -1168,7 +1165,6 @@ public final class SmsManager {
         if (parts.size() > 1) {
             final int finalPriority = priority;
             final int finalValidity = validityPeriod;
-            final Context context = ActivityThread.currentApplication().getApplicationContext();
             if (persistMessage) {
                 resolveSubscriptionForOperation(new SubscriptionResolverResult() {
                     @Override
@@ -1325,7 +1321,6 @@ public final class SmsManager {
             throw new IllegalArgumentException("Invalid message data");
         }
 
-        final Context context = ActivityThread.currentApplication().getApplicationContext();
         resolveSubscriptionForOperation(new SubscriptionResolverResult() {
             @Override
             public void onSuccess(int subId) {

@@ -960,6 +960,9 @@ public class WifiScanner {
      * Retrieve the most recent scan results from a single scan request.
      * {@hide}
      */
+    @NonNull
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public List<ScanResult> getSingleScanResults() {
         validateChannel();
         Bundle scanParams = new Bundle();
@@ -973,7 +976,7 @@ public class WifiScanner {
         OperationResult result = (OperationResult) reply.obj;
         Log.e(TAG, "Error retrieving SingleScan results reason: " + result.reason
                 + " description: " + result.description);
-        return new ArrayList<ScanResult>();
+        return new ArrayList<>();
     }
 
     private void startPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings, int key) {

@@ -24,7 +24,6 @@ import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.car.Car;
-import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
 import android.content.Context;
@@ -114,6 +113,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightsOutNotifController;
+import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -153,7 +153,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private static final float FLING_ANIMATION_MAX_TIME = 0.5f;
     // acceleration rate for the fling animation
     private static final float FLING_SPEED_UP_FACTOR = 0.6f;
+
     private final ScrimController mScrimController;
+    private final StatusBarWindowViewController mStatusBarWindowViewController;
+    private final LockscreenLockIconController mLockscreenLockIconController;
 
     private float mOpeningVelocity = DEFAULT_FLING_VELOCITY;
     private float mClosingVelocity = DEFAULT_FLING_VELOCITY;
@@ -175,10 +178,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private final CarServiceProvider mCarServiceProvider;
 
     private DeviceProvisionedController mDeviceProvisionedController;
-    private DrivingStateHelper mDrivingStateHelper;
     private PowerManagerHelper mPowerManagerHelper;
     private FlingAnimationUtils mFlingAnimationUtils;
-    private SwitchToGuestTimer mSwitchToGuestTimer;
     private NotificationDataManager mNotificationDataManager;
     private NotificationClickHandlerFactory mNotificationClickHandlerFactory;
     private ScreenLifecycle mScreenLifecycle;
@@ -287,7 +288,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
-            StatusBarWindowViewController.Builder statusBarWindowViewControllerBuild,
+            StatusBarWindowViewController statusBarWindowViewController,
+            LockscreenLockIconController lockscreenLockIconController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
@@ -363,7 +365,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notificationListener,
                 configurationController,
                 statusBarWindowController,
-                statusBarWindowViewControllerBuild,
+                statusBarWindowViewController,
+                lockscreenLockIconController,
                 dozeParameters,
                 scrimController,
                 null /* keyguardLiftController */,
@@ -385,6 +388,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 viewMediatorCallback,
                 dismissCallbackRegistry);
         mScrimController = scrimController;
+        mStatusBarWindowViewController = statusBarWindowViewController;
+        mLockscreenLockIconController = lockscreenLockIconController;
         mDeviceProvisionedController = deviceProvisionedController;
         mCarServiceProvider = carServiceProvider;
         mDrivingStateHelperLazy = drivingStateHelperLazy;
@@ -400,22 +405,22 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
         mScreenLifecycle.addObserver(mScreenObserver);
 
-      	// Notification bar related setup.
+        // Notification bar related setup.
         mInitialBackgroundAlpha = (float) mContext.getResources().getInteger(
-            R.integer.config_initialNotificationBackgroundAlpha) / 100;
+                R.integer.config_initialNotificationBackgroundAlpha) / 100;
         if (mInitialBackgroundAlpha < 0 || mInitialBackgroundAlpha > 100) {
             throw new RuntimeException(
-              "Unable to setup notification bar due to incorrect initial background alpha"
-                      + " percentage");
+                    "Unable to setup notification bar due to incorrect initial background alpha"
+                            + " percentage");
         }
         float finalBackgroundAlpha = Math.max(
-            mInitialBackgroundAlpha,
-            (float) mContext.getResources().getInteger(
-                R.integer.config_finalNotificationBackgroundAlpha) / 100);
+                mInitialBackgroundAlpha,
+                (float) mContext.getResources().getInteger(
+                        R.integer.config_finalNotificationBackgroundAlpha) / 100);
         if (finalBackgroundAlpha < 0 || finalBackgroundAlpha > 100) {
             throw new RuntimeException(
-              "Unable to setup notification bar due to incorrect final background alpha"
-                      + " percentage");
+                    "Unable to setup notification bar due to incorrect final background alpha"
+                            + " percentage");
         }
         mBackgroundAlphaDiff = finalBackgroundAlpha - mInitialBackgroundAlpha;
 
@@ -431,15 +436,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         createBatteryController();
         mCarBatteryController.startListening();
-
-        // Used by onDrivingStateChanged and it can be called inside
-        // DrivingStateHelper.connectToCarService()
-        mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
-
-        // Register a listener for driving state changes.
-        mDrivingStateHelper = mDrivingStateHelperLazy.get();
-        mDrivingStateHelper.setCarDrivingStateEventListener(this::onDrivingStateChanged);
-        mDrivingStateHelper.connectToCarService();
 
         mPowerManagerHelper = mPowerManagerHelperLazy.get();
         mPowerManagerHelper.setCarPowerStateListener(mCarPowerStateListener);
@@ -560,13 +556,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         });
         CarNotificationListener carNotificationListener = new CarNotificationListener();
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
-        mCarServiceProvider.addListener(car -> {
-            CarUxRestrictionsManager carUxRestrictionsManager =
-                    (CarUxRestrictionsManager)
-                            car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
-            mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
-                    carUxRestrictionsManager);
-        });
 
         mNotificationDataManager = new NotificationDataManager();
         mNotificationDataManager.setOnUnseenCountUpdateListener(
@@ -681,14 +670,21 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 return handled || isTracking;
             }
         });
+        mCarServiceProvider.addListener(car -> {
+            CarUxRestrictionsManager carUxRestrictionsManager =
+                    (CarUxRestrictionsManager)
+                            car.getCarManager(Car.CAR_UX_RESTRICTION_SERVICE);
+            mCarUxRestrictionManagerWrapper.setCarUxRestrictionsManager(
+                    carUxRestrictionsManager);
 
-        mNotificationViewController = new NotificationViewController(
-                mNotificationView,
-                PreprocessingManager.getInstance(mContext),
-                carNotificationListener,
-                mCarUxRestrictionManagerWrapper,
-                mNotificationDataManager);
-        mNotificationViewController.enable();
+                    mNotificationViewController = new NotificationViewController(
+                            mNotificationView,
+                            PreprocessingManager.getInstance(mContext),
+                            carNotificationListener,
+                            mCarUxRestrictionManagerWrapper,
+                            mNotificationDataManager);
+                    mNotificationViewController.enable();
+        });
     }
 
     /**
@@ -906,20 +902,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         }
     }
 
-    private void onDrivingStateChanged(CarDrivingStateEvent notUsed) {
-        // Check if we need to start the timer every time driving state changes.
-        startSwitchToGuestTimerIfDrivingOnKeyguard();
-    }
-
-    private void startSwitchToGuestTimerIfDrivingOnKeyguard() {
-        if (mDrivingStateHelper.isCurrentlyDriving() && mState != StatusBarState.SHADE) {
-            // We're driving while keyguard is up.
-            mSwitchToGuestTimer.start();
-        } else {
-            mSwitchToGuestTimer.cancel();
-        }
-    }
-
     @Override
     protected void createUserSwitcher() {
         UserSwitcherController userSwitcherController =
@@ -944,8 +926,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     @Override
     public void onStateChanged(int newState) {
         super.onStateChanged(newState);
-
-        startSwitchToGuestTimerIfDrivingOnKeyguard();
 
         if (newState != StatusBarState.FULLSCREEN_USER_SWITCHER) {
             hideUserSwitcher();

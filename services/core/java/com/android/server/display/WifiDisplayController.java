@@ -16,8 +16,6 @@
 
 package com.android.server.display;
 
-import com.android.internal.util.DumpUtils;
-
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -36,15 +34,17 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.p2p.WifiP2pWfdInfo;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.GroupInfoListener;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
+import android.net.wifi.p2p.WifiP2pWfdInfo;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.Surface;
+
+import com.android.internal.util.DumpUtils;
 
 import java.io.PrintWriter;
 import java.net.Inet4Address;
@@ -292,11 +292,11 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
                 WifiP2pWfdInfo wfdInfo = new WifiP2pWfdInfo();
                 wfdInfo.setWfdEnabled(true);
-                wfdInfo.setDeviceType(WifiP2pWfdInfo.WFD_SOURCE);
+                wfdInfo.setDeviceType(WifiP2pWfdInfo.DEVICE_TYPE_WFD_SOURCE);
                 wfdInfo.setSessionAvailable(true);
                 wfdInfo.setControlPort(DEFAULT_CONTROL_PORT);
                 wfdInfo.setMaxThroughput(MAX_THROUGHPUT);
-                mWifiP2pManager.setWFDInfo(mWifiP2pChannel, wfdInfo, new ActionListener() {
+                mWifiP2pManager.setWfdInfo(mWifiP2pChannel, wfdInfo, new ActionListener() {
                     @Override
                     public void onSuccess() {
                         if (DEBUG) {
@@ -324,7 +324,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
             if (mWfdEnabled || mWfdEnabling) {
                 WifiP2pWfdInfo wfdInfo = new WifiP2pWfdInfo();
                 wfdInfo.setWfdEnabled(false);
-                mWifiP2pManager.setWFDInfo(mWifiP2pChannel, wfdInfo, new ActionListener() {
+                mWifiP2pManager.setWfdInfo(mWifiP2pChannel, wfdInfo, new ActionListener() {
                     @Override
                     public void onSuccess() {
                         if (DEBUG) {
@@ -508,7 +508,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 Slog.d(TAG, "updateDesiredDevice: new information "
                         + describeWifiP2pDevice(device));
             }
-            mDesiredDevice.update(device);
+            mDesiredDevice.updateSupplicantDetails(device);
+            mDesiredDevice.status = device.status;
             if (mAdvertisedDisplay != null
                     && mAdvertisedDisplay.getDeviceAddress().equals(address)) {
                 readvertiseDisplay(createWifiDisplay(mDesiredDevice));
@@ -694,7 +695,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
             config.wps = wps;
             config.deviceAddress = mConnectingDevice.deviceAddress;
             // Helps with STA & P2P concurrency
-            config.groupOwnerIntent = WifiP2pConfig.MIN_GROUP_OWNER_INTENT;
+            config.groupOwnerIntent = WifiP2pConfig.GROUP_OWNER_INTENT_MIN;
 
             WifiDisplay display = createWifiDisplay(mConnectingDevice);
             advertiseDisplay(display, null, 0, 0, 0);
@@ -824,6 +825,10 @@ final class WifiDisplayController implements DumpUtils.Dump {
         requestPeers();
     }
 
+    private static boolean contains(WifiP2pGroup group, WifiP2pDevice device) {
+        return group.getOwner().equals(device) || group.getClientList().contains(device);
+    }
+
     private void handleConnectionChanged(NetworkInfo networkInfo) {
         mNetworkInfo = networkInfo;
         if (mWfdEnabled && networkInfo.isConnected()) {
@@ -835,7 +840,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                             Slog.d(TAG, "Received group info: " + describeWifiP2pGroup(info));
                         }
 
-                        if (mConnectingDevice != null && !info.contains(mConnectingDevice)) {
+                        if (mConnectingDevice != null && !contains(info, mConnectingDevice)) {
                             Slog.i(TAG, "Aborting connection to Wifi display because "
                                     + "the current P2P group does not contain the device "
                                     + "we expected to find: " + mConnectingDevice.deviceName
@@ -844,7 +849,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                             return;
                         }
 
-                        if (mDesiredDevice != null && !info.contains(mDesiredDevice)) {
+                        if (mDesiredDevice != null && !contains(info, mDesiredDevice)) {
                             disconnect();
                             return;
                         }
@@ -1038,14 +1043,15 @@ final class WifiDisplayController implements DumpUtils.Dump {
     }
 
     private static boolean isWifiDisplay(WifiP2pDevice device) {
-        return device.wfdInfo != null
-                && device.wfdInfo.isWfdEnabled()
-                && isPrimarySinkDeviceType(device.wfdInfo.getDeviceType());
+        WifiP2pWfdInfo wfdInfo = device.getWfdInfo();
+        return wfdInfo != null
+                && wfdInfo.isWfdEnabled()
+                && isPrimarySinkDeviceType(wfdInfo.getDeviceType());
     }
 
     private static boolean isPrimarySinkDeviceType(int deviceType) {
-        return deviceType == WifiP2pWfdInfo.PRIMARY_SINK
-                || deviceType == WifiP2pWfdInfo.SOURCE_OR_PRIMARY_SINK;
+        return deviceType == WifiP2pWfdInfo.DEVICE_TYPE_PRIMARY_SINK
+                || deviceType == WifiP2pWfdInfo.DEVICE_TYPE_SOURCE_OR_PRIMARY_SINK;
     }
 
     private static String describeWifiP2pDevice(WifiP2pDevice device) {
@@ -1058,7 +1064,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
     private static WifiDisplay createWifiDisplay(WifiP2pDevice device) {
         return new WifiDisplay(device.deviceAddress, device.deviceName, null,
-                true, device.wfdInfo.isSessionAvailable(), false);
+                true, device.getWfdInfo().isSessionAvailable(), false);
     }
 
     private final BroadcastReceiver mWifiP2pReceiver = new BroadcastReceiver() {

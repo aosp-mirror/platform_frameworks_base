@@ -445,7 +445,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_RADIO) != 0) {
             // We were asked to fetch Telephony data.
             if (mTelephony == null) {
-                mTelephony = TelephonyManager.from(mContext);
+                mTelephony = mContext.getSystemService(TelephonyManager.class);
             }
 
             if (mTelephony != null) {
