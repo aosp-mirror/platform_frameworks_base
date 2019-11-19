@@ -20,7 +20,6 @@ import static android.os.Build.IS_USER;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -352,9 +351,7 @@ public class WindowManagerShellCommand extends ShellCommand {
     }
 
     private int runDumpVisibleWindowViews(PrintWriter pw) {
-        ParcelFileDescriptor outFile = openFileForSystem(getNextArgRequired(), "w");
-        try (ZipOutputStream out = new ZipOutputStream(
-                new ParcelFileDescriptor.AutoCloseOutputStream(outFile))) {
+        try (ZipOutputStream out = new ZipOutputStream(getRawOutputStream())) {
             ArrayList<Pair<String, ByteTransferPipe>> requestList = new ArrayList<>();
             synchronized (mInternal.mGlobalLock) {
                 // Request dump from all windows parallelly before writing to disk.
@@ -368,7 +365,6 @@ public class WindowManagerShellCommand extends ShellCommand {
                             requestList.add(Pair.create(w.getName(), pipe));
                         } catch (IOException | RemoteException e) {
                             // Skip this window
-                            pw.println("Error for window " + w.getName() + " : " + e.getMessage());
                             if (pipe != null) {
                                 pipe.kill();
                             }
@@ -382,8 +378,6 @@ public class WindowManagerShellCommand extends ShellCommand {
                     data = entry.second.get();
                 } catch (IOException e) {
                     // Ignore this window
-                    pw.println(
-                            "Error for window " + entry.first + " : " + e.getMessage());
                     continue;
                 }
                 out.putNextEntry(new ZipEntry(entry.first));
@@ -414,7 +408,7 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Dismiss the keyguard, prompting user for auth if necessary.");
         pw.println("  set-user-rotation [free|lock] [-d DISPLAY_ID] [rotation]");
         pw.println("    Set user rotation mode and user rotation.");
-        pw.println("  dump-visible-window-views out-file");
+        pw.println("  dump-visible-window-views");
         pw.println("    Dumps the encoded view hierarchies of visible windows");
         pw.println("  set-fix-to-user-rotation [-d DISPLAY_ID] [enabled|disabled]");
         pw.println("    Enable or disable rotating display for app requested orientation.");
