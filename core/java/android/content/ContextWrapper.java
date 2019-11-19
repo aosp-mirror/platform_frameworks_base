@@ -672,7 +672,6 @@ public class ContextWrapper extends Context {
     /** @hide */
     @Override
     @Nullable
-    @SystemApi
     public Intent registerReceiverForAllUsers(@Nullable BroadcastReceiver receiver,
             @NonNull IntentFilter filter, @Nullable String broadcastPermission,
             @Nullable Handler scheduler) {
