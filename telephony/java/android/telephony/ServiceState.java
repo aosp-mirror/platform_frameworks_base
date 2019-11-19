@@ -278,12 +278,9 @@ public class ServiceState implements Parcelable {
      */
     public static final int UNKNOWN_ID = -1;
 
-    private String mVoiceOperatorAlphaLong;
-    private String mVoiceOperatorAlphaShort;
-    private String mVoiceOperatorNumeric;
-    private String mDataOperatorAlphaLong;
-    private String mDataOperatorAlphaShort;
-    private String mDataOperatorNumeric;
+    private String mOperatorAlphaLong;
+    private String mOperatorAlphaShort;
+    private String mOperatorNumeric;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mIsManualNetworkSelection;
 
@@ -379,12 +376,9 @@ public class ServiceState implements Parcelable {
     protected void copyFrom(ServiceState s) {
         mVoiceRegState = s.mVoiceRegState;
         mDataRegState = s.mDataRegState;
-        mVoiceOperatorAlphaLong = s.mVoiceOperatorAlphaLong;
-        mVoiceOperatorAlphaShort = s.mVoiceOperatorAlphaShort;
-        mVoiceOperatorNumeric = s.mVoiceOperatorNumeric;
-        mDataOperatorAlphaLong = s.mDataOperatorAlphaLong;
-        mDataOperatorAlphaShort = s.mDataOperatorAlphaShort;
-        mDataOperatorNumeric = s.mDataOperatorNumeric;
+        mOperatorAlphaLong = s.mOperatorAlphaLong;
+        mOperatorAlphaShort = s.mOperatorAlphaShort;
+        mOperatorNumeric = s.mOperatorNumeric;
         mIsManualNetworkSelection = s.mIsManualNetworkSelection;
         mCssIndicator = s.mCssIndicator;
         mNetworkId = s.mNetworkId;
@@ -418,12 +412,9 @@ public class ServiceState implements Parcelable {
     public ServiceState(Parcel in) {
         mVoiceRegState = in.readInt();
         mDataRegState = in.readInt();
-        mVoiceOperatorAlphaLong = in.readString();
-        mVoiceOperatorAlphaShort = in.readString();
-        mVoiceOperatorNumeric = in.readString();
-        mDataOperatorAlphaLong = in.readString();
-        mDataOperatorAlphaShort = in.readString();
-        mDataOperatorNumeric = in.readString();
+        mOperatorAlphaLong = in.readString();
+        mOperatorAlphaShort = in.readString();
+        mOperatorNumeric = in.readString();
         mIsManualNetworkSelection = in.readInt() != 0;
         mCssIndicator = (in.readInt() != 0);
         mNetworkId = in.readInt();
@@ -448,12 +439,9 @@ public class ServiceState implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mVoiceRegState);
         out.writeInt(mDataRegState);
-        out.writeString(mVoiceOperatorAlphaLong);
-        out.writeString(mVoiceOperatorAlphaShort);
-        out.writeString(mVoiceOperatorNumeric);
-        out.writeString(mDataOperatorAlphaLong);
-        out.writeString(mDataOperatorAlphaShort);
-        out.writeString(mDataOperatorNumeric);
+        out.writeString(mOperatorAlphaLong);
+        out.writeString(mOperatorAlphaShort);
+        out.writeString(mOperatorNumeric);
         out.writeInt(mIsManualNetworkSelection ? 1 : 0);
         out.writeInt(mCssIndicator ? 1 : 0);
         out.writeInt(mNetworkId);
@@ -691,7 +679,7 @@ public class ServiceState implements Parcelable {
      * @return long name of operator, null if unregistered or unknown
      */
     public String getOperatorAlphaLong() {
-        return mVoiceOperatorAlphaLong;
+        return mOperatorAlphaLong;
     }
 
     /**
@@ -699,18 +687,10 @@ public class ServiceState implements Parcelable {
      * @return long name of operator
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link #getOperatorAlphaLong} instead.")
     public String getVoiceOperatorAlphaLong() {
-        return mVoiceOperatorAlphaLong;
-    }
-
-    /**
-     * Get current registered data network operator name in long alphanumeric format.
-     * @return long name of voice operator
-     * @hide
-     */
-    public String getDataOperatorAlphaLong() {
-        return mDataOperatorAlphaLong;
+        return mOperatorAlphaLong;
     }
 
     /**
@@ -721,7 +701,7 @@ public class ServiceState implements Parcelable {
      * @return short name of operator, null if unregistered or unknown
      */
     public String getOperatorAlphaShort() {
-        return mVoiceOperatorAlphaShort;
+        return mOperatorAlphaShort;
     }
 
     /**
@@ -729,9 +709,10 @@ public class ServiceState implements Parcelable {
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link #getOperatorAlphaShort} instead.")
     public String getVoiceOperatorAlphaShort() {
-        return mVoiceOperatorAlphaShort;
+        return mOperatorAlphaShort;
     }
 
     /**
@@ -739,9 +720,10 @@ public class ServiceState implements Parcelable {
      * @return short name of operator, null if unregistered or unknown
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link #getOperatorAlphaShort} instead.")
     public String getDataOperatorAlphaShort() {
-        return mDataOperatorAlphaShort;
+        return mOperatorAlphaShort;
     }
 
     /**
@@ -755,11 +737,11 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public String getOperatorAlpha() {
-        if (TextUtils.isEmpty(mVoiceOperatorAlphaLong)) {
-            return mVoiceOperatorAlphaShort;
+        if (TextUtils.isEmpty(mOperatorAlphaLong)) {
+            return mOperatorAlphaShort;
         }
 
-        return mVoiceOperatorAlphaLong;
+        return mOperatorAlphaLong;
     }
 
     /**
@@ -775,7 +757,7 @@ public class ServiceState implements Parcelable {
      * {@link com.android.internal.telephony.MccTable#countryCodeForMcc(int)}.
      */
     public String getOperatorNumeric() {
-        return mVoiceOperatorNumeric;
+        return mOperatorNumeric;
     }
 
     /**
@@ -785,7 +767,7 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getVoiceOperatorNumeric() {
-        return mVoiceOperatorNumeric;
+        return mOperatorNumeric;
     }
 
     /**
@@ -793,9 +775,10 @@ public class ServiceState implements Parcelable {
      * @return numeric format of operator, null if unregistered or unknown
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link #getOperatorNumeric} instead.")
     public String getDataOperatorNumeric() {
-        return mDataOperatorNumeric;
+        return mOperatorNumeric;
     }
 
     /**
@@ -815,12 +798,9 @@ public class ServiceState implements Parcelable {
                     mDataRegState,
                     mChannelNumber,
                     Arrays.hashCode(mCellBandwidths),
-                    mVoiceOperatorAlphaLong,
-                    mVoiceOperatorAlphaShort,
-                    mVoiceOperatorNumeric,
-                    mDataOperatorAlphaLong,
-                    mDataOperatorAlphaShort,
-                    mDataOperatorNumeric,
+                    mOperatorAlphaLong,
+                    mOperatorAlphaShort,
+                    mOperatorNumeric,
                     mIsManualNetworkSelection,
                     mCssIndicator,
                     mNetworkId,
@@ -850,12 +830,9 @@ public class ServiceState implements Parcelable {
                     && mIsManualNetworkSelection == s.mIsManualNetworkSelection
                     && mChannelNumber == s.mChannelNumber
                     && Arrays.equals(mCellBandwidths, s.mCellBandwidths)
-                    && equalsHandlesNulls(mVoiceOperatorAlphaLong, s.mVoiceOperatorAlphaLong)
-                    && equalsHandlesNulls(mVoiceOperatorAlphaShort, s.mVoiceOperatorAlphaShort)
-                    && equalsHandlesNulls(mVoiceOperatorNumeric, s.mVoiceOperatorNumeric)
-                    && equalsHandlesNulls(mDataOperatorAlphaLong, s.mDataOperatorAlphaLong)
-                    && equalsHandlesNulls(mDataOperatorAlphaShort, s.mDataOperatorAlphaShort)
-                    && equalsHandlesNulls(mDataOperatorNumeric, s.mDataOperatorNumeric)
+                    && equalsHandlesNulls(mOperatorAlphaLong, s.mOperatorAlphaLong)
+                    && equalsHandlesNulls(mOperatorAlphaShort, s.mOperatorAlphaShort)
+                    && equalsHandlesNulls(mOperatorNumeric, s.mOperatorNumeric)
                     && equalsHandlesNulls(mCssIndicator, s.mCssIndicator)
                     && equalsHandlesNulls(mNetworkId, s.mNetworkId)
                     && equalsHandlesNulls(mSystemId, s.mSystemId)
@@ -1007,10 +984,8 @@ public class ServiceState implements Parcelable {
                     .append(", mChannelNumber=").append(mChannelNumber)
                     .append(", duplexMode()=").append(getDuplexMode())
                     .append(", mCellBandwidths=").append(Arrays.toString(mCellBandwidths))
-                    .append(", mVoiceOperatorAlphaLong=").append(mVoiceOperatorAlphaLong)
-                    .append(", mVoiceOperatorAlphaShort=").append(mVoiceOperatorAlphaShort)
-                    .append(", mDataOperatorAlphaLong=").append(mDataOperatorAlphaLong)
-                    .append(", mDataOperatorAlphaShort=").append(mDataOperatorAlphaShort)
+                    .append(", mOperatorAlphaLong=").append(mOperatorAlphaLong)
+                    .append(", mOperatorAlphaShort=").append(mOperatorAlphaShort)
                     .append(", isManualNetworkSelection=").append(mIsManualNetworkSelection)
                     .append(mIsManualNetworkSelection ? "(manual)" : "(automatic)")
                     .append(", getRilVoiceRadioTechnology=").append(getRilVoiceRadioTechnology())
@@ -1040,12 +1015,9 @@ public class ServiceState implements Parcelable {
         mDataRegState = STATE_OUT_OF_SERVICE;
         mChannelNumber = -1;
         mCellBandwidths = new int[0];
-        mVoiceOperatorAlphaLong = null;
-        mVoiceOperatorAlphaShort = null;
-        mVoiceOperatorNumeric = null;
-        mDataOperatorAlphaLong = null;
-        mDataOperatorAlphaShort = null;
-        mDataOperatorNumeric = null;
+        mOperatorAlphaLong = null;
+        mOperatorAlphaShort = null;
+        mOperatorNumeric = null;
         mIsManualNetworkSelection = false;
         mCssIndicator = false;
         mNetworkId = -1;
@@ -1204,26 +1176,9 @@ public class ServiceState implements Parcelable {
     }
 
     public void setOperatorName(String longName, String shortName, String numeric) {
-        mVoiceOperatorAlphaLong = longName;
-        mVoiceOperatorAlphaShort = shortName;
-        mVoiceOperatorNumeric = numeric;
-        mDataOperatorAlphaLong = longName;
-        mDataOperatorAlphaShort = shortName;
-        mDataOperatorNumeric = numeric;
-    }
-
-    /** @hide */
-    public void setVoiceOperatorName(String longName, String shortName, String numeric) {
-        mVoiceOperatorAlphaLong = longName;
-        mVoiceOperatorAlphaShort = shortName;
-        mVoiceOperatorNumeric = numeric;
-    }
-
-    /** @hide */
-    public void setDataOperatorName(String longName, String shortName, String numeric) {
-        mDataOperatorAlphaLong = longName;
-        mDataOperatorAlphaShort = shortName;
-        mDataOperatorNumeric = numeric;
+        mOperatorAlphaLong = longName;
+        mOperatorAlphaShort = shortName;
+        mOperatorNumeric = numeric;
     }
 
     /**
@@ -1233,19 +1188,8 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
-    public void setOperatorAlphaLong(String longName) {
-        mVoiceOperatorAlphaLong = longName;
-        mDataOperatorAlphaLong = longName;
-    }
-
-    /** @hide */
-    public void setVoiceOperatorAlphaLong(String longName) {
-        mVoiceOperatorAlphaLong = longName;
-    }
-
-    /** @hide */
-    public void setDataOperatorAlphaLong(String longName) {
-        mDataOperatorAlphaLong = longName;
+    public void setOperatorAlphaLong(@Nullable String longName) {
+        mOperatorAlphaLong = longName;
     }
 
     public void setIsManualSelection(boolean isManual) {
@@ -1293,12 +1237,12 @@ public class ServiceState implements Parcelable {
         m.putInt("dataRegState", mDataRegState);
         m.putInt("dataRoamingType", getDataRoamingType());
         m.putInt("voiceRoamingType", getVoiceRoamingType());
-        m.putString("operator-alpha-long", mVoiceOperatorAlphaLong);
-        m.putString("operator-alpha-short", mVoiceOperatorAlphaShort);
-        m.putString("operator-numeric", mVoiceOperatorNumeric);
-        m.putString("data-operator-alpha-long", mDataOperatorAlphaLong);
-        m.putString("data-operator-alpha-short", mDataOperatorAlphaShort);
-        m.putString("data-operator-numeric", mDataOperatorNumeric);
+        m.putString("operator-alpha-long", mOperatorAlphaLong);
+        m.putString("operator-alpha-short", mOperatorAlphaShort);
+        m.putString("operator-numeric", mOperatorNumeric);
+        m.putString("data-operator-alpha-long", mOperatorAlphaLong);
+        m.putString("data-operator-alpha-short", mOperatorAlphaShort);
+        m.putString("data-operator-numeric", mOperatorNumeric);
         m.putBoolean("manual", mIsManualNetworkSelection);
         m.putInt("radioTechnology", getRilVoiceRadioTechnology());
         m.putInt("dataRadioTechnology", getRadioTechnology());
@@ -1933,12 +1877,9 @@ public class ServiceState implements Parcelable {
         }
         if (!removeCoarseLocation) return state;
 
-        state.mDataOperatorAlphaLong = null;
-        state.mDataOperatorAlphaShort = null;
-        state.mDataOperatorNumeric = null;
-        state.mVoiceOperatorAlphaLong = null;
-        state.mVoiceOperatorAlphaShort = null;
-        state.mVoiceOperatorNumeric = null;
+        state.mOperatorAlphaLong = null;
+        state.mOperatorAlphaShort = null;
+        state.mOperatorNumeric = null;
 
         return state;
     }
