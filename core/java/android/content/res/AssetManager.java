@@ -38,6 +38,7 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
@@ -176,7 +177,7 @@ public final class AssetManager implements AutoCloseable {
     public AssetManager() {
         final ApkAssets[] assets;
         synchronized (sSync) {
-            createSystemAssetsInZygoteLocked();
+            createSystemAssetsInZygoteLocked(false, FRAMEWORK_APK_PATH);
             assets = sSystemApkAssets;
         }
 
@@ -205,17 +206,20 @@ public final class AssetManager implements AutoCloseable {
 
     /**
      * This must be called from Zygote so that system assets are shared by all applications.
+     * @hide
      */
     @GuardedBy("sSync")
-    private static void createSystemAssetsInZygoteLocked() {
-        if (sSystem != null) {
+    @VisibleForTesting
+    public static void createSystemAssetsInZygoteLocked(boolean reinitialize,
+            String frameworkPath) {
+        if (sSystem != null || reinitialize) {
             return;
         }
 
 
         try {
             final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
-            apkAssets.add(ApkAssets.loadFromPath(FRAMEWORK_APK_PATH, true /*system*/));
+            apkAssets.add(ApkAssets.loadFromPath(frameworkPath, true /*system*/));
             final String[] systemIdmapPaths = nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
             if (systemIdmapPaths != null) {
                 for (String idmapPath : systemIdmapPaths) {
@@ -279,7 +283,7 @@ public final class AssetManager implements AutoCloseable {
     @UnsupportedAppUsage
     public static AssetManager getSystem() {
         synchronized (sSync) {
-            createSystemAssetsInZygoteLocked();
+            createSystemAssetsInZygoteLocked(false, FRAMEWORK_APK_PATH);
             return sSystem;
         }
     }
