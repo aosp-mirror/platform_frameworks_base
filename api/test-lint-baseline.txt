@@ -399,6 +399,8 @@ GetterSetterNames: android.location.GnssClock#setLeapSecond(int):
     
 GetterSetterNames: android.location.GnssClock#setTimeUncertaintyNanos(double):
     
+GetterSetterNames: android.location.GnssMeasurement#setBasebandCn0DbHz(double):
+
 GetterSetterNames: android.location.GnssMeasurement#setCarrierFrequencyHz(float):
     
 GetterSetterNames: android.location.GnssMeasurement#setCodeType(String):

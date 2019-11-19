@@ -16,9 +16,11 @@
 
 package android.location;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.hardware.gnss.V1_0.IGnssMeasurementCallback.GnssMeasurementFlags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,6 +39,7 @@ public final class GnssMeasurement implements Parcelable {
     private long mReceivedSvTimeNanos;
     private long mReceivedSvTimeUncertaintyNanos;
     private double mCn0DbHz;
+    private double mBasebandCn0DbHz;
     private double mPseudorangeRateMetersPerSecond;
     private double mPseudorangeRateUncertaintyMetersPerSecond;
     private int mAccumulatedDeltaRangeState;
@@ -51,16 +54,20 @@ public final class GnssMeasurement implements Parcelable {
     private double mAutomaticGainControlLevelInDb;
     @NonNull private String mCodeType;
 
-    // The following enumerations must be in sync with the values declared in gps.h
+    // The following enumerations must be in sync with the values declared in GNSS HAL.
 
     private static final int HAS_NO_FLAGS = 0;
-    private static final int HAS_SNR = (1<<0);
-    private static final int HAS_CARRIER_FREQUENCY = (1<<9);
-    private static final int HAS_CARRIER_CYCLES = (1<<10);
-    private static final int HAS_CARRIER_PHASE = (1<<11);
-    private static final int HAS_CARRIER_PHASE_UNCERTAINTY = (1<<12);
-    private static final int HAS_AUTOMATIC_GAIN_CONTROL = (1<<13);
+    private static final int HAS_SNR = GnssMeasurementFlags.HAS_SNR;
+    private static final int HAS_CARRIER_FREQUENCY = GnssMeasurementFlags.HAS_CARRIER_FREQUENCY;
+    private static final int HAS_CARRIER_CYCLES = GnssMeasurementFlags.HAS_CARRIER_CYCLES;
+    private static final int HAS_CARRIER_PHASE = GnssMeasurementFlags.HAS_CARRIER_PHASE;
+    private static final int HAS_CARRIER_PHASE_UNCERTAINTY =
+            GnssMeasurementFlags.HAS_CARRIER_PHASE_UNCERTAINTY;
+    private static final int HAS_AUTOMATIC_GAIN_CONTROL =
+            GnssMeasurementFlags.HAS_AUTOMATIC_GAIN_CONTROL;
+
     private static final int HAS_CODE_TYPE = (1 << 14);
+    private static final int HAS_BASEBAND_CN0 = (1 << 15);
 
     /**
      * The status of the multipath indicator.
@@ -240,6 +247,7 @@ public final class GnssMeasurement implements Parcelable {
         mReceivedSvTimeNanos = measurement.mReceivedSvTimeNanos;
         mReceivedSvTimeUncertaintyNanos = measurement.mReceivedSvTimeUncertaintyNanos;
         mCn0DbHz = measurement.mCn0DbHz;
+        mBasebandCn0DbHz = measurement.mBasebandCn0DbHz;
         mPseudorangeRateMetersPerSecond = measurement.mPseudorangeRateMetersPerSecond;
         mPseudorangeRateUncertaintyMetersPerSecond =
                 measurement.mPseudorangeRateUncertaintyMetersPerSecond;
@@ -785,6 +793,49 @@ public final class GnssMeasurement implements Parcelable {
     @TestApi
     public void setCn0DbHz(double value) {
         mCn0DbHz = value;
+    }
+
+    /**
+     * Returns {@code true} if {@link #getBasebandCn0DbHz()} is available, {@code false} otherwise.
+     */
+    public boolean hasBasebandCn0DbHz() {
+        return isFlagSet(HAS_BASEBAND_CN0);
+    }
+
+    /**
+     * Gets the baseband carrier-to-noise density in dB-Hz.
+     *
+     * <p>Typical range: 0-50 dB-Hz.
+     *
+     * <p>The value contains the measured C/N0 for the signal at the baseband. This is typically
+     * a few dB weaker than the value estimated for C/N0 at the antenna port, which is reported
+     * in {@link #getCn0DbHz()}.
+     */
+    @FloatRange(from = 0, to = 50)
+    public double getBasebandCn0DbHz() {
+        return mBasebandCn0DbHz;
+    }
+
+    /**
+     * Sets the baseband carrier-to-noise density in dB-Hz.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setBasebandCn0DbHz(double value) {
+        setFlag(HAS_BASEBAND_CN0);
+        mBasebandCn0DbHz = value;
+    }
+
+    /**
+     * Resets the baseband carrier-to-noise density in dB-Hz.
+     *
+     * @hide
+     */
+    @TestApi
+    public void resetBasebandCn0DbHz() {
+        resetFlag(HAS_BASEBAND_CN0);
+        mBasebandCn0DbHz = Double.NaN;
     }
 
     /**
@@ -1400,6 +1451,7 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mSnrInDb = parcel.readDouble();
             gnssMeasurement.mAutomaticGainControlLevelInDb = parcel.readDouble();
             gnssMeasurement.mCodeType = parcel.readString();
+            gnssMeasurement.mBasebandCn0DbHz = parcel.readDouble();
 
             return gnssMeasurement;
         }
@@ -1433,6 +1485,7 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mSnrInDb);
         parcel.writeDouble(mAutomaticGainControlLevelInDb);
         parcel.writeString(mCodeType);
+        parcel.writeDouble(mBasebandCn0DbHz);
     }
 
     @Override
@@ -1460,6 +1513,9 @@ public final class GnssMeasurement implements Parcelable {
                 mReceivedSvTimeUncertaintyNanos));
 
         builder.append(String.format(format, "Cn0DbHz", mCn0DbHz));
+
+        builder.append(String.format(format, "BasebandCn0DbHz",
+                hasBasebandCn0DbHz() ? mBasebandCn0DbHz : null));
 
         builder.append(String.format(
                 formatWithUncertainty,
@@ -1536,6 +1592,7 @@ public final class GnssMeasurement implements Parcelable {
         resetSnrInDb();
         resetAutomaticGainControlLevel();
         resetCodeType();
+        resetBasebandCn0DbHz();
     }
 
     private void setFlag(int flag) {
