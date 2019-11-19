@@ -25,16 +25,16 @@ namespace test {
 static const int IDENT_DISPLAYEVENT = 1;
 
 static android::DisplayInfo DUMMY_DISPLAY{
-        1080,   // w
-        1920,   // h
-        320.0,  // xdpi
-        320.0,  // ydpi
-        60.0,   // fps
-        2.0,    // density
-        0,      // orientation
-        false,  // secure?
-        0,      // appVsyncOffset
-        0,      // presentationDeadline
+        1080,           // w
+        1920,           // h
+        320.0,          // xdpi
+        320.0,          // ydpi
+        60.0,           // fps
+        2.0,            // density
+        ui::ROTATION_0, // orientation
+        false,          // secure?
+        0,              // appVsyncOffset
+        0,              // presentationDeadline
 };
 
 DisplayInfo getInternalDisplay() {
