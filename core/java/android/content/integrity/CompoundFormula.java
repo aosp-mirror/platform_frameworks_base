@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.model;
+package android.content.integrity;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 
@@ -35,7 +35,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Represents a complex formula consisting of other simple and complex formulas.
+ * Represents a compound formula formed by joining other simple and complex formulas with boolean
+ * connectors.
  *
  * <p>Instances of this class are immutable.
  *
@@ -43,12 +44,12 @@ import java.util.Objects;
  */
 @SystemApi
 @VisibleForTesting
-public final class OpenFormula implements Formula, Parcelable {
+public final class CompoundFormula implements Formula, Parcelable {
     private static final String TAG = "OpenFormula";
 
     @IntDef(
             value = {
-                    AND, OR, NOT,
+                AND, OR, NOT,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Connector {}
@@ -66,16 +67,16 @@ public final class OpenFormula implements Formula, Parcelable {
     private final @NonNull List<Formula> mFormulas;
 
     @NonNull
-    public static final Creator<OpenFormula> CREATOR =
-            new Creator<OpenFormula>() {
+    public static final Creator<CompoundFormula> CREATOR =
+            new Creator<CompoundFormula>() {
                 @Override
-                public OpenFormula createFromParcel(Parcel in) {
-                    return new OpenFormula(in);
+                public CompoundFormula createFromParcel(Parcel in) {
+                    return new CompoundFormula(in);
                 }
 
                 @Override
-                public OpenFormula[] newArray(int size) {
-                    return new OpenFormula[size];
+                public CompoundFormula[] newArray(int size) {
+                    return new CompoundFormula[size];
                 }
             };
 
@@ -85,15 +86,15 @@ public final class OpenFormula implements Formula, Parcelable {
      * @throws IllegalArgumentException if the number of operands is not matching the requirements
      *     for that operator (at least 2 for {@link #AND} and {@link #OR}, 1 for {@link #NOT}).
      */
-    public OpenFormula(@Connector int connector, @NonNull List<Formula> formulas) {
-        checkArgument(isValidConnector(connector),
-                String.format("Unknown connector: %d", connector));
+    public CompoundFormula(@Connector int connector, @NonNull List<Formula> formulas) {
+        checkArgument(
+                isValidConnector(connector), String.format("Unknown connector: %d", connector));
         validateFormulas(connector, formulas);
         this.mConnector = connector;
         this.mFormulas = Collections.unmodifiableList(formulas);
     }
 
-    OpenFormula(Parcel in) {
+    CompoundFormula(Parcel in) {
         mConnector = in.readInt();
         int length = in.readInt();
         checkArgument(length >= 0, "Must have non-negative length. Got " + length);
@@ -132,7 +133,7 @@ public final class OpenFormula implements Formula, Parcelable {
 
     @Override
     public int getTag() {
-        return Formula.OPEN_FORMULA_TAG;
+        return Formula.COMPOUND_FORMULA_TAG;
     }
 
     @Override
@@ -160,7 +161,7 @@ public final class OpenFormula implements Formula, Parcelable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        OpenFormula that = (OpenFormula) o;
+        CompoundFormula that = (CompoundFormula) o;
         return mConnector == that.mConnector && mFormulas.equals(that.mFormulas);
     }
 
@@ -217,8 +218,6 @@ public final class OpenFormula implements Formula, Parcelable {
     }
 
     private static boolean isValidConnector(int connector) {
-        return connector == AND
-                || connector == OR
-                || connector == NOT;
+        return connector == AND || connector == OR || connector == NOT;
     }
 }

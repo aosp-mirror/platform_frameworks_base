@@ -16,9 +16,10 @@
 
 package com.android.server.integrity.engine;
 
-import com.android.server.integrity.model.AppInstallMetadata;
+import android.content.integrity.AppInstallMetadata;
+import android.content.integrity.Rule;
+
 import com.android.server.integrity.model.IntegrityCheckResult;
-import com.android.server.integrity.model.Rule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,8 @@ import java.util.List;
 /**
  * The engine used to evaluate rules against app installs.
  *
- * <p>Every app install is evaluated against rules (pushed by the verifier) by the evaluation
- * engine to allow/block that install.
+ * <p>Every app install is evaluated against rules (pushed by the verifier) by the evaluation engine
+ * to allow/block that install.
  */
 public final class RuleEvaluationEngine {
     private static final String TAG = "RuleEvaluation";
@@ -36,9 +37,7 @@ public final class RuleEvaluationEngine {
     // installs against rules.
     private static RuleEvaluationEngine sRuleEvaluationEngine;
 
-    /**
-     * Provide a singleton instance of the rule evaluation engine.
-     */
+    /** Provide a singleton instance of the rule evaluation engine. */
     public static synchronized RuleEvaluationEngine getRuleEvaluationEngine() {
         if (sRuleEvaluationEngine == null) {
             return new RuleEvaluationEngine();
@@ -50,7 +49,7 @@ public final class RuleEvaluationEngine {
      * Load, and match the list of rules against an app install metadata.
      *
      * @param appInstallMetadata Metadata of the app to be installed, and to evaluate the rules
-     *                           against.
+     *     against.
      * @return result of the integrity check
      */
     public IntegrityCheckResult evaluate(AppInstallMetadata appInstallMetadata) {

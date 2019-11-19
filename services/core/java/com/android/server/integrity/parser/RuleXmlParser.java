@@ -16,12 +16,11 @@
 
 package com.android.server.integrity.parser;
 
+import android.content.integrity.AtomicFormula;
+import android.content.integrity.CompoundFormula;
+import android.content.integrity.Formula;
+import android.content.integrity.Rule;
 import android.util.Xml;
-
-import com.android.server.integrity.model.AtomicFormula;
-import com.android.server.integrity.model.Formula;
-import com.android.server.integrity.model.OpenFormula;
-import com.android.server.integrity.model.Rule;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -34,9 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * A helper class to parse rules into the {@link Rule} model from Xml representation.
- */
+/** A helper class to parse rules into the {@link Rule} model from Xml representation. */
 public final class RuleXmlParser implements RuleParser {
 
     public static final String TAG = "RuleXmlParser";
@@ -90,7 +87,8 @@ public final class RuleXmlParser implements RuleParser {
         // corrupt in the XML, it will be skipped to the next rule.
         if (!nodeName.equals(RULE_LIST_TAG)) {
             throw new RuntimeException(
-                    String.format("Rules must start with RuleList <RL> tag. Found: %s at %s",
+                    String.format(
+                            "Rules must start with RuleList <RL> tag. Found: %s at %s",
                             nodeName, parser.getPositionDescription()));
         }
 
@@ -141,8 +139,8 @@ public final class RuleXmlParser implements RuleParser {
 
     private static Formula parseOpenFormula(XmlPullParser parser)
             throws IOException, XmlPullParserException {
-        int connector = Integer.parseInt(
-                extractAttributeValue(parser, CONNECTOR_ATTRIBUTE).orElse("-1"));
+        int connector =
+                Integer.parseInt(extractAttributeValue(parser, CONNECTOR_ATTRIBUTE).orElse("-1"));
         List<Formula> formulas = new ArrayList<>();
 
         int eventType;
@@ -171,17 +169,17 @@ public final class RuleXmlParser implements RuleParser {
             }
         }
 
-        return new OpenFormula(connector, formulas);
+        return new CompoundFormula(connector, formulas);
     }
 
     private static Formula parseAtomicFormula(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         int key = Integer.parseInt(extractAttributeValue(parser, KEY_ATTRIBUTE).orElse("-1"));
-        int operator = Integer.parseInt(
-                extractAttributeValue(parser, OPERATOR_ATTRIBUTE).orElse("-1"));
+        int operator =
+                Integer.parseInt(extractAttributeValue(parser, OPERATOR_ATTRIBUTE).orElse("-1"));
         String value = extractAttributeValue(parser, VALUE_ATTRIBUTE).orElse(null);
-        String isHashedValue = extractAttributeValue(parser, IS_HASHED_VALUE_ATTRIBUTE).orElse(
-                null);
+        String isHashedValue =
+                extractAttributeValue(parser, IS_HASHED_VALUE_ATTRIBUTE).orElse(null);
 
         int eventType;
         while ((eventType = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -192,15 +190,18 @@ public final class RuleXmlParser implements RuleParser {
         return constructAtomicFormulaBasedOnKey(key, operator, value, isHashedValue);
     }
 
-    private static Formula constructAtomicFormulaBasedOnKey(@AtomicFormula.Key int key,
-            @AtomicFormula.Operator int operator, String value, String isHashedValue) {
+    private static Formula constructAtomicFormulaBasedOnKey(
+            @AtomicFormula.Key int key,
+            @AtomicFormula.Operator int operator,
+            String value,
+            String isHashedValue) {
         switch (key) {
             case AtomicFormula.PACKAGE_NAME:
             case AtomicFormula.INSTALLER_NAME:
             case AtomicFormula.APP_CERTIFICATE:
             case AtomicFormula.INSTALLER_CERTIFICATE:
-                return new AtomicFormula.StringAtomicFormula(key, value,
-                        Boolean.parseBoolean(isHashedValue));
+                return new AtomicFormula.StringAtomicFormula(
+                        key, value, Boolean.parseBoolean(isHashedValue));
             case AtomicFormula.PRE_INSTALLED:
                 return new AtomicFormula.BooleanAtomicFormula(key, Boolean.parseBoolean(value));
             case AtomicFormula.VERSION_CODE:

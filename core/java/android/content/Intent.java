@@ -4417,6 +4417,22 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_VIEW_LOCUS = "android.intent.action.VIEW_LOCUS";
 
+    /**
+     * Broadcast Action: Sent to the integrity component when a package
+     * needs to be verified. The data contains the package URI along with other relevant
+     * information.
+     *
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION =
+            "android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.model;
+package android.content.integrity;
 
-import static com.android.server.testutils.TestUtils.assertExpectException;
+import static android.content.integrity.TestUtils.assertExpectException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -60,11 +60,11 @@ public class RuleTest {
 
     @Test
     public void testToString() {
-        OpenFormula openFormula =
-                new OpenFormula(
-                        OpenFormula.AND,
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND,
                         Arrays.asList(PACKAGE_NAME_ATOMIC_FORMULA, APP_CERTIFICATE_ATOMIC_FORMULA));
-        Rule rule = new Rule(openFormula, Rule.DENY);
+        Rule rule = new Rule(compoundFormula, Rule.DENY);
 
         assertEquals(
                 String.format(
@@ -93,12 +93,12 @@ public class RuleTest {
     public void testParcelUnparcel() {
         Rule rule =
                 new Rule(
-                        new OpenFormula(
-                                OpenFormula.AND,
+                        new CompoundFormula(
+                                CompoundFormula.AND,
                                 Arrays.asList(
                                         APP_CERTIFICATE_ATOMIC_FORMULA,
-                                        new OpenFormula(
-                                                OpenFormula.NOT,
+                                        new CompoundFormula(
+                                                CompoundFormula.NOT,
                                                 Arrays.asList(PACKAGE_NAME_ATOMIC_FORMULA)))),
                         Rule.DENY);
         Parcel p = Parcel.obtain();

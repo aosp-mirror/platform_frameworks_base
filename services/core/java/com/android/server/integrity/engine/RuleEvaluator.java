@@ -16,18 +16,18 @@
 
 package com.android.server.integrity.engine;
 
-import static com.android.server.integrity.model.Rule.DENY;
-import static com.android.server.integrity.model.Rule.FORCE_ALLOW;
+import static android.content.integrity.Rule.DENY;
+import static android.content.integrity.Rule.FORCE_ALLOW;
 
 import android.annotation.NonNull;
+import android.content.integrity.AppInstallMetadata;
+import android.content.integrity.AtomicFormula;
+import android.content.integrity.CompoundFormula;
+import android.content.integrity.Formula;
+import android.content.integrity.Rule;
 import android.util.Slog;
 
-import com.android.server.integrity.model.AppInstallMetadata;
-import com.android.server.integrity.model.AtomicFormula;
-import com.android.server.integrity.model.Formula;
 import com.android.server.integrity.model.IntegrityCheckResult;
-import com.android.server.integrity.model.OpenFormula;
-import com.android.server.integrity.model.Rule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,17 +89,17 @@ final class RuleEvaluator {
         if (isAtomicFormula(formula)) {
             return true;
         }
-        OpenFormula openFormula = (OpenFormula) formula;
-        return openFormula.getConnector() == OpenFormula.AND
-                && openFormula.getFormulas().stream().allMatch(RuleEvaluator::isAtomicFormula);
+        CompoundFormula compoundFormula = (CompoundFormula) formula;
+        return compoundFormula.getConnector() == CompoundFormula.AND
+                && compoundFormula.getFormulas().stream().allMatch(RuleEvaluator::isAtomicFormula);
     }
 
     private static boolean isAtomicFormula(Formula formula) {
         if (formula instanceof AtomicFormula) {
             return true;
         }
-        OpenFormula openFormula = (OpenFormula) formula;
-        return openFormula.getConnector() == OpenFormula.NOT
-                && openFormula.getFormulas().get(0) instanceof AtomicFormula;
+        CompoundFormula compoundFormula = (CompoundFormula) formula;
+        return compoundFormula.getConnector() == CompoundFormula.NOT
+                && compoundFormula.getFormulas().get(0) instanceof AtomicFormula;
     }
 }

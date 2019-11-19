@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.model;
+package android.content.integrity;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 

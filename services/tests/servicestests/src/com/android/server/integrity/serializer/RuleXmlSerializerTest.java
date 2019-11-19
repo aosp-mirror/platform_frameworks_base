@@ -20,13 +20,13 @@ import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static org.junit.Assert.assertEquals;
 
-import androidx.annotation.NonNull;
+import android.content.integrity.AppInstallMetadata;
+import android.content.integrity.AtomicFormula;
+import android.content.integrity.CompoundFormula;
+import android.content.integrity.Formula;
+import android.content.integrity.Rule;
 
-import com.android.server.integrity.model.AppInstallMetadata;
-import com.android.server.integrity.model.AtomicFormula;
-import com.android.server.integrity.model.Formula;
-import com.android.server.integrity.model.OpenFormula;
-import com.android.server.integrity.model.Rule;
+import androidx.annotation.NonNull;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,7 +80,7 @@ public class RuleXmlSerializerTest {
 
     @Test
     public void testXmlStream_serializeValidOpenFormula() throws Exception {
-        Rule rule = new Rule(new OpenFormula(OpenFormula.NOT,
+        Rule rule = new Rule(new CompoundFormula(CompoundFormula.NOT,
                 Collections.singletonList(
                         new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME,
                                 "com.app.test", /* isHashedValue= */ false))), Rule.DENY);
@@ -95,7 +95,7 @@ public class RuleXmlSerializerTest {
                     Collections.singletonMap("E", String.valueOf(Rule.DENY)),
                         /* closed= */ false)
                 + generateTagWithAttribute(/* tag= */ "OF",
-                    Collections.singletonMap("C", String.valueOf(OpenFormula.NOT)),
+                    Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
                         /* closed= */ false)
                 + generateTagWithAttribute(/* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                 + "</OF>"
@@ -110,7 +110,7 @@ public class RuleXmlSerializerTest {
 
     @Test
     public void testXmlString_serializeValidOpenFormula_notConnector() throws Exception {
-        Rule rule = new Rule(new OpenFormula(OpenFormula.NOT,
+        Rule rule = new Rule(new CompoundFormula(CompoundFormula.NOT,
                 Collections.singletonList(
                         new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME,
                                 "com.app.test", /* isHashedValue= */ false))), Rule.DENY);
@@ -124,7 +124,7 @@ public class RuleXmlSerializerTest {
                     Collections.singletonMap("E", String.valueOf(Rule.DENY)),
                         /* closed= */ false)
                 + generateTagWithAttribute(/* tag= */ "OF",
-                    Collections.singletonMap("C", String.valueOf(OpenFormula.NOT)),
+                    Collections.singletonMap("C", String.valueOf(CompoundFormula.NOT)),
                         /* closed= */ false)
                 + generateTagWithAttribute(/* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                 + "</OF>"
@@ -138,7 +138,7 @@ public class RuleXmlSerializerTest {
 
     @Test
     public void testXmlString_serializeValidOpenFormula_andConnector() throws Exception {
-        Rule rule = new Rule(new OpenFormula(OpenFormula.AND,
+        Rule rule = new Rule(new CompoundFormula(CompoundFormula.AND,
                 Arrays.asList(new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME,
                                 "com.app.test", /* isHashedValue= */ false),
                         new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE,
@@ -157,7 +157,7 @@ public class RuleXmlSerializerTest {
                     Collections.singletonMap("E", String.valueOf(Rule.DENY)),
                         /* closed= */ false)
                 + generateTagWithAttribute(/* tag= */ "OF",
-                    Collections.singletonMap("C", String.valueOf(OpenFormula.AND)),
+                    Collections.singletonMap("C", String.valueOf(CompoundFormula.AND)),
                         /* closed= */ false)
                 + generateTagWithAttribute(/* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                 + generateTagWithAttribute(/* tag= */ "AF", appCertificateAttrs, /* closed= */ true)
@@ -172,7 +172,7 @@ public class RuleXmlSerializerTest {
 
     @Test
     public void testXmlString_serializeValidOpenFormula_orConnector() throws Exception {
-        Rule rule = new Rule(new OpenFormula(OpenFormula.OR,
+        Rule rule = new Rule(new CompoundFormula(CompoundFormula.OR,
                 Arrays.asList(new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME,
                                 "com.app.test", /* isHashedValue= */ false),
                         new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE,
@@ -191,7 +191,7 @@ public class RuleXmlSerializerTest {
                     Collections.singletonMap("E", String.valueOf(Rule.DENY)),
                         /* closed= */ false)
                 + generateTagWithAttribute(/* tag= */ "OF",
-                    Collections.singletonMap("C", String.valueOf(OpenFormula.OR)),
+                    Collections.singletonMap("C", String.valueOf(CompoundFormula.OR)),
                         /* closed= */ false)
                 + generateTagWithAttribute(/* tag= */ "AF", packageNameAttrs, /* closed= */ true)
                 + generateTagWithAttribute(/* tag= */ "AF", appCertificateAttrs, /* closed= */ true)

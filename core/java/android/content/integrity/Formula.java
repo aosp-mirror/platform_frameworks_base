@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.model;
+package android.content.integrity;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.content.integrity.AtomicFormula.BooleanAtomicFormula;
+import android.content.integrity.AtomicFormula.IntAtomicFormula;
+import android.content.integrity.AtomicFormula.StringAtomicFormula;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.integrity.model.AtomicFormula.BooleanAtomicFormula;
-import com.android.server.integrity.model.AtomicFormula.IntAtomicFormula;
-import com.android.server.integrity.model.AtomicFormula.StringAtomicFormula;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -40,7 +40,7 @@ import java.lang.annotation.RetentionPolicy;
 public interface Formula {
     @IntDef(
             value = {
-                    OPEN_FORMULA_TAG,
+                    COMPOUND_FORMULA_TAG,
                     STRING_ATOMIC_FORMULA_TAG,
                     INT_ATOMIC_FORMULA_TAG,
                     BOOLEAN_ATOMIC_FORMULA_TAG
@@ -48,7 +48,7 @@ public interface Formula {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Tag {}
 
-    int OPEN_FORMULA_TAG = 0;
+    int COMPOUND_FORMULA_TAG = 0;
     int STRING_ATOMIC_FORMULA_TAG = 1;
     int INT_ATOMIC_FORMULA_TAG = 2;
     int BOOLEAN_ATOMIC_FORMULA_TAG = 3;
@@ -87,8 +87,8 @@ public interface Formula {
     static Formula readFromParcel(@NonNull Parcel in) {
         int tag = in.readInt();
         switch (tag) {
-            case OPEN_FORMULA_TAG:
-                return OpenFormula.CREATOR.createFromParcel(in);
+            case COMPOUND_FORMULA_TAG:
+                return CompoundFormula.CREATOR.createFromParcel(in);
             case STRING_ATOMIC_FORMULA_TAG:
                 return StringAtomicFormula.CREATOR.createFromParcel(in);
             case INT_ATOMIC_FORMULA_TAG:

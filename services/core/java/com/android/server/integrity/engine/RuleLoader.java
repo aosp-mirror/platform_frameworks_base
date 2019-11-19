@@ -16,7 +16,7 @@
 
 package com.android.server.integrity.engine;
 
-import com.android.server.integrity.model.Rule;
+import android.content.integrity.Rule;
 
 import java.util.ArrayList;
 import java.util.List;

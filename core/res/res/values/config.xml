@@ -4179,4 +4179,10 @@
     <!-- Whether or not to show the built-in charging animation when the device begins charging
          wirelessly. -->
     <bool name="config_showBuiltinWirelessChargingAnim">true</bool>
+
+    <!-- A list of potential packages, in priority order, that can supply rules to
+         AppIntegrityManager. These need to be apps on the system partition. -->
+    <string-array name="config_integrityRuleProviderPackages" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
 </resources>
