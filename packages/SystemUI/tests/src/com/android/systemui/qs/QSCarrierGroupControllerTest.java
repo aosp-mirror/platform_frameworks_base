@@ -16,7 +16,10 @@
 
 package com.android.systemui.qs;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -24,55 +27,89 @@ import android.os.Handler;
 import android.telephony.SubscriptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextController;
-import com.android.systemui.Dependency;
-import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
+import com.android.systemui.utils.os.FakeHandler;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class QSCarrierGroupTest extends LeakCheckedTest {
+public class QSCarrierGroupControllerTest extends LeakCheckedTest {
 
-    private QSCarrierGroup mCarrierGroup;
+    private QSCarrierGroupController mQSCarrierGroupController;
+    private NetworkController.SignalCallback mSignalCallback;
     private CarrierTextController.CarrierTextCallback mCallback;
+    @Mock
+    private QSCarrierGroup mQSCarrierGroup;
+    @Mock
+    private ActivityStarter mActivityStarter;
+    @Mock
+    private NetworkController mNetworkController;
+    @Mock
+    private CarrierTextController.Builder mCarrierTextControllerBuilder;
+    @Mock
+    private CarrierTextController mCarrierTextController;
     private TestableLooper mTestableLooper;
 
     @Before
     public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
         mTestableLooper = TestableLooper.get(this);
-        mDependency.injectTestDependency(
-                Dependency.BG_HANDLER, new Handler(mTestableLooper.getLooper()));
-        mDependency.injectTestDependency(Dependency.MAIN_LOOPER, mTestableLooper.getLooper());
-        mTestableLooper.runWithLooper(
-                () -> mCarrierGroup = (QSCarrierGroup) LayoutInflater.from(mContext).inflate(
-                        R.layout.qs_carrier_group, null));
-        mCallback = mCarrierGroup.getCallback();
+        Handler handler = new FakeHandler(TestableLooper.get(this).getLooper());
+
+        when(mNetworkController.hasVoiceCallingFeature()).thenReturn(true);
+        doAnswer(invocation -> mSignalCallback = invocation.getArgument(0))
+                .when(mNetworkController)
+                .addCallback(any(NetworkController.SignalCallback.class));
+
+        when(mCarrierTextControllerBuilder.setShowAirplaneMode(anyBoolean()))
+                .thenReturn(mCarrierTextControllerBuilder);
+        when(mCarrierTextControllerBuilder.setShowMissingSim(anyBoolean()))
+                .thenReturn(mCarrierTextControllerBuilder);
+        when(mCarrierTextControllerBuilder.build()).thenReturn(mCarrierTextController);
+
+        doAnswer(invocation -> mCallback = invocation.getArgument(0))
+                .when(mCarrierTextController)
+                .setListening(any(CarrierTextController.CarrierTextCallback.class));
+
+        when(mQSCarrierGroup.getNoSimTextView()).thenReturn(new TextView(mContext));
+        when(mQSCarrierGroup.getCarrier1View()).thenReturn(mock(QSCarrier.class));
+        when(mQSCarrierGroup.getCarrier2View()).thenReturn(mock(QSCarrier.class));
+        when(mQSCarrierGroup.getCarrier3View()).thenReturn(mock(QSCarrier.class));
+        when(mQSCarrierGroup.getCarrierDivider1()).thenReturn(new View(mContext));
+        when(mQSCarrierGroup.getCarrierDivider2()).thenReturn(new View(mContext));
+
+        mQSCarrierGroupController = new QSCarrierGroupController.Builder(
+                mActivityStarter, handler, TestableLooper.get(this).getLooper(),
+                mNetworkController, mCarrierTextControllerBuilder)
+                .setQSCarrierGroup(mQSCarrierGroup)
+                .build();
+
+        mQSCarrierGroupController.setListening(true);
     }
 
     @Test // throws no Exception
     public void testUpdateCarrierText_sameLengths() {
-        QSCarrierGroup spiedCarrierGroup = Mockito.spy(mCarrierGroup);
-        when(spiedCarrierGroup.getSlotIndex(anyInt())).thenAnswer(
-                new Answer<Integer>() {
-                    @Override
-                    public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        return invocationOnMock.getArgument(0);
-                    }
-                });
+        QSCarrierGroupController spiedCarrierGroupController =
+                Mockito.spy(mQSCarrierGroupController);
+        when(spiedCarrierGroupController.getSlotIndex(anyInt())).thenAnswer(
+                (Answer<Integer>) invocationOnMock -> invocationOnMock.getArgument(0));
 
         // listOfCarriers length 1, subscriptionIds length 1, anySims false
         CarrierTextController.CarrierTextCallbackInfo
@@ -115,14 +152,10 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
 
     @Test // throws no Exception
     public void testUpdateCarrierText_differentLength() {
-        QSCarrierGroup spiedCarrierGroup = Mockito.spy(mCarrierGroup);
-        when(spiedCarrierGroup.getSlotIndex(anyInt())).thenAnswer(
-                new Answer<Integer>() {
-                    @Override
-                    public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        return invocationOnMock.getArgument(0);
-                    }
-                });
+        QSCarrierGroupController spiedCarrierGroupController =
+                Mockito.spy(mQSCarrierGroupController);
+        when(spiedCarrierGroupController.getSlotIndex(anyInt())).thenAnswer(
+                (Answer<Integer>) invocationOnMock -> invocationOnMock.getArgument(0));
 
         // listOfCarriers length 2, subscriptionIds length 1, anySims false
         CarrierTextController.CarrierTextCallbackInfo
@@ -164,9 +197,11 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
 
     @Test // throws no Exception
     public void testUpdateCarrierText_invalidSim() {
-        QSCarrierGroup spiedCarrierGroup = Mockito.spy(mCarrierGroup);
-        when(spiedCarrierGroup.getSlotIndex(anyInt())).thenReturn(
+        QSCarrierGroupController spiedCarrierGroupController =
+                Mockito.spy(mQSCarrierGroupController);
+        when(spiedCarrierGroupController.getSlotIndex(anyInt())).thenReturn(
                 SubscriptionManager.INVALID_SIM_SLOT_INDEX);
+
         CarrierTextController.CarrierTextCallbackInfo
                 c4 = new CarrierTextController.CarrierTextCallbackInfo(
                 "",
@@ -179,10 +214,7 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
 
     @Test // throws no Exception
     public void testSetMobileDataIndicators_invalidSim() {
-        QSCarrierGroup spiedCarrierGroup = Mockito.spy(mCarrierGroup);
-        when(spiedCarrierGroup.getSlotIndex(anyInt())).thenReturn(
-                SubscriptionManager.INVALID_SIM_SLOT_INDEX);
-        spiedCarrierGroup.setMobileDataIndicators(
+        mSignalCallback.setMobileDataIndicators(
                 mock(NetworkController.IconState.class),
                 mock(NetworkController.IconState.class),
                 0, 0, true, true, "", "", true, 0, true);
