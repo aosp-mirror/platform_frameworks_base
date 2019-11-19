@@ -957,10 +957,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             new DeviceConfig.OnPropertiesChangedListener() {
                 @Override
                 public void onPropertiesChanged(Properties properties) {
-                    mPssDeferralTime = properties.getLong(ACTIVITY_START_PSS_DEFER_CONFIG, 0);
-                    if (DEBUG_PSS) {
-                        Slog.d(TAG_PSS, "Activity-start PSS delay now "
-                                + mPssDeferralTime + " ms");
+                    if (properties.getKeyset().contains(ACTIVITY_START_PSS_DEFER_CONFIG)) {
+                        mPssDeferralTime = properties.getLong(ACTIVITY_START_PSS_DEFER_CONFIG, 0);
+                        if (DEBUG_PSS) {
+                            Slog.d(TAG_PSS, "Activity-start PSS delay now "
+                                    + mPssDeferralTime + " ms");
+                        }
                     }
                 }
             };
