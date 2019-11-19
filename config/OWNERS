@@ -1,0 +1,5 @@
+# compat-team@ for changes to hiddenapi files
+per-file hiddenapi-* = andreionea@google.com, atrost@google.com, mathewi@google.com, satayev@google.com
+
+# Escalations:
+per-file hiddenapi-* = bdc@google.com, narayan@google.com
