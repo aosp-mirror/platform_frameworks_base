@@ -16,8 +16,9 @@
 
 package android.hardware.biometrics;
 
+import static android.hardware.biometrics.BiometricManager.Authenticators;
+
 import android.annotation.UnsupportedAppUsage;
-import android.app.KeyguardManager;
 
 
 /**
@@ -128,8 +129,8 @@ public interface BiometricConstants {
 
     /**
      * The device does not have pin, pattern, or password set up. See
-     * {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)} and
-     * {@link KeyguardManager#isDeviceSecure()}
+     * {@link BiometricPrompt.Builder#setAllowedAuthenticators(int)},
+     * {@link Authenticators#DEVICE_CREDENTIAL}, and {@link BiometricManager#canAuthenticate(int)}.
      */
     int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
 

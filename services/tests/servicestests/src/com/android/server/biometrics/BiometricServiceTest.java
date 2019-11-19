@@ -23,7 +23,6 @@ import static junit.framework.TestCase.assertNotNull;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -36,11 +35,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
+import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricService;
@@ -82,8 +83,6 @@ public class BiometricServiceTest {
 
     private static final String FINGERPRINT_ACQUIRED_SENSOR_DIRTY = "sensor_dirty";
 
-    private static final int STRENGTH_STRONG = 1;
-
     private BiometricService mBiometricService;
 
     @Mock
@@ -102,6 +101,8 @@ public class BiometricServiceTest {
     IBiometricAuthenticator mFingerprintAuthenticator;
     @Mock
     IBiometricAuthenticator mFaceAuthenticator;
+    @Mock
+    ITrustManager mTrustManager;
 
     @Before
     public void setUp() {
@@ -112,10 +113,11 @@ public class BiometricServiceTest {
 
         when(mInjector.getActivityManagerService()).thenReturn(mock(IActivityManager.class));
         when(mInjector.getStatusBarService()).thenReturn(mock(IStatusBarService.class));
-        when(mInjector.getSettingObserver(any(), any(), any())).thenReturn(
-                mock(BiometricService.SettingObserver.class));
+        when(mInjector.getSettingObserver(any(), any(), any()))
+                .thenReturn(mock(BiometricService.SettingObserver.class));
         when(mInjector.getKeyStore()).thenReturn(mock(KeyStore.class));
         when(mInjector.isDebugEnabled(any(), anyInt())).thenReturn(false);
+        when(mInjector.getTrustManager()).thenReturn(mTrustManager);
 
         when(mResources.getString(R.string.biometric_error_hw_unavailable))
                 .thenReturn(ERROR_HW_UNAVAILABLE);
@@ -126,13 +128,55 @@ public class BiometricServiceTest {
     }
 
     @Test
+    public void testAuthenticate_credentialAllowedButNotSetup_returnsNoDeviceCredential()
+            throws Exception {
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(false);
+
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
+                Authenticators.DEVICE_CREDENTIAL);
+        waitForIdle();
+        verify(mReceiver1).onError(
+                eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL),
+                eq(0 /* vendorCode */));
+    }
+
+    @Test
+    public void testAuthenticate_credentialAllowedAndSetup_callsSystemUI() throws Exception {
+        // When no biometrics are enrolled, but credentials are set up, status bar should be
+        // invoked right away with showAuthenticationDialog
+
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
+                Authenticators.DEVICE_CREDENTIAL);
+        waitForIdle();
+
+        assertNull(mBiometricService.mPendingAuthSession);
+        // StatusBar showBiometricDialog invoked
+        verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
+                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                any(IBiometricServiceReceiverInternal.class),
+                eq(0),
+                anyBoolean() /* requireConfirmation */,
+                anyInt() /* userId */,
+                eq(TEST_PACKAGE_NAME));
+    }
+
+    @Test
     public void testAuthenticate_withoutHardware_returnsErrorHardwareNotPresent() throws
             Exception {
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
 
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
-                false /* allowDeviceCredential */);
+                null /* authenticators */);
         waitForIdle();
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_NONE),
@@ -146,17 +190,64 @@ public class BiometricServiceTest {
 
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
-        mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG,
+        mBiometricService.mImpl.registerAuthenticator(0 /* id */, Authenticators.BIOMETRIC_STRONG,
                 BiometricAuthenticator.TYPE_FINGERPRINT, mFingerprintAuthenticator);
 
-
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
-                false /* allowDeviceCredential */);
+                null /* authenticators */);
         waitForIdle();
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS),
                 eq(0 /* vendorCode */));
+    }
+
+    @Test
+    public void testAuthenticate_notStrongEnough_returnsHardwareNotPresent() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_WEAK);
+
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
+                Authenticators.BIOMETRIC_STRONG);
+        waitForIdle();
+        verify(mReceiver1).onError(
+                eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT),
+                eq(0 /* vendorCode */));
+    }
+
+    @Test
+    public void testAuthenticate_picksStrongIfAvailable() throws Exception {
+        // If both strong and weak are available, and the caller requires STRONG, authentication
+        // is able to proceed.
+
+        final int[] modalities = new int[] {
+                BiometricAuthenticator.TYPE_FINGERPRINT,
+                BiometricAuthenticator.TYPE_FACE,
+        };
+
+        final int[] strengths = new int[] {
+                Authenticators.BIOMETRIC_WEAK,
+                Authenticators.BIOMETRIC_STRONG,
+        };
+
+        setupAuthForMultiple(modalities, strengths);
+
+        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
+                false /* requireConfirmation */, Authenticators.BIOMETRIC_STRONG);
+        waitForIdle();
+        verify(mReceiver1, never()).onError(
+                anyInt(),
+                anyInt(),
+                anyInt() /* vendorCode */);
+
+        // StatusBar showBiometricDialog invoked with face, which was set up to be STRONG
+        verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
+                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                any(IBiometricServiceReceiverInternal.class),
+                eq(BiometricAuthenticator.TYPE_FACE),
+                eq(false) /* requireConfirmation */,
+                anyInt() /* userId */,
+                eq(TEST_PACKAGE_NAME));
     }
 
     @Test
@@ -167,11 +258,11 @@ public class BiometricServiceTest {
 
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
-        mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG,
+        mBiometricService.mImpl.registerAuthenticator(0 /* id */, Authenticators.BIOMETRIC_STRONG,
                 BiometricAuthenticator.TYPE_FINGERPRINT, mFingerprintAuthenticator);
 
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
-                false /* allowDeviceCredential */);
+                null /* authenticators */);
         waitForIdle();
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_NONE),
@@ -182,18 +273,12 @@ public class BiometricServiceTest {
     @Test
     public void testAuthenticateFace_respectsUserSetting()
             throws Exception {
-        when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
-        when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
-
-        mBiometricService = new BiometricService(mContext, mInjector);
-        mBiometricService.onStart();
-        mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG,
-                BiometricAuthenticator.TYPE_FACE, mFaceAuthenticator);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
 
         // Disabled in user settings receives onError
         when(mBiometricService.mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(false);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
-                false /* allowDeviceCredential */);
+                null /* authenticators */);
         waitForIdle();
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_NONE),
@@ -206,7 +291,7 @@ public class BiometricServiceTest {
         when(mBiometricService.mSettingObserver.getFaceAlwaysRequireConfirmation(anyInt()))
                 .thenReturn(true);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
-                false /* allowDeviceCredential */);
+                null /* authenticators */);
         waitForIdle();
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
         verify(mBiometricService.mAuthenticators.get(0).impl).prepareForAuthentication(
@@ -226,7 +311,7 @@ public class BiometricServiceTest {
         when(mBiometricService.mSettingObserver.getFaceAlwaysRequireConfirmation(anyInt()))
                 .thenReturn(false);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
-                false /* allowDeviceCredential */);
+                null /* authenticators */);
         waitForIdle();
         verify(mBiometricService.mAuthenticators.get(0).impl).prepareForAuthentication(
                 eq(false) /* requireConfirmation */,
@@ -243,11 +328,11 @@ public class BiometricServiceTest {
 
     @Test
     public void testAuthenticate_happyPathWithoutConfirmation() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
 
         // Start testing the happy path
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
-                false /* allowDeviceCredential */);
+                null /* authenticators */);
         waitForIdle();
 
         // Creates a pending auth session with the correct initial states
@@ -315,10 +400,11 @@ public class BiometricServiceTest {
 
     @Test
     public void testAuthenticate_noBiometrics_credentialAllowed() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(false);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
-                true /* requireConfirmation */, true /* allowDeviceCredential */);
+                true /* requireConfirmation */,
+                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
         waitForIdle();
 
         assertEquals(BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL,
@@ -337,9 +423,9 @@ public class BiometricServiceTest {
 
     @Test
     public void testAuthenticate_happyPathWithConfirmation() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                true /* requireConfirmation */, false /* allowDeviceCredential */);
+                true /* requireConfirmation */, null /* authenticators */);
 
         // Test authentication succeeded goes to PENDING_CONFIRMATION and that the HAT is not
         // sent to KeyStore yet
@@ -363,9 +449,9 @@ public class BiometricServiceTest {
     @Test
     public void testRejectFace_whenAuthenticating_notifiesSystemUIAndClient_thenPaused()
             throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onAuthenticationFailed();
         waitForIdle();
@@ -382,9 +468,9 @@ public class BiometricServiceTest {
     @Test
     public void testRejectFingerprint_whenAuthenticating_notifiesAndKeepsAuthenticating()
             throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onAuthenticationFailed();
         waitForIdle();
@@ -401,16 +487,16 @@ public class BiometricServiceTest {
     @Test
     public void testErrorCanceled_whenAuthenticating_notifiesSystemUIAndClient() throws
             Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         // Create a new pending auth session but don't start it yet. HAL contract is that previous
         // one must get ERROR_CANCELED. Simulate that here by creating the pending auth session,
         // sending ERROR_CANCELED to the current auth session, and then having the second one
         // onReadyForAuthentication.
         invokeAuthenticate(mBiometricService.mImpl, mReceiver2, false /* requireConfirmation */,
-                false /* allowDeviceCredential */);
+                null /* authenticators */);
         waitForIdle();
 
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
@@ -443,9 +529,9 @@ public class BiometricServiceTest {
 
     @Test
     public void testErrorHalTimeout_whenAuthenticating_entersPausedState() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
@@ -492,9 +578,9 @@ public class BiometricServiceTest {
 
     @Test
     public void testErrorFromHal_whenPaused_notifiesSystemUIAndClient() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
@@ -525,9 +611,9 @@ public class BiometricServiceTest {
         // For errors that show in SystemUI, BiometricService stays in STATE_ERROR_PENDING_SYSUI
         // until SystemUI notifies us that the dialog is dismissed at which point the current
         // session is done.
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
@@ -559,9 +645,10 @@ public class BiometricServiceTest {
 
     @Test
     public void testErrorFromHal_whilePreparingAuthentication_credentialAllowed() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, true /* allowDeviceCredential */);
+                false /* requireConfirmation */,
+                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
         waitForIdle();
 
         mBiometricService.mInternalReceiver.onError(
@@ -592,9 +679,9 @@ public class BiometricServiceTest {
     @Test
     public void testErrorFromHal_whilePreparingAuthentication_credentialNotAllowed()
             throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
         waitForIdle();
 
         mBiometricService.mInternalReceiver.onError(
@@ -664,9 +751,10 @@ public class BiometricServiceTest {
     @Test
     public void testErrorFromHal_whileShowingDeviceCredential_doesntNotifySystemUI()
             throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, true /* allowDeviceCredential */);
+                false /* requireConfirmation */,
+                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
 
         mBiometricService.mInternalReceiver.onDeviceCredentialPressed();
         waitForIdle();
@@ -689,9 +777,10 @@ public class BiometricServiceTest {
 
     @Test
     public void testLockout_whileAuthenticating_credentialAllowed() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, true /* allowDeviceCredential */);
+                false /* requireConfirmation */,
+                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
 
         assertEquals(BiometricService.STATE_AUTH_STARTED,
                 mBiometricService.mCurrentAuthSession.mState);
@@ -713,9 +802,9 @@ public class BiometricServiceTest {
 
     @Test
     public void testLockout_whenAuthenticating_credentialNotAllowed() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         assertEquals(BiometricService.STATE_AUTH_STARTED,
                 mBiometricService.mCurrentAuthSession.mState);
@@ -738,9 +827,9 @@ public class BiometricServiceTest {
     @Test
     public void testDismissedReasonUserCancel_whileAuthenticating_cancelsHalAuthentication()
             throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver
                 .onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
@@ -761,9 +850,9 @@ public class BiometricServiceTest {
 
     @Test
     public void testDismissedReasonNegative_whilePaused_doesntInvokeHalCancel() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
@@ -787,9 +876,9 @@ public class BiometricServiceTest {
     @Test
     public void testDismissedReasonUserCancel_whilePaused_doesntInvokeHalCancel() throws
             Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
@@ -812,9 +901,9 @@ public class BiometricServiceTest {
 
     @Test
     public void testDismissedReasonUserCancel_whenPendingConfirmation() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                true /* requireConfirmation */, false /* allowDeviceCredential */);
+                true /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onAuthenticationSucceeded(
                 true /* requireConfirmation */,
@@ -841,9 +930,9 @@ public class BiometricServiceTest {
 
     @Test
     public void testAcquire_whenAuthenticating_sentToSystemUI() throws Exception {
-        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
-                false /* requireConfirmation */, false /* allowDeviceCredential */);
+                false /* requireConfirmation */, null /* authenticators */);
 
         mBiometricService.mInternalReceiver.onAcquired(
                 FingerprintManager.FINGERPRINT_ACQUIRED_IMAGER_DIRTY,
@@ -857,26 +946,166 @@ public class BiometricServiceTest {
                 BiometricService.STATE_AUTH_STARTED);
     }
 
+    @Test
+    public void testCanAuthenticate_whenDeviceHasRequestedBiometricStrength() throws Exception {
+        // When only biometric is requested, and sensor is strong enough
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, Authenticators.BIOMETRIC_STRONG));
+    }
+
+    @Test
+    public void testCanAuthenticate_whenDeviceDoesNotHaveRequestedBiometricStrength()
+            throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_WEAK);
+
+        // When only biometric is requested, and sensor is not strong enough
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(false);
+        int authenticators = Authenticators.BIOMETRIC_STRONG;
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+
+        // When credential and biometric are requested, and sensor is not strong enough
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        authenticators = Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL;
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+    }
+
+    @Test
+    public void testCanAuthenticate_onlyCredentialRequested() throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        // Credential requested but not set up
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(false);
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED,
+                invokeCanAuthenticate(mBiometricService, Authenticators.DEVICE_CREDENTIAL));
+
+        // Credential requested and set up
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, Authenticators.DEVICE_CREDENTIAL));
+    }
+
+    @Test
+    public void testCanAuthenticate_whenNoBiometricsEnrolled() throws Exception {
+        // With credential set up, test the following.
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
+                false /* enrolled */);
+
+        // When only biometric is requested
+        int authenticators = Authenticators.BIOMETRIC_STRONG;
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+
+        // When credential and biometric are requested
+        authenticators = Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL;
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+    }
+
+    @Test
+    public void testCanAuthenticate_whenBiometricsNotEnabledForApps() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
+        when(mBiometricService.mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(false);
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+
+        // When only biometric is requested
+        int authenticators = Authenticators.BIOMETRIC_STRONG;
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+
+        // When credential and biometric are requested
+        authenticators = Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL;
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+    }
+
+    @Test
+    public void testCanAuthenticate_whenNoBiometricSensor() throws Exception {
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        // When only biometric is requested
+        int authenticators = Authenticators.BIOMETRIC_STRONG;
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+
+        // When credential and biometric are requested, and credential is not set up
+        authenticators = Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL;
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+
+        // When credential and biometric are requested, and credential is set up
+        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+    }
+
     // Helper methods
 
-    private void setupAuthForOnly(int modality) throws RemoteException {
+    private int invokeCanAuthenticate(BiometricService service, int authenticators)
+            throws Exception {
+        return service.mImpl.canAuthenticate(TEST_PACKAGE_NAME, 0 /* userId */, authenticators);
+    }
+
+    private void setupAuthForOnly(int modality, int strength) throws Exception {
+        setupAuthForOnly(modality, strength, true /* enrolled */);
+    }
+
+    private void setupAuthForOnly(int modality, int strength, boolean enrolled) throws Exception {
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
 
         when(mBiometricService.mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(true);
 
-        if (modality == BiometricAuthenticator.TYPE_FINGERPRINT) {
-            when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
+        if ((modality & BiometricAuthenticator.TYPE_FINGERPRINT) != 0) {
+            when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any()))
+                    .thenReturn(enrolled);
             when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
-            mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG, modality,
+            mBiometricService.mImpl.registerAuthenticator(0 /* id */, strength, modality,
                     mFingerprintAuthenticator);
-        } else if (modality == BiometricAuthenticator.TYPE_FACE) {
-            when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
+        }
+
+        if ((modality & BiometricAuthenticator.TYPE_FACE) != 0) {
+            when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(enrolled);
             when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
-            mBiometricService.mImpl.registerAuthenticator(0 /* id */, STRENGTH_STRONG, modality,
+            mBiometricService.mImpl.registerAuthenticator(0 /* id */, strength, modality,
                     mFaceAuthenticator);
-        } else {
-            fail("Unknown modality: " + modality);
+        }
+    }
+
+    // TODO: Reduce duplicated code, currently we cannot start the BiometricService in setUp() for
+    // all tests.
+    private void setupAuthForMultiple(int[] modalities, int[] strengths) throws RemoteException {
+        mBiometricService = new BiometricService(mContext, mInjector);
+        mBiometricService.onStart();
+
+        when(mBiometricService.mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(true);
+
+        assertEquals(modalities.length, strengths.length);
+
+        for (int i = 0; i < modalities.length; i++) {
+            final int modality = modalities[i];
+            final int strength = strengths[i];
+
+            if ((modality & BiometricAuthenticator.TYPE_FINGERPRINT) != 0) {
+                when(mFingerprintAuthenticator.hasEnrolledTemplates(anyInt(), any()))
+                        .thenReturn(true);
+                when(mFingerprintAuthenticator.isHardwareDetected(any())).thenReturn(true);
+                mBiometricService.mImpl.registerAuthenticator(0 /* id */, strength, modality,
+                        mFingerprintAuthenticator);
+            }
+
+            if ((modality & BiometricAuthenticator.TYPE_FACE) != 0) {
+                when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
+                when(mFaceAuthenticator.isHardwareDetected(any())).thenReturn(true);
+                mBiometricService.mImpl.registerAuthenticator(0 /* id */, strength, modality,
+                        mFaceAuthenticator);
+            }
         }
     }
 
@@ -891,9 +1120,9 @@ public class BiometricServiceTest {
 
     private void invokeAuthenticateAndStart(IBiometricService.Stub service,
             IBiometricServiceReceiver receiver, boolean requireConfirmation,
-            boolean allowDeviceCredential) throws Exception {
+            Integer authenticators) throws Exception {
         // Request auth, creates a pending session
-        invokeAuthenticate(service, receiver, requireConfirmation, allowDeviceCredential);
+        invokeAuthenticate(service, receiver, requireConfirmation, authenticators);
         waitForIdle();
 
         startPendingAuthSession(mBiometricService);
@@ -914,23 +1143,24 @@ public class BiometricServiceTest {
 
     private static void invokeAuthenticate(IBiometricService.Stub service,
             IBiometricServiceReceiver receiver, boolean requireConfirmation,
-            boolean allowDeviceCredential) throws Exception {
+            Integer authenticators) throws Exception {
         service.authenticate(
                 new Binder() /* token */,
                 0 /* sessionId */,
                 0 /* userId */,
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
-                createTestBiometricPromptBundle(requireConfirmation, allowDeviceCredential));
+                createTestBiometricPromptBundle(requireConfirmation, authenticators));
     }
 
-    private static Bundle createTestBiometricPromptBundle(boolean requireConfirmation,
-            boolean allowDeviceCredential) {
+    private static Bundle createTestBiometricPromptBundle(
+            boolean requireConfirmation,
+            Integer authenticators) {
         final Bundle bundle = new Bundle();
         bundle.putBoolean(BiometricPrompt.KEY_REQUIRE_CONFIRMATION, requireConfirmation);
 
-        if (allowDeviceCredential) {
-            bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, true);
+        if (authenticators != null) {
+            bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
         }
         return bundle;
     }

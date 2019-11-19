@@ -110,15 +110,19 @@ public class AuthServiceTest {
 
         final int userId = 0;
         final int expectedResult = BIOMETRIC_SUCCESS;
-        when(mBiometricService.canAuthenticate(anyString(), anyInt())).thenReturn(expectedResult);
+        final int authenticators = 0;
+        when(mBiometricService.canAuthenticate(anyString(), anyInt(), anyInt()))
+                .thenReturn(expectedResult);
 
-        final int result = mAuthService.mImpl.canAuthenticate(TEST_OP_PACKAGE_NAME, userId);
+        final int result = mAuthService.mImpl
+                .canAuthenticate(TEST_OP_PACKAGE_NAME, userId, authenticators);
 
         assertEquals(expectedResult, result);
         waitForIdle();
         verify(mBiometricService).canAuthenticate(
                 eq(TEST_OP_PACKAGE_NAME),
-                eq(userId));
+                eq(userId),
+                eq(authenticators));
     }
 
 

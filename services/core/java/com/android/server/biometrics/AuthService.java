@@ -26,6 +26,7 @@ import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
+import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -119,17 +120,17 @@ public class AuthService extends SystemService {
         }
 
         @Override
-        public int canAuthenticate(String opPackageName, int userId) throws RemoteException {
+        public int canAuthenticate(String opPackageName, int userId,
+                @Authenticators.Types int authenticators) throws RemoteException {
             final int callingUserId = UserHandle.getCallingUserId();
-            Slog.d(TAG, "canAuthenticate, userId: " + userId
-                    + ", callingUserId: " + callingUserId);
-
+            Slog.d(TAG, "canAuthenticate, userId: " + userId + ", callingUserId: " + callingUserId
+                    + ", authenticators: " + authenticators);
             if (userId != callingUserId) {
                 checkInternalPermission();
             } else {
                 checkPermission();
             }
-            return mBiometricService.canAuthenticate(opPackageName, userId);
+            return mBiometricService.canAuthenticate(opPackageName, userId, authenticators);
         }
 
         @Override

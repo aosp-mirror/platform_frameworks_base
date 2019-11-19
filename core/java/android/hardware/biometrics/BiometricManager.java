@@ -166,27 +166,64 @@ public class BiometricManager {
     }
 
     /**
-     * Determine if biometrics can be used. In other words, determine if {@link BiometricPrompt}
-     * can be expected to be shown (hardware available, templates enrolled, user-enabled).
+     * Determine if biometrics can be used. In other words, determine if
+     * {@link BiometricPrompt} can be expected to be shown (hardware available, templates enrolled,
+     * user-enabled). This is the equivalent of {@link #canAuthenticate(int)} with
+     * {@link Authenticators#BIOMETRIC_WEAK}
      *
-     * @return Returns {@link #BIOMETRIC_ERROR_NONE_ENROLLED} if the user does not have any
-     *     enrolled, or {@link #BIOMETRIC_ERROR_HW_UNAVAILABLE} if none are currently
-     *     supported/enabled. Returns {@link #BIOMETRIC_SUCCESS} if a biometric can currently be
-     *     used (enrolled and available).
+     * @return {@link #BIOMETRIC_ERROR_NONE_ENROLLED} if the user does not have any strong
+     *     biometrics enrolled, or {@link #BIOMETRIC_ERROR_HW_UNAVAILABLE} if none are currently
+     *     supported/enabled. Returns {@link #BIOMETRIC_SUCCESS} if a strong biometric can currently
+     *     be used (enrolled and available).
+     *
+     * @deprecated See {@link #canAuthenticate(int)}.
      */
+    @Deprecated
     @RequiresPermission(USE_BIOMETRIC)
     public @BiometricError int canAuthenticate() {
-        return canAuthenticate(mContext.getUserId());
+        return canAuthenticate(Authenticators.BIOMETRIC_WEAK);
+    }
+
+    /**
+     * Determine if any of the provided authenticators can be used. In other words, determine if
+     * {@link BiometricPrompt} can be expected to be shown (hardware available, templates enrolled,
+     * user-enabled).
+     *
+     * For biometric authenticators, determine if the device can currently authenticate with at
+     * least the requested strength. For example, invoking this API with
+     * {@link Authenticators#BIOMETRIC_WEAK} on a device that currently only has
+     * {@link Authenticators#BIOMETRIC_STRONG} enrolled will return {@link #BIOMETRIC_SUCCESS}.
+     *
+     * Invoking this API with {@link Authenticators#DEVICE_CREDENTIAL} can be used to determine
+     * if the user has a PIN/Pattern/Password set up.
+     *
+     * @param authenticators bit field consisting of constants defined in {@link Authenticators}.
+     *                       If multiple authenticators are queried, a logical OR will be applied.
+     *                       For example, if {@link Authenticators#DEVICE_CREDENTIAL} |
+     *                       {@link Authenticators#BIOMETRIC_STRONG} is queried and only
+     *                       {@link Authenticators#DEVICE_CREDENTIAL} is set up, this API will
+     *                       return {@link #BIOMETRIC_SUCCESS}
+     *
+     * @return {@link #BIOMETRIC_ERROR_NONE_ENROLLED} if the user does not have any of the
+     *     requested authenticators enrolled, or {@link #BIOMETRIC_ERROR_HW_UNAVAILABLE} if none are
+     *     currently supported/enabled. Returns {@link #BIOMETRIC_SUCCESS} if one of the requested
+     *     authenticators can currently be used (enrolled and available).
+     */
+    @RequiresPermission(USE_BIOMETRIC)
+    public @BiometricError int canAuthenticate(@Authenticators.Types int authenticators) {
+        return canAuthenticate(mContext.getUserId(), authenticators);
     }
 
     /**
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public @BiometricError int canAuthenticate(int userId) {
+    public @BiometricError int canAuthenticate(int userId,
+            @Authenticators.Types int authenticators) {
         if (mService != null) {
             try {
-                return mService.canAuthenticate(mContext.getOpPackageName(), userId);
+                final String opPackageName = mContext.getOpPackageName();
+                return mService.canAuthenticate(opPackageName, userId, authenticators);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

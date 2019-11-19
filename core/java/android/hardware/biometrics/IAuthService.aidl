@@ -35,7 +35,7 @@ interface IAuthService {
 
     // TODO(b/141025588): Make userId the first arg to be consistent with hasEnrolledBiometrics.
     // Checks if biometrics can be used.
-    int canAuthenticate(String opPackageName, int userId);
+    int canAuthenticate(String opPackageName, int userId, int authenticators);
 
     // Checks if any biometrics are enrolled.
     boolean hasEnrolledBiometrics(int userId, String opPackageName);
