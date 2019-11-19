@@ -877,22 +877,58 @@ public final class Telephony {
             public static final int RESULT_SMS_GENERIC_ERROR = 2;
 
             /**
-             * Set by BroadcastReceiver to indicate insufficient memory to store
-             * the message.
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate
+             * insufficient memory to store the message.
              */
             public static final int RESULT_SMS_OUT_OF_MEMORY = 3;
 
             /**
-             * Set by BroadcastReceiver to indicate that the message, while
-             * possibly valid, is of a format or encoding that is not
-             * supported.
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate that
+             * the message, while possibly valid, is of a format or encoding that is not supported.
              */
             public static final int RESULT_SMS_UNSUPPORTED = 4;
 
             /**
-             * Set by BroadcastReceiver to indicate a duplicate incoming message.
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a
+             * duplicate incoming message.
              */
             public static final int RESULT_SMS_DUPLICATED = 5;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a
+             * dispatch failure.
+             */
+            public static final int RESULT_SMS_DISPATCH_FAILURE = 6;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a null
+             * PDU was received.
+             */
+            public static final int RESULT_SMS_NULL_PDU = 7;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a null
+             * message was encountered.
+             */
+            public static final int RESULT_SMS_NULL_MESSAGE = 8;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate an sms
+             * was received while the phone was in encrypted state.
+             */
+            public static final int RESULT_SMS_RECEIVED_WHILE_ENCRYPTED = 9;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate a
+             * telephony database error.
+             */
+            public static final int RESULT_SMS_DATABASE_ERROR = 10;
+
+            /**
+             * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate an
+             * invalid uri.
+             */
+            public static final int RESULT_SMS_INVALID_URI = 11;
 
             /**
              * Activity action: Ask the user to change the default
