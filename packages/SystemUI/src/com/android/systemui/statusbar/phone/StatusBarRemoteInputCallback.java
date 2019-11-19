@@ -50,6 +50,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
+
 /**
  */
 @Singleton
@@ -60,7 +62,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final ActivityStarter mActivityStarter;
-    private final ShadeController mShadeController;
+    private final Lazy<ShadeController> mShadeControllerLazy;
     private final Context mContext;
     private final ActivityIntentHelper mActivityIntentHelper;
     private final NotificationGroupManager mGroupManager;
@@ -79,7 +81,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
-            ActivityStarter activityStarter, ShadeController shadeController,
+            ActivityStarter activityStarter, Lazy<ShadeController> shadeControllerLazy,
             CommandQueue commandQueue) {
         mContext = context;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
@@ -87,7 +89,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         mLockscreenUserManager = notificationLockscreenUserManager;
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
-        mShadeController = shadeController;
+        mShadeControllerLazy = shadeControllerLazy;
         mActivityStarter = activityStarter;
         mStatusBarStateController.addCallback(this);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
@@ -116,7 +118,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         if (!row.isPinned()) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
         }
-        mShadeController.showBouncer(true /* scrimmed */);
+        mShadeControllerLazy.get().showBouncer(true /* scrimmed */);
         mPendingRemoteInputView = clicked;
     }
 
@@ -162,8 +164,8 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
                     });
                 }
             };
-            mShadeController.postOnShadeExpanded(clickPendingViewRunnable);
-            mShadeController.instantExpandNotificationsPanel();
+            mShadeControllerLazy.get().postOnShadeExpanded(clickPendingViewRunnable);
+            mShadeControllerLazy.get().instantExpandNotificationsPanel();
         }
     }
 
@@ -251,7 +253,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
                 boolean handled = defaultHandler.handleClick();
 
                 // close the shade if it was open and maybe wait for activity start.
-                return handled && mShadeController.closeShadeIfOpen();
+                return handled && mShadeControllerLazy.get().closeShadeIfOpen();
             }, null, afterKeyguardGone);
             return true;
         } else {

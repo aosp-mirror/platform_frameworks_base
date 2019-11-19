@@ -33,7 +33,6 @@ import android.view.IWindowManager;
 import android.view.LayoutInflater;
 
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -139,13 +138,6 @@ public class DependencyProvider {
     // anywhere it is needed.
     public DisplayMetrics provideDisplayMetrics() {
         return new DisplayMetrics();
-    }
-
-    @Singleton
-    @Provides
-    public IStatusBarService provideIStatusBarService() {
-        return IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
     /** */
