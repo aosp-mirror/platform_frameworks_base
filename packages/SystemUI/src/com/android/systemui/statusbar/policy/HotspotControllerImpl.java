@@ -54,7 +54,6 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     private int mHotspotState;
     private volatile int mNumConnectedDevices;
     private boolean mWaitingForTerminalState;
-    private boolean mListening;
 
     /**
      * Controller used to retrieve information related to a hotspot.
@@ -109,19 +108,14 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             if (DEBUG) Log.d(TAG, "addCallback " + callback);
             mCallbacks.add(callback);
             if (mWifiManager != null) {
-                if (mListening) {
-                    if (mCallbacks.size() == 1) {
-                        mWifiManager.registerSoftApCallback(new HandlerExecutor(mMainHandler),
-                                this);
-                    } else {
-                        // mWifiManager#registerSoftApCallback triggers a call to
-                        // onConnectedClientsChanged on the Main Handler. In order to always update
-                        // the callback on added, we make this call when adding callbacks after the
-                        // first.
-                        mMainHandler.post(() ->
-                                callback.onHotspotChanged(isHotspotEnabled(),
-                                        mNumConnectedDevices));
-                    }
+                if (mCallbacks.size() == 1) {
+                    mWifiManager.registerSoftApCallback(new HandlerExecutor(mMainHandler), this);
+                } else {
+                    // mWifiManager#registerSoftApCallback triggers a call to onNumClientsChanged
+                    // on the Main Handler. In order to always update the callback on added, we
+                    // make this call when adding callbacks after the first.
+                    mMainHandler.post(() ->
+                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices));
                 }
             }
         }
@@ -133,20 +127,9 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
         synchronized (mCallbacks) {
             mCallbacks.remove(callback);
-            if (mCallbacks.isEmpty() && mWifiManager != null && mListening) {
+            if (mCallbacks.isEmpty() && mWifiManager != null) {
                 mWifiManager.unregisterSoftApCallback(this);
             }
-        }
-    }
-
-    @Override
-    public void handleSetListening(boolean listening) {
-        // Wait for the first |handleSetListening(true))| to register softap callbacks (for lazy
-        // registration of the softap callbacks).
-        if (mListening || !listening) return;
-        mListening = true;
-        if (mCallbacks.size() >= 1) {
-            mWifiManager.registerSoftApCallback(new HandlerExecutor(mMainHandler), this);
         }
     }
 
