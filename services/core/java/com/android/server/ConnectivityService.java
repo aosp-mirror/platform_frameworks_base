@@ -6522,7 +6522,32 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final NetworkAgentInfo newDefaultNetwork = getDefaultNetwork();
 
-        // TODO : move the LegacyTypeTracker-related code to a separate function.
+        updateLegacyTypeTrackerAndVpnLockdownForRematch(oldDefaultNetwork, newDefaultNetwork, nais);
+
+        // Tear down all unneeded networks.
+        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            if (unneeded(nai, UnneededFor.TEARDOWN)) {
+                if (nai.getLingerExpiry() > 0) {
+                    // This network has active linger timers and no requests, but is not
+                    // lingering. Linger it.
+                    //
+                    // One way (the only way?) this can happen if this network is unvalidated
+                    // and became unneeded due to another network improving its score to the
+                    // point where this network will no longer be able to satisfy any requests
+                    // even if it validates.
+                    updateLingerState(nai, now);
+                } else {
+                    if (DBG) log("Reaping " + nai.name());
+                    teardownUnneededNetwork(nai);
+                }
+            }
+        }
+    }
+
+    private void updateLegacyTypeTrackerAndVpnLockdownForRematch(
+            @Nullable final NetworkAgentInfo oldDefaultNetwork,
+            @Nullable final NetworkAgentInfo newDefaultNetwork,
+            @NonNull final NetworkAgentInfo[] nais) {
         if (oldDefaultNetwork != newDefaultNetwork) {
             // Maintain the illusion : since the legacy API only understands one network at a time,
             // if the default network changed, apps should see a disconnected broadcast for the
@@ -6537,6 +6562,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // capability.
                 mDefaultInetConditionPublished = newDefaultNetwork.lastValidated ? 100 : 0;
                 mLegacyTypeTracker.add(newDefaultNetwork.networkInfo.getType(), newDefaultNetwork);
+                // If the legacy VPN is connected, notifyLockdownVpn may end up sending a broadcast
+                // to reflect the NetworkInfo of this new network. This broadcast has to be sent
+                // after the disconnect broadcasts above, but before the broadcasts sent by the
+                // legacy type tracker below.
+                // TODO : refactor this, it's too complex
                 notifyLockdownVpn(newDefaultNetwork);
             }
         }
@@ -6557,25 +6587,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // This is on top of the multiple intent sequencing referenced in the todo above.
         for (NetworkAgentInfo nai : nais) {
             addNetworkToLegacyTypeTracker(nai);
-        }
-
-        // Tear down all unneeded networks.
-        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-            if (unneeded(nai, UnneededFor.TEARDOWN)) {
-                if (nai.getLingerExpiry() > 0) {
-                    // This network has active linger timers and no requests, but is not
-                    // lingering. Linger it.
-                    //
-                    // One way (the only way?) this can happen if this network is unvalidated
-                    // and became unneeded due to another network improving its score to the
-                    // point where this network will no longer be able to satisfy any requests
-                    // even if it validates.
-                    updateLingerState(nai, now);
-                } else {
-                    if (DBG) log("Reaping " + nai.name());
-                    teardownUnneededNetwork(nai);
-                }
-            }
         }
     }
 
