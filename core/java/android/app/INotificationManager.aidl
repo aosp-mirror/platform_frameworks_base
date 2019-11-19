@@ -44,8 +44,6 @@ interface INotificationManager
     void cancelAllNotifications(String pkg, int userId);
 
     void clearData(String pkg, int uid, boolean fromApp);
-    // TODO: Replace parameter (ITransientNotification callback) with (CharSequence text)
-    void enqueueTextToast(String pkg, ITransientNotification callback, int duration, int displayId);
     @UnsupportedAppUsage
     void enqueueToast(String pkg, ITransientNotification callback, int duration, int displayId);
     @UnsupportedAppUsage

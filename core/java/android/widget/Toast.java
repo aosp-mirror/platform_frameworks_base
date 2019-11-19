@@ -100,8 +100,6 @@ public class Toast {
     @UnsupportedAppUsage
     int mDuration;
     View mNextView;
-    // TODO(b/128611929): Remove this and check for null view when toast creation is in the system
-    boolean mIsCustomToast = false;
 
     /**
      * Construct an empty Toast object.  You must call {@link #setView} before you
@@ -142,11 +140,7 @@ public class Toast {
         final int displayId = mContext.getDisplayId();
 
         try {
-            if (mIsCustomToast) {
-                service.enqueueToast(pkg, tn, mDuration, displayId);
-            } else {
-                service.enqueueTextToast(pkg, tn, mDuration, displayId);
-            }
+            service.enqueueToast(pkg, tn, mDuration, displayId);
         } catch (RemoteException e) {
             // Empty
         }
@@ -166,7 +160,6 @@ public class Toast {
      * @see #getView
      */
     public void setView(View view) {
-        mIsCustomToast = true;
         mNextView = view;
     }
 
@@ -175,7 +168,6 @@ public class Toast {
      * @see #setView
      */
     public View getView() {
-        mIsCustomToast = true;
         return mNextView;
     }
 
