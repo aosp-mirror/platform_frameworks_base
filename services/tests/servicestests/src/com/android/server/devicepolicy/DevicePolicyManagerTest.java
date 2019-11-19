@@ -2635,6 +2635,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
     }
 
+    private void setupProfileOwnerOnUser0() throws Exception {
+        mContext.callerPermissions.addAll(OWNER_SETUP_PERMISSIONS);
+
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        dpm.setActiveAdmin(admin1, false);
+        assertTrue(dpm.setProfileOwner(admin1, null, UserHandle.USER_SYSTEM));
+
+        mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
+    }
+
     private void setupDeviceOwner() throws Exception {
         mContext.callerPermissions.addAll(OWNER_SETUP_PERMISSIONS);
 
@@ -3609,6 +3619,43 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0");
         verify(getServices().settings).settingsSystemPutStringForUser(
             Settings.System.SCREEN_BRIGHTNESS, "0", DpmMockContext.CALLER_USER_HANDLE);
+    }
+
+    public void testSetAutoTimeModifiesSetting() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        dpm.setAutoTime(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME, 1);
+
+        dpm.setAutoTime(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME, 0);
+    }
+
+    public void testSetAutoTimeWithPOOnUser0() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupProfileOwnerOnUser0();
+        dpm.setAutoTime(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME, 1);
+
+        dpm.setAutoTime(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME, 0);
+    }
+
+    public void testSetAutoTimeFailWithPONotOnUser0() throws Exception {
+        setupProfileOwner();
+        assertExpectException(SecurityException.class, null, () -> dpm.setAutoTime(admin1, false));
+        verify(getServices().settings, never()).settingsGlobalPutInt(Settings.Global.AUTO_TIME, 0);
+    }
+
+    public void testSetAutoTimeWithPOOfOrganizationOwnedDevice() throws Exception {
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+
+        dpm.setAutoTime(admin1, true);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME, 1);
+
+        dpm.setAutoTime(admin1, false);
+        verify(getServices().settings).settingsGlobalPutInt(Settings.Global.AUTO_TIME, 0);
     }
 
     public void testSetTime() throws Exception {
