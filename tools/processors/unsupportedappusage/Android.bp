@@ -1,11 +1,6 @@
 
-java_plugin {
-    name: "unsupportedappusage-annotation-processor",
-    processor_class: "android.processor.unsupportedappusage.UnsupportedAppUsageProcessor",
-
-    java_resources: [
-        "META-INF/**/*",
-    ],
+java_library_host {
+    name: "unsupportedappusage-annotation-processor-lib",
     srcs: [
         "src/**/*.java",
     ],
@@ -22,6 +17,18 @@ java_plugin {
             "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
         ],
     },
+}
+
+java_plugin {
+    name: "unsupportedappusage-annotation-processor",
+    processor_class: "android.processor.unsupportedappusage.UnsupportedAppUsageProcessor",
+
+    java_resources: [
+        "META-INF/**/*",
+    ],
+    static_libs: [
+        "unsupportedappusage-annotation-processor-lib"
+    ],
 
     use_tools_jar: true,
 }

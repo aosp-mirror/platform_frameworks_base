@@ -146,6 +146,7 @@ public class NetworkStatsManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     @TestApi
     public void setPollForce(boolean pollForce) {
         if (pollForce) {

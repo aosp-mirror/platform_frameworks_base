@@ -25,7 +25,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+
+import com.android.internal.telecom.IVideoProvider;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -512,8 +515,8 @@ public final class Call {
 
         /**
          * Indicates the call used Assisted Dialing.
-         * See also {@link Connection#PROPERTY_ASSISTED_DIALING_USED}
-         * @hide
+         *
+         * @see TelecomManager#EXTRA_USE_ASSISTED_DIALING
          */
         public static final int PROPERTY_ASSISTED_DIALING_USED = 0x00000200;
 
@@ -1181,7 +1184,8 @@ public final class Call {
         public void onConferenceableCallsChanged(Call call, List<Call> conferenceableCalls) {}
 
         /**
-         * Invoked when a {@link Call} receives an event from its associated {@link Connection}.
+         * Invoked when a {@link Call} receives an event from its associated {@link Connection} or
+         * {@link Conference}.
          * <p>
          * Where possible, the Call should make an attempt to handle {@link Connection} events which
          * are part of the {@code android.telecom.*} namespace.  The Call should ignore any events
@@ -1189,7 +1193,8 @@ public final class Call {
          * possible that a {@link ConnectionService} has defined its own Connection events which a
          * Call is not aware of.
          * <p>
-         * See {@link Connection#sendConnectionEvent(String, Bundle)}.
+         * See {@link Connection#sendConnectionEvent(String, Bundle)},
+         * {@link Conference#sendConferenceEvent(String, Bundle)}.
          *
          * @param call The {@code Call} receiving the event.
          * @param event The event.
@@ -2130,13 +2135,22 @@ public final class Call {
             cannedTextResponsesChanged = true;
         }
 
-        VideoCallImpl newVideoCallImpl = parcelableCall.getVideoCallImpl(mCallingPackage,
-                mTargetSdkVersion);
-        boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged() &&
-                !Objects.equals(mVideoCallImpl, newVideoCallImpl);
+        IVideoProvider previousVideoProvider = mVideoCallImpl == null ? null :
+                mVideoCallImpl.getVideoProvider();
+        IVideoProvider newVideoProvider = parcelableCall.getVideoProvider();
+
+        // parcelableCall.isVideoCallProviderChanged is only true when we have a video provider
+        // specified; so we should check if the actual IVideoProvider changes as well.
+        boolean videoCallChanged = parcelableCall.isVideoCallProviderChanged()
+                && !Objects.equals(previousVideoProvider, newVideoProvider);
         if (videoCallChanged) {
-            mVideoCallImpl = newVideoCallImpl;
+            if (mVideoCallImpl != null) {
+                mVideoCallImpl.destroy();
+            }
+            mVideoCallImpl = parcelableCall.isVideoCallProviderChanged() ?
+                    parcelableCall.getVideoCallImpl(mCallingPackage, mTargetSdkVersion) : null;
         }
+
         if (mVideoCallImpl != null) {
             mVideoCallImpl.setVideoState(getDetails().getVideoState());
         }

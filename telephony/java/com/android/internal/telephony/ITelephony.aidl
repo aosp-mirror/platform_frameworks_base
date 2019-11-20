@@ -319,6 +319,7 @@ interface ITelephony {
     /**
      * Replaced by getDataActivityForSubId.
      */
+    @UnsupportedAppUsage(maxTargetSdk = 28)
     int getDataActivity();
 
     /**
@@ -336,6 +337,7 @@ interface ITelephony {
     /**
      * Replaced by getDataStateForSubId.
      */
+    @UnsupportedAppUsage(maxTargetSdk = 28)
     int getDataState();
 
     /**
@@ -817,7 +819,7 @@ interface ITelephony {
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    boolean getTetherApnRequiredForSubscriber(int subId);
+    boolean isTetheringApnRequiredForSubscriber(int subId);
 
     /**
     * Enables framework IMS and triggers IMS Registration.

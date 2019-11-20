@@ -432,7 +432,7 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
         }
 
         @Override
-        public OperationResult finish(byte[] signature, byte[] additionalEntropy) {
+        public OperationResult finish(byte[] input, byte[] signature, byte[] additionalEntropy) {
             if ((additionalEntropy != null) && (additionalEntropy.length > 0)) {
                 throw new ProviderException("AAD stream does not support additional entropy");
             }

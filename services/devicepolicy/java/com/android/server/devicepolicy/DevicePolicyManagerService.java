@@ -1939,7 +1939,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         TelephonyManager getTelephonyManager() {
-            return TelephonyManager.from(mContext);
+            return mContext.getSystemService(TelephonyManager.class);
         }
 
         TrustManager getTrustManager() {

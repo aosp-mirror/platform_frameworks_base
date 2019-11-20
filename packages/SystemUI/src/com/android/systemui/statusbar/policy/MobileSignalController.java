@@ -22,6 +22,8 @@ import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings.Global;
+import android.telephony.CellSignalStrength;
+import android.telephony.CellSignalStrengthCdma;
 import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -48,6 +50,7 @@ import com.android.systemui.statusbar.policy.NetworkControllerImpl.SubscriptionD
 import java.io.PrintWriter;
 import java.util.BitSet;
 import java.util.Objects;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -457,6 +460,18 @@ public class MobileSignalController extends SignalController<
     }
 
     /**
+     * Extracts the CellSignalStrengthCdma from SignalStrength then returns the level
+     */
+    private final int getCdmaLevel() {
+        List<CellSignalStrengthCdma> signalStrengthCdma =
+            mSignalStrength.getCellSignalStrengths(CellSignalStrengthCdma.class);
+        if (!signalStrengthCdma.isEmpty()) {
+            return signalStrengthCdma.get(0).getLevel();
+        }
+        return CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+    }
+
+    /**
      * Updates the current state based on mServiceState, mSignalStrength, mDataNetType,
      * mDataState, and mSimState.  It should be called any time one of these is updated.
      * This will call listeners if necessary.
@@ -470,7 +485,7 @@ public class MobileSignalController extends SignalController<
                 && mSignalStrength != null;
         if (mCurrentState.connected) {
             if (!mSignalStrength.isGsm() && mConfig.alwaysShowCdmaRssi) {
-                mCurrentState.level = mSignalStrength.getCdmaLevel();
+                mCurrentState.level = getCdmaLevel();
             } else {
                 mCurrentState.level = mSignalStrength.getLevel();
             }

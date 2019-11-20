@@ -667,6 +667,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char dex2oatImageCompilerFilterBuf[sizeof("--compiler-filter=")-1 + PROPERTY_VALUE_MAX];
     char dex2oatThreadsBuf[sizeof("-j")-1 + PROPERTY_VALUE_MAX];
     char dex2oatThreadsImageBuf[sizeof("-j")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatCpuSetBuf[sizeof("--cpu-set=")-1 + PROPERTY_VALUE_MAX];
+    char dex2oatCpuSetImageBuf[sizeof("--cpu-set=")-1 + PROPERTY_VALUE_MAX];
     char dex2oat_isa_variant_key[PROPERTY_KEY_MAX];
     char dex2oat_isa_variant[sizeof("--instruction-set-variant=") -1 + PROPERTY_VALUE_MAX];
     char dex2oat_isa_features_key[PROPERTY_KEY_MAX];
@@ -955,6 +957,10 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     }
     parseCompilerOption("dalvik.vm.dex2oat-threads", dex2oatThreadsBuf, "-j", "-Xcompiler-option");
     parseCompilerOption("dalvik.vm.image-dex2oat-threads", dex2oatThreadsImageBuf, "-j",
+                        "-Ximage-compiler-option");
+    parseCompilerOption("dalvik.vm.dex2oat-cpu-set", dex2oatCpuSetBuf, "--cpu-set=",
+                        "-Xcompiler-option");
+    parseCompilerOption("dalvik.vm.image-dex2oat-cpu-set", dex2oatCpuSetImageBuf, "--cpu-set=",
                         "-Ximage-compiler-option");
 
     // The runtime will compile a boot image, when necessary, not using installd. Thus, we need to

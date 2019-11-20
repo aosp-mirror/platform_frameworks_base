@@ -129,7 +129,7 @@ public class BluetoothDeviceFilterUtils {
 
     @UnsupportedAppUsage
     public static String getDeviceDisplayNameInternal(@NonNull BluetoothDevice device) {
-        return firstNotEmpty(device.getAliasName(), device.getAddress());
+        return firstNotEmpty(device.getAlias(), device.getAddress());
     }
 
     @UnsupportedAppUsage

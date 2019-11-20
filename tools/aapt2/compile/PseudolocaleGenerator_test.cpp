@@ -234,6 +234,27 @@ TEST(PseudolocaleGeneratorTest, PseudolocalizeOnlyDefaultConfigs) {
                                             test::ParseConfigOrDie("ar-rXB")));
 }
 
+TEST(PseudolocaleGeneratorTest, PluralsArePseudolocalized) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder().SetPackageId("com.pkg", 0x7F).Build();
+  std::unique_ptr<Plural> plural = util::make_unique<Plural>();
+  plural->values = {util::make_unique<String>(table->string_pool.MakeRef("zero")),
+                    util::make_unique<String>(table->string_pool.MakeRef("one"))};
+  ASSERT_TRUE(table->AddResource(test::ParseNameOrDie("com.pkg:plurals/foo"), ConfigDescription{},
+                                 {}, std::move(plural), context->GetDiagnostics()));
+  std::unique_ptr<Plural> expected = util::make_unique<Plural>();
+  expected->values = {util::make_unique<String>(table->string_pool.MakeRef("[žéŕö one]")),
+                      util::make_unique<String>(table->string_pool.MakeRef("[öñé one]"))};
+
+  PseudolocaleGenerator generator;
+  ASSERT_TRUE(generator.Consume(context.get(), table.get()));
+
+  const auto* actual = test::GetValueForConfig<Plural>(table.get(), "com.pkg:plurals/foo",
+                                                       test::ParseConfigOrDie("en-rXA"));
+  EXPECT_TRUE(actual->Equals(expected.get()));
+}
+
 TEST(PseudolocaleGeneratorTest, RespectUntranslateableSections) {
   std::unique_ptr<IAaptContext> context =
       test::ContextBuilder().SetCompilationPackage("android").Build();

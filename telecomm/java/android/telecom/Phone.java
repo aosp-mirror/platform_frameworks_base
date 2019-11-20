@@ -152,13 +152,20 @@ public final class Phone {
             return;
         }
 
-        Call call = new Call(this, parcelableCall.getId(), mInCallAdapter,
-                parcelableCall.getState(), mCallingPackage, mTargetSdkVersion);
-        mCallByTelecomCallId.put(parcelableCall.getId(), call);
-        mCalls.add(call);
-        checkCallTree(parcelableCall);
-        call.internalUpdate(parcelableCall, mCallByTelecomCallId);
-        fireCallAdded(call);
+        Call call = mCallByTelecomCallId.get(parcelableCall.getId());
+        if (call == null) {
+            call = new Call(this, parcelableCall.getId(), mInCallAdapter,
+                    parcelableCall.getState(), mCallingPackage, mTargetSdkVersion);
+            mCallByTelecomCallId.put(parcelableCall.getId(), call);
+            mCalls.add(call);
+            checkCallTree(parcelableCall);
+            call.internalUpdate(parcelableCall, mCallByTelecomCallId);
+            fireCallAdded(call);
+        } else {
+            Log.w(this, "Call %s added, but it was already present", call.internalGetCallId());
+            checkCallTree(parcelableCall);
+            call.internalUpdate(parcelableCall, mCallByTelecomCallId);
+        }
     }
 
     final void internalRemoveCall(Call call) {
@@ -190,7 +197,11 @@ public final class Phone {
         } else {
             // This call may have come out of audio processing. Try adding it if our target sdk
             // version is low enough.
-            if (mTargetSdkVersion < SDK_VERSION_R) {
+            // The only two allowable states coming out of audio processing are ACTIVE and
+            // SIMULATED_RINGING.
+            if (mTargetSdkVersion < SDK_VERSION_R && (parcelableCall.getState() == Call.STATE_ACTIVE
+                    || parcelableCall.getState() == Call.STATE_SIMULATED_RINGING)) {
+                Log.i(this, "adding call during update for sdk compatibility");
                 internalAddCall(parcelableCall);
             }
         }

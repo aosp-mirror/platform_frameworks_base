@@ -208,6 +208,12 @@ public class TetheringTest {
             if (Context.TELEPHONY_SERVICE.equals(name)) return mTelephonyManager;
             return super.getSystemService(name);
         }
+
+        @Override
+        public String getSystemServiceName(Class<?> serviceClass) {
+            if (TelephonyManager.class.equals(serviceClass)) return Context.TELEPHONY_SERVICE;
+            return super.getSystemServiceName(serviceClass);
+        }
     }
 
     public class MockIpServerDependencies extends IpServer.Dependencies {

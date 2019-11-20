@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.pm.PackageManager;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
@@ -32,6 +33,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class ImsException extends Exception {
 
     /**

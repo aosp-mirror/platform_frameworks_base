@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -1126,8 +1127,9 @@ public final class Telephony {
              * values:</p>
              *
              * <ul>
-             *   <li><em>"message"</em> - An SmsCbMessage object containing the broadcast message
-             *   data, including ETWS or CMAS warning notification info if present.</li>
+             *   <li><em>"message"</em> - An {@link android.telephony.SmsCbMessage} object
+             *   containing the broadcast message data, including ETWS or CMAS warning notification
+             *   info if present.</li>
              * </ul>
              *
              * <p>The extra values can be extracted using
@@ -1138,11 +1140,12 @@ public final class Telephony {
              *
              * <p>Requires {@link android.Manifest.permission#RECEIVE_EMERGENCY_BROADCAST} to
              * receive.</p>
-             * @removed
+             * @hide
              */
             @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-            public static final String SMS_EMERGENCY_CB_RECEIVED_ACTION =
-                    "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+            @SystemApi
+            public static final String ACTION_SMS_EMERGENCY_CB_RECEIVED =
+                    "android.provider.action.SMS_EMERGENCY_CB_RECEIVED";
 
             /**
              * Broadcast Action: A new CDMA SMS has been received containing Service Category
@@ -3944,10 +3947,11 @@ public final class Telephony {
     }
 
     /**
-     * Contains received SMS cell broadcast messages. More details are available in 3GPP TS 23.041.
+     * Contains received cell broadcast messages. More details are available in 3GPP TS 23.041.
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final class CellBroadcasts implements BaseColumns {
 
         /**
@@ -3958,9 +3962,42 @@ public final class Telephony {
 
         /**
          * The {@code content://} URI for this table.
+         * Only privileged framework components running on phone or network stack uid can
+         * query or modify this table.
          */
         @NonNull
         public static final Uri CONTENT_URI = Uri.parse("content://cellbroadcasts");
+
+        /**
+         * The {@code content://} URI for query cellbroadcast message history.
+         * query results include following entries
+         * <ul>
+         *     <li>{@link #_ID}</li>
+         *     <li>{@link #SLOT_INDEX}</li>
+         *     <li>{@link #GEOGRAPHICAL_SCOPE}</li>
+         *     <li>{@link #PLMN}</li>
+         *     <li>{@link #LAC}</li>
+         *     <li>{@link #CID}</li>
+         *     <li>{@link #SERIAL_NUMBER}</li>
+         *     <li>{@link #SERVICE_CATEGORY}</li>
+         *     <li>{@link #LANGUAGE_CODE}</li>
+         *     <li>{@link #MESSAGE_BODY}</li>
+         *     <li>{@link #DELIVERY_TIME}</li>
+         *     <li>{@link #MESSAGE_READ}</li>
+         *     <li>{@link #MESSAGE_FORMAT}</li>
+         *     <li>{@link #MESSAGE_PRIORITY}</li>
+         *     <li>{@link #ETWS_WARNING_TYPE}</li>
+         *     <li>{@link #CMAS_MESSAGE_CLASS}</li>
+         *     <li>{@link #CMAS_CATEGORY}</li>
+         *     <li>{@link #CMAS_RESPONSE_TYPE}</li>
+         *     <li>{@link #CMAS_SEVERITY}</li>
+         *     <li>{@link #CMAS_URGENCY}</li>
+         *     <li>{@link #CMAS_CERTAINTY}</li>
+         * </ul>
+         */
+        @RequiresPermission(Manifest.permission.READ_CELL_BROADCASTS)
+        @NonNull
+        public static final Uri MESSAGE_HISTORY_URI = Uri.parse("content://cellbroadcasts/history");
 
         /**
          * The subscription which received this cell broadcast message.
@@ -3973,7 +4010,6 @@ public final class Telephony {
         /**
          * The slot which received this cell broadcast message.
          * <P>Type: INTEGER</P>
-         * @hide
          */
         public static final String SLOT_INDEX = "slot_index";
 
@@ -4151,14 +4187,12 @@ public final class Telephony {
         /**
          * The timestamp in millisecond of when the device received the message.
          * <P>Type: BIGINT</P>
-         * @hide
          */
         public static final String RECEIVED_TIME = "received_time";
 
         /**
          * Indicates that whether the message has been broadcasted to the application.
          * <P>Type: BOOLEAN</P>
-         * @hide
          */
         public static final String MESSAGE_BROADCASTED = "message_broadcasted";
 
@@ -4194,7 +4228,6 @@ public final class Telephony {
          * "circle|0,0|100;polygon|0,0|0,1.5|1,1|1,0;circle|100.123,100|200.123"
          *
          * <P>Type: TEXT</P>
-         * @hide
          */
         public static final String GEOMETRIES = "geometries";
 
@@ -4206,7 +4239,6 @@ public final class Telephony {
          * for the alert.
          *
          * <P>Type: INTEGER</P>
-         * @hide
          */
         public static final String MAXIMUM_WAIT_TIME = "maximum_wait_time";
 

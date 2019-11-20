@@ -202,7 +202,18 @@ public class SessionManager {
         return createSubsession(false);
     }
 
-    private synchronized Session createSubsession(boolean isStartedFromActiveSession) {
+    /**
+     * Creates a new subsession based on an existing session. Will not be started until
+     * {@link #continueSession(Session, String)} or {@link #cancelSubsession(Session)} is called.
+     * <p>
+     * Only public for testing!
+     * @param isStartedFromActiveSession true if this subsession is being created for a task on the
+     *     same thread, false if it is being created for a related task on another thread.
+     * @return a new {@link Session}, call {@link #continueSession(Session, String)} to continue the
+     * session and {@link #endSession()} when done with this subsession.
+     */
+    @VisibleForTesting
+    public synchronized Session createSubsession(boolean isStartedFromActiveSession) {
         int threadId = getCallingThreadId();
         Session threadSession = mSessionMapper.get(threadId);
         if (threadSession == null) {

@@ -21,6 +21,8 @@ import android.os.Message;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsSsInfo;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 /**
  * Provides APIs for the supplementary service settings using IMS (Ut interface).
  * It is created from 3GPP TS 24.623 (XCAP(XML Configuration Access Protocol)
@@ -121,6 +123,7 @@ public interface ImsUtInterface {
      * Retrieves the configuration of the call forward.
      * The return value of ((AsyncResult)result.obj) is an array of {@link ImsCallForwardInfo}.
      */
+    @UnsupportedAppUsage
     public void queryCallForward(int condition, String number, Message result);
 
     /**

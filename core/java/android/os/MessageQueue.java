@@ -468,6 +468,7 @@ public final class MessageQueue {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public int postSyncBarrier() {
         return postSyncBarrier(SystemClock.uptimeMillis());
@@ -512,6 +513,7 @@ public final class MessageQueue {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public void removeSyncBarrier(int token) {
         // Remove a sync barrier token from the queue.

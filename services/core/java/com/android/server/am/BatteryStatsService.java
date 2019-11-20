@@ -731,7 +731,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void notePhoneState(int state) {
         enforceCallingPermission();
-        int simState = TelephonyManager.getDefault().getSimState();
+        int simState = mContext.getSystemService(TelephonyManager.class).getSimState();
         synchronized (mStats) {
             mStats.notePhoneStateLocked(state, simState);
         }

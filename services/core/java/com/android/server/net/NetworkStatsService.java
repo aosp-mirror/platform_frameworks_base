@@ -337,7 +337,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         NetworkStatsService service = new NetworkStatsService(context, networkManager, alarmManager,
-                wakeLock, getDefaultClock(), TelephonyManager.getDefault(),
+                wakeLock, getDefaultClock(), context.getSystemService(TelephonyManager.class),
                 new DefaultNetworkStatsSettings(context), new NetworkStatsFactory(),
                 new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir());
         service.registerLocalService();

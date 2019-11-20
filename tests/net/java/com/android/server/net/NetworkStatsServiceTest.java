@@ -192,8 +192,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         mService = new NetworkStatsService(
                 mServiceContext, mNetManager, mAlarmManager, wakeLock, mClock,
-                TelephonyManager.getDefault(), mSettings, mStatsFactory,
-                new NetworkStatsObservers(),  mStatsDir, getBaseDir(mStatsDir));
+                mServiceContext.getSystemService(TelephonyManager.class), mSettings,
+                mStatsFactory, new NetworkStatsObservers(),  mStatsDir, getBaseDir(mStatsDir));
         mHandlerThread = new HandlerThread("HandlerThread");
         mHandlerThread.start();
         Handler.Callback callback = new NetworkStatsService.HandlerCallback(mService);

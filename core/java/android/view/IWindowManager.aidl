@@ -151,6 +151,7 @@ interface IWindowManager
     float getCurrentAnimatorScale();
 
     // For testing
+    @UnsupportedAppUsage(maxTargetSdk = 28)
     void setInTouchMode(boolean showFocus);
 
     // For StrictMode flashing a red border on violations from the UI
@@ -158,6 +159,7 @@ interface IWindowManager
     // Manager uses that to determine whether or not the red border should
     // actually be shown.  (it will be ignored that pid doesn't have windows
     // on screen)
+    @UnsupportedAppUsage(maxTargetSdk = 28)
     void showStrictModeViolation(boolean on);
 
     // Proxy to set the system property for whether the flashing

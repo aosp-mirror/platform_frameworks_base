@@ -16,12 +16,18 @@
 
 package com.google.android.gles_jni;
 
-import javax.microedition.khronos.egl.*;
-
 import android.graphics.SurfaceTexture;
 import android.view.Surface;
-import android.view.SurfaceView;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.egl.EGLDisplay;
+import javax.microedition.khronos.egl.EGLSurface;
 
 public class EGLImpl implements EGL10 {
     private EGLContextImpl mContext = new EGLContextImpl(-1);
@@ -49,6 +55,10 @@ public class EGLImpl implements EGL10 {
     
     /** @hide **/
     public static native int  getInitCount(EGLDisplay display);
+
+    @UnsupportedAppUsage
+    public EGLImpl() {
+    }
 
     public EGLContext eglCreateContext(EGLDisplay display, EGLConfig config, EGLContext share_context, int[] attrib_list) {
         long eglContextId = _eglCreateContext(display, config, share_context, attrib_list);

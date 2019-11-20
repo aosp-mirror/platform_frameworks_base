@@ -2613,6 +2613,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #getActionButton()
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public final void setActionButton(int button) {
         nativeSetActionButton(mNativePtr, button);

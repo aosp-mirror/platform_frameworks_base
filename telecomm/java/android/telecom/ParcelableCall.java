@@ -21,6 +21,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -223,6 +224,10 @@ public final class ParcelableCall implements Parcelable {
         }
 
         return mVideoCall;
+    }
+
+    public IVideoProvider getVideoProvider() {
+        return mVideoCallProvider;
     }
 
     public boolean getIsRttCallChanged() {

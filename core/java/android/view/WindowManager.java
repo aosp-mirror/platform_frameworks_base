@@ -1686,6 +1686,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@hide}
          */
+        @UnsupportedAppUsage
         @TestApi
         public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 0x00000040;
 
@@ -1930,6 +1931,7 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         name = "COLOR_SPACE_AGNOSTIC")
         })
+        @UnsupportedAppUsage
         @TestApi
         public int privateFlags;
 

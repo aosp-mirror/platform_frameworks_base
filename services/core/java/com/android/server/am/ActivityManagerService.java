@@ -24,6 +24,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
+import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
@@ -348,7 +349,6 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.appop.AppOpsService;
-import com.android.server.compat.CompatConfig;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
@@ -5048,8 +5048,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
             mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
-            long[] disabledCompatChanges = CompatConfig.get().getDisabledChanges(app.info);
+            long[] disabledCompatChanges = {};
             if (mPlatformCompat != null) {
+                disabledCompatChanges = mPlatformCompat.getDisabledChanges(app.info);
                 mPlatformCompat.resetReporting(app.info);
             }
             if (app.isolatedEntryPoint != null) {
@@ -15769,13 +15770,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             boolean disableHiddenApiChecks = ai.usesNonSdkApi()
                     || (flags & INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
-            if (disableHiddenApiChecks) {
+            boolean disableTestApiChecks = disableHiddenApiChecks
+                    || (flags & INSTR_FLAG_DISABLE_TEST_API_CHECKS) != 0;
+            if (disableHiddenApiChecks || disableTestApiChecks) {
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");
             }
-            // Allow instrumented processes access to test APIs.
-            // TODO(satayev): make this configurable via testing framework.
-            boolean disableTestApiChecks = true;
 
             final boolean mountExtStorageFull = isCallerShell()
                     && (flags & INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL) != 0;

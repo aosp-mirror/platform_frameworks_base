@@ -20,10 +20,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telecom.Log;
 import android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -34,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class ImsExternalCallState implements Parcelable {
 
     private static final String TAG = "ImsExternalCallState";
@@ -217,8 +218,8 @@ public final class ImsExternalCallState implements Parcelable {
     @Override
     public String toString() {
         return "ImsExternalCallState { mCallId = " + mCallId +
-                ", mAddress = " + Log.pii(mAddress) +
-                ", mLocalAddress = " + Log.pii(mLocalAddress) +
+                ", mAddress = " + Rlog.pii(TAG, mAddress) +
+                ", mLocalAddress = " + Rlog.pii(TAG, mLocalAddress) +
                 ", mIsPullable = " + mIsPullable +
                 ", mCallState = " + mCallState +
                 ", mCallType = " + mCallType +

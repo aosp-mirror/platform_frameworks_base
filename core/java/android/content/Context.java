@@ -63,6 +63,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.provider.MediaStore;
+import android.telephony.TelephonyRegistryManager;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -4726,6 +4727,13 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.telephony.ims.ImsManager}.
+     * @hide
+     */
+    public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.telephony.ims.RcsMessageManager}.
      * @hide
      */
@@ -4740,7 +4748,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.os.telephony.TelephonyRegistryManager}.
+     * {@link TelephonyRegistryManager}.
      * @hide
      */
     @SystemApi
@@ -5293,6 +5301,7 @@ public abstract class Context {
      * Get the user associated with this context
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public @UserIdInt int getUserId() {
         return android.os.UserHandle.myUserId();
@@ -5409,6 +5418,7 @@ public abstract class Context {
      * @return Returns the {@link Display} object this context is associated with.
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public abstract Display getDisplay();
 

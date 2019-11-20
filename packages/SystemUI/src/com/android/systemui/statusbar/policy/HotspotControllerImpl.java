@@ -21,20 +21,24 @@ import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiClient;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.UserManager;
 import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
+ * Controller used to retrieve information related to a hotspot.
  */
 @Singleton
 public class HotspotControllerImpl implements HotspotController, WifiManager.SoftApCallback {
@@ -49,10 +53,11 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     private final Context mContext;
 
     private int mHotspotState;
-    private int mNumConnectedDevices;
+    private volatile int mNumConnectedDevices;
     private boolean mWaitingForTerminalState;
 
     /**
+     * Controller used to retrieve information related to a hotspot.
      */
     @Inject
     public HotspotControllerImpl(Context context, @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
@@ -96,7 +101,6 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     /**
      * Adds {@code callback} to the controller. The controller will update the callback on state
      * changes. It will immediately trigger the callback added to notify current state.
-     * @param callback
      */
     @Override
     public void addCallback(Callback callback) {
@@ -106,13 +110,16 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             mCallbacks.add(callback);
             if (mWifiManager != null) {
                 if (mCallbacks.size() == 1) {
-                    mWifiManager.registerSoftApCallback(this, mMainHandler);
+                    mWifiManager.registerSoftApCallback(new HandlerExecutor(mMainHandler), this);
                 } else {
-                    // mWifiManager#registerSoftApCallback triggers a call to onNumClientsChanged
-                    // on the Main Handler. In order to always update the callback on added, we
-                    // make this call when adding callbacks after the first.
+                    // mWifiManager#registerSoftApCallback triggers a call to
+                    // onConnectedClientsChanged on the Main Handler. In order to always update
+                    // the callback on added, we make this call when adding callbacks after the
+                    // first.
                     mMainHandler.post(() ->
-                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices));
+                            callback.onHotspotChanged(isHotspotEnabled(),
+                                    mNumConnectedDevices));
+
                 }
             }
         }
@@ -217,8 +224,8 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     }
 
     @Override
-    public void onNumClientsChanged(int numConnectedDevices) {
-        mNumConnectedDevices = numConnectedDevices;
+    public void onConnectedClientsChanged(List<WifiClient> clients) {
+        mNumConnectedDevices = clients.size();
         fireHotspotChangedCallback();
     }
 }

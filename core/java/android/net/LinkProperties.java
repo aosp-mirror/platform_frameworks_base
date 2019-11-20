@@ -111,6 +111,8 @@ public final class LinkProperties implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Landroid/net/LinkProperties$ProvisioningChange;")
     public enum ProvisioningChange {
         @UnsupportedAppUsage
         STILL_NOT_PROVISIONED,

@@ -1892,6 +1892,7 @@ public final class StrictMode {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     @TestApi
     public static void conditionallyCheckInstanceCounts() {
         VmPolicy policy = getVmPolicy();
@@ -2751,6 +2752,7 @@ public final class StrictMode {
         }
 
         /** Create an instance of ViolationInfo initialized from a Parcel. */
+        @UnsupportedAppUsage
         public ViolationInfo(Parcel in) {
             this(in, false);
         }

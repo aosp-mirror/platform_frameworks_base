@@ -59,6 +59,7 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_CONFIGURATOR = 9;
     public static final int PACKAGE_INCIDENT_REPORT_APPROVER = 10;
     public static final int PACKAGE_APP_PREDICTOR = 11;
+    public static final int PACKAGE_TELEPHONY = 12;
     @IntDef(value = {
         PACKAGE_SYSTEM,
         PACKAGE_SETUP_WIZARD,
@@ -72,6 +73,7 @@ public abstract class PackageManagerInternal {
         PACKAGE_CONFIGURATOR,
         PACKAGE_INCIDENT_REPORT_APPROVER,
         PACKAGE_APP_PREDICTOR,
+        PACKAGE_TELEPHONY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KnownPackage {}
@@ -413,6 +415,17 @@ public abstract class PackageManagerInternal {
             @ResolveInfoFlags int flags, int filterCallingUid, int userId);
 
     /**
+     * Retrieve all activities that can be performed for the given intent.
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     * of the calling UID.
+     * @see PackageManager#queryIntentActivities(Intent, int)
+     */
+    public abstract List<ResolveInfo> queryIntentActivities(
+            Intent intent, @Nullable String resolvedType, @ResolveInfoFlags int flags,
+            int filterCallingUid, int userId);
+
+
+    /**
      * Retrieve all services that can be performed for the given intent.
      * @see PackageManager#queryIntentServices(Intent, int)
      */
@@ -715,10 +728,11 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean isResolveActivityComponent(@NonNull ComponentInfo component);
 
+
     /**
-     * Returns the package name for a known package.
+     * Returns a list of package names for a known package
      */
-    public abstract @Nullable String getKnownPackageName(
+    public abstract @NonNull String[] getKnownPackageNames(
             @KnownPackage int knownPackage, int userId);
 
     /**

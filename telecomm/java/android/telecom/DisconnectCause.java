@@ -97,6 +97,14 @@ public final class DisconnectCause implements Parcelable {
      */
     public static final String REASON_EMULATING_SINGLE_CALL = "EMULATING_SINGLE_CALL";
 
+    /**
+     * This reason is set when a call is ended in order to place an emergency call when a
+     * {@link PhoneAccount} doesn't support holding an ongoing call to place an emergency call. This
+     * reason string should only be associated with the {@link #LOCAL} disconnect code returned from
+     * {@link #getCode()}.
+     */
+    public static final String REASON_EMERGENCY_CALL_PLACED = "REASON_EMERGENCY_CALL_PLACED";
+
     private int mDisconnectCode;
     private CharSequence mDisconnectLabel;
     private CharSequence mDisconnectDescription;
