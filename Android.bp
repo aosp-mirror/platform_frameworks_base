@@ -806,7 +806,6 @@ aidl_interface {
             enabled: true,
         },
     },
-    api_dir: "aidl/incremental",
 }
 
 gensrcs {
