@@ -93,14 +93,12 @@ import static android.os.storage.StorageManager.FLAG_STORAGE_EXTERNAL;
 
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE;
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
-import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.server.pm.ComponentResolver.RESOLVE_PRIORITY_SORTER;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
-import static com.android.server.pm.InstructionSets.getPrimaryInstructionSet;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.compressedFileExists;
@@ -280,6 +278,7 @@ import android.view.Display;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
@@ -435,7 +434,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // user, but by default initialize to this.
     public static final boolean DEBUG_DEXOPT = false;
 
-    private static final boolean DEBUG_ABI_SELECTION = false;
+    static final boolean DEBUG_ABI_SELECTION = false;
     private static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
     private static final boolean DEBUG_APP_DATA = false;
 
@@ -665,7 +664,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final File sAppInstallDir =
             new File(Environment.getDataDirectory(), "app");
     /** Directory where installed application's 32-bit native libraries are copied. */
-    private static final File sAppLib32InstallDir =
+    @VisibleForTesting
+    static final File sAppLib32InstallDir =
             new File(Environment.getDataDirectory(), "app-lib");
 
     // ----------------------------------------------------------------
@@ -755,6 +755,30 @@ public class PackageManagerService extends IPackageManager.Stub
     private final ModuleInfoProvider mModuleInfoProvider;
 
     private final ApexManager mApexManager;
+
+    private final Injector mInjector;
+
+    /**
+     * Unit tests will instantiate and / or extend to mock dependencies / behaviors.
+     */
+    @VisibleForTesting
+    static class Injector {
+        private final UserManagerInternal mUserManager;
+        private final PackageAbiHelper mAbiHelper;
+
+        Injector(UserManagerInternal userManager, PackageAbiHelper abiHelper) {
+            mUserManager = userManager;
+            mAbiHelper = abiHelper;
+        }
+
+        public UserManagerInternal getUserManager() {
+            return mUserManager;
+        }
+
+        public PackageAbiHelper getAbiHelper() {
+            return mAbiHelper;
+        }
+    }
 
     class PackageParserCallback implements PackageParser.Callback {
         @Override public final boolean hasFeature(String feature) {
@@ -2103,8 +2127,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // survive long enough to benefit of background optimizations.
             for (int userId : firstUserIds) {
                 PackageInfo info = getPackageInfo(packageName, /*flags*/ 0, userId);
-                // There's a race currently where some install events may interleave with an uninstall.
-                // This can lead to package info being null (b/36642664).
+                // There's a race currently where some install events may interleave with an
+                // uninstall. This can lead to package info being null (b/36642664).
                 if (info != null) {
                     mDexManager.notifyPackageInstalled(info, userId);
                 }
@@ -2179,6 +2203,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * @param packageIsExternal true if the package is currently installed on
      * external/removable/unprotected storage.
      * @return {@link StorageEnum#TYPE_UNKNOWN} if the package is not stored externally or the
+     * corresponding {@link StorageEnum} storage type value if it is.
      * corresponding {@link StorageEnum} storage type value if it is.
      */
     private static int getPackageExternalStorageType(VolumeInfo packageVolume,
@@ -2437,6 +2462,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     mPermissionManager.getPermissionSettings(), mPackages);
         }
         }
+
+        // TODO(b/137961986): We should pass this via constructor, but would first need to create
+        // a packages lock that could also be passed in.
+        mInjector = new Injector(getUserManagerInternal(), new PackageAbiHelperImpl());
+
         mSettings.addSharedUserLPw("android.uid.system", Process.SYSTEM_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.phone", RADIO_UID,
@@ -3144,7 +3174,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
                 final List<String> changedAbiCodePath =
-                        adjustCpuAbisForSharedUserLPw(setting.packages, null /*scannedPackage*/);
+                        applyAdjustedAbiToSharedUser(setting, null /*scannedPackage*/,
+                        mInjector.getAbiHelper().getAdjustedAbiForSharedUser(
+                                setting.packages, null /*scannedPackage*/));
                 if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
                     for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
                         final String codePathString = changedAbiCodePath.get(i);
@@ -9413,7 +9445,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             null /* originalPkgSetting */, null, parseFlags, scanFlags,
                             (pkg == mPlatformPackage), user);
                     applyPolicy(pkg, parseFlags, scanFlags, mPlatformPackage);
-                    final ScanResult scanResult = scanPackageOnlyLI(request, mFactoryTest, -1L);
+                    final ScanResult scanResult =
+                            scanPackageOnlyLI(request, mInjector, mFactoryTest, -1L);
                     if (scanResult.existingSettingCopied && scanResult.request.pkgSetting != null) {
                         scanResult.request.pkgSetting.updateFrom(scanResult.pkgSetting);
                     }
@@ -10775,7 +10808,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** The result of a package scan. */
-    private static class ScanResult {
+    @VisibleForTesting
+    static class ScanResult {
         /** The request that initiated the scan that produced this result. */
         public final ScanRequest request;
         /** Whether or not the package scan was successful */
@@ -10814,7 +10848,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** A package to be scanned */
-    private static class ScanRequest {
+    @VisibleForTesting
+    static class ScanRequest {
         /** The parsed package */
         @NonNull public final PackageParser.Package pkg;
         /** The package this package replaces */
@@ -11007,7 +11042,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     pkgSetting == null ? null : pkgSetting.pkg, pkgSetting, disabledPkgSetting,
                     originalPkgSetting, realPkgName, parseFlags, scanFlags,
                     (pkg == mPlatformPackage), user);
-            return scanPackageOnlyLI(request, mFactoryTest, currentTime);
+            return scanPackageOnlyLI(request, mInjector, mFactoryTest, currentTime);
         }
     }
 
@@ -11232,20 +11267,70 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * Applies the adjusted ABI calculated by
+     * {@link PackageAbiHelper#getAdjustedAbiForSharedUser(Set, PackageParser.Package)} to all
+     * relevant packages and settings.
+     * @param sharedUserSetting The {@code SharedUserSetting} to adjust
+     * @param scannedPackage the package being scanned or null
+     * @param adjustedAbi the adjusted ABI calculated by {@link PackageAbiHelper}
+     * @return the list of code paths that belong to packages that had their ABIs adjusted.
+     */
+    private static List<String> applyAdjustedAbiToSharedUser(SharedUserSetting sharedUserSetting,
+            PackageParser.Package scannedPackage, String adjustedAbi) {
+        if (scannedPackage != null)  {
+            scannedPackage.applicationInfo.primaryCpuAbi = adjustedAbi;
+        }
+        List<String> changedAbiCodePath = null;
+        for (PackageSetting ps : sharedUserSetting.packages) {
+            if (scannedPackage == null || !scannedPackage.packageName.equals(ps.name)) {
+                if (ps.primaryCpuAbiString != null) {
+                    continue;
+                }
+
+                ps.primaryCpuAbiString = adjustedAbi;
+                if (ps.pkg != null && ps.pkg.applicationInfo != null
+                        && !TextUtils.equals(
+                        adjustedAbi, ps.pkg.applicationInfo.primaryCpuAbi)) {
+                    ps.pkg.applicationInfo.primaryCpuAbi = adjustedAbi;
+                    if (DEBUG_ABI_SELECTION) {
+                        Slog.i(TAG,
+                                "Adjusting ABI for " + ps.name + " to " + adjustedAbi
+                                        + " (scannedPackage="
+                                        + (scannedPackage != null ? scannedPackage : "null")
+                                        + ")");
+                    }
+                    if (changedAbiCodePath == null) {
+                        changedAbiCodePath = new ArrayList<>();
+                    }
+                    changedAbiCodePath.add(ps.codePathString);
+                }
+            }
+        }
+        return changedAbiCodePath;
+    }
+
+
+    /**
      * Just scans the package without any side effects.
      * <p>Not entirely true at the moment. There is still one side effect -- this
      * method potentially modifies a live {@link PackageSetting} object representing
      * the package being scanned. This will be resolved in the future.
      *
+     * @param injector injector for acquiring dependencies
      * @param request Information about the package to be scanned
      * @param isUnderFactoryTest Whether or not the device is under factory test
      * @param currentTime The current time, in millis
      * @return The results of the scan
      */
     @GuardedBy("mInstallLock")
-    private static @NonNull ScanResult scanPackageOnlyLI(@NonNull ScanRequest request,
+    @VisibleForTesting
+    @NonNull
+    static ScanResult scanPackageOnlyLI(@NonNull ScanRequest request,
+            Injector injector,
             boolean isUnderFactoryTest, long currentTime)
-                    throws PackageManagerException {
+            throws PackageManagerException {
+        final PackageAbiHelper packageAbiHelper = injector.getAbiHelper();
+        final UserManagerInternal userManager = injector.getUserManager();
         final PackageParser.Package pkg = request.pkg;
         PackageSetting pkgSetting = request.pkgSetting;
         final PackageSetting disabledPkgSetting = request.disabledPkgSetting;
@@ -11351,7 +11436,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!createNewPackage) {
             final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
             final boolean fullApp = (scanFlags & SCAN_AS_FULL_APP) != 0;
-            setInstantAppForUser(pkgSetting, userId, instantApp, fullApp);
+            setInstantAppForUser(userManager, pkgSetting, userId, instantApp, fullApp);
         }
         // TODO(patb): see if we can do away with disabled check here.
         if (disabledPkgSetting != null
@@ -11397,7 +11482,10 @@ public class PackageManagerService extends IPackageManager.Stub
             if (needToDeriveAbi) {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
                 final boolean extractNativeLibs = !pkg.isLibrary();
-                derivePackageAbi(pkg, cpuAbiOverride, extractNativeLibs);
+                final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths> derivedAbi =
+                        packageAbiHelper.derivePackageAbi(pkg, cpuAbiOverride, extractNativeLibs);
+                derivedAbi.first.applyTo(pkg);
+                derivedAbi.second.applyTo(pkg);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
                 // Some system apps still use directory structure for native libraries
@@ -11405,8 +11493,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 // structure. Try to detect abi based on directory structure.
                 if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp() &&
                         pkg.applicationInfo.primaryCpuAbi == null) {
-                    setBundledAppAbisAndRoots(pkg, pkgSetting);
-                    setNativeLibraryPaths(pkg, sAppLib32InstallDir);
+                    final PackageAbiHelper.Abis abis = packageAbiHelper.getBundledAppAbis(
+                            pkg);
+                    abis.applyTo(pkg);
+                    abis.applyTo(pkgSetting);
+                    final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
+                            packageAbiHelper.getNativeLibraryPaths(pkg, sAppLib32InstallDir);
+                    nativeLibraryPaths.applyTo(pkg);
                 }
             } else {
                 // This is not a first boot or an upgrade, don't bother deriving the
@@ -11415,7 +11508,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkg.applicationInfo.primaryCpuAbi = primaryCpuAbiFromSettings;
                 pkg.applicationInfo.secondaryCpuAbi = secondaryCpuAbiFromSettings;
 
-                setNativeLibraryPaths(pkg, sAppLib32InstallDir);
+                final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
+                        packageAbiHelper.getNativeLibraryPaths(pkg, sAppLib32InstallDir);
+                nativeLibraryPaths.applyTo(pkg);
 
                 if (DEBUG_ABI_SELECTION) {
                     Slog.i(TAG, "Using ABIS and native lib paths from settings : " +
@@ -11436,7 +11531,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // ABIs we've determined above. For non-moves, the path will be updated based on the
             // ABIs we determined during compilation, but the path will depend on the final
             // package path (after the rename away from the stage path).
-            setNativeLibraryPaths(pkg, sAppLib32InstallDir);
+            final PackageAbiHelper.NativeLibraryPaths nativeLibraryPaths =
+                    packageAbiHelper.getNativeLibraryPaths(pkg, sAppLib32InstallDir);
+            nativeLibraryPaths.applyTo(pkg);
         }
 
         // This is a special case for the "system" package, where the ABI is
@@ -11490,8 +11587,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // We also do this *before* we perform dexopt on this package, so that
             // we can avoid redundant dexopts, and also to make sure we've got the
             // code and package path correct.
-            changedAbiCodePath =
-                    adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages, pkg);
+            changedAbiCodePath = applyAdjustedAbiToSharedUser(pkgSetting.sharedUser, pkg,
+                    packageAbiHelper.getAdjustedAbiForSharedUser(
+                            pkgSetting.sharedUser.packages, pkg));
         }
 
         if (isUnderFactoryTest && pkg.requestedPermissions.contains(
@@ -12344,264 +12442,6 @@ public class PackageManagerService extends IPackageManager.Stub
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    /**
-     * Derive the ABI of a non-system package located at {@code scanFile}. This information
-     * is derived purely on the basis of the contents of {@code scanFile} and
-     * {@code cpuAbiOverride}.
-     *
-     * If {@code extractLibs} is true, native libraries are extracted from the app if required.
-     */
-    private static void derivePackageAbi(PackageParser.Package pkg, String cpuAbiOverride,
-            boolean extractLibs)
-                    throws PackageManagerException {
-        // Give ourselves some initial paths; we'll come back for another
-        // pass once we've determined ABI below.
-        setNativeLibraryPaths(pkg, sAppLib32InstallDir);
-
-        // We shouldn't attempt to extract libs from system app when it was not updated.
-        if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp()) {
-            extractLibs = false;
-        }
-
-        final String nativeLibraryRootStr = pkg.applicationInfo.nativeLibraryRootDir;
-        final boolean useIsaSpecificSubdirs = pkg.applicationInfo.nativeLibraryRootRequiresIsa;
-
-        NativeLibraryHelper.Handle handle = null;
-        try {
-            handle = NativeLibraryHelper.Handle.create(pkg);
-            // TODO(multiArch): This can be null for apps that didn't go through the
-            // usual installation process. We can calculate it again, like we
-            // do during install time.
-            //
-            // TODO(multiArch): Why do we need to rescan ASEC apps again ? It seems totally
-            // unnecessary.
-            final File nativeLibraryRoot = new File(nativeLibraryRootStr);
-
-            // Null out the abis so that they can be recalculated.
-            pkg.applicationInfo.primaryCpuAbi = null;
-            pkg.applicationInfo.secondaryCpuAbi = null;
-            if (isMultiArch(pkg.applicationInfo)) {
-                // Warn if we've set an abiOverride for multi-lib packages..
-                // By definition, we need to copy both 32 and 64 bit libraries for
-                // such packages.
-                if (pkg.cpuAbiOverride != null
-                        && !NativeLibraryHelper.CLEAR_ABI_OVERRIDE.equals(pkg.cpuAbiOverride)) {
-                    Slog.w(TAG, "Ignoring abiOverride for multi arch application.");
-                }
-
-                int abi32 = PackageManager.NO_NATIVE_LIBRARIES;
-                int abi64 = PackageManager.NO_NATIVE_LIBRARIES;
-                if (Build.SUPPORTED_32_BIT_ABIS.length > 0) {
-                    if (extractLibs) {
-                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
-                        abi32 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                nativeLibraryRoot, Build.SUPPORTED_32_BIT_ABIS,
-                                useIsaSpecificSubdirs);
-                    } else {
-                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
-                        abi32 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_32_BIT_ABIS);
-                    }
-                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-                }
-
-                // Shared library native code should be in the APK zip aligned
-                if (abi32 >= 0 && pkg.isLibrary() && extractLibs) {
-                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                            "Shared library native lib extraction not supported");
-                }
-
-                maybeThrowExceptionForMultiArchCopy(
-                        "Error unpackaging 32 bit native libs for multiarch app.", abi32);
-
-                if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
-                    if (extractLibs) {
-                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
-                        abi64 = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                                nativeLibraryRoot, Build.SUPPORTED_64_BIT_ABIS,
-                                useIsaSpecificSubdirs);
-                    } else {
-                        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
-                        abi64 = NativeLibraryHelper.findSupportedAbi(handle, Build.SUPPORTED_64_BIT_ABIS);
-                    }
-                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-                }
-
-                maybeThrowExceptionForMultiArchCopy(
-                        "Error unpackaging 64 bit native libs for multiarch app.", abi64);
-
-                if (abi64 >= 0) {
-                    // Shared library native libs should be in the APK zip aligned
-                    if (extractLibs && pkg.isLibrary()) {
-                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                                "Shared library native lib extraction not supported");
-                    }
-                    pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[abi64];
-                }
-
-                if (abi32 >= 0) {
-                    final String abi = Build.SUPPORTED_32_BIT_ABIS[abi32];
-                    if (abi64 >= 0) {
-                        if (pkg.use32bitAbi) {
-                            pkg.applicationInfo.secondaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
-                            pkg.applicationInfo.primaryCpuAbi = abi;
-                        } else {
-                            pkg.applicationInfo.secondaryCpuAbi = abi;
-                        }
-                    } else {
-                        pkg.applicationInfo.primaryCpuAbi = abi;
-                    }
-                }
-            } else {
-                String[] abiList = (cpuAbiOverride != null) ?
-                        new String[] { cpuAbiOverride } : Build.SUPPORTED_ABIS;
-
-                // Enable gross and lame hacks for apps that are built with old
-                // SDK tools. We must scan their APKs for renderscript bitcode and
-                // not launch them if it's present. Don't bother checking on devices
-                // that don't have 64 bit support.
-                boolean needsRenderScriptOverride = false;
-                if (Build.SUPPORTED_64_BIT_ABIS.length > 0 && cpuAbiOverride == null &&
-                        NativeLibraryHelper.hasRenderscriptBitcode(handle)) {
-                    abiList = Build.SUPPORTED_32_BIT_ABIS;
-                    needsRenderScriptOverride = true;
-                }
-
-                final int copyRet;
-                if (extractLibs) {
-                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyNativeBinaries");
-                    copyRet = NativeLibraryHelper.copyNativeBinariesForSupportedAbi(handle,
-                            nativeLibraryRoot, abiList, useIsaSpecificSubdirs);
-                } else {
-                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "findSupportedAbi");
-                    copyRet = NativeLibraryHelper.findSupportedAbi(handle, abiList);
-                }
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-
-                if (copyRet < 0 && copyRet != PackageManager.NO_NATIVE_LIBRARIES) {
-                    throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                            "Error unpackaging native libs for app, errorCode=" + copyRet);
-                }
-
-                if (copyRet >= 0) {
-                    // Shared libraries that have native libs must be multi-architecture
-                    if (pkg.isLibrary()) {
-                        throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                                "Shared library with native libs must be multiarch");
-                    }
-                    pkg.applicationInfo.primaryCpuAbi = abiList[copyRet];
-                } else if (copyRet == PackageManager.NO_NATIVE_LIBRARIES && cpuAbiOverride != null) {
-                    pkg.applicationInfo.primaryCpuAbi = cpuAbiOverride;
-                } else if (needsRenderScriptOverride) {
-                    pkg.applicationInfo.primaryCpuAbi = abiList[0];
-                }
-            }
-        } catch (IOException ioe) {
-            Slog.e(TAG, "Unable to get canonical file " + ioe.toString());
-        } finally {
-            IoUtils.closeQuietly(handle);
-        }
-
-        // Now that we've calculated the ABIs and determined if it's an internal app,
-        // we will go ahead and populate the nativeLibraryPath.
-        setNativeLibraryPaths(pkg, sAppLib32InstallDir);
-    }
-
-    /**
-     * Adjusts ABIs for a set of packages belonging to a shared user so that they all match.
-     * i.e, so that all packages can be run inside a single process if required.
-     *
-     * Optionally, callers can pass in a parsed package via {@code newPackage} in which case
-     * this function will either try and make the ABI for all packages in {@code packagesForUser}
-     * match {@code scannedPackage} or will update the ABI of {@code scannedPackage} to match
-     * the ABI selected for {@code packagesForUser}. This variant is used when installing or
-     * updating a package that belongs to a shared user.
-     *
-     * NOTE: We currently only match for the primary CPU abi string. Matching the secondary
-     * adds unnecessary complexity.
-     */
-    private static @Nullable List<String> adjustCpuAbisForSharedUserLPw(
-            Set<PackageSetting> packagesForUser, PackageParser.Package scannedPackage) {
-        List<String> changedAbiCodePath = null;
-        String requiredInstructionSet = null;
-        if (scannedPackage != null && scannedPackage.applicationInfo.primaryCpuAbi != null) {
-            requiredInstructionSet = VMRuntime.getInstructionSet(
-                     scannedPackage.applicationInfo.primaryCpuAbi);
-        }
-
-        PackageSetting requirer = null;
-        for (PackageSetting ps : packagesForUser) {
-            // If packagesForUser contains scannedPackage, we skip it. This will happen
-            // when scannedPackage is an update of an existing package. Without this check,
-            // we will never be able to change the ABI of any package belonging to a shared
-            // user, even if it's compatible with other packages.
-            if (scannedPackage == null || !scannedPackage.packageName.equals(ps.name)) {
-                if (ps.primaryCpuAbiString == null) {
-                    continue;
-                }
-
-                final String instructionSet = VMRuntime.getInstructionSet(ps.primaryCpuAbiString);
-                if (requiredInstructionSet != null && !instructionSet.equals(requiredInstructionSet)) {
-                    // We have a mismatch between instruction sets (say arm vs arm64) warn about
-                    // this but there's not much we can do.
-                    String errorMessage = "Instruction set mismatch, "
-                            + ((requirer == null) ? "[caller]" : requirer)
-                            + " requires " + requiredInstructionSet + " whereas " + ps
-                            + " requires " + instructionSet;
-                    Slog.w(TAG, errorMessage);
-                }
-
-                if (requiredInstructionSet == null) {
-                    requiredInstructionSet = instructionSet;
-                    requirer = ps;
-                }
-            }
-        }
-
-        if (requiredInstructionSet != null) {
-            String adjustedAbi;
-            if (requirer != null) {
-                // requirer != null implies that either scannedPackage was null or that scannedPackage
-                // did not require an ABI, in which case we have to adjust scannedPackage to match
-                // the ABI of the set (which is the same as requirer's ABI)
-                adjustedAbi = requirer.primaryCpuAbiString;
-                if (scannedPackage != null) {
-                    scannedPackage.applicationInfo.primaryCpuAbi = adjustedAbi;
-                }
-            } else {
-                // requirer == null implies that we're updating all ABIs in the set to
-                // match scannedPackage.
-                adjustedAbi =  scannedPackage.applicationInfo.primaryCpuAbi;
-            }
-
-            for (PackageSetting ps : packagesForUser) {
-                if (scannedPackage == null || !scannedPackage.packageName.equals(ps.name)) {
-                    if (ps.primaryCpuAbiString != null) {
-                        continue;
-                    }
-
-                    ps.primaryCpuAbiString = adjustedAbi;
-                    if (ps.pkg != null && ps.pkg.applicationInfo != null &&
-                            !TextUtils.equals(adjustedAbi, ps.pkg.applicationInfo.primaryCpuAbi)) {
-                        ps.pkg.applicationInfo.primaryCpuAbi = adjustedAbi;
-                        if (DEBUG_ABI_SELECTION) {
-                            Slog.i(TAG, "Adjusting ABI for " + ps.name + " to " + adjustedAbi
-                                    + " (requirer="
-                                    + (requirer != null ? requirer.pkg : "null")
-                                    + ", scannedPackage="
-                                    + (scannedPackage != null ? scannedPackage : "null")
-                                    + ")");
-                        }
-                        if (changedAbiCodePath == null) {
-                            changedAbiCodePath = new ArrayList<>();
-                        }
-                        changedAbiCodePath.add(ps.codePathString);
-                    }
-                }
-            }
-        }
-        return changedAbiCodePath;
-    }
-
     private void setUpCustomResolverActivity(PackageParser.Package pkg) {
         synchronized (mPackages) {
             mResolverReplaced = true;
@@ -12651,207 +12491,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mInstantAppInstallerInfo.isDefault = true;
         mInstantAppInstallerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                 | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
-    }
-
-    private static String calculateBundledApkRoot(final String codePathString) {
-        final File codePath = new File(codePathString);
-        final File codeRoot;
-        if (FileUtils.contains(Environment.getRootDirectory(), codePath)) {
-            codeRoot = Environment.getRootDirectory();
-        } else if (FileUtils.contains(Environment.getOemDirectory(), codePath)) {
-            codeRoot = Environment.getOemDirectory();
-        } else if (FileUtils.contains(Environment.getVendorDirectory(), codePath)) {
-            codeRoot = Environment.getVendorDirectory();
-        } else if (FileUtils.contains(Environment.getOdmDirectory(), codePath)) {
-            codeRoot = Environment.getOdmDirectory();
-        } else if (FileUtils.contains(Environment.getProductDirectory(), codePath)) {
-            codeRoot = Environment.getProductDirectory();
-        } else if (FileUtils.contains(Environment.getSystemExtDirectory(), codePath)) {
-            codeRoot = Environment.getSystemExtDirectory();
-        } else if (FileUtils.contains(Environment.getOdmDirectory(), codePath)) {
-            codeRoot = Environment.getOdmDirectory();
-        } else {
-            // Unrecognized code path; take its top real segment as the apk root:
-            // e.g. /something/app/blah.apk => /something
-            try {
-                File f = codePath.getCanonicalFile();
-                File parent = f.getParentFile();    // non-null because codePath is a file
-                File tmp;
-                while ((tmp = parent.getParentFile()) != null) {
-                    f = parent;
-                    parent = tmp;
-                }
-                codeRoot = f;
-                Slog.w(TAG, "Unrecognized code path "
-                        + codePath + " - using " + codeRoot);
-            } catch (IOException e) {
-                // Can't canonicalize the code path -- shenanigans?
-                Slog.w(TAG, "Can't canonicalize code path " + codePath);
-                return Environment.getRootDirectory().getPath();
-            }
-        }
-        return codeRoot.getPath();
-    }
-
-    /**
-     * Derive and set the location of native libraries for the given package,
-     * which varies depending on where and how the package was installed.
-     */
-    private static void setNativeLibraryPaths(PackageParser.Package pkg, File appLib32InstallDir) {
-        final ApplicationInfo info = pkg.applicationInfo;
-        final String codePath = pkg.codePath;
-        final File codeFile = new File(codePath);
-        final boolean bundledApp = info.isSystemApp() && !info.isUpdatedSystemApp();
-
-        info.nativeLibraryRootDir = null;
-        info.nativeLibraryRootRequiresIsa = false;
-        info.nativeLibraryDir = null;
-        info.secondaryNativeLibraryDir = null;
-
-        if (isApkFile(codeFile)) {
-            // Monolithic install
-            if (bundledApp) {
-                // If "/system/lib64/apkname" exists, assume that is the per-package
-                // native library directory to use; otherwise use "/system/lib/apkname".
-                final String apkRoot = calculateBundledApkRoot(info.sourceDir);
-                final boolean is64Bit = VMRuntime.is64BitInstructionSet(
-                        getPrimaryInstructionSet(info));
-
-                // This is a bundled system app so choose the path based on the ABI.
-                // if it's a 64 bit abi, use lib64 otherwise use lib32. Note that this
-                // is just the default path.
-                final String apkName = deriveCodePathName(codePath);
-                final String libDir = is64Bit ? LIB64_DIR_NAME : LIB_DIR_NAME;
-                info.nativeLibraryRootDir = Environment.buildPath(new File(apkRoot), libDir,
-                        apkName).getAbsolutePath();
-
-                if (info.secondaryCpuAbi != null) {
-                    final String secondaryLibDir = is64Bit ? LIB_DIR_NAME : LIB64_DIR_NAME;
-                    info.secondaryNativeLibraryDir = Environment.buildPath(new File(apkRoot),
-                            secondaryLibDir, apkName).getAbsolutePath();
-                }
-            } else {
-                final String apkName = deriveCodePathName(codePath);
-                info.nativeLibraryRootDir = new File(appLib32InstallDir, apkName)
-                        .getAbsolutePath();
-            }
-
-            info.nativeLibraryRootRequiresIsa = false;
-            info.nativeLibraryDir = info.nativeLibraryRootDir;
-        } else {
-            // Cluster install
-            info.nativeLibraryRootDir = new File(codeFile, LIB_DIR_NAME).getAbsolutePath();
-            info.nativeLibraryRootRequiresIsa = true;
-
-            info.nativeLibraryDir = new File(info.nativeLibraryRootDir,
-                    getPrimaryInstructionSet(info)).getAbsolutePath();
-
-            if (info.secondaryCpuAbi != null) {
-                info.secondaryNativeLibraryDir = new File(info.nativeLibraryRootDir,
-                        VMRuntime.getInstructionSet(info.secondaryCpuAbi)).getAbsolutePath();
-            }
-        }
-    }
-
-    /**
-     * Calculate the abis and roots for a bundled app. These can uniquely
-     * be determined from the contents of the system partition, i.e whether
-     * it contains 64 or 32 bit shared libraries etc. We do not validate any
-     * of this information, and instead assume that the system was built
-     * sensibly.
-     */
-    private static void setBundledAppAbisAndRoots(PackageParser.Package pkg,
-                                           PackageSetting pkgSetting) {
-        final String apkName = deriveCodePathName(pkg.applicationInfo.getCodePath());
-
-        // If "/system/lib64/apkname" exists, assume that is the per-package
-        // native library directory to use; otherwise use "/system/lib/apkname".
-        final String apkRoot = calculateBundledApkRoot(pkg.applicationInfo.sourceDir);
-        setBundledAppAbi(pkg, apkRoot, apkName);
-        // pkgSetting might be null during rescan following uninstall of updates
-        // to a bundled app, so accommodate that possibility.  The settings in
-        // that case will be established later from the parsed package.
-        //
-        // If the settings aren't null, sync them up with what we've just derived.
-        // note that apkRoot isn't stored in the package settings.
-        if (pkgSetting != null) {
-            pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
-            pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
-        }
-    }
-
-    /**
-     * Deduces the ABI of a bundled app and sets the relevant fields on the
-     * parsed pkg object.
-     *
-     * @param apkRoot the root of the installed apk, something like {@code /system} or {@code /oem}
-     *        under which system libraries are installed.
-     * @param apkName the name of the installed package.
-     */
-    private static void setBundledAppAbi(PackageParser.Package pkg, String apkRoot, String apkName) {
-        final File codeFile = new File(pkg.codePath);
-
-        final boolean has64BitLibs;
-        final boolean has32BitLibs;
-        if (isApkFile(codeFile)) {
-            // Monolithic install
-            has64BitLibs = (new File(apkRoot, new File(LIB64_DIR_NAME, apkName).getPath())).exists();
-            has32BitLibs = (new File(apkRoot, new File(LIB_DIR_NAME, apkName).getPath())).exists();
-        } else {
-            // Cluster install
-            final File rootDir = new File(codeFile, LIB_DIR_NAME);
-            if (!ArrayUtils.isEmpty(Build.SUPPORTED_64_BIT_ABIS)
-                    && !TextUtils.isEmpty(Build.SUPPORTED_64_BIT_ABIS[0])) {
-                final String isa = VMRuntime.getInstructionSet(Build.SUPPORTED_64_BIT_ABIS[0]);
-                has64BitLibs = (new File(rootDir, isa)).exists();
-            } else {
-                has64BitLibs = false;
-            }
-            if (!ArrayUtils.isEmpty(Build.SUPPORTED_32_BIT_ABIS)
-                    && !TextUtils.isEmpty(Build.SUPPORTED_32_BIT_ABIS[0])) {
-                final String isa = VMRuntime.getInstructionSet(Build.SUPPORTED_32_BIT_ABIS[0]);
-                has32BitLibs = (new File(rootDir, isa)).exists();
-            } else {
-                has32BitLibs = false;
-            }
-        }
-
-        if (has64BitLibs && !has32BitLibs) {
-            // The package has 64 bit libs, but not 32 bit libs. Its primary
-            // ABI should be 64 bit. We can safely assume here that the bundled
-            // native libraries correspond to the most preferred ABI in the list.
-
-            pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[0];
-            pkg.applicationInfo.secondaryCpuAbi = null;
-        } else if (has32BitLibs && !has64BitLibs) {
-            // The package has 32 bit libs but not 64 bit libs. Its primary
-            // ABI should be 32 bit.
-
-            pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_32_BIT_ABIS[0];
-            pkg.applicationInfo.secondaryCpuAbi = null;
-        } else if (has32BitLibs && has64BitLibs) {
-            // The application has both 64 and 32 bit bundled libraries. We check
-            // here that the app declares multiArch support, and warn if it doesn't.
-            //
-            // We will be lenient here and record both ABIs. The primary will be the
-            // ABI that's higher on the list, i.e, a device that's configured to prefer
-            // 64 bit apps will see a 64 bit primary ABI,
-
-            if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_MULTIARCH) == 0) {
-                Slog.e(TAG, "Package " + pkg + " has multiple bundled libs, but is not multiarch.");
-            }
-
-            if (VMRuntime.is64BitInstructionSet(getPreferredInstructionSet())) {
-                pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[0];
-                pkg.applicationInfo.secondaryCpuAbi = Build.SUPPORTED_32_BIT_ABIS[0];
-            } else {
-                pkg.applicationInfo.primaryCpuAbi = Build.SUPPORTED_32_BIT_ABIS[0];
-                pkg.applicationInfo.secondaryCpuAbi = Build.SUPPORTED_64_BIT_ABIS[0];
-            }
-        } else {
-            pkg.applicationInfo.primaryCpuAbi = null;
-            pkg.applicationInfo.secondaryCpuAbi = null;
-        }
     }
 
     private void killApplication(String pkgName, int appId, String reason) {
@@ -13575,7 +13214,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     // upgrade app from instant to full; we don't allow app downgrade
                     installed = true;
                 }
-                setInstantAppForUser(pkgSetting, userId, instantApp, fullApp);
+                setInstantAppForUser(
+                        getUserManagerInternal(), pkgSetting, userId, instantApp, fullApp);
             }
 
             if (installed) {
@@ -13623,8 +13263,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    static void setInstantAppForUser(PackageSetting pkgSetting, int userId,
-            boolean instantApp, boolean fullApp) {
+    static void setInstantAppForUser(UserManagerInternal userManager, PackageSetting pkgSetting,
+            int userId, boolean instantApp, boolean fullApp) {
         // no state specified; do nothing
         if (!instantApp && !fullApp) {
             return;
@@ -13636,7 +13276,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 pkgSetting.setInstantApp(false /*instantApp*/, userId);
             }
         } else {
-            for (int currentUserId : sUserManager.getUserIds()) {
+            for (int currentUserId : userManager.getUserIds()) {
                 if (instantApp && !pkgSetting.getInstantApp(currentUserId)) {
                     pkgSetting.setInstantApp(true /*instantApp*/, currentUserId);
                 } else if (fullApp && pkgSetting.getInstantApp(currentUserId)) {
@@ -15910,16 +15550,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private static void maybeThrowExceptionForMultiArchCopy(String message, int copyRet) throws
-            PackageManagerException {
-        if (copyRet < 0) {
-            if (copyRet != PackageManager.NO_NATIVE_LIBRARIES &&
-                    copyRet != PackageManager.INSTALL_FAILED_NO_MATCHING_ABIS) {
-                throw new PackageManagerException(copyRet, message);
-            }
-        }
-    }
-
     /**
      * Logic to handle movement of existing installed applications.
      */
@@ -16044,26 +15674,6 @@ public class PackageManagerService extends IPackageManager.Stub
             result = new File(targetDir, packageName + "-" + suffix);
         } while (result.exists());
         return result;
-    }
-
-    // Utility method that returns the relative package path with respect
-    // to the installation directory. Like say for /data/data/com.test-1.apk
-    // string com.test-1 is returned.
-    static String deriveCodePathName(String codePath) {
-        if (codePath == null) {
-            return null;
-        }
-        final File codeFile = new File(codePath);
-        final String name = codeFile.getName();
-        if (codeFile.isDirectory()) {
-            return name;
-        } else if (name.endsWith(".apk") || name.endsWith(".tmp")) {
-            final int lastDot = name.lastIndexOf('.');
-            return name.substring(0, lastDot);
-        } else {
-            Slog.w(TAG, "Odd, " + codePath + " doesn't look like an APK");
-            return null;
-        }
     }
 
     static class PackageInstalledInfo {
@@ -17000,7 +16610,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 final PrepareResult prepareResult;
                 try {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "preparePackage");
-                    prepareResult = preparePackageLI(request.args, request.installResult);
+                    prepareResult =
+                            preparePackageLI(request.args, request.installResult);
                 } catch (PrepareFailure prepareFailure) {
                     request.installResult.setError(prepareFailure.error,
                             prepareFailure.getMessage());
@@ -17660,7 +17271,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 String abiOverride = (TextUtils.isEmpty(pkg.cpuAbiOverride) ?
                         args.abiOverride : pkg.cpuAbiOverride);
                 final boolean extractNativeLibs = !pkg.isLibrary();
-                derivePackageAbi(pkg, abiOverride, extractNativeLibs);
+                final Pair<PackageAbiHelper.Abis, PackageAbiHelper.NativeLibraryPaths>
+                        derivedAbi = mInjector.getAbiHelper().derivePackageAbi(
+                                pkg, abiOverride, extractNativeLibs);
+                derivedAbi.first.applyTo(pkg);
+                derivedAbi.second.applyTo(pkg);
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
                 throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
@@ -18189,10 +17804,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private static boolean isMultiArch(ApplicationInfo info) {
-        return (info.flags & ApplicationInfo.FLAG_MULTIARCH) != 0;
-    }
-
     private static boolean isExternal(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
     }
@@ -18201,7 +17812,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return (ps.pkgFlags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
     }
 
-    private static boolean isSystemApp(PackageParser.Package pkg) {
+    static boolean isSystemApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
