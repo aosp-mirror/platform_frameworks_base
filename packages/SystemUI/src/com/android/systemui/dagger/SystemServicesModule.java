@@ -24,6 +24,7 @@ import android.app.IActivityManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.WallpaperManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
@@ -31,6 +32,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.view.IWindowManager;
@@ -65,6 +67,12 @@ public class SystemServicesModule {
     @Provides
     static AlarmManager provideAlarmManager(Context context) {
         return context.getSystemService(AlarmManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static DevicePolicyManager provideDevicePolicyManager(Context context) {
+        return context.getSystemService(DevicePolicyManager.class);
     }
 
     @Singleton
@@ -144,6 +152,12 @@ public class SystemServicesModule {
     @Provides
     static SensorPrivacyManager provideSensorPrivacyManager(Context context) {
         return context.getSystemService(SensorPrivacyManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static UserManager provideUserManager(Context context) {
+        return context.getSystemService(UserManager.class);
     }
 
     @Provides

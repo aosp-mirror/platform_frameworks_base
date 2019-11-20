@@ -27,7 +27,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 import android.os.ServiceManager;
-import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -233,13 +232,6 @@ public class DependencyProvider {
     @Provides
     public AlwaysOnDisplayPolicy provideAlwaysOnDisplayPolicy(Context context) {
         return new AlwaysOnDisplayPolicy(context);
-    }
-
-    /** */
-    @Singleton
-    @Provides
-    public UserManager providesUserManager(Context context) {
-        return context.getSystemService(UserManager.class);
     }
 
     /** */
