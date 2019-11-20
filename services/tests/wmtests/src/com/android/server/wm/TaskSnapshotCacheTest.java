@@ -20,10 +20,16 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static junit.framework.Assert.assertEquals;
 
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
+
+import android.app.ActivityManager.TaskSnapshot;
+
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,12 +45,14 @@ import org.junit.Test;
 public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
     private TaskSnapshotCache mCache;
+    @Mock
+    TaskSnapshot mSnapshot;
 
     @Override
     @Before
     public void setUp() {
         super.setUp();
-
+        MockitoAnnotations.initMocks(this);
         mCache = new TaskSnapshotCache(mWm, mLoader);
     }
 
@@ -109,5 +117,14 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
         // Load it from disk
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 true /* restoreFromDisk */, false /* reducedResolution */));
+    }
+
+    @Test
+    public void testClearCache() {
+        final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
+        mCache.putSnapshot(window.getTask(), mSnapshot);
+        assertEquals(mSnapshot, mCache.getSnapshot(window.getTask().mTaskId, 0, false, false));
+        mCache.clearRunningCache();
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0, false, false));
     }
 }

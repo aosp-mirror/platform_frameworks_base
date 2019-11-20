@@ -1791,7 +1791,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // task snapshot starting window.
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
-            return snapshot == null ? STARTING_WINDOW_TYPE_NONE
+            return snapshot == null ? STARTING_WINDOW_TYPE_SPLASH_SCREEN
                     : snapshotOrientationSameAsTask(snapshot) || fromRecents
                             ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else {

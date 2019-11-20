@@ -6945,6 +6945,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private final class LocalService extends WindowManagerInternal {
+
+        @Override
+        public void clearSnapshotCache() {
+            synchronized (mGlobalLock) {
+                mTaskSnapshotController.clearSnapshotCache();
+            }
+        }
+
         @Override
         public void requestTraversalFromDisplayManager() {
             synchronized (mGlobalLock) {
