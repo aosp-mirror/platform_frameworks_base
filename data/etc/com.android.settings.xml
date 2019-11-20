@@ -40,6 +40,7 @@
         <permission name="android.permission.OVERRIDE_WIFI_CONFIG"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.READ_SEARCH_INDEXABLES"/>
+        <permission name="android.permission.RESET_BATTERY_STATS"/>
         <permission name="android.permission.REBOOT"/>
         <permission name="android.permission.SET_TIME"/>
         <permission name="android.permission.STATUS_BAR"/>
