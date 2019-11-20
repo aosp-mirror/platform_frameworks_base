@@ -27,6 +27,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 
@@ -36,7 +37,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
 
 import static com.google.common.truth.Truth.assertThat;
 

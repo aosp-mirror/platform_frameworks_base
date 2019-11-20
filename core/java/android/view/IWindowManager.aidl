@@ -66,6 +66,22 @@ import android.view.SurfaceControl;
 interface IWindowManager
 {
     /**
+     * No overridden behavior is provided in terms of fixing rotation to user rotation. Use
+     * other flags to derive the default behavior, such as {@link WindowManagerService#mIsPc}
+     * and {@link WindowManagerService#mForceDesktopModeOnExternalDisplays}.
+     */
+    const int FIXED_TO_USER_ROTATION_DEFAULT = 0;
+    /**
+     * Don't fix display rotation to {@link DisplayRotation#mUserRotation} only. Always allow
+     * other factors to play a role in deciding display rotation.
+     */
+    const int FIXED_TO_USER_ROTATION_DISABLED = 1;
+    /**
+     * Only use {@link DisplayRotation#mUserRotation} as the display rotation.
+     */
+    const int FIXED_TO_USER_ROTATION_ENABLED = 2;
+
+    /**
      * ===== NOTICE =====
      * The first three methods must remain the first three methods. Scripts
      * and tools rely on their transaction number to work properly.
@@ -271,6 +287,11 @@ interface IWindowManager
      * @return Whether the rotation is frozen.
      */
     boolean isDisplayRotationFrozen(int displayId);
+
+    /**
+    *  Sets if display rotation is fixed to user specified value for given displayId.
+    */
+    void setFixedToUserRotation(int displayId, int fixedToUserRotation);
 
     /**
      * Screenshot the current wallpaper layer, including the whole screen.

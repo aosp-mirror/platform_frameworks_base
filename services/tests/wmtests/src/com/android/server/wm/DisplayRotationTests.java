@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
+import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
@@ -32,9 +35,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DEFAULT;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
-import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

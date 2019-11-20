@@ -82,6 +82,7 @@ import android.view.Gravity;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
 import android.view.ISystemGestureExclusionListener;
+import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.ViewRootImpl;
@@ -704,7 +705,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testAllowsTopmostFullscreenOrientation() {
         final DisplayContent dc = createNewDisplay();
         dc.getDisplayRotation().setFixedToUserRotation(
-                DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED);
+                IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
 
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
@@ -735,7 +736,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testOnDescendantOrientationRequestChanged() {
         final DisplayContent dc = createNewDisplay();
         dc.getDisplayRotation().setFixedToUserRotation(
-                DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED);
+                IWindowManager.FIXED_TO_USER_ROTATION_DISABLED);
         final int newOrientation = dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
                 ? SCREEN_ORIENTATION_PORTRAIT
                 : SCREEN_ORIENTATION_LANDSCAPE;
@@ -757,7 +758,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testOnDescendantOrientationRequestChanged_FrozenToUserRotation() {
         final DisplayContent dc = createNewDisplay();
         dc.getDisplayRotation().setFixedToUserRotation(
-                DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
+                IWindowManager.FIXED_TO_USER_ROTATION_ENABLED);
         final int newOrientation = dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
                 ? SCREEN_ORIENTATION_PORTRAIT
                 : SCREEN_ORIENTATION_LANDSCAPE;
