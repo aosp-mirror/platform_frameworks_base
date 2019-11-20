@@ -390,7 +390,7 @@ java_defaults {
 
 filegroup {
     name: "framework-jarjar-rules",
-    srcs: ["framework_jarjar_rules.txt"],
+    srcs: ["jarjar_rules_hidl.txt"],
 }
 
 filegroup {
