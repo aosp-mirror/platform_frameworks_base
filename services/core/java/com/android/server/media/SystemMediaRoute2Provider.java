@@ -179,12 +179,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             if (mCurAudioRoutesInfo.bluetoothName != null) {
                 //TODO: mark as bluetooth once MediaRoute2Info has device type
                 mBluetoothA2dpRoute = new MediaRoute2Info.Builder(BLUETOOTH_ROUTE_ID,
-                        mCurAudioRoutesInfo.bluetoothName.toString())
+                        mCurAudioRoutesInfo.bluetoothName)
                         .setDescription(mContext.getResources().getText(
                                 R.string.bluetooth_a2dp_audio_route_name).toString())
                         .addSupportedCategory(CATEGORY_LIVE_AUDIO)
                         .build();
-            } else if (mBluetoothA2dpRoute != null) {
+            } else {
                 mBluetoothA2dpRoute = null;
             }
         }
