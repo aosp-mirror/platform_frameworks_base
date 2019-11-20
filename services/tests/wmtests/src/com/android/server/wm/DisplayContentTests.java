@@ -904,7 +904,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testCalculateSystemGestureExclusion_immersiveStickyLegacyWindow() throws Exception {
-        mWm.mSystemGestureExcludedByPreQStickyImmersive = true;
+        mWm.mConstants.mSystemGestureExcludedByPreQStickyImmersive = true;
 
         final DisplayContent dc = createNewDisplay();
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "win");

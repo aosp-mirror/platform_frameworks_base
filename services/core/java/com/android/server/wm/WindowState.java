@@ -701,7 +701,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         final boolean immersiveSticky =
                 (mSystemUiVisibility & immersiveStickyFlags) == immersiveStickyFlags;
-        return immersiveSticky && mWmService.mSystemGestureExcludedByPreQStickyImmersive
+        return immersiveSticky && mWmService.mConstants.mSystemGestureExcludedByPreQStickyImmersive
                 && mActivityRecord != null && mActivityRecord.mTargetSdk < Build.VERSION_CODES.Q;
     }
 
@@ -3040,7 +3040,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private void logExclusionRestrictions(int side) {
         if (!logsGestureExclusionRestrictions(this)
                 || SystemClock.uptimeMillis() < mLastExclusionLogUptimeMillis[side]
-                + mWmService.mSystemGestureExclusionLogDebounceTimeoutMillis) {
+                + mWmService.mConstants.mSystemGestureExclusionLogDebounceTimeoutMillis) {
             // Drop the log if we have just logged; this is okay, because what we would have logged
             // was true only for a short duration.
             return;

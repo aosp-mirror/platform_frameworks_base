@@ -56,7 +56,6 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.StrictMode;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.view.InputChannel;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -299,10 +298,10 @@ public class SystemServicesTestRule implements TestRule {
         // Unregister display listener from root to avoid issues with subsequent tests.
         mContext.getSystemService(DisplayManager.class)
                 .unregisterDisplayListener(mAtmService.mRootActivityContainer);
-        // ProptertiesChangesListener is registered in the constructor of WindowManagerService to
-        // a static object, so we need to clean it up in tearDown(), even though we didn't set up
-        // in tests.
-        DeviceConfig.removeOnPropertiesChangedListener(mWmService.mPropertiesChangedListener);
+        // The constructor of WindowManagerService registers WindowManagerConstants and
+        // HighRefreshRateBlacklist with DeviceConfig. We need to undo that here to avoid
+        // leaking mWmService.
+        mWmService.mConstants.dispose();
         mWmService.mHighRefreshRateBlacklist.dispose();
 
         waitUntilWindowManagerHandlersIdle();

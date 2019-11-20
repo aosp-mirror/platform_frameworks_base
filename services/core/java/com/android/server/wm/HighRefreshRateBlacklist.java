@@ -27,9 +27,9 @@ import android.util.ArraySet;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.wm.utils.DeviceConfigInterface;
 
 import java.io.PrintWriter;
-import java.util.concurrent.Executor;
 
 /**
  * A Blacklist for packages that should force the display out of high refresh rate.
@@ -45,25 +45,7 @@ class HighRefreshRateBlacklist {
     private OnPropertiesChangedListener mListener = new OnPropertiesChangedListener();
 
     static HighRefreshRateBlacklist create(@NonNull Resources r) {
-        return new HighRefreshRateBlacklist(r, new DeviceConfigInterface() {
-            @Override
-            public @Nullable String getProperty(@NonNull String namespace, @NonNull String name) {
-                return DeviceConfig.getProperty(namespace, name);
-            }
-
-            @Override
-            public void addOnPropertiesChangedListener(@NonNull String namespace,
-                    @NonNull Executor executor,
-                    @NonNull DeviceConfig.OnPropertiesChangedListener listener) {
-                DeviceConfig.addOnPropertiesChangedListener(namespace, executor, listener);
-            }
-
-            @Override
-            public void removePropertiesChangedListener(
-                    DeviceConfig.OnPropertiesChangedListener listener) {
-                DeviceConfig.removeOnPropertiesChangedListener(listener);
-            }
-        });
+        return new HighRefreshRateBlacklist(r, DeviceConfigInterface.REAL);
     }
 
     @VisibleForTesting
@@ -116,17 +98,9 @@ class HighRefreshRateBlacklist {
     /** Used to prevent WmTests leaking issues. */
     @VisibleForTesting
     void dispose() {
-        mDeviceConfig.removePropertiesChangedListener(mListener);
+        mDeviceConfig.removeOnPropertiesChangedListener(mListener);
         mDeviceConfig = null;
         mBlacklistedPackages.clear();
-    }
-
-    interface DeviceConfigInterface {
-        @Nullable String getProperty(@NonNull String namespace, @NonNull String name);
-        void addOnPropertiesChangedListener(@NonNull String namespace, @NonNull Executor executor,
-                @NonNull DeviceConfig.OnPropertiesChangedListener listener);
-        void removePropertiesChangedListener(
-                @NonNull DeviceConfig.OnPropertiesChangedListener listener);
     }
 
     private class OnPropertiesChangedListener implements DeviceConfig.OnPropertiesChangedListener {

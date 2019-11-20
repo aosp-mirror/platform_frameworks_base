@@ -857,7 +857,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mWallpaperController = new WallpaperController(mWmService, this);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
-        mSystemGestureExclusionLimit = mWmService.mSystemGestureExclusionLimitDp
+        mSystemGestureExclusionLimit = mWmService.mConstants.mSystemGestureExclusionLimitDp
                 * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
         mDisplayFrames = new DisplayFrames(mDisplayId, mDisplayInfo,
@@ -2037,7 +2037,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void updateSystemGestureExclusionLimit() {
-        mSystemGestureExclusionLimit = mWmService.mSystemGestureExclusionLimitDp
+        mSystemGestureExclusionLimit = mWmService.mConstants.mSystemGestureExclusionLimitDp
                 * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
         updateSystemGestureExclusion();
     }
@@ -5094,7 +5094,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @return Whether gesture exclusion area should be logged for the given window
      */
     static boolean logsGestureExclusionRestrictions(WindowState win) {
-        if (win.mWmService.mSystemGestureExclusionLogDebounceTimeoutMillis <= 0) {
+        if (win.mWmService.mConstants.mSystemGestureExclusionLogDebounceTimeoutMillis <= 0) {
             return false;
         }
         final WindowManager.LayoutParams attrs = win.getAttrs();

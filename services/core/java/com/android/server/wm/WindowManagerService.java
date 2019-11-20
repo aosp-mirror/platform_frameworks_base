@@ -36,9 +36,6 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE;
-import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP;
-import static android.provider.DeviceConfig.WindowManager.KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
@@ -188,7 +185,6 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -280,6 +276,7 @@ import com.android.server.power.ShutdownThread;
 import com.android.server.protolog.ProtoLogImpl;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.utils.PriorityDump;
+import com.android.server.wm.utils.DeviceConfigInterface;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -411,7 +408,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
 
-    private static final int MIN_GESTURE_EXCLUSION_LIMIT_DP = 200;
+    final WindowManagerConstants mConstants = new WindowManagerConstants(this,
+            DeviceConfigInterface.REAL);
 
     final WindowTracing mWindowTracing;
 
@@ -938,19 +936,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowChangeListener> mWindowChangeListeners = new ArrayList<>();
     boolean mWindowsChanged = false;
 
-    int mSystemGestureExclusionLimitDp;
-    boolean mSystemGestureExcludedByPreQStickyImmersive;
-
-    /**
-     * The minimum duration between gesture exclusion logging for a given window in
-     * milliseconds.
-     *
-     * Events that happen in-between will be silently dropped.
-     *
-     * A non-positive value disables logging.
-     */
-    public long mSystemGestureExclusionLogDebounceTimeoutMillis;
-
     public interface WindowChangeListener {
         public void windowsChanged();
         public void focusChanged();
@@ -1053,9 +1038,6 @@ public class WindowManagerService extends IWindowManager.Stub
     };
 
     final ArrayList<AppFreezeListener> mAppFreezeListeners = new ArrayList<>();
-
-    @VisibleForTesting
-    final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener;
 
     interface AppFreezeListener {
         void onAppFreezeTimeout();
@@ -1261,38 +1243,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mHighRefreshRateBlacklist = HighRefreshRateBlacklist.create(context.getResources());
 
-        mSystemGestureExclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
-                DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                        KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
-        mSystemGestureExclusionLogDebounceTimeoutMillis =
-                DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                        KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS, 0);
-        mSystemGestureExcludedByPreQStickyImmersive =
-                DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                        KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
-
-        mPropertiesChangedListener = properties -> {
-            synchronized (mGlobalLock) {
-                final int exclusionLimitDp = Math.max(MIN_GESTURE_EXCLUSION_LIMIT_DP,
-                        DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                                KEY_SYSTEM_GESTURE_EXCLUSION_LIMIT_DP, 0));
-                final boolean excludedByPreQSticky = DeviceConfig.getBoolean(
-                        DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                        KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
-                if (mSystemGestureExcludedByPreQStickyImmersive != excludedByPreQSticky
-                        || mSystemGestureExclusionLimitDp != exclusionLimitDp) {
-                    mSystemGestureExclusionLimitDp = exclusionLimitDp;
-                    mSystemGestureExcludedByPreQStickyImmersive = excludedByPreQSticky;
-                    mRoot.forAllDisplays(DisplayContent::updateSystemGestureExclusionLimit);
-                }
-
-                mSystemGestureExclusionLogDebounceTimeoutMillis =
-                        DeviceConfig.getInt(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                                KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS, 0);
-            }
-        };
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                new HandlerExecutor(mH), mPropertiesChangedListener);
+        mConstants.start(new HandlerExecutor(mH));
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
         mEmbeddedWindowController = new EmbeddedWindowController(mGlobalLock);
@@ -6199,6 +6150,9 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if ("refresh".equals(cmd)) {
                 dumpHighRefreshRateBlacklist(pw);
                 return;
+            } else if ("constants".equals(cmd)) {
+                mConstants.dump(pw);
+                return;
             } else {
                 // Dumping a single name?
                 if (!dumpWindows(pw, cmd, args, opti, dumpAll)) {
@@ -6262,6 +6216,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println(separator);
             }
             dumpHighRefreshRateBlacklist(pw);
+            if (dumpAll) {
+                pw.println(separator);
+            }
+            mConstants.dump(pw);
         }
     }
 
