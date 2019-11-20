@@ -38,6 +38,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -97,6 +98,7 @@ import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.SmsApplication;
 import com.android.internal.telephony.TelephonyProperties;
 
 import dalvik.system.VMRuntime;
@@ -198,11 +200,28 @@ public class TelephonyManager {
     /** @hide */
     static public final int OTASP_SIM_UNPROVISIONED = 5;
 
-    /** @hide */
+    /**
+     * Used in carrier Wi-Fi for IMSI + IMPI encryption, this indicates a public key that's
+     * available for use in ePDG links.
+     *
+     * @hide
+     */
+    @SystemApi
     static public final int KEY_TYPE_EPDG = 1;
 
-    /** @hide */
+    /**
+     * Used in carrier Wi-Fi for IMSI + IMPI encryption, this indicates a public key that's
+     * available for use in WLAN links.
+     *
+     * @hide
+     */
+    @SystemApi
     static public final int KEY_TYPE_WLAN = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"KEY_TYPE_"}, value = {KEY_TYPE_EPDG, KEY_TYPE_WLAN})
+    public @interface KeyType {}
 
     /**
      * No Single Radio Voice Call Continuity (SRVCC) handover is active.
@@ -271,6 +290,8 @@ public class TelephonyManager {
      *  TSTS - Triple SIM Triple Standby
      **/
     /** @hide */
+    @UnsupportedAppUsage(implicitMember =
+            "values()[Landroid/telephony/TelephonyManager$MultiSimVariants;")
     public enum MultiSimVariants {
         @UnsupportedAppUsage
         DSDS,
@@ -429,6 +450,25 @@ public class TelephonyManager {
                 getActiveModemCount());
     }
 
+    /**
+     * Gets the maximum number of SIMs that can be active, based on the device's multisim
+     * configuration.
+     * @return 1 for single-SIM, DSDS, and TSTS devices. 2 for DSDA devices.
+     * @hide
+     */
+    @SystemApi
+    public int getMaxNumberOfSimultaneouslyActiveSims() {
+        switch (getMultiSimConfiguration()) {
+            case UNKNOWN:
+            case DSDS:
+            case TSTS:
+                return 1;
+            case DSDA:
+                return 2;
+        }
+        return 1;
+    }
+
     /** {@hide} */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static TelephonyManager from(Context context) {
@@ -454,7 +494,7 @@ public class TelephonyManager {
      */
     @Nullable
     public TelephonyManager createForPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
-        int subId = getSubIdForPhoneAccountHandle(phoneAccountHandle);
+        int subId = getSubscriptionId(phoneAccountHandle);
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             return null;
         }
@@ -1610,12 +1650,11 @@ public class TelephonyManager {
      * Returns the software version number for the device, for example,
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
-     *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>
+     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}.
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @Nullable
     public String getDeviceSoftwareVersion() {
         return getDeviceSoftwareVersion(getSlotIndex());
     }
@@ -1624,12 +1663,16 @@ public class TelephonyManager {
      * Returns the software version number for the device, for example,
      * the IMEI/SV for GSM phones. Return null if the software version is
      * not available.
+     * <p>
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
      *
      * @param slotIndex of which deviceID is returned
+     *
+     * @hide
      */
-    /** {@hide} */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @UnsupportedAppUsage
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable
     public String getDeviceSoftwareVersion(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
@@ -2758,6 +2801,8 @@ public class TelephonyManager {
     /** Class of broadly defined "4G" networks. {@hide} */
     @UnsupportedAppUsage
     public static final int NETWORK_CLASS_4_G = 3;
+    /** Class of broadly defined "5G" networks. {@hide} */
+    public static final int NETWORK_CLASS_5_G = 4;
 
     /**
      * Return general class of network type, such as "3G" or "4G". In cases
@@ -2790,6 +2835,8 @@ public class TelephonyManager {
             case NETWORK_TYPE_IWLAN:
             case NETWORK_TYPE_LTE_CA:
                 return NETWORK_CLASS_4_G;
+            case NETWORK_TYPE_NR:
+                return NETWORK_CLASS_5_G;
             default:
                 return NETWORK_CLASS_UNKNOWN;
         }
@@ -3784,25 +3831,27 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns Carrier specific information that will be used to encrypt the IMSI and IMPI.
-     * This includes the public key and the key identifier. For multi-sim devices, if no subId
-     * has been specified, we will return the value for the dafault data sim.
-     * Return null if it is unavailable.
+     * Returns carrier specific information that will be used to encrypt the IMSI and IMPI,
+     * including the public key and the key identifier; or {@code null} if not available.
      * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * @param keyType whether the key is being used for wlan or epdg. Valid key types are
-     *        {@link TelephonyManager#KEY_TYPE_EPDG} or
-     *        {@link TelephonyManager#KEY_TYPE_WLAN}.
+     * For a multi-sim device, the dafault data sim is used if not specified.
+     * <p>
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
+     *
+     * @param keyType whether the key is being used for EPDG or WLAN. Valid values are
+     *        {@link #KEY_TYPE_EPDG} or {@link #KEY_TYPE_WLAN}.
      * @return ImsiEncryptionInfo Carrier specific information that will be used to encrypt the
      *         IMSI and IMPI. This includes the public key and the key identifier. This information
-     *         will be stored in the device keystore. The system will return a null when no key was
-     *         found, and the carrier does not require a key. The system will throw
-     *         IllegalArgumentException when an invalid key is sent or when key is required but
+     *         will be stored in the device keystore. {@code null} will be returned when no key is
+     *         found, and the carrier does not require a key.
+     * @throws IllegalArgumentException when an invalid key is found or when key is required but
      *         not found.
      * @hide
      */
-    public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int keyType) {
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    @Nullable
+    public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(@KeyType int keyType) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) {
@@ -3830,14 +3879,21 @@ public class TelephonyManager {
     }
 
     /**
-     * Resets the Carrier Keys in the database. This involves 2 steps:
+     * Resets the carrier keys used to encrypt the IMSI and IMPI.
+     * <p>
+     * This involves 2 steps:
      *  1. Delete the keys from the database.
      *  2. Send an intent to download new Certificates.
      * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * For a multi-sim device, the dafault data sim is used if not specified.
+     * <p>
+     * Requires Permission: MODIFY_PHONE_STATE.
+     *
+     * @see #getCarrierInfoForImsiEncryption
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
     public void resetCarrierKeysForImsiEncryption() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -3864,7 +3920,7 @@ public class TelephonyManager {
      * @return true if the digit at position keyType is 1, else false.
      * @hide
      */
-    private static boolean isKeyEnabled(int keyAvailability, int keyType) {
+    private static boolean isKeyEnabled(int keyAvailability, @KeyType int keyType) {
         int returnValue = (keyAvailability >> (keyType - 1)) & 1;
         return (returnValue == 1) ? true : false;
     }
@@ -3873,7 +3929,7 @@ public class TelephonyManager {
      * If Carrier requires Imsi to be encrypted.
      * @hide
      */
-    private boolean isImsiEncryptionRequired(int subId, int keyType) {
+    private boolean isImsiEncryptionRequired(int subId, @KeyType int keyType) {
         CarrierConfigManager configManager =
                 (CarrierConfigManager) mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
         if (configManager == null) {
@@ -4072,6 +4128,7 @@ public class TelephonyManager {
      * @hide
      * nobody seems to call this.
      */
+    @UnsupportedAppUsage
     @TestApi
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public String getLine1AlphaTag() {
@@ -7634,12 +7691,16 @@ public class TelephonyManager {
 
     /**
      * Check whether DUN APN is required for tethering.
+     * <p>
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
      *
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    public boolean getTetherApnRequired() {
-        return getTetherApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public boolean isTetheringApnRequired() {
+        return isTetheringApnRequired(getSubId(SubscriptionManager.getActiveDataSubscriptionId()));
     }
 
     /**
@@ -7649,11 +7710,11 @@ public class TelephonyManager {
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    public boolean getTetherApnRequired(int subId) {
+    public boolean isTetheringApnRequired(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.getTetherApnRequiredForSubscriber(subId);
+                return telephony.isTetheringApnRequiredForSubscriber(subId);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "hasMatchedTetherApnSetting RemoteException", ex);
         } catch (NullPointerException ex) {
@@ -7907,6 +7968,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @TestApi
     public List<String> getCarrierPackageNamesForIntent(Intent intent) {
         return getCarrierPackageNamesForIntentAndPhone(intent, getPhoneId());
     }
@@ -9284,6 +9346,21 @@ public class TelephonyManager {
     }
 
     /**
+     * Gets the default Respond Via Message application
+     * @param context context from the calling app
+     * @param updateIfNeeded update the default app if there is no valid default app configured.
+     * @return component name of the app and class to direct Respond Via Message intent to, or
+     * {@code null} if the functionality is not supported.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static @Nullable ComponentName getDefaultRespondViaMessageApplication(
+            @NonNull Context context, boolean updateIfNeeded) {
+        return SmsApplication.getDefaultRespondViaMessageApplication(context, updateIfNeeded);
+    }
+
+    /**
      * Set the alphabetic name of current registered operator.
      * @param name the alphabetic name of current registered operator.
      * @hide
@@ -9385,7 +9462,7 @@ public class TelephonyManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public int getSubIdForPhoneAccount(PhoneAccount phoneAccount) {
+    public int getSubIdForPhoneAccount(@Nullable PhoneAccount phoneAccount) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
             ITelephony service = getITelephony();
@@ -9429,7 +9506,7 @@ public class TelephonyManager {
      *         permission.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public int getSubIdForPhoneAccountHandle(@NonNull PhoneAccountHandle phoneAccountHandle) {
+    public int getSubscriptionId(@NonNull PhoneAccountHandle phoneAccountHandle) {
         int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         try {
             ITelephony service = getITelephony();
@@ -9438,7 +9515,7 @@ public class TelephonyManager {
                         phoneAccountHandle, mContext.getOpPackageName());
             }
         } catch (RemoteException ex) {
-            Log.e(TAG, "getSubIdForPhoneAccountHandle RemoteException", ex);
+            Log.e(TAG, "getSubscriptionId RemoteException", ex);
             ex.rethrowAsRuntimeException();
         }
         return retval;
@@ -10560,6 +10637,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public int getCarrierIdListVersion() {
         try {
@@ -11448,6 +11526,7 @@ public class TelephonyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @TestApi
     public Pair<Integer, Integer> getRadioHalVersion() {
         try {

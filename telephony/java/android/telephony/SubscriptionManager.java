@@ -31,6 +31,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
@@ -48,6 +49,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelUuid;
@@ -60,10 +62,8 @@ import android.telephony.ims.ImsMmTelManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ISub;
-import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.Preconditions;
 
@@ -158,6 +158,7 @@ public class SubscriptionManager {
      */
     @NonNull
     @SystemApi
+    @TestApi
     public static final Uri WFC_ENABLED_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc");
 
     /**
@@ -177,6 +178,7 @@ public class SubscriptionManager {
      */
     @NonNull
     @SystemApi
+    @TestApi
     public static final Uri ADVANCED_CALLING_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "advanced_calling");
 
@@ -195,6 +197,7 @@ public class SubscriptionManager {
      */
     @NonNull
     @SystemApi
+    @TestApi
     public static final Uri WFC_MODE_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc_mode");
 
     /**
@@ -212,6 +215,7 @@ public class SubscriptionManager {
      */
     @NonNull
     @SystemApi
+    @TestApi
     public static final Uri WFC_ROAMING_MODE_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "wfc_roaming_mode");
 
@@ -231,6 +235,7 @@ public class SubscriptionManager {
      */
     @NonNull
     @SystemApi
+    @TestApi
     public static final Uri VT_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "vt_enabled");
 
@@ -249,6 +254,7 @@ public class SubscriptionManager {
      */
     @NonNull
     @SystemApi
+    @TestApi
     public static final Uri WFC_ROAMING_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "wfc_roaming_enabled");
 
@@ -924,20 +930,24 @@ public class SubscriptionManager {
             OnSubscriptionsChangedListenerHandler(Looper looper) {
                 super(looper);
             }
-
-            @Override
-            public void handleMessage(Message msg) {
-                if (DBG) {
-                    log("handleMessage: invoke the overriden onSubscriptionsChanged()");
-                }
-                OnSubscriptionsChangedListener.this.onSubscriptionsChanged();
-            }
         }
 
-        private final Handler mHandler;
+        /**
+         * Posted executor callback on the handler associated with a given looper.
+         * The looper can be the calling thread's looper or the looper passed from the
+         * constructor {@link #OnSubscriptionsChangedListener(Looper)}.
+         */
+        private final HandlerExecutor mExecutor;
+
+        /**
+         * @hide
+         */
+        public HandlerExecutor getHandlerExecutor() {
+            return mExecutor;
+        }
 
         public OnSubscriptionsChangedListener() {
-            mHandler = new OnSubscriptionsChangedListenerHandler();
+            mExecutor = new HandlerExecutor(new OnSubscriptionsChangedListenerHandler());
         }
 
         /**
@@ -946,7 +956,7 @@ public class SubscriptionManager {
          * @hide
          */
         public OnSubscriptionsChangedListener(Looper looper) {
-            mHandler = new OnSubscriptionsChangedListenerHandler(looper);
+            mExecutor = new HandlerExecutor(new OnSubscriptionsChangedListenerHandler(looper));
         }
 
         /**
@@ -957,18 +967,6 @@ public class SubscriptionManager {
         public void onSubscriptionsChanged() {
             if (DBG) log("onSubscriptionsChanged: NOT OVERRIDDEN");
         }
-
-        /**
-         * The callback methods need to be called on the handler thread where
-         * this object was created.  If the binder did that for us it'd be nice.
-         */
-        IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
-            @Override
-            public void onSubscriptionsChanged() {
-                if (DBG) log("callback: received, sendEmptyMessage(0) to handler");
-                mHandler.sendEmptyMessage(0);
-            }
-        };
 
         private void log(String s) {
             Rlog.d(LOG_TAG, s);
@@ -1011,21 +1009,19 @@ public class SubscriptionManager {
      *                 onSubscriptionsChanged overridden.
      */
     public void addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
+        if (listener == null) return;
         String pkgName = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
             logd("register OnSubscriptionsChangedListener pkgName=" + pkgName
                     + " listener=" + listener);
         }
-        try {
-            // We use the TelephonyRegistry as it runs in the system and thus is always
-            // available. Where as SubscriptionController could crash and not be available
-            ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
-                    "telephony.registry"));
-            if (tr != null) {
-                tr.addOnSubscriptionsChangedListener(pkgName, listener.callback);
-            }
-        } catch (RemoteException ex) {
-            Log.e(LOG_TAG, "Remote exception ITelephonyRegistry " + ex);
+        // We use the TelephonyRegistry as it runs in the system and thus is always
+        // available. Where as SubscriptionController could crash and not be available
+        TelephonyRegistryManager telephonyRegistryManager = (TelephonyRegistryManager)
+                mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (telephonyRegistryManager != null) {
+            telephonyRegistryManager.addOnSubscriptionsChangedListener(listener,
+                    listener.mExecutor);
         }
     }
 
@@ -1037,21 +1033,18 @@ public class SubscriptionManager {
      * @param listener that is to be unregistered.
      */
     public void removeOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
+        if (listener == null) return;
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
             logd("unregister OnSubscriptionsChangedListener pkgForDebug=" + pkgForDebug
                     + " listener=" + listener);
         }
-        try {
-            // We use the TelephonyRegistry as it runs in the system and thus is always
-            // available where as SubscriptionController could crash and not be available
-            ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
-                    "telephony.registry"));
-            if (tr != null) {
-                tr.removeOnSubscriptionsChangedListener(pkgForDebug, listener.callback);
-            }
-        } catch (RemoteException ex) {
-            Log.e(LOG_TAG, "Remote exception ITelephonyRegistry " + ex);
+        // We use the TelephonyRegistry as it runs in the system and thus is always
+        // available where as SubscriptionController could crash and not be available
+        TelephonyRegistryManager telephonyRegistryManager = (TelephonyRegistryManager)
+                mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (telephonyRegistryManager != null) {
+            telephonyRegistryManager.removeOnSubscriptionsChangedListener(listener);
         }
     }
 
@@ -1070,7 +1063,6 @@ public class SubscriptionManager {
      * for #onOpportunisticSubscriptionsChanged to be invoked.
      */
     public static class OnOpportunisticSubscriptionsChangedListener {
-        private Executor mExecutor;
         /**
          * Callback invoked when there is any change to any SubscriptionInfo. Typically
          * this method would invoke {@link #getActiveSubscriptionInfoList}
@@ -1078,27 +1070,6 @@ public class SubscriptionManager {
         public void onOpportunisticSubscriptionsChanged() {
             if (DBG) log("onOpportunisticSubscriptionsChanged: NOT OVERRIDDEN");
         }
-
-        private void setExecutor(Executor executor) {
-            mExecutor = executor;
-        }
-
-        /**
-         * The callback methods need to be called on the handler thread where
-         * this object was created.  If the binder did that for us it'd be nice.
-         */
-        IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
-            @Override
-            public void onSubscriptionsChanged() {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    if (DBG) log("onOpportunisticSubscriptionsChanged callback received.");
-                    mExecutor.execute(() -> onOpportunisticSubscriptionsChanged());
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-        };
 
         private void log(String s) {
             Rlog.d(LOG_TAG, s);
@@ -1126,18 +1097,13 @@ public class SubscriptionManager {
                     + " listener=" + listener);
         }
 
-        listener.setExecutor(executor);
-
-        try {
-            // We use the TelephonyRegistry as it runs in the system and thus is always
-            // available. Where as SubscriptionController could crash and not be available
-            ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
-                    "telephony.registry"));
-            if (tr != null) {
-                tr.addOnOpportunisticSubscriptionsChangedListener(pkgName, listener.callback);
-            }
-        } catch (RemoteException ex) {
-            Log.e(LOG_TAG, "Remote exception ITelephonyRegistry " + ex);
+        // We use the TelephonyRegistry as it runs in the system and thus is always
+        // available where as SubscriptionController could crash and not be available
+        TelephonyRegistryManager telephonyRegistryManager = (TelephonyRegistryManager)
+                mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (telephonyRegistryManager != null) {
+            telephonyRegistryManager.addOnOpportunisticSubscriptionsChangedListener(
+                    listener, executor);
         }
     }
 
@@ -1157,16 +1123,10 @@ public class SubscriptionManager {
             logd("unregister OnOpportunisticSubscriptionsChangedListener pkgForDebug="
                     + pkgForDebug + " listener=" + listener);
         }
-        try {
-            // We use the TelephonyRegistry as it runs in the system and thus is always
-            // available where as SubscriptionController could crash and not be available
-            ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
-                    "telephony.registry"));
-            if (tr != null) {
-                tr.removeOnSubscriptionsChangedListener(pkgForDebug, listener.callback);
-            }
-        } catch (RemoteException ex) {
-            Log.e(LOG_TAG, "Remote exception ITelephonyRegistry " + ex);
+        TelephonyRegistryManager telephonyRegistryManager = (TelephonyRegistryManager)
+                mContext.getSystemService(Context.TELEPHONY_REGISTRY_SERVICE);
+        if (telephonyRegistryManager != null) {
+            telephonyRegistryManager.removeOnOpportunisticSubscriptionsChangedListener(listener);
         }
     }
 
@@ -1868,17 +1828,40 @@ public class SubscriptionManager {
         return subId;
     }
 
-    /** @hide */
-    public void setDefaultVoiceSubId(int subId) {
-        if (VDBG) logd("setDefaultVoiceSubId sub id = " + subId);
+    /**
+     * Sets the system's default voice subscription id.
+     *
+     * On a data-only device, this is a no-op.
+     *
+     * May throw a {@link RuntimeException} if the provided subscription id is equal to
+     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}
+     *
+     * @param subscriptionId A valid subscription ID to set as the system default, or
+     *                       {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public void setDefaultVoiceSubscriptionId(int subscriptionId) {
+        if (VDBG) logd("setDefaultVoiceSubId sub id = " + subscriptionId);
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                iSub.setDefaultVoiceSubId(subId);
+                iSub.setDefaultVoiceSubId(subscriptionId);
             }
         } catch (RemoteException ex) {
             // ignore it
         }
+    }
+
+    /**
+     * Same as {@link #setDefaultVoiceSubscriptionId(int)}, but preserved for backwards
+     * compatibility.
+     * @hide
+     */
+    public void setDefaultVoiceSubId(int subId) {
+        setDefaultVoiceSubscriptionId(subId);
     }
 
     /**
@@ -2600,7 +2583,6 @@ public class SubscriptionManager {
      *
      * @param info The subscription to check.
      * @return whether the app is authorized to manage this subscription per its metadata.
-     * @throws IllegalArgumentException if this subscription is not embedded.
      */
     public boolean canManageSubscription(SubscriptionInfo info) {
         return canManageSubscription(info, mContext.getPackageName());
@@ -2616,14 +2598,10 @@ public class SubscriptionManager {
      * @param info The subscription to check.
      * @param packageName Package name of the app to check.
      * @return whether the app is authorized to manage this subscription per its access rules.
-     * @throws IllegalArgumentException if this subscription is not embedded.
      * @hide
      */
     public boolean canManageSubscription(SubscriptionInfo info, String packageName) {
-        if (!info.isEmbedded()) {
-            throw new IllegalArgumentException("Not an embedded subscription");
-        }
-        if (info.getAllAccessRules() == null) {
+        if (info == null || info.getAllAccessRules() == null) {
             return false;
         }
         PackageManager packageManager = mContext.getPackageManager();
@@ -2631,7 +2609,8 @@ public class SubscriptionManager {
         try {
             packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
         } catch (PackageManager.NameNotFoundException e) {
-            throw new IllegalArgumentException("Unknown package: " + packageName, e);
+            logd("Unknown package: " + packageName);
+            return false;
         }
         for (UiccAccessRule rule : info.getAllAccessRules()) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)
@@ -3024,7 +3003,7 @@ public class SubscriptionManager {
         // to the caller.
         boolean hasCarrierPrivilegePermission = TelephonyManager.from(mContext)
                 .hasCarrierPrivileges(info.getSubscriptionId())
-                || (info.isEmbedded() && canManageSubscription(info));
+                || canManageSubscription(info);
         return hasCarrierPrivilegePermission;
     }
 
@@ -3202,13 +3181,14 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get active data subscription id.
+     * Get active data subscription id. Active data subscription refers to the subscription
+     * currently chosen to provide cellular internet connection to the user. This may be
+     * different from getDefaultDataSubscriptionId(). Eg. Opportunistics data
+     *
      * See {@link PhoneStateListener#onActiveDataSubscriptionIdChanged(int)} for the details.
      *
-     * @return Active data subscription id
-     *
-     * //TODO: Refactor this API in b/134702460
-     * @hide
+     * @return Active data subscription id if any is chosen, or
+     * SubscriptionManager.INVALID_SUBSCRIPTION_ID if not.
      */
     public static int getActiveDataSubscriptionId() {
         try {

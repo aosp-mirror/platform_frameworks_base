@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Handler;
@@ -36,6 +37,7 @@ import com.android.internal.os.SomeArgs;
  * @hide
  */
 @SystemApi
+@TestApi
 public abstract class ImsVideoCallProvider {
     private static final int MSG_SET_CALLBACK = 1;
     private static final int MSG_SET_CAMERA = 2;

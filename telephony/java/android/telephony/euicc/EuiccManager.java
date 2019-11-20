@@ -189,6 +189,29 @@ public class EuiccManager {
             "android.telephony.euicc.action.RENAME_SUBSCRIPTION_PRIVILEGED";
 
     /**
+     * Intent action sent by a carrier app to launch the eSIM activation flow provided by the LPA UI
+     * (LUI). The carrier app must send this intent with one of the following:
+     *
+     * <p>{@link #EXTRA_USE_QR_SCANNER} not set or set to false: The LPA should try to get an
+     * activation code from the carrier app by binding to the carrier app service implementing
+     * {@link android.service.euicc.EuiccService#ACTION_BIND_CARRIER_PROVISIONING_SERVICE}.
+     * <p>{@link #EXTRA_USE_QR_SCANNER} set to true: The LPA should launch a QR scanner for the user
+     * to scan an eSIM profile QR code.
+     *
+     * <p>Upon completion, the LPA should return one of the following results to the carrier app:
+     *
+     * <p>{@code Activity.RESULT_OK}: The LPA has succeeded in downloading the new eSIM profile.
+     * <p>{@code Activity.RESULT_CANCELED}: The carrier app should treat this as if the user pressed
+     * the back button.
+     * <p>Anything else: The carrier app should treat this as an error.
+     *
+     * <p>LPA needs to check if caller's package name is allowed to perform this action.
+     **/
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_START_EUICC_ACTIVATION =
+            "android.telephony.euicc.action.START_EUICC_ACTIVATION";
+
+    /**
      * Result code for an operation indicating that the operation succeeded.
      */
     public static final int EMBEDDED_SUBSCRIPTION_RESULT_OK = 0;
@@ -342,9 +365,19 @@ public class EuiccManager {
      *
      * @hide
      */
-    // TODO: Make this a @SystemApi.
+    @SystemApi
     public static final String EXTRA_PHYSICAL_SLOT_ID =
             "android.telephony.euicc.extra.PHYSICAL_SLOT_ID";
+
+
+    /**
+     * Key for an extra set on actions {@link #ACTION_START_EUICC_ACTIVATION} providing a boolean
+     * value of whether to start eSIM activation with QR scanner.
+     *
+     * <p>Expected type of the extra data: boolean
+     **/
+    public static final String EXTRA_USE_QR_SCANNER =
+            "android.telephony.euicc.extra.USE_QR_SCANNER";
 
     /**
      * Optional meta-data attribute for a carrier app providing an icon to use to represent the
@@ -830,7 +863,7 @@ public class EuiccManager {
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      *
      * @deprecated From R, callers should specify a flag for specific set of subscriptions to erase
-     * and use {@link #eraseSubscriptionsWithOptions(int, PendingIntent)} instead
+     * and use {@link #eraseSubscriptions(int, PendingIntent)} instead
      *
      * @hide
      */
@@ -862,7 +895,7 @@ public class EuiccManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
-    public void eraseSubscriptionsWithOptions(
+    public void eraseSubscriptions(
             @ResetOption int options, @NonNull PendingIntent callbackIntent) {
         if (!isEnabled()) {
             sendUnavailableError(callbackIntent);

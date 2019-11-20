@@ -7234,7 +7234,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void listenForCallState() {
-        TelephonyManager.from(getContext()).listen(new PhoneStateListener() {
+        getContext().getSystemService(TelephonyManager.class).listen(new PhoneStateListener() {
             @Override
             public void onCallStateChanged(int state, String incomingNumber) {
                 if (mCallState == state) return;

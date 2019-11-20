@@ -95,9 +95,9 @@ public class CachedBluetoothDeviceManagerTest {
         when(mDevice1.getName()).thenReturn(DEVICE_NAME_1);
         when(mDevice2.getName()).thenReturn(DEVICE_NAME_2);
         when(mDevice3.getName()).thenReturn(DEVICE_NAME_3);
-        when(mDevice1.getAliasName()).thenReturn(DEVICE_ALIAS_1);
-        when(mDevice2.getAliasName()).thenReturn(DEVICE_ALIAS_2);
-        when(mDevice3.getAliasName()).thenReturn(DEVICE_ALIAS_3);
+        when(mDevice1.getAlias()).thenReturn(DEVICE_ALIAS_1);
+        when(mDevice2.getAlias()).thenReturn(DEVICE_ALIAS_2);
+        when(mDevice3.getAlias()).thenReturn(DEVICE_ALIAS_3);
         when(mDevice1.getBluetoothClass()).thenReturn(DEVICE_CLASS_1);
         when(mDevice2.getBluetoothClass()).thenReturn(DEVICE_CLASS_2);
         when(mDevice3.getBluetoothClass()).thenReturn(DEVICE_CLASS_2);
@@ -224,7 +224,7 @@ public class CachedBluetoothDeviceManagerTest {
         assertThat(cachedDevice1.getName()).isEqualTo(DEVICE_ALIAS_1);
 
         final String newAliasName = "NewAliasName";
-        when(mDevice1.getAliasName()).thenReturn(newAliasName);
+        when(mDevice1.getAlias()).thenReturn(newAliasName);
         mCachedDeviceManager.onDeviceNameUpdated(mDevice1);
         assertThat(cachedDevice1.getName()).isEqualTo(newAliasName);
     }

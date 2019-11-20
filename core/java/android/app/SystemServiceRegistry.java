@@ -157,7 +157,7 @@ import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
 import android.os.storage.StorageManager;
-import android.os.telephony.TelephonyRegistryManager;
+import android.telephony.TelephonyRegistryManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
@@ -173,7 +173,6 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
-import android.telephony.ims.RcsMessageManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -612,7 +611,7 @@ final class SystemServiceRegistry {
             new CachedServiceFetcher<TelephonyRegistryManager>() {
                 @Override
                 public TelephonyRegistryManager createService(ContextImpl ctx) {
-                    return new TelephonyRegistryManager();
+                    return new TelephonyRegistryManager(ctx);
                 }});
 
         registerService(Context.TELEPHONY_SUBSCRIPTION_SERVICE, SubscriptionManager.class,
@@ -621,14 +620,6 @@ final class SystemServiceRegistry {
             public SubscriptionManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new SubscriptionManager(ctx.getOuterContext());
             }});
-
-        registerService(Context.TELEPHONY_RCS_MESSAGE_SERVICE, RcsMessageManager.class,
-                new CachedServiceFetcher<RcsMessageManager>() {
-                    @Override
-                    public RcsMessageManager createService(ContextImpl ctx) {
-                        return new RcsMessageManager(ctx.getOuterContext());
-                    }
-                });
 
         registerService(Context.CARRIER_CONFIG_SERVICE, CarrierConfigManager.class,
                 new CachedServiceFetcher<CarrierConfigManager>() {
@@ -662,7 +653,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<UiModeManager>() {
             @Override
             public UiModeManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                return new UiModeManager();
+                return new UiModeManager(ctx.getOuterContext());
             }});
 
         registerService(Context.USB_SERVICE, UsbManager.class,

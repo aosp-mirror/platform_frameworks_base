@@ -203,9 +203,12 @@ public final class DataSpecificRegistrationInfo implements Parcelable {
     }
 
     /**
+     * Get whether network has configured carrier aggregation or not.
+     *
      * @return {@code true} if using carrier aggregation.
      * @hide
      */
+    @SystemApi
     public boolean isUsingCarrierAggregation() {
         return mIsUsingCarrierAggregation;
     }

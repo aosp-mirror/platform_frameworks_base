@@ -363,12 +363,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     /**
      * Get name from remote device
-     * @return {@link BluetoothDevice#getAliasName()} if
-     * {@link BluetoothDevice#getAliasName()} is not null otherwise return
+     * @return {@link BluetoothDevice#getAlias()} if
+     * {@link BluetoothDevice#getAlias()} is not null otherwise return
      * {@link BluetoothDevice#getAddress()}
      */
     public String getName() {
-        final String aliasName = mDevice.getAliasName();
+        final String aliasName = mDevice.getAlias();
         return TextUtils.isEmpty(aliasName) ? getAddress() : aliasName;
     }
 
@@ -426,7 +426,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * @return true if device's alias name is not null nor empty, false otherwise
      */
     public boolean hasHumanReadableName() {
-        return !TextUtils.isEmpty(mDevice.getAliasName());
+        return !TextUtils.isEmpty(mDevice.getAlias());
     }
 
     /**
@@ -573,7 +573,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         if (BluetoothUtils.D) {
-            Log.e(TAG, "updating profiles for " + mDevice.getAliasName() + ", " + mDevice);
+            Log.e(TAG, "updating profiles for " + mDevice.getAlias() + ", " + mDevice);
             BluetoothClass bluetoothClass = mDevice.getBluetoothClass();
 
             if (bluetoothClass != null) Log.v(TAG, "Class: " + bluetoothClass.toString());

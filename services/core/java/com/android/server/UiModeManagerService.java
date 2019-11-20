@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -41,6 +42,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -53,6 +55,7 @@ import android.provider.Settings.Secure;
 import android.service.dreams.Sandman;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -66,6 +69,9 @@ import com.android.server.twilight.TwilightState;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 final class UiModeManagerService extends SystemService {
     private static final String TAG = UiModeManager.class.getSimpleName();
@@ -81,6 +87,7 @@ final class UiModeManagerService extends SystemService {
     private int mLastBroadcastState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private int mNightMode = UiModeManager.MODE_NIGHT_NO;
 
+    private Map<Integer, String> mCarModePackagePriority = new HashMap<>();
     private boolean mCarModeEnabled = false;
     private boolean mCharging = false;
     private boolean mPowerSave = false;
@@ -338,15 +345,25 @@ final class UiModeManagerService extends SystemService {
 
     private final IUiModeManager.Stub mService = new IUiModeManager.Stub() {
         @Override
-        public void enableCarMode(int flags) {
+        public void enableCarMode(@UiModeManager.EnableCarMode int flags,
+                @IntRange(from = 0) int priority, String callingPackage) {
             if (isUiModeLocked()) {
                 Slog.e(TAG, "enableCarMode while UI mode is locked");
                 return;
             }
+
+            if (priority != UiModeManager.DEFAULT_PRIORITY
+                    && getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.ENTER_CAR_MODE_PRIORITIZED)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Enabling car mode with a priority requires "
+                        + "permission ENTER_CAR_MODE_PRIORITIZED");
+            }
+
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    setCarModeLocked(true, flags);
+                    setCarModeLocked(true, flags, priority, callingPackage);
                     if (mSystemReady) {
                         updateLocked(flags, 0);
                     }
@@ -356,16 +373,49 @@ final class UiModeManagerService extends SystemService {
             }
         }
 
+        /**
+         * This method is only kept around for the time being; the AIDL has an UnsupportedAppUsage
+         * tag which means this method is technically considered part of the greylist "API".
+         * @param flags
+         */
         @Override
-        public void disableCarMode(int flags) {
+        public void disableCarMode(@UiModeManager.DisableCarMode int flags) {
+            disableCarModeByCallingPackage(flags, null /* callingPackage */);
+        }
+
+        /**
+         * Handles requests to disable car mode.
+         * @param flags Disable car mode flags
+         * @param callingPackage
+         */
+        @Override
+        public void disableCarModeByCallingPackage(@UiModeManager.DisableCarMode int flags,
+                String callingPackage) {
             if (isUiModeLocked()) {
                 Slog.e(TAG, "disableCarMode while UI mode is locked");
                 return;
             }
+
+            // If the caller is the system, we will allow the DISABLE_CAR_MODE_ALL_PRIORITIES car
+            // mode flag to be specified; this is so that the user can disable car mode at all
+            // priorities using the persistent notification.
+            boolean isSystemCaller = Binder.getCallingUid() == Process.SYSTEM_UID;
+            final int carModeFlags =
+                    isSystemCaller ? flags : flags & ~UiModeManager.DISABLE_CAR_MODE_ALL_PRIORITIES;
+
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    setCarModeLocked(false, 0);
+                    // Determine if the caller has enabled car mode at a priority other than the
+                    // default one.  If they have, then attempt to disable at that priority.
+                    int priority = mCarModePackagePriority.entrySet()
+                            .stream()
+                            .filter(e -> e.getValue().equals(callingPackage))
+                            .findFirst()
+                            .map(Map.Entry::getKey)
+                            .orElse(UiModeManager.DEFAULT_PRIORITY);
+
+                    setCarModeLocked(false, carModeFlags, priority, callingPackage);
                     if (mSystemReady) {
                         updateLocked(0, flags);
                     }
@@ -471,19 +521,32 @@ final class UiModeManagerService extends SystemService {
         synchronized (mLock) {
             pw.println("Current UI Mode Service state:");
             pw.print("  mDockState="); pw.print(mDockState);
-                    pw.print(" mLastBroadcastState="); pw.println(mLastBroadcastState);
+            pw.print(" mLastBroadcastState="); pw.println(mLastBroadcastState);
+
             pw.print("  mNightMode="); pw.print(mNightMode); pw.print(" (");
-                    pw.print(Shell.nightModeToStr(mNightMode)); pw.print(") ");
-                    pw.print(" mNightModeLocked="); pw.print(mNightModeLocked);
-                    pw.print(" mCarModeEnabled="); pw.print(mCarModeEnabled);
-                    pw.print(" mComputedNightMode="); pw.print(mComputedNightMode);
-                    pw.print(" mCarModeEnableFlags="); pw.print(mCarModeEnableFlags);
-                    pw.print(" mEnableCarDockLaunch="); pw.println(mEnableCarDockLaunch);
+            pw.print(Shell.nightModeToStr(mNightMode)); pw.print(") ");
+            pw.print(" mNightModeLocked="); pw.println(mNightModeLocked);
+
+            pw.print("  mCarModeEnabled="); pw.print(mCarModeEnabled);
+            pw.print(" (carModeApps=");
+            for (Map.Entry<Integer, String> entry : mCarModePackagePriority.entrySet()) {
+                pw.print(entry.getKey());
+                pw.print(":");
+                pw.print(entry.getValue());
+                pw.print(" ");
+            }
+            pw.println("");
+            pw.print(" mComputedNightMode="); pw.print(mComputedNightMode);
+            pw.print(" mCarModeEnableFlags="); pw.print(mCarModeEnableFlags);
+            pw.print(" mEnableCarDockLaunch="); pw.println(mEnableCarDockLaunch);
+
             pw.print("  mCurUiMode=0x"); pw.print(Integer.toHexString(mCurUiMode));
-                    pw.print(" mUiModeLocked="); pw.print(mUiModeLocked);
-                    pw.print(" mSetUiMode=0x"); pw.println(Integer.toHexString(mSetUiMode));
+            pw.print(" mUiModeLocked="); pw.print(mUiModeLocked);
+            pw.print(" mSetUiMode=0x"); pw.println(Integer.toHexString(mSetUiMode));
+
             pw.print("  mHoldingConfiguration="); pw.print(mHoldingConfiguration);
-                    pw.print(" mSystemReady="); pw.println(mSystemReady);
+            pw.print(" mSystemReady="); pw.println(mSystemReady);
+
             if (mTwilightManager != null) {
                 // We may not have a TwilightManager.
                 pw.print("  mTwilightService.getLastTwilightState()=");
@@ -506,12 +569,32 @@ final class UiModeManagerService extends SystemService {
         }
     }
 
-    void setCarModeLocked(boolean enabled, int flags) {
-        if (mCarModeEnabled != enabled) {
-            mCarModeEnabled = enabled;
+    /**
+     * Updates the global car mode state.
+     * The device is considered to be in car mode if there exists an app at any priority level which
+     * has entered car mode.
+     *
+     * @param enabled {@code true} if the caller wishes to enable car mode, {@code false} otherwise.
+     * @param flags Flags used when enabling/disabling car mode.
+     * @param priority The priority level for entering or exiting car mode; defaults to
+     *                 {@link UiModeManager#DEFAULT_PRIORITY} for callers using
+     *                 {@link UiModeManager#enableCarMode(int)}.  Callers using
+     *                 {@link UiModeManager#enableCarMode(int, int)} may specify a priority.
+     * @param packageName The package name of the app which initiated the request to enable or
+     *                    disable car mode.
+     */
+    void setCarModeLocked(boolean enabled, int flags, int priority, String packageName) {
+        if (enabled) {
+            enableCarMode(priority, packageName);
+        } else {
+            disableCarMode(flags, priority, packageName);
+        }
+        boolean isCarModeNowEnabled = isCarModeEnabled();
 
+        if (mCarModeEnabled != isCarModeNowEnabled) {
+            mCarModeEnabled = isCarModeNowEnabled;
             // When exiting car mode, restore night mode from settings
-            if (!mCarModeEnabled) {
+            if (!isCarModeNowEnabled) {
                 Context context = getContext();
                 updateNightModeFromSettings(context,
                         context.getResources(),
@@ -521,11 +604,102 @@ final class UiModeManagerService extends SystemService {
         mCarModeEnableFlags = flags;
     }
 
+    /**
+     * Handles disabling car mode.
+     * <p>
+     * Car mode can be disabled at a priority level if any of the following is true:
+     * 1. The priority being disabled is the {@link UiModeManager#DEFAULT_PRIORITY}.
+     * 2. The priority level is enabled and the caller is the app who originally enabled it.
+     * 3. The {@link UiModeManager#DISABLE_CAR_MODE_ALL_PRIORITIES} flag was specified, meaning all
+     *    car mode priorities are disabled.
+     *
+     * @param flags Car mode flags.
+     * @param priority The priority level at which to disable car mode.
+     * @param packageName The calling package which initiated the request.
+     */
+    private void disableCarMode(int flags, int priority, String packageName) {
+        boolean isDisableAll = (flags & UiModeManager.DISABLE_CAR_MODE_ALL_PRIORITIES) != 0;
+        boolean isPriorityTracked = mCarModePackagePriority.keySet().contains(priority);
+        boolean isDefaultPriority = priority == UiModeManager.DEFAULT_PRIORITY;
+        boolean isChangeAllowed =
+                // Anyone can disable the default priority.
+                isDefaultPriority
+                // If priority was enabled, only enabling package can disable it.
+                || isPriorityTracked && mCarModePackagePriority.get(priority).equals(packageName)
+                // Disable all priorities flag can disable all regardless.
+                || isDisableAll;
+        if (isChangeAllowed) {
+            Slog.d(TAG, "disableCarMode: disabling, priority=" + priority
+                    + ", packageName=" + packageName);
+            if (isDisableAll) {
+                Set<Map.Entry<Integer, String>> entries =
+                        new ArraySet<>(mCarModePackagePriority.entrySet());
+                mCarModePackagePriority.clear();
+
+                for (Map.Entry<Integer, String> entry : entries) {
+                    notifyCarModeDisabled(entry.getKey(), entry.getValue());
+                }
+            } else {
+                mCarModePackagePriority.remove(priority);
+                notifyCarModeDisabled(priority, packageName);
+            }
+        }
+    }
+
+    /**
+     * Handles enabling car mode.
+     * <p>
+     * Car mode can be enabled at any priority if it has not already been enabled at that priority.
+     * The calling package is tracked for the first app which enters priority at the
+     * {@link UiModeManager#DEFAULT_PRIORITY}, though any app can disable it at that priority.
+     *
+     * @param priority The priority for enabling car mode.
+     * @param packageName The calling package which initiated the request.
+     */
+    private void enableCarMode(int priority, String packageName) {
+        boolean isPriorityTracked = mCarModePackagePriority.containsKey(priority);
+        boolean isPackagePresent = mCarModePackagePriority.containsValue(packageName);
+        if (!isPriorityTracked && !isPackagePresent) {
+            Slog.d(TAG, "enableCarMode: enabled at priority=" + priority + ", packageName="
+                    + packageName);
+            mCarModePackagePriority.put(priority, packageName);
+            notifyCarModeEnabled(priority, packageName);
+        } else {
+            Slog.d(TAG, "enableCarMode: car mode at priority " + priority + " already enabled.");
+        }
+
+    }
+
+    private void notifyCarModeEnabled(int priority, String packageName) {
+        Intent intent = new Intent(UiModeManager.ACTION_ENTER_CAR_MODE_PRIORITIZED);
+        intent.putExtra(UiModeManager.EXTRA_CALLING_PACKAGE, packageName);
+        intent.putExtra(UiModeManager.EXTRA_PRIORITY, priority);
+        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
+                android.Manifest.permission.HANDLE_CAR_MODE_CHANGES);
+    }
+
+    private void notifyCarModeDisabled(int priority, String packageName) {
+        Intent intent = new Intent(UiModeManager.ACTION_EXIT_CAR_MODE_PRIORITIZED);
+        intent.putExtra(UiModeManager.EXTRA_CALLING_PACKAGE, packageName);
+        intent.putExtra(UiModeManager.EXTRA_PRIORITY, priority);
+        getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
+                android.Manifest.permission.HANDLE_CAR_MODE_CHANGES);
+    }
+
+    /**
+     * Determines if car mode is enabled at any priority level.
+     * @return {@code true} if car mode is enabled, {@code false} otherwise.
+     */
+    private boolean isCarModeEnabled() {
+        return mCarModePackagePriority.size() > 0;
+    }
+
     private void updateDockState(int newState) {
         synchronized (mLock) {
             if (newState != mDockState) {
                 mDockState = newState;
-                setCarModeLocked(mDockState == Intent.EXTRA_DOCK_STATE_CAR, 0);
+                setCarModeLocked(mDockState == Intent.EXTRA_DOCK_STATE_CAR, 0,
+                        UiModeManager.DEFAULT_PRIORITY, "" /* packageName */);
                 if (mSystemReady) {
                     updateLocked(UiModeManager.ENABLE_CAR_MODE_GO_CAR_HOME, 0);
                 }

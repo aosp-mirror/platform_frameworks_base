@@ -3117,29 +3117,31 @@ public class WifiManager {
 
     /**
      * Base class for soft AP callback. Should be extended by applications and set when calling
-     * {@link WifiManager#registerSoftApCallback(SoftApCallback, Handler)}.
+     * {@link WifiManager#registerSoftApCallback(Executor, SoftApCallback)}.
      *
      * @hide
      */
+    @SystemApi
     public interface SoftApCallback {
         /**
          * Called when soft AP state changes.
          *
-         * @param state new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
-         *        {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
-         *        {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
+         * @param state         new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
+         *                      {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
+         *                      {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
          * @param failureReason reason when in failed state. One of
-         *        {@link #SAP_START_FAILURE_GENERAL}, {@link #SAP_START_FAILURE_NO_CHANNEL}
+         *                      {@link #SAP_START_FAILURE_GENERAL},
+         *                      {@link #SAP_START_FAILURE_NO_CHANNEL}
          */
-        public abstract void onStateChanged(@WifiApState int state,
+        void onStateChanged(@WifiApState int state,
                 @SapStartFailure int failureReason);
 
         /**
-         * Called when number of connected clients to soft AP changes.
+         * Called when the connected clients to soft AP changes.
          *
-         * @param numClients number of connected clients
+         * @param clients the currently connected clients
          */
-        public abstract void onNumClientsChanged(int numClients);
+        void onConnectedClientsChanged(@NonNull List<WifiClient> clients);
     }
 
     /**
@@ -3148,11 +3150,11 @@ public class WifiManager {
      * @hide
      */
     private class SoftApCallbackProxy extends ISoftApCallback.Stub {
-        private final Handler mHandler;
+        private final Executor mExecutor;
         private final SoftApCallback mCallback;
 
-        SoftApCallbackProxy(Looper looper, SoftApCallback callback) {
-            mHandler = new Handler(looper);
+        SoftApCallbackProxy(Executor executor, SoftApCallback callback) {
+            mExecutor = executor;
             mCallback = callback;
         }
 
@@ -3162,18 +3164,23 @@ public class WifiManager {
                 Log.v(TAG, "SoftApCallbackProxy: onStateChanged: state=" + state
                         + ", failureReason=" + failureReason);
             }
-            mHandler.post(() -> {
+
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
                 mCallback.onStateChanged(state, failureReason);
             });
         }
 
         @Override
-        public void onNumClientsChanged(int numClients) {
+        public void onConnectedClientsChanged(List<WifiClient> clients) {
             if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "SoftApCallbackProxy: onNumClientsChanged: numClients=" + numClients);
+                Log.v(TAG, "SoftApCallbackProxy: onConnectedClientsChanged: clients="
+                        + clients.size() + " clients");
             }
-            mHandler.post(() -> {
-                mCallback.onNumClientsChanged(numClients);
+
+            Binder.clearCallingIdentity();
+            mExecutor.execute(() -> {
+                mCallback.onConnectedClientsChanged(clients);
             });
         }
     }
@@ -3190,22 +3197,23 @@ public class WifiManager {
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
+     * @param executor The executor to execute the callbacks of the {@code executor}
+     *                 object. If null, then the application's main executor will be used.
      * @param callback Callback for soft AP events
-     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
-     *                 object. If null, then the application's main thread will be used.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerSoftApCallback(@NonNull SoftApCallback callback,
-                                       @Nullable Handler handler) {
+    public void registerSoftApCallback(@Nullable @CallbackExecutor Executor executor,
+                                       @NonNull SoftApCallback callback) {
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
-        Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", handler=" + handler);
+        Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", executor=" + executor);
 
-        Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
+        executor = (executor == null) ? mContext.getMainExecutor() : executor;
         Binder binder = new Binder();
         try {
-            mService.registerSoftApCallback(binder, new SoftApCallbackProxy(looper, callback),
+            mService.registerSoftApCallback(binder, new SoftApCallbackProxy(executor, callback),
                     callback.hashCode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

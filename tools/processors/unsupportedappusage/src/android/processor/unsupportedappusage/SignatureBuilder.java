@@ -101,14 +101,20 @@ public class SignatureBuilder {
     private String getClassSignature(TypeElement clazz) {
         StringBuilder sb = new StringBuilder("L");
         for (Element enclosing : getEnclosingElements(clazz)) {
-            if (enclosing.getKind() == PACKAGE) {
-                sb.append(((PackageElement) enclosing)
-                        .getQualifiedName()
-                        .toString()
-                        .replace('.', '/'));
-                sb.append('/');
-            } else {
-                sb.append(enclosing.getSimpleName()).append('$');
+            switch (enclosing.getKind()) {
+                case MODULE:
+                    // ignore this.
+                    break;
+                case PACKAGE:
+                    sb.append(((PackageElement) enclosing)
+                            .getQualifiedName()
+                            .toString()
+                            .replace('.', '/'));
+                    sb.append('/');
+                    break;
+                default:
+                    sb.append(enclosing.getSimpleName()).append('$');
+                    break;
             }
 
         }

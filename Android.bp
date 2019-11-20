@@ -418,6 +418,7 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
+    libs: ["app-compat-annotations"],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -454,12 +455,14 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
+    libs: ["app-compat-annotations"],
 }
 
 java_library {
     name: "framework-annotation-proc",
     defaults: ["framework-defaults"],
     srcs: [":framework-all-sources"],
+    libs: ["app-compat-annotations"],
     installable: false,
     plugins: [
         "unsupportedappusage-annotation-processor",
@@ -500,6 +503,7 @@ java_library {
 java_library {
     name: "framework-atb-backward-compatibility",
     installable: true,
+    libs: ["app-compat-annotations"],
     srcs: [
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
@@ -516,24 +520,22 @@ gensrcs {
     name: "framework-javastream-protos",
     depfile: true,
 
-    tool_files: ["tools/genprotos.sh"],
     tools: [
         "aprotoc",
         "protoc-gen-javastream",
         "soong_zip",
     ],
 
-    // TODO This should not be needed. If you set a custom OUT_DIR or OUT_DIR_COMMON_BASE you can
-    // end up with a command that is extremely long, potentially going passed MAX_ARG_STRLEN due to
-    // the way sbox rewrites the command. See b/70221552.
-    cmd: "$(location tools/genprotos.sh) " +
-        " $(location aprotoc) " +
-        " $(location protoc-gen-javastream) " +
-        " $(location soong_zip) " +
-        " $(genDir) " +
-        " $(depfile) " +
-        " $(in) " +
-        " $(out)",
+    cmd: "mkdir -p $(genDir)/$(in) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-javastream) " +
+        "  --dependency_out=$(depfile) " +
+        "  --javastream_out=$(genDir)/$(in) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in) " +
+        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
+
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
@@ -861,28 +863,6 @@ python_binary_host {
     ],
 }
 
-// TODO: Don't rely on this list by switching package.html into package-info.java
-frameworks_base_subdirs = [
-    "core/java",
-    "graphics/java",
-    "location/java",
-    "media/java",
-    "media/mca/effect/java",
-    "media/mca/filterfw/java",
-    "media/mca/filterpacks/java",
-    "drm/java",
-    "mms/java",
-    "opengl/java",
-    "sax/java",
-    "telecomm/java",
-    "telephony/common",
-    "telephony/java",
-    "wifi/java",
-    "lowpan/java",
-    "keystore/java",
-    "rs/java",
-]
-
 // Make the api/current.txt file available for use by modules in other
 // directories.
 filegroup {
@@ -915,7 +895,10 @@ framework_docs_only_args = " -android -manifest $(location core/res/AndroidManif
     "-overview $(location core/java/overview.html) " +
     // Federate Support Library references against local API file.
     "-federate SupportLib https://developer.android.com " +
-    "-federationapi SupportLib $(location :current-support-api) "
+    "-federationapi SupportLib $(location :current-support-api) " +
+    // Federate Support Library references against local API file.
+    "-federate AndroidX https://developer.android.com " +
+    "-federationapi AndroidX $(location :current-androidx-api) "
 
 framework_docs_only_libs = [
     "voip-common",
@@ -958,29 +941,13 @@ framework_docs_only_libs = [
 
 metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
     "--ignore-classes-on-classpath " +
-    "--hide-package com.android.okhttp " +
-    "--hide-package com.android.org.conscrypt --hide-package com.android.server " +
+    "--hide-package com.android.server " +
     "--error UnhiddenSystemApi " +
     "--hide RequiresPermission " +
     "--hide CallbackInterface " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo "
-
-// http://b/129765390 Rewrite links to "platform" or "technotes" folders
-// which are siblings (and thus outside of) {@docRoot}.
-//
-// We have to escape \ as \\ and $ as $$ here because they get resolved by
-// different layers of the build tooling. The arguments are wrapped in '' so
-// that the shell doesn't add yet another level of escaping.
-metalava_framework_docs_args += " --replace-documentation " +
-    // packages whose descendants to apply replacement to (all packages from
-    // libcore/ojluni/src/main/java that contribute to documentation).
-    "com.sun:java:javax:jdk.net:sun " +
-    // regex of the string to replace
-    "'(<a\\s+href\\s?=[\\*\\s]*\")(?:(?:\\{@docRoot\\}/\\.\\./)|(?:(?:\\.\\./)+))((?:platform|technotes).+)\">' " +
-    // replacement (with $1, $2 backreferences to the regex groups)
-    "'$$1https://docs.oracle.com/javase/8/docs/$$2\">' "
 
 packages_to_document = [
     "android",
@@ -1010,7 +977,6 @@ stubs_defaults {
         "test-runner/src/**/*.java",
     ],
     libs: framework_docs_only_libs,
-    local_sourcepaths: frameworks_base_subdirs,
     create_doc_stubs: true,
     annotations_enabled: true,
     api_levels_annotations_enabled: true,
@@ -1021,7 +987,6 @@ stubs_defaults {
     previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
         "metalava-manual",
-        "ojluni-annotated-sdk-stubs",
     ],
 }
 
@@ -1051,6 +1016,7 @@ doc_defaults {
         "core/res/AndroidManifest.xml",
         "core/java/overview.html",
         ":current-support-api",
+        ":current-androidx-api",
     ],
     create_stubs: false,
 }
@@ -1072,13 +1038,11 @@ stubs_defaults {
         ":updatable-media-srcs",
     ],
     libs: ["framework-internal-utils"],
-    local_sourcepaths: frameworks_base_subdirs,
     installable: false,
     annotations_enabled: true,
     previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
         "metalava-manual",
-        "ojluni-annotated-sdk-stubs",
     ],
     api_levels_annotations_enabled: true,
     api_levels_annotations_dirs: [
@@ -1413,7 +1377,6 @@ droidstubs {
     previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
         "metalava-manual",
-        "ojluni-annotated-sdk-stubs",
     ],
     args: " --show-annotation android.annotation.SystemApi",
 }

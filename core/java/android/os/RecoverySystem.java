@@ -888,7 +888,7 @@ public class RecoverySystem {
         }
         List<SubscriptionInfo> invisibleSubs = new ArrayList<>();
         for (SubscriptionInfo sub : availableSubs) {
-            if (sub.isEmbedded() && !subscriptionManager.isSubscriptionVisible(sub)) {
+            if (sub.isEmbedded() && sub.getGroupUuid() != null && sub.isOpportunistic()) {
                 invisibleSubs.add(sub);
             }
         }

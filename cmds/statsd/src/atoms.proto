@@ -324,6 +324,8 @@ message Atom {
 
         AppCompatibilityChangeReported app_compatibility_change_reported =
             228 [(allow_from_any_uid) = true];
+        PerfettoUploaded perfetto_uploaded =
+            229 [(log_from_module) = "perfetto"];
     }
 
     // Pulled events will start at field 10000.
@@ -6856,4 +6858,38 @@ message AppCompatibilityChangeReported {
     // Where it was logged from.
     optional Source source = 4;
 
+}
+
+/**
+ * Logged from
+ *     external/perfetto/src/perfetto_cmd/perfetto_cmd.cc
+ */
+message PerfettoUploaded {
+    enum Event {
+        PERFETTO_UNDEFINED = 0;
+        PERFETTO_TRACE_BEGIN = 1;
+        PERFETTO_BACKGROUND_TRACE_BEGIN = 2;
+        PERFETTO_ON_CONNECT = 3;
+        PERFETTO_ON_TRACING_DISABLED = 4;
+        PERFETTO_UPLOAD_DROPBOX_BEGIN = 5;
+        PERFETTO_UPLOAD_DROPBOX_SUCCESS = 6;
+        PERFETTO_UPLOAD_DROPBOX_FAILURE = 7;
+        PERFETTO_UPLOAD_INCIDENT_BEGIN = 8;
+        PERFETTO_UPLOAD_INCIDENT_SUCCESS = 9;
+        PERFETTO_UPLOAD_INCIDENT_FAILURE = 10;
+        PERFETTO_FINALIZE_TRACE_AND_EXIT = 11;
+        PERFETTO_TRIGGER_BEGIN = 12;
+        PERFETTO_TRIGGER_SUCCESS = 13;
+        PERFETTO_TRIGGER_FAILURE = 14;
+        PERFETTO_HIT_GUARDRAILS = 15;
+        PERFETTO_ON_TIMEOUT = 16;
+        PERFETTO_NOT_UPLOADING_EMPTY_TRACE = 17;
+    }
+
+    // Which stage of the pipeline we are reporting from.
+    optional Event event = 1;
+
+    // UUID matching the one set inside the SystemInfo trace packet.
+    optional int64 trace_uuid_lsb = 2;
+    optional int64 trace_uuid_msb = 3;
 }

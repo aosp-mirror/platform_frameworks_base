@@ -41,6 +41,10 @@ public class MetricsLogger {
 
     private static MetricsLogger sMetricsLogger;
 
+    @UnsupportedAppUsage
+    public MetricsLogger() {
+    }
+
     private static MetricsLogger getLogger() {
         if (sMetricsLogger == null) {
             sMetricsLogger = new MetricsLogger();

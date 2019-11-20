@@ -25,6 +25,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.prediction.AppPredictionContext;
@@ -139,6 +140,9 @@ import java.util.Set;
 public class ChooserActivity extends ResolverActivity {
     private static final String TAG = "ChooserActivity";
 
+    @UnsupportedAppUsage
+    public ChooserActivity() {
+    }
 
     /**
      * Boolean extra to change the following behavior: Normally, ChooserActivity finishes itself
