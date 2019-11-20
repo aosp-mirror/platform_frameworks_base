@@ -58,8 +58,8 @@ private:
     ~DeviceInfo();
 
     int mMaxTextureSize;
-    sk_sp<SkColorSpace> mWideColorSpace;
-    SkColorType mWideColorType;
+    sk_sp<SkColorSpace> mWideColorSpace = SkColorSpace::MakeSRGB();
+    SkColorType mWideColorType = SkColorType::kN32_SkColorType;
     ADisplayConfig* mCurrentConfig = nullptr;
     ADisplay** mDisplays = nullptr;
     int mDisplaysSize = 0;
