@@ -44,6 +44,10 @@ public class DeviceIdleManager {
         mService = service;
     }
 
+    IDeviceIdleController getService() {
+        return mService;
+    }
+
     /**
      * @return package names the system has white-listed to opt out of power save restrictions,
      * except for device idle mode.
