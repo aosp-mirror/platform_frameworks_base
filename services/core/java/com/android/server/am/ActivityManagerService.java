@@ -10079,6 +10079,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpUsersLocked(pw);
         }
     }
 
@@ -10367,6 +10372,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else if ("locks".equals(cmd)) {
                 LockGuard.dump(fd, pw, args);
+            } else if ("users".equals(cmd)) {
+                synchronized (this) {
+                    dumpUsersLocked(pw);
+                }
             } else {
                 // Dumping a single activity?
                 if (!mAtmInternal.dumpActivity(fd, pw, cmd, args, opti, dumpAll,
@@ -10841,12 +10850,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         needSep = mAppErrors.dumpLocked(fd, pw, needSep, dumpPackage);
 
-        if (dumpPackage == null) {
-            pw.println();
-            needSep = false;
-            mUserController.dump(pw, dumpAll);
-        }
-
         needSep = mAtmInternal.dumpForProcesses(fd, pw, dumpAll, dumpPackage, dumpAppId, needSep,
                 mTestPssMode, mWakefulness);
 
@@ -11053,6 +11056,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         pw.println("  mForceBackgroundCheck=" + mForceBackgroundCheck);
+    }
+
+    @GuardedBy("this")
+    private void dumpUsersLocked(PrintWriter pw) {
+        pw.println("ACTIVITY MANAGER USERS (dumpsys activity users)");
+        mUserController.dump(pw);
     }
 
     @GuardedBy("this")
