@@ -274,9 +274,14 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
-    // This method should not perform any I/O (e.g. do not call isBackupActivatedForUser),
-    // it's used in multiple places where I/O waits would cause system lock-ups.
-    private boolean isUserReadyForBackup(int userId) {
+    /**
+     * This method should not perform any I/O (e.g. do not call isBackupActivatedForUser),
+     * it's used in multiple places where I/O waits would cause system lock-ups.
+     * @param userId User id for which this operation should be performed.
+     * @return true if the user is ready for backup and false otherwise.
+     */
+    @Override
+    public boolean isUserReadyForBackup(int userId) {
         return mUserServices.get(UserHandle.USER_SYSTEM) != null
                 && mUserServices.get(userId) != null;
     }

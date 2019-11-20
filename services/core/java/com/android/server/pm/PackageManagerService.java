@@ -13483,10 +13483,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
             try {
-                if (bm.isBackupServiceActive(userId)) {
+                if (bm.isUserReadyForBackup(userId)) {
                     bm.restoreAtInstallForUser(
                             userId, res.pkg.getAppInfoPackageName(), token);
                 } else {
+                    Slog.w(TAG, "User " + userId + " is not ready. Restore at install "
+                            + "didn't take place.");
                     return false;
                 }
             } catch (RemoteException e) {

@@ -597,6 +597,12 @@ interface IBackupManager {
     boolean isBackupServiceActive(int whichUser);
 
     /**
+    * Checks if the user is ready for backup or not.
+    * @param userId User id for which this operation should be performed.
+    */
+    boolean isUserReadyForBackup(int userId);
+
+    /**
      * Ask the framework which dataset, if any, the given package's data would be
      * restored from if we were to install it right now.
      *
