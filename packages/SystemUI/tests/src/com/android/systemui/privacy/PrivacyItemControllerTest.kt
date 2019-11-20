@@ -110,7 +110,6 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         handler = Handler(testableLooper.looper)
 
         appOpsController = mDependency.injectMockDependency(AppOpsController::class.java)
-        mDependency.injectTestDependency(Dependency.BG_HANDLER, handler)
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER, handler)
         mContext.addMockSystemService(UserManager::class.java, userManager)
         mContext.getOrCreateTestableResources().addOverride(R.string.device_services,
