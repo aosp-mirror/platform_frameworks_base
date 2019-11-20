@@ -8538,6 +8538,7 @@ package android.telephony {
     method @NonNull public android.content.ContentValues getContentValues();
     method @Nullable public android.telephony.SmsCbEtwsInfo getEtwsWarningInfo();
     method public int getGeographicalScope();
+    method @NonNull public java.util.List<android.telephony.CbGeoUtils.Geometry> getGeometries();
     method @Nullable public String getLanguageCode();
     method @NonNull public android.telephony.SmsCbLocation getLocation();
     method public int getMaximumWaitingDuration();
