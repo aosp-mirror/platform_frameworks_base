@@ -32,8 +32,8 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.os.Handler;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -48,6 +48,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.recents.OverviewProxyService;
@@ -76,10 +77,8 @@ public class NotificationLockscreenUserManagerImpl implements
     private static final String TAG = "LockscreenUserManager";
     private static final boolean ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT = false;
 
-    private final DeviceProvisionedController mDeviceProvisionedController =
-            Dependency.get(DeviceProvisionedController.class);
-    private final KeyguardStateController mKeyguardStateController = Dependency.get(
-            KeyguardStateController.class);
+    private final DeviceProvisionedController mDeviceProvisionedController;
+    private final KeyguardStateController mKeyguardStateController;
 
     // Lazy
     private NotificationEntryManager mEntryManager;
@@ -168,6 +167,7 @@ public class NotificationLockscreenUserManagerImpl implements
     };
 
     protected final Context mContext;
+    private final Handler mMainHandler;
     protected final SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
 
     protected int mCurrentUserId = 0;
@@ -184,24 +184,33 @@ public class NotificationLockscreenUserManagerImpl implements
 
     @Inject
     public NotificationLockscreenUserManagerImpl(Context context,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            DevicePolicyManager devicePolicyManager,
+            UserManager userManager,
+            IStatusBarService iStatusBarService,
+            KeyguardManager keyguardManager,
+            StatusBarStateController statusBarStateController,
+            @MainHandler Handler mainHandler,
+            DeviceProvisionedController deviceProvisionedController,
+            KeyguardStateController keyguardStateController) {
         mContext = context;
-        mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mMainHandler = mainHandler;
+        mDevicePolicyManager = devicePolicyManager;
+        mUserManager = userManager;
         mCurrentUserId = ActivityManager.getCurrentUser();
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        Dependency.get(StatusBarStateController.class).addCallback(this);
+        mBarService = iStatusBarService;
+        statusBarStateController.addCallback(this);
         mLockPatternUtils = new LockPatternUtils(context);
-        mKeyguardManager = context.getSystemService(KeyguardManager.class);
+        mKeyguardManager = keyguardManager;
         mBroadcastDispatcher = broadcastDispatcher;
+        mDeviceProvisionedController = deviceProvisionedController;
+        mKeyguardStateController = keyguardStateController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
         mPresenter = presenter;
 
-        mLockscreenSettingsObserver = new ContentObserver(Dependency.get(Dependency.MAIN_HANDLER)) {
+        mLockscreenSettingsObserver = new ContentObserver(mMainHandler) {
             @Override
             public void onChange(boolean selfChange) {
                 // We don't know which user changed LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS or
@@ -215,7 +224,7 @@ public class NotificationLockscreenUserManagerImpl implements
             }
         };
 
-        mSettingsObserver = new ContentObserver(Dependency.get(Dependency.MAIN_HANDLER)) {
+        mSettingsObserver = new ContentObserver(mMainHandler) {
             @Override
             public void onChange(boolean selfChange) {
                 updateLockscreenNotificationSetting();
