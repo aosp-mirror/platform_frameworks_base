@@ -29,6 +29,7 @@ import android.telephony.CbGeoUtils.Geometry;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -407,13 +408,17 @@ public final class SmsCbMessage implements Parcelable {
     }
 
     /**
-     * Get the warning area coordinates information represent by polygons and circles.
-     * @return a list of geometries, {@link Nullable} means there is no coordinate information
-     * associated to this message.
+     * Get the warning area coordinates information represented by polygons and circles.
+     * @return a list of geometries, or an empty list if there is no coordinate information
+     * associated with this message.
      * @hide
      */
-    @Nullable
+    @SystemApi
+    @NonNull
     public List<Geometry> getGeometries() {
+        if (mGeometries == null) {
+            return new ArrayList<>();
+        }
         return mGeometries;
     }
 
@@ -720,6 +725,6 @@ public final class SmsCbMessage implements Parcelable {
      * @return {@code True} if this message needs geo-fencing check.
      */
     public boolean needGeoFencingCheck() {
-        return mMaximumWaitTimeSec > 0 && mGeometries != null;
+        return mMaximumWaitTimeSec > 0 && mGeometries != null && !mGeometries.isEmpty();
     }
 }
