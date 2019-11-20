@@ -47,6 +47,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -62,6 +63,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
@@ -95,6 +97,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     private final AccessibilityWindowManager mA11yWindowManager;
     private final DisplayManager mDisplayManager;
     private final PowerManager mPowerManager;
+    private final IPlatformCompat mIPlatformCompat;
 
     // Handler for scheduling method invocations on the main thread.
     public final InvocationHandler mInvocationHandler;
@@ -228,6 +231,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mA11yWindowManager = a11yWindowManager;
         mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mIPlatformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         mEventDispatchHandler = new Handler(mainHandler.getLooper()) {
             @Override
             public void handleMessage(Message message) {
@@ -336,7 +341,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 // configurable properties.
                 AccessibilityServiceInfo oldInfo = mAccessibilityServiceInfo;
                 if (oldInfo != null) {
-                    oldInfo.updateDynamicallyConfigurableProperties(info);
+                    oldInfo.updateDynamicallyConfigurableProperties(mIPlatformCompat, info);
                     setDynamicallyConfigurableProperties(oldInfo);
                 } else {
                     setDynamicallyConfigurableProperties(info);

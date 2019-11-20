@@ -22,6 +22,8 @@ import android.accessibilityservice.AccessibilityButtonController.AccessibilityB
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -32,8 +34,10 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -43,6 +47,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.R;
+import com.android.internal.compat.IPlatformCompat;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -299,6 +304,11 @@ public class AccessibilityServiceInfo implements Parcelable {
      /**
      * This flag indicates to the system that the accessibility service requests that an
      * accessibility button be shown within the system's navigation area, if available.
+      * <p>
+      *   <strong>Note:</strong> For accessibility services targeting APIs greater than
+      *   {@link Build.VERSION_CODES#Q API 29}, this flag must be specified in the
+      *   accessibility service metadata file. Otherwise, it will be ignored.
+      * </p>
      */
     public static final int FLAG_REQUEST_ACCESSIBILITY_BUTTON = 0x00000100;
 
@@ -422,6 +432,12 @@ public class AccessibilityServiceInfo implements Parcelable {
      * <p>
      *   <strong>Can be dynamically set at runtime.</strong>
      * </p>
+     * <p>
+     *   <strong>Note:</strong> Accessibility services with targetSdkVersion greater than
+     *   {@link Build.VERSION_CODES#Q API 29} cannot dynamically set the
+     *   {@link #FLAG_REQUEST_ACCESSIBILITY_BUTTON} at runtime. It must be specified in the
+     *   accessibility service metadata file.
+     * </p>
      * @see #DEFAULT
      * @see #FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
      * @see #FLAG_REQUEST_TOUCH_EXPLORATION_MODE
@@ -495,6 +511,15 @@ public class AccessibilityServiceInfo implements Parcelable {
      * Non localized description of the accessibility service.
      */
     private String mNonLocalizedDescription;
+
+    /**
+     * For accessibility services targeting APIs greater than {@link Build.VERSION_CODES#Q API 29},
+     * {@link #FLAG_REQUEST_ACCESSIBILITY_BUTTON} must be specified in the accessibility service
+     * metadata file. Otherwise, it will be ignored.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.Q)
+    private static final long REQUEST_ACCESSIBILITY_BUTTON_CHANGE = 136293963L;
 
     /**
      * Creates a new instance.
@@ -623,13 +648,23 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
-     * Updates the properties that an AccessibilitySerivice can change dynamically.
+     * Updates the properties that an AccessibilityService can change dynamically.
+     * <p>
+     * Note: A11y services targeting APIs > Q, it cannot update flagRequestAccessibilityButton
+     * dynamically.
+     * </p>
      *
+     * @param platformCompat The platform compat service to check the compatibility change.
      * @param other The info from which to update the properties.
      *
      * @hide
      */
-    public void updateDynamicallyConfigurableProperties(AccessibilityServiceInfo other) {
+    public void updateDynamicallyConfigurableProperties(IPlatformCompat platformCompat,
+            AccessibilityServiceInfo other) {
+        if (isRequestAccessibilityButtonChangeEnabled(platformCompat)) {
+            other.flags &= ~FLAG_REQUEST_ACCESSIBILITY_BUTTON;
+            other.flags |= (flags & FLAG_REQUEST_ACCESSIBILITY_BUTTON);
+        }
         eventTypes = other.eventTypes;
         packageNames = other.packageNames;
         feedbackType = other.feedbackType;
@@ -637,6 +672,21 @@ public class AccessibilityServiceInfo implements Parcelable {
         mNonInteractiveUiTimeout = other.mNonInteractiveUiTimeout;
         mInteractiveUiTimeout = other.mInteractiveUiTimeout;
         flags = other.flags;
+    }
+
+    private boolean isRequestAccessibilityButtonChangeEnabled(IPlatformCompat platformCompat) {
+        if (mResolveInfo == null) {
+            return true;
+        }
+        try {
+            if (platformCompat != null) {
+                return platformCompat.isChangeEnabledByPackageName(
+                        REQUEST_ACCESSIBILITY_BUTTON_CHANGE, mResolveInfo.serviceInfo.packageName,
+                        mResolveInfo.serviceInfo.applicationInfo.uid);
+            }
+        } catch (RemoteException ignore) {
+        }
+        return mResolveInfo.serviceInfo.applicationInfo.targetSdkVersion > Build.VERSION_CODES.Q;
     }
 
     /**
