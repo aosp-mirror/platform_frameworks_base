@@ -253,7 +253,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 mCommandQueue,
                 mDivider,
                 Optional.of(mRecents),
-                () -> mock(StatusBar.class));
+                () -> mock(StatusBar.class),
+                mHandler);
     }
 
     private class HostCallbacksForExternalDisplay extends
