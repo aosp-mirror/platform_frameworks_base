@@ -200,7 +200,8 @@ public class PackageWatchdog {
     }
 
     /**
-     * Registers {@code observer} to listen for package failures
+     * Registers {@code observer} to listen for package failures. Add a new ObserverInternal for
+     * this observer if it does not already exist.
      *
      * <p>Observers are expected to call this on boot. It does not specify any packages but
      * it will resume observing any packages requested from a previous boot.
@@ -210,6 +211,11 @@ public class PackageWatchdog {
             ObserverInternal internalObserver = mAllObservers.get(observer.getName());
             if (internalObserver != null) {
                 internalObserver.registeredObserver = observer;
+            } else {
+                internalObserver = new ObserverInternal(observer.getName(), new ArrayList<>());
+                internalObserver.registeredObserver = observer;
+                mAllObservers.put(observer.getName(), internalObserver);
+                syncState("added new observer");
             }
         }
     }
@@ -415,6 +421,14 @@ public class PackageWatchdog {
          * watchdog may drop observing packages with the old name.
          */
         String getName();
+
+        /**
+         * An observer will not be pruned if this is set, even if the observer is not explicitly
+         * monitoring any packages.
+         */
+        default boolean isPersistent() {
+            return false;
+        }
     }
 
     long getTriggerFailureCount() {
@@ -626,7 +640,8 @@ public class PackageWatchdog {
             if (!failedPackages.isEmpty()) {
                 onHealthCheckFailed(observer, failedPackages);
             }
-            if (observer.packages.isEmpty()) {
+            if (observer.packages.isEmpty() && (observer.registeredObserver == null
+                    || !observer.registeredObserver.isPersistent())) {
                 Slog.i(TAG, "Discarding observer " + observer.name + ". All packages expired");
                 it.remove();
             }
