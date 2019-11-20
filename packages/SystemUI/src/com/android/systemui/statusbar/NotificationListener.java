@@ -26,12 +26,13 @@ import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
-import com.android.systemui.Dependency;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
@@ -51,20 +52,22 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
 
     // Dependencies:
-    private final NotificationRemoteInputManager mRemoteInputManager =
-            Dependency.get(NotificationRemoteInputManager.class);
-    private final NotificationEntryManager mEntryManager =
-            Dependency.get(NotificationEntryManager.class);
-    private final NotificationGroupManager mGroupManager =
-            Dependency.get(NotificationGroupManager.class);
+    private final NotificationEntryManager mEntryManager;
+    private final NotificationGroupManager mGroupManager;
 
     private final Context mContext;
+    private final Handler mMainHandler;
     private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
     @Nullable private NotifServiceListener mDownstreamListener;
 
     @Inject
-    public NotificationListener(Context context) {
+    public NotificationListener(Context context, @MainHandler Handler mainHandler,
+            NotificationEntryManager notificationEntryManager,
+            NotificationGroupManager notificationGroupManager) {
         mContext = context;
+        mMainHandler = mainHandler;
+        mEntryManager = notificationEntryManager;
+        mGroupManager = notificationGroupManager;
     }
 
     public void addNotificationSettingsListener(NotificationSettingsListener listener) {
@@ -85,7 +88,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             return;
         }
         final RankingMap currentRanking = getCurrentRanking();
-        Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+        mMainHandler.post(() -> {
             for (StatusBarNotification sbn : notifications) {
                 if (mDownstreamListener != null) {
                     mDownstreamListener.onNotificationPosted(sbn, currentRanking);
@@ -102,7 +105,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             final RankingMap rankingMap) {
         if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
         if (sbn != null && !onPluginNotificationPosted(sbn, rankingMap)) {
-            Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+            mMainHandler.post(() -> {
                 processForRemoteInput(sbn.getNotification(), mContext);
 
                 if (mDownstreamListener != null) {
@@ -144,7 +147,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn + " reason: " + reason);
         if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
             final String key = sbn.getKey();
-            Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+            mMainHandler.post(() -> {
                 if (mDownstreamListener != null) {
                     mDownstreamListener.onNotificationRemoved(sbn, rankingMap, reason);
                 }
@@ -163,7 +166,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (DEBUG) Log.d(TAG, "onRankingUpdate");
         if (rankingMap != null) {
             RankingMap r = onPluginRankingUpdate(rankingMap);
-            Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+            mMainHandler.post(() -> {
                 if (mDownstreamListener != null) {
                     mDownstreamListener.onNotificationRankingUpdate(rankingMap);
                 }
