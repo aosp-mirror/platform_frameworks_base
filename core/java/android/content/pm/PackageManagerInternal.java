@@ -415,6 +415,17 @@ public abstract class PackageManagerInternal {
             @ResolveInfoFlags int flags, int filterCallingUid, int userId);
 
     /**
+     * Retrieve all activities that can be performed for the given intent.
+     * @param filterCallingUid The results will be filtered in the context of this UID instead
+     * of the calling UID.
+     * @see PackageManager#queryIntentActivities(Intent, int)
+     */
+    public abstract List<ResolveInfo> queryIntentActivities(
+            Intent intent, @Nullable String resolvedType, @ResolveInfoFlags int flags,
+            int filterCallingUid, int userId);
+
+
+    /**
      * Retrieve all services that can be performed for the given intent.
      * @see PackageManager#queryIntentServices(Intent, int)
      */
