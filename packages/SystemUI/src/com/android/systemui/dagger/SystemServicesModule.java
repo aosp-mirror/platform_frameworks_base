@@ -36,6 +36,7 @@ import android.service.dreams.IDreamManager;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
@@ -54,6 +55,11 @@ import dagger.Provides;
  */
 @Module
 public class SystemServicesModule {
+    @Provides
+    @Singleton
+    static AccessibilityManager provideAccessibilityManager(Context context) {
+        return context.getSystemService(AccessibilityManager.class);
+    }
 
     @Singleton
     @Provides
