@@ -1,2 +1,0 @@
-rule android.hidl.** android.internal.hidl.@1
-rule com.google.android.exoplayer2.** android.media.internal.exo.@1
