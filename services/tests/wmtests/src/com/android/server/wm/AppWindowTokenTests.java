@@ -262,7 +262,6 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         mActivity.setOccludesParent(true);
         mActivity.setHidden(true);
-        mActivity.sendingToBottom = true;
         // Can not specify orientation if app isn't visible even though it occludes parent.
         assertEquals(SCREEN_ORIENTATION_UNSET, mActivity.getOrientation());
         // Can specify orientation if the current orientation candidate is orientation behind.

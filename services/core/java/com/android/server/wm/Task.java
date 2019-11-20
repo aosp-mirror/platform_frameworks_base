@@ -252,8 +252,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     boolean mUserSetupComplete; // The user set-up is complete as of the last time the task activity
                                 // was changed.
 
-    int numFullscreen;      // Number of fullscreen activities.
-
     /** Can't be put in lockTask mode. */
     final static int LOCK_TASK_AUTH_DONT_LOCK = 0;
     /** Can enter app pinning with user approval. Can never start over existing lockTask task. */
@@ -1210,9 +1208,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addChild: %s at top.", this);
         r.inHistory = true;
 
-        if (r.occludesParent()) {
-            numFullscreen++;
-        }
         // Only set this based on the first activity
         if (!hadChild) {
             if (r.getActivityType() == ACTIVITY_TYPE_UNDEFINED) {
@@ -1256,9 +1251,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         }
 
         super.removeChild(r);
-        if (r.occludesParent()) {
-            numFullscreen--;
-        }
         if (r.isPersistable()) {
             mAtmService.notifyTaskPersisterLocked(this, false);
         }
@@ -2255,7 +2247,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             // We want to place all non-overlay activities below overlays.
             while (maxPosition > 0) {
                 final ActivityRecord current = mChildren.get(maxPosition - 1);
-                if (current.mTaskOverlay && !current.removed) {
+                if (current.mTaskOverlay) {
                     --maxPosition;
                     continue;
                 }
@@ -2266,17 +2258,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             }
         }
 
-        if (suggestedPosition >= maxPosition) {
-            return Math.min(maxPosition, suggestedPosition);
-        }
-
-        for (int pos = 0; pos < maxPosition && pos < suggestedPosition; ++pos) {
-            // TODO: Confirm that this is the behavior we want long term.
-            if (mChildren.get(pos).removed) {
-                // suggestedPosition assumes removed tokens are actually gone.
-                ++suggestedPosition;
-            }
-        }
         return Math.min(maxPosition, suggestedPosition);
     }
 
@@ -2337,12 +2318,6 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         // our insets so that there will not be a jump in the area covered by system decorations.
         // We rely on the pinned animation to later unset this value.
         mPreserveNonFloatingState = stack.inPinnedWindowingMode();
-    }
-
-    void setSendingToBottom(boolean toBottom) {
-        for (int appTokenNdx = 0; appTokenNdx < mChildren.size(); appTokenNdx++) {
-            mChildren.get(appTokenNdx).sendingToBottom = toBottom;
-        }
     }
 
     public int setBounds(Rect bounds, boolean forceResize) {
@@ -2981,10 +2956,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             pw.print(prefix); pw.print("mActivityComponent=");
             pw.println(realActivity.flattenToShortString());
         }
-        if (autoRemoveRecents || isPersistable || !isActivityTypeStandard() || numFullscreen != 0) {
+        if (autoRemoveRecents || isPersistable || !isActivityTypeStandard()) {
             pw.print(prefix); pw.print("autoRemoveRecents="); pw.print(autoRemoveRecents);
             pw.print(" isPersistable="); pw.print(isPersistable);
-            pw.print(" numFullscreen="); pw.print(numFullscreen);
             pw.print(" activityType="); pw.println(getActivityType());
         }
         if (rootWasReset || mNeverRelinquishIdentity || mReuseTask
