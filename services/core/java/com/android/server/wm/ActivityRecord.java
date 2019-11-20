@@ -4569,7 +4569,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If the activity is stopped, stopping, cycle to an active state. We avoid doing
         // this when there is an activity waiting to become translucent as the extra binder
         // calls will lead to noticeable jank. A later call to
-        // ActivityStack#ensureActivitiesVisibleLocked will bring the activity to a proper
+        // ActivityStack#ensureActivitiesVisible will bring the activity to a proper
         // active state.
         if (!isState(STARTED, RESUMED, PAUSED, STOPPED, STOPPING)
                 || getActivityStack().mTranslucentActivityWaiting != null) {

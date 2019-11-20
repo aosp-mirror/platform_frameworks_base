@@ -213,7 +213,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
     static final String TAG_TASKS = TAG + POSTFIX_TASKS;
     private static final String TAG_TRANSITION = TAG + POSTFIX_TRANSITION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
-    private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
+    static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
 
     // Ticks during which we check progress while waiting for an app to launch.
     private static final int LAUNCH_TICK = 500;
@@ -515,6 +515,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
     }
 
     private static final ResetTargetTaskHelper sResetTargetTaskHelper = new ResetTargetTaskHelper();
+    private final EnsureActivitiesVisibleHelper mEnsureActivitiesVisibleHelper =
+            new EnsureActivitiesVisibleHelper(this);
 
     int numActivities() {
         int count = 0;
@@ -1492,8 +1494,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
     void goToSleep() {
         // Ensure visibility without updating configuration, as activities are about to sleep.
-        ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
-                !PRESERVE_WINDOWS);
+        ensureActivitiesVisible(null /* starting */, 0 /* configChanges */, !PRESERVE_WINDOWS);
 
         // Make sure any paused or stopped but visible activities are now sleeping.
         // This ensures that the activity's onStop() is called.
@@ -1979,127 +1980,25 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
      * Make sure that all activities that need to be visible in the stack (that is, they
      * currently can be seen by the user) actually are and update their configuration.
      */
-    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
+    void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
-                true /* notifyClients */);
+        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */);
     }
 
     /**
      * Ensure visibility with an option to also update the configuration of visible activities.
-     * @see #ensureActivitiesVisibleLocked(ActivityRecord, int, boolean)
+     * @see #ensureActivitiesVisible(ActivityRecord, int, boolean)
      * @see RootActivityContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
      */
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
-    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
+    void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
         mTopActivityOccludesKeyguard = false;
         mTopDismissingKeyguardActivity = null;
         mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
         try {
-            ActivityRecord top = topRunningActivityLocked();
-            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + top
-                    + " configChanges=0x" + Integer.toHexString(configChanges));
-            if (top != null) {
-                checkTranslucentActivityWaiting(top);
-            }
-
-            // If the top activity is not fullscreen, then we need to
-            // make sure any activities under it are now visible.
-            boolean aboveTop = top != null;
-            final boolean stackShouldBeVisible = shouldBeVisible(starting);
-            boolean behindFullscreenActivity = !stackShouldBeVisible;
-            // We should not resume activities that being launched behind because these
-            // activities are actually behind other fullscreen activities, but still required
-            // to be visible (such as performing Recents animation).
-            final boolean resumeTopActivity = isFocusable() && isInStackLocked(starting) == null
-                    && top != null && !top.mLaunchTaskBehind;
-            for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
-                final Task task = getChildAt(taskNdx);
-                for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
-                    final ActivityRecord r = task.getChildAt(activityNdx);
-                    final boolean isTop = r == top;
-                    if (aboveTop && !isTop) {
-                        continue;
-                    }
-                    aboveTop = false;
-
-                    final boolean reallyVisible = r.shouldBeVisible(behindFullscreenActivity,
-                            false /* ignoringKeyguard */);
-                    // Check whether activity should be visible without Keyguard influence
-                    if (r.visibleIgnoringKeyguard) {
-                        if (r.occludesParent()) {
-                            // At this point, nothing else needs to be shown in this task.
-                            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
-                                    + " stackVisible=" + stackShouldBeVisible
-                                    + " behindFullscreen=" + behindFullscreenActivity);
-                            behindFullscreenActivity = true;
-                        } else {
-                            behindFullscreenActivity = false;
-                        }
-                    }
-
-                    if (reallyVisible) {
-                        if (r.finishing) {
-                            continue;
-                        }
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make visible? " + r
-                                + " finishing=" + r.finishing + " state=" + r.getState());
-                        // First: if this is not the current activity being started, make
-                        // sure it matches the current configuration.
-                        if (r != starting && notifyClients) {
-                            r.ensureActivityConfiguration(0 /* globalChanges */, preserveWindows,
-                                    true /* ignoreVisibility */);
-                        }
-
-                        if (!r.attachedToProcess()) {
-                            makeVisibleAndRestartIfNeeded(starting, configChanges, isTop,
-                                    resumeTopActivity && isTop, r);
-                        } else if (r.mVisibleRequested) {
-                            // If this activity is already visible, then there is nothing to do here.
-                            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                                    "Skipping: already visible at " + r);
-
-                            if (r.mClientVisibilityDeferred && notifyClients) {
-                                r.makeClientVisible();
-                            }
-
-                            r.handleAlreadyVisible();
-                            if (notifyClients) {
-                                r.makeActiveIfNeeded(starting);
-                            }
-                        } else {
-                            r.makeVisibleIfNeeded(starting, notifyClients);
-                        }
-                        // Aggregate current change flags.
-                        configChanges |= r.configChangeFlags;
-                    } else {
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make invisible? " + r
-                                + " finishing=" + r.finishing + " state=" + r.getState()
-                                + " stackShouldBeVisible=" + stackShouldBeVisible
-                                + " behindFullscreenActivity=" + behindFullscreenActivity
-                                + " mLaunchTaskBehind=" + r.mLaunchTaskBehind);
-                        r.makeInvisible();
-                    }
-                }
-                final int windowingMode = getWindowingMode();
-                if (windowingMode == WINDOWING_MODE_FREEFORM) {
-                    // The visibility of tasks and the activities they contain in freeform stack are
-                    // determined individually unlike other stacks where the visibility or fullscreen
-                    // status of an activity in a previous task affects other.
-                    behindFullscreenActivity = !stackShouldBeVisible;
-                } else if (isActivityTypeHome()) {
-                    if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Home task: at " + task
-                            + " stackShouldBeVisible=" + stackShouldBeVisible
-                            + " behindFullscreenActivity=" + behindFullscreenActivity);
-                    // No other task in the home stack should be visible behind the home activity.
-                    // Home activities is usually a translucent activity with the wallpaper behind
-                    // them. However, when they don't have the wallpaper behind them, we want to
-                    // show activities in the next application stack behind them vs. another
-                    // task in the home stack like recents.
-                    behindFullscreenActivity = true;
-                }
-            }
+            mEnsureActivitiesVisibleHelper.process(
+                    starting, configChanges, preserveWindows, notifyClients);
 
             if (mTranslucentActivityWaiting != null &&
                     mUndrawnActivitiesBelowTopTranslucent.isEmpty()) {
@@ -2214,7 +2113,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         return (flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0;
     }
 
-    private void checkTranslucentActivityWaiting(ActivityRecord top) {
+    void checkTranslucentActivityWaiting(ActivityRecord top) {
         if (mTranslucentActivityWaiting != top) {
             mUndrawnActivitiesBelowTopTranslucent.clear();
             if (mTranslucentActivityWaiting != null) {
@@ -2224,31 +2123,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             }
             mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
         }
-    }
-
-    private boolean makeVisibleAndRestartIfNeeded(ActivityRecord starting, int configChanges,
-            boolean isTop, boolean andResume, ActivityRecord r) {
-        // We need to make sure the app is running if it's the top, or it is just made visible from
-        // invisible. If the app is already visible, it must have died while it was visible. In this
-        // case, we'll show the dead window but will not restart the app. Otherwise we could end up
-        // thrashing.
-        if (isTop || !r.mVisibleRequested) {
-            // This activity needs to be visible, but isn't even running...
-            // get it started and resume if no other stack in this stack is resumed.
-            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
-            if (r != starting) {
-                r.startFreezingScreenLocked(configChanges);
-            }
-            if (!r.mVisibleRequested || r.mLaunchTaskBehind) {
-                if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
-                r.setVisibility(true);
-            }
-            if (r != starting) {
-                mStackSupervisor.startSpecificActivityLocked(r, andResume, true /* checkConfig */);
-                return true;
-            }
-        }
-        return false;
     }
 
     void convertActivityToTranslucent(ActivityRecord r) {
@@ -2490,7 +2364,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         && next.containsDismissKeyguardWindow();
 
                 if (canShowWhenLocked || mayDismissKeyguard) {
-                    ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
+                    ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                             !PRESERVE_WINDOWS);
                     nothingToResume = shouldSleepActivities();
                 }
@@ -2819,7 +2693,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                     next.showStartingWindow(null /* prev */, false /* newTask */,
                             false /* taskSwitch */);
                 }
-                mStackSupervisor.startSpecificActivityLocked(next, true, false);
+                mStackSupervisor.startSpecificActivity(next, true, false);
                 return true;
             }
 
@@ -2846,7 +2720,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
             }
             if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Restarting " + next);
-            mStackSupervisor.startSpecificActivityLocked(next, true, true);
+            mStackSupervisor.startSpecificActivity(next, true, true);
         }
 
         return true;
@@ -2991,7 +2865,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 // Don't do a starting window for mLaunchTaskBehind. More importantly make sure we
                 // tell WindowManager that r is visible even though it is at the back of the stack.
                 r.setVisibility(true);
-                ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
                 // Go ahead to execute app transition for this activity since the app transition
                 // will not be triggered through the resume channel.
                 getDisplay().mDisplayContent.executeAppTransition();
@@ -4381,7 +4255,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
-        ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+        ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         mRootActivityContainer.resumeFocusedStacksTopActivities();
     }
 

@@ -1408,7 +1408,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             boolean preserveWindows, boolean notifyClients) {
         for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = getChildAt(stackNdx);
-            stack.ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
+            stack.ensureActivitiesVisible(starting, configChanges, preserveWindows,
                     notifyClients);
         }
     }
