@@ -333,7 +333,6 @@ public class NotificationLockscreenUserManagerImpl implements
     }
 
     private boolean hideSilentNotificationsOnLockscreen() {
-        // TODO(b/140058091)
         return whitelistIpcs(() -> Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1) == 0);
     }
