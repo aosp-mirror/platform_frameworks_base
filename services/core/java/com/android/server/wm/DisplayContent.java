@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -4268,12 +4267,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         int getOrientation() {
-            if (isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
-                    || isStackVisible(WINDOWING_MODE_FREEFORM)) {
+            if (isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)) {
                 // Apps and their containers are not allowed to specify an orientation while the
-                // docked or freeform stack is visible...except for the home stack if the docked
-                // stack is minimized and it actually set something and the bounds is different from
-                // the display.
+                // docked stack is visible...except for the home stack if the docked stack is
+                // minimized and it actually set something and the bounds is different from  the
+                // display.
                 if (mHomeStack != null && mHomeStack.isVisible()
                         && mDividerControllerLocked.isMinimizedDock()
                         && !(mDividerControllerLocked.isHomeStackResizable()
