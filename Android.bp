@@ -895,7 +895,10 @@ framework_docs_only_args = " -android -manifest $(location core/res/AndroidManif
     "-overview $(location core/java/overview.html) " +
     // Federate Support Library references against local API file.
     "-federate SupportLib https://developer.android.com " +
-    "-federationapi SupportLib $(location :current-support-api) "
+    "-federationapi SupportLib $(location :current-support-api) " +
+    // Federate Support Library references against local API file.
+    "-federate AndroidX https://developer.android.com " +
+    "-federationapi AndroidX $(location :current-androidx-api) "
 
 framework_docs_only_libs = [
     "voip-common",
@@ -1013,6 +1016,7 @@ doc_defaults {
         "core/res/AndroidManifest.xml",
         "core/java/overview.html",
         ":current-support-api",
+        ":current-androidx-api",
     ],
     create_stubs: false,
 }
