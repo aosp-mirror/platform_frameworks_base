@@ -270,7 +270,8 @@ public abstract class PackageSettingBase extends SettingBase {
         updateAvailable = orig.updateAvailable;
     }
 
-    private PackageUserState modifyUserState(int userId) {
+    @VisibleForTesting
+    PackageUserState modifyUserState(int userId) {
         PackageUserState state = mUserState.get(userId);
         if (state == null) {
             state = new PackageUserState();
@@ -461,6 +462,18 @@ public abstract class PackageSettingBase extends SettingBase {
         state.instantApp = instantApp;
         state.virtualPreload = virtualPreload;
         state.harmfulAppWarning = harmfulAppWarning;
+    }
+
+    void setUserState(int userId, PackageUserState otherState) {
+        setUserState(userId, otherState.ceDataInode, otherState.enabled, otherState.installed,
+                otherState.stopped, otherState.notLaunched, otherState.hidden,
+                otherState.distractionFlags, otherState.suspended, otherState.suspendingPackage,
+                otherState.dialogInfo, otherState.suspendedAppExtras,
+                otherState.suspendedLauncherExtras, otherState.instantApp,
+                otherState.virtualPreload, otherState.lastDisableAppCaller,
+                otherState.enabledComponents, otherState.disabledComponents,
+                otherState.domainVerificationStatus, otherState.appLinkGeneration,
+                otherState.installReason, otherState.harmfulAppWarning);
     }
 
     ArraySet<String> getEnabledComponents(int userId) {
