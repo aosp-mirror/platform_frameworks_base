@@ -3253,6 +3253,15 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_REVOKED_COMPAT =  FLAG_PERMISSION_REVOKE_ON_UPGRADE;
 
     /**
+     * Permission flag: The permission is one-time and should be revoked automatically on app
+     * inactivity
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_ONE_TIME = 1 << 16;
+
+    /**
      * Permission flags: Bitwise or of all permission flags allowing an
      * exemption for a restricted permission.
      * @hide
@@ -3293,7 +3302,8 @@ public abstract class PackageManager {
             | FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT
             | FLAG_PERMISSION_APPLY_RESTRICTION
             | FLAG_PERMISSION_GRANTED_BY_ROLE
-            | FLAG_PERMISSION_REVOKED_COMPAT;
+            | FLAG_PERMISSION_REVOKED_COMPAT
+            | FLAG_PERMISSION_ONE_TIME;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -4073,7 +4083,8 @@ public abstract class PackageManager {
             FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT,
             FLAG_PERMISSION_APPLY_RESTRICTION,
             FLAG_PERMISSION_GRANTED_BY_ROLE,
-            FLAG_PERMISSION_REVOKED_COMPAT
+            FLAG_PERMISSION_REVOKED_COMPAT,
+            FLAG_PERMISSION_ONE_TIME
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -7174,6 +7185,7 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_APPLY_RESTRICTION: return "APPLY_RESTRICTION";
             case FLAG_PERMISSION_GRANTED_BY_ROLE: return "GRANTED_BY_ROLE";
             case FLAG_PERMISSION_REVOKED_COMPAT: return "REVOKED_COMPAT";
+            case FLAG_PERMISSION_ONE_TIME: return "ONE_TIME";
             default: return Integer.toString(flag);
         }
     }

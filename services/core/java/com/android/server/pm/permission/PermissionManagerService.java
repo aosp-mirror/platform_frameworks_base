@@ -204,6 +204,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     /** Permission controller: User space permission management */
     private PermissionControllerManager mPermissionControllerManager;
 
+    /** Map of OneTimePermissionUserManagers keyed by userId */
+    private final SparseArray<OneTimePermissionUserManager> mOneTimePermissionUserManagers =
+            new SparseArray<>();
+
     /** Default permission policy to provide proper behaviour out-of-the-box */
     private final DefaultPermissionGrantPolicy mDefaultPermissionGrantPolicy;
 
@@ -3007,6 +3011,53 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     public List<SplitPermissionInfoParcelable> getSplitPermissions() {
         return PermissionManager.splitPermissionInfoListToParcelableList(
                 SystemConfig.getInstance().getSplitPermissions());
+    }
+
+    private OneTimePermissionUserManager getOneTimePermissionUserManager(@UserIdInt int userId) {
+        synchronized (mLock) {
+            OneTimePermissionUserManager oneTimePermissionUserManager =
+                    mOneTimePermissionUserManagers.get(userId);
+            if (oneTimePermissionUserManager == null) {
+                oneTimePermissionUserManager = new OneTimePermissionUserManager(
+                        mContext.createContextAsUser(UserHandle.of(userId), /*flags*/ 0));
+                mOneTimePermissionUserManagers.put(userId, oneTimePermissionUserManager);
+            }
+            return oneTimePermissionUserManager;
+        }
+    }
+
+    @Override
+    public void startOneTimePermissionSession(String packageName, @UserIdInt int userId,
+            long timeoutMillis, int importanceToResetTimer, int importanceToKeepSessionAlive) {
+        mContext.enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+                "Must be able to revoke runtime permissions to register permissions as one time.");
+        mContext.enforceCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS,
+                "Must be able to access usage stats to register permissions as one time.");
+        packageName = Preconditions.checkNotNull(packageName);
+
+        long token = Binder.clearCallingIdentity();
+        try {
+            getOneTimePermissionUserManager(userId).startPackageOneTimeSession(packageName,
+                    timeoutMillis, importanceToResetTimer, importanceToKeepSessionAlive);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void stopOneTimePermissionSession(String packageName, @UserIdInt int userId) {
+        mContext.enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+                "Must be able to revoke runtime permissions to remove permissions as one time.");
+        mContext.enforceCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS,
+                "Must be able to access usage stats to remove permissions as one time.");
+        Preconditions.checkNotNull(packageName);
+
+        long token = Binder.clearCallingIdentity();
+        try {
+            getOneTimePermissionUserManager(userId).stopPackageOneTimeSession(packageName);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     private boolean isNewPlatformPermissionForPackage(String perm, AndroidPackage pkg) {
