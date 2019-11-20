@@ -535,24 +535,22 @@ gensrcs {
     name: "framework-javastream-protos",
     depfile: true,
 
-    tool_files: ["tools/genprotos.sh"],
     tools: [
         "aprotoc",
         "protoc-gen-javastream",
         "soong_zip",
     ],
 
-    // TODO This should not be needed. If you set a custom OUT_DIR or OUT_DIR_COMMON_BASE you can
-    // end up with a command that is extremely long, potentially going passed MAX_ARG_STRLEN due to
-    // the way sbox rewrites the command. See b/70221552.
-    cmd: "$(location tools/genprotos.sh) " +
-        " $(location aprotoc) " +
-        " $(location protoc-gen-javastream) " +
-        " $(location soong_zip) " +
-        " $(genDir) " +
-        " $(depfile) " +
-        " $(in) " +
-        " $(out)",
+    cmd: "mkdir -p $(genDir)/$(in) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-javastream) " +
+        "  --dependency_out=$(depfile) " +
+        "  --javastream_out=$(genDir)/$(in) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in) " +
+        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
+
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
