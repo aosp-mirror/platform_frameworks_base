@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-package android.service.notification;
+package android.service.controls;
 
-import android.net.Uri;
-import android.service.notification.Condition;
-
-/** @hide */
-oneway interface IConditionProvider {
-    void onConnected();
-    void onSubscribe(in Uri conditionId);
-    void onUnsubscribe(in Uri conditionId);
-}
+parcelable RangeTemplate;
