@@ -26,6 +26,7 @@ import android.net.wifi.IDppCallback;
 import android.net.wifi.ILocalOnlyHotspotCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
+import android.net.wifi.IScanResultsCallback;
 import android.net.wifi.IScanResultsListener;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
@@ -512,14 +513,26 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @deprecated replaced by {@link #registerScanResultsCallback(IScanResultsCallback)} */
+    @Deprecated
     public void registerScanResultsListener(
             IBinder binder, IScanResultsListener listener, int listenerIdentifier) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @deprecated replaced by {@link #unregisterScanResultsCallback(IScanResultsCallback)} */
+    @Deprecated
     public void unregisterScanResultsListener(int listenerIdentifier) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void registerScanResultsCallback(IScanResultsCallback callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void unregisterScanResultsCallback(IScanResultsCallback callback) {
         throw new UnsupportedOperationException();
     }
 
