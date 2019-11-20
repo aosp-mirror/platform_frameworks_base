@@ -348,16 +348,6 @@ public class KeyStore {
         return list(prefix, UID_SELF);
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public boolean reset() {
-        try {
-            return mBinder.reset() == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
-    }
-
     /**
      * Attempt to lock the keystore for {@code user}.
      *
