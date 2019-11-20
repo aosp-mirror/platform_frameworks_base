@@ -1529,8 +1529,8 @@ public class UserManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public boolean isGuestUser(int id) {
-        UserInfo user = getUserInfo(id);
+    public boolean isGuestUser(@UserIdInt int userId) {
+        UserInfo user = getUserInfo(userId);
         return user != null && user.isGuest();
     }
 
