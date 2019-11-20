@@ -665,15 +665,15 @@ public class StagingManager {
     private boolean isApexSessionFinalized(ApexSessionInfo session) {
         /* checking if the session is in a final state, i.e., not active anymore */
         return session.isUnknown || session.isActivationFailed || session.isSuccess
-                || session.isRolledBack;
+                || session.isReverted;
     }
 
     private static boolean isApexSessionFailed(ApexSessionInfo apexSessionInfo) {
-        // isRollbackInProgress is included to cover the scenario, when a device is rebooted in
-        // during the rollback, and apexd fails to resume the rollback after reboot.
+        // isRevertInProgress is included to cover the scenario, when a device is rebooted
+        // during the revert, and apexd fails to resume the revert after reboot.
         return apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown
-                || apexSessionInfo.isRolledBack || apexSessionInfo.isRollbackInProgress
-                || apexSessionInfo.isRollbackFailed;
+                || apexSessionInfo.isReverted || apexSessionInfo.isRevertInProgress
+                || apexSessionInfo.isRevertFailed;
     }
 
     @GuardedBy("mStagedSessions")
