@@ -15,6 +15,7 @@
  */
 package android.os;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -22,13 +23,24 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * @hide Only for use within the system server.
  */
 public abstract class UserManagerInternal {
-    public static final int CAMERA_NOT_DISABLED = 0;
-    public static final int CAMERA_DISABLED_LOCALLY = 1;
-    public static final int CAMERA_DISABLED_GLOBALLY = 2;
+
+    public static final int OWNER_TYPE_DEVICE_OWNER = 0;
+    public static final int OWNER_TYPE_PROFILE_OWNER = 1;
+    public static final int OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE = 2;
+    public static final int OWNER_TYPE_NO_OWNER = 3;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {OWNER_TYPE_DEVICE_OWNER, OWNER_TYPE_PROFILE_OWNER,
+            OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE, OWNER_TYPE_NO_OWNER})
+    public @interface OwnerType {
+    }
 
     public interface UserRestrictionsListener {
         /**
@@ -47,13 +59,19 @@ public abstract class UserManagerInternal {
      *
      * @param userId target user id for the local restrictions.
      * @param restrictions a bundle of user restrictions.
-     * @param isDeviceOwner whether {@code userId} corresponds to device owner user id.
-     * @param cameraRestrictionScope is camera disabled and if so what is the scope of restriction.
-     *        Should be one of {@link #CAMERA_NOT_DISABLED}, {@link #CAMERA_DISABLED_LOCALLY} or
-     *                               {@link #CAMERA_DISABLED_GLOBALLY}
+     * @param restrictionOwnerType determines which admin {@code userId} corresponds to.
+     *             The admin can be either
+     *             {@link UserManagerInternal#OWNER_TYPE_DEVICE_OWNER},
+     *             {@link UserManagerInternal#OWNER_TYPE_PROFILE_OWNER},
+     *             {@link UserManagerInternal#OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE}
+     *             or {@link UserManagerInternal#OWNER_TYPE_NO_OWNER}.
+     *             If the admin is a DEVICE_OWNER or a PROFILE_OWNER_ORG_OWNED_DEVICE then
+     *             a restriction may be applied globally depending on which restriction it is,
+     *             otherwise it will be applied just on the current user.
+     * @see OwnerType
      */
     public abstract void setDevicePolicyUserRestrictions(int userId, @Nullable Bundle restrictions,
-            boolean isDeviceOwner, int cameraRestrictionScope);
+            @OwnerType int restrictionOwnerType);
 
     /**
      * Returns the "base" user restrictions.

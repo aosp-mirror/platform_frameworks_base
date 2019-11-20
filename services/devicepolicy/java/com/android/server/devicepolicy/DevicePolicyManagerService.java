@@ -5568,8 +5568,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void enforceProfileOwnerOfCorpOwnedDevice(ActiveAdmin admin) {
-        if (!isProfileOwnerOfOrganizationOwnedDevicte(admin)) {
+    private void enforceProfileOwnerOfOrganizationOwnedDevice(ActiveAdmin admin) {
+        if (!isProfileOwnerOfOrganizationOwnedDevice(admin)) {
             throw new SecurityException(String.format("Provided admin %s is either not a profile "
                     + "owner or not on a corporate-owned device.", admin));
         }
@@ -6639,7 +6639,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         boolean calledByProfileOwnerOnOrgOwnedDevice =
-                isProfileOwnerOfOrganizationOwnedDevicte(admin);
+                isProfileOwnerOfOrganizationOwnedDevice(admin);
 
         if (calledOnParentInstance && !calledByProfileOwnerOnOrgOwnedDevice) {
             throw new SecurityException("Wiping the entire device can only be done by a profile"
@@ -8020,7 +8020,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * {@code getActiveAdminForCallerLocked} or one of the similar variants, not caller-supplied
      * input.
      */
-    private boolean isProfileOwnerOfOrganizationOwnedDevicte(@Nullable ActiveAdmin admin) {
+    private boolean isProfileOwnerOfOrganizationOwnedDevice(@Nullable ActiveAdmin admin) {
         if (admin == null) {
             return false;
         }
@@ -10223,8 +10223,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final boolean isDeviceOwner = mOwners.isDeviceOwnerUserId(userId);
             final Bundle userRestrictions;
-            // Whether device owner enforces camera restriction.
-            boolean disallowCameraGlobally = false;
+            final int restrictionOwnerType;
 
             if (isDeviceOwner) {
                 final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
@@ -10232,33 +10231,45 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return; // Shouldn't happen.
                 }
                 userRestrictions = deviceOwner.userRestrictions;
-                // DO can disable camera globally.
-                disallowCameraGlobally = deviceOwner.disableCamera;
+                addOrRemoveDisableCameraRestriction(userRestrictions, deviceOwner);
+                restrictionOwnerType = UserManagerInternal.OWNER_TYPE_DEVICE_OWNER;
             } else {
                 final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(userId);
                 userRestrictions = profileOwner != null ? profileOwner.userRestrictions : null;
+                addOrRemoveDisableCameraRestriction(userRestrictions, userId);
+
+                if (isProfileOwnerOfOrganizationOwnedDevice(profileOwner)) {
+                    restrictionOwnerType =
+                          UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE;
+                } else if (profileOwner != null) {
+                    restrictionOwnerType = UserManagerInternal.OWNER_TYPE_PROFILE_OWNER;
+                } else {
+                    restrictionOwnerType = UserManagerInternal.OWNER_TYPE_NO_OWNER;
+                }
             }
 
-            // Whether any admin enforces camera restriction.
-            final int cameraRestrictionScope =
-                    getCameraRestrictionScopeLocked(userId, disallowCameraGlobally);
-
             mUserManagerInternal.setDevicePolicyUserRestrictions(userId, userRestrictions,
-                    isDeviceOwner, cameraRestrictionScope);
+                    restrictionOwnerType);
         }
     }
 
-    /**
-     * Get the scope of camera restriction for a given user if any.
-     */
-    private int getCameraRestrictionScopeLocked(int userId, boolean disallowCameraGlobally) {
-        if (disallowCameraGlobally) {
-            return UserManagerInternal.CAMERA_DISABLED_GLOBALLY;
-        } else if (getCameraDisabled(
-                /* who= */ null, userId, /* mergeDeviceOwnerRestriction= */ false)) {
-            return UserManagerInternal.CAMERA_DISABLED_LOCALLY;
+    private void addOrRemoveDisableCameraRestriction(Bundle userRestrictions, ActiveAdmin admin) {
+        if (userRestrictions == null) return;
+        if (admin.disableCamera) {
+            userRestrictions.putBoolean(UserManager.DISALLOW_CAMERA, true);
+        } else {
+            userRestrictions.remove(UserManager.DISALLOW_CAMERA);
         }
-        return UserManagerInternal.CAMERA_NOT_DISABLED;
+    }
+
+    private void addOrRemoveDisableCameraRestriction(Bundle userRestrictions, int userId) {
+        if (userRestrictions == null) return;
+        if (getCameraDisabled(/* who= */ null, userId, /* mergeDeviceOwnerRestriction= */
+                false)) {
+            userRestrictions.putBoolean(UserManager.DISALLOW_CAMERA, true);
+        } else {
+            userRestrictions.remove(UserManager.DISALLOW_CAMERA);
+        }
     }
 
     @Override
