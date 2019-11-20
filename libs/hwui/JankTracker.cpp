@@ -81,7 +81,7 @@ static FrameInfoIndex sFrameStart = FrameInfoIndex::IntendedVsync;
 
 JankTracker::JankTracker(ProfileDataContainer* globalData) {
     mGlobalData = globalData;
-    nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1_s / DeviceInfo::getRefreshRate());
+    nsecs_t frameIntervalNanos = DeviceInfo::getVsyncPeriod();
     nsecs_t sfOffset = DeviceInfo::getCompositorOffset();
     nsecs_t offsetDelta = sfOffset - DeviceInfo::getAppOffset();
     // There are two different offset cases. If the offsetDelta is positive
