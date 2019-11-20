@@ -424,7 +424,26 @@ public final class SmsManager {
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                true /* persistMessage*/, null);
+                true /* persistMessage*/, null, 0L /* messageId */);
+    }
+
+
+    /**
+     * Send a text based SMS. Same as {@link #sendTextMessage( String destinationAddress,
+     * String scAddress, String text, PendingIntent sentIntent, PendingIntent deliveryIntent)}, but
+     * adds an optional messageId.
+     * @param messageId An id that uniquely identifies the message requested to be sent.
+     * Used for logging and diagnostics purposes. The id may be 0.
+     *
+     * @throws IllegalArgumentException if destinationAddress or text are empty
+     *
+     */
+    public void sendTextMessage(
+            @NonNull String destinationAddress, @Nullable String scAddress, @NonNull String text,
+            @Nullable PendingIntent sentIntent, @Nullable PendingIntent deliveryIntent,
+            long messageId) {
+        sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
+                true /* persistMessage*/, null, messageId);
     }
 
     /**
@@ -542,7 +561,7 @@ public final class SmsManager {
 
     private void sendTextMessageInternal(String destinationAddress, String scAddress,
             String text, PendingIntent sentIntent, PendingIntent deliveryIntent,
-            boolean persistMessage, String packageName) {
+            boolean persistMessage, String packageName, long messageId) {
         if (TextUtils.isEmpty(destinationAddress)) {
             throw new IllegalArgumentException("Invalid destinationAddress");
         }
@@ -569,10 +588,10 @@ public final class SmsManager {
                     try {
                         iSms.sendTextForSubscriber(subId, packageName,
                                 destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                                persistMessage);
+                                persistMessage, messageId);
                     } catch (RemoteException e) {
                         Log.e(TAG, "sendTextMessageInternal: Couldn't send SMS, exception - "
-                                + e.getMessage());
+                                + e.getMessage() + " id: " + messageId);
                         notifySmsError(sentIntent, RESULT_REMOTE_EXCEPTION);
                     }
                 }
@@ -589,10 +608,10 @@ public final class SmsManager {
             try {
                 iSms.sendTextForSubscriber(getSubscriptionId(), packageName,
                         destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                        persistMessage);
+                        persistMessage, messageId);
             } catch (RemoteException e) {
                 Log.e(TAG, "sendTextMessageInternal (no persist): Couldn't send SMS, exception - "
-                        + e.getMessage());
+                        + e.getMessage() + " id: " + messageId);
                 notifySmsError(sentIntent, RESULT_REMOTE_EXCEPTION);
             }
         }
@@ -634,7 +653,8 @@ public final class SmsManager {
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
         sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                false /* persistMessage */, null);
+                false /* persistMessage */, null,
+                0L /* messageId */);
     }
 
     private void sendTextMessageInternal(
@@ -921,7 +941,26 @@ public final class SmsManager {
             String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, true /* persistMessage*/, null);
+                deliveryIntents, true /* persistMessage*/, null,
+                0L /* messageId */);
+    }
+
+    /**
+     * Send a multi-part text based SMS. Same as #sendMultipartTextMessage(String, String,
+     * ArrayList, ArrayList, ArrayList), but adds an optional messageId.
+     * @param messageId An id that uniquely identifies the message requested to be sent.
+     * Used for logging and diagnostics purposes. The id may be 0.
+     *
+     * @throws IllegalArgumentException if destinationAddress or data are empty
+     *
+     */
+    public void sendMultipartTextMessage(
+            @NonNull String destinationAddress, @Nullable String scAddress,
+            @NonNull List<String> parts, @Nullable List<PendingIntent> sentIntents,
+            @Nullable List<PendingIntent> deliveryIntents, long messageId) {
+        sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
+                deliveryIntents, true /* persistMessage*/, null,
+                messageId);
     }
 
     /**
@@ -946,17 +985,17 @@ public final class SmsManager {
     @SystemApi
     @TestApi
     public void sendMultipartTextMessage(
-            @NonNull String destinationAddress, @NonNull String scAddress,
+            @NonNull String destinationAddress, @Nullable String scAddress,
             @NonNull List<String> parts, @Nullable List<PendingIntent> sentIntents,
             @Nullable List<PendingIntent> deliveryIntents, @NonNull String packageName) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, true /* persistMessage*/, packageName);
+                deliveryIntents, true /* persistMessage*/, packageName, 0L /* messageId */);
     }
 
     private void sendMultipartTextMessageInternal(
             String destinationAddress, String scAddress, List<String> parts,
             List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents,
-            boolean persistMessage, String packageName) {
+            boolean persistMessage, String packageName, long messageId) {
         if (TextUtils.isEmpty(destinationAddress)) {
             throw new IllegalArgumentException("Invalid destinationAddress");
         }
@@ -983,10 +1022,11 @@ public final class SmsManager {
                             ISms iSms = getISmsServiceOrThrow();
                             iSms.sendMultipartTextForSubscriber(subId, packageName,
                                     destinationAddress, scAddress, parts, sentIntents,
-                                    deliveryIntents, persistMessage);
+                                    deliveryIntents, persistMessage, messageId);
                         } catch (RemoteException e) {
                             Log.e(TAG, "sendMultipartTextMessageInternal: Couldn't send SMS - "
-                                    + e.getMessage());
+                                    + e.getMessage() + " id: "
+                                    + messageId);
                             notifySmsError(sentIntents, RESULT_REMOTE_EXCEPTION);
                         }
                     }
@@ -1003,11 +1043,11 @@ public final class SmsManager {
                     if (iSms != null) {
                         iSms.sendMultipartTextForSubscriber(getSubscriptionId(), packageName,
                                 destinationAddress, scAddress, parts, sentIntents, deliveryIntents,
-                                persistMessage);
+                                persistMessage, messageId);
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "sendMultipartTextMessageInternal: Couldn't send SMS - "
-                            + e.getMessage());
+                            + e.getMessage() + " id: " + messageId);
                     notifySmsError(sentIntents, RESULT_REMOTE_EXCEPTION);
                 }
             }
@@ -1021,7 +1061,7 @@ public final class SmsManager {
                 deliveryIntent = deliveryIntents.get(0);
             }
             sendTextMessageInternal(destinationAddress, scAddress, parts.get(0),
-                    sentIntent, deliveryIntent, true, packageName);
+                    sentIntent, deliveryIntent, true, packageName, messageId);
         }
     }
 
@@ -1051,7 +1091,8 @@ public final class SmsManager {
             String destinationAddress, String scAddress, List<String> parts,
             List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents) {
         sendMultipartTextMessageInternal(destinationAddress, scAddress, parts, sentIntents,
-                deliveryIntents, false /* persistMessage*/, null);
+                deliveryIntents, false /* persistMessage*/, null,
+                0L /* messageId */);
     }
 
     /**

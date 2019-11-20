@@ -145,10 +145,13 @@ interface ISms {
      *   be automatically persisted in the SMS db. It only affects messages sent
      *   by a non-default SMS app. Currently only the carrier app can set this
      *   parameter to false to skip auto message persistence.
+     * @param messageId An id that uniquely identifies the message requested to be sent.
+     *   Used for logging and diagnostics purposes. The id may be 0.
      */
     void sendTextForSubscriber(in int subId, String callingPkg, in String destAddr,
             in String scAddr, in String text, in PendingIntent sentIntent,
-            in PendingIntent deliveryIntent, in boolean persistMessageForNonDefaultSmsApp);
+            in PendingIntent deliveryIntent, in boolean persistMessageForNonDefaultSmsApp,
+            in long messageId);
 
     /**
      * Send an SMS. Internal use only.
@@ -270,11 +273,14 @@ interface ISms {
      *   be automatically persisted in the SMS db. It only affects messages sent
      *   by a non-default SMS app. Currently only the carrier app can set this
      *   parameter to false to skip auto message persistence.
+     * @param messageId An id that uniquely identifies the message requested to be sent.
+     *   Used for logging and diagnostics purposes. The id may be 0.
      */
     void sendMultipartTextForSubscriber(in int subId, String callingPkg,
             in String destinationAddress, in String scAddress,
             in List<String> parts, in List<PendingIntent> sentIntents,
-            in List<PendingIntent> deliveryIntents, in boolean persistMessageForNonDefaultSmsApp);
+            in List<PendingIntent> deliveryIntents, in boolean persistMessageForNonDefaultSmsApp,
+            in long messageId);
 
     /**
      * Send a multi-part text based SMS with options using Subscription Id.
