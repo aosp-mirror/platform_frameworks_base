@@ -20,19 +20,31 @@ import android.annotation.NonNull;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.internal.os.BinderInternal;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+
 public class SystemUIService extends Service {
+
+    private final Handler mMainHandler;
+
+    @Inject
+    public SystemUIService(@MainHandler Handler mainHandler) {
+        super();
+        mMainHandler = mainHandler;
+    }
 
     @Override
     public void onCreate() {
@@ -56,7 +68,7 @@ public class SystemUIService extends Service {
                                     "uid " + uid + " sent too many Binder proxies to uid "
                                     + Process.myUid());
                         }
-                    }, Dependency.get(Dependency.MAIN_HANDLER));
+                    }, mMainHandler);
         }
     }
 

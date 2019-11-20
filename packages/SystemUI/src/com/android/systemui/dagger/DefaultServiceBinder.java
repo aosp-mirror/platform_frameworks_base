@@ -19,6 +19,7 @@ package com.android.systemui.dagger;
 import android.app.Service;
 
 import com.android.systemui.ImageWallpaper;
+import com.android.systemui.SystemUIService;
 import com.android.systemui.doze.DozeService;
 import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.screenshot.TakeScreenshotService;
@@ -50,6 +51,12 @@ public abstract class DefaultServiceBinder {
     @IntoMap
     @ClassKey(KeyguardService.class)
     public abstract Service bindKeyguardService(KeyguardService service);
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(SystemUIService.class)
+    public abstract Service bindSystemUIService(SystemUIService service);
 
     /** */
     @Binds
