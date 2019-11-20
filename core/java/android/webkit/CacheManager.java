@@ -50,6 +50,11 @@ public final class CacheManager {
      */
     @Deprecated
     public static class CacheResult {
+
+        @UnsupportedAppUsage
+        public CacheResult() {
+        }
+
         // these fields are saved to the database
         @UnsupportedAppUsage
         int httpStatusCode;

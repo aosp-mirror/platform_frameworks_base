@@ -667,8 +667,10 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Показывать уведомления от этого приложения?"</string>
     <string name="notification_silence_title" msgid="5763240612242137433">"Без звука"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"Оповещения"</string>
+    <string name="notification_bubble_title" msgid="6826478461954949364">"Всплывающая подсказка"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"Уведомления приходят без звука и вибрации"</string>
     <string name="notification_channel_summary_default" msgid="5994062840431965586">"Уведомления приходят со звуком или вибрацией"</string>
+    <string name="notification_channel_summary_bubble" msgid="4269580628050629291">"Привлекает ваше внимание к контенту с помощью плавающего ярлыка"</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Эти уведомления нельзя изменить."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Эту группу уведомлений нельзя настроить здесь."</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Уведомление отправлено через прокси-сервер."</string>
@@ -956,4 +958,7 @@
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Закрыть"</string>
     <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"Параметры навигации в системе обновлены. Чтобы изменить их, перейдите в настройки."</string>
     <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"Чтобы обновить параметры навигации в системе, перейдите в настройки."</string>
+    <string name="inattentive_sleep_warning_title" msgid="7695119731872371794">"Переход в режим ожидания"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="4279125516592217099">"Устройство Android TV скоро выключится. Чтобы этого не произошло, нажмите любую кнопку."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="3128565462954884260">"Устройство скоро выключится. Чтобы этого не произошло, нажмите любую кнопку или коснитесь экрана."</string>
 </resources>

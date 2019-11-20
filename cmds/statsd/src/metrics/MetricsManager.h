@@ -35,7 +35,7 @@ namespace os {
 namespace statsd {
 
 // A MetricsManager is responsible for managing metrics from one single config source.
-class MetricsManager : public PackageInfoListener {
+class MetricsManager : public virtual android::RefBase {
 public:
     MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const int64_t timeBaseNs,
                    const int64_t currentTimeNs, const sp<UidMap>& uidMap,
@@ -63,15 +63,11 @@ public:
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet);
 
     void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
-                          const int64_t version) override;
+                          const int64_t version);
 
-    void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid) override;
+    void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid);
 
-    void onUidMapReceived(const int64_t& eventTimeNs) override;
-
-    bool shouldAddUidMapListener() const {
-        return !mAllowedPkg.empty();
-    }
+    void onUidMapReceived(const int64_t& eventTimeNs);
 
     bool shouldWriteToDisk() const {
         return mNoReportMetricIds.size() != mAllMetricProducers.size();

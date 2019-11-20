@@ -376,6 +376,10 @@ public class ResolverListAdapter extends BaseAdapter {
         final DisplayResolveInfo
                 dri = new DisplayResolveInfo(intent, add,
                 replaceIntent != null ? replaceIntent : defaultIntent, makePresentationGetter(add));
+        dri.setPinned(rci.isPinned());
+        if (rci.isPinned()) {
+            Log.i(TAG, "Pinned item: " + rci.name);
+        }
         addResolveInfo(dri);
         if (replaceIntent == intent) {
             // Only add alternates if we didn't get a specific replacement from

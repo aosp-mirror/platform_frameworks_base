@@ -64,6 +64,10 @@ public abstract class ContentSuggestionsService extends Service {
         @Override
         public void provideContextImage(int taskId, GraphicBuffer contextImage,
                 int colorSpaceId, Bundle imageContextRequestExtras) {
+            if (imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)
+                    && contextImage != null) {
+                throw new IllegalArgumentException("Two bitmaps provided; expected one.");
+            }
 
             Bitmap wrappedBuffer = null;
             if (imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)) {

@@ -661,8 +661,12 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"اس ایپ کی طرف سے اطلاعات دکھانا جاری رکھیں؟"</string>
     <string name="notification_silence_title" msgid="5763240612242137433">"خاموش"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"الرٹ کرنا"</string>
+    <!-- no translation found for notification_bubble_title (6826478461954949364) -->
+    <skip />
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"بغیر آواز یا وائبریشن کے آپ کو فوکس کرنے میں مدد کرتا ہے۔"</string>
     <string name="notification_channel_summary_default" msgid="5994062840431965586">"آواز اور وائبریشن کے ذریعے آپ کی توجہ حاصل کرتا ہے۔"</string>
+    <!-- no translation found for notification_channel_summary_bubble (4269580628050629291) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"اطلاعات کے اس گروپ کو یہاں کنفیگر نہیں کیا جا سکتا"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"پراکسی اطلاع"</string>
@@ -946,4 +950,7 @@
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"برخاست کریں"</string>
     <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"سسٹم نیویگیشن اپ ڈیٹ کیا گیا۔ تبدیلیاں کرنے کے لیے، ترتیبات پر جائیں۔"</string>
     <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>
+    <string name="inattentive_sleep_warning_title" msgid="7695119731872371794">"اسٹینڈ بائی"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="4279125516592217099">"‏Android TV آلہ جلد ہی بند ہوجائے گا آن رکھنے کے ليے بٹن دبائیں۔"</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="3128565462954884260">"آلہ جلد ہی بند ہوجائے گا اسے آن رکھنے کے ليے دبائیں۔"</string>
 </resources>

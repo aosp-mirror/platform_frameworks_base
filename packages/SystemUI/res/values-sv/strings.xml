@@ -661,8 +661,10 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vill du fortsätta visa aviseringar för den här appen?"</string>
     <string name="notification_silence_title" msgid="5763240612242137433">"Tyst"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"Påkallar uppmärksamhet"</string>
+    <string name="notification_bubble_title" msgid="6826478461954949364">"Bubbla"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"Inga ljud eller vibrationer som stör koncentrationen."</string>
     <string name="notification_channel_summary_default" msgid="5994062840431965586">"Påkallar uppmärksamhet med ljud eller vibrationer."</string>
+    <string name="notification_channel_summary_bubble" msgid="4269580628050629291">"Behåller din uppmärksamhet med en flytande genväg till innehållet."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Det går inte att ändra de här aviseringarna."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Den här aviseringsgruppen kan inte konfigureras här"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Avisering via proxy"</string>
@@ -946,4 +948,7 @@
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Stäng"</string>
     <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"Systemnavigeringen har uppdaterats. Öppna inställningarna om du vill ändra något."</string>
     <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"Öppna inställningarna och uppdatera systemnavigeringen"</string>
+    <string name="inattentive_sleep_warning_title" msgid="7695119731872371794">"Viloläge"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="4279125516592217099">"Android TV-enheten stängs snart av. Tryck på en knapp för att behålla den på."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="3128565462954884260">"Enheten stängs snart av. Tryck för att behålla den på."</string>
 </resources>

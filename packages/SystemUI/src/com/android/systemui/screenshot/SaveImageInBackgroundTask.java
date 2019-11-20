@@ -38,6 +38,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
@@ -50,6 +51,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.systemui.R;
@@ -69,9 +71,12 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -81,6 +86,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "SaveImageInBackgroundTask";
 
     private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
+    private static final String SCREENSHOT_ID_TEMPLATE = "Screenshot_%s";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
     private final GlobalScreenshot.SaveImageInBackgroundData mParams;
@@ -91,8 +97,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final Notification.BigPictureStyle mNotificationStyle;
     private final int mImageWidth;
     private final int mImageHeight;
-    private final Handler mHandler;
     private final ScreenshotNotificationSmartActionsProvider mSmartActionsProvider;
+    private final String mScreenshotId;
+    private final boolean mSmartActionsEnabled;
+    private final Random mRandom = new Random();
 
     SaveImageInBackgroundTask(Context context, GlobalScreenshot.SaveImageInBackgroundData data,
             NotificationManager nManager) {
@@ -103,11 +111,20 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         mImageTime = System.currentTimeMillis();
         String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(mImageTime));
         mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
+        mScreenshotId = String.format(SCREENSHOT_ID_TEMPLATE, UUID.randomUUID());
 
         // Initialize screenshot notification smart actions provider.
-        mHandler = new Handler();
-        mSmartActionsProvider =
-                SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider();
+        mSmartActionsEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.ENABLE_SCREENSHOT_NOTIFICATION_SMART_ACTIONS, false);
+        if (mSmartActionsEnabled) {
+            mSmartActionsProvider =
+                    SystemUIFactory.getInstance()
+                            .createScreenshotNotificationSmartActionsProvider(
+                                    context, THREAD_POOL_EXECUTOR, new Handler());
+        } else {
+            // If smart actions is not enabled use empty implementation.
+            mSmartActionsProvider = new ScreenshotNotificationSmartActionsProvider();
+        }
 
         // Create the large notification icon
         mImageWidth = data.image.getWidth();
@@ -201,6 +218,38 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         return info.isManagedProfile();
     }
 
+    private List<Notification.Action> buildSmartActions(
+            List<Notification.Action> actions, Context context) {
+        List<Notification.Action> broadcastActions = new ArrayList<>();
+        for (Notification.Action action : actions) {
+            // Proxy smart actions through {@link GlobalScreenshot.SmartActionsReceiver}
+            // for logging smart actions.
+            Bundle extras = action.getExtras();
+            String actionType = extras.getString(
+                    ScreenshotNotificationSmartActionsProvider.ACTION_TYPE,
+                    ScreenshotNotificationSmartActionsProvider.DEFAULT_ACTION_TYPE);
+            Intent intent = new Intent(context,
+                    GlobalScreenshot.SmartActionsReceiver.class).putExtra(
+                    GlobalScreenshot.EXTRA_ACTION_INTENT, action.actionIntent);
+            addIntentExtras(mScreenshotId, intent, actionType, mSmartActionsEnabled);
+            PendingIntent broadcastIntent = PendingIntent.getBroadcast(context,
+                    mRandom.nextInt(),
+                    intent,
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            broadcastActions.add(new Notification.Action.Builder(action.getIcon(), action.title,
+                    broadcastIntent).setContextual(true).addExtras(extras).build());
+        }
+        return broadcastActions;
+    }
+
+    private static void addIntentExtras(String screenshotId, Intent intent, String actionType,
+            boolean smartActionsEnabled) {
+        intent
+                .putExtra(GlobalScreenshot.EXTRA_ACTION_TYPE, actionType)
+                .putExtra(GlobalScreenshot.EXTRA_ID, screenshotId)
+                .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED, smartActionsEnabled);
+    }
+
     /**
      * Generates a new hardware bitmap with specified values, copying the content from the
      * passed in bitmap.
@@ -227,16 +276,13 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
         Context context = mParams.context;
         Bitmap image = mParams.image;
-        boolean smartActionsEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.ENABLE_SCREENSHOT_NOTIFICATION_SMART_ACTIONS, true);
-        CompletableFuture<List<Notification.Action>>
-                smartActionsFuture = GlobalScreenshot.getSmartActionsFuture(
-                context, image, mSmartActionsProvider, mHandler, smartActionsEnabled,
-                isManagedProfile(context));
-
         Resources r = context.getResources();
 
         try {
+            CompletableFuture<List<Notification.Action>> smartActionsFuture =
+                    GlobalScreenshot.getSmartActionsFuture(mScreenshotId, image,
+                            mSmartActionsProvider, mSmartActionsEnabled, isManagedProfile(context));
+
             // Save the screenshot to the MediaStore
             final MediaStore.PendingParams params = new MediaStore.PendingParams(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI, mImageFileName, "image/png");
@@ -289,104 +335,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 IoUtils.closeQuietly(session);
             }
 
-            // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
-            // order to do some common work like dismissing the keyguard and sending
-            // closeSystemWindows
-
-            // Create a share intent, this will always go through the chooser activity first
-            // which should not trigger auto-enter PiP
-            String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
-            String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
-            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-            sharingIntent.setType("image/png");
-            sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-            // Include URI in ClipData also, so that grantPermission picks it up.
-            // We don't use setData here because some apps interpret this as "to:".
-            ClipData clipdata = new ClipData(new ClipDescription("content",
-                    new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}),
-                    new ClipData.Item(uri));
-            sharingIntent.setClipData(clipdata);
-            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-            sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            // Make sure pending intents for the system user are still unique across users
-            // by setting the (otherwise unused) request code to the current user id.
-            int requestCode = context.getUserId();
-
-            PendingIntent chooserAction = PendingIntent.getBroadcast(context, requestCode,
-                    new Intent(context, GlobalScreenshot.TargetChosenReceiver.class),
-                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
-            Intent sharingChooserIntent = Intent.createChooser(sharingIntent, null,
-                    chooserAction.getIntentSender())
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            // Create a share action for the notification
-            PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
-                    new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
-                            .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, sharingChooserIntent)
-                            .putExtra(GlobalScreenshot.EXTRA_DISALLOW_ENTER_PIP, true)
-                            .setAction(Intent.ACTION_SEND),
-                    PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
-            Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
-                    R.drawable.ic_screenshot_share,
-                    r.getString(com.android.internal.R.string.share), shareAction);
-            mNotificationBuilder.addAction(shareActionBuilder.build());
-
-            // Create an edit intent, if a specific package is provided as the editor, then
-            // launch that directly
-            String editorPackage = context.getString(R.string.config_screenshotEditor);
-            Intent editIntent = new Intent(Intent.ACTION_EDIT);
-            if (!TextUtils.isEmpty(editorPackage)) {
-                editIntent.setComponent(ComponentName.unflattenFromString(editorPackage));
-            }
-            editIntent.setType("image/png");
-            editIntent.setData(uri);
-            editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
-            // Create a edit action
-            PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
-                    new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
-                            .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, editIntent)
-                            .putExtra(GlobalScreenshot.EXTRA_CANCEL_NOTIFICATION,
-                                    editIntent.getComponent() != null)
-                            .setAction(Intent.ACTION_EDIT),
-                    PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
-            Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
-                    R.drawable.ic_screenshot_edit,
-                    r.getString(com.android.internal.R.string.screenshot_edit), editAction);
-            mNotificationBuilder.addAction(editActionBuilder.build());
-            if (editAction != null && mParams.onEditReady != null) {
-                mParams.onEditReady.apply(editAction);
-            }
-
-            // Create a delete action for the notification
-            PendingIntent deleteAction = PendingIntent.getBroadcast(context, requestCode,
-                    new Intent(context, GlobalScreenshot.DeleteScreenshotReceiver.class)
-                            .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString()),
-                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
-            Notification.Action.Builder deleteActionBuilder = new Notification.Action.Builder(
-                    R.drawable.ic_screenshot_delete,
-                    r.getString(com.android.internal.R.string.delete), deleteAction);
-            mNotificationBuilder.addAction(deleteActionBuilder.build());
+            populateNotificationActions(context, r, uri, smartActionsFuture, mNotificationBuilder);
 
             mParams.imageUri = uri;
             mParams.image = null;
             mParams.errorMsgResId = 0;
-
-            if (smartActionsEnabled) {
-                int timeoutMs = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
-                        SystemUiDeviceConfigFlags
-                                .SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS,
-                        1000);
-                List<Notification.Action> smartActions = GlobalScreenshot.getSmartActions(
-                        smartActionsFuture,
-                        timeoutMs);
-                for (Notification.Action action : smartActions) {
-                    mNotificationBuilder.addAction(action);
-                }
-            }
         } catch (Exception e) {
             // IOException/UnsupportedOperationException may be thrown if external storage is
             // not mounted
@@ -401,6 +354,115 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         }
 
         return null;
+    }
+
+    @VisibleForTesting
+    void populateNotificationActions(Context context, Resources r, Uri uri,
+            CompletableFuture<List<Notification.Action>> smartActionsFuture,
+            Notification.Builder notificationBuilder) {
+        // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
+        // order to do some common work like dismissing the keyguard and sending
+        // closeSystemWindows
+
+        // Create a share intent, this will always go through the chooser activity first
+        // which should not trigger auto-enter PiP
+        String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
+        String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
+        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+        sharingIntent.setType("image/png");
+        sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        // Include URI in ClipData also, so that grantPermission picks it up.
+        // We don't use setData here because some apps interpret this as "to:".
+        ClipData clipdata = new ClipData(new ClipDescription("content",
+                new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}),
+                new ClipData.Item(uri));
+        sharingIntent.setClipData(clipdata);
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        // Make sure pending intents for the system user are still unique across users
+        // by setting the (otherwise unused) request code to the current user id.
+        int requestCode = context.getUserId();
+
+        PendingIntent chooserAction = PendingIntent.getBroadcast(context, requestCode,
+                new Intent(context, GlobalScreenshot.TargetChosenReceiver.class),
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+        Intent sharingChooserIntent = Intent.createChooser(sharingIntent, null,
+                chooserAction.getIntentSender())
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        // Create a share action for the notification
+        PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
+                new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
+                        .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, sharingChooserIntent)
+                        .putExtra(GlobalScreenshot.EXTRA_DISALLOW_ENTER_PIP, true)
+                        .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
+                        .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
+                                mSmartActionsEnabled)
+                        .setAction(Intent.ACTION_SEND),
+                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
+        Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
+                R.drawable.ic_screenshot_share,
+                r.getString(com.android.internal.R.string.share), shareAction);
+        notificationBuilder.addAction(shareActionBuilder.build());
+
+        // Create an edit intent, if a specific package is provided as the editor, then
+        // launch that directly
+        String editorPackage = context.getString(R.string.config_screenshotEditor);
+        Intent editIntent = new Intent(Intent.ACTION_EDIT);
+        if (!TextUtils.isEmpty(editorPackage)) {
+            editIntent.setComponent(ComponentName.unflattenFromString(editorPackage));
+        }
+        editIntent.setType("image/png");
+        editIntent.setData(uri);
+        editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        // Create a edit action
+        PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
+                new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
+                        .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, editIntent)
+                        .putExtra(GlobalScreenshot.EXTRA_CANCEL_NOTIFICATION,
+                                editIntent.getComponent() != null)
+                        .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
+                        .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
+                                mSmartActionsEnabled)
+                        .setAction(Intent.ACTION_EDIT),
+                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
+        Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
+                R.drawable.ic_screenshot_edit,
+                r.getString(com.android.internal.R.string.screenshot_edit), editAction);
+        notificationBuilder.addAction(editActionBuilder.build());
+        if (editAction != null && mParams.onEditReady != null) {
+            mParams.onEditReady.apply(editAction);
+        }
+
+        // Create a delete action for the notification
+        PendingIntent deleteAction = PendingIntent.getBroadcast(context, requestCode,
+                new Intent(context, GlobalScreenshot.DeleteScreenshotReceiver.class)
+                        .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString())
+                        .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
+                        .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
+                                mSmartActionsEnabled),
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+        Notification.Action.Builder deleteActionBuilder = new Notification.Action.Builder(
+                R.drawable.ic_screenshot_delete,
+                r.getString(com.android.internal.R.string.delete), deleteAction);
+        notificationBuilder.addAction(deleteActionBuilder.build());
+
+        if (mSmartActionsEnabled) {
+            int timeoutMs = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
+                    SystemUiDeviceConfigFlags
+                            .SCREENSHOT_NOTIFICATION_SMART_ACTIONS_TIMEOUT_MS,
+                    1000);
+            List<Notification.Action> smartActions = buildSmartActions(
+                    GlobalScreenshot.getSmartActions(mScreenshotId, smartActionsFuture,
+                            timeoutMs, mSmartActionsProvider), context);
+            for (Notification.Action action : smartActions) {
+                notificationBuilder.addAction(action);
+            }
+        }
     }
 
     @Override

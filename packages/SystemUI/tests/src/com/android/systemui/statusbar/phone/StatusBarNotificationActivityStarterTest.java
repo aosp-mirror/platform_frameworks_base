@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -116,8 +117,11 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private Intent mContentIntentInner;
     @Mock
-
     private NotificationActivityStarter mNotificationActivityStarter;
+    @Mock
+    private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
+    @Mock
+    private NotificationPanelView mNotificationPanelView;
 
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mNotificationRow;
@@ -156,19 +160,25 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         mActiveNotifications.add(mBubbleNotificationRow.getEntry());
         when(mEntryManager.getVisibleNotifications()).thenReturn(mActiveNotifications);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE);
+        when(mSuperStatusBarViewFactory.getNotificationPanelView())
+                .thenReturn(mNotificationPanelView);
 
-        mNotificationActivityStarter = new StatusBarNotificationActivityStarter(getContext(),
-                mock(CommandQueue.class), mAssistManager, mock(NotificationPanelView.class),
-                mock(NotificationPresenter.class), mEntryManager, mock(HeadsUpManagerPhone.class),
-                mActivityStarter, mock(ActivityLaunchAnimator.class), mStatusBarService,
+        mNotificationActivityStarter = (new StatusBarNotificationActivityStarter.Builder(
+                getContext(), mock(CommandQueue.class), () -> mAssistManager,
+                mEntryManager, mock(HeadsUpManagerPhone.class),
+                mActivityStarter, mStatusBarService,
                 mock(StatusBarStateController.class), mock(KeyguardManager.class),
                 mock(IDreamManager.class), mRemoteInputManager,
                 mock(StatusBarRemoteInputCallback.class), mock(NotificationGroupManager.class),
-                mock(NotificationLockscreenUserManager.class), mShadeController,
+                mock(NotificationLockscreenUserManager.class),
                 mKeyguardStateController,
                 mock(NotificationInterruptionStateProvider.class), mock(MetricsLogger.class),
                 mock(LockPatternUtils.class), mHandler, mHandler, mActivityIntentHelper,
-                mBubbleController);
+                mBubbleController, mSuperStatusBarViewFactory))
+                .setShadeController(mShadeController)
+                .setNotificationPresenter(mock(NotificationPresenter.class))
+                .setActivityLaunchAnimator(mock(ActivityLaunchAnimator.class))
+        .build();
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
         doAnswer(mCallOnDismiss).when(mActivityStarter).dismissKeyguardThenExecute(

@@ -396,7 +396,7 @@ bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAt
 }
 
 bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseTimeNs,
-                 const int64_t currentTimeNs, UidMap& uidMap,
+                 const int64_t currentTimeNs,
                  const sp<StatsPullerManager>& pullerManager,
                  const unordered_map<int64_t, int>& logTrackerMap,
                  const unordered_map<int64_t, int>& conditionTrackerMap,
@@ -788,8 +788,6 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         noReportMetricIds.insert(no_report_metric);
     }
     for (const auto& it : allMetricProducers) {
-        uidMap.addListener(it);
-
         // Register metrics to StateTrackers
         for (int atomId : it->getSlicedStateAtoms()) {
             if (!StateManager::getInstance().registerListener(atomId, it)) {
@@ -939,7 +937,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         ALOGE("initStates failed");
         return false;
     }
-    if (!initMetrics(key, config, timeBaseNs, currentTimeNs, uidMap, pullerManager, logTrackerMap,
+    if (!initMetrics(key, config, timeBaseNs, currentTimeNs, pullerManager, logTrackerMap,
                      conditionTrackerMap, allAtomMatchers, stateAtomIdMap, allStateGroupMaps,
                      allConditionTrackers, allMetricProducers,
                      conditionToMetricMap, trackerToMetricMap, metricProducerMap,

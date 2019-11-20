@@ -108,6 +108,8 @@
 
     <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE" />
+    <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE_PRIVILEGED" />
+    <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE_PRIVILEGED" />
     <protected-broadcast android:name="android.app.action.ENTER_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
@@ -4346,6 +4348,21 @@
          it will be ignored.
         @hide -->
     <permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"
+      android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows entering or exiting car mode using a specified priority.
+        This permission is required to use UiModeManager while specifying a priority for the calling
+        app.  A device manufacturer uses this permission to prioritize the apps which can
+        potentially request to enter car-mode on a device to help establish the correct behavior
+        where multiple such apps are active at the same time.
+        @hide -->
+    <permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED"
+                android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Required to receive ACTION_ENTER_CAR_MODE_PRIVILEGED or
+        ACTION_EXIT_CAR_MODE_PRIVILEGED.
+        @hide -->
+    <permission android:name="android.permission.HANDLE_CAR_MODE_CHANGES"
                 android:protectionLevel="signature|privileged" />
 
     <!-- The system process is explicitly the only one allowed to launch the

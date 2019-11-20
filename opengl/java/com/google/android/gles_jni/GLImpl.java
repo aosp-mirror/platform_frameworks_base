@@ -26,7 +26,10 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.util.Log;
 
+import dalvik.annotation.compat.UnsupportedAppUsage;
+
 import java.nio.Buffer;
+
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL10Ext;
 import javax.microedition.khronos.opengles.GL11;
@@ -56,6 +59,7 @@ public class GLImpl implements GL10, GL10Ext, GL11, GL11Ext, GL11ExtensionPack {
     private boolean have_OES_framebuffer_object;
     private boolean have_OES_texture_cube_map;
 
+    @UnsupportedAppUsage
     public GLImpl() {
     }
 

@@ -610,9 +610,11 @@ public class NotificationManagerService extends SystemService {
      * @param userId user id of the autogroup summary
      * @param pkg package of the autogroup summary
      * @param needsOngoingFlag true if the group has at least one ongoing notification
+     * @param isAppForeground true if the app is currently in the foreground.
      */
     @GuardedBy("mNotificationLock")
-    protected void updateAutobundledSummaryFlags(int userId, String pkg, boolean needsOngoingFlag) {
+    protected void updateAutobundledSummaryFlags(int userId, String pkg, boolean needsOngoingFlag,
+            boolean isAppForeground) {
         ArrayMap<String, String> summaries = mAutobundledSummaries.get(userId);
         if (summaries == null) {
             return;
@@ -633,7 +635,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         if (summary.sbn.getNotification().flags != oldFlags) {
-            mHandler.post(new EnqueueNotificationRunnable(userId, summary));
+            mHandler.post(new EnqueueNotificationRunnable(userId, summary, isAppForeground));
         }
     }
 
@@ -1143,14 +1145,21 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationBubbleChanged(String key, boolean isBubble) {
+            String pkg;
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                pkg = r != null && r.sbn != null ? r.sbn.getPackageName() : null;
+            }
+            boolean isAppForeground = pkg != null
+                    && mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     final StatusBarNotification n = r.sbn;
                     final int callingUid = n.getUid();
-                    final String pkg = n.getPackageName();
+                    pkg = n.getPackageName();
                     if (isBubble && isNotificationAppropriateToBubble(r, pkg, callingUid,
-                            null /* oldEntry */)) {
+                            null /* oldEntry */, isAppForeground)) {
                         r.getNotification().flags |= FLAG_BUBBLE;
                     } else {
                         r.getNotification().flags &= ~FLAG_BUBBLE;
@@ -2046,11 +2055,18 @@ public class NotificationManagerService extends SystemService {
 
             @Override
             public void updateAutogroupSummary(String key, boolean needsOngoingFlag) {
+                String pkg = null;
+                synchronized (mNotificationLock) {
+                    NotificationRecord r = mNotificationsByKey.get(key);
+                    pkg = r.sbn.getPackageName();
+                }
+                boolean isAppForeground = pkg != null
+                        && mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
                 synchronized (mNotificationLock) {
                     NotificationRecord r = mNotificationsByKey.get(key);
                     if (r == null) return;
                     updateAutobundledSummaryFlags(r.getUser().getIdentifier(),
-                            r.sbn.getPackageName(), needsOngoingFlag);
+                            r.sbn.getPackageName(), needsOngoingFlag, isAppForeground);
                 }
             }
         });
@@ -4490,6 +4506,8 @@ public class NotificationManagerService extends SystemService {
     // Posts a 'fake' summary for a package that has exceeded the solo-notification limit.
     private void createAutoGroupSummary(int userId, String pkg, String triggeringKey) {
         NotificationRecord summaryRecord = null;
+        final boolean isAppForeground =
+                mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
         synchronized (mNotificationLock) {
             NotificationRecord notificationRecord = mNotificationsByKey.get(triggeringKey);
             if (notificationRecord == null) {
@@ -4546,7 +4564,7 @@ public class NotificationManagerService extends SystemService {
         }
         if (summaryRecord != null && checkDisqualifyingFeatures(userId, MY_UID,
                 summaryRecord.sbn.getId(), summaryRecord.sbn.getTag(), summaryRecord, true)) {
-            mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord));
+            mHandler.post(new EnqueueNotificationRunnable(userId, summaryRecord, isAppForeground));
         }
     }
 
@@ -5057,7 +5075,15 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        mHandler.post(new EnqueueNotificationRunnable(userId, r));
+        // Need escalated privileges to get package importance
+        final long token = Binder.clearCallingIdentity();
+        boolean isAppForeground;
+        try {
+            isAppForeground = mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        mHandler.post(new EnqueueNotificationRunnable(userId, r, isAppForeground));
     }
 
     @VisibleForTesting
@@ -5136,18 +5162,15 @@ public class NotificationManagerService extends SystemService {
      * Updates the flags for this notification to reflect whether it is a bubble or not.
      */
     private void flagNotificationForBubbles(NotificationRecord r, String pkg, int userId,
-            NotificationRecord oldRecord) {
+            NotificationRecord oldRecord, boolean isAppForeground) {
         Notification notification = r.getNotification();
-        if (isNotificationAppropriateToBubble(r, pkg, userId, oldRecord)) {
+        if (isNotificationAppropriateToBubble(r, pkg, userId, oldRecord, isAppForeground)) {
             notification.flags |= FLAG_BUBBLE;
         } else {
             notification.flags &= ~FLAG_BUBBLE;
         }
-        // Is the app in the foreground?
-        final boolean appIsForeground =
-                mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
         Notification.BubbleMetadata metadata = notification.getBubbleMetadata();
-        if (!appIsForeground && metadata != null) {
+        if (!isAppForeground && metadata != null) {
             // Remove any flags that only work when foregrounded
             int flags = metadata.getFlags();
             flags &= ~Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
@@ -5161,7 +5184,7 @@ public class NotificationManagerService extends SystemService {
      * accounting for user choice & policy.
      */
     private boolean isNotificationAppropriateToBubble(NotificationRecord r, String pkg, int userId,
-            NotificationRecord oldRecord) {
+            NotificationRecord oldRecord, boolean isAppForeground) {
         Notification notification = r.getNotification();
         if (!canBubble(r, pkg, userId)) {
             // no log: canBubble has its own
@@ -5173,7 +5196,7 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
 
-        if (mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND) {
+        if (isAppForeground) {
             // If the app is foreground it always gets to bubble
             return true;
         }
@@ -5671,11 +5694,13 @@ public class NotificationManagerService extends SystemService {
     protected class EnqueueNotificationRunnable implements Runnable {
         private final NotificationRecord r;
         private final int userId;
+        private final boolean isAppForeground;
 
-        EnqueueNotificationRunnable(int userId, NotificationRecord r) {
+        EnqueueNotificationRunnable(int userId, NotificationRecord r, boolean foreground) {
             this.userId = userId;
             this.r = r;
-        };
+            this.isAppForeground = foreground;
+        }
 
         @Override
         public void run() {
@@ -5720,7 +5745,7 @@ public class NotificationManagerService extends SystemService {
                 final String tag = n.getTag();
 
                 // We need to fix the notification up a little for bubbles
-                flagNotificationForBubbles(r, pkg, callingUid, old);
+                flagNotificationForBubbles(r, pkg, callingUid, old, isAppForeground);
 
                 // Handle grouped notifications and bail out early if we
                 // can to avoid extracting signals.

@@ -16,11 +16,15 @@
 
 package com.android.systemui.power;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.IBinder;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -34,6 +38,8 @@ import com.android.systemui.R;
 public class InattentiveSleepWarningView extends FrameLayout {
     private final IBinder mWindowToken = new Binder();
     private final WindowManager mWindowManager;
+    private Animator mFadeOutAnimator;
+    private boolean mDismissing;
 
     InattentiveSleepWarningView(Context context) {
         super(context);
@@ -47,23 +53,62 @@ public class InattentiveSleepWarningView extends FrameLayout {
             // overlay consumes key presses
             return true;
         });
+
+        mFadeOutAnimator = AnimatorInflater.loadAnimator(getContext(),
+                com.android.internal.R.animator.fade_out);
+        mFadeOutAnimator.setTarget(this);
+        mFadeOutAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                removeView();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mDismissing = false;
+                setAlpha(1f);
+                setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    private void removeView() {
+        if (mDismissing) {
+            setVisibility(View.INVISIBLE);
+            mWindowManager.removeView(InattentiveSleepWarningView.this);
+        }
     }
 
     /**
      * Show the warning.
      */
     public void show() {
-        if (getParent() == null) {
-            mWindowManager.addView(this, getLayoutParams(mWindowToken));
+        if (getParent() != null) {
+            if (mFadeOutAnimator.isStarted()) {
+                mFadeOutAnimator.cancel();
+            }
+            return;
         }
+
+        setAlpha(1f);
+        setVisibility(View.VISIBLE);
+        mWindowManager.addView(this, getLayoutParams(mWindowToken));
     }
 
     /**
      * Dismiss the warning.
      */
-    public void dismiss() {
-        if (getParent() != null) {
-            mWindowManager.removeView(this);
+    public void dismiss(boolean animated) {
+        if (getParent() == null) {
+            return;
+        }
+
+        mDismissing = true;
+
+        if (animated) {
+            postOnAnimation(mFadeOutAnimator::start);
+        } else {
+            removeView();
         }
     }
 

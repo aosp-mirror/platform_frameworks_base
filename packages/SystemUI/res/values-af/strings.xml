@@ -661,8 +661,10 @@
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Hou aan om kennisgewings van hierdie program af te wys?"</string>
     <string name="notification_silence_title" msgid="5763240612242137433">"Stil"</string>
     <string name="notification_alert_title" msgid="8031196611815490340">"Waarskuwings"</string>
+    <string name="notification_bubble_title" msgid="6826478461954949364">"Borrel"</string>
     <string name="notification_channel_summary_low" msgid="3387466082089715555">"Help jou om te fokus sonder klank of vibrasie."</string>
     <string name="notification_channel_summary_default" msgid="5994062840431965586">"Kry jou aandag met klank of vibrasie."</string>
+    <string name="notification_channel_summary_bubble" msgid="4269580628050629291">"Hou jou aandag met \'n swewende kortpad na hierdie inhoud toe."</string>
     <string name="notification_unblockable_desc" msgid="4556908766584964102">"Hierdie kennisgewings kan nie gewysig word nie."</string>
     <string name="notification_multichannel_desc" msgid="4695920306092240550">"Hierdie groep kennisgewings kan nie hier opgestel word nie"</string>
     <string name="notification_delegate_header" msgid="2857691673814814270">"Instaanbediener-kennisgewing"</string>
@@ -946,4 +948,7 @@
     <string name="bubble_dismiss_text" msgid="8028337712674081668">"Maak toe"</string>
     <string name="notification_content_system_nav_changed" msgid="7218093915747788444">"Stelselnavigasie is opgedateer. Gaan na Instellings toe om veranderinge te maak."</string>
     <string name="notification_content_gesture_nav_available" msgid="8111130443656460792">"Gaan na Instellings toe om stelselnavigasie op te dateer"</string>
+    <string name="inattentive_sleep_warning_title" msgid="7695119731872371794">"Bystandmodus"</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="4279125516592217099">"Die Android TV-toestel gaan binnekort afskakel; druk \'n knoppie om dit aan te hou."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="3128565462954884260">"Die toestel gaan binnekort afskakel; druk om dit aan te hou."</string>
 </resources>

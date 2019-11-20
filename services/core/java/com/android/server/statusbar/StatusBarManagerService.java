@@ -1387,11 +1387,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void dismissInattentiveSleepWarning() {
+    public void dismissInattentiveSleepWarning(boolean animated) {
         enforceStatusBarService();
         if (mBar != null) {
             try {
-                mBar.dismissInattentiveSleepWarning();
+                mBar.dismissInattentiveSleepWarning(animated);
             } catch (RemoteException ex) {
             }
         }

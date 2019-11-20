@@ -16,8 +16,12 @@
 
 package com.android.systemui.screenshot;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -25,14 +29,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.NotificationChannels;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -70,12 +80,12 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         when(bitmap.getConfig()).thenReturn(Bitmap.Config.HARDWARE);
         ScreenshotNotificationSmartActionsProvider smartActionsProvider = mock(
                 ScreenshotNotificationSmartActionsProvider.class);
-        when(smartActionsProvider.getActions(any(), any(), any(), any(), any(),
+        when(smartActionsProvider.getActions(any(), any(), any(),
                 eq(false))).thenThrow(
                 RuntimeException.class);
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
-                GlobalScreenshot.getSmartActionsFuture(mContext, bitmap,
-                        smartActionsProvider, mHandler, true, false);
+                GlobalScreenshot.getSmartActionsFuture("", bitmap,
+                        smartActionsProvider, true, false);
         Assert.assertNotNull(smartActionsFuture);
         List<Notification.Action> smartActions = smartActionsFuture.get(5, TimeUnit.MILLISECONDS);
         Assert.assertEquals(Collections.emptyList(), smartActions);
@@ -92,8 +102,17 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         when(smartActionsFuture.get(timeoutMs, TimeUnit.MILLISECONDS)).thenThrow(
                 RuntimeException.class);
         List<Notification.Action> actions = GlobalScreenshot.getSmartActions(
-                smartActionsFuture, timeoutMs);
+                "", smartActionsFuture, timeoutMs, mSmartActionsProvider);
         Assert.assertEquals(Collections.emptyList(), actions);
+    }
+
+    // Tests any exception thrown in notifying feedback does not affect regular screenshot flow.
+    @Test
+    public void testExceptionHandlingInNotifyingFeedback()
+            throws Exception {
+        doThrow(RuntimeException.class).when(mSmartActionsProvider).notifyOp(any(), any(), any(),
+                anyLong());
+        GlobalScreenshot.notifyScreenshotOp(null, mSmartActionsProvider, null, null, -1);
     }
 
     // Tests for a non-hardware bitmap, ScreenshotNotificationSmartActionsProvider is never invoked
@@ -104,9 +123,9 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         Bitmap bitmap = mock(Bitmap.class);
         when(bitmap.getConfig()).thenReturn(Bitmap.Config.RGB_565);
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
-                GlobalScreenshot.getSmartActionsFuture(mContext, bitmap,
-                        mSmartActionsProvider, mHandler, true, true);
-        verify(mSmartActionsProvider, never()).getActions(any(), any(), any(), any(), any(),
+                GlobalScreenshot.getSmartActionsFuture("", bitmap,
+                        mSmartActionsProvider, true, true);
+        verify(mSmartActionsProvider, never()).getActions(any(), any(), any(),
                 eq(false));
         Assert.assertNotNull(smartActionsFuture);
         List<Notification.Action> smartActions = smartActionsFuture.get(5, TimeUnit.MILLISECONDS);
@@ -118,10 +137,10 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
     public void testScreenshotNotificationSmartActionsProviderInvokedOnce() {
         Bitmap bitmap = mock(Bitmap.class);
         when(bitmap.getConfig()).thenReturn(Bitmap.Config.HARDWARE);
-        GlobalScreenshot.getSmartActionsFuture(mContext, bitmap, mSmartActionsProvider,
-                mHandler, true, true);
+        GlobalScreenshot.getSmartActionsFuture("", bitmap, mSmartActionsProvider,
+                true, true);
         verify(mSmartActionsProvider, times(1))
-                .getActions(any(), any(), any(), any(), any(), eq(true));
+                .getActions(any(), any(), any(), eq(true));
     }
 
     // Tests for a hardware bitmap, a completed future is returned.
@@ -131,13 +150,65 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         Bitmap bitmap = mock(Bitmap.class);
         when(bitmap.getConfig()).thenReturn(Bitmap.Config.HARDWARE);
         ScreenshotNotificationSmartActionsProvider actionsProvider =
-                SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider();
+                SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider(
+                        mContext, null, mHandler);
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
-                GlobalScreenshot.getSmartActionsFuture(mContext, bitmap,
+                GlobalScreenshot.getSmartActionsFuture("", bitmap,
                         actionsProvider,
-                        mHandler, true, true);
+                        true, true);
         Assert.assertNotNull(smartActionsFuture);
         List<Notification.Action> smartActions = smartActionsFuture.get(5, TimeUnit.MILLISECONDS);
         Assert.assertEquals(smartActions.size(), 0);
+    }
+
+    // Tests for notification action extras.
+    @Test
+    public void testNotificationActionExtras() {
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+        NotificationManager notificationManager =
+                (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
+        GlobalScreenshot.SaveImageInBackgroundData
+                data = new GlobalScreenshot.SaveImageInBackgroundData();
+        data.context = mContext;
+        data.image = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+        data.iconSize = 10;
+        data.finisher = null;
+        data.onEditReady = null;
+        data.previewWidth = 10;
+        data.previewheight = 10;
+        SaveImageInBackgroundTask task = new SaveImageInBackgroundTask(mContext, data,
+                notificationManager);
+        Notification.Builder notificationBuilder = new Notification.Builder(mContext,
+                NotificationChannels.SCREENSHOTS_HEADSUP);
+        task.populateNotificationActions(mContext, mContext.getResources(),
+                Uri.parse("Screenshot_123.png"),
+                CompletableFuture.completedFuture(Collections.emptyList()), notificationBuilder);
+
+        Notification notification = notificationBuilder.build();
+        Assert.assertEquals(notification.actions.length, 3);
+        boolean isShareFound = false;
+        boolean isEditFound = false;
+        boolean isDeleteFound = false;
+        for (Notification.Action action : notification.actions) {
+            Intent intent = action.actionIntent.getIntent();
+            Assert.assertNotNull(intent);
+            Bundle bundle = intent.getExtras();
+            Assert.assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_ID));
+            Assert.assertTrue(bundle.containsKey(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED));
+
+            if (action.title.equals(GlobalScreenshot.ACTION_TYPE_DELETE)) {
+                isDeleteFound = intent.getAction() == null;
+            } else if (action.title.equals(GlobalScreenshot.ACTION_TYPE_EDIT)) {
+                isEditFound = Intent.ACTION_EDIT.equals(intent.getAction());
+            } else if (action.title.equals(GlobalScreenshot.ACTION_TYPE_SHARE)) {
+                isShareFound = Intent.ACTION_SEND.equals(intent.getAction());
+            }
+        }
+
+        Assert.assertTrue(isEditFound);
+        Assert.assertTrue(isDeleteFound);
+        Assert.assertTrue(isShareFound);
     }
 }

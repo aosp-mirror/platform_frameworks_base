@@ -2441,4 +2441,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     NOTIFICATION_ACCESS_DETAIL = 1804;
+
+    // OPEN: Settings > Developer Options > Platform Compat
+    // CATEGORY: SETTINGS
+    // OS: R
+    SETTINGS_PLATFORM_COMPAT_DASHBOARD = 1805;
 }

@@ -717,7 +717,7 @@ class RecentTasks {
                 // Only look at tasks for the user ID of interest.
                 continue;
             }
-            if (task.autoRemoveRecents && task.getTopActivity() == null) {
+            if (task.autoRemoveRecents && task.getTopNonFinishingActivity() == null) {
                 // This situation is broken, and we should just get rid of it now.
                 remove(task);
                 Slog.w(TAG, "Removing auto-remove without activity: " + task);
@@ -931,7 +931,7 @@ class RecentTasks {
                 }
             }
 
-            if (task.autoRemoveRecents && task.getTopActivity() == null) {
+            if (task.autoRemoveRecents && task.getTopNonFinishingActivity() == null) {
                 // Don't include auto remove tasks that are finished or finishing.
                 if (DEBUG_RECENTS) {
                     Slog.d(TAG_RECENTS, "Skipping, auto-remove without activity: " + task);

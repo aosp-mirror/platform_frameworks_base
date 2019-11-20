@@ -172,7 +172,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
         final KeyguardController keyguard = mSupervisor.getKeyguardController();
         final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
-        final ActivityRecord activity = stack.getTopActivity();
+        final ActivityRecord activity = stack.getTopNonFinishingActivity();
 
         // Create empty stack on top.
         final ActivityStack emptyStack =
@@ -228,7 +228,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         display.positionChildAtTop(alwaysOnTopStack, false /* includingParents */);
         assertTrue(alwaysOnTopStack.isAlwaysOnTop());
         // Ensure always on top state is synced to the children of the stack.
-        assertTrue(alwaysOnTopStack.getTopActivity().isAlwaysOnTop());
+        assertTrue(alwaysOnTopStack.getTopNonFinishingActivity().isAlwaysOnTop());
         assertEquals(alwaysOnTopStack, display.getTopStack());
 
         final ActivityStack pinnedStack = display.createStack(

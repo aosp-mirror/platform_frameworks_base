@@ -66,7 +66,7 @@ public class BiometricManager {
     @interface BiometricError {}
 
     private final Context mContext;
-    private final IBiometricService mService;
+    private final IAuthService mService;
     private final boolean mHasHardware;
 
     /**
@@ -86,7 +86,7 @@ public class BiometricManager {
      * @param context
      * @param service
      */
-    public BiometricManager(Context context, IBiometricService service) {
+    public BiometricManager(Context context, IAuthService service) {
         mContext = context;
         mService = service;
 

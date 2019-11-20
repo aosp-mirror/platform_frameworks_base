@@ -75,7 +75,7 @@ public class NotificationHistoryDatabase {
     private final Context mContext;
     private final AlarmManager mAlarmManager;
     private final Object mLock = new Object();
-    private Handler mFileWriteHandler;
+    private final Handler mFileWriteHandler;
     @VisibleForTesting
     // List of files holding history information, sorted newest to oldest
     final LinkedList<AtomicFile> mHistoryFiles;
@@ -90,11 +90,12 @@ public class NotificationHistoryDatabase {
     @VisibleForTesting
     NotificationHistory mBuffer;
 
-    public NotificationHistoryDatabase(Context context, File dir,
+    public NotificationHistoryDatabase(Context context, Handler fileWriteHandler, File dir,
             FileAttrProvider fileAttrProvider) {
         mContext = context;
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mCurrentVersion = DEFAULT_CURRENT_VERSION;
+        mFileWriteHandler = fileWriteHandler;
         mVersionFile = new File(dir, "version");
         mHistoryDir = new File(dir, "history");
         mHistoryFiles = new LinkedList<>();
@@ -107,10 +108,8 @@ public class NotificationHistoryDatabase {
         mContext.registerReceiver(mFileCleaupReceiver, deletionFilter);
     }
 
-    public void init(Handler fileWriteHandler) {
+    public void init() {
         synchronized (mLock) {
-            mFileWriteHandler = fileWriteHandler;
-
             try {
                 mHistoryDir.mkdir();
                 mVersionFile.createNewFile();
@@ -160,13 +159,13 @@ public class NotificationHistoryDatabase {
         }
     }
 
-    void forceWriteToDisk() {
+    public void forceWriteToDisk() {
         if (!mFileWriteHandler.hasCallbacks(mWriteBufferRunnable)) {
             mFileWriteHandler.post(mWriteBufferRunnable);
         }
     }
 
-    void onPackageRemoved(String packageName) {
+    public void onPackageRemoved(String packageName) {
         RemovePackageRunnable rpr = new RemovePackageRunnable(packageName);
         mFileWriteHandler.post(rpr);
     }
@@ -227,7 +226,7 @@ public class NotificationHistoryDatabase {
     /**
      * Remove any files that are too old and schedule jobs to clean up the rest
      */
-    public void prune(final int retentionDays, final long currentTimeMillis) {
+    void prune(final int retentionDays, final long currentTimeMillis) {
         synchronized (mLock) {
             GregorianCalendar retentionBoundary = new GregorianCalendar();
             retentionBoundary.setTimeInMillis(currentTimeMillis);
@@ -252,7 +251,7 @@ public class NotificationHistoryDatabase {
         }
     }
 
-    void scheduleDeletion(File file, long deletionTime) {
+    private void scheduleDeletion(File file, long deletionTime) {
         if (DEBUG) {
             Slog.d(TAG, "Scheduling deletion for " + file.getName() + " at " + deletionTime);
         }

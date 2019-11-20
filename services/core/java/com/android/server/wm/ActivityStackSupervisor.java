@@ -1428,7 +1428,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             moveHomeStackToFrontIfNeeded(flags, currentStack.getDisplay(), reason);
         }
 
-        final ActivityRecord r = task.getTopActivity();
+        final ActivityRecord r = task.getTopNonFinishingActivity();
         currentStack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
                 r == null ? null : r.appTimeTracker, reason);
 
@@ -2077,7 +2077,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         // When launching tasks behind, update the last active time of the top task after the new
         // task has been shown briefly
-        final ActivityRecord top = stack.getTopActivity();
+        final ActivityRecord top = stack.getTopNonFinishingActivity();
         if (top != null) {
             top.getTask().touchActiveTime();
         }
@@ -2458,7 +2458,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     /** Notifies that the top activity of the task is forced to be resizeable. */
     private void handleForcedResizableTaskIfNeeded(Task task, int reason) {
-        final ActivityRecord topActivity = task.getTopActivity();
+        final ActivityRecord topActivity = task.getTopNonFinishingActivity();
         if (topActivity == null || topActivity.noDisplay
                 || !topActivity.isNonResizableOrForcedResizable(task.getWindowingMode())) {
             return;
@@ -2750,7 +2750,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             // Work Challenge is present) let startActivityInPackage handle the intercepting.
             if (!mService.mAmInternal.shouldConfirmCredentials(task.mUserId)
                     && task.getRootActivity() != null) {
-                final ActivityRecord targetActivity = task.getTopActivity();
+                final ActivityRecord targetActivity = task.getTopNonFinishingActivity();
 
                 mRootActivityContainer.sendPowerHintForLaunchStartIfNeeded(
                         true /* forceSend */, targetActivity);
@@ -2767,7 +2767,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 }
 
                 mService.getActivityStartController().postStartActivityProcessingForLastStarter(
-                        task.getTopActivity(), ActivityManager.START_TASK_TO_FRONT,
+                        task.getTopNonFinishingActivity(), ActivityManager.START_TASK_TO_FRONT,
                         task.getStack());
                 return ActivityManager.START_TASK_TO_FRONT;
             }

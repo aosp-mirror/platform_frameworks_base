@@ -1202,7 +1202,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mSummaryByGroupKey.put("pkg", summary);
         mService.mAutobundledSummaries.put(0, new ArrayMap<>());
         mService.mAutobundledSummaries.get(0).put("pkg", summary.getKey());
-        mService.updateAutobundledSummaryFlags(0, "pkg", true);
+        mService.updateAutobundledSummaryFlags(0, "pkg", true, false);
 
         assertTrue(summary.sbn.isOngoing());
     }
@@ -1218,7 +1218,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.mAutobundledSummaries.get(0).put("pkg", summary.getKey());
         mService.mSummaryByGroupKey.put("pkg", summary);
 
-        mService.updateAutobundledSummaryFlags(0, "pkg", false);
+        mService.updateAutobundledSummaryFlags(0, "pkg", false, false);
 
         assertFalse(summary.sbn.isOngoing());
     }

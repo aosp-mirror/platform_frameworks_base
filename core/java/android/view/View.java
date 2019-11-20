@@ -4547,6 +4547,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     static class ListenerInfo {
+
+        @UnsupportedAppUsage
+        ListenerInfo() {
+        }
+
         /**
          * Listener used to dispatch focus change events.
          * This field should be made private, so it is hidden from the SDK.
@@ -10348,6 +10353,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * the user. It is a supplement to the boolean states (for example, checked/unchecked) and
      * it is used for customized state description (for example, "wifi, connected, three bars").
      * State description changes frequently while content description should change less often.
+     * State description should be localized. For android widgets which have default state
+     * descriptions, app developers can call this method to override the state descriptions.
+     * Setting state description to null restores the default behavior.
      *
      * @param stateDescription The state description.
      * @see #getStateDescription()
@@ -27851,6 +27859,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         private int mClassification;
 
+        @UnsupportedAppUsage
+        private CheckForLongPress() {
+        }
+
         @Override
         public void run() {
             if ((mOriginalPressedState == isPressed()) && (mParent != null)
@@ -28336,6 +28348,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * whenever possible.
          */
         static class InvalidateInfo {
+
+            @UnsupportedAppUsage
+            InvalidateInfo() {
+            }
+
             private static final int POOL_LIMIT = 10;
 
             private static final SynchronizedPool<InvalidateInfo> sPool =

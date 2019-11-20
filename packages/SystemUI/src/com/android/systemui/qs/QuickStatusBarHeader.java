@@ -549,7 +549,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
         mHeaderQsPanel.setListening(listening);
         mListening = listening;
-        mCarrierGroup.setListening(mListening);
 
         if (listening) {
             mZenController.addCallback(this);

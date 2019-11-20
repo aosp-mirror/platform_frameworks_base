@@ -30,8 +30,6 @@ import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_TOP_BAR;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
-import static com.android.systemui.Dependency.BG_HANDLER;
-import static com.android.systemui.Dependency.MAIN_HANDLER;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
@@ -123,7 +121,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.view.AppearanceRegion;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
@@ -386,6 +383,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final PluginManager mPluginManager;
     private final RemoteInputUriController mRemoteInputUriController;
     private final Optional<Divider> mDividerOptional;
+    private final StatusBarNotificationActivityStarter.Builder
+            mStatusBarNotificationActivityStarterBuilder;
     private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private final LightsOutNotifController mLightsOutNotifController;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
@@ -678,6 +677,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             RemoteInputUriController remoteInputUriController,
             Optional<Divider> dividerOptional,
             LightsOutNotifController lightsOutNotifController,
+            StatusBarNotificationActivityStarter.Builder
+                    statusBarNotificationActivityStarterBuilder,
             SuperStatusBarViewFactory superStatusBarViewFactory,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             ViewMediatorCallback viewMediatorCallback,
@@ -748,7 +749,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPluginManager = pluginManager;
         mRemoteInputUriController = remoteInputUriController;
         mDividerOptional = dividerOptional;
-
+        mStatusBarNotificationActivityStarterBuilder = statusBarNotificationActivityStarterBuilder;
         mSuperStatusBarViewFactory = superStatusBarViewFactory;
         mLightsOutNotifController =  lightsOutNotifController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -967,7 +968,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
-        mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
+        mNotificationPanel = mSuperStatusBarViewFactory.getNotificationPanelView();
 
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
         NotificationListContainer notifListContainer = (NotificationListContainer) mStackScroller;
@@ -1228,6 +1229,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mStatusBarStateController,
                         mNotificationLogger);
 
+        // TODO: inject this.
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
@@ -1242,20 +1244,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationShelf.setOnActivatedListener(mPresenter);
         mRemoteInputManager.getController().addCallback(mStatusBarWindowController);
 
-        final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback =
-                (StatusBarRemoteInputCallback) Dependency.get(
-                        NotificationRemoteInputManager.Callback.class);
-        final ActivityStarter activityStarter = Dependency.get(ActivityStarter.class);
-
-        mNotificationActivityStarter = new StatusBarNotificationActivityStarter(mContext,
-                mCommandQueue, mAssistManagerLazy.get(), mNotificationPanel, mPresenter,
-                mEntryManager, mHeadsUpManager, activityStarter, mActivityLaunchAnimator,
-                mBarService, mStatusBarStateController, mKeyguardManager, mDreamManager,
-                mRemoteInputManager, mStatusBarRemoteInputCallback, mGroupManager,
-                mLockscreenUserManager, this, mKeyguardStateController,
-                mNotificationInterruptionStateProvider, mMetricsLogger,
-                new LockPatternUtils(mContext), Dependency.get(MAIN_HANDLER),
-                Dependency.get(BG_HANDLER), mActivityIntentHelper, mBubbleController);
+        mNotificationActivityStarter =
+                mStatusBarNotificationActivityStarterBuilder
+                        .setShadeController(this)
+                        .setActivityLaunchAnimator(mActivityLaunchAnimator)
+                        .setNotificationPresenter(mPresenter)
+                        .build();
 
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 

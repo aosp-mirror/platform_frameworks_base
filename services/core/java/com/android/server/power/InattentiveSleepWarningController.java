@@ -75,18 +75,18 @@ public class InattentiveSleepWarningController {
      * Dismiss the warning.
      */
     @GuardedBy("PowerManagerService.mLock")
-    public void dismiss() {
+    public void dismiss(boolean animated) {
         if (!isShown()) {
             return;
         }
 
-        mHandler.post(this::dismissInternal);
+        mHandler.post(() -> dismissInternal(animated));
         mIsShown = false;
     }
 
-    private void dismissInternal() {
+    private void dismissInternal(boolean animated) {
         try {
-            getStatusBar().dismissInattentiveSleepWarning();
+            getStatusBar().dismissInattentiveSleepWarning(animated);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to dismiss inattentive sleep warning", e);
         }

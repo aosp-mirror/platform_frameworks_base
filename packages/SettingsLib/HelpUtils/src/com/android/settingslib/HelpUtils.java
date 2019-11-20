@@ -33,6 +33,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.settingslib.widget.R;
 
 import java.net.URISyntaxException;
@@ -45,7 +47,8 @@ import java.util.Locale;
 public class HelpUtils {
     private final static String TAG = HelpUtils.class.getSimpleName();
 
-    private static final int MENU_HELP = Menu.FIRST + 100;
+    @VisibleForTesting
+    static final int MENU_HELP = Menu.FIRST + 100;
 
     /**
      * Help URL query parameter key for the preferred language.
@@ -68,11 +71,16 @@ public class HelpUtils {
      */
     private static String sCachedVersionCode = null;
 
-    /** Static helper that is not instantiable*/
-    private HelpUtils() { }
+    /** Static helper that is not instantiable */
+    private HelpUtils() {
+    }
 
     public static boolean prepareHelpMenuItem(Activity activity, Menu menu, String helpUri,
             String backupContext) {
+        // menu contains help item, skip it
+        if (menu.findItem(MENU_HELP) != null) {
+            return false;
+        }
         MenuItem helpItem = menu.add(0, MENU_HELP, 0, R.string.help_feedback_label);
         helpItem.setIcon(R.drawable.ic_help_actionbar);
         return prepareHelpMenuItem(activity, helpItem, helpUri, backupContext);
@@ -80,6 +88,10 @@ public class HelpUtils {
 
     public static boolean prepareHelpMenuItem(Activity activity, Menu menu, int helpUriResource,
             String backupContext) {
+        // menu contains help item, skip it
+        if (menu.findItem(MENU_HELP) != null) {
+            return false;
+        }
         MenuItem helpItem = menu.add(0, MENU_HELP, 0, R.string.help_feedback_label);
         helpItem.setIcon(R.drawable.ic_help_actionbar);
         return prepareHelpMenuItem(activity, helpItem, activity.getString(helpUriResource),
@@ -90,11 +102,12 @@ public class HelpUtils {
      * Prepares the help menu item by doing the following.
      * - If the helpUrlString is empty or null, the help menu item is made invisible.
      * - Otherwise, this makes the help menu item visible and sets the intent for the help menu
-     *   item to view the URL.
+     * item to view the URL.
      *
      * @return returns whether the help menu item has been made visible.
      */
-    public static boolean prepareHelpMenuItem(final Activity activity, MenuItem helpMenuItem,
+    @VisibleForTesting
+    static boolean prepareHelpMenuItem(final Activity activity, MenuItem helpMenuItem,
             String helpUriString, String backupContext) {
         if (Global.getInt(activity.getContentResolver(), Global.DEVICE_PROVISIONED, 0) == 0) {
             return false;
@@ -117,10 +130,10 @@ public class HelpUtils {
                         /**
                          * TODO: Enable metrics logger for @SystemApi (b/111552654)
                          *
-                        MetricsLogger.action(activity,
-                            MetricsEvent.ACTION_SETTING_HELP_AND_FEEDBACK,
-                            intent.getStringExtra(EXTRA_CONTEXT));
-                        */
+                         MetricsLogger.action(activity,
+                         MetricsEvent.ACTION_SETTING_HELP_AND_FEEDBACK,
+                         intent.getStringExtra(EXTRA_CONTEXT));
+                         */
                         try {
                             activity.startActivityForResult(intent, 0);
                         } catch (ActivityNotFoundException exc) {
@@ -212,6 +225,7 @@ public class HelpUtils {
     /**
      * Adds two query parameters into the Uri, namely the language code and the version code
      * of the app's package as gotten via the context.
+     *
      * @return the uri with added query parameters
      */
     private static Uri uriWithAddedParameters(Context context, Uri baseUri) {

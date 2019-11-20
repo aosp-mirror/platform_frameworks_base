@@ -301,6 +301,11 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
         return results;
     }
 
+    @Override
+    public boolean isPinned() {
+        return mSourceInfo != null && mSourceInfo.isPinned();
+    }
+
     /**
      * Necessary methods to communicate between {@link SelectableTargetInfo}
      * and {@link ResolverActivity} or {@link ChooserActivity}.

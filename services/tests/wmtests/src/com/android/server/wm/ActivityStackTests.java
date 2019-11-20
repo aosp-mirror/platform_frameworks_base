@@ -243,8 +243,8 @@ public class ActivityStackTests extends ActivityTestsBase {
                 new RootActivityContainer.FindTaskResult();
         mStack.findTaskLocked(r, result);
 
-        assertEquals(r, task.getTopActivity(false /* includeOverlays */));
-        assertEquals(taskOverlay, task.getTopActivity(true /* includeOverlays */));
+        assertEquals(r, task.getTopNonFinishingActivity(false /* includeOverlays */));
+        assertEquals(taskOverlay, task.getTopNonFinishingActivity(true /* includeOverlays */));
         assertNotNull(result.mRecord);
     }
 
@@ -1006,7 +1006,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // There is still an activity1 in stack1 so the activity2 should be added to finishing list
         // that will be destroyed until idle.
-        stack2.getTopActivity().visible = true;
+        stack2.getTopNonFinishingActivity().visible = true;
         final ActivityRecord activity2 = finishTopActivity(stack2);
         assertEquals(STOPPING, activity2.getState());
         assertThat(mSupervisor.mStoppingActivities).contains(activity2);

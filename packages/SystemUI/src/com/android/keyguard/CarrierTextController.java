@@ -24,6 +24,7 @@ import static com.android.systemui.DejankUtils.whitelistIpcs;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -42,10 +43,13 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.util.List;
 import java.util.Objects;
+
+import javax.inject.Inject;
 
 /**
  * Controller that generates text including the carrier names and/or the status of all the SIM
@@ -598,6 +602,35 @@ public class CarrierTextController {
         return mContext.getText(carrierHelpTextId);
     }
 
+    public static class Builder {
+        private final Context mContext;
+        private final String mSeparator;
+        private boolean mShowAirplaneMode;
+        private boolean mShowMissingSim;
+
+        @Inject
+        public Builder(Context context, @MainResources Resources resources) {
+            mContext = context;
+            mSeparator = resources.getString(
+                    com.android.internal.R.string.kg_text_message_separator);
+        }
+
+
+        public Builder setShowAirplaneMode(boolean showAirplaneMode) {
+            mShowAirplaneMode = showAirplaneMode;
+            return this;
+        }
+
+        public Builder setShowMissingSim(boolean showMissingSim) {
+            mShowMissingSim = showMissingSim;
+            return this;
+        }
+
+        public CarrierTextController build() {
+            return new CarrierTextController(
+                    mContext, mSeparator, mShowAirplaneMode, mShowMissingSim);
+        }
+    }
     /**
      * Data structure for passing information to CarrierTextController subscribers
      */

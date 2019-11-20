@@ -68,7 +68,7 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.biometrics.IBiometricService;
+import android.hardware.biometrics.IAuthService;
 import android.hardware.camera2.CameraManager;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.DisplayManager;
@@ -657,7 +657,7 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<UiModeManager>() {
             @Override
             public UiModeManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                return new UiModeManager();
+                return new UiModeManager(ctx.getOuterContext());
             }});
 
         registerService(Context.USB_SERVICE, UsbManager.class,
@@ -947,9 +947,9 @@ public final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         if (BiometricManager.hasBiometrics(ctx)) {
                             final IBinder binder =
-                                    ServiceManager.getServiceOrThrow(Context.BIOMETRIC_SERVICE);
-                            final IBiometricService service =
-                                    IBiometricService.Stub.asInterface(binder);
+                                    ServiceManager.getServiceOrThrow(Context.AUTH_SERVICE);
+                            final IAuthService service =
+                                    IAuthService.Stub.asInterface(binder);
                             return new BiometricManager(ctx.getOuterContext(), service);
                         } else {
                             // Allow access to the manager when service is null. This saves memory

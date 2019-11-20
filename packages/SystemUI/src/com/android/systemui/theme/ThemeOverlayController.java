@@ -33,10 +33,10 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.BgHandler;
 
 import com.google.android.collect.Sets;
 
@@ -66,11 +66,14 @@ public class ThemeOverlayController extends SystemUI {
     private ThemeOverlayManager mThemeManager;
     private UserManager mUserManager;
     private BroadcastDispatcher mBroadcastDispatcher;
+    private final Handler mBgHandler;
 
     @Inject
-    public ThemeOverlayController(Context context, BroadcastDispatcher broadcastDispatcher) {
+    public ThemeOverlayController(Context context, BroadcastDispatcher broadcastDispatcher,
+            @BgHandler Handler bgHandler) {
         super(context);
         mBroadcastDispatcher = broadcastDispatcher;
+        mBgHandler = bgHandler;
     }
 
     @Override
@@ -82,7 +85,6 @@ public class ThemeOverlayController extends SystemUI {
                 AsyncTask.THREAD_POOL_EXECUTOR,
                 mContext.getString(R.string.launcher_overlayable_package),
                 mContext.getString(R.string.themepicker_overlayable_package));
-        final Handler bgHandler = Dependency.get(Dependency.BG_HANDLER);
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
@@ -92,11 +94,11 @@ public class ThemeOverlayController extends SystemUI {
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
                 updateThemeOverlays();
             }
-        }, filter, bgHandler, UserHandle.ALL);
+        }, filter, mBgHandler, UserHandle.ALL);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES),
                 false,
-                new ContentObserver(bgHandler) {
+                new ContentObserver(mBgHandler) {
                     @Override
                     public void onChange(boolean selfChange, Uri uri, int userId) {
                         if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);

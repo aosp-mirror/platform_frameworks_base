@@ -198,6 +198,9 @@ public class ResourcesManager {
      * Resources and base configuration override associated with an Activity.
      */
     private static class ActivityResources {
+        @UnsupportedAppUsage
+        private ActivityResources() {
+        }
         public final Configuration overrideConfig = new Configuration();
         public final ArrayList<WeakReference<Resources>> activityResources = new ArrayList<>();
     }
@@ -215,6 +218,10 @@ public class ResourcesManager {
      */
     private final ArrayMap<Pair<Integer, DisplayAdjustments>, WeakReference<Display>>
             mAdjustedDisplays = new ArrayMap<>();
+
+    @UnsupportedAppUsage
+    public ResourcesManager() {
+    }
 
     @UnsupportedAppUsage
     public static ResourcesManager getInstance() {

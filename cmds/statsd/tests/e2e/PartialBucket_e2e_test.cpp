@@ -162,7 +162,10 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
 
     ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
     backfillStartEndTimestamp(&report);
-    EXPECT_EQ(1, report.metrics_size());
+
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info_size());
     EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
                     has_start_bucket_elapsed_nanos());
     EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
@@ -186,7 +189,10 @@ TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
 
     ConfigMetricsReport report = GetReports(service.mProcessor, start + 4);
     backfillStartEndTimestamp(&report);
-    EXPECT_EQ(1, report.metrics_size());
+
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info_size());
     EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
                     has_start_bucket_elapsed_nanos());
     EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
@@ -228,8 +234,9 @@ TEST(PartialBucketE2eTest, TestValueMetricWithMinPartialBucket) {
     ConfigMetricsReport report =
             GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
     backfillStartEndTimestamp(&report);
-    EXPECT_EQ(1, report.metrics_size());
-    EXPECT_EQ(1, report.metrics(0).value_metrics().skipped_size());
+
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(1, report.metrics(0).value_metrics().skipped_size());
     EXPECT_TRUE(report.metrics(0).value_metrics().skipped(0).has_start_bucket_elapsed_nanos());
     // Can't test the start time since it will be based on the actual time when the pulling occurs.
     EXPECT_EQ(MillisToNano(NanoToMillis(endSkipped)),
@@ -270,8 +277,8 @@ TEST(PartialBucketE2eTest, TestGaugeMetricWithMinPartialBucket) {
     ConfigMetricsReport report =
             GetReports(service.mProcessor, 5 * 60 * NS_PER_SEC + start + 100 * NS_PER_SEC, true);
     backfillStartEndTimestamp(&report);
-    EXPECT_EQ(1, report.metrics_size());
-    EXPECT_EQ(1, report.metrics(0).gauge_metrics().skipped_size());
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(1, report.metrics(0).gauge_metrics().skipped_size());
     // Can't test the start time since it will be based on the actual time when the pulling occurs.
     EXPECT_TRUE(report.metrics(0).gauge_metrics().skipped(0).has_start_bucket_elapsed_nanos());
     EXPECT_EQ(MillisToNano(NanoToMillis(endSkipped)),

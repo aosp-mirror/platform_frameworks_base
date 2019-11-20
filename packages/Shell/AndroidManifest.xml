@@ -215,6 +215,9 @@
     <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES"/>
 
+    <!-- Permission requried for CTS test - UiModeManagerTest -->
+    <uses-permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

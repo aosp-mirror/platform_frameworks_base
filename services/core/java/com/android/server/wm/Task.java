@@ -655,7 +655,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         }
 
         final int toStackWindowingMode = toStack.getWindowingMode();
-        final ActivityRecord topActivity = getTopActivity();
+        final ActivityRecord topActivity = getTopNonFinishingActivity();
 
         final boolean mightReplaceWindow = topActivity != null
                 && replaceWindowsOnTaskMove(getWindowingMode(), toStackWindowingMode);
@@ -1077,11 +1077,11 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         return getChildAt(rootActivityIndex);
     }
 
-    ActivityRecord getTopActivity() {
-        return getTopActivity(true /* includeOverlays */);
+    ActivityRecord getTopNonFinishingActivity() {
+        return getTopNonFinishingActivity(true /* includeOverlays */);
     }
 
-    ActivityRecord getTopActivity(boolean includeOverlays) {
+    ActivityRecord getTopNonFinishingActivity(boolean includeOverlays) {
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final ActivityRecord r = getChildAt(i);
             if (r.finishing || (!includeOverlays && r.mTaskOverlay)) {
@@ -1328,9 +1328,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
      * Completely remove all activities associated with an existing
      * task starting at a specified index.
      */
-    private void performClearTaskAtIndexLocked(int activityNdx, String reason) {
+    private void performClearTaskAtIndexLocked(String reason) {
         int numActivities = getChildCount();
-        for ( ; activityNdx < numActivities; ++activityNdx) {
+        for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
             final ActivityRecord r = getChildAt(activityNdx);
             if (r.finishing) {
                 continue;
@@ -1355,7 +1355,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
      */
     void performClearTaskLocked() {
         mReuseTask = true;
-        performClearTaskAtIndexLocked(0, "clear-task-all");
+        performClearTaskAtIndexLocked("clear-task-all");
         mReuseTask = false;
     }
 
@@ -1425,7 +1425,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     void removeTaskActivitiesLocked(String reason) {
         // Just remove the entire task.
-        performClearTaskAtIndexLocked(0, reason);
+        performClearTaskAtIndexLocked(reason);
     }
 
     String lockTaskAuthToString() {
@@ -2129,7 +2129,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             // Use the top activity as the reference of orientation. Don't include overlays because
             // it is usually not the actual content or just temporarily shown.
             // E.g. ForcedResizableInfoActivity.
-            refActivity = getTopActivity(false /* includeOverlays */);
+            refActivity = getTopNonFinishingActivity(false /* includeOverlays */);
         }
 
         // If the task or the reference activity requires a different orientation (either by
@@ -2912,7 +2912,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         info.stackId = getStackId();
         info.taskId = mTaskId;
         info.displayId = mStack == null ? Display.INVALID_DISPLAY : mStack.mDisplayId;
-        info.isRunning = getTopActivity() != null;
+        info.isRunning = getTopNonFinishingActivity() != null;
         info.baseIntent = new Intent(getBaseIntent());
         info.baseActivity = mReuseActivitiesReport.base != null
                 ? mReuseActivitiesReport.base.intent.getComponent()

@@ -4358,7 +4358,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean isDisplaySleeping = getDisplay().isSleeping()
                 && getDisplayId() != DEFAULT_DISPLAY;
         // Whether this activity is the top activity of this stack.
-        final boolean isTop = this == stack.getTopActivity();
+        final boolean isTop = this == stack.getTopNonFinishingActivity();
         // Exclude the case where this is the top activity in a pinned stack.
         final boolean isTopNotPinnedStack = stack.isAttached()
                 && stack.getDisplay().isTopNotPinnedStack(stack);

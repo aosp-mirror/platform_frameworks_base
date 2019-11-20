@@ -73,7 +73,7 @@ public class QSCarrier extends LinearLayout {
         mColorForegroundIntensity = QuickStatusBarHeader.getColorIntensity(colorForeground);
     }
 
-    public void updateState(QSCarrierGroup.CellSignalState state) {
+    public void updateState(QSCarrierGroupController.CellSignalState state) {
         mMobileGroup.setVisibility(state.visible ? View.VISIBLE : View.GONE);
         if (state.visible) {
             mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);

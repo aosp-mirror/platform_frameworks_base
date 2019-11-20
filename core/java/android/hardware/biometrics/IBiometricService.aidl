@@ -22,10 +22,7 @@ import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricAuthenticator;
 
 /**
- * Communication channel from BiometricPrompt and BiometricManager to BiometricService. The
- * interface does not expose specific biometric modalities. The system will use the default
- * biometric for apps. On devices with more than one, the choice is dictated by user preference in
- * Settings.
+ * Communication channel from AuthService to BiometricService.
  * @hide
  */
 interface IBiometricService {

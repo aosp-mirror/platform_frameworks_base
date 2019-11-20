@@ -676,7 +676,7 @@ class RootActivityContainer extends ConfigurationContainer
                 final ActivityStack stack = display.getChildAt(j);
                 // Get top activity from a visible stack and add it to the list.
                 if (stack.shouldBeVisible(null /* starting */)) {
-                    final ActivityRecord top = stack.getTopActivity();
+                    final ActivityRecord top = stack.getTopNonFinishingActivity();
                     if (top != null) {
                         if (stack == topFocusedStack) {
                             topActivityTokens.add(0, top.appToken);
@@ -1268,8 +1268,8 @@ class RootActivityContainer extends ConfigurationContainer
             taskIds[i] = task.mTaskId;
             taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
                     : task.realActivity != null ? task.realActivity.flattenToString()
-                    : task.getTopActivity() != null ? task.getTopActivity().packageName
-                    : "unknown";
+                    : task.getTopNonFinishingActivity() != null
+                            ? task.getTopNonFinishingActivity().packageName : "unknown";
             taskBounds[i] = mService.getTaskBounds(task.mTaskId);
             taskUserIds[i] = task.mUserId;
         }
@@ -2138,7 +2138,7 @@ class RootActivityContainer extends ConfigurationContainer
      */
     private boolean taskTopActivityIsUser(Task task, @UserIdInt int userId) {
         // To handle the case that work app is in the task but just is not the top one.
-        final ActivityRecord activityRecord = task.getTopActivity();
+        final ActivityRecord activityRecord = task.getTopNonFinishingActivity();
         final ActivityRecord resultTo = (activityRecord != null ? activityRecord.resultTo : null);
 
         return (activityRecord != null && activityRecord.mUserId == userId)

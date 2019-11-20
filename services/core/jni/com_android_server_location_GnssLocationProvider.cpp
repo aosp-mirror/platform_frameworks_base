@@ -698,12 +698,6 @@ Return<void> GnssCallback::gnssSvStatusCbImpl(const T& svStatus) {
     JNIEnv* env = getJniEnv();
 
     uint32_t listSize = getGnssSvInfoListSize(svStatus);
-    if (listSize > static_cast<uint32_t>(
-            android::hardware::gnss::V1_0::GnssMax::SVS_COUNT)) {
-        ALOGD("Too many satellites %u. Clamps to %u.", listSize,
-              static_cast<uint32_t>(android::hardware::gnss::V1_0::GnssMax::SVS_COUNT));
-        listSize = static_cast<uint32_t>(android::hardware::gnss::V1_0::GnssMax::SVS_COUNT);
-    }
 
     jintArray svidWithFlagArray = env->NewIntArray(listSize);
     jfloatArray cn0Array = env->NewFloatArray(listSize);
