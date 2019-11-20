@@ -3118,7 +3118,7 @@ public class WifiManager {
 
     /**
      * Base class for soft AP callback. Should be extended by applications and set when calling
-     * {@link WifiManager#registerSoftApCallback(SoftApCallback, Handler)}.
+     * {@link WifiManager#registerSoftApCallback(Executor, SoftApCallback)}.
      *
      * @hide
      */
@@ -3198,16 +3198,16 @@ public class WifiManager {
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
-     * @param callback Callback for soft AP events
      * @param executor The executor to execute the callbacks of the {@code executor}
      *                 object. If null, then the application's main executor will be used.
+     * @param callback Callback for soft AP events
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void registerSoftApCallback(@NonNull SoftApCallback callback,
-                                       @Nullable @CallbackExecutor Executor executor) {
+    public void registerSoftApCallback(@Nullable @CallbackExecutor Executor executor,
+                                       @NonNull SoftApCallback callback) {
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
         Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", executor=" + executor);
 
