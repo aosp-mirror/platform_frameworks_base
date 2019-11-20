@@ -28,7 +28,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
-import android.net.wifi.WifiSsid;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -189,7 +188,7 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
 
     private String getValidSsid(WifiInfo info) {
         String ssid = info.getSSID();
-        if (ssid != null && !WifiSsid.NONE.equals(ssid)) {
+        if (ssid != null && !WifiManager.UNKNOWN_SSID.equals(ssid)) {
             return ssid;
         }
         // OK, it's not in the connectionInfo; we have to go hunting for it

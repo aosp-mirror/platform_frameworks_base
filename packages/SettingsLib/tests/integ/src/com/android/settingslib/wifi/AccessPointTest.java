@@ -120,7 +120,7 @@ public class AccessPointTest {
     private OsuProvider createOsuProvider() {
         Map<String, String> friendlyNames = new HashMap<>();
         friendlyNames.put("en", OSU_FRIENDLY_NAME);
-        return new OsuProvider(null, friendlyNames, null, null, null, null, null);
+        return new OsuProvider((WifiSsid) null, friendlyNames, null, null, null, null, null);
     }
 
     @Before
@@ -549,7 +549,7 @@ public class AccessPointTest {
         WifiInfo wifiInfo = new WifiInfo();
         wifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
         wifiInfo.setEphemeral(true);
-        wifiInfo.setNetworkSuggestionOrSpecifierPackageName(appPackageName);
+        wifiInfo.setAppPackageName(appPackageName);
         wifiInfo.setRssi(rssi);
 
         Context context = mock(Context.class);
