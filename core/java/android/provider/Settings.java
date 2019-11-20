@@ -11889,6 +11889,7 @@ public final class Settings {
          * as if they had been accepted by the user.
          * @hide
          */
+        @TestApi
         public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
 
         /**
