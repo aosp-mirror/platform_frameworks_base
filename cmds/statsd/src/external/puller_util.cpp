@@ -55,7 +55,7 @@ using std::vector;
  */
 void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<UidMap>& uidMap,
                                       int tagId) {
-    if (StatsPullerManager::kAllPullAtomInfo.find(tagId) ==
+    if (StatsPullerManager::kAllPullAtomInfo.find({.atomTag = tagId}) ==
         StatsPullerManager::kAllPullAtomInfo.end()) {
         VLOG("Unknown pull atom id %d", tagId);
         return;
@@ -121,7 +121,7 @@ void mapAndMergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const 
 
     vector<shared_ptr<LogEvent>> mergedData;
     const vector<int>& additiveFieldsVec =
-            StatsPullerManager::kAllPullAtomInfo.find(tagId)->second.additiveFields;
+            StatsPullerManager::kAllPullAtomInfo.find({.atomTag = tagId})->second.additiveFields;
     const set<int> additiveFields(additiveFieldsVec.begin(), additiveFieldsVec.end());
     bool needMerge = true;
 

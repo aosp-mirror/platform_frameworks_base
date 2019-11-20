@@ -517,7 +517,7 @@ public final class StatsManager {
         }
     }
 
-    private static class  PullAtomCallbackInternal extends IPullAtomCallback.Stub {
+    private static class PullAtomCallbackInternal extends IPullAtomCallback.Stub {
         public final int mAtomId;
         public final StatsPullAtomCallback mCallback;
         public final Executor mExecutor;

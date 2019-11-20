@@ -16,15 +16,18 @@
 
 #pragma once
 
+#include <android/os/IPullAtomCallback.h>
 #include <android/os/IStatsCompanionService.h>
 #include <android/os/IStatsPullerCallback.h>
 #include <binder/IServiceManager.h>
 #include <utils/RefBase.h>
 #include <utils/threads.h>
+
 #include <list>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 #include "PullDataReceiver.h"
 #include "StatsPuller.h"
 #include "guardrail/StatsdStats.h"
@@ -52,6 +55,27 @@ typedef struct {
     // marked as false.
     int64_t pullTimeoutNs = StatsdStats::kPullMaxDelayNs;
 } PullAtomInfo;
+
+typedef struct PullerKey {
+    // The uid of the process that registers this puller.
+    const int uid = -1;
+    // The atom that this puller is for.
+    const int atomTag;
+
+    bool operator<(const PullerKey& that) const {
+        if (uid < that.uid) {
+            return true;
+        }
+        if (uid > that.uid) {
+            return false;
+        }
+        return atomTag < that.atomTag;
+    };
+
+    bool operator==(const PullerKey& that) const {
+        return uid == that.uid && atomTag == that.atomTag;
+    };
+} PullerKey;
 
 class StatsPullerManager : public virtual RefBase {
 public:
@@ -92,12 +116,16 @@ public:
 
     void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
 
-    void RegisterPullerCallback(int32_t atomTag,
-                                const sp<IStatsPullerCallback>& callback);
+    // Deprecated, remove after puller API is complete.
+    void RegisterPullerCallback(int32_t atomTag, const sp<IStatsPullerCallback>& callback);
+
+    void RegisterPullAtomCallback(const int uid, const int32_t atomTag, const int64_t coolDownNs,
+                                  const int64_t timeoutNs, const vector<int32_t>& additiveFields,
+                                  const sp<IPullAtomCallback>& callback);
 
     void UnregisterPullerCallback(int32_t atomTag);
 
-    static std::map<int, PullAtomInfo> kAllPullAtomInfo;
+    static std::map<PullerKey, PullAtomInfo> kAllPullAtomInfo;
 
 private:
     sp<IStatsCompanionService> mStatsCompanionService = nullptr;

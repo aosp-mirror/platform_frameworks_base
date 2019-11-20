@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <android/os/IPullAtomCallback.h>
+#include <android/os/IStatsPullerCallback.h>
 #include <utils/String16.h>
 
 #include "StatsPuller.h"
@@ -25,13 +25,13 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StatsCallbackPuller : public StatsPuller {
+class StatsCallbackPullerDeprecated : public StatsPuller {
 public:
-    explicit StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback);
+    explicit StatsCallbackPullerDeprecated(int tagId, const sp<IStatsPullerCallback>& callback);
 
 private:
     bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
-    const sp<IPullAtomCallback> mCallback;
+    const sp<IStatsPullerCallback> mCallback;
 };
 
 }  // namespace statsd
