@@ -789,12 +789,11 @@ public class WifiScanner {
 
     /**
      * Enable/Disable wifi scanning.
-     * Note: WifiService calls this after any client interface mode changes (i.e. a new interface
-     * set up or an existing interface torn down)
-     * If there are >= 1 active client interface, invoke setScanningEnabled(true)
-     * If there are 0 active client interface, invoke setScanningEnabled(false)
+     *
+     * @param enable set to true to enable scanning, set to false to disable all types of scanning.
      * {@hide}
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.NETWORK_STACK)
     public void setScanningEnabled(boolean enable) {
         validateChannel();

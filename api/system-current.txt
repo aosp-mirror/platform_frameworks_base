@@ -5028,6 +5028,7 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<java.lang.Integer> getAvailableChannels(int);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean getScanResults();
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<android.net.wifi.ScanResult> getSingleScanResults();
+    method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setScanningEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener, android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
