@@ -27,7 +27,7 @@ import android.content.pm.ApplicationInfo;
 import android.server.ServerProtoEnums;
 import android.service.batterystats.BatteryStatsServiceDumpHistoryProto;
 import android.service.batterystats.BatteryStatsServiceDumpProto;
-import android.telephony.SignalStrength;
+import android.telephony.CellSignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
@@ -2529,7 +2529,7 @@ public abstract class BatteryStats implements Parcelable {
                 new String[] {"in", "out", "em", "off"}),
         new BitDescription(HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_MASK,
                 HistoryItem.STATE_PHONE_SIGNAL_STRENGTH_SHIFT, "phone_signal_strength", "Pss",
-                SignalStrength.SIGNAL_STRENGTH_NAMES,
+                new String[] { "none", "poor", "moderate", "good", "great" },
                 new String[] { "0", "1", "2", "3", "4" }),
         new BitDescription(HistoryItem.STATE_BRIGHTNESS_MASK,
                 HistoryItem.STATE_BRIGHTNESS_SHIFT, "brightness", "Sb",
@@ -3891,14 +3891,14 @@ public abstract class BatteryStats implements Parcelable {
         dumpLine(pw, 0 /* uid */, category, SCREEN_BRIGHTNESS_DATA, args);
 
         // Dump signal strength stats
-        args = new Object[SignalStrength.NUM_SIGNAL_STRENGTH_BINS];
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        args = new Object[CellSignalStrength.getNumSignalStrengthLevels()];
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
             args[i] = getPhoneSignalStrengthTime(i, rawRealtime, which) / 1000;
         }
         dumpLine(pw, 0 /* uid */, category, SIGNAL_STRENGTH_TIME_DATA, args);
         dumpLine(pw, 0 /* uid */, category, SIGNAL_SCANNING_TIME_DATA,
                 getPhoneSignalScanningTime(rawRealtime, which) / 1000);
-        for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); i++) {
             args[i] = getPhoneSignalStrengthCount(i, which);
         }
         dumpLine(pw, 0 /* uid */, category, SIGNAL_STRENGTH_COUNT_DATA, args);
@@ -4968,7 +4968,7 @@ public abstract class BatteryStats implements Parcelable {
             "good (-108dBm to -98dBm): ",
             "great (greater than -98dBm): "};
         didOne = false;
-        final int numCellularRxBins = Math.min(SignalStrength.NUM_SIGNAL_STRENGTH_BINS,
+        final int numCellularRxBins = Math.min(CellSignalStrength.getNumSignalStrengthLevels(),
             cellularRxSignalStrengthDescription.length);
         for (int i=0; i<numCellularRxBins; i++) {
             final long time = getPhoneSignalStrengthTime(i, rawRealtime, which);
@@ -8216,7 +8216,7 @@ public abstract class BatteryStats implements Parcelable {
                 which);
 
         // Phone signal strength (SIGNAL_STRENGTH_TIME_DATA and SIGNAL_STRENGTH_COUNT_DATA)
-        for (int i = 0; i < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; ++i) {
+        for (int i = 0; i < CellSignalStrength.getNumSignalStrengthLevels(); ++i) {
             final long pssToken = proto.start(SystemProto.PHONE_SIGNAL_STRENGTH);
             proto.write(SystemProto.PhoneSignalStrength.NAME, i);
             dumpTimer(proto, SystemProto.PhoneSignalStrength.TOTAL, getPhoneSignalStrengthTimer(i),

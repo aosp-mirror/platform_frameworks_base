@@ -32,7 +32,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.DrawableWrapper;
 import android.os.Handler;
-import android.telephony.SignalStrength;
+import android.telephony.CellSignalStrength;
 import android.util.LayoutDirection;
 import android.util.PathParser;
 
@@ -145,7 +145,7 @@ public class SignalDrawable extends DrawableWrapper {
 
     private int unpackLevel(int packedState) {
         int numBins = (packedState & NUM_LEVEL_MASK) >> NUM_LEVEL_SHIFT;
-        int levelOffset = numBins == (SignalStrength.NUM_SIGNAL_STRENGTH_BINS + 1) ? 10 : 0;
+        int levelOffset = numBins == (CellSignalStrength.getNumSignalStrengthLevels() + 1) ? 10 : 0;
         int level = (packedState & LEVEL_MASK);
         return level + levelOffset;
     }
