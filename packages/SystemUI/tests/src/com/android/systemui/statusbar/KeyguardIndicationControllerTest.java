@@ -23,7 +23,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,7 +39,9 @@ import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.os.BatteryManager;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserManager;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,8 +50,10 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitor.BatteryStatus;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -96,6 +102,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Mock
     private UserManager mUserManager;
     @Mock
+    private IBatteryStats mIBatteryStats;
+    @Mock
     private DockManager mDockManager;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
@@ -131,8 +139,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController = new KeyguardIndicationController(mContext, mIndicationArea, mLockIcon,
                 mLockPatternUtils, mWakeLock, mShadeController, mAccessibilityController,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
-                mDockManager);
+                mDockManager, mIBatteryStats);
         mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
+        clearInvocations(mIBatteryStats);
     }
 
     @Test
@@ -338,6 +347,42 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
         mController.onUnlockedChanged();
         assertThat(mTextView.getText()).isEqualTo(restingIndication);
+    }
+
+    @Test
+    public void onRefreshBatteryInfo_computesChargingTime() throws RemoteException {
+        createController();
+        BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
+                80 /* level */, BatteryManager.BATTERY_PLUGGED_WIRELESS, 100 /* health */,
+                0 /* maxChargingWattage */);
+
+        mController.getKeyguardCallback().onRefreshBatteryInfo(status);
+        verify(mIBatteryStats).computeChargeTimeRemaining();
+    }
+
+    @Test
+    public void onRefreshBatteryInfo_computesChargingTime_onlyWhenCharging()
+            throws RemoteException {
+        createController();
+        BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
+                80 /* level */, 0 /* plugged */, 100 /* health */,
+                0 /* maxChargingWattage */);
+
+        mController.getKeyguardCallback().onRefreshBatteryInfo(status);
+        verify(mIBatteryStats, never()).computeChargeTimeRemaining();
+    }
+
+    /**
+     * Regression test.
+     * We should not make calls to the system_process when updating the doze state.
+     */
+    @Test
+    public void setDozing_noIBatteryCalls() throws RemoteException {
+        createController();
+        mController.setVisible(true);
+        mController.setDozing(true);
+        mController.setDozing(false);
+        verify(mIBatteryStats, never()).computeChargeTimeRemaining();
     }
 
     @Test
