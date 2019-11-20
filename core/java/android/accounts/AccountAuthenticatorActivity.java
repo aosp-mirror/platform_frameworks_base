@@ -32,7 +32,11 @@ import android.os.Bundle;
  * This result will be sent as the result of the request when the activity finishes. If this
  * is never set or if it is set to null then error {@link AccountManager#ERROR_CODE_CANCELED}
  * will be called on the response.
+ *
+ * @deprecated Applications should extend Activity themselves. This class is not compatible with
+ *   AppCompat, and the functionality it provides is not complex.
  */
+@Deprecated
 public class AccountAuthenticatorActivity extends Activity {
     private AccountAuthenticatorResponse mAccountAuthenticatorResponse = null;
     private Bundle mResultBundle = null;
