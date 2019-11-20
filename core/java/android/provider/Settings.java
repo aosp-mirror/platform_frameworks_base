@@ -8156,6 +8156,15 @@ public final class Settings {
         public static final String NOTIFICATION_BADGING = "notification_badging";
 
         /**
+         * When enabled the system will maintain a rolling history of received notifications. When
+         * disabled the history will be disabled and deleted.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String NOTIFICATION_HISTORY_ENABLED = "notification_history_enabled";
+
+        /**
          * Whether notifications are dismissed by a right-to-left swipe (instead of a left-to-right
          * swipe).
          *
