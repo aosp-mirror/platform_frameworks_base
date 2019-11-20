@@ -33,10 +33,13 @@ import com.android.internal.util.function.OctConsumer;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadConsumer;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuadPredicate;
 import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
+import com.android.internal.util.function.QuintPredicate;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.util.function.TriFunction;
+import com.android.internal.util.function.TriPredicate;
 import com.android.internal.util.function.UndecConsumer;
 import com.android.internal.util.function.UndecFunction;
 import com.android.internal.util.function.pooled.PooledLambdaImpl.LambdaType.ReturnType;
@@ -342,6 +345,66 @@ public interface PooledLambda {
             ArgumentPlaceholder<A> arg1, B arg2) {
         return acquire(PooledLambdaImpl.sPool,
                 function, 2, 1, ReturnType.BOOLEAN, arg1, arg2, null, null, null, null, null, null,
+                null, null, null);
+    }
+
+    /**
+     * {@link PooledPredicate} factory
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 placeholder for a missing argument. Use {@link #__} to get one
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @return a {@link PooledPredicate}, equivalent to lambda:
+     *         {@code (arg1) -> function(arg1, arg2, arg3) }
+     */
+    static <A, B, C> PooledPredicate<A> obtainPredicate(
+            TriPredicate<? super A, ? super B, ? super C> function,
+            ArgumentPlaceholder<A> arg1, B arg2, C arg3) {
+        return acquire(PooledLambdaImpl.sPool,
+                function, 3, 1, ReturnType.BOOLEAN, arg1, arg2, arg3, null, null, null, null, null,
+                null, null, null);
+    }
+
+    /**
+     * {@link PooledPredicate} factory
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 placeholder for a missing argument. Use {@link #__} to get one
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @return a {@link PooledPredicate}, equivalent to lambda:
+     *         {@code (arg1) -> function(arg1, arg2, arg3, arg4) }
+     */
+    static <A, B, C, D> PooledPredicate<A> obtainPredicate(
+            QuadPredicate<? super A, ? super B, ? super C, ? super D> function,
+            ArgumentPlaceholder<A> arg1, B arg2, C arg3, D arg4) {
+        return acquire(PooledLambdaImpl.sPool,
+                function, 3, 1, ReturnType.BOOLEAN, arg1, arg2, arg3, arg4, null, null, null, null,
+                null, null, null);
+    }
+
+    /**
+     * {@link PooledPredicate} factory
+     *
+     * @param function non-capturing lambda(typically an unbounded method reference)
+     *                 to be invoked on call
+     * @param arg1 placeholder for a missing argument. Use {@link #__} to get one
+     * @param arg2 parameter supplied to {@code function} on call
+     * @param arg3 parameter supplied to {@code function} on call
+     * @param arg4 parameter supplied to {@code function} on call
+     * @param arg5 parameter supplied to {@code function} on call
+     * @return a {@link PooledPredicate}, equivalent to lambda:
+     *         {@code (arg1) -> function(arg1, arg2, arg3, arg4, arg5) }
+     */
+    static <A, B, C, D, E> PooledPredicate<A> obtainPredicate(
+            QuintPredicate<? super A, ? super B, ? super C, ? super D, ? super E> function,
+            ArgumentPlaceholder<A> arg1, B arg2, C arg3, D arg4, E arg5) {
+        return acquire(PooledLambdaImpl.sPool,
+                function, 3, 1, ReturnType.BOOLEAN, arg1, arg2, arg3, arg4, arg5, null, null, null,
                 null, null, null);
     }
 
