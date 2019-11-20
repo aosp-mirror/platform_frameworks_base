@@ -529,7 +529,7 @@
 
              - TYPE_ETHERNET (9) is prepended to this list, and
 
-             - the return value of TelephonyManager.isTetherApnRequired()
+             - the return value of TelephonyManager.isTetheringApnRequired()
                determines how the array is further modified:
 
                    * TRUE (DUN REQUIRED).
