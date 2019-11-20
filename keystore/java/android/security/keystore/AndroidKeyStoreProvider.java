@@ -400,6 +400,12 @@ public class AndroidKeyStoreProvider extends Provider {
      *
      * <p>Note: the returned {@code KeyStore} is already initialized/loaded. Thus, there is
      * no need to invoke {@code load} on it.
+     *
+     * @param uid Uid for which the keystore provider is requested.
+     * @throws KeyStoreException if a KeyStoreSpi implementation for the specified type is not
+     * available from the specified provider.
+     * @throws NoSuchProviderException If the specified provider is not registered in the security
+     * provider list.
      * @hide
      */
     @SystemApi
