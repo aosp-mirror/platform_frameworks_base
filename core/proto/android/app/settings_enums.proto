@@ -2411,4 +2411,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: Q
     SETTINGS_GESTURE_TAP = 1751;
+
+    // OPEN: Settings > Developer Options > Platform Compat
+    // CATEGORY: SETTINGS
+    // OS: R
+    SETTINGS_PLATFORM_COMPAT_DASHBOARD = 1805;
 }
