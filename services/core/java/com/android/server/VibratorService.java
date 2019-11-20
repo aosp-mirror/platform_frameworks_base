@@ -28,8 +28,8 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
+import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.V1_0.EffectStrength;
-import android.hardware.vibrator.V1_4.Capabilities;
 import android.icu.text.DateFormat;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -1154,7 +1154,7 @@ public class VibratorService extends IVibratorService.Stub
                 long duration = vibratorPerformEffect(prebaked.getId(),
                         prebaked.getEffectStrength(), vib);
                 long timeout = duration;
-                if ((mCapabilities & Capabilities.PERFORM_COMPLETION_CALLBACK) != 0) {
+                if ((mCapabilities & IVibrator.CAP_PERFORM_CALLBACK) != 0) {
                     timeout *= ASYNC_TIMEOUT_MULTIPLIER;
                 }
                 if (timeout > 0) {
