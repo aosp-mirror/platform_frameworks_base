@@ -10860,7 +10860,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (DEBUG_CURSOR) {
-            logCursor("onTouchEvent", MotionEvent.actionToString(event.getActionMasked()));
+            logCursor("onTouchEvent", "%d: %s (%f,%f)",
+                    event.getSequenceNumber(),
+                    MotionEvent.actionToString(event.getActionMasked()),
+                    event.getX(), event.getY());
         }
 
         final int action = event.getActionMasked();
