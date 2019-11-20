@@ -67,6 +67,11 @@ public final class SimpleTimeDetectorStrategy implements TimeDetectorStrategy {
     public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion) {
         // NITZ logic
 
+        // Empty suggestions are just ignored as we don't currently keep track of suggestion origin.
+        if (timeSuggestion.getUtcTime() == null) {
+            return;
+        }
+
         boolean timeSuggestionIsValid =
                 validateNewPhoneSuggestion(timeSuggestion, mLastPhoneSuggestion);
         if (!timeSuggestionIsValid) {

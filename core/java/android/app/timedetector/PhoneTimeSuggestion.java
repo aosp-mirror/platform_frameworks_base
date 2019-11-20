@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A time signal from a telephony source. The value consists of the number of milliseconds elapsed
+ * A time signal from a telephony source. The value can be {@code null} to indicate that the
+ * telephony source has entered an "un-opinionated" state and any previously sent suggestions are
+ * being withdrawn. When not {@code null}, the value consists of the number of milliseconds elapsed
  * since 1/1/1970 00:00:00 UTC and the time according to the elapsed realtime clock when that number
  * was established. The elapsed realtime clock is considered accurate but volatile, so time signals
  * must not be persisted across device resets.
@@ -50,20 +52,17 @@ public final class PhoneTimeSuggestion implements Parcelable {
             };
 
     private final int mPhoneId;
-    @NonNull
-    private final TimestampedValue<Long> mUtcTime;
-    @Nullable
-    private ArrayList<String> mDebugInfo;
+    @Nullable private TimestampedValue<Long> mUtcTime;
+    @Nullable private ArrayList<String> mDebugInfo;
 
-    public PhoneTimeSuggestion(int phoneId, @NonNull TimestampedValue<Long> utcTime) {
+    public PhoneTimeSuggestion(int phoneId) {
         mPhoneId = phoneId;
-        mUtcTime = Objects.requireNonNull(utcTime);
     }
 
     private static PhoneTimeSuggestion createFromParcel(Parcel in) {
         int phoneId = in.readInt();
-        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */);
-        PhoneTimeSuggestion suggestion = new PhoneTimeSuggestion(phoneId, utcTime);
+        PhoneTimeSuggestion suggestion = new PhoneTimeSuggestion(phoneId);
+        suggestion.setUtcTime(in.readParcelable(null /* classLoader */));
         @SuppressWarnings("unchecked")
         ArrayList<String> debugInfo = (ArrayList<String>) in.readArrayList(null /* classLoader */);
         suggestion.mDebugInfo = debugInfo;
@@ -86,7 +85,11 @@ public final class PhoneTimeSuggestion implements Parcelable {
         return mPhoneId;
     }
 
-    @NonNull
+    public void setUtcTime(@Nullable TimestampedValue<Long> utcTime) {
+        mUtcTime = utcTime;
+    }
+
+    @Nullable
     public TimestampedValue<Long> getUtcTime() {
         return mUtcTime;
     }
