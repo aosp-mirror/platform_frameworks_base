@@ -1096,7 +1096,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         taskTop.finishing = true;
 
         final ActivityRecord newR = new ActivityBuilder(mService).build();
-        final ActivityRecord result = mStack.resetTaskIfNeededLocked(taskTop, newR);
+        final ActivityRecord result = mStack.resetTaskIfNeeded(taskTop, newR);
         assertThat(result).isEqualTo(taskTop);
     }
 

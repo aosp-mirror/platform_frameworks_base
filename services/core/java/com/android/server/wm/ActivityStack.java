@@ -62,7 +62,6 @@ import static com.android.server.am.ActivityStackProto.DISPLAY_ID;
 import static com.android.server.am.ActivityStackProto.FULLSCREEN;
 import static com.android.server.am.ActivityStackProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityStackProto.STACK;
-import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -119,7 +118,6 @@ import static com.android.server.wm.StackProto.DEFER_REMOVAL;
 import static com.android.server.wm.StackProto.FILLS_PARENT;
 import static com.android.server.wm.StackProto.MINIMIZE_AMOUNT;
 import static com.android.server.wm.StackProto.WINDOW_CONTAINER;
-import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
@@ -203,7 +201,7 @@ import java.util.function.Consumer;
 class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarget,
         ConfigurationContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_ATM;
-    private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
+    static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_APP = TAG + POSTFIX_APP;
     private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
@@ -212,7 +210,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
-    private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
+    static final String TAG_TASKS = TAG + POSTFIX_TASKS;
     private static final String TAG_TRANSITION = TAG + POSTFIX_TRANSITION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
@@ -515,6 +513,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             }
         }
     }
+
+    private static final ResetTargetTaskHelper sResetTargetTaskHelper = new ResetTargetTaskHelper();
 
     int numActivities() {
         int count = 0;
@@ -2980,7 +2980,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 // If the caller has requested that the target task be
                 // reset, then do so.
                 if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
-                    resetTaskIfNeededLocked(r, r);
+                    resetTaskIfNeeded(r, r);
                     doShow = topRunningNonDelayedActivityLocked(null) == r;
                 }
             } else if (options != null && options.getAnimationType()
@@ -3052,297 +3052,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
     }
 
     /**
-     * Helper method for {@link #resetTaskIfNeededLocked(ActivityRecord, ActivityRecord)}.
-     * Performs a reset of the given task, if needed for new activity start.
-     * @param task The task containing the Activity (taskTop) that might be reset.
-     * @param forceReset Flag indicating if clear task was requested
-     * @return An ActivityOptions that needs to be processed.
-     */
-    private ActivityOptions resetTargetTaskIfNeededLocked(Task task, boolean forceReset) {
-        ActivityOptions topOptions = null;
-
-        // Tracker of the end of currently handled reply chain (sublist) of activities. What happens
-        // to activities in the same chain will depend on what the end activity of the chain needs.
-        int replyChainEnd = -1;
-        boolean canMoveOptions = true;
-        int numTasksCreated = 0;
-
-        // We only do this for activities that are not the root of the task (since if we finish
-        // the root, we may no longer have the task!).
-        final int numActivities = task.getChildCount();
-        int lastActivityNdx = task.findRootIndex(true /* effectiveRoot */);
-        if (lastActivityNdx == -1) {
-            lastActivityNdx = 0;
-        }
-        for (int i = numActivities - 1; i > lastActivityNdx; --i) {
-            ActivityRecord target = task.getChildAt(i);
-            // TODO: Why is this needed? Looks like we're breaking the loop before we reach the root
-            if (target.isRootOfTask()) break;
-
-            final int flags = target.info.flags;
-            final boolean finishOnTaskLaunch =
-                    (flags & ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0;
-            final boolean allowTaskReparenting =
-                    (flags & ActivityInfo.FLAG_ALLOW_TASK_REPARENTING) != 0;
-            final boolean clearWhenTaskReset =
-                    (target.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0;
-
-            if (!finishOnTaskLaunch
-                    && !clearWhenTaskReset
-                    && target.resultTo != null) {
-                // If this activity is sending a reply to a previous
-                // activity, we can't do anything with it now until
-                // we reach the start of the reply chain.
-                // XXX note that we are assuming the result is always
-                // to the previous activity, which is almost always
-                // the case but we really shouldn't count on.
-                if (replyChainEnd < 0) {
-                    replyChainEnd = i;
-                }
-            } else if (!finishOnTaskLaunch
-                    && !clearWhenTaskReset
-                    && allowTaskReparenting
-                    && target.taskAffinity != null
-                    && !target.taskAffinity.equals(task.affinity)) {
-                // If this activity has an affinity for another
-                // task, then we need to move it out of here.  We will
-                // move it as far out of the way as possible, to the
-                // bottom of the activity stack.  This also keeps it
-                // correctly ordered with any activities we previously
-                // moved.
-                // TODO: We should probably look for other stacks also, since corresponding task
-                // with the same affinity is unlikely to be in the same stack.
-                final Task targetTask;
-                final ActivityRecord bottom =
-                        hasChild() && getChildAt(0).hasChild() ?
-                                getChildAt(0).getChildAt(0) : null;
-                if (bottom != null && target.taskAffinity.equals(bottom.getTask().affinity)) {
-                    // If the activity currently at the bottom has the
-                    // same task affinity as the one we are moving,
-                    // then merge it into the same task.
-                    targetTask = bottom.getTask();
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity " + target
-                            + " out to bottom task " + targetTask);
-                } else {
-                    targetTask = createTask(
-                            mStackSupervisor.getNextTaskIdForUserLocked(target.mUserId),
-                            target.info, null /* intent */, null /* voiceSession */,
-                            null /* voiceInteractor */, false /* toTop */);
-                    targetTask.affinityIntent = target.intent;
-                    numTasksCreated++;
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity " + target
-                            + " out to new task " + targetTask);
-                }
-
-                boolean noOptions = canMoveOptions;
-                final int start = replyChainEnd < 0 ? i : replyChainEnd;
-                for (int srcPos = start; srcPos >= i; --srcPos) {
-                    final ActivityRecord p = task.getChildAt(srcPos);
-                    if (p.finishing) {
-                        continue;
-                    }
-
-                    canMoveOptions = false;
-                    if (noOptions && topOptions == null) {
-                        topOptions = p.takeOptionsLocked(false /* fromClient */);
-                        if (topOptions != null) {
-                            noOptions = false;
-                        }
-                    }
-                    if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
-                            "Removing activity " + p + " from task=" + task + " adding to task="
-                            + targetTask + " Callers=" + Debug.getCallers(4));
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                            "Pushing next activity " + p + " out to target's task " + target);
-                    p.reparent(targetTask, 0 /* position - bottom */, "resetTargetTaskIfNeeded");
-                }
-
-                positionChildAtBottom(targetTask);
-                mStackSupervisor.mRecentTasks.add(targetTask);
-                replyChainEnd = -1;
-            } else if (forceReset || finishOnTaskLaunch || clearWhenTaskReset) {
-                // If the activity should just be removed -- either
-                // because it asks for it, or the task should be
-                // cleared -- then finish it and anything that is
-                // part of its reply chain.
-                int end;
-                if (clearWhenTaskReset) {
-                    // In this case, we want to finish this activity
-                    // and everything above it, so be sneaky and pretend
-                    // like these are all in the reply chain.
-                    end = task.getChildCount() - 1;
-                } else if (replyChainEnd < 0) {
-                    end = i;
-                } else {
-                    end = replyChainEnd;
-                }
-                boolean noOptions = canMoveOptions;
-                for (int srcPos = i; srcPos <= end; srcPos++) {
-                    ActivityRecord p = task.getChildAt(srcPos);
-                    if (p.finishing) {
-                        continue;
-                    }
-                    canMoveOptions = false;
-                    if (noOptions && topOptions == null) {
-                        topOptions = p.takeOptionsLocked(false /* fromClient */);
-                        if (topOptions != null) {
-                            noOptions = false;
-                        }
-                    }
-                    if (DEBUG_TASKS) Slog.w(TAG_TASKS,
-                            "resetTaskIntendedTask: calling finishActivity on " + p);
-                    if (p.finishIfPossible("reset-task", false /* oomAdj */)
-                            == FINISH_RESULT_REMOVED) {
-                        end--;
-                        srcPos--;
-                    }
-                }
-                replyChainEnd = -1;
-            } else {
-                // If we were in the middle of a chain, well the
-                // activity that started it all doesn't want anything
-                // special, so leave it all as-is.
-                replyChainEnd = -1;
-            }
-        }
-
-        // Create target stack for the newly created tasks if necessary
-        if (numTasksCreated > 0) {
-            ActivityDisplay display = getDisplay();
-            final boolean singleTaskInstanceDisplay = display.isSingleTaskInstance();
-            if (singleTaskInstanceDisplay) {
-                display = mRootActivityContainer.getDefaultDisplay();
-            }
-
-            if (singleTaskInstanceDisplay || display.alwaysCreateStack(getWindowingMode(),
-                    getActivityType())) {
-                for (int index = numTasksCreated - 1; index >= 0; index--) {
-                    final Task targetTask = getChildAt(index);
-                    final ActivityStack targetStack = display.getOrCreateStack(getWindowingMode(),
-                            getActivityType(), false /* onTop */);
-                    targetTask.reparent(targetStack, false /* toTop */,
-                            REPARENT_LEAVE_STACK_IN_PLACE, false /* animate */,
-                            true /* deferResume */, "resetTargetTask");
-                }
-            }
-        }
-
-        return topOptions;
-    }
-
-    /**
-     * Helper method for {@link #resetTaskIfNeededLocked(ActivityRecord, ActivityRecord)}.
-     * Processes all of the activities in a given Task looking for an affinity with the task
-     * of resetTaskIfNeededLocked.taskTop.
-     * @param affinityTask The task we are looking for an affinity to.
-     * @param task Task that resetTaskIfNeededLocked.taskTop belongs to.
-     * @param topTaskIsHigher True if #task has already been processed by resetTaskIfNeededLocked.
-     * @param forceReset Flag indicating if clear task was requested
-     */
-    // TODO: Consider merging with #resetTargetTaskIfNeededLocked() above
-    private int resetAffinityTaskIfNeededLocked(Task affinityTask, Task task,
-            boolean topTaskIsHigher, boolean forceReset, int taskInsertionPoint) {
-        // Tracker of the end of currently handled reply chain (sublist) of activities. What happens
-        // to activities in the same chain will depend on what the end activity of the chain needs.
-        int replyChainEnd = -1;
-        final String taskAffinity = task.affinity;
-
-        final int numActivities = task.getChildCount();
-
-        // Do not operate on or below the effective root Activity.
-        int lastActivityNdx = affinityTask.findRootIndex(true /* effectiveRoot */);
-        if (lastActivityNdx == -1) {
-            lastActivityNdx = 0;
-        }
-        for (int i = numActivities - 1; i > lastActivityNdx; --i) {
-            ActivityRecord target = task.getChildAt(i);
-            // TODO: Why is this needed? Looks like we're breaking the loop before we reach the root
-            if (target.isRootOfTask()) break;
-
-            final int flags = target.info.flags;
-            boolean finishOnTaskLaunch = (flags & ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0;
-            boolean allowTaskReparenting = (flags & ActivityInfo.FLAG_ALLOW_TASK_REPARENTING) != 0;
-
-            if (target.resultTo != null) {
-                // If this activity is sending a reply to a previous
-                // activity, we can't do anything with it now until
-                // we reach the start of the reply chain.
-                // XXX note that we are assuming the result is always
-                // to the previous activity, which is almost always
-                // the case but we really shouldn't count on.
-                if (replyChainEnd < 0) {
-                    replyChainEnd = i;
-                }
-            } else if (topTaskIsHigher
-                    && allowTaskReparenting
-                    && taskAffinity != null
-                    && taskAffinity.equals(target.taskAffinity)) {
-                // This activity has an affinity for our task. Either remove it if we are
-                // clearing or move it over to our task.  Note that
-                // we currently punt on the case where we are resetting a
-                // task that is not at the top but who has activities above
-                // with an affinity to it...  this is really not a normal
-                // case, and we will need to later pull that task to the front
-                // and usually at that point we will do the reset and pick
-                // up those remaining activities.  (This only happens if
-                // someone starts an activity in a new task from an activity
-                // in a task that is not currently on top.)
-                if (forceReset || finishOnTaskLaunch) {
-                    final int start = replyChainEnd >= 0 ? replyChainEnd : i;
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                            "Finishing task at index " + start + " to " + i);
-                    for (int srcPos = start; srcPos >= i; --srcPos) {
-                        final ActivityRecord p = task.getChildAt(srcPos);
-                        if (p.finishing) {
-                            continue;
-                        }
-                        p.finishIfPossible("move-affinity", false /* oomAdj */);
-                    }
-                } else {
-                    if (taskInsertionPoint < 0) {
-                        taskInsertionPoint = task.getChildCount();
-
-                    }
-
-                    final int start = replyChainEnd >= 0 ? replyChainEnd : i;
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                            "Reparenting from task=" + affinityTask + ":" + start + "-" + i
-                            + " to task=" + task + ":" + taskInsertionPoint);
-                    for (int srcPos = start; srcPos >= i; --srcPos) {
-                        final ActivityRecord p = task.getChildAt(srcPos);
-                        p.reparent(task, taskInsertionPoint, "resetAffinityTaskIfNeededLocked");
-
-                        if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
-                                "Removing and adding activity " + p + " to stack at " + task
-                                + " callers=" + Debug.getCallers(3));
-                        if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Pulling activity " + p
-                                + " from " + srcPos + " in to resetting task " + task);
-                    }
-                    positionChildAtTop(task);
-
-                    // Now we've moved it in to place...  but what if this is
-                    // a singleTop activity and we have put it on top of another
-                    // instance of the same activity?  Then we drop the instance
-                    // below so it remains singleTop.
-                    if (target.info.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP) {
-                        final ArrayList<ActivityRecord> taskActivities = task.mChildren;
-                        final int targetNdx = taskActivities.indexOf(target);
-                        if (targetNdx > 0) {
-                            final ActivityRecord p = taskActivities.get(targetNdx - 1);
-                            if (p.intent.getComponent().equals(target.intent.getComponent())) {
-                                p.finishIfPossible("replace", false /* oomAdj */);
-                            }
-                        }
-                    }
-                }
-
-                replyChainEnd = -1;
-            }
-        }
-        return taskInsertionPoint;
-    }
-
-    /**
      * Reset the task by reparenting the activities that have same affinity to the task or
      * reparenting the activities that have different affinityies out of the task, while these
      * activities allow task reparenting.
@@ -3352,37 +3061,16 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
      * @return The non-finishing top activity of the task after reset or the original task top
      *         activity if all activities within the task are finishing.
      */
-    final ActivityRecord resetTaskIfNeededLocked(ActivityRecord taskTop,
-            ActivityRecord newActivity) {
+    ActivityRecord resetTaskIfNeeded(ActivityRecord taskTop, ActivityRecord newActivity) {
         final boolean forceReset =
                 (newActivity.info.flags & ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0;
         final Task task = taskTop.getTask();
 
-        // False until we evaluate the Task associated with taskTop. Switches to true
-        // for remaining tasks. Used for later tasks to reparent to task.
-        boolean taskFound = false;
-
         // If ActivityOptions are moved out and need to be aborted or moved to taskTop.
-        ActivityOptions topOptions = null;
+        final ActivityOptions topOptions = sResetTargetTaskHelper.process(this, task, forceReset);
 
-        // Preserve the location for reparenting in the new task.
-        int reparentInsertionPoint = -1;
-
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final Task targetTask = getChildAt(i);
-
-            if (targetTask == task) {
-                topOptions = resetTargetTaskIfNeededLocked(task, forceReset);
-                taskFound = true;
-            } else {
-                reparentInsertionPoint = resetAffinityTaskIfNeededLocked(targetTask, task,
-                        taskFound, forceReset, reparentInsertionPoint);
-            }
-        }
-
-        int taskNdx = mChildren.indexOf(task);
-        if (taskNdx >= 0) {
-            ActivityRecord newTop = getChildAt(taskNdx).getTopNonFinishingActivity();
+        if (mChildren.contains(task)) {
+            final ActivityRecord newTop = task.getTopNonFinishingActivity();
             if (newTop != null) {
                 taskTop = newTop;
             }
@@ -3391,11 +3079,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         if (topOptions != null) {
             // If we got some ActivityOptions from an activity on top that
             // was removed from the task, propagate them to the new real top.
-            if (taskTop != null) {
-                taskTop.updateOptionsLocked(topOptions);
-            } else {
-                topOptions.abort();
-            }
+            taskTop.updateOptionsLocked(topOptions);
         }
 
         return taskTop;
@@ -5219,7 +4903,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         displayContent.layoutAndAssignWindowLayersIfNeeded();
     }
 
-    private void positionChildAtBottom(Task child) {
+    void positionChildAtBottom(Task child) {
         // If there are other focusable stacks on the display, the z-order of the display should not
         // be changed just because a task was placed at the bottom. E.g. if it is moving the topmost
         // task to bottom, the next focusable stack on the same display should be focused.

@@ -1812,7 +1812,7 @@ class ActivityStarter {
         final boolean resetTask =
                 reusedActivity != null && (mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0;
         if (resetTask) {
-            targetTaskTop = mTargetStack.resetTaskIfNeededLocked(targetTaskTop, mStartActivity);
+            targetTaskTop = mTargetStack.resetTaskIfNeeded(targetTaskTop, mStartActivity);
         }
 
         if ((mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))

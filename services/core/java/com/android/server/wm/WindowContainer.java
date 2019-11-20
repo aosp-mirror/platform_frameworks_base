@@ -79,6 +79,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -775,10 +776,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /**
      * @return {@code true} if in this subtree of the hierarchy we have an
-     *         {@ode ActivityRecord#isAnimating(TRANSITION)}, {@code false} otherwise.
+     *         {@code ActivityRecord#isAnimating(TRANSITION)}, {@code false} otherwise.
      */
     boolean isAppTransitioning() {
-        return forAllActivities(app -> app.isAnimating(TRANSITION));
+        return getActivity(app -> app.isAnimating(TRANSITION)) != null;
     }
 
     /**
@@ -1094,13 +1095,79 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         wrapper.release();
     }
 
-    boolean forAllActivities(ToBooleanFunction<ActivityRecord> callback) {
+    boolean forAllActivities(Function<ActivityRecord, Boolean> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             if (mChildren.get(i).forAllActivities(callback)) {
                 return true;
             }
         }
         return false;
+    }
+
+    void forAllActivities(Consumer<ActivityRecord> callback) {
+        forAllActivities(callback, true /*traverseTopToBottom*/);
+    }
+
+    void forAllActivities(Consumer<ActivityRecord> callback, boolean traverseTopToBottom) {
+        if (traverseTopToBottom) {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                mChildren.get(i).forAllActivities(callback, traverseTopToBottom);
+            }
+        } else {
+            final int count = mChildren.size();
+            for (int i = 0; i < count; i++) {
+                mChildren.get(i).forAllActivities(callback, traverseTopToBottom);
+            }
+        }
+    }
+
+    /** @return {@code true} if this node or any of its children contains an activity. */
+    boolean hasActivity() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).hasActivity()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    ActivityRecord getActivity(Predicate<ActivityRecord> callback) {
+        return getActivity(callback, true /*traverseTopToBottom*/);
+    }
+
+    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
+        if (traverseTopToBottom) {
+            for (int i = mChildren.size() - 1; i >= 0; --i) {
+                final ActivityRecord r = mChildren.get(i).getActivity(callback, traverseTopToBottom);
+                if (r != null) {
+                    return r;
+                }
+            }
+        } else {
+            final int count = mChildren.size();
+            for (int i = 0; i < count; i++) {
+                final ActivityRecord r = mChildren.get(i).getActivity(callback, traverseTopToBottom);
+                if (r != null) {
+                    return r;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    ActivityRecord getTopActivity(boolean includeFinishing, boolean includeOverlays) {
+        // Break down into 4 calls to avoid object creation due to capturing input params.
+        if (includeFinishing) {
+            if (includeOverlays) {
+                return getActivity((r) -> true);
+            }
+            return getActivity((r) -> !r.mTaskOverlay);
+        } else if (includeOverlays) {
+            return getActivity((r) -> !r.finishing);
+        }
+
+        return getActivity((r) -> !r.finishing && !r.mTaskOverlay);
     }
 
     void forAllWallpaperWindows(Consumer<WallpaperWindowToken> callback) {

@@ -333,6 +333,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * An entry in the history stack, representing an activity.
@@ -1579,6 +1582,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     ActivityRecord asActivityRecord() {
         // I am an activity record!
         return this;
+    }
+
+    @Override
+    boolean hasActivity() {
+        // I am an activity!
+        return true;
     }
 
     void setProcess(WindowProcessController proc) {
@@ -3418,8 +3427,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    boolean forAllActivities(ToBooleanFunction<ActivityRecord> callback) {
+    boolean forAllActivities(Function<ActivityRecord, Boolean> callback) {
         return callback.apply(this);
+    }
+
+    @Override
+    void forAllActivities(Consumer<ActivityRecord> callback, boolean traverseTopToBottom) {
+        callback.accept(this);
+    }
+
+    @Override
+    ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
+        return callback.test(this) ? this : null;
     }
 
     @Override
