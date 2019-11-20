@@ -12,6 +12,7 @@ package android {
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
+    field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
@@ -629,6 +630,9 @@ package android.app.usage {
   public class StorageStatsManager {
     method public boolean isQuotaSupported(@NonNull java.util.UUID);
     method public boolean isReservedSupported(@NonNull java.util.UUID);
+    method @NonNull @WorkerThread public java.util.Collection<android.os.storage.CrateInfo> queryCratesForPackage(@NonNull java.util.UUID, @NonNull String, @NonNull android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull @WorkerThread public java.util.Collection<android.os.storage.CrateInfo> queryCratesForUid(@NonNull java.util.UUID, int) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_CRATES) @WorkerThread public java.util.Collection<android.os.storage.CrateInfo> queryCratesForUser(@NonNull java.util.UUID, @NonNull android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
   }
 
   public final class UsageStatsManager {
@@ -2313,6 +2317,17 @@ package android.os.image {
 }
 
 package android.os.storage {
+
+  public final class CrateInfo implements android.os.Parcelable {
+    ctor public CrateInfo(@NonNull CharSequence, long);
+    ctor public CrateInfo(@NonNull CharSequence);
+    method @Nullable public static android.os.storage.CrateInfo copyFrom(int, @Nullable String, @Nullable String);
+    method public int describeContents();
+    method public long getExpirationMillis();
+    method @NonNull public CharSequence getLabel();
+    method public void writeToParcel(@Nullable android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.storage.CrateInfo> CREATOR;
+  }
 
   public class StorageManager {
     method public static boolean hasIsolatedStorage();
