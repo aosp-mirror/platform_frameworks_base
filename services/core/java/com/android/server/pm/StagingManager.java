@@ -216,7 +216,7 @@ public class StagingManager {
         }
         final long activeVersion = activePackage.applicationInfo.longVersionCode;
         if (activeVersion != session.params.requiredInstalledVersionCode) {
-            if (!mApexManager.abortActiveSession()) {
+            if (!mApexManager.abortStagedSession(session.sessionId)) {
                 Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
             }
             throw new PackageManagerException(
@@ -235,7 +235,7 @@ public class StagingManager {
         final boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
                 session.params.installFlags, activePackage.applicationInfo.flags);
         if (activeVersion > newVersionCode && !allowsDowngrade) {
-            if (!mApexManager.abortActiveSession()) {
+            if (!mApexManager.abortStagedSession(session.sessionId)) {
                 Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
             }
             throw new PackageManagerException(
@@ -678,7 +678,10 @@ public class StagingManager {
                                 + " because it is not active or APEXD is not reachable");
                 return;
             }
-            mApexManager.abortActiveSession();
+            try {
+                mApexManager.abortStagedSession(session.sessionId);
+            } catch (Exception ignore) {
+            }
         }
     }
 
