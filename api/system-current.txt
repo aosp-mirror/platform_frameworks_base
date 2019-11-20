@@ -3578,6 +3578,19 @@ package android.media {
     method public android.media.AudioAttributes.Builder setInternalCapturePreset(int);
   }
 
+  public final class AudioDeviceAddress implements android.os.Parcelable {
+    ctor public AudioDeviceAddress(@NonNull android.media.AudioDeviceInfo);
+    ctor public AudioDeviceAddress(int, int, @NonNull String);
+    method public int describeContents();
+    method @NonNull public String getAddress();
+    method public int getRole();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioDeviceAddress> CREATOR;
+    field public static final int ROLE_INPUT = 1; // 0x1
+    field public static final int ROLE_OUTPUT = 2; // 0x2
+  }
+
   public final class AudioFocusInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.media.AudioAttributes getAttributes();
