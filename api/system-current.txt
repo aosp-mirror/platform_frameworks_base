@@ -8132,6 +8132,7 @@ package android.telephony {
     field public static final int NUMBER_UNREACHABLE = 8; // 0x8
     field public static final int OTASP_PROVISIONING_IN_PROCESS = 76; // 0x4c
     field public static final int OUTGOING_CANCELED = 44; // 0x2c
+    field public static final int OUTGOING_EMERGENCY_CALL_PLACED = 80; // 0x50
     field public static final int OUTGOING_FAILURE = 43; // 0x2b
     field public static final int OUT_OF_NETWORK = 11; // 0xb
     field public static final int OUT_OF_SERVICE = 18; // 0x12
