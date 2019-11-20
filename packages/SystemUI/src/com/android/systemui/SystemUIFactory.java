@@ -50,6 +50,7 @@ import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.volume.VolumeDialogComponent;
 
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import dagger.Module;
@@ -116,7 +117,9 @@ public class SystemUIFactory {
      * This method is overridden in vendor specific implementation of Sys UI.
      */
     public ScreenshotNotificationSmartActionsProvider
-            createScreenshotNotificationSmartActionsProvider() {
+            createScreenshotNotificationSmartActionsProvider(Context context,
+            Executor executor,
+            Handler uiHandler) {
         return new ScreenshotNotificationSmartActionsProvider();
     }
 
