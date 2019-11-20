@@ -19,5 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="recents_quick_scrub_onboarding" msgid="3449337212132057178">"Перетащите влево, чтобы быстро переключиться между приложениями"</string>
+    <string name="recents_quick_scrub_onboarding" msgid="2452671841151577157">"Перетащите влево, чтобы быстро переключиться между приложениями"</string>
 </resources>
