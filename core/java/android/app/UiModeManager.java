@@ -17,6 +17,10 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -68,6 +72,25 @@ public class UiModeManager {
      * of the broadcast to {@link Activity#RESULT_CANCELED}.
      */
     public static String ACTION_ENTER_CAR_MODE = "android.app.action.ENTER_CAR_MODE";
+
+    /**
+     * Broadcast sent when the device's UI has switched to car mode, either by being placed in a car
+     * dock or explicit action of the user.
+     * <p>
+     * In addition to the behavior for {@link #ACTION_ENTER_CAR_MODE}, this broadcast includes the
+     * package name of the app which requested to enter car mode in the
+     * {@link #EXTRA_CALLING_PACKAGE}.  If an app requested to enter car mode using
+     * {@link #enableCarMode(int, int)} and specified a priority this will be specified in the
+     * {@link #EXTRA_PRIORITY}.
+     *
+     * This is primarily intended to be received by other components of the Android OS.
+     * <p>
+     * Receiver requires permission: {@link android.Manifest.permission.HANDLE_CAR_MODE_CHANGES}
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_ENTER_CAR_MODE_PRIORITIZED =
+            "android.app.action.ENTER_CAR_MODE_PRIORITIZED";
     
     /**
      * Broadcast sent when the device's UI has switch away from car mode back
@@ -75,6 +98,28 @@ public class UiModeManager {
      * when the user exits car mode.
      */
     public static String ACTION_EXIT_CAR_MODE = "android.app.action.EXIT_CAR_MODE";
+
+    /**
+     * Broadcast sent when the device's UI has switched away from car mode back to normal mode.
+     * Typically used by a car mode app, to dismiss itself when the user exits car mode.
+     * <p>
+     * In addition to the behavior for {@link #ACTION_EXIT_CAR_MODE}, this broadcast includes the
+     * package name of the app which requested to exit car mode in {@link #EXTRA_CALLING_PACKAGE}.
+     * If an app requested to enter car mode using {@link #enableCarMode(int, int)} and specified a
+     * priority this will be specified in the {@link #EXTRA_PRIORITY} when exiting car mode.
+     * <p>
+     * If {@link #DISABLE_CAR_MODE_ALL_PRIORITIES} is used when disabling car mode (i.e. this is
+     * initiated by the user via the persistent car mode notification), this broadcast is sent once
+     * for each priority level for which car mode is being disabled.
+     * <p>
+     * This is primarily intended to be received by other components of the Android OS.
+     * <p>
+     * Receiver requires permission: {@link android.Manifest.permission.HANDLE_CAR_MODE_CHANGES}
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_EXIT_CAR_MODE_PRIORITIZED =
+            "android.app.action.EXIT_CAR_MODE_PRIORITIZED";
     
     /**
      * Broadcast sent when the device's UI has switched to desk mode,
@@ -96,6 +141,24 @@ public class UiModeManager {
      * when the user exits desk mode.
      */
     public static String ACTION_EXIT_DESK_MODE = "android.app.action.EXIT_DESK_MODE";
+
+    /**
+     * String extra used with {@link #ACTION_ENTER_CAR_MODE_PRIORITIZED} and
+     * {@link #ACTION_EXIT_CAR_MODE_PRIORITIZED} to indicate the package name of the app which
+     * requested to enter or exit car mode.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_CALLING_PACKAGE = "android.app.extra.CALLING_PACKAGE";
+
+    /**
+     * Integer extra used with {@link #ACTION_ENTER_CAR_MODE_PRIORITIZED} and
+     * {@link #ACTION_EXIT_CAR_MODE_PRIORITIZED} to indicate the priority level at which car mode
+     * is being disabled.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PRIORITY = "android.app.extra.PRIORITY";
 
     /** @hide */
     @IntDef(prefix = { "MODE_" }, value = {
@@ -126,10 +189,21 @@ public class UiModeManager {
 
     private IUiModeManager mService;
 
+    /**
+     * Context required for getting the opPackageName of API caller; maybe be {@code null} if the
+     * old constructor marked with UnSupportedAppUsage is used.
+     */
+    private @Nullable Context mContext;
+
     @UnsupportedAppUsage
     /*package*/ UiModeManager() throws ServiceNotFoundException {
+        this(null /* context */);
+    }
+
+    /*package*/ UiModeManager(Context context) throws ServiceNotFoundException {
         mService = IUiModeManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.UI_MODE_SERVICE));
+        mContext = context;
     }
 
     /**
@@ -152,6 +226,14 @@ public class UiModeManager {
      */
     public static final int ENABLE_CAR_MODE_ALLOW_SLEEP = 0x0002;
 
+    /** @hide */
+    @IntDef(prefix = { "ENABLE_CAR_MODE_" }, value = {
+            ENABLE_CAR_MODE_GO_CAR_HOME,
+            ENABLE_CAR_MODE_ALLOW_SLEEP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EnableCarMode {}
+
     /**
      * Force device into car mode, like it had been placed in the car dock.
      * This will cause the device to switch to the car home UI as part of
@@ -159,9 +241,54 @@ public class UiModeManager {
      * @param flags Must be 0.
      */
     public void enableCarMode(int flags) {
+        enableCarMode(DEFAULT_PRIORITY, flags);
+    }
+
+    /**
+     * Force device into car mode, like it had been placed in the car dock.  This will cause the
+     * device to switch to the car home UI as part of the mode switch.
+     * <p>
+     * An app may request to enter car mode when the system is already in car mode.  The app may
+     * specify a "priority" when entering car mode.  The device will remain in car mode
+     * (i.e. {@link #getCurrentModeType()} is {@link Configuration#UI_MODE_TYPE_CAR}) as long as
+     * there is a priority level at which car mode have been enabled.  For example assume app A
+     * enters car mode at priority level 100, and then app B enters car mode at the default priority
+     * (0).  If app A exits car mode, the device will remain in car mode until app B exits car mode.
+     * <p>
+     * Specifying a priority level when entering car mode is important in cases where multiple apps
+     * on a device implement a car-mode {@link android.telecom.InCallService} (see
+     * {@link android.telecom.TelecomManager#METADATA_IN_CALL_SERVICE_CAR_MODE_UI}).  The
+     * {@link android.telecom.InCallService} associated with the highest priority app which entered
+     * car mode will be bound to by Telecom and provided with information about ongoing calls on
+     * the device.
+     * <p>
+     * System apps holding the required permission can enable car mode when the app determines the
+     * correct conditions exist for that app to be in car mode.  The device maker should ensure that
+     * where multiple apps exist on the device which can potentially enter car mode, appropriate
+     * priorities are used to ensure that calls delivered by the
+     * {@link android.telecom.InCallService} API are delivered to the highest priority app.
+     * If app A and app B can both potentially enable car mode, and it is desired that app B is the
+     * one which should receive call information, the priority for app B should be higher than the
+     * one for app A.
+     * <p>
+     * When an app uses a priority to enable car mode, they can disable car mode at the specified
+     * priority level using {@link #disableCarMode(int)}.  An app may only enable car mode at a
+     * single priority.
+     * <p>
+     * Public apps are assumed to enter/exit car mode at {@link #DEFAULT_PRIORITY}.
+     *
+     * @param priority The declared priority for the caller.
+     * @param flags Car mode flags.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.ENTER_CAR_MODE_PRIORITIZED)
+    public void enableCarMode(@IntRange(from = 0) int priority, @EnableCarMode int flags) {
         if (mService != null) {
             try {
-                mService.enableCarMode(flags);
+                mService.enableCarMode(flags, priority,
+                        mContext == null ? null : mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -176,15 +303,44 @@ public class UiModeManager {
      * being in car mode).
      */
     public static final int DISABLE_CAR_MODE_GO_HOME = 0x0001;
+
+    /**
+     * Flag for use with {@link #disableCarMode(int)}: Disables car mode at ALL priority levels.
+     * Primarily intended for use from {@link com.android.internal.app.DisableCarModeActivity} to
+     * provide the user with a means to exit car mode at all priority levels.
+     * @hide
+     */
+    public static final int DISABLE_CAR_MODE_ALL_PRIORITIES = 0x0002;
+
+    /** @hide */
+    @IntDef(prefix = { "DISABLE_CAR_MODE_" }, value = {
+            DISABLE_CAR_MODE_GO_HOME
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DisableCarMode {}
+
+    /**
+     * The default priority used for entering car mode.
+     * <p>
+     * Callers of the {@link UiModeManager#enableCarMode(int)} priority will be assigned the
+     * default priority.
+     * <p>
+     * System apps can specify a priority other than the default priority when using
+     * {@link UiModeManager#enableCarMode(int, int)} to enable car mode.
+     * @hide
+     */
+    @SystemApi
+    public static final int DEFAULT_PRIORITY = 0;
     
     /**
      * Turn off special mode if currently in car mode.
-     * @param flags May be 0 or {@link #DISABLE_CAR_MODE_GO_HOME}.
+     * @param flags One of the disable car mode flags.
      */
-    public void disableCarMode(int flags) {
+    public void disableCarMode(@DisableCarMode int flags) {
         if (mService != null) {
             try {
-                mService.disableCarMode(flags);
+                mService.disableCarModeByCallingPackage(flags,
+                        mContext == null ? null : mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
