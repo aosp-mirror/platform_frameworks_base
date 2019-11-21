@@ -93,6 +93,27 @@ public class SystemPropertiesTest extends TestCase {
     }
 
     @SmallTest
+    private static void testHandle() throws Exception {
+        String value;
+        SystemProperties.Handle handle = SystemProperties.find("doesnotexist_2341431");
+        assertNull(handle);
+        SystemProperties.set(KEY, "abc");
+        handle = SystemProperties.find(KEY);
+        assertNotNull(handle);
+        value = handle.get();
+        assertEquals("abc", value);
+        SystemProperties.set(KEY, "blarg");
+        value = handle.get();
+        assertEquals("blarg", value);
+        SystemProperties.set(KEY, "1");
+        assertEquals(1, handle.getInt(-1));
+        assertEquals(1, handle.getLong(-1));
+        assertEquals(true, handle.getBoolean(false));
+        SystemProperties.set(KEY, "");
+        assertEquals(12345, handle.getInt(12345));
+    }
+
+    @SmallTest
     public void testIntegralProperties() throws Exception {
         testInt("", 123, 123);
         testInt("", 0, 0);
