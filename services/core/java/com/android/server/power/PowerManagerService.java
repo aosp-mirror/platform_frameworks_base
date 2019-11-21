@@ -3770,6 +3770,10 @@ public final class PowerManagerService extends SystemService
         if (wcd != null) {
             wcd.dump(pw);
         }
+
+        if (mNotifier != null) {
+            mNotifier.dump(pw);
+        }
     }
 
     private void dumpProto(FileDescriptor fd) {
@@ -4228,7 +4232,7 @@ public final class PowerManagerService extends SystemService
     /**
      * Represents a wake lock that has been acquired by an application.
      */
-    private final class WakeLock implements IBinder.DeathRecipient {
+    /* package */ final class WakeLock implements IBinder.DeathRecipient {
         public final IBinder mLock;
         public int mFlags;
         public String mTag;
