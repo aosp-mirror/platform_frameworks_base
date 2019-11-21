@@ -4898,6 +4898,15 @@ public abstract class Context {
     public static final String BATTERY_STATS_SERVICE = "batterystats";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * AppSearchManager for indexing and querying app data managed
+     * by the system.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String APP_SEARCH_SERVICE = "app_search";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
