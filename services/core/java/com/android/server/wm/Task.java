@@ -2712,7 +2712,13 @@ class Task extends WindowContainer<WindowContainer> {
         getDimBounds(mTmpDimBoundsRect);
 
         // Bounds need to be relative, as the dim layer is a child.
-        mTmpDimBoundsRect.offsetTo(0, 0);
+        if (inFreeformWindowingMode()) {
+            getBounds(mTmpRect);
+            mTmpDimBoundsRect.offsetTo(mTmpDimBoundsRect.left - mTmpRect.left,
+                    mTmpDimBoundsRect.top - mTmpRect.top);
+        } else {
+            mTmpDimBoundsRect.offsetTo(0, 0);
+        }
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
         }

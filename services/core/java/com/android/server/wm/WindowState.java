@@ -958,8 +958,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int layoutXDiff;
         final int layoutYDiff;
         final WindowState imeWin = mWmService.mRoot.getCurrentInputMethodWindow();
+        final boolean isInputMethodAdjustTarget = windowsAreFloating
+                ? dc.mInputMethodTarget != null && task == dc.mInputMethodTarget.getTask()
+                : isInputMethodTarget();
         final boolean isImeTarget =
-                imeWin != null && imeWin.isVisibleNow() && isInputMethodTarget();
+                imeWin != null && imeWin.isVisibleNow() && isInputMethodAdjustTarget;
         if (isFullscreenAndFillsDisplay || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mWindowFrames.mContainingFrame.set(mWindowFrames.mParentFrame);
@@ -990,7 +993,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         final int distanceToTop = Math.max(mWindowFrames.mContainingFrame.top
                                 - mWindowFrames.mContentFrame.top, 0);
                         int offs = Math.min(bottomOverlap, distanceToTop);
-                        mWindowFrames.mContainingFrame.top -= offs;
+                        mWindowFrames.mContainingFrame.offset(0, -offs);
+                        mInsetFrame.offset(0, -offs);
                     }
                 } else if (!inPinnedWindowingMode() && mWindowFrames.mContainingFrame.bottom
                         > mWindowFrames.mParentFrame.bottom) {
