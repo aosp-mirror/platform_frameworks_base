@@ -3207,27 +3207,6 @@ public class WifiManager {
     }
 
     /**
-     * Method that triggers a notification to the user about a band conversion
-     * (e.g. 5 GHz to 2.4 GHz) to their saved AP config.
-     *
-     * @hide
-     */
-    // TODO(b/144218444): move the notification to Settings instead of making this @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void notifyUserOfApBandConversion() {
-        Log.d(TAG, "apBand was converted, notify the user");
-        try {
-            IWifiManager iWifiManager = getIWifiManager();
-            if (iWifiManager == null) {
-                throw new RemoteException("Wifi service is not running");
-            }
-            iWifiManager.notifyUserOfApBandConversion(mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Enable/Disable TDLS on a specific local route.
      *
      * <p>
