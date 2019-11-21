@@ -35,6 +35,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.telephony.Annotation.RilRadioTechnology;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
