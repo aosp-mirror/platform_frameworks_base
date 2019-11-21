@@ -546,24 +546,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
 
         mNotificationDataManager = new NotificationDataManager();
-        mNotificationDataManager.setOnUnseenCountUpdateListener(
-                () -> {
-                    if (mNavigationBarView != null && mNotificationDataManager != null) {
-                        Boolean hasUnseen =
-                                mNotificationDataManager.getUnseenNotificationCount() > 0;
-                        if (mNavigationBarView != null) {
-                            mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
-
-                        if (mLeftNavigationBarView != null) {
-                            mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
-
-                        if (mRightNavigationBarView != null) {
-                            mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
-                        }
-                    }
-                });
+        mNotificationDataManager.setOnUnseenCountUpdateListener(this::onUnseenCountUpdate);
 
         mEnableHeadsUpNotificationWhenNotificationShadeOpen = mContext.getResources().getBoolean(
                 R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen);
@@ -686,6 +669,29 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                             mNotificationDataManager);
                     mNotificationViewController.enable();
                 });
+    }
+
+    /**
+     * This method is called whenever there is an update to the number of unseen notifications.
+     * This method can be extended by OEMs to customize the desired logic.
+     */
+    protected void onUnseenCountUpdate() {
+        if (mNavigationBarView != null && mNotificationDataManager != null) {
+            Boolean hasUnseen =
+                    mNotificationDataManager.getUnseenNotificationCount() > 0;
+
+            if (mNavigationBarView != null) {
+                mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+            }
+
+            if (mLeftNavigationBarView != null) {
+                mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+            }
+
+            if (mRightNavigationBarView != null) {
+                mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
+            }
+        }
     }
 
     /**
