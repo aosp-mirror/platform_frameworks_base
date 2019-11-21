@@ -35,8 +35,8 @@ import android.telephony.Annotation.SrvccState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 
-import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.IPhoneStateListener;
 
 import dalvik.system.VMRuntime;
 
@@ -334,10 +334,8 @@ public class PhoneStateListener {
      * Listen for call disconnect causes which contains {@link DisconnectCause} and
      * {@link PreciseDisconnectCause}.
      *
-     * @hide
      */
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
-    @SystemApi
     public static final int LISTEN_CALL_DISCONNECT_CAUSES                  = 0x02000000;
 
     /**
@@ -357,10 +355,8 @@ public class PhoneStateListener {
      * {@link android.telephony.ims.ImsReasonInfo}
      *
      * @see #onImsCallDisconnectCauseChanged(ImsReasonInfo)
-     * @hide
      */
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
-    @SystemApi
     public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES              = 0x08000000;
 
     /**
@@ -699,10 +695,8 @@ public class PhoneStateListener {
      * @param disconnectCause {@link DisconnectCause}.
      * @param preciseDisconnectCause {@link PreciseDisconnectCause}.
      *
-     * @hide
      */
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
-    @SystemApi
     public void onCallDisconnectCauseChanged(int disconnectCause, int preciseDisconnectCause) {
         // default implementation empty
     }
@@ -718,10 +712,8 @@ public class PhoneStateListener {
      *
      * @param imsReasonInfo {@link ImsReasonInfo} contains details on why IMS call failed.
      *
-     * @hide
      */
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
-    @SystemApi
     public void onImsCallDisconnectCauseChanged(@NonNull ImsReasonInfo imsReasonInfo) {
         // default implementation empty
     }
@@ -965,8 +957,7 @@ public class PhoneStateListener {
      * subId. Otherwise, this callback applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}.
      *
-     * Requires
-     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE}
      * @param state the modem radio power state
      * @hide
      */
