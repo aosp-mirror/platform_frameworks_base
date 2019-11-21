@@ -96,14 +96,14 @@ public class WifiUtils {
             visibility.append(" standard = ").append(info.getWifiStandard());
             visibility.append(" rssi=").append(info.getRssi());
             visibility.append(" ");
-            visibility.append(" score=").append(info.score);
+            visibility.append(" score=").append(info.getScore());
             if (accessPoint.getSpeed() != AccessPoint.Speed.NONE) {
                 visibility.append(" speed=").append(accessPoint.getSpeedLabel());
             }
-            visibility.append(String.format(" tx=%.1f,", info.txSuccessRate));
-            visibility.append(String.format("%.1f,", info.txRetriesRate));
-            visibility.append(String.format("%.1f ", info.txBadRate));
-            visibility.append(String.format("rx=%.1f", info.rxSuccessRate));
+            visibility.append(String.format(" tx=%.1f,", info.getTxSuccessRate()));
+            visibility.append(String.format("%.1f,", info.getTxRetriesRate()));
+            visibility.append(String.format("%.1f ", info.getTxBadRate()));
+            visibility.append(String.format("rx=%.1f", info.getRxSuccessRate()));
         }
 
         int maxRssi5 = WifiConfiguration.INVALID_RSSI;

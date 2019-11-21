@@ -163,10 +163,6 @@ public class Dependency {
      */
     private static final String BG_LOOPER_NAME = "background_looper";
     /**
-     * Key for getting a background Handler for background work.
-     */
-    private static final String BG_HANDLER_NAME = "background_handler";
-    /**
      * Key for getting a Handler for receiving time tick broadcasts on.
      */
     public static final String TIME_TICK_HANDLER_NAME = "time_tick_handler";
@@ -194,10 +190,6 @@ public class Dependency {
      * Key for getting a mainer Looper.
      */
     public static final DependencyKey<Looper> MAIN_LOOPER = new DependencyKey<>(MAIN_LOOPER_NAME);
-    /**
-     * Key for getting a background Handler for background work.
-     */
-    public static final DependencyKey<Handler> BG_HANDLER = new DependencyKey<>(BG_HANDLER_NAME);
     /**
      * Key for getting a Handler for receiving time tick broadcasts on.
      */
@@ -347,7 +339,6 @@ public class Dependency {
         // on imports.
         mProviders.put(TIME_TICK_HANDLER, mTimeTickHandler::get);
         mProviders.put(BG_LOOPER, mBgLooper::get);
-        mProviders.put(BG_HANDLER, mBgHandler::get);
         mProviders.put(MAIN_LOOPER, mMainLooper::get);
         mProviders.put(MAIN_HANDLER, mMainHandler::get);
         mProviders.put(ActivityStarter.class, mActivityStarter::get);

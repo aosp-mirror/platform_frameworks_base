@@ -20,28 +20,23 @@ import static android.hardware.display.DisplayManager.DeviceConfig.KEY_HIGH_REFR
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
-import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
-import com.android.server.wm.HighRefreshRateBlacklist.DeviceConfigInterface;
+import com.android.internal.util.Preconditions;
+import com.android.server.wm.utils.FakeDeviceConfigInterface;
 
+import org.junit.After;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Build/Install/Run:
@@ -50,67 +45,79 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 @Presubmit
 public class HighRefreshRateBlacklistTest {
+    private static final String APP1 = "com.android.sample1";
+    private static final String APP2 = "com.android.sample2";
+    private static final String APP3 = "com.android.sample3";
+
+    private HighRefreshRateBlacklist mBlacklist;
+
+    @After
+    public void tearDown() {
+        mBlacklist.dispose();
+    }
 
     @Test
     public void testDefaultBlacklist() {
-        final Resources r = createResources("com.android.sample1", "com.android.sample2");
-        HighRefreshRateBlacklist blacklist =
-                new HighRefreshRateBlacklist(r, new FakeDeviceConfigInterface());
-        assertTrue(blacklist.isBlacklisted("com.android.sample1"));
-        assertTrue(blacklist.isBlacklisted("com.android.sample2"));
-        assertFalse(blacklist.isBlacklisted("com.android.sample3"));
+        final Resources r = createResources(APP1, APP2);
+        mBlacklist = new HighRefreshRateBlacklist(r, new FakeDeviceConfig());
+
+        assertTrue(mBlacklist.isBlacklisted(APP1));
+        assertTrue(mBlacklist.isBlacklisted(APP2));
+        assertFalse(mBlacklist.isBlacklisted(APP3));
     }
 
     @Test
     public void testNoDefaultBlacklist() {
         final Resources r = createResources();
-        HighRefreshRateBlacklist blacklist =
-                new HighRefreshRateBlacklist(r, new FakeDeviceConfigInterface());
-        assertFalse(blacklist.isBlacklisted("com.android.sample1"));
+        mBlacklist = new HighRefreshRateBlacklist(r, new FakeDeviceConfig());
+
+        assertFalse(mBlacklist.isBlacklisted(APP1));
     }
 
     @Test
     public void testDefaultBlacklistIsOverriddenByDeviceConfig() {
-        final Resources r = createResources("com.android.sample1");
-        final FakeDeviceConfigInterface config = new FakeDeviceConfigInterface();
-        config.setBlacklist("com.android.sample2,com.android.sample3");
-        HighRefreshRateBlacklist blacklist = new HighRefreshRateBlacklist(r, config);
-        assertFalse(blacklist.isBlacklisted("com.android.sample1"));
-        assertTrue(blacklist.isBlacklisted("com.android.sample2"));
-        assertTrue(blacklist.isBlacklisted("com.android.sample3"));
+        final Resources r = createResources(APP1);
+        final FakeDeviceConfig config = new FakeDeviceConfig();
+        config.setBlacklist(APP2 + "," + APP3);
+        mBlacklist = new HighRefreshRateBlacklist(r, config);
+
+        assertFalse(mBlacklist.isBlacklisted(APP1));
+        assertTrue(mBlacklist.isBlacklisted(APP2));
+        assertTrue(mBlacklist.isBlacklisted(APP3));
     }
 
     @Test
     public void testDefaultBlacklistIsOverriddenByEmptyDeviceConfig() {
-        final Resources r = createResources("com.android.sample1");
-        final FakeDeviceConfigInterface config = new FakeDeviceConfigInterface();
+        final Resources r = createResources(APP1);
+        final FakeDeviceConfig config = new FakeDeviceConfig();
         config.setBlacklist("");
-        HighRefreshRateBlacklist blacklist = new HighRefreshRateBlacklist(r, config);
-        assertFalse(blacklist.isBlacklisted("com.android.sample1"));
+        mBlacklist = new HighRefreshRateBlacklist(r, config);
+
+        assertFalse(mBlacklist.isBlacklisted(APP1));
     }
 
     @Test
     public void testDefaultBlacklistIsOverriddenByDeviceConfigUpdate() {
-        final Resources r = createResources("com.android.sample1");
-        final FakeDeviceConfigInterface config = new FakeDeviceConfigInterface();
-        HighRefreshRateBlacklist blacklist = new HighRefreshRateBlacklist(r, config);
+        final Resources r = createResources(APP1);
+        final FakeDeviceConfig config = new FakeDeviceConfig();
+        mBlacklist = new HighRefreshRateBlacklist(r, config);
 
         // First check that the default blacklist is in effect
-        assertTrue(blacklist.isBlacklisted("com.android.sample1"));
-        assertFalse(blacklist.isBlacklisted("com.android.sample2"));
-        assertFalse(blacklist.isBlacklisted("com.android.sample3"));
+        assertTrue(mBlacklist.isBlacklisted(APP1));
+        assertFalse(mBlacklist.isBlacklisted(APP2));
+        assertFalse(mBlacklist.isBlacklisted(APP3));
 
         //  Then confirm that the DeviceConfig list has propagated and taken effect.
-        config.setBlacklist("com.android.sample2,com.android.sample3");
-        assertFalse(blacklist.isBlacklisted("com.android.sample1"));
-        assertTrue(blacklist.isBlacklisted("com.android.sample2"));
-        assertTrue(blacklist.isBlacklisted("com.android.sample3"));
+        config.setBlacklist(APP2 + "," + APP3);
+        assertFalse(mBlacklist.isBlacklisted(APP1));
+        assertTrue(mBlacklist.isBlacklisted(APP2));
+        assertTrue(mBlacklist.isBlacklisted(APP3));
 
         //  Finally make sure we go back to the default list if the DeviceConfig gets deleted.
         config.setBlacklist(null);
-        assertTrue(blacklist.isBlacklisted("com.android.sample1"));
-        assertFalse(blacklist.isBlacklisted("com.android.sample2"));
-        assertFalse(blacklist.isBlacklisted("com.android.sample3"));
+        assertTrue(mBlacklist.isBlacklisted(APP1));
+        assertFalse(mBlacklist.isBlacklisted(APP2));
+        assertFalse(mBlacklist.isBlacklisted(APP3));
     }
 
     private Resources createResources(String... defaultBlacklist) {
@@ -120,64 +127,25 @@ public class HighRefreshRateBlacklistTest {
         return r;
     }
 
-
-    class FakeDeviceConfigInterface implements DeviceConfigInterface {
-        private List<Pair<DeviceConfig.OnPropertiesChangedListener, Executor>> mListeners =
-                new ArrayList<>();
-        private String mBlacklist;
+    private static class FakeDeviceConfig extends FakeDeviceConfigInterface {
 
         @Override
         public String getProperty(String namespace, String name) {
-            if (!DeviceConfig.NAMESPACE_DISPLAY_MANAGER.equals(namespace)
-                    || !KEY_HIGH_REFRESH_RATE_BLACKLIST.equals(name)) {
-                throw new IllegalArgumentException("Only things in NAMESPACE_DISPLAY_MANAGER "
-                        + "supported.");
-            }
-            return mBlacklist;
+            Preconditions.checkArgument(DeviceConfig.NAMESPACE_DISPLAY_MANAGER.equals(namespace));
+            Preconditions.checkArgument(KEY_HIGH_REFRESH_RATE_BLACKLIST.equals(name));
+            return super.getProperty(namespace, name);
         }
 
         @Override
         public void addOnPropertiesChangedListener(String namespace, Executor executor,
                 DeviceConfig.OnPropertiesChangedListener listener) {
-
-            if (!DeviceConfig.NAMESPACE_DISPLAY_MANAGER.equals(namespace)) {
-                throw new IllegalArgumentException("Only things in NAMESPACE_DISPLAY_MANAGER "
-                        + "supported.");
-            }
-            mListeners.add(new Pair<>(listener, executor));
+            Preconditions.checkArgument(DeviceConfig.NAMESPACE_DISPLAY_MANAGER.equals(namespace));
+            super.addOnPropertiesChangedListener(namespace, executor, listener);
         }
 
         void setBlacklist(String blacklist) {
-            mBlacklist = blacklist;
-            CountDownLatch latch = new CountDownLatch(mListeners.size());
-            for (Pair<DeviceConfig.OnPropertiesChangedListener, Executor> listenerInfo :
-                    mListeners) {
-                final Executor executor = listenerInfo.second;
-                final DeviceConfig.OnPropertiesChangedListener listener = listenerInfo.first;
-                DeviceConfig.Properties properties = createBlacklistProperties(blacklist);
-                executor.execute(() -> {
-                    listener.onPropertiesChanged(properties);
-                    latch.countDown();
-                });
-            }
-            try {
-                latch.await(10, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Failed to notify all blacklist listeners in time.", e);
-            }
-        }
-
-        private DeviceConfig.Properties createBlacklistProperties(final String blacklist) {
-            DeviceConfig.Properties properties = mock(DeviceConfig.Properties.class);
-            when(properties.getString(anyString(), any())).thenAnswer(invocation -> {
-                final Object[] args = invocation.getArguments();
-                if (KEY_HIGH_REFRESH_RATE_BLACKLIST.equals(args[0])) {
-                    return blacklist;
-                } else {
-                    return args[1];
-                }
-            });
-            return properties;
+            putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                    KEY_HIGH_REFRESH_RATE_BLACKLIST, blacklist);
         }
     }
 }

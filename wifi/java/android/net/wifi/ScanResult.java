@@ -585,6 +585,7 @@ public class ScanResult implements Parcelable {
      *
      * @hide
      */
+    // TODO(b/144431927): remove once migrated to Suggestions
     public boolean isCarrierAp;
 
     /**
@@ -592,6 +593,7 @@ public class ScanResult implements Parcelable {
      *
      * @hide
      */
+    // TODO(b/144431927): remove once migrated to Suggestions
     public int carrierApEapType;
 
     /**
@@ -599,13 +601,14 @@ public class ScanResult implements Parcelable {
      *
      * @hide
      */
+    // TODO(b/144431927): remove once migrated to Suggestions
     public String carrierName;
 
     /** {@hide} */
     public ScanResult(WifiSsid wifiSsid, String BSSID, long hessid, int anqpDomainId,
             byte[] osuProviders, String caps, int level, int frequency, long tsf) {
         this.wifiSsid = wifiSsid;
-        this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
+        this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiManager.UNKNOWN_SSID;
         this.BSSID = BSSID;
         this.hessid = hessid;
         this.anqpDomainId = anqpDomainId;
@@ -636,7 +639,7 @@ public class ScanResult implements Parcelable {
     public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
             long tsf, int distCm, int distSdCm) {
         this.wifiSsid = wifiSsid;
-        this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
+        this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiManager.UNKNOWN_SSID;
         this.BSSID = BSSID;
         this.capabilities = caps;
         this.level = level;
@@ -740,19 +743,18 @@ public class ScanResult implements Parcelable {
         StringBuffer sb = new StringBuffer();
         String none = "<none>";
 
-        sb.append("SSID: ").
-            append(wifiSsid == null ? WifiSsid.NONE : wifiSsid).
-            append(", BSSID: ").
-            append(BSSID == null ? none : BSSID).
-            append(", capabilities: ").
-            append(capabilities == null ? none : capabilities).
-            append(", level: ").
-            append(level).
-            append(", frequency: ").
-            append(frequency).
-            append(", timestamp: ").
-            append(timestamp);
-
+        sb.append("SSID: ")
+                .append(wifiSsid == null ? WifiManager.UNKNOWN_SSID : wifiSsid)
+                .append(", BSSID: ")
+                .append(BSSID == null ? none : BSSID)
+                .append(", capabilities: ")
+                .append(capabilities == null ? none : capabilities)
+                .append(", level: ")
+                .append(level)
+                .append(", frequency: ")
+                .append(frequency)
+                .append(", timestamp: ")
+                .append(timestamp);
         sb.append(", distance: ").append((distanceCm != UNSPECIFIED ? distanceCm : "?")).
                 append("(cm)");
         sb.append(", distanceSd: ").append((distanceSdCm != UNSPECIFIED ? distanceSdCm : "?")).

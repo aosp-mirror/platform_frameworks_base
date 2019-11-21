@@ -131,6 +131,7 @@ import android.app.role.RoleManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
+import android.compat.annotation.ChangeId;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -216,6 +217,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -236,6 +238,7 @@ import com.android.server.EventLogTags;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.UiThread;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.ManagedServices.ManagedServiceInfo;
@@ -355,6 +358,15 @@ public class NotificationManagerService extends SystemService {
     private static final int REQUEST_CODE_TIMEOUT = 1;
     private static final String SCHEME_TIMEOUT = "timeout";
     private static final String EXTRA_KEY = "key";
+
+    /**
+     * Apps targeting R+ that post custom toasts in the background will have those blocked. Apps can
+     * still post toasts created with {@link Toast#makeText(Context, CharSequence, int)} and its
+     * variants while in the background.
+     */
+    @ChangeId
+    private static final long CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK = 128611929L;
+
     private IActivityManager mAm;
     private ActivityManager mActivityManager;
     private IPackageManager mPackageManager;
@@ -372,9 +384,11 @@ public class NotificationManagerService extends SystemService {
     private UriGrantsManagerInternal mUgmInternal;
     private RoleObserver mRoleObserver;
     private UserManager mUm;
+    private IPlatformCompat mPlatformCompat;
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
+    private Handler mUiHandler;
     private final HandlerThread mRankingThread = new HandlerThread("ranker",
             Process.THREAD_PRIORITY_BACKGROUND);
 
@@ -594,6 +608,15 @@ public class NotificationManagerService extends SystemService {
     }
 
     protected void setDefaultAssistantForUser(int userId) {
+        String overrideDefaultAssistantString = DeviceConfig.getProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE);
+        if (overrideDefaultAssistantString != null) {
+            ComponentName overrideDefaultAssistant =
+                    ComponentName.unflattenFromString(overrideDefaultAssistantString);
+            if (allowAssistant(userId, overrideDefaultAssistant)) return;
+        }
+
         ArraySet<ComponentName> defaults = mAssistants.getDefaultComponents();
         // We should have only one default assistant by default
         // allowAssistant should execute once in practice
@@ -1782,8 +1805,11 @@ public class NotificationManagerService extends SystemService {
                 ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
         mDpm = dpm;
         mUm = userManager;
+        mPlatformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
 
         mHandler = new WorkerHandler(looper);
+        mUiHandler = new Handler(UiThread.get().getLooper());
         String[] extractorNames;
         try {
             extractorNames = resources.getStringArray(R.array.config_notificationSignalExtractors);
@@ -2450,9 +2476,19 @@ public class NotificationManagerService extends SystemService {
         // ============================================================================
 
         @Override
+        public void enqueueTextToast(String pkg, ITransientNotification callback, int duration,
+                int displayId) {
+            enqueueToast(pkg, callback, duration, displayId, false);
+        }
+
+        @Override
         public void enqueueToast(String pkg, ITransientNotification callback, int duration,
-                int displayId)
-        {
+                int displayId) {
+            enqueueToast(pkg, callback, duration, displayId, true);
+        }
+
+        private void enqueueToast(String pkg, ITransientNotification callback, int duration,
+                int displayId, boolean isCustomToast) {
             if (DBG) {
                 Slog.i(TAG, "enqueueToast pkg=" + pkg + " callback=" + callback
                         + " duration=" + duration + " displayId=" + displayId);
@@ -2464,25 +2500,52 @@ public class NotificationManagerService extends SystemService {
             }
 
             final int callingUid = Binder.getCallingUid();
+            final UserHandle callingUser = Binder.getCallingUserHandle();
             final boolean isSystemToast = isCallerSystemOrPhone()
                     || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(pkg);
             final boolean isPackageSuspended = isPackagePaused(pkg);
             final boolean notificationsDisabledForPackage = !areNotificationsEnabledForPackage(pkg,
                     callingUid);
 
+            final boolean appIsForeground;
             long callingIdentity = Binder.clearCallingIdentity();
             try {
-                final boolean appIsForeground = mActivityManager.getUidImportance(callingUid)
+                appIsForeground = mActivityManager.getUidImportance(callingUid)
                         == IMPORTANCE_FOREGROUND;
-                if (ENABLE_BLOCKED_TOASTS && !isSystemToast && ((notificationsDisabledForPackage
-                        && !appIsForeground) || isPackageSuspended)) {
-                    Slog.e(TAG, "Suppressing toast from package " + pkg
-                            + (isPackageSuspended ? " due to package suspended."
-                            : " by user request."));
-                    return;
-                }
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
+            }
+
+            if (ENABLE_BLOCKED_TOASTS && !isSystemToast && ((notificationsDisabledForPackage
+                    && !appIsForeground) || isPackageSuspended)) {
+                Slog.e(TAG, "Suppressing toast from package " + pkg
+                        + (isPackageSuspended ? " due to package suspended."
+                        : " by user request."));
+                return;
+            }
+
+            if (isCustomToast && !appIsForeground && !isSystemToast) {
+                boolean block;
+                try {
+                    block = mPlatformCompat.isChangeEnabledByPackageName(
+                            CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK, pkg,
+                            callingUser.getIdentifier());
+                } catch (RemoteException e) {
+                    // Shouldn't happen have since it's a local local
+                    Slog.e(TAG, "Unexpected exception while checking block background custom toasts"
+                            + " change", e);
+                    block = false;
+                }
+                if (block) {
+                    // TODO(b/144152069): Remove informative toast
+                    mUiHandler.post(() -> Toast.makeText(getContext(),
+                            "Background custom toast blocked for package " + pkg + ".\n"
+                                    + "See go/r-toast-block.",
+                            Toast.LENGTH_SHORT).show());
+                    Slog.w(TAG, "Blocking custom toast from package " + pkg
+                            + " due to package not in the foreground");
+                    return;
+                }
             }
 
             synchronized (mToastQueue) {

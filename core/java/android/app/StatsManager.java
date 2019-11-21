@@ -101,6 +101,9 @@ public final class StatsManager {
      */
     public static final String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
 
+    private static final long DEFAULT_COOL_DOWN_NS = 1_000_000_000L; // 1 second.
+    private static final long DEFAULT_TIMEOUT_NS = 10_000_000_000L; // 10 seconds.
+
     /**
      * Constructor for StatsManagerClient.
      *
@@ -495,20 +498,23 @@ public final class StatsManager {
      * pulled.
      *
      * @param atomTag           The tag of the atom for this puller callback.
-     * @param coolDownNs        The minimum time between successive pulls. A cache of the previous
-     *                          pull will be used if the time between pulls is less than coolDownNs.
-     * @param timeoutNs         The maximum time a pull should take. Statsd will wait timeoutNs for
-     *                          the pull to complete before timing out and marking the pull as
-     *                          failed.
-     * @param additiveFields    Fields that are added when mapping isolated uids to host uids.
+     * @param metadata          Optional metadata specifying the timeout, cool down time, and
+     *                          additive fields for mapping isolated to host uids.
      * @param callback          The callback to be invoked when the stats service pulls the atom.
+     * @param executor          The executor in which to run the callback
      * @throws RemoteException  if unsuccessful due to failing to connect to system server.
      *
      * @hide
      */
-    public void registerPullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
-            int[] additiveFields, @NonNull StatsPullAtomCallback callback,
-            @NonNull Executor executor) throws RemoteException, SecurityException {
+    public void registerPullAtomCallback(int atomTag, @Nullable PullAtomMetadata metadata,
+            @NonNull StatsPullAtomCallback callback, @NonNull Executor executor)
+            throws RemoteException, SecurityException {
+        long coolDownNs = metadata == null ? DEFAULT_COOL_DOWN_NS : metadata.mCoolDownNs;
+        long timeoutNs = metadata == null ? DEFAULT_TIMEOUT_NS : metadata.mTimeoutNs;
+        int[] additiveFields = metadata == null ? new int[0] : metadata.mAdditiveFields;
+        if (additiveFields == null) {
+            additiveFields = new int[0];
+        }
         synchronized (this) {
             IStatsCompanionService service = getIStatsCompanionServiceLocked();
             PullAtomCallbackInternal rec =
@@ -517,7 +523,7 @@ public final class StatsManager {
         }
     }
 
-    private static class  PullAtomCallbackInternal extends IPullAtomCallback.Stub {
+    private static class PullAtomCallbackInternal extends IPullAtomCallback.Stub {
         public final int mAtomId;
         public final StatsPullAtomCallback mCallback;
         public final Executor mExecutor;
@@ -541,6 +547,89 @@ public final class StatsManager {
                     Slog.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId);
                 }
             });
+        }
+    }
+
+    /**
+     * Metadata required for registering a StatsPullAtomCallback.
+     * All fields are optional, and defaults will be used for fields that are unspecified.
+     *
+     * @hide
+     */
+    public static class PullAtomMetadata {
+        private final long mCoolDownNs;
+        private final long mTimeoutNs;
+        private final int[] mAdditiveFields;
+
+        // Private Constructor for builder
+        private PullAtomMetadata(long coolDownNs, long timeoutNs, int[] additiveFields) {
+            mCoolDownNs = coolDownNs;
+            mTimeoutNs = timeoutNs;
+            mAdditiveFields = additiveFields;
+        }
+
+        /**
+         * Returns a new PullAtomMetadata.Builder object for constructing PullAtomMetadata for
+         * StatsManager#registerPullAtomCallback
+         */
+        public static PullAtomMetadata.Builder newBuilder() {
+            return new PullAtomMetadata.Builder();
+        }
+
+        /**
+         * Builder for PullAtomMetadata.
+         */
+        public static class Builder {
+            private long mCoolDownNs;
+            private long mTimeoutNs;
+            private int[] mAdditiveFields;
+
+            private Builder() {
+                mCoolDownNs = DEFAULT_COOL_DOWN_NS;
+                mTimeoutNs = DEFAULT_TIMEOUT_NS;
+                mAdditiveFields = null;
+            }
+
+            /**
+             * Set the cool down time of the pull in nanoseconds. If two successive pulls are issued
+             * within the cool down, a cached version of the first will be used for the second.
+             */
+            @NonNull
+            public Builder setCoolDownNs(long coolDownNs) {
+                mCoolDownNs = coolDownNs;
+                return this;
+            }
+
+            /**
+             * Set the maximum time the pull can take in nanoseconds.
+             */
+            @NonNull
+            public Builder setTimeoutNs(long timeoutNs) {
+                mTimeoutNs = timeoutNs;
+                return this;
+            }
+
+            /**
+             * Set the additive fields of this pulled atom.
+             *
+             * This is only applicable for atoms which have a uid field. When tasks are run in
+             * isolated processes, the data will be attributed to the host uid. Additive fields
+             * will be combined when the non-additive fields are the same.
+             */
+            @NonNull
+            public Builder setAdditiveFields(int[] additiveFields) {
+                mAdditiveFields = additiveFields;
+                return this;
+            }
+
+            /**
+             * Builds and returns a PullAtomMetadata object with the values set in the builder and
+             * defaults for unset fields.
+             */
+            @NonNull
+            public PullAtomMetadata build() {
+                return new PullAtomMetadata(mCoolDownNs, mTimeoutNs, mAdditiveFields);
+            }
         }
     }
 

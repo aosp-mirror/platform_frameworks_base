@@ -1095,24 +1095,6 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * Get the Bluetooth alias of the remote device.
-     * If Alias is null, get the Bluetooth name instead.
-     *
-     * @return the Bluetooth alias, or null if no alias or there was a problem
-     * @hide
-     * @see #getAlias()
-     * @see #getName()
-     */
-    @UnsupportedAppUsage(publicAlternatives = "Use {@link #getName()} instead.")
-    public String getAliasName() {
-        String name = getAlias();
-        if (name == null) {
-            name = getName();
-        }
-        return name;
-    }
-
-    /**
      * Get the most recent identified battery level of this Bluetooth device
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *

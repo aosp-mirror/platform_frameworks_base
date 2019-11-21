@@ -121,107 +121,6 @@ constexpr inline static ApkAssetsCookie JavaCookieToApkAssetsCookie(jint cookie)
   return cookie > 0 ? static_cast<ApkAssetsCookie>(cookie - 1) : kInvalidCookie;
 }
 
-// This is called by zygote (running as user root) as part of preloadResources.
-static void NativeVerifySystemIdmaps(JNIEnv* /*env*/, jclass /*clazz*/) {
-  switch (pid_t pid = fork()) {
-    case -1:
-      PLOG(ERROR) << "failed to fork for idmap";
-      break;
-
-    // child
-    case 0: {
-      struct __user_cap_header_struct capheader;
-      struct __user_cap_data_struct capdata;
-
-      memset(&capheader, 0, sizeof(capheader));
-      memset(&capdata, 0, sizeof(capdata));
-
-      capheader.version = _LINUX_CAPABILITY_VERSION;
-      capheader.pid = 0;
-
-      if (capget(&capheader, &capdata) != 0) {
-        PLOG(ERROR) << "capget";
-        exit(1);
-      }
-
-      capdata.effective = capdata.permitted;
-      if (capset(&capheader, &capdata) != 0) {
-        PLOG(ERROR) << "capset";
-        exit(1);
-      }
-
-      if (setgid(AID_SYSTEM) != 0) {
-        PLOG(ERROR) << "setgid";
-        exit(1);
-      }
-
-      if (setuid(AID_SYSTEM) != 0) {
-        PLOG(ERROR) << "setuid";
-        exit(1);
-      }
-
-      // Generic idmap parameters
-      const char* argv[11];
-      int argc = 0;
-      struct stat st;
-
-      memset(argv, 0, sizeof(argv));
-      argv[argc++] = AssetManager::IDMAP_BIN;
-      argv[argc++] = "--scan";
-      argv[argc++] = AssetManager::TARGET_PACKAGE_NAME;
-      argv[argc++] = AssetManager::TARGET_APK_PATH;
-      argv[argc++] = AssetManager::IDMAP_DIR;
-
-      // Directories to scan for overlays: if OVERLAY_THEME_DIR_PROPERTY is defined,
-      // use VENDOR_OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in
-      // addition to VENDOR_OVERLAY_DIR.
-      std::string overlay_theme_path = base::GetProperty(AssetManager::OVERLAY_THEME_DIR_PROPERTY,
-                                                         "");
-      if (!overlay_theme_path.empty()) {
-        overlay_theme_path =
-          std::string(AssetManager::VENDOR_OVERLAY_DIR) + "/" + overlay_theme_path;
-        if (stat(overlay_theme_path.c_str(), &st) == 0) {
-          argv[argc++] = overlay_theme_path.c_str();
-        }
-      }
-
-      if (stat(AssetManager::VENDOR_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::VENDOR_OVERLAY_DIR;
-      }
-
-      if (stat(AssetManager::PRODUCT_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::PRODUCT_OVERLAY_DIR;
-      }
-
-      if (stat(AssetManager::SYSTEM_EXT_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::SYSTEM_EXT_OVERLAY_DIR;
-      }
-
-      if (stat(AssetManager::ODM_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::ODM_OVERLAY_DIR;
-      }
-
-      if (stat(AssetManager::OEM_OVERLAY_DIR, &st) == 0) {
-        argv[argc++] = AssetManager::OEM_OVERLAY_DIR;
-      }
-
-      // Finally, invoke idmap (if any overlay directory exists)
-      if (argc > 5) {
-        execv(AssetManager::IDMAP_BIN, (char* const*)argv);
-        PLOG(ERROR) << "failed to execv for idmap";
-        exit(1); // should never get here
-      } else {
-        exit(0);
-      }
-  } break;
-
-  // parent
-  default:
-    waitpid(pid, nullptr, 0);
-    break;
-  }
-}
-
 static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv* env,
                                                                         jclass /*clazz*/) {
   // --input-directory can be given multiple times, but idmap2 expects the directory to exist
@@ -1665,7 +1564,6 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeAssetGetRemainingLength", "(J)J", (void*)NativeAssetGetRemainingLength},
 
     // System/idmap related methods.
-    {"nativeVerifySystemIdmaps", "()V", (void*)NativeVerifySystemIdmaps},
     {"nativeCreateIdmapsForStaticOverlaysTargetingAndroid", "()[Ljava/lang/String;",
      (void*)NativeCreateIdmapsForStaticOverlaysTargetingAndroid},
     {"nativeGetOverlayableMap", "(JLjava/lang/String;)Ljava/util/Map;",

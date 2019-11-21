@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.server.pm;
+#pragma once
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+#include <android/os/IStatsPullerCallback.h>
+#include <utils/String16.h>
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-        UserDataPreparerTest.class,
-        UserLifecycleStressTest.class,
-        UserManagerServiceCreateProfileTest.class,
-        UserManagerServiceIdRecyclingTest.class,
-        UserManagerServiceTest.class,
-        UserManagerServiceUserInfoTest.class,
-        UserManagerServiceUserTypeTest.class,
-        UserManagerTest.class,
-        UserRestrictionsUtilsTest.class,
-        UserSystemPackageInstallerTest.class,
-})
-public class UserTests {
-}
+#include "StatsPuller.h"
 
+namespace android {
+namespace os {
+namespace statsd {
+
+class StatsCallbackPullerDeprecated : public StatsPuller {
+public:
+    explicit StatsCallbackPullerDeprecated(int tagId, const sp<IStatsPullerCallback>& callback);
+
+private:
+    bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
+    const sp<IStatsPullerCallback> mCallback;
+};
+
+}  // namespace statsd
+}  // namespace os
+}  // namespace android

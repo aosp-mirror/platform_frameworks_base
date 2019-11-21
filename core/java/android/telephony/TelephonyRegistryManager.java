@@ -16,7 +16,10 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
@@ -225,14 +228,33 @@ public class TelephonyRegistryManager {
      * @param slotIndex for which call state changed. Can be derived from subId except when subId is
      * invalid.
      * @param state latest call state. e.g, offhook, ringing
-     * @param incomingNumer incoming phone number.
+     * @param incomingNumber incoming phone number.
      *
      * @hide
      */
     public void notifyCallStateChanged(int subId, int slotIndex, @CallState int state,
-        String incomingNumer) {
+            String incomingNumber) {
         try {
-            sRegistry.notifyCallState(slotIndex, subId, state, incomingNumer);
+            sRegistry.notifyCallState(slotIndex, subId, state, incomingNumber);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Notify call state changed on all subscriptions.
+     *
+     * @param state latest call state. e.g, offhook, ringing
+     * @param incomingNumber incoming phone number.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void notifyCallStateChangedForAllSubscriptions(@CallState int state,
+            @Nullable String incomingNumber) {
+        try {
+            sRegistry.notifyCallStateForAllSubs(state, incomingNumber);
         } catch (RemoteException ex) {
             // system server crash
         }
@@ -594,9 +616,9 @@ public class TelephonyRegistryManager {
      * @hide
      */
     public void notifyPreciseCallState(int subId, int slotIndex,
-        @PreciseCallStates int ringCallPreciseState,
-        @PreciseCallStates int foregroundCallPreciseState,
-        @PreciseCallStates int backgroundCallPreciseState) {
+            @PreciseCallStates int ringCallPreciseState,
+            @PreciseCallStates int foregroundCallPreciseState,
+            @PreciseCallStates int backgroundCallPreciseState) {
         try {
             sRegistry.notifyPreciseCallState(slotIndex, subId, ringCallPreciseState,
                 foregroundCallPreciseState, backgroundCallPreciseState);

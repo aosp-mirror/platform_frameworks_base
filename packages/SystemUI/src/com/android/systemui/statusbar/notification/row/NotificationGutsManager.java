@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -41,6 +42,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
@@ -101,16 +103,18 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     protected String mKeyToRemoveOnGutsClosed;
 
     private final Lazy<StatusBar> mStatusBarLazy;
+    private final Handler mMainHandler;
     private Runnable mOpenRunnable;
 
     @Inject
     public NotificationGutsManager(Context context, VisualStabilityManager visualStabilityManager,
-            Lazy<StatusBar> statusBarLazy) {
+            Lazy<StatusBar> statusBarLazy, @MainHandler Handler mainHandler,
+            AccessibilityManager accessibilityManager) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarLazy = statusBarLazy;
-        mAccessibilityManager = (AccessibilityManager)
-                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        mMainHandler = mainHandler;
+        mAccessibilityManager = accessibilityManager;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -389,7 +393,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                         .setLeaveOpenOnKeyguardHide(true);
             }
 
-            Runnable r = () -> Dependency.get(Dependency.MAIN_HANDLER).post(
+            Runnable r = () -> mMainHandler.post(
                     () -> openGutsInternal(view, x, y, menuItem));
 
             mStatusBarLazy.get().executeRunnableDismissingKeyguard(

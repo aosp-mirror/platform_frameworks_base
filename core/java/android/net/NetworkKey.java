@@ -21,7 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiSsid;
+import android.net.wifi.WifiManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -69,22 +69,25 @@ public class NetworkKey implements Parcelable {
      */
     @Nullable
     public static NetworkKey createFromScanResult(@Nullable ScanResult result) {
-        if (result != null && result.wifiSsid != null) {
-            final String ssid = result.wifiSsid.toString();
-            final String bssid = result.BSSID;
-            if (!TextUtils.isEmpty(ssid) && !ssid.equals(WifiSsid.NONE)
-                    && !TextUtils.isEmpty(bssid)) {
-                WifiKey wifiKey;
-                try {
-                    wifiKey = new WifiKey(String.format("\"%s\"", ssid), bssid);
-                } catch (IllegalArgumentException e) {
-                    Log.e(TAG, "Unable to create WifiKey.", e);
-                    return null;
-                }
-                return new NetworkKey(wifiKey);
-            }
+        if (result == null) {
+            return null;
         }
-        return null;
+        final String ssid = result.SSID;
+        if (TextUtils.isEmpty(ssid) || ssid.equals(WifiManager.UNKNOWN_SSID)) {
+            return null;
+        }
+        final String bssid = result.BSSID;
+        if (TextUtils.isEmpty(bssid)) {
+            return null;
+        }
+
+        try {
+            WifiKey wifiKey = new WifiKey(String.format("\"%s\"", ssid), bssid);
+            return new NetworkKey(wifiKey);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to create WifiKey.", e);
+            return null;
+        }
     }
 
     /**
@@ -100,7 +103,7 @@ public class NetworkKey implements Parcelable {
         if (wifiInfo != null) {
             final String ssid = wifiInfo.getSSID();
             final String bssid = wifiInfo.getBSSID();
-            if (!TextUtils.isEmpty(ssid) && !ssid.equals(WifiSsid.NONE)
+            if (!TextUtils.isEmpty(ssid) && !ssid.equals(WifiManager.UNKNOWN_SSID)
                     && !TextUtils.isEmpty(bssid)) {
                 WifiKey wifiKey;
                 try {

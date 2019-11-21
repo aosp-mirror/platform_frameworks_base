@@ -43,8 +43,6 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.internal.telephony.PhoneConstants;
-
 import java.util.List;
 
 /**
@@ -613,7 +611,7 @@ public class CallLog {
          * if the contact is unknown.
          * @param context the context used to get the ContentResolver
          * @param number the phone number to be added to the calls db
-         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         * @param presentation enum value from TelecomManager.PRESENTATION_xxx, which
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
@@ -648,7 +646,7 @@ public class CallLog {
          * @param number the phone number to be added to the calls db
          * @param viaNumber the secondary number that the incoming call received with. If the
          *       call was received with the SIM assigned number, then this field must be ''.
-         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         * @param presentation enum value from TelecomManager.PRESENTATION_xxx, which
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
@@ -689,7 +687,7 @@ public class CallLog {
          *        if it was outgoing. Otherwise it is ''.
          * @param viaNumber the secondary number that the incoming call received with. If the
          *        call was received with the SIM assigned number, then this field must be ''.
-         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         * @param presentation enum value from TelecomManager.PRESENTATION_xxx, which
          *        is set by the network and denotes the number presenting rules for
          *        "allowed", "payphone", "restricted" or "unknown"
          * @param callType enumerated values for "incoming", "outgoing", or "missed"
@@ -1051,22 +1049,22 @@ public class CallLog {
 
         /**
          * Remap network specified number presentation types
-         * PhoneConstants.PRESENTATION_xxx to calllog number presentation types
+         * TelecomManager.PRESENTATION_xxx to calllog number presentation types
          * Calls.PRESENTATION_xxx, in order to insulate the persistent calllog
          * from any future radio changes.
          * If the number field is empty set the presentation type to Unknown.
          */
         private static int getLogNumberPresentation(String number, int presentation) {
-            if (presentation == PhoneConstants.PRESENTATION_RESTRICTED) {
+            if (presentation == TelecomManager.PRESENTATION_RESTRICTED) {
                 return presentation;
             }
 
-            if (presentation == PhoneConstants.PRESENTATION_PAYPHONE) {
+            if (presentation == TelecomManager.PRESENTATION_PAYPHONE) {
                 return presentation;
             }
 
             if (TextUtils.isEmpty(number)
-                    || presentation == PhoneConstants.PRESENTATION_UNKNOWN) {
+                    || presentation == TelecomManager.PRESENTATION_UNKNOWN) {
                 return PRESENTATION_UNKNOWN;
             }
 

@@ -31,6 +31,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -45,12 +47,13 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -66,14 +69,28 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
-    @Mock private NotificationPresenter mPresenter;
-    @Mock private UserManager mUserManager;
+    @Mock
+    private NotificationPresenter mPresenter;
+    @Mock
+    private UserManager mUserManager;
 
     // Dependency mocks:
-    @Mock private NotificationEntryManager mEntryManager;
-    @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private StatusBarKeyguardViewManager mKeyguardViewManager;
-    @Mock private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private NotificationEntryManager mEntryManager;
+    @Mock
+    private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private IStatusBarService mIStatusBarService;
+    @Mock
+    private KeyguardManager mKeyguardManager;
+    @Mock
+    private DeviceProvisionedController mDeviceProvisionedController;
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
 
     private int mCurrentUserId;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
@@ -82,11 +99,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
-        mDependency.injectTestDependency(DeviceProvisionedController.class,
-                mDeviceProvisionedController);
-        mDependency.injectMockDependency(KeyguardStateController.class);
 
-        mContext.addMockSystemService(UserManager.class, mUserManager);
         mCurrentUserId = ActivityManager.getCurrentUser();
 
         when(mUserManager.getProfiles(mCurrentUserId)).thenReturn(Lists.newArrayList(
@@ -196,7 +209,10 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private class TestNotificationLockscreenUserManager
             extends NotificationLockscreenUserManagerImpl {
         public TestNotificationLockscreenUserManager(Context context) {
-            super(context, mBroadcastDispatcher);
+            super(context, mBroadcastDispatcher, mDevicePolicyManager, mUserManager,
+                    mIStatusBarService, NotificationLockscreenUserManagerTest.this.mKeyguardManager,
+                    mStatusBarStateController, Handler.createAsync(Looper.myLooper()),
+                    mDeviceProvisionedController, mKeyguardStateController);
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

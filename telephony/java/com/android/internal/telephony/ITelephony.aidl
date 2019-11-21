@@ -849,7 +849,7 @@ interface ITelephony {
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    boolean isTetherApnRequiredForSubscriber(int subId);
+    boolean isTetheringApnRequiredForSubscriber(int subId);
 
     /**
     * Enables framework IMS and triggers IMS Registration.

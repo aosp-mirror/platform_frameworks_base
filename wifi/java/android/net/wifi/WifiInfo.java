@@ -53,7 +53,7 @@ public class WifiInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
 
     static {
@@ -79,8 +79,12 @@ public class WifiInfo implements Parcelable {
     private WifiSsid mWifiSsid;
     private int mNetworkId;
 
-    /** @hide **/
-    @UnsupportedAppUsage
+    /**
+     * Used to indicate that the RSSI is invalid, for example if no RSSI measurements are available
+     * yet.
+     * @hide
+     */
+    @SystemApi
     public static final int INVALID_RSSI = -127;
 
     /** @hide **/
@@ -161,7 +165,7 @@ public class WifiInfo implements Parcelable {
      * If connected to a network suggestion or specifier, store the package name of the app,
      * else null.
      */
-    private String mNetworkSuggestionOrSpecifierPackageName;
+    private String mAppPackageName;
 
     /**
      * Running total count of lost (not ACKed) transmitted unicast data packets.
@@ -184,32 +188,89 @@ public class WifiInfo implements Parcelable {
      */
     public long rxSuccess;
 
+    private double mTxBadRate;
+
     /**
      * Average rate of lost transmitted packets, in units of packets per second.
      * @hide
      */
-    public double txBadRate;
+    @SystemApi
+    public double getTxBadRate() {
+        return mTxBadRate;
+    }
+
+    /** @hide */
+    public void setTxBadRate(double txBadRate) {
+        mTxBadRate = txBadRate;
+    }
+
+    private double mTxRetriesRate;
+
     /**
      * Average rate of transmitted retry packets, in units of packets per second.
      * @hide
      */
-    public double txRetriesRate;
+    @SystemApi
+    public double getTxRetriesRate() {
+        return mTxRetriesRate;
+    }
+
+    /** @hide */
+    public void setTxRetriesRate(double txRetriesRate) {
+        mTxRetriesRate = txRetriesRate;
+    }
+
+    private double mTxSuccessRate;
+
     /**
      * Average rate of successfully transmitted unicast packets, in units of packets per second.
      * @hide
      */
-    public double txSuccessRate;
+    @SystemApi
+    public double getTxSuccessRate() {
+        return mTxSuccessRate;
+    }
+
+    /** @hide */
+    public void setTxSuccessRate(double txSuccessRate) {
+        mTxSuccessRate = txSuccessRate;
+    }
+
+    private double mRxSuccessRate;
+
     /**
      * Average rate of received unicast data packets, in units of packets per second.
      * @hide
      */
-    public double rxSuccessRate;
+    @SystemApi
+    public double getRxSuccessRate() {
+        return mRxSuccessRate;
+    }
 
-    /**
-     * @hide
-     */
+    /** @hide */
+    public void setRxSuccessRate(double rxSuccessRate) {
+        mRxSuccessRate = rxSuccessRate;
+    }
+
+    /** @hide */
     @UnsupportedAppUsage
     public int score;
+
+    /**
+     * The current Wifi score.
+     * NOTE: this value should only be used for debugging purposes. Do not rely on this value for
+     * any computations. The meaning of this value can and will change at any time without warning.
+     * @hide
+     */
+    @SystemApi
+    public int getScore() {
+        return score;
+    }
+
+    /** @hide */
+    public void setScore(int score) {
+        this.score = score;
+    }
 
     /**
      * Flag indicating that AP has hinted that upstream connection is metered,
@@ -243,17 +304,17 @@ public class WifiInfo implements Parcelable {
         setMeteredHint(false);
         setEphemeral(false);
         setOsuAp(false);
-        setNetworkSuggestionOrSpecifierPackageName(null);
+        setAppPackageName(null);
         setFQDN(null);
         setProviderFriendlyName(null);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
         txRetries = 0;
-        txBadRate = 0;
-        txSuccessRate = 0;
-        rxSuccessRate = 0;
-        txRetriesRate = 0;
+        mTxBadRate = 0;
+        mTxSuccessRate = 0;
+        mRxSuccessRate = 0;
+        mTxRetriesRate = 0;
         score = 0;
     }
 
@@ -277,8 +338,8 @@ public class WifiInfo implements Parcelable {
             mMeteredHint = source.mMeteredHint;
             mEphemeral = source.mEphemeral;
             mTrusted = source.mTrusted;
-            mNetworkSuggestionOrSpecifierPackageName =
-                    source.mNetworkSuggestionOrSpecifierPackageName;
+            mAppPackageName =
+                    source.mAppPackageName;
             mOsuAp = source.mOsuAp;
             mFqdn = source.mFqdn;
             mProviderFriendlyName = source.mProviderFriendlyName;
@@ -286,10 +347,10 @@ public class WifiInfo implements Parcelable {
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
             rxSuccess = source.rxSuccess;
-            txBadRate = source.txBadRate;
-            txRetriesRate = source.txRetriesRate;
-            txSuccessRate = source.txSuccessRate;
-            rxSuccessRate = source.rxSuccessRate;
+            mTxBadRate = source.mTxBadRate;
+            mTxRetriesRate = source.mTxRetriesRate;
+            mTxSuccessRate = source.mTxSuccessRate;
+            mRxSuccessRate = source.mRxSuccessRate;
             score = source.score;
             mWifiStandard = source.mWifiStandard;
         }
@@ -323,10 +384,10 @@ public class WifiInfo implements Parcelable {
                 return "\"" + unicode + "\"";
             } else {
                 String hex = mWifiSsid.getHexString();
-                return (hex != null) ? hex : WifiSsid.NONE;
+                return (hex != null) ? hex : WifiManager.UNKNOWN_SSID;
             }
         }
-        return WifiSsid.NONE;
+        return WifiManager.UNKNOWN_SSID;
     }
 
     /** @hide */
@@ -523,8 +584,15 @@ public class WifiInfo implements Parcelable {
         mEphemeral = ephemeral;
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
+    /**
+     * Returns true if the current Wifi network is ephemeral, false otherwise.
+     * An ephemeral network is a network that is temporary and not persisted in the system.
+     * Ephemeral networks cannot be forgotten, only disabled with
+     * {@link WifiManager#disableEphemeralNetwork(String)}.
+     *
+     * @hide
+     */
+    @SystemApi
     public boolean isEphemeral() {
         return mEphemeral;
     }
@@ -581,13 +649,19 @@ public class WifiInfo implements Parcelable {
     }
 
     /** {@hide} */
-    public void setNetworkSuggestionOrSpecifierPackageName(@Nullable String packageName) {
-        mNetworkSuggestionOrSpecifierPackageName = packageName;
+    public void setAppPackageName(@Nullable String packageName) {
+        mAppPackageName = packageName;
     }
 
-    /** {@hide} */
-    public @Nullable String getNetworkSuggestionOrSpecifierPackageName() {
-        return mNetworkSuggestionOrSpecifierPackageName;
+    /**
+     * If this network was created in response to an app request (e.g. through Network Suggestion
+     * or Network Specifier), return the package name of the app that made the request.
+     * Null otherwise.
+     * @hide
+     */
+    @SystemApi
+    public @Nullable String getAppPackageName() {
+        return mAppPackageName;
     }
 
 
@@ -648,7 +722,7 @@ public class WifiInfo implements Parcelable {
         return mWifiSsid.isHidden();
     }
 
-   /**
+    /**
      * Map a supplicant state into a fine-grained network connectivity state.
      * @param suppState the supplicant state
      * @return the corresponding {@link DetailedState}
@@ -680,9 +754,14 @@ public class WifiInfo implements Parcelable {
         }
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
-    public static String removeDoubleQuotes(String string) {
+    /**
+     * Remove double quotes (") surrounding a SSID string, if present. Otherwise, return the
+     * string unmodified. Return null if the input string was null.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public static String removeDoubleQuotes(@Nullable String string) {
         if (string == null) return null;
         final int length = string.length();
         if ((length > 1) && (string.charAt(0) == '"') && (string.charAt(length - 1) == '"')) {
@@ -696,7 +775,7 @@ public class WifiInfo implements Parcelable {
         StringBuffer sb = new StringBuffer();
         String none = "<none>";
 
-        sb.append("SSID: ").append(mWifiSsid == null ? WifiSsid.NONE : mWifiSsid)
+        sb.append("SSID: ").append(mWifiSsid == null ? WifiManager.UNKNOWN_SSID : mWifiSsid)
                 .append(", BSSID: ").append(mBSSID == null ? none : mBSSID)
                 .append(", MAC: ").append(mMacAddress == null ? none : mMacAddress)
                 .append(", Supplicant state: ")
@@ -745,16 +824,16 @@ public class WifiInfo implements Parcelable {
         dest.writeInt(mTrusted ? 1 : 0);
         dest.writeInt(score);
         dest.writeLong(txSuccess);
-        dest.writeDouble(txSuccessRate);
+        dest.writeDouble(mTxSuccessRate);
         dest.writeLong(txRetries);
-        dest.writeDouble(txRetriesRate);
+        dest.writeDouble(mTxRetriesRate);
         dest.writeLong(txBad);
-        dest.writeDouble(txBadRate);
+        dest.writeDouble(mTxBadRate);
         dest.writeLong(rxSuccess);
-        dest.writeDouble(rxSuccessRate);
+        dest.writeDouble(mRxSuccessRate);
         mSupplicantState.writeToParcel(dest, flags);
         dest.writeInt(mOsuAp ? 1 : 0);
-        dest.writeString(mNetworkSuggestionOrSpecifierPackageName);
+        dest.writeString(mAppPackageName);
         dest.writeString(mFqdn);
         dest.writeString(mProviderFriendlyName);
         dest.writeInt(mWifiStandard);
@@ -787,16 +866,16 @@ public class WifiInfo implements Parcelable {
                 info.mTrusted = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccess = in.readLong();
-                info.txSuccessRate = in.readDouble();
+                info.mTxSuccessRate = in.readDouble();
                 info.txRetries = in.readLong();
-                info.txRetriesRate = in.readDouble();
+                info.mTxRetriesRate = in.readDouble();
                 info.txBad = in.readLong();
-                info.txBadRate = in.readDouble();
+                info.mTxBadRate = in.readDouble();
                 info.rxSuccess = in.readLong();
-                info.rxSuccessRate = in.readDouble();
+                info.mRxSuccessRate = in.readDouble();
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
                 info.mOsuAp = in.readInt() != 0;
-                info.mNetworkSuggestionOrSpecifierPackageName = in.readString();
+                info.mAppPackageName = in.readString();
                 info.mFqdn = in.readString();
                 info.mProviderFriendlyName = in.readString();
                 info.mWifiStandard = in.readInt();

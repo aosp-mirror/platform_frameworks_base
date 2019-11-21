@@ -390,7 +390,7 @@ java_defaults {
 
 filegroup {
     name: "framework-jarjar-rules",
-    srcs: ["framework_jarjar_rules.txt"],
+    srcs: ["jarjar_rules_hidl.txt"],
 }
 
 filegroup {
@@ -535,24 +535,22 @@ gensrcs {
     name: "framework-javastream-protos",
     depfile: true,
 
-    tool_files: ["tools/genprotos.sh"],
     tools: [
         "aprotoc",
         "protoc-gen-javastream",
         "soong_zip",
     ],
 
-    // TODO This should not be needed. If you set a custom OUT_DIR or OUT_DIR_COMMON_BASE you can
-    // end up with a command that is extremely long, potentially going passed MAX_ARG_STRLEN due to
-    // the way sbox rewrites the command. See b/70221552.
-    cmd: "$(location tools/genprotos.sh) " +
-        " $(location aprotoc) " +
-        " $(location protoc-gen-javastream) " +
-        " $(location soong_zip) " +
-        " $(genDir) " +
-        " $(depfile) " +
-        " $(in) " +
-        " $(out)",
+    cmd: "mkdir -p $(genDir)/$(in) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-javastream) " +
+        "  --dependency_out=$(depfile) " +
+        "  --javastream_out=$(genDir)/$(in) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in) " +
+        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
+
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
@@ -808,7 +806,6 @@ aidl_interface {
             enabled: true,
         },
     },
-    api_dir: "aidl/incremental",
 }
 
 gensrcs {
@@ -952,7 +949,10 @@ framework_docs_only_args = " -android -manifest $(location core/res/AndroidManif
     "-overview $(location core/java/overview.html) " +
     // Federate Support Library references against local API file.
     "-federate SupportLib https://developer.android.com " +
-    "-federationapi SupportLib $(location :current-support-api) "
+    "-federationapi SupportLib $(location :current-support-api) " +
+    // Federate Support Library references against local API file.
+    "-federate AndroidX https://developer.android.com " +
+    "-federationapi AndroidX $(location :current-androidx-api) "
 
 framework_docs_only_libs = [
     "voip-common",
@@ -1063,6 +1063,7 @@ doc_defaults {
         "core/res/AndroidManifest.xml",
         "core/java/overview.html",
         ":current-support-api",
+        ":current-androidx-api",
     ],
     create_stubs: false,
 }

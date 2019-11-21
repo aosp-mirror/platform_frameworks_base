@@ -82,10 +82,6 @@ class WindowToken extends WindowContainer<WindowState> {
     // will be shown.
     boolean waitingToShow;
 
-    // Set to true when this token is in a pending transaction where its
-    // windows will be put to the bottom of the list.
-    boolean sendingToBottom;
-
     /** The owner has {@link android.Manifest.permission#MANAGE_APP_TOKENS} */
     final boolean mOwnerCanManageAppTokens;
 
@@ -298,9 +294,8 @@ class WindowToken extends WindowContainer<WindowState> {
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
                 pw.print(" hidden="); pw.print(mHidden);
                 pw.print(" hasVisible="); pw.println(hasVisible);
-        if (waitingToShow || sendingToBottom) {
+        if (waitingToShow) {
             pw.print(prefix); pw.print("waitingToShow="); pw.print(waitingToShow);
-                    pw.print(" sendingToBottom="); pw.print(sendingToBottom);
         }
     }
 

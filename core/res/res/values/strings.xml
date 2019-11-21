@@ -3042,6 +3042,11 @@
     <!-- Default text for a button that can be toggled on and off. -->
     <string name="capital_off">OFF</string>
 
+    <!-- Default state for CompoundButton for on and off. [CHAR LIMIT=32] -->
+    <string name="checked">checked</string>
+    <!-- Default text for a button that can be toggled on and off. [CHAR LIMIT=32] -->
+    <string name="not_checked">not checked</string>
+
     <!-- Title of intent resolver dialog when selecting an application to run. -->
     <string name="whichApplication">Complete action using</string>
     <!-- Title of intent resolver dialog when selecting an application to run

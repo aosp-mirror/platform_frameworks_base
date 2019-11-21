@@ -1066,7 +1066,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             } else {
                 summary.append(getSummary(mContext, /* ssid */ null, getDetailedState(),
                         mInfo != null && mInfo.isEphemeral(),
-                        mInfo != null ? mInfo.getNetworkSuggestionOrSpecifierPackageName() : null));
+                        mInfo != null ? mInfo.getAppPackageName() : null));
             }
         } else { // not active
             if (mConfig != null && mConfig.hasNoInternetAccess()) {

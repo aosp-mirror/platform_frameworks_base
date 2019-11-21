@@ -103,7 +103,7 @@ public class NetworkStackClient {
             // checks here should be kept in sync with PermissionUtil.
             if (caller != Process.SYSTEM_UID
                     && caller != Process.NETWORK_STACK_UID
-                    && !UserHandle.isSameApp(caller, Process.BLUETOOTH_UID)) {
+                    && UserHandle.getAppId(caller) != Process.BLUETOOTH_UID) {
                 throw new SecurityException(
                         "Only the system server should try to bind to the network stack.");
             }

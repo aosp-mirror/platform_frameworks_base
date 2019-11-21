@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,6 +90,14 @@ public final class OsuProvider implements Parcelable {
      * Icon data for the OSU (Online Sign-Up) provider.
      */
     private final Icon mIcon;
+
+    /** @hide */
+    public OsuProvider(String osuSsid, Map<String, String> friendlyNames,
+            String serviceDescription, Uri serverUri, String nai, List<Integer> methodList,
+            Icon icon) {
+        this(WifiSsid.createFromByteArray(osuSsid.getBytes(StandardCharsets.UTF_8)),
+                friendlyNames, serviceDescription, serverUri, nai, methodList, icon);
+    }
 
     /** @hide */
     public OsuProvider(WifiSsid osuSsid, Map<String, String> friendlyNames,

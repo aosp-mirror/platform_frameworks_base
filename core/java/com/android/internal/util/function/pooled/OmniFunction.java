@@ -30,10 +30,13 @@ import com.android.internal.util.function.OctConsumer;
 import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadConsumer;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuadPredicate;
 import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
+import com.android.internal.util.function.QuintPredicate;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.util.function.TriFunction;
+import com.android.internal.util.function.TriPredicate;
 import com.android.internal.util.function.UndecConsumer;
 import com.android.internal.util.function.UndecFunction;
 
@@ -59,7 +62,8 @@ abstract class OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> implements
         HeptConsumer<A, B, C, D, E, F, G>, OctConsumer<A, B, C, D, E, F, G, H>,
         NonaConsumer<A, B, C, D, E, F, G, H, I>, DecConsumer<A, B, C, D, E, F, G, H, I, J>,
         UndecConsumer<A, B, C, D, E, F, G, H, I, J, K>,
-        PooledPredicate<A>, BiPredicate<A, B>, PooledSupplier<R>, PooledRunnable, ThrowingRunnable,
+        PooledPredicate<A>, BiPredicate<A, B>, TriPredicate<A, B, C>, QuadPredicate<A, B, C, D>,
+        QuintPredicate<A, B, C, D, E>, PooledSupplier<R>, PooledRunnable, ThrowingRunnable,
         ThrowingSupplier<R>, PooledSupplier.OfInt, PooledSupplier.OfLong, PooledSupplier.OfDouble {
 
     abstract R invoke(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j, K k);
@@ -96,6 +100,21 @@ abstract class OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> implements
     @Override
     public R get() {
         return invoke(null, null, null, null, null, null, null, null, null, null, null);
+    }
+
+    @Override
+    public boolean test(A o, B o2, C o3, D o4, E o5) {
+        return (Boolean) invoke(o, o2, o3, o4, o5, null, null, null, null, null, null);
+    }
+
+    @Override
+    public boolean test(A o, B o2, C o3, D o4) {
+        return (Boolean) invoke(o, o2, o3, o4, null, null, null, null, null, null, null);
+    }
+
+    @Override
+    public boolean test(A o, B o2, C o3) {
+        return (Boolean) invoke(o, o2, o3, null, null, null, null, null, null, null, null);
     }
 
     @Override

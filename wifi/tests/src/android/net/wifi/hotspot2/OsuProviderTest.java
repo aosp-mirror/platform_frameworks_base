@@ -82,7 +82,7 @@ public class OsuProviderTest {
      */
     @Test
     public void verifyParcelWithEmptyProviderInfo() throws Exception {
-        verifyParcel(new OsuProvider(null, null, null, null, null, null, null));
+        verifyParcel(new OsuProvider((WifiSsid) null, null, null, null, null, null, null));
     }
 
     /**
@@ -102,7 +102,7 @@ public class OsuProviderTest {
      */
     @Test
     public void verifyCopyConstructorWithNullSource() throws Exception {
-        OsuProvider expected = new OsuProvider(null, null, null, null, null, null, null);
+        OsuProvider expected = new OsuProvider((WifiSsid) null, null, null, null, null, null, null);
         assertEquals(expected, new OsuProvider(null));
     }
 

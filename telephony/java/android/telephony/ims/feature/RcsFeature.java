@@ -199,10 +199,17 @@ public class RcsFeature extends ImsFeature {
         /** @hide*/
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(prefix = "CAPABILITY_TYPE_", flag = true, value = {
+                CAPABILITY_TYPE_NONE,
                 CAPABILITY_TYPE_OPTIONS_UCE,
                 CAPABILITY_TYPE_PRESENCE_UCE
         })
         public @interface RcsImsCapabilityFlag {}
+
+        /**
+         * Undefined capability type for initialization
+         * @hide
+         */
+        public static final int CAPABILITY_TYPE_NONE = 0;
 
         /**
          * This carrier supports User Capability Exchange using SIP OPTIONS as defined by the

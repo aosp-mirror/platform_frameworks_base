@@ -24,6 +24,7 @@ import android.app.IActivityManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.WallpaperManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
@@ -31,11 +32,13 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
@@ -54,11 +57,22 @@ import dagger.Provides;
  */
 @Module
 public class SystemServicesModule {
+    @Provides
+    @Singleton
+    static AccessibilityManager provideAccessibilityManager(Context context) {
+        return context.getSystemService(AccessibilityManager.class);
+    }
 
     @Singleton
     @Provides
     static AlarmManager provideAlarmManager(Context context) {
         return context.getSystemService(AlarmManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static DevicePolicyManager provideDevicePolicyManager(Context context) {
+        return context.getSystemService(DevicePolicyManager.class);
     }
 
     @Singleton
@@ -138,6 +152,12 @@ public class SystemServicesModule {
     @Provides
     static SensorPrivacyManager provideSensorPrivacyManager(Context context) {
         return context.getSystemService(SensorPrivacyManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static UserManager provideUserManager(Context context) {
+        return context.getSystemService(UserManager.class);
     }
 
     @Provides

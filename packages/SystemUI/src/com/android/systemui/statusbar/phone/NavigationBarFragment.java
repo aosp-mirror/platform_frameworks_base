@@ -89,11 +89,11 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.model.SysUiState;
@@ -196,7 +196,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     @Nullable
     private AssistHandleViewController mAssistHandlerViewController;
 
-    private Handler mHandler = Dependency.get(Dependency.MAIN_HANDLER);
+    private final Handler mHandler;
 
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
         @Override
@@ -271,7 +271,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             SysUiState sysUiFlagsContainer,
             BroadcastDispatcher broadcastDispatcher,
             CommandQueue commandQueue, Divider divider,
-            Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy) {
+            Optional<Recents> recentsOptional, Lazy<StatusBar> statusBarLazy,
+            @MainHandler Handler mainHandler) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mStatusBarStateController = statusBarStateController;
@@ -287,6 +288,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mCommandQueue = commandQueue;
         mDivider = divider;
         mRecentsOptional = recentsOptional;
+        mHandler = mainHandler;
     }
 
     // ----- Fragment Lifecycle Callbacks -----

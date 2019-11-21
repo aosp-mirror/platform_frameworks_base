@@ -54,7 +54,7 @@ public class WifiInfoTest {
         writeWifiInfo.setOsuAp(true);
         writeWifiInfo.setFQDN(TEST_FQDN);
         writeWifiInfo.setProviderFriendlyName(TEST_PROVIDER_NAME);
-        writeWifiInfo.setNetworkSuggestionOrSpecifierPackageName(TEST_PACKAGE_NAME);
+        writeWifiInfo.setAppPackageName(TEST_PACKAGE_NAME);
         writeWifiInfo.setWifiStandard(TEST_WIFI_STANDARD);
 
         Parcel parcel = Parcel.obtain();
@@ -71,7 +71,7 @@ public class WifiInfoTest {
         assertTrue(readWifiInfo.isTrusted());
         assertTrue(readWifiInfo.isOsuAp());
         assertTrue(readWifiInfo.isPasspointAp());
-        assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getNetworkSuggestionOrSpecifierPackageName());
+        assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getAppPackageName());
         assertEquals(TEST_FQDN, readWifiInfo.getPasspointFqdn());
         assertEquals(TEST_PROVIDER_NAME, readWifiInfo.getPasspointProviderFriendlyName());
         assertEquals(TEST_WIFI_STANDARD, readWifiInfo.getWifiStandard());

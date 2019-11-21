@@ -66,9 +66,9 @@ public final class MediaRoute2Info implements Parcelable {
     @Nullable
     final String mProviderId;
     @NonNull
-    final String mName;
+    final CharSequence mName;
     @Nullable
-    final String mDescription;
+    final CharSequence mDescription;
     @Nullable
     final String mClientPackageName;
     @NonNull
@@ -98,8 +98,8 @@ public final class MediaRoute2Info implements Parcelable {
     MediaRoute2Info(@NonNull Parcel in) {
         mId = in.readString();
         mProviderId = in.readString();
-        mName = in.readString();
-        mDescription = in.readString();
+        mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mClientPackageName = in.readString();
         mSupportedCategories = in.createStringArrayList();
         mVolume = in.readInt();
@@ -194,12 +194,12 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     @NonNull
-    public String getName() {
+    public CharSequence getName() {
         return mName;
     }
 
     @Nullable
-    public String getDescription() {
+    public CharSequence getDescription() {
         return mDescription;
     }
 
@@ -277,8 +277,8 @@ public final class MediaRoute2Info implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mId);
         dest.writeString(mProviderId);
-        dest.writeString(mName);
-        dest.writeString(mDescription);
+        TextUtils.writeToParcel(mName, dest, flags);
+        TextUtils.writeToParcel(mDescription, dest, flags);
         dest.writeString(mClientPackageName);
         dest.writeStringList(mSupportedCategories);
         dest.writeInt(mVolume);
@@ -308,8 +308,8 @@ public final class MediaRoute2Info implements Parcelable {
     public static final class Builder {
         String mId;
         String mProviderId;
-        String mName;
-        String mDescription;
+        CharSequence mName;
+        CharSequence mDescription;
         String mClientPackageName;
         List<String> mSupportedCategories;
         int mVolume;
@@ -317,13 +317,7 @@ public final class MediaRoute2Info implements Parcelable {
         int mVolumeHandling = PLAYBACK_VOLUME_FIXED;
         Bundle mExtras;
 
-        public Builder(@NonNull String id, @NonNull String name) {
-            if (TextUtils.isEmpty(id)) {
-                throw new IllegalArgumentException("id must not be null or empty");
-            }
-            if (TextUtils.isEmpty(name)) {
-                throw new IllegalArgumentException("name must not be null or empty");
-            }
+        public Builder(@NonNull String id, @NonNull CharSequence name) {
             setId(id);
             setName(name);
             mSupportedCategories = new ArrayList<>();
@@ -379,10 +373,8 @@ public final class MediaRoute2Info implements Parcelable {
          * Sets the user-visible name of the route.
          */
         @NonNull
-        public Builder setName(@NonNull String name) {
-            if (TextUtils.isEmpty(name)) {
-                throw new IllegalArgumentException("name must not be null or empty");
-            }
+        public Builder setName(@NonNull CharSequence name) {
+            Objects.requireNonNull(name, "name must not be null");
             mName = name;
             return this;
         }

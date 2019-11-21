@@ -26,8 +26,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.DebugUtils;
 
-import com.android.server.pm.UserTypeDetails;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -181,7 +179,7 @@ public class UserInfo implements Parcelable {
 
     /**
      * Type of user, such as {@link UserManager#USER_TYPE_PROFILE_MANAGED}, corresponding to
-     * {@link UserTypeDetails#getName()}.
+     * {@link com.android.server.pm.UserTypeDetails#getName()}.
      */
     public String userType;
 
@@ -195,9 +193,10 @@ public class UserInfo implements Parcelable {
     public int restrictedProfileParentId;
 
     /**
-     * Which badge color/label to use within a particular {@link UserTypeDetails}, i.e.
-     * the badgeIndex.
-     * This is an index for distinguishing different profiles with the same parent and user type.
+     * Index for distinguishing different profiles with the same parent and user type for the
+     * purpose of badging.
+     * It is used for determining which badge color/label to use (if applicable) from
+     * the options available for a particular user type.
      */
     public int profileBadge;
 

@@ -103,8 +103,6 @@ import java.util.Arrays;
  * When writing an activity to satisfy these requests one must pass in the AccountManagerResponse
  * and return the result via that response when the activity finishes (or whenever else  the
  * activity author deems it is the correct time to respond).
- * The {@link AccountAuthenticatorActivity} handles this, so one may wish to extend that when
- * writing activities to handle these requests.
  */
 public abstract class AbstractAccountAuthenticator {
     private static final String TAG = "AccountAuthenticator";

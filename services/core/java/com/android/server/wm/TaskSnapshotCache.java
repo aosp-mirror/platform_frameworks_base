@@ -19,11 +19,8 @@ package com.android.server.wm;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskSnapshot;
 import android.util.ArrayMap;
-import android.util.LruCache;
 
 import java.io.PrintWriter;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Caches snapshots. See {@link TaskSnapshotController}.
@@ -40,6 +37,10 @@ class TaskSnapshotCache {
     TaskSnapshotCache(WindowManagerService service, TaskSnapshotLoader loader) {
         mService = service;
         mLoader = loader;
+    }
+
+    void clearRunningCache() {
+        mRunningCache.clear();
     }
 
     void putSnapshot(Task task, TaskSnapshot snapshot) {

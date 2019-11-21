@@ -185,7 +185,6 @@ import static com.android.server.wm.AppWindowTokenProto.LAST_SURFACE_SHOWING;
 import static com.android.server.wm.AppWindowTokenProto.NAME;
 import static com.android.server.wm.AppWindowTokenProto.NUM_DRAWN_WINDOWS;
 import static com.android.server.wm.AppWindowTokenProto.NUM_INTERESTING_WINDOWS;
-import static com.android.server.wm.AppWindowTokenProto.REMOVED;
 import static com.android.server.wm.AppWindowTokenProto.REPORTED_DRAWN;
 import static com.android.server.wm.AppWindowTokenProto.REPORTED_VISIBLE;
 import static com.android.server.wm.AppWindowTokenProto.STARTING_DISPLAYED;
@@ -631,9 +630,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Last visibility state we reported to the app token.
     boolean reportedVisible;
 
-    // Set to true when the token has been removed from the window mgr.
-    boolean removed;
-
     boolean mDisablePreviewScreenshots;
 
     // Information about an application starting window if displayed.
@@ -878,9 +874,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(" lastAllDrawn="); pw.print(mLastAllDrawn);
             pw.println(")");
         }
-        if (mStartingData != null || removed || firstWindowDrawn || mIsExiting) {
+        if (mStartingData != null || firstWindowDrawn || mIsExiting) {
             pw.print(prefix); pw.print("startingData="); pw.print(mStartingData);
-            pw.print(" removed="); pw.print(removed);
             pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
             pw.print(" mIsExiting="); pw.println(mIsExiting);
         }
@@ -1750,12 +1745,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (surface != null) {
                 boolean abort = false;
                 synchronized (mWmService.mGlobalLock) {
-                    // If the window was successfully added, then
-                    // we need to remove it.
-                    if (removed || mStartingData == null) {
-                        ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
-                                "Aborted starting %s: removed=%b startingData=%s",
-                                ActivityRecord.this, removed, mStartingData);
+                    // If the window was successfully added, then we need to remove it.
+                    if (mStartingData == null) {
+                        ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Aborted starting %s: startingData=%s",
+                                ActivityRecord.this, mStartingData);
 
                         startingWindow = null;
                         mStartingData = null;
@@ -1798,7 +1791,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // task snapshot starting window.
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
-            return snapshot == null ? STARTING_WINDOW_TYPE_NONE
+            return snapshot == null ? STARTING_WINDOW_TYPE_SPLASH_SCREEN
                     : snapshotOrientationSameAsTask(snapshot) || fromRecents
                             ? STARTING_WINDOW_TYPE_SNAPSHOT : STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else {
@@ -2010,12 +2003,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         setMainWindowOpaque(occludesParent);
         mWmService.mWindowPlacerLocked.requestTraversal();
 
-        if (changed && task != null) {
-            if (!occludesParent) {
-                getActivityStack().convertActivityToTranslucent(this);
-            }
-            // Keep track of the number of fullscreen activities in this task.
-            task.numFullscreen += occludesParent ? +1 : -1;
+        if (changed && task != null && !occludesParent) {
+            getActivityStack().convertActivityToTranslucent(this);
         }
         // Always ensure visibility if this activity doesn't occlude parent, so the
         // {@link #returningOptions} of the activity under this one can be applied in
@@ -3040,7 +3029,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             removeIfPossible();
         }
 
-        removed = true;
         stopFreezingScreen(true, true);
 
         final DisplayContent dc = getDisplayContent();
@@ -4132,11 +4120,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     void setHidden(boolean hidden) {
         super.setHidden(hidden);
         scheduleAnimation();
-    }
-
-    @Override
-    void onAppTransitionDone() {
-        sendingToBottom = false;
     }
 
     /**
@@ -6090,10 +6073,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return mOrientation;
         }
 
-        // The {@link ActivityRecord} should only specify an orientation when it is not closing or
-        // going to the bottom. Allowing closing {@link ActivityRecord} to participate can lead to
-        // an Activity in another task being started in the wrong orientation during the transition.
-        if (!(sendingToBottom || getDisplayContent().mClosingApps.contains(this))
+        // The {@link ActivityRecord} should only specify an orientation when it is not closing.
+        // Allowing closing {@link ActivityRecord} to participate can lead to an Activity in another
+        // task being started in the wrong orientation during the transition.
+        if (!getDisplayContent().mClosingApps.contains(this)
                 && (isVisible() || getDisplayContent().mOpeningApps.contains(this))) {
             return mOrientation;
         }
@@ -7348,7 +7331,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(NUM_DRAWN_WINDOWS, mNumDrawnWindows);
         proto.write(ALL_DRAWN, allDrawn);
         proto.write(LAST_ALL_DRAWN, mLastAllDrawn);
-        proto.write(REMOVED, removed);
         if (startingWindow != null) {
             startingWindow.writeIdentifierToProto(proto, STARTING_WINDOW);
         }

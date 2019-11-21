@@ -1295,7 +1295,9 @@ package android.bluetooth {
 
   public final class BluetoothAdapter {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean addOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean connectAllEnabledProfiles(@NonNull android.bluetooth.BluetoothDevice);
     method public boolean disableBLE();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean disconnectAllEnabledProfiles(@NonNull android.bluetooth.BluetoothDevice);
     method public boolean enableBLE();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean enableNoAutoConnect();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean factoryReset();
@@ -3576,6 +3578,19 @@ package android.media {
     method public android.media.AudioAttributes.Builder setInternalCapturePreset(int);
   }
 
+  public final class AudioDeviceAddress implements android.os.Parcelable {
+    ctor public AudioDeviceAddress(@NonNull android.media.AudioDeviceInfo);
+    ctor public AudioDeviceAddress(int, int, @NonNull String);
+    method public int describeContents();
+    method @NonNull public String getAddress();
+    method public int getRole();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioDeviceAddress> CREATOR;
+    field public static final int ROLE_INPUT = 1; // 0x1
+    field public static final int ROLE_OUTPUT = 2; // 0x2
+  }
+
   public final class AudioFocusInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.media.AudioAttributes getAttributes();
@@ -4840,8 +4855,18 @@ package android.net.wifi {
   }
 
   public class WifiInfo implements android.os.Parcelable {
+    method @Nullable public String getAppPackageName();
+    method public double getRxSuccessRate();
+    method public int getScore();
+    method public double getTxBadRate();
+    method public double getTxRetriesRate();
+    method public double getTxSuccessRate();
+    method public boolean isEphemeral();
     method public boolean isOsuAp();
     method public boolean isPasspointAp();
+    method @Nullable public static String removeDoubleQuotes(@Nullable String);
+    field public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
+    field public static final int INVALID_RSSI = -127; // 0xffffff81
   }
 
   public class WifiManager {
@@ -6127,6 +6152,19 @@ package android.printservice.recommendation {
 }
 
 package android.provider {
+
+  public class BlockedNumberContract {
+    field @NonNull public static final android.net.Uri AUTHORITY_URI;
+    field public static final String METHOD_NOTIFY_EMERGENCY_CONTACT = "notify_emergency_contact";
+    field public static final String METHOD_SHOULD_SYSTEM_BLOCK_NUMBER = "should_system_block_number";
+    field public static final String RES_BLOCK_STATUS = "block_status";
+    field public static final int STATUS_BLOCKED_IN_LIST = 1; // 0x1
+    field public static final int STATUS_BLOCKED_NOT_IN_CONTACTS = 5; // 0x5
+    field public static final int STATUS_BLOCKED_PAYPHONE = 4; // 0x4
+    field public static final int STATUS_BLOCKED_RESTRICTED = 2; // 0x2
+    field public static final int STATUS_BLOCKED_UNKNOWN_NUMBER = 3; // 0x3
+    field public static final int STATUS_NOT_BLOCKED = 0; // 0x0
+  }
 
   public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
@@ -8130,6 +8168,7 @@ package android.telephony {
     field public static final int NUMBER_UNREACHABLE = 8; // 0x8
     field public static final int OTASP_PROVISIONING_IN_PROCESS = 76; // 0x4c
     field public static final int OUTGOING_CANCELED = 44; // 0x2c
+    field public static final int OUTGOING_EMERGENCY_CALL_PLACED = 80; // 0x50
     field public static final int OUTGOING_FAILURE = 43; // 0x2b
     field public static final int OUT_OF_NETWORK = 11; // 0xb
     field public static final int OUT_OF_SERVICE = 18; // 0x12
@@ -8704,7 +8743,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isPotentialEmergencyNumber(@NonNull String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRadioOn();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isTetherApnRequired();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isTetheringApnRequired();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isVideoCallingEnabled();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
@@ -8795,6 +8834,7 @@ package android.telephony {
   public class TelephonyRegistryManager {
     method public void addOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
     method public void addOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyCallStateChangedForAllSubscriptions(int, @Nullable String);
     method public void notifyCarrierNetworkChange(boolean);
     method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
     method public void removeOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);

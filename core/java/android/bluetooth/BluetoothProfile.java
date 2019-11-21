@@ -324,4 +324,54 @@ public interface BluetoothProfile {
                 return "STATE_UNKNOWN";
         }
     }
+
+    /**
+     * Convert an integer value of profile ID into human readable string
+     *
+     * @param profile profile ID
+     * @return profile name as String, UNKOWN_PROFILE if the profile ID is not defined.
+     * @hide
+     */
+    static String getProfileName(int profile) {
+        switch(profile) {
+            case HEADSET:
+                return "HEADSET";
+            case A2DP:
+                return "A2DP";
+            case HID_HOST:
+                return "HID_HOST";
+            case PAN:
+                return "PAN";
+            case PBAP:
+                return "PBAP";
+            case GATT:
+                return "GATT";
+            case GATT_SERVER:
+                return "GATT_SERVER";
+            case MAP:
+                return "MAP";
+            case SAP:
+                return "SAP";
+            case A2DP_SINK:
+                return "A2DP_SINK";
+            case AVRCP_CONTROLLER:
+                return "AVRCP_CONTROLLER";
+            case AVRCP:
+                return "AVRCP";
+            case HEADSET_CLIENT:
+                return "HEADSET_CLIENT";
+            case PBAP_CLIENT:
+                return "PBAP_CLIENT";
+            case MAP_CLIENT:
+                return "MAP_CLIENT";
+            case HID_DEVICE:
+                return "HID_DEVICE";
+            case OPP:
+                return "OPP";
+            case HEARING_AID:
+                return "HEARING_AID";
+            default:
+                return "UNKNOWN_PROFILE";
+        }
+    }
 }

@@ -214,6 +214,13 @@ class TaskSnapshotController {
     }
 
     /**
+     * @see WindowManagerInternal#clearSnapshotCache
+     */
+    public void clearSnapshotCache() {
+        mCache.clearRunningCache();
+    }
+
+    /**
      * Creates a starting surface for {@param token} with {@param snapshot}. DO NOT HOLD THE WINDOW
      * MANAGER LOCK WHEN CALLING THIS METHOD!
      */
