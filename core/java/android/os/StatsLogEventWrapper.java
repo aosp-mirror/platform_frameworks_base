@@ -139,7 +139,7 @@ public final class StatsLogEventWrapper implements Parcelable {
         out.writeLong(mElapsedTimeNs);
         out.writeLong(mWallClockTimeNs);
         if (mWorkSource != null) {
-            ArrayList<android.os.WorkSource.WorkChain> workChains = mWorkSource.getWorkChains();
+            List<WorkSource.WorkChain> workChains = mWorkSource.getWorkChains();
             // number of chains
             out.writeInt(workChains.size());
             for (int i = 0; i < workChains.size(); i++) {

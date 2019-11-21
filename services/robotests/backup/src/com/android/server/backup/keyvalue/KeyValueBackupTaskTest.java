@@ -713,7 +713,7 @@ public class KeyValueBackupTaskTest  {
                     // Verify has set work source and hasn't unset yet.
                     verify(mBackupManagerService)
                             .setWorkSource(
-                                    argThat(workSource -> workSource.get(0) == PACKAGE_1.uid));
+                                    argThat(workSource -> workSource.getUid(0) == PACKAGE_1.uid));
                     verify(mBackupManagerService, never()).setWorkSource(null);
                 });
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);

@@ -1309,7 +1309,7 @@ static void write_java_work_source_method(FILE* out,
         fprintf(out, "            write_non_chained(code");
         for (int argIndex = 1; argIndex <= argIndexMax; argIndex++) {
             if (argIndex == attributionArg) {
-                fprintf(out, ", ws.get(i), ws.getName(i)");
+                fprintf(out, ", ws.getUid(i), ws.getPackageName(i)");
             } else {
                fprintf(out, ", arg%d", argIndex);
             }
@@ -1318,7 +1318,7 @@ static void write_java_work_source_method(FILE* out,
         fprintf(out, "        }\n"); // close for-loop
 
         // write() component.
-        fprintf(out, "        ArrayList<WorkSource.WorkChain> workChains = ws.getWorkChains();\n");
+        fprintf(out, "        List<WorkSource.WorkChain> workChains = ws.getWorkChains();\n");
         fprintf(out, "        if (workChains != null) {\n");
         fprintf(out, "            for (WorkSource.WorkChain wc : workChains) {\n");
         fprintf(out, "                write(code");
@@ -1407,7 +1407,7 @@ write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionD
     fprintf(out, "\n");
     fprintf(out, "import android.os.WorkSource;\n");
     fprintf(out, "import android.util.SparseArray;\n");
-    fprintf(out, "import java.util.ArrayList;\n");
+    fprintf(out, "import java.util.List;\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
     fprintf(out, "/**\n");
