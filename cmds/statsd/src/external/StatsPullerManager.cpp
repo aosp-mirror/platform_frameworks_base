@@ -499,8 +499,9 @@ void StatsPullerManager::RegisterPullAtomCallback(const int uid, const int32_t a
     StatsdStats::getInstance().notePullerCallbackRegistrationChanged(atomTag, /*registered=*/true);
     kAllPullAtomInfo[{.atomTag = atomTag}] = {.additiveFields = additiveFields,
                                               .coolDownNs = coolDownNs,
+                                              .puller = new StatsCallbackPuller(atomTag, callback),
                                               .pullTimeoutNs = timeoutNs,
-                                              .puller = new StatsCallbackPuller(atomTag, callback)};
+    };
 }
 
 void StatsPullerManager::UnregisterPullerCallback(int32_t atomTag) {
