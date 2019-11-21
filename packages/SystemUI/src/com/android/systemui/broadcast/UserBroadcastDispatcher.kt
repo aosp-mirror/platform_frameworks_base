@@ -28,6 +28,7 @@ import android.util.ArrayMap
 import android.util.ArraySet
 import android.util.Log
 import androidx.annotation.MainThread
+import androidx.annotation.VisibleForTesting
 import com.android.internal.util.Preconditions
 import com.android.systemui.Dumpable
 import java.io.FileDescriptor
@@ -77,6 +78,14 @@ class UserBroadcastDispatcher(
     // Only modify in BG thread
     private val actionsToReceivers = ArrayMap<String, MutableSet<ReceiverData>>()
     private val receiverToReceiverData = ArrayMap<BroadcastReceiver, MutableSet<ReceiverData>>()
+
+    @VisibleForTesting
+    internal fun isReceiverReferenceHeld(receiver: BroadcastReceiver): Boolean {
+        return receiverToReceiverData.contains(receiver) ||
+                actionsToReceivers.any {
+            it.value.any { it.receiver == receiver }
+        }
+    }
 
     // Only call on BG thread as it reads from the maps
     private fun createFilter(): IntentFilter {
@@ -142,7 +151,7 @@ class UserBroadcastDispatcher(
         if (DEBUG) Log.w(TAG, "Unregister receiver: $receiver")
         val actions = receiverToReceiverData.getOrElse(receiver) { return }
                 .flatMap { it.filter.actionsIterator().asSequence().asIterable() }.toSet()
-        receiverToReceiverData.get(receiver)?.clear()
+        receiverToReceiverData.remove(receiver)?.clear()
         var changed = false
         actions.forEach { action ->
             actionsToReceivers.get(action)?.removeIf { it.receiver == receiver }
