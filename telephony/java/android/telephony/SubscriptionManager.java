@@ -58,6 +58,7 @@ import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ISub;
@@ -73,6 +74,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -907,6 +909,11 @@ public class SubscriptionManager {
 
     private final Context mContext;
     private volatile INetworkPolicyManager mNetworkPolicy;
+
+    // Cache of Resource that has been created in getResourcesForSubId. Key is a Pair containing
+    // the Context and subId.
+    private static final Map<Pair<Context, Integer>, Resources> sResourcesCache =
+            new ConcurrentHashMap<>();
 
     /**
      * A listener class for monitoring changes to {@link SubscriptionInfo} records.
@@ -2329,8 +2336,20 @@ public class SubscriptionManager {
      * @return Resources associated with Subscription.
      * @hide
      */
+    @NonNull
     public static Resources getResourcesForSubId(Context context, int subId,
             boolean useRootLocale) {
+        // Check if resources for this context and subId already exist in the resource cache.
+        // Resources that use the root locale are not cached.
+        Pair<Context, Integer> cacheKey = null;
+        if (isValidSubscriptionId(subId) && !useRootLocale) {
+            cacheKey = Pair.create(context, subId);
+            if (sResourcesCache.containsKey(cacheKey)) {
+                // Cache hit. Use cached Resources.
+                return sResourcesCache.get(cacheKey);
+            }
+        }
+
         final SubscriptionInfo subInfo =
                 SubscriptionManager.from(context).getActiveSubscriptionInfo(subId);
 
@@ -2350,7 +2369,13 @@ public class SubscriptionManager {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         DisplayMetrics newMetrics = new DisplayMetrics();
         newMetrics.setTo(metrics);
-        return new Resources(context.getResources().getAssets(), newMetrics, newConfig);
+        Resources res = new Resources(context.getResources().getAssets(), newMetrics, newConfig);
+
+        if (cacheKey != null) {
+            // Save the newly created Resources in the resource cache.
+            sResourcesCache.put(cacheKey, res);
+        }
+        return res;
     }
 
     /**
