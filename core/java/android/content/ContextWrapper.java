@@ -898,8 +898,8 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    public Context createContextAsUser(UserHandle user) {
-        return mBase.createContextAsUser(user);
+    public Context createContextAsUser(UserHandle user, @CreatePackageOptions int flags) {
+        return mBase.createContextAsUser(user, flags);
     }
 
     /** @hide */
