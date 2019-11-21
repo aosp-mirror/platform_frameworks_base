@@ -360,9 +360,11 @@ public class NotificationManagerService extends SystemService {
     private static final String EXTRA_KEY = "key";
 
     /**
-     * Apps targeting R+ that post custom toasts in the background will have those blocked. Apps can
+     * Apps that post custom toasts in the background will have those blocked. Apps can
      * still post toasts created with {@link Toast#makeText(Context, CharSequence, int)} and its
      * variants while in the background.
+     *
+     * TODO(b/144152069): Add @EnabledAfter(Q) to target R+ after assessing impact on dogfood
      */
     @ChangeId
     private static final long CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK = 128611929L;
