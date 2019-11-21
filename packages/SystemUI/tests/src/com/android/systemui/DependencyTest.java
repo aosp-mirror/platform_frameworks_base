@@ -37,8 +37,6 @@ import java.io.PrintWriter;
 public class DependencyTest extends SysuiTestCase {
 
     public static final DependencyKey<Dumpable> DUMPABLE = new DependencyKey<>("dumpable");
-    public static final DependencyKey<ConfigurationChangedReceiver> CONFIGURATION_CHANGED_RECEIVER
-            = new DependencyKey<>("config_changed_receiver");
 
     @Test
     public void testClassDependency() {
@@ -63,15 +61,6 @@ public class DependencyTest extends SysuiTestCase {
         Dependency.get(DUMPABLE);
         mDependency.dump(fd, mock(PrintWriter.class), args);
         verify(d).dump(eq(fd), any(), eq(args));
-    }
-
-    @Test
-    public void testConfigurationChanged() {
-        ConfigurationChangedReceiver d = mock(ConfigurationChangedReceiver.class);
-        mDependency.injectTestDependency(CONFIGURATION_CHANGED_RECEIVER, d);
-        Dependency.get(CONFIGURATION_CHANGED_RECEIVER);
-        mDependency.onConfigurationChanged(null);
-        verify(d).onConfigurationChanged(eq(null));
     }
 
     @Test

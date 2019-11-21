@@ -60,7 +60,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.net.DataUsageController;
-import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -87,8 +86,7 @@ import javax.inject.Singleton;
 /** Platform implementation of the network controller. **/
 @Singleton
 public class NetworkControllerImpl extends BroadcastReceiver
-        implements NetworkController, DemoMode, DataUsageController.NetworkNameProvider,
-        ConfigurationChangedReceiver, Dumpable {
+        implements NetworkController, DemoMode, DataUsageController.NetworkNameProvider, Dumpable {
     // debug
     static final String TAG = "NetworkController";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -167,6 +165,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private boolean mUserSetup;
     private boolean mSimDetected;
 
+    private ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    mConfig = Config.readConfig(mContext);
+                    mReceiverHandler.post(() -> handleConfigurationChanged());
+                }
+            };
     /**
      * Construct this controller object and register for updates.
      */
@@ -560,16 +566,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 }
                 break;
         }
-    }
-
-    public void onConfigurationChanged(Configuration newConfig) {
-        mConfig = Config.readConfig(mContext);
-        mReceiverHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                handleConfigurationChanged();
-            }
-        });
     }
 
     @VisibleForTesting
