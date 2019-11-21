@@ -505,12 +505,17 @@ public class BatteryStatsHelper {
                 }
             }
         }
-        Collections.sort(mMobilemsppList, new Comparator<BatterySipper>() {
-            @Override
-            public int compare(BatterySipper lhs, BatterySipper rhs) {
-                return Double.compare(rhs.mobilemspp, lhs.mobilemspp);
-            }
-        });
+        try {
+          Collections.sort(mMobilemsppList, new Comparator<BatterySipper>() {
+              @Override
+              public int compare(BatterySipper lhs, BatterySipper rhs) {
+                  return Double.compare(rhs.mobilemspp, lhs.mobilemspp);
+              }
+          });
+        }
+        catch (Exception e) {
+          // nothing to do
+        }
 
         processMiscUsage();
 
