@@ -73,6 +73,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1972506791": {
+      "message": "Set freezing of %s: hidden=%b freezing=%b visibleRequested=%b. %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-1963461591": {
       "message": "Removing %s from %s",
       "level": "VERBOSE",
@@ -877,6 +883,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-229838822": {
+      "message": "setAppVisibility(%s, visible=%b): %s hidden=%b mVisibleRequested=%b Callers=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-198463978": {
       "message": "updateRotationUnchecked: alwaysSendConfiguration=%b forceRelayout=%b",
       "level": "VERBOSE",
@@ -1201,12 +1213,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "358613119": {
-      "message": "setAppVisibility(%s, visible=%b): %s hidden=%b hiddenRequested=%b Callers=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "371641947": {
       "message": "Window Manager Crash %s",
       "level": "WTF",
@@ -1488,12 +1494,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
-    },
-    "857751535": {
-      "message": "commitVisibility: %s: hidden=%b hiddenRequested=%b",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "873914452": {
       "message": "goodToGo()",
@@ -1987,10 +1987,10 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
-    "1966564525": {
-      "message": "Set freezing of %s: hidden=%b freezing=%b hiddenRequested=%b. %s",
-      "level": "INFO",
-      "group": "WM_DEBUG_ORIENTATION",
+    "1965198071": {
+      "message": "commitVisibility: %s: hidden=%b visibleRequested=%b",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1984470582": {

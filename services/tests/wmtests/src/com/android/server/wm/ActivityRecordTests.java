@@ -591,7 +591,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Prepare the activity record to be ready for immediate removal. It should be invisible and
         // have no process. Otherwise, request to finish it will send a message to client first.
         mActivity.setState(STOPPED, "test");
-        mActivity.visible = false;
+        mActivity.mVisibleRequested = false;
         mActivity.nowVisible = false;
         // Set process to 'null' to allow immediate removal, but don't call mActivity.setProcess() -
         // this will cause NPE when updating task's process.
@@ -600,7 +600,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Put a visible activity on top, so the finishing activity doesn't have to wait until the
         // next activity reports idle to destroy it.
         final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
-        topActivity.visible = true;
+        topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;
         topActivity.setState(RESUMED, "test");
 
@@ -686,7 +686,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testFinishActivityIfPossible_visibleResumedPreparesAppTransition() {
         mActivity.finishing = false;
-        mActivity.visible = true;
+        mActivity.mVisibleRequested = true;
         mActivity.setState(RESUMED, "test");
         mActivity.finishIfPossible("test", false /* oomAdj */);
 
@@ -702,7 +702,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testFinishActivityIfPossible_visibleNotResumedExecutesAppTransition() {
         mActivity.finishing = false;
-        mActivity.visible = true;
+        mActivity.mVisibleRequested = true;
         mActivity.setState(PAUSED, "test");
         mActivity.finishIfPossible("test", false /* oomAdj */);
 
@@ -720,7 +720,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // Put an activity on top of test activity to make it invisible and prevent us from
         // accidentally resuming the topmost one again.
         new ActivityBuilder(mService).build();
-        mActivity.visible = false;
+        mActivity.mVisibleRequested = false;
         mActivity.setState(STOPPED, "test");
 
         mActivity.finishIfPossible("test", false /* oomAdj */);
@@ -772,7 +772,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_keepStateOfNextInvisible() {
         final ActivityRecord currentTop = mActivity;
-        currentTop.visible = currentTop.nowVisible = true;
+        currentTop.mVisibleRequested = currentTop.nowVisible = true;
 
         // Simulates that {@code currentTop} starts an existing activity from background (so its
         // state is stopped) and the starting flow just goes to place it at top.
@@ -798,13 +798,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_waitForNextVisible() {
         final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
-        topActivity.visible = true;
+        topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;
         topActivity.finishing = true;
         topActivity.setState(PAUSED, "true");
         // Mark the bottom activity as not visible, so that we will wait for it before removing
         // the top one.
-        mActivity.visible = false;
+        mActivity.mVisibleRequested = false;
         mActivity.nowVisible = false;
         mActivity.setState(STOPPED, "test");
 
@@ -823,13 +823,13 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_noWaitForNextVisible_alreadyInvisible() {
         final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
-        topActivity.visible = false;
+        topActivity.mVisibleRequested = false;
         topActivity.nowVisible = false;
         topActivity.finishing = true;
         topActivity.setState(PAUSED, "true");
         // Mark the bottom activity as not visible, so that we would wait for it before removing
         // the top one.
-        mActivity.visible = false;
+        mActivity.mVisibleRequested = false;
         mActivity.nowVisible = false;
         mActivity.setState(STOPPED, "test");
 
@@ -845,12 +845,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_waitForIdle() {
         final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
-        topActivity.visible = true;
+        topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;
         topActivity.finishing = true;
         topActivity.setState(PAUSED, "true");
         // Mark the bottom activity as already visible, so that there is no need to wait for it.
-        mActivity.visible = true;
+        mActivity.mVisibleRequested = true;
         mActivity.nowVisible = true;
         mActivity.setState(RESUMED, "test");
 
@@ -866,12 +866,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_noWaitForNextVisible_stopped() {
         final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
-        topActivity.visible = false;
+        topActivity.mVisibleRequested = false;
         topActivity.nowVisible = false;
         topActivity.finishing = true;
         topActivity.setState(STOPPED, "true");
         // Mark the bottom activity as already visible, so that there is no need to wait for it.
-        mActivity.visible = true;
+        mActivity.mVisibleRequested = true;
         mActivity.nowVisible = true;
         mActivity.setState(RESUMED, "test");
 
@@ -887,12 +887,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testCompleteFinishing_noWaitForNextVisible_nonFocusedStack() {
         final ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
-        topActivity.visible = true;
+        topActivity.mVisibleRequested = true;
         topActivity.nowVisible = true;
         topActivity.finishing = true;
         topActivity.setState(PAUSED, "true");
         // Mark the bottom activity as already visible, so that there is no need to wait for it.
-        mActivity.visible = true;
+        mActivity.mVisibleRequested = true;
         mActivity.nowVisible = true;
         mActivity.setState(RESUMED, "test");
 
@@ -901,7 +901,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         final ActivityStack stack = new StackBuilder(mRootActivityContainer).build();
         final ActivityRecord focusedActivity = stack.getChildAt(0).getChildAt(0);
         focusedActivity.nowVisible = true;
-        focusedActivity.visible = true;
+        focusedActivity.mVisibleRequested = true;
         focusedActivity.setState(RESUMED, "test");
         stack.mResumedActivity = focusedActivity;
 

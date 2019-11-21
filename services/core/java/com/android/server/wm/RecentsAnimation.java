@@ -107,7 +107,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 mTargetActivityType);
         ActivityRecord targetActivity = getTargetActivity(targetStack);
         if (targetActivity != null) {
-            if (targetActivity.visible || targetActivity.isTopRunningActivity()) {
+            if (targetActivity.mVisibleRequested || targetActivity.isTopRunningActivity()) {
                 // The activity is ready.
                 return;
             }
@@ -189,7 +189,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         // Send launch hint if we are actually launching the target. If it's already visible
         // (shouldn't happen in general) we don't need to send it.
-        if (targetActivity == null || !targetActivity.visible) {
+        if (targetActivity == null || !targetActivity.mVisibleRequested) {
             mService.mRootActivityContainer.sendPowerHintForLaunchStartIfNeeded(
                     true /* forceSend */, targetActivity);
         }

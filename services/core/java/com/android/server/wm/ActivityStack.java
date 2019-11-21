@@ -1693,7 +1693,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 prev = prev.completeFinishing("completePausedLocked");
             } else if (prev.hasProcess()) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueue pending stop if needed: " + prev
-                        + " wasStopping=" + wasStopping + " visible=" + prev.visible);
+                        + " wasStopping=" + wasStopping
+                        + " visibleRequested=" + prev.mVisibleRequested);
                 if (prev.deferRelaunchUntilPaused) {
                     // Complete the deferred relaunch that was waiting for pause to complete.
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Re-launching after pause: " + prev);
@@ -1703,7 +1704,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                     // We can't clobber it, because the stop confirmation will not be handled.
                     // We don't need to schedule another stop, we only need to let it happen.
                     prev.setState(STOPPING, "completePausedLocked");
-                } else if (!prev.visible || shouldSleepOrShutDownActivities()) {
+                } else if (!prev.mVisibleRequested || shouldSleepOrShutDownActivities()) {
                     // Clear out any deferred client hide we might currently have.
                     prev.setDeferHidingClient(false);
                     // If we were visible then resumeTopActivities will release resources before
@@ -1824,7 +1825,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
     boolean isTopActivityVisible() {
         final ActivityRecord topActivity = getTopNonFinishingActivity();
-        return topActivity != null && topActivity.visible;
+        return topActivity != null && topActivity.mVisibleRequested;
     }
 
     /**
@@ -1965,7 +1966,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = getChildAt(taskNdx);
             ActivityRecord r = task.topRunningActivityLocked();
-            if (r == null || r.finishing || !r.visible) {
+            if (r == null || r.finishing || !r.mVisibleRequested) {
                 task.mLayerRank = -1;
             } else {
                 task.mLayerRank = baseLayer + layer++;
@@ -2054,7 +2055,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         if (!r.attachedToProcess()) {
                             makeVisibleAndRestartIfNeeded(starting, configChanges, isTop,
                                     resumeTopActivity && isTop, r);
-                        } else if (r.visible) {
+                        } else if (r.mVisibleRequested) {
                             // If this activity is already visible, then there is nothing to do here.
                             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                                     "Skipping: already visible at " + r);
@@ -2231,16 +2232,16 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         // invisible. If the app is already visible, it must have died while it was visible. In this
         // case, we'll show the dead window but will not restart the app. Otherwise we could end up
         // thrashing.
-        if (isTop || !r.visible) {
+        if (isTop || !r.mVisibleRequested) {
             // This activity needs to be visible, but isn't even running...
             // get it started and resume if no other stack in this stack is resumed.
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
             if (r != starting) {
                 r.startFreezingScreenLocked(configChanges);
             }
-            if (!r.visible || r.mLaunchTaskBehind) {
+            if (!r.mVisibleRequested || r.mLaunchTaskBehind) {
                 if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
-                r.setVisible(true);
+                r.setVisibility(true);
             }
             if (r != starting) {
                 mStackSupervisor.startSpecificActivityLocked(r, andResume, true /* checkConfig */);
@@ -2683,7 +2684,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
         if (next.attachedToProcess()) {
             if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next
-                    + " stopped=" + next.stopped + " visible=" + next.visible);
+                    + " stopped=" + next.stopped
+                    + " visibleRequested=" + next.mVisibleRequested);
 
             // If the previous activity is translucent, force a visibility update of
             // the next activity, so that it's added to WM's opening app list, and
@@ -2698,7 +2700,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                     && !lastFocusedStack.mLastPausedActivity.occludesParent()));
 
             // This activity is now becoming visible.
-            if (!next.visible || next.stopped || lastActivityTranslucent) {
+            if (!next.mVisibleRequested || next.stopped || lastActivityTranslucent) {
                 next.setVisibility(true);
             }
 
@@ -2753,7 +2755,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                     // Do over!
                     mStackSupervisor.scheduleResumeTopActivities();
                 }
-                if (!next.visible || next.stopped) {
+                if (!next.mVisibleRequested || next.stopped) {
                     next.setVisibility(true);
                 }
                 next.completeResumeLocked();
@@ -3422,7 +3424,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
         final ActivityRecord top = stack.topRunningActivityLocked();
 
-        if (stack.isActivityTypeHome() && (top == null || !top.visible)) {
+        if (stack.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
             // If we will be focusing on the home stack next and its current top activity isn't
             // visible, then use the move the home stack task to top to make the activity visible.
             stack.getDisplay().moveHomeActivityToTop(reason);
@@ -3919,7 +3921,10 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         "Record #" + targetIndex + " " + r + ": app=" + r.app);
 
                 if (r.app == app) {
-                    if (r.visible) {
+                    if (r.isVisible() || r.mVisibleRequested) {
+                        // While an activity launches a new activity, it's possible that the old
+                        // activity is already requested to be hidden (mVisibleRequested=false), but
+                        // this visibility is not yet committed, so isVisible()=true.
                         hasVisibleActivities = true;
                     }
                     final boolean remove;
@@ -3935,8 +3940,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         // Don't currently have state for the activity, or
                         // it is finishing -- always remove it.
                         remove = true;
-                    } else if (!r.visible && r.launchCount > 2 &&
-                            r.lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
+                    } else if (!r.mVisibleRequested && r.launchCount > 2
+                            && r.lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
                         // We have launched this activity too many times since it was
                         // able to run, so give up and remove it.
                         // (Note if the activity is visible, we don't remove the record.
@@ -3972,7 +3977,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         // it died, we leave the dead window on screen so it's basically visible.
                         // This is needed when user later tap on the dead window, we need to stop
                         // other apps when user transfers focus to the restarted activity.
-                        r.nowVisible = r.visible;
+                        r.nowVisible = r.mVisibleRequested;
                     }
                     r.cleanUp(true /* cleanServices */, true /* setState */);
                     if (remove) {
@@ -4155,7 +4160,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
      * Ensures all visible activities at or below the input activity have the right configuration.
      */
     void ensureVisibleActivitiesConfigurationLocked(ActivityRecord start, boolean preserveWindow) {
-        if (start == null || !start.visible) {
+        if (start == null || !start.mVisibleRequested) {
             return;
         }
 
@@ -4550,7 +4555,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 final ActivityRecord a = task.getChildAt(activityNdx);
                 if (a.info.packageName.equals(packageName)) {
                     a.forceNewConfig = true;
-                    if (starting != null && a == starting && a.visible) {
+                    if (starting != null && a == starting && a.mVisibleRequested) {
                         a.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
                     }
                 }

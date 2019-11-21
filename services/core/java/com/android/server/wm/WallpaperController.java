@@ -532,9 +532,9 @@ class WallpaperController {
         }
 
         final boolean newTargetHidden = wallpaperTarget.mActivityRecord != null
-                && wallpaperTarget.mActivityRecord.hiddenRequested;
+                && !wallpaperTarget.mActivityRecord.mVisibleRequested;
         final boolean oldTargetHidden = prevWallpaperTarget.mActivityRecord != null
-                && prevWallpaperTarget.mActivityRecord.hiddenRequested;
+                && !prevWallpaperTarget.mActivityRecord.mVisibleRequested;
 
         if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Animating wallpapers:" + " old: "
                 + prevWallpaperTarget + " hidden=" + oldTargetHidden + " new: " + wallpaperTarget

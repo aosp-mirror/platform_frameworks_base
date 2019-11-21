@@ -533,7 +533,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             for (int i = mActivities.size() - 1; i >= 0; --i) {
                 final ActivityRecord r = mActivities.get(i);
-                if (r.visible) {
+                if (r.mVisibleRequested) {
                     return true;
                 }
             }
@@ -555,7 +555,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 continue;
             }
             ActivityRecord topActivity = task.getTopNonFinishingActivity();
-            if (topActivity != null && topActivity.visible) {
+            if (topActivity != null && topActivity.mVisibleRequested) {
                 return true;
             }
         }
@@ -589,7 +589,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // - no longer visible OR
         // - not focusable (in PiP mode for instance)
         if (topDisplay == null
-                || !mPreQTopResumedActivity.visible
+                || !mPreQTopResumedActivity.mVisibleRequested
                 || !mPreQTopResumedActivity.isFocusable()) {
             canUpdate = true;
         }
@@ -739,7 +739,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             // Don't consider any activities that are currently not in a state where they
             // can be destroyed.
-            if (r.visible || !r.stopped || !r.hasSavedState()
+            if (r.mVisibleRequested || !r.stopped || !r.hasSavedState()
                     || r.isState(STARTED, RESUMED, PAUSING, PAUSED, STOPPING)) {
                 if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Not releasing in-use activity: " + r);
                 continue;
@@ -793,7 +793,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                         continue;
                     }
                 }
-                if (r.visible) {
+                if (r.mVisibleRequested) {
                     final Task task = r.getTask();
                     if (task != null && minTaskLayer > 0) {
                         final int layer = task.mLayerRank;

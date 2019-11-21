@@ -1006,7 +1006,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // There is still an activity1 in stack1 so the activity2 should be added to finishing list
         // that will be destroyed until idle.
-        stack2.getTopNonFinishingActivity().visible = true;
+        stack2.getTopNonFinishingActivity().mVisibleRequested = true;
         final ActivityRecord activity2 = finishTopActivity(stack2);
         assertEquals(STOPPING, activity2.getState());
         assertThat(mSupervisor.mStoppingActivities).contains(activity2);

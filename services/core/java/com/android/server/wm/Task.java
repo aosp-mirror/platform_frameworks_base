@@ -2204,7 +2204,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
         for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
             final ActivityRecord r = getChildAt(activityNdx);
-            if (r.visible) {
+            if (r.mVisibleRequested) {
                 r.showStartingWindow(null /* prev */, false /* newTask */, taskSwitch);
             }
         }
@@ -2508,7 +2508,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final ActivityRecord token = mChildren.get(i);
             // skip hidden (or about to hide) apps
-            if (token.mIsExiting || token.isClientHidden() || token.hiddenRequested) {
+            if (token.mIsExiting || token.isClientHidden() || !token.mVisibleRequested) {
                 continue;
             }
             final WindowState win = token.findMainWindow();
@@ -2728,7 +2728,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final ActivityRecord token = mChildren.get(i);
             // skip hidden (or about to hide) apps
-            if (!token.mIsExiting && !token.isClientHidden() && !token.hiddenRequested) {
+            if (!token.mIsExiting && !token.isClientHidden() && token.mVisibleRequested) {
                 return token;
             }
         }
