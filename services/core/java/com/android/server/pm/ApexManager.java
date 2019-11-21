@@ -207,7 +207,7 @@ abstract class ApexManager {
      *
      * @return {@code true} upon success, {@code false} if any remote exception occurs
      */
-    abstract boolean abortActiveSession();
+    abstract boolean revertActiveSessions();
 
     /**
      * Abandons the staged session with the given sessionId.
@@ -496,9 +496,9 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean abortActiveSession() {
+        boolean revertActiveSessions() {
             try {
-                mApexService.abortActiveSession();
+                mApexService.revertActiveSessions();
                 return true;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
@@ -704,7 +704,7 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean abortActiveSession() {
+        boolean revertActiveSessions() {
             throw new UnsupportedOperationException();
         }
 
