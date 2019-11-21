@@ -175,7 +175,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             // Cleaned up everything in Handler.
-            mSystemServicesTestRule.cleanupWindowManagerHandlers();
+            cleanupWindowManagerHandlers();
         } catch (Exception e) {
             Log.e(TAG, "Failed to tear down test", e);
             throw e;

@@ -355,6 +355,8 @@ public class SystemServicesTestRule implements TestRule {
         }
         wm.mH.removeCallbacksAndMessages(null);
         wm.mAnimationHandler.removeCallbacksAndMessages(null);
+        // This is a different handler object than the wm.mAnimationHandler above.
+        AnimationThread.getHandler().removeCallbacksAndMessages(null);
         SurfaceAnimationThread.getHandler().removeCallbacksAndMessages(null);
     }
 
@@ -367,6 +369,8 @@ public class SystemServicesTestRule implements TestRule {
         wm.mH.removeMessages(WindowManagerService.H.FORCE_GC);
         waitHandlerIdle(wm.mH);
         waitHandlerIdle(wm.mAnimationHandler);
+        // This is a different handler object than the wm.mAnimationHandler above.
+        waitHandlerIdle(AnimationThread.getHandler());
         waitHandlerIdle(SurfaceAnimationThread.getHandler());
     }
 
