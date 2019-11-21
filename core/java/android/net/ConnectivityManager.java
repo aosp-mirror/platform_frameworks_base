@@ -52,12 +52,12 @@ import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.Protocol;
@@ -2149,19 +2149,14 @@ public class ConnectivityManager {
     @Deprecated
     @UnsupportedAppUsage
     public boolean getMobileDataEnabled() {
-        IBinder b = ServiceManager.getService(Context.TELEPHONY_SERVICE);
-        if (b != null) {
-            try {
-                ITelephony it = ITelephony.Stub.asInterface(b);
-                int subId = SubscriptionManager.getDefaultDataSubscriptionId();
-                Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
-                boolean retVal = it.isUserDataEnabled(subId);
-                Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
-                        + " retVal=" + retVal);
-                return retVal;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        if (tm != null) {
+            int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+            Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
+            boolean retVal = tm.createForSubscriptionId(subId).isDataEnabled();
+            Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
+                    + " retVal=" + retVal);
+            return retVal;
         }
         Log.d("ConnectivityManager", "getMobileDataEnabled()- remote exception retVal=false");
         return false;
