@@ -33,6 +33,7 @@ using namespace std;
 const string DEFAULT_MODULE_NAME = "DEFAULT";
 const string DEFAULT_CPP_NAMESPACE = "android,util";
 const string DEFAULT_CPP_HEADER_IMPORT = "statslog.h";
+const string DEFAULT_ATOMS_INFO_CPP_HEADER_IMPORT = "atoms_info.h";
 const string DEFAULT_JAVA_PACKAGE = "android.util";
 const string DEFAULT_JAVA_CLASS = "StatsLogInternal";
 
@@ -49,8 +50,14 @@ bool atom_needed_for_module(const AtomDecl& atomDecl, const string& moduleName);
 
 bool signature_needed_for_module(const set<string>& modules, const string& moduleName);
 
-void build_non_chained_decl_map(const Atoms& atoms,
-                                std::map<int, set<AtomDecl>::const_iterator>* decl_map);
+// Common Native helpers
+void write_namespace(FILE* out, const string& cppNamespaces);
+
+void write_closing_namespace(FILE* out, const string& cppNamespaces);
+
+void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl,
+        const string& moduleName
+);
 
 // Common Java helpers.
 void write_java_atom_codes(FILE* out, const Atoms& atoms, const string& moduleName);

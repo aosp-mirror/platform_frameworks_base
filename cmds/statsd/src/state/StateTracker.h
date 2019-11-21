@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include <statslog.h>
+#include <atoms_info.h>
 #include <utils/RefBase.h>
 #include "HashableDimensionKey.h"
 #include "logd/LogEvent.h"

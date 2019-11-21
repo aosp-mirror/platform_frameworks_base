@@ -22,6 +22,7 @@
 
 #include <inttypes.h>
 
+#include "atoms_info.h"
 #include "condition/CombinationConditionTracker.h"
 #include "condition/SimpleConditionTracker.h"
 #include "condition/StateConditionTracker.h"
@@ -36,7 +37,6 @@
 #include "metrics/ValueMetricProducer.h"
 #include "state/StateManager.h"
 #include "stats_util.h"
-#include "statslog.h"
 
 using std::set;
 using std::string;
