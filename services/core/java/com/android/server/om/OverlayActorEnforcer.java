@@ -29,7 +29,6 @@ import android.util.Pair;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
-import com.android.server.SystemConfig;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,6 +36,8 @@ import java.util.Map;
 
 /**
  * Performs verification that a calling UID can act on a target package's overlayable.
+ *
+ * Actors requirements are specified in {@link android.content.om.OverlayManager}.
  *
  * @hide
  */
@@ -99,13 +100,7 @@ public class OverlayActorEnforcer {
     }
 
     /**
-     * An actor is valid if any of the following is true:
-     * - is {@link Process#ROOT_UID}, {@link Process#SYSTEM_UID}
-     * - is the target overlay package
-     * - has the CHANGE_OVERLAY_PACKAGES permission and an actor is not defined
-     * - is the same the as the package defined in {@link SystemConfig#getNamedActors()} for a given
-     *     namespace and actor name
-     *
+     * See {@link OverlayActorEnforcer} class comment for actor requirements.
      * @return true if the actor is allowed to act on the target overlayInfo
      */
     private ActorState isAllowedActor(String methodName, OverlayInfo overlayInfo,
