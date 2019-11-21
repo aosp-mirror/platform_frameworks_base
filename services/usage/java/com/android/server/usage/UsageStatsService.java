@@ -347,7 +347,7 @@ public class UsageStatsService extends SystemService implements
                 Slog.i(TAG, "Attempted to unlock stopped or removed user " + userId);
                 return;
             }
-            userService.userUnlocked(System.currentTimeMillis());
+
             // Process all the pending reported events
             while (pendingEvents.peek() != null) {
                 reportEvent(pendingEvents.poll(), userId);
@@ -466,6 +466,7 @@ public class UsageStatsService extends SystemService implements
             if (mUserUnlockedStates.get(userId)) {
                 try {
                     service.init(currentTimeMillis);
+                    mUserState.put(userId, service);
                 } catch (Exception e) {
                     if (mUserManager.isUserUnlocked(userId)) {
                         throw e; // rethrow exception - user is unlocked
@@ -476,7 +477,6 @@ public class UsageStatsService extends SystemService implements
                     }
                 }
             }
-            mUserState.put(userId, service);
         }
         return service;
     }
