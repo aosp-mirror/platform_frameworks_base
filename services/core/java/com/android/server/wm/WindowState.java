@@ -200,7 +200,7 @@ import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowInfo;
-import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -3377,7 +3377,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public void showInsets(@InsetType int types, boolean fromIme) {
+    public void showInsets(@InsetsType int types, boolean fromIme) {
         try {
             mClient.showInsets(types, fromIme);
         } catch (RemoteException e) {
@@ -3386,7 +3386,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public void hideInsets(@InsetType int types, boolean fromIme) {
+    public void hideInsets(@InsetsType int types, boolean fromIme) {
         try {
             mClient.hideInsets(types, fromIme);
         } catch (RemoteException e) {

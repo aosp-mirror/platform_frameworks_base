@@ -20,7 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.hardware.camera2.params.OutputConfiguration.ROTATION_90;
-import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -403,18 +403,18 @@ public class WindowStateTests extends WindowTestsBase {
 
     @Test
     public void testVisibleWithInsetsProvider() {
-        final WindowState topBar = createWindow(null, TYPE_STATUS_BAR, "topBar");
+        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        topBar.mHasSurface = true;
-        assertTrue(topBar.isVisible());
-        mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
-                .setWindow(topBar, null /* frameProvider */);
+        statusBar.mHasSurface = true;
+        assertTrue(statusBar.isVisible());
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
+                .setWindow(statusBar, null /* frameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
-        mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
-                .onInsetsModified(app, new InsetsSource(TYPE_TOP_BAR));
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
+                .onInsetsModified(app, new InsetsSource(ITYPE_STATUS_BAR));
         waitUntilHandlersIdle();
-        assertFalse(topBar.isVisible());
+        assertFalse(statusBar.isVisible());
     }
 
     @Test

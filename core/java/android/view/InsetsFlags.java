@@ -23,11 +23,11 @@ import static android.view.View.STATUS_BAR_TRANSPARENT;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
-import static android.view.WindowInsetsController.APPEARANCE_LIGHT_SIDE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_LIGHT_TOP_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_SIDE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_TOP_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
@@ -43,25 +43,25 @@ public class InsetsFlags {
 
     @ViewDebug.ExportedProperty(flagMapping = {
             @ViewDebug.FlagToString(
-                    mask = APPEARANCE_OPAQUE_TOP_BAR,
-                    equals = APPEARANCE_OPAQUE_TOP_BAR,
-                    name = "OPAQUE_TOP_BAR"),
+                    mask = APPEARANCE_OPAQUE_STATUS_BARS,
+                    equals = APPEARANCE_OPAQUE_STATUS_BARS,
+                    name = "OPAQUE_STATUS_BARS"),
             @ViewDebug.FlagToString(
-                    mask = APPEARANCE_OPAQUE_SIDE_BARS,
-                    equals = APPEARANCE_OPAQUE_SIDE_BARS,
-                    name = "OPAQUE_SIDE_BARS"),
+                    mask = APPEARANCE_OPAQUE_NAVIGATION_BARS,
+                    equals = APPEARANCE_OPAQUE_NAVIGATION_BARS,
+                    name = "OPAQUE_NAVIGATION_BARS"),
             @ViewDebug.FlagToString(
                     mask = APPEARANCE_LOW_PROFILE_BARS,
                     equals = APPEARANCE_LOW_PROFILE_BARS,
                     name = "LOW_PROFILE_BARS"),
             @ViewDebug.FlagToString(
-                    mask = APPEARANCE_LIGHT_TOP_BAR,
-                    equals = APPEARANCE_LIGHT_TOP_BAR,
-                    name = "LIGHT_TOP_BAR"),
+                    mask = APPEARANCE_LIGHT_STATUS_BARS,
+                    equals = APPEARANCE_LIGHT_STATUS_BARS,
+                    name = "LIGHT_STATUS_BARS"),
             @ViewDebug.FlagToString(
-                    mask = APPEARANCE_LIGHT_SIDE_BARS,
-                    equals = APPEARANCE_LIGHT_SIDE_BARS,
-                    name = "LIGHT_SIDE_BARS")
+                    mask = APPEARANCE_LIGHT_NAVIGATION_BARS,
+                    equals = APPEARANCE_LIGHT_NAVIGATION_BARS,
+                    name = "LIGHT_NAVIGATION_BARS")
     })
     public @Appearance int appearance;
 
@@ -88,14 +88,14 @@ public class InsetsFlags {
         appearance |= convertFlag(systemUiVisibility, SYSTEM_UI_FLAG_LOW_PROFILE,
                 APPEARANCE_LOW_PROFILE_BARS);
         appearance |= convertFlag(systemUiVisibility, SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
-                APPEARANCE_LIGHT_TOP_BAR);
+                APPEARANCE_LIGHT_STATUS_BARS);
         appearance |= convertFlag(systemUiVisibility, SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
-                APPEARANCE_LIGHT_SIDE_BARS);
+                APPEARANCE_LIGHT_NAVIGATION_BARS);
         appearance |= convertNoFlag(systemUiVisibility,
-                STATUS_BAR_TRANSLUCENT | STATUS_BAR_TRANSPARENT, APPEARANCE_OPAQUE_TOP_BAR);
+                STATUS_BAR_TRANSLUCENT | STATUS_BAR_TRANSPARENT, APPEARANCE_OPAQUE_STATUS_BARS);
         appearance |= convertNoFlag(systemUiVisibility,
                 NAVIGATION_BAR_TRANSLUCENT | NAVIGATION_BAR_TRANSPARENT,
-                APPEARANCE_OPAQUE_SIDE_BARS);
+                APPEARANCE_OPAQUE_NAVIGATION_BARS);
         return appearance;
     }
 

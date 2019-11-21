@@ -25,11 +25,11 @@ import static android.view.View.STATUS_BAR_TRANSPARENT;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
-import static android.view.WindowInsetsController.APPEARANCE_LIGHT_SIDE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_LIGHT_TOP_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_SIDE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_TOP_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 
 import static org.junit.Assert.assertTrue;
 
@@ -57,11 +57,12 @@ public class InsetsFlagsTest {
     @Test
     public void testGetAppearance() {
         assertContainsAppearance(APPEARANCE_LOW_PROFILE_BARS, SYSTEM_UI_FLAG_LOW_PROFILE);
-        assertContainsAppearance(APPEARANCE_LIGHT_TOP_BAR, SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        assertContainsAppearance(APPEARANCE_LIGHT_SIDE_BARS, SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        assertContainsAppearance(APPEARANCE_OPAQUE_TOP_BAR,
+        assertContainsAppearance(APPEARANCE_LIGHT_STATUS_BARS, SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        assertContainsAppearance(APPEARANCE_LIGHT_NAVIGATION_BARS,
+                SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        assertContainsAppearance(APPEARANCE_OPAQUE_STATUS_BARS,
                 0xffffffff & ~(STATUS_BAR_TRANSLUCENT | STATUS_BAR_TRANSPARENT));
-        assertContainsAppearance(APPEARANCE_OPAQUE_SIDE_BARS,
+        assertContainsAppearance(APPEARANCE_OPAQUE_NAVIGATION_BARS,
                 0xffffffff & ~(NAVIGATION_BAR_TRANSLUCENT | NAVIGATION_BAR_TRANSPARENT));
     }
 

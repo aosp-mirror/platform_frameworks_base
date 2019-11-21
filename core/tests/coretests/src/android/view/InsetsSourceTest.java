@@ -16,7 +16,7 @@
 
 package android.view;
 
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 
 import static org.junit.Assert.assertEquals;
 
@@ -43,7 +43,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class InsetsSourceTest {
 
-    private InsetsSource mSource = new InsetsSource(TYPE_NAVIGATION_BAR);
+    private InsetsSource mSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
 
     @Before
     public void setUp() {

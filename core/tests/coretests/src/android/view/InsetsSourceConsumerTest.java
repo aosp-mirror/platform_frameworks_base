@@ -16,7 +16,7 @@
 
 package android.view;
 
-import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -82,15 +82,15 @@ public class InsetsSourceConsumerTest {
                 // activity isn't running, lets ignore BadTokenException.
             }
             InsetsState state = new InsetsState();
-            mSpyInsetsSource = Mockito.spy(new InsetsSource(TYPE_TOP_BAR));
+            mSpyInsetsSource = Mockito.spy(new InsetsSource(ITYPE_STATUS_BAR));
             state.addSource(mSpyInsetsSource);
 
-            mConsumer = new InsetsSourceConsumer(TYPE_TOP_BAR, state,
+            mConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR, state,
                     () -> mMockTransaction, new InsetsController(viewRootImpl));
         });
         instrumentation.waitForIdleSync();
 
-        mConsumer.setControl(new InsetsSourceControl(TYPE_TOP_BAR, mLeash, new Point()));
+        mConsumer.setControl(new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point()));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class InsetsSourceConsumerTest {
         reset(mMockTransaction);
         mConsumer.hide();
         verifyZeroInteractions(mMockTransaction);
-        mConsumer.setControl(new InsetsSourceControl(TYPE_TOP_BAR, mLeash, new Point()));
+        mConsumer.setControl(new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point()));
         verify(mMockTransaction).hide(eq(mLeash));
     }
 }

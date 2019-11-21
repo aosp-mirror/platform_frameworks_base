@@ -34,7 +34,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseIntArray;
 import android.view.WindowInsets.Type;
-import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams;
 
 import java.io.PrintWriter;
@@ -54,71 +54,59 @@ public class InsetsState implements Parcelable {
      * at the same time.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "TYPE", value = {
-            TYPE_TOP_BAR,
-            TYPE_SIDE_BAR_1,
-            TYPE_SIDE_BAR_2,
-            TYPE_SIDE_BAR_3,
-            TYPE_TOP_GESTURES,
-            TYPE_BOTTOM_GESTURES,
-            TYPE_LEFT_GESTURES,
-            TYPE_RIGHT_GESTURES,
-            TYPE_TOP_TAPPABLE_ELEMENT,
-            TYPE_BOTTOM_TAPPABLE_ELEMENT,
-            TYPE_IME
+    @IntDef(prefix = "ITYPE", value = {
+            ITYPE_STATUS_BAR,
+            ITYPE_NAVIGATION_BAR,
+            ITYPE_CAPTION_BAR,
+            ITYPE_TOP_GESTURES,
+            ITYPE_BOTTOM_GESTURES,
+            ITYPE_LEFT_GESTURES,
+            ITYPE_RIGHT_GESTURES,
+            ITYPE_TOP_TAPPABLE_ELEMENT,
+            ITYPE_BOTTOM_TAPPABLE_ELEMENT,
+            ITYPE_IME
     })
-    public @interface InternalInsetType {}
+    public @interface InternalInsetsType {}
 
     static final int FIRST_TYPE = 0;
 
-    /** Top bar. Can be status bar or caption in freeform windowing mode. */
-    public static final int TYPE_TOP_BAR = FIRST_TYPE;
+    public static final int ITYPE_STATUS_BAR = FIRST_TYPE;
+    public static final int ITYPE_NAVIGATION_BAR = 1;
+    public static final int ITYPE_CAPTION_BAR = 2;
 
-    /**
-     * Up to 3 side bars that appear on left/right/bottom. On phones there is only one side bar
-     * (the navigation bar, see {@link #TYPE_NAVIGATION_BAR}), but other form factors might have
-     * multiple, like Android Auto.
-     */
-    public static final int TYPE_SIDE_BAR_1 = 1;
-    public static final int TYPE_SIDE_BAR_2 = 2;
-    public static final int TYPE_SIDE_BAR_3 = 3;
-
-    public static final int TYPE_TOP_GESTURES = 4;
-    public static final int TYPE_BOTTOM_GESTURES = 5;
-    public static final int TYPE_LEFT_GESTURES = 6;
-    public static final int TYPE_RIGHT_GESTURES = 7;
-    public static final int TYPE_TOP_TAPPABLE_ELEMENT = 8;
-    public static final int TYPE_BOTTOM_TAPPABLE_ELEMENT = 9;
+    public static final int ITYPE_TOP_GESTURES = 3;
+    public static final int ITYPE_BOTTOM_GESTURES = 4;
+    public static final int ITYPE_LEFT_GESTURES = 5;
+    public static final int ITYPE_RIGHT_GESTURES = 6;
+    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 7;
+    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 8;
 
     /** Input method window. */
-    public static final int TYPE_IME = 10;
+    public static final int ITYPE_IME = 9;
 
-    static final int LAST_TYPE = TYPE_IME;
+    static final int LAST_TYPE = ITYPE_IME;
 
     // Derived types
 
-    /** First side bar is navigation bar. */
-    public static final int TYPE_NAVIGATION_BAR = TYPE_SIDE_BAR_1;
-
     /** A shelf is the same as the navigation bar. */
-    public static final int TYPE_SHELF = TYPE_NAVIGATION_BAR;
+    public static final int ITYPE_SHELF = ITYPE_NAVIGATION_BAR;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "INSET_SIDE", value = {
-            INSET_SIDE_LEFT,
-            INSET_SIDE_TOP,
-            INSET_SIDE_RIGHT,
-            INSET_SIDE_BOTTOM,
-            INSET_SIDE_FLOATING,
-            INSET_SIDE_UNKNWON
+    @IntDef(prefix = "IINSETS_SIDE", value = {
+            ISIDE_LEFT,
+            ISIDE_TOP,
+            ISIDE_RIGHT,
+            ISIDE_BOTTOM,
+            ISIDE_FLOATING,
+            ISIDE_UNKNOWN
     })
-    public @interface InsetSide {}
-    static final int INSET_SIDE_LEFT = 0;
-    static final int INSET_SIDE_TOP = 1;
-    static final int INSET_SIDE_RIGHT = 2;
-    static final int INSET_SIDE_BOTTOM = 3;
-    static final int INSET_SIDE_FLOATING = 4;
-    static final int INSET_SIDE_UNKNWON = 5;
+    public @interface InternalInsetsSide {}
+    static final int ISIDE_LEFT = 0;
+    static final int ISIDE_TOP = 1;
+    static final int ISIDE_RIGHT = 2;
+    static final int ISIDE_BOTTOM = 3;
+    static final int ISIDE_FLOATING = 4;
+    static final int ISIDE_UNKNOWN = 5;
 
     private final ArrayMap<Integer, InsetsSource> mSources = new ArrayMap<>();
 
@@ -147,7 +135,7 @@ public class InsetsState implements Parcelable {
     public WindowInsets calculateInsets(Rect frame, boolean isScreenRound,
             boolean alwaysConsumeSystemBars, DisplayCutout cutout,
             @Nullable Rect legacyContentInsets, @Nullable Rect legacyStableInsets,
-            int legacySoftInputMode, @Nullable @InsetSide SparseIntArray typeSideMap) {
+            int legacySoftInputMode, @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
         Insets[] typeMaxInsetsMap = new Insets[Type.SIZE];
         boolean[] typeVisibilityMap = new boolean[SIZE];
@@ -165,10 +153,10 @@ public class InsetsState implements Parcelable {
             }
 
             boolean skipNonImeInImeMode = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_IME
-                    && source.getType() != TYPE_IME;
+                    && source.getType() != ITYPE_IME;
             boolean skipSystemBars = ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
-                    && (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR);
-            boolean skipIme = source.getType() == TYPE_IME
+                    && (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR);
+            boolean skipIme = source.getType() == ITYPE_IME
                     && (legacySoftInputMode & LayoutParams.SOFT_INPUT_ADJUST_RESIZE) == 0;
             boolean skipLegacyTypes = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE
                     && (toPublicType(type) & Type.compatSystemInsets()) != 0;
@@ -182,7 +170,7 @@ public class InsetsState implements Parcelable {
 
             // IME won't be reported in max insets as the size depends on the EditorInfo of the IME
             // target.
-            if (source.getType() != TYPE_IME) {
+            if (source.getType() != ITYPE_IME) {
                 processSource(source, relativeFrameMax, true /* ignoreVisibility */,
                         typeMaxInsetsMap, null /* typeSideMap */, null /* typeVisibilityMap */);
             }
@@ -192,7 +180,7 @@ public class InsetsState implements Parcelable {
     }
 
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,
-            Insets[] typeInsetsMap, @Nullable @InsetSide SparseIntArray typeSideMap,
+            Insets[] typeInsetsMap, @Nullable @InternalInsetsSide SparseIntArray typeSideMap,
             @Nullable boolean[] typeVisibilityMap) {
         Insets insets = source.calculateInsets(relativeFrame, ignoreVisibility);
 
@@ -212,7 +200,7 @@ public class InsetsState implements Parcelable {
     }
 
     private void processSourceAsPublicType(InsetsSource source, Insets[] typeInsetsMap,
-            @InsetSide @Nullable SparseIntArray typeSideMap,
+            @InternalInsetsSide @Nullable SparseIntArray typeSideMap,
             @Nullable boolean[] typeVisibilityMap, Insets insets, int type) {
         int index = indexOf(type);
         Insets existing = typeInsetsMap[index];
@@ -227,8 +215,8 @@ public class InsetsState implements Parcelable {
         }
 
         if (typeSideMap != null) {
-            @InsetSide int insetSide = getInsetSide(insets);
-            if (insetSide != INSET_SIDE_UNKNWON) {
+            @InternalInsetsSide int insetSide = getInsetSide(insets);
+            if (insetSide != ISIDE_UNKNOWN) {
                 typeSideMap.put(source.getType(), insetSide);
             }
         }
@@ -238,26 +226,26 @@ public class InsetsState implements Parcelable {
      * Retrieves the side for a certain {@code insets}. It is required that only one field l/t/r/b
      * is set in order that this method returns a meaningful result.
      */
-    private @InsetSide int getInsetSide(Insets insets) {
+    private @InternalInsetsSide int getInsetSide(Insets insets) {
         if (Insets.NONE.equals(insets)) {
-            return INSET_SIDE_FLOATING;
+            return ISIDE_FLOATING;
         }
         if (insets.left != 0) {
-            return INSET_SIDE_LEFT;
+            return ISIDE_LEFT;
         }
         if (insets.top != 0) {
-            return INSET_SIDE_TOP;
+            return ISIDE_TOP;
         }
         if (insets.right != 0) {
-            return INSET_SIDE_RIGHT;
+            return ISIDE_RIGHT;
         }
         if (insets.bottom != 0) {
-            return INSET_SIDE_BOTTOM;
+            return ISIDE_BOTTOM;
         }
-        return INSET_SIDE_UNKNWON;
+        return ISIDE_UNKNOWN;
     }
 
-    public InsetsSource getSource(@InternalInsetType int type) {
+    public InsetsSource getSource(@InternalInsetsType int type) {
         return mSources.computeIfAbsent(type, InsetsSource::new);
     }
 
@@ -273,19 +261,19 @@ public class InsetsState implements Parcelable {
      * Modifies the state of this class to exclude a certain type to make it ready for dispatching
      * to the client.
      *
-     * @param type The {@link InternalInsetType} of the source to remove
+     * @param type The {@link InternalInsetsType} of the source to remove
      */
-    public void removeSource(@InternalInsetType int type) {
+    public void removeSource(@InternalInsetsType int type) {
         mSources.remove(type);
     }
 
     /**
      * A shortcut for setting the visibility of the source.
      *
-     * @param type The {@link InternalInsetType} of the source to set the visibility
+     * @param type The {@link InternalInsetsType} of the source to set the visibility
      * @param visible {@code true} for visible
      */
-    public void setSourceVisible(@InternalInsetType int type, boolean visible) {
+    public void setSourceVisible(@InternalInsetsType int type, boolean visible) {
         InsetsSource source = mSources.get(type);
         if (source != null) {
             source.setVisible(visible);
@@ -321,62 +309,53 @@ public class InsetsState implements Parcelable {
         return mSources.valueAt(index);
     }
 
-    public static @InternalInsetType ArraySet<Integer> toInternalType(@InsetType int insetTypes) {
+    public static @InternalInsetsType ArraySet<Integer> toInternalType(@InsetsType int types) {
         final ArraySet<Integer> result = new ArraySet<>();
-        if ((insetTypes & Type.TOP_BAR) != 0) {
-            result.add(TYPE_TOP_BAR);
+        if ((types & Type.STATUS_BARS) != 0) {
+            result.add(ITYPE_STATUS_BAR);
         }
-        if ((insetTypes & Type.SIDE_BARS) != 0) {
-            result.add(TYPE_SIDE_BAR_1);
-            result.add(TYPE_SIDE_BAR_2);
-            result.add(TYPE_SIDE_BAR_3);
+        if ((types & Type.NAVIGATION_BARS) != 0) {
+            result.add(ITYPE_NAVIGATION_BAR);
         }
-        if ((insetTypes & Type.IME) != 0) {
-            result.add(TYPE_IME);
+        if ((types & Type.CAPTION_BAR) != 0) {
+            result.add(ITYPE_CAPTION_BAR);
+        }
+        if ((types & Type.IME) != 0) {
+            result.add(ITYPE_IME);
         }
         return result;
     }
 
-    static @InsetType int toPublicType(@InternalInsetType int type) {
+    static @Type.InsetsType int toPublicType(@InternalInsetsType int type) {
         switch (type) {
-            case TYPE_TOP_BAR:
-                return Type.TOP_BAR;
-            case TYPE_SIDE_BAR_1:
-            case TYPE_SIDE_BAR_2:
-            case TYPE_SIDE_BAR_3:
-                return Type.SIDE_BARS;
-            case TYPE_IME:
+            case ITYPE_STATUS_BAR:
+                return Type.STATUS_BARS;
+            case ITYPE_NAVIGATION_BAR:
+                return Type.NAVIGATION_BARS;
+            case ITYPE_CAPTION_BAR:
+                return Type.CAPTION_BAR;
+            case ITYPE_IME:
                 return Type.IME;
-            case TYPE_TOP_GESTURES:
-            case TYPE_BOTTOM_GESTURES:
+            case ITYPE_TOP_GESTURES:
+            case ITYPE_BOTTOM_GESTURES:
                 return Type.MANDATORY_SYSTEM_GESTURES;
-            case TYPE_LEFT_GESTURES:
-            case TYPE_RIGHT_GESTURES:
+            case ITYPE_LEFT_GESTURES:
+            case ITYPE_RIGHT_GESTURES:
                 return Type.SYSTEM_GESTURES;
-            case TYPE_TOP_TAPPABLE_ELEMENT:
-            case TYPE_BOTTOM_TAPPABLE_ELEMENT:
+            case ITYPE_TOP_TAPPABLE_ELEMENT:
+            case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
                 return Type.TAPPABLE_ELEMENT;
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
         }
     }
 
-    public static boolean getDefaultVisibility(@InsetType int type) {
-        switch (type) {
-            case TYPE_TOP_BAR:
-            case TYPE_SIDE_BAR_1:
-            case TYPE_SIDE_BAR_2:
-            case TYPE_SIDE_BAR_3:
-                return true;
-            case TYPE_IME:
-                return false;
-            default:
-                return true;
-        }
+    public static boolean getDefaultVisibility(@InsetsType int type) {
+        return type != ITYPE_IME;
     }
 
-    public static boolean containsType(@InternalInsetType int[] types,
-            @InternalInsetType int type) {
+    public static boolean containsType(@InternalInsetsType int[] types,
+            @InternalInsetsType int type) {
         if (types == null) {
             return false;
         }
@@ -395,30 +374,30 @@ public class InsetsState implements Parcelable {
         }
     }
 
-    public static String typeToString(@InternalInsetType int type) {
+    public static String typeToString(@InternalInsetsType int type) {
         switch (type) {
-            case TYPE_TOP_BAR:
-                return "TYPE_TOP_BAR";
-            case TYPE_SIDE_BAR_1:
-                return "TYPE_SIDE_BAR_1";
-            case TYPE_SIDE_BAR_2:
-                return "TYPE_SIDE_BAR_2";
-            case TYPE_SIDE_BAR_3:
-                return "TYPE_SIDE_BAR_3";
-            case TYPE_TOP_GESTURES:
-                return "TYPE_TOP_GESTURES";
-            case TYPE_BOTTOM_GESTURES:
-                return "TYPE_BOTTOM_GESTURES";
-            case TYPE_LEFT_GESTURES:
-                return "TYPE_LEFT_GESTURES";
-            case TYPE_RIGHT_GESTURES:
-                return "TYPE_RIGHT_GESTURES";
-            case TYPE_TOP_TAPPABLE_ELEMENT:
-                return "TYPE_TOP_TAPPABLE_ELEMENT";
-            case TYPE_BOTTOM_TAPPABLE_ELEMENT:
-                return "TYPE_BOTTOM_TAPPABLE_ELEMENT";
+            case ITYPE_STATUS_BAR:
+                return "ITYPE_STATUS_BAR";
+            case ITYPE_NAVIGATION_BAR:
+                return "ITYPE_NAVIGATION_BAR";
+            case ITYPE_CAPTION_BAR:
+                return "ITYPE_CAPTION_BAR";
+            case ITYPE_TOP_GESTURES:
+                return "ITYPE_TOP_GESTURES";
+            case ITYPE_BOTTOM_GESTURES:
+                return "ITYPE_BOTTOM_GESTURES";
+            case ITYPE_LEFT_GESTURES:
+                return "ITYPE_LEFT_GESTURES";
+            case ITYPE_RIGHT_GESTURES:
+                return "ITYPE_RIGHT_GESTURES";
+            case ITYPE_TOP_TAPPABLE_ELEMENT:
+                return "ITYPE_TOP_TAPPABLE_ELEMENT";
+            case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
+                return "ITYPE_BOTTOM_TAPPABLE_ELEMENT";
+            case ITYPE_IME:
+                return "ITYPE_IME";
             default:
-                return "TYPE_UNKNOWN_" + type;
+                return "ITYPE_UNKNOWN_" + type;
         }
     }
 

@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.view.WindowInsetsController.APPEARANCE_LIGHT_SIDE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_LIGHT_TOP_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
@@ -123,10 +123,10 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     void onNavigationBarAppearanceChanged(@Appearance int appearance, boolean nbModeChanged,
             int navigationBarMode, boolean navbarColorManagedByIme) {
         int diff = appearance ^ mAppearance;
-        if ((diff & APPEARANCE_LIGHT_SIDE_BARS) != 0 || nbModeChanged) {
+        if ((diff & APPEARANCE_LIGHT_NAVIGATION_BARS) != 0 || nbModeChanged) {
             final boolean last = mNavigationLight;
             mHasLightNavigationBar = isLight(appearance, navigationBarMode,
-                    APPEARANCE_LIGHT_SIDE_BARS);
+                    APPEARANCE_LIGHT_NAVIGATION_BARS);
             mNavigationLight = mHasLightNavigationBar
                     && (mDirectReplying && mNavbarColorManagedByIme || !mForceDarkForScrim)
                     && !mQsCustomizing;
@@ -140,7 +140,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     }
 
     void onNavigationBarModeChanged(int newBarMode) {
-        mHasLightNavigationBar = isLight(mAppearance, newBarMode, APPEARANCE_LIGHT_SIDE_BARS);
+        mHasLightNavigationBar = isLight(mAppearance, newBarMode, APPEARANCE_LIGHT_NAVIGATION_BARS);
     }
 
     private void reevaluate() {
@@ -206,7 +206,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
         for (int i = 0; i < numStacks; i++) {
             if (isLight(mAppearanceRegions[i].getAppearance(), mStatusBarMode,
-                    APPEARANCE_LIGHT_TOP_BAR)) {
+                    APPEARANCE_LIGHT_STATUS_BARS)) {
                 numLightStacks++;
                 indexLightStack = i;
             }
@@ -252,7 +252,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         final int numStacks = mAppearanceRegions.length;
         for (int i = 0; i < numStacks; i++) {
             final boolean isLight = isLight(mAppearanceRegions[i].getAppearance(), mStatusBarMode,
-                    APPEARANCE_LIGHT_TOP_BAR);
+                    APPEARANCE_LIGHT_STATUS_BARS);
             pw.print(" stack #"); pw.print(i); pw.print(": ");
             pw.print(mAppearanceRegions[i].toString()); pw.print(" isLight="); pw.println(isLight);
         }

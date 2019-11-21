@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.view.WindowInsetsController.APPEARANCE_LIGHT_TOP_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
@@ -64,8 +64,8 @@ public class LightBarControllerTest extends SysuiTestCase {
         final Rect firstBounds = new Rect(0, 0, 1, 1);
         final Rect secondBounds = new Rect(1, 0, 2, 1);
         final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
-                new AppearanceRegion(APPEARANCE_LIGHT_TOP_BAR, firstBounds),
-                new AppearanceRegion(APPEARANCE_LIGHT_TOP_BAR, secondBounds)
+                new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, firstBounds),
+                new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, secondBounds)
         };
         mLightBarController.onStatusBarAppearanceChanged(
                 appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
@@ -79,7 +79,7 @@ public class LightBarControllerTest extends SysuiTestCase {
         final Rect firstBounds = new Rect(0, 0, 1, 1);
         final Rect secondBounds = new Rect(1, 0, 2, 1);
         final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
-                new AppearanceRegion(APPEARANCE_LIGHT_TOP_BAR, firstBounds),
+                new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, firstBounds),
                 new AppearanceRegion(0 /* appearance */, secondBounds)
         };
         mLightBarController.onStatusBarAppearanceChanged(
@@ -95,7 +95,7 @@ public class LightBarControllerTest extends SysuiTestCase {
         final Rect secondBounds = new Rect(1, 0, 2, 1);
         final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
                 new AppearanceRegion(0 /* appearance */, firstBounds),
-                new AppearanceRegion(APPEARANCE_LIGHT_TOP_BAR, secondBounds)
+                new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, secondBounds)
         };
         mLightBarController.onStatusBarAppearanceChanged(
                 appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
@@ -121,7 +121,7 @@ public class LightBarControllerTest extends SysuiTestCase {
     @Test
     public void testOnStatusBarAppearanceChanged_singleStack_light() {
         final AppearanceRegion[] appearanceRegions = new AppearanceRegion[]{
-                new AppearanceRegion(APPEARANCE_LIGHT_TOP_BAR, new Rect(0, 0, 1, 1))
+                new AppearanceRegion(APPEARANCE_LIGHT_STATUS_BARS, new Rect(0, 0, 1, 1))
         };
         mLightBarController.onStatusBarAppearanceChanged(
                 appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,

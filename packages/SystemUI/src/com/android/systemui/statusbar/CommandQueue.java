@@ -42,7 +42,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.os.SomeArgs;
@@ -284,12 +284,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         /**
          * @see IStatusBar#showTransient(int, int[]).
          */
-        default void showTransient(int displayId, @InternalInsetType int[] types) { }
+        default void showTransient(int displayId, @InternalInsetsType int[] types) { }
 
         /**
          * @see IStatusBar#abortTransient(int, int[]).
          */
-        default void abortTransient(int displayId, @InternalInsetType int[] types) { }
+        default void abortTransient(int displayId, @InternalInsetsType int[] types) { }
 
         /**
          * @see IStatusBar#topAppWindowChanged(int, boolean, boolean).

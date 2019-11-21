@@ -93,7 +93,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
-import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -7504,11 +7504,11 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.obtainMessage(MSG_INSETS_CONTROL_CHANGED, args).sendToTarget();
     }
 
-    private void showInsets(@InsetType int types, boolean fromIme) {
+    private void showInsets(@InsetsType int types, boolean fromIme) {
         mHandler.obtainMessage(MSG_SHOW_INSETS, types, fromIme ? 1 : 0).sendToTarget();
     }
 
-    private void hideInsets(@InsetType int types, boolean fromIme) {
+    private void hideInsets(@InsetsType int types, boolean fromIme) {
         mHandler.obtainMessage(MSG_HIDE_INSETS, types, fromIme ? 1 : 0).sendToTarget();
     }
 
@@ -8627,7 +8627,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void showInsets(@InsetType int types, boolean fromIme) {
+        public void showInsets(@InsetsType int types, boolean fromIme) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.showInsets(types, fromIme);
@@ -8635,7 +8635,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void hideInsets(@InsetType int types, boolean fromIme) {
+        public void hideInsets(@InsetsType int types, boolean fromIme) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.hideInsets(types, fromIme);
