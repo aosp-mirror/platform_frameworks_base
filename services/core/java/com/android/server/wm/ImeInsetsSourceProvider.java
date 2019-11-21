@@ -92,12 +92,13 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
         // Refer to WindowManagerService#applyImeVisibility(token, false).
         // If IMMS's imeTarget is child of DisplayContent's imeTarget and child window
         // is above the parent, we will consider it as the same target for now.
+        // Also, if imeTarget is closing, it would be considered as outdated target.
         // TODO(b/139861270): Remove the child & sublayer check once IMMS is aware of
         //  actual IME target.
-        return mImeTargetFromIme == mDisplayContent.mInputMethodTarget
-                || (mDisplayContent.mInputMethodTarget.getParentWindow() == mImeTargetFromIme
-                        && mDisplayContent.mInputMethodTarget.mSubLayer
-                                > mImeTargetFromIme.mSubLayer);
+        final WindowState dcTarget = mDisplayContent.mInputMethodTarget;
+        return (!dcTarget.isClosing() && mImeTargetFromIme == dcTarget)
+                || (dcTarget.getParentWindow() == mImeTargetFromIme
+                        && dcTarget.mSubLayer > mImeTargetFromIme.mSubLayer);
     }
 
 }
