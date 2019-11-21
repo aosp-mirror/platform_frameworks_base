@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.recoverysystem;
 
 import android.content.Context;
 import android.net.LocalSocket;
@@ -26,6 +26,8 @@ import android.os.RecoverySystem;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Slog;
+
+import com.android.server.SystemService;
 
 import libcore.io.IoUtils;
 
