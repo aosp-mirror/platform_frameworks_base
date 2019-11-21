@@ -184,7 +184,8 @@ public class PhoneStateListener {
     public static final int LISTEN_CELL_INFO = 0x00000400;
 
     /**
-     * Listen for {@link PreciseCallState.State} of ringing, background and foreground calls.
+     * Listen for {@link android.telephony.Annotation.PreciseCallStates} of ringing,
+     * background and foreground calls.
      *
      * @hide
      */
