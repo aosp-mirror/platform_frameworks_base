@@ -114,7 +114,7 @@ public class MediaRouter2 {
     @GuardedBy("sLock")
     private MediaRoute2Info mSelectingRoute;
     @GuardedBy("sLock")
-    private Client mClient;
+    private Client2 mClient;
 
     final Handler mHandler;
     volatile List<MediaRoute2Info> mFilteredRoutes = Collections.emptyList();
@@ -196,10 +196,10 @@ public class MediaRouter2 {
 
         synchronized (sLock) {
             if (mClient == null) {
-                Client client = new Client();
+                Client2 client = new Client2();
                 try {
                     mMediaRouterService.registerClient2(client, mPackageName);
-                    mMediaRouterService.setControlCategories2(client, mControlCategories);
+                    mMediaRouterService.setControlCategories(client, mControlCategories);
                     mClient = client;
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to register media router.", ex);
@@ -288,7 +288,7 @@ public class MediaRouter2 {
     public void requestSelectRoute(@NonNull MediaRoute2Info route) {
         Objects.requireNonNull(route, "route must not be null");
 
-        Client client;
+        Client2 client;
         synchronized (sLock) {
             if (mSelectingRoute == route) {
                 Log.w(TAG, "The route selection request is already sent.");
@@ -318,7 +318,7 @@ public class MediaRouter2 {
         Objects.requireNonNull(route, "route must not be null");
         Objects.requireNonNull(request, "request must not be null");
 
-        Client client;
+        Client2 client;
         synchronized (sLock) {
             client = mClient;
         }
@@ -342,7 +342,7 @@ public class MediaRouter2 {
     public void requestSetVolume(@NonNull MediaRoute2Info route, int volume) {
         Objects.requireNonNull(route, "route must not be null");
 
-        Client client;
+        Client2 client;
         synchronized (sLock) {
             client = mClient;
         }
@@ -366,7 +366,7 @@ public class MediaRouter2 {
     public void requestUpdateVolume(@NonNull MediaRoute2Info route, int delta) {
         Objects.requireNonNull(route, "route must not be null");
 
-        Client client;
+        Client2 client;
         synchronized (sLock) {
             client = mClient;
         }
@@ -398,13 +398,13 @@ public class MediaRouter2 {
         List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
 
         mControlCategories = newControlCategories;
-        Client client;
+        Client2 client;
         synchronized (sLock) {
             client = mClient;
         }
         if (client != null) {
             try {
-                mMediaRouterService.setControlCategories2(client, mControlCategories);
+                mMediaRouterService.setControlCategories(client, mControlCategories);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to set control categories.", ex);
             }
@@ -600,7 +600,7 @@ public class MediaRouter2 {
         }
     }
 
-    class Client extends IMediaRouter2Client.Stub {
+    class Client2 extends IMediaRouter2Client.Stub {
         @Override
         public void notifyRestoreRoute() throws RemoteException {}
 

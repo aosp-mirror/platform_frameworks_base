@@ -40,7 +40,6 @@ interface IMediaRouterService {
     void setSelectedRoute(IMediaRouterClient client, String routeId, boolean explicit);
     void requestSetVolume(IMediaRouterClient client, String routeId, int volume);
     void requestUpdateVolume(IMediaRouterClient client, String routeId, int direction);
-    void setControlCategories(IMediaRouterClient client, in List<String> categories);
 
     // Methods for media router 2
     List<MediaRoute2Info> getSystemRoutes();
@@ -56,7 +55,7 @@ interface IMediaRouterService {
      * @param route the route to be selected
      */
     void requestSelectRoute2(IMediaRouter2Client client, in @nullable MediaRoute2Info route);
-    void setControlCategories2(IMediaRouter2Client client, in List<String> categories);
+    void setControlCategories(IMediaRouter2Client client, in List<String> categories);
 
     void registerManager(IMediaRouter2Manager manager, String packageName);
     void unregisterManager(IMediaRouter2Manager manager);
