@@ -1108,7 +1108,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   UnsetChldSignalHandler();
 
   if (is_system_server) {
-    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks);
+    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks, runtime_flags);
     if (env->ExceptionCheck()) {
       fail_fn("Error calling post fork system server hooks.");
     }
@@ -1741,7 +1741,7 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gZygoteClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteClassName));
   gCallPostForkSystemServerHooks = GetStaticMethodIDOrDie(env, gZygoteClass,
                                                           "callPostForkSystemServerHooks",
-                                                          "()V");
+                                                          "(I)V");
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(IZZLjava/lang/String;)V");
 

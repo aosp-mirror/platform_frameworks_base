@@ -891,9 +891,9 @@ public final class Zygote {
         }
     }
 
-    private static void callPostForkSystemServerHooks() {
+    private static void callPostForkSystemServerHooks(int runtimeFlags) {
         // SystemServer specific post fork hooks run before child post fork hooks.
-        ZygoteHooks.postForkSystemServer();
+        ZygoteHooks.postForkSystemServer(runtimeFlags);
     }
 
     private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
