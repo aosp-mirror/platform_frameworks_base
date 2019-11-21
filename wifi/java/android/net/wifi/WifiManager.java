@@ -1835,8 +1835,9 @@ public class WifiManager {
 
     /**
      * Remove some or all of the network suggestions that were previously provided by the app.
-     * If the current network is a suggestion being removed and if it was only provided by this app
-     * and is not a saved network then the framework will immediately disconnect.
+     * If one of the suggestions being removed was used to establish connection to the current
+     * network, then the device will immediately disconnect from that network.
+     *
      * See {@link WifiNetworkSuggestion} for a detailed explanation of the parameters.
      * See {@link WifiNetworkSuggestion#equals(Object)} for the equivalence evaluation used.
      *
