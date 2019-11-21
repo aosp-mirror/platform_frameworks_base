@@ -2773,7 +2773,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                return mRootActivityContainer.getAllStackInfos();
+                return mRootActivityContainer.getAllStackInfos(INVALID_DISPLAY);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2787,6 +2787,33 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 return mRootActivityContainer.getStackInfo(windowingMode, activityType);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public List<ActivityManager.StackInfo> getAllStackInfosOnDisplay(int displayId) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getAllStackInfos()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                return mRootActivityContainer.getAllStackInfos(displayId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public ActivityManager.StackInfo getStackInfoOnDisplay(int windowingMode, int activityType,
+            int displayId) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "getStackInfo()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                return mRootActivityContainer.getStackInfo(windowingMode, activityType, displayId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
