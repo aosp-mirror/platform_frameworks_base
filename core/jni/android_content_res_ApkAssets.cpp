@@ -194,6 +194,59 @@ static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring fil
   return reinterpret_cast<jlong>(xml_tree.release());
 }
 
+static jobject NativeGetOverlayableInfo(JNIEnv* env, jclass /*clazz*/, jlong ptr,
+                                         jstring overlayable_name) {
+  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+
+  const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
+  if (packages.empty()) {
+    jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
+    return 0;
+  }
+
+  // TODO(b/119899133): Convert this to a search for the info rather than assuming it's at index 0
+  const auto& overlayable_map = packages[0]->GetOverlayableMap();
+  if (overlayable_map.empty()) {
+    return nullptr;
+  }
+
+  auto overlayable_name_native = std::string(env->GetStringUTFChars(overlayable_name, NULL));
+  auto actor = overlayable_map.find(overlayable_name_native);
+  if (actor == overlayable_map.end()) {
+    return nullptr;
+  }
+
+  jstring actor_string = env->NewStringUTF(actor->first.c_str());
+  if (env->ExceptionCheck() || actor_string == nullptr) {
+    jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
+    return 0;
+  }
+
+  jclass overlayable_class = env->FindClass("android/content/om/OverlayableInfo");
+  jmethodID overlayable_constructor = env->GetMethodID(overlayable_class, "<init>",
+                                                       "(Ljava/lang/String;Ljava/lang/String;I)V");
+  return env->NewObject(
+      overlayable_class,
+      overlayable_constructor,
+      overlayable_name,
+      actor_string
+  );
+}
+
+static jboolean NativeDefinesOverlayable(JNIEnv* env, jclass /*clazz*/, jlong ptr) {
+  const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
+
+  const auto& packages = apk_assets->GetLoadedArsc()->GetPackages();
+  if (packages.empty()) {
+    // Must throw to prevent bypass by returning false
+    jniThrowException(env, "java/io/IOException", "Error reading overlayable from APK");
+    return 0;
+  }
+
+  const auto& overlayable_infos = packages[0]->GetOverlayableMap();
+  return overlayable_infos.empty() ? JNI_FALSE : JNI_TRUE;
+}
+
 // JNI registration.
 static const JNINativeMethod gApkAssetsMethods[] = {
     {"nativeLoad", "(Ljava/lang/String;ZZZZ)J", (void*)NativeLoad},
@@ -208,6 +261,9 @@ static const JNINativeMethod gApkAssetsMethods[] = {
     {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
     {"nativeIsUpToDate", "(J)Z", (void*)NativeIsUpToDate},
     {"nativeOpenXml", "(JLjava/lang/String;)J", (void*)NativeOpenXml},
+    {"nativeGetOverlayableInfo", "(JLjava/lang/String;)Landroid/content/om/OverlayableInfo;",
+     (void*)NativeGetOverlayableInfo},
+    {"nativeDefinesOverlayable", "(J)Z", (void*)NativeDefinesOverlayable},
 };
 
 int register_android_content_res_ApkAssets(JNIEnv* env) {
