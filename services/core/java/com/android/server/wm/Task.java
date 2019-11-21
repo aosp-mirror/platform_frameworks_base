@@ -2046,15 +2046,20 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             // could never go away in Honeycomb.
             final int compatScreenWidthDp = (int) (mTmpNonDecorBounds.width() / density);
             final int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
-            // We're only overriding LONG, SIZE and COMPAT parts of screenLayout, so we start
-            // override calculation with partial default.
             // Reducing the screen layout starting from its parent config.
-            final int sl = parentConfig.screenLayout
-                    & (Configuration.SCREENLAYOUT_LONG_MASK | Configuration.SCREENLAYOUT_SIZE_MASK);
-            final int longSize = Math.max(compatScreenHeightDp, compatScreenWidthDp);
-            final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
-            inOutConfig.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
+            inOutConfig.screenLayout = computeScreenLayoutOverride(parentConfig.screenLayout,
+                    compatScreenWidthDp, compatScreenHeightDp);
         }
+    }
+
+    /** Computes LONG, SIZE and COMPAT parts of {@link Configuration#screenLayout}. */
+    static int computeScreenLayoutOverride(int sourceScreenLayout, int screenWidthDp,
+            int screenHeightDp) {
+        sourceScreenLayout = sourceScreenLayout
+                & (Configuration.SCREENLAYOUT_LONG_MASK | Configuration.SCREENLAYOUT_SIZE_MASK);
+        final int longSize = Math.max(screenWidthDp, screenHeightDp);
+        final int shortSize = Math.min(screenWidthDp, screenHeightDp);
+        return Configuration.reduceScreenLayout(sourceScreenLayout, longSize, shortSize);
     }
 
     @Override

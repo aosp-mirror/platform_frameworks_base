@@ -290,10 +290,12 @@ public class SizeCompatTests extends ActivityTestsBase {
     public void testFixedScreenLayoutSizeBits() {
         setUpApp(new TestActivityDisplay.Builder(mService, 1000, 2500).build());
         final int fixedScreenLayout = Configuration.SCREENLAYOUT_LONG_NO
-                | Configuration.SCREENLAYOUT_SIZE_NORMAL;
+                | Configuration.SCREENLAYOUT_SIZE_NORMAL
+                | Configuration.SCREENLAYOUT_COMPAT_NEEDED;
         final int layoutMask = Configuration.SCREENLAYOUT_LONG_MASK
                 | Configuration.SCREENLAYOUT_SIZE_MASK
-                | Configuration.SCREENLAYOUT_LAYOUTDIR_MASK;
+                | Configuration.SCREENLAYOUT_LAYOUTDIR_MASK
+                | Configuration.SCREENLAYOUT_COMPAT_NEEDED;
         Configuration c = new Configuration(mTask.getRequestedOverrideConfiguration());
         c.screenLayout = fixedScreenLayout | Configuration.SCREENLAYOUT_LAYOUTDIR_LTR;
         mTask.onRequestedOverrideConfigurationChanged(c);
