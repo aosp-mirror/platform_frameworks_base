@@ -22,7 +22,13 @@ cc_test {
     stem: "block_device_writer",
 
     srcs: ["block_device_writer.cpp"],
-    cflags: ["-Wall", "-Werror", "-Wextra", "-g"],
+    cflags: [
+        "-D_FILE_OFFSET_BITS=64",
+        "-Wall",
+        "-Werror",
+        "-Wextra",
+        "-g",
+    ],
     shared_libs: ["libbase", "libutils"],
 
     test_suites: ["general-tests"],
