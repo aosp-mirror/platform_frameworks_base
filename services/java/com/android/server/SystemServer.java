@@ -704,7 +704,7 @@ public final class SystemServer {
 
         // Bring up recovery system in case a rescue party needs a reboot
         t.traceBegin("StartRecoverySystemService");
-        mSystemServiceManager.startService(RecoverySystemService.class);
+        mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         t.traceEnd();
 
         // Now that we have the bare essentials of the OS up and running, take
