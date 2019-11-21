@@ -19,6 +19,7 @@
 #include "statslog.h"
 
 #include "CountMetricProducer.h"
+#include "atoms_info.h"
 #include "condition/CombinationConditionTracker.h"
 #include "condition/SimpleConditionTracker.h"
 #include "guardrail/StatsdStats.h"

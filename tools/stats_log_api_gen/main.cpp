@@ -1,6 +1,7 @@
 
 
 #include "Collation.h"
+#include "atoms_info_writer.h"
 #if !defined(STATS_SCHEMA_LEGACY)
 #include "java_writer.h"
 #endif
@@ -18,8 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "android-base/strings.h"
-
 using namespace google::protobuf;
 using namespace std;
 
@@ -27,152 +26,6 @@ namespace android {
 namespace stats_log_api_gen {
 
 using android::os::statsd::Atom;
-
-static void write_atoms_info_cpp(FILE *out, const Atoms &atoms) {
-    std::set<string> kTruncatingAtomNames = {"mobile_radio_power_state_changed",
-                                                 "audio_state_changed",
-                                                 "call_state_changed",
-                                                 "phone_signal_strength_changed",
-                                                 "mobile_bytes_transfer_by_fg_bg",
-                                                 "mobile_bytes_transfer"};
-    fprintf(out,
-            "const std::set<int> "
-            "AtomsInfo::kTruncatingTimestampAtomBlackList = {\n");
-    for (set<string>::const_iterator blacklistedAtom = kTruncatingAtomNames.begin();
-         blacklistedAtom != kTruncatingAtomNames.end(); blacklistedAtom++) {
-            fprintf(out, " %s,\n", make_constant_name(*blacklistedAtom).c_str());
-    }
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    fprintf(out,
-            "const std::set<int> AtomsInfo::kAtomsWithAttributionChain = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-             field != atom->fields.end(); field++) {
-            if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                string constant = make_constant_name(atom->name);
-                fprintf(out, " %s,\n", constant.c_str());
-                break;
-            }
-        }
-    }
-
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    fprintf(out,
-            "const std::set<int> AtomsInfo::kWhitelistedAtoms = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->whitelisted) {
-            string constant = make_constant_name(atom->name);
-            fprintf(out, " %s,\n", constant.c_str());
-        }
-    }
-
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    fprintf(out, "static std::map<int, int> getAtomUidField() {\n");
-    fprintf(out, "  std::map<int, int> uidField;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->uidField == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding uid field for atom "
-                "(%d)%s\n",
-                atom->code, atom->name.c_str());
-        fprintf(out, "    uidField[static_cast<int>(%s)] = %d;\n",
-                make_constant_name(atom->name).c_str(), atom->uidField);
-    }
-
-    fprintf(out, "    return uidField;\n");
-    fprintf(out, "};\n");
-
-    fprintf(out,
-            "const std::map<int, int> AtomsInfo::kAtomsWithUidField = "
-            "getAtomUidField();\n");
-
-    fprintf(out,
-            "static std::map<int, StateAtomFieldOptions> "
-            "getStateAtomFieldOptions() {\n");
-    fprintf(out, "    std::map<int, StateAtomFieldOptions> options;\n");
-    fprintf(out, "    StateAtomFieldOptions opt;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->primaryFields.size() == 0 && atom->exclusiveField == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding primary and exclusive fields for atom "
-                "(%d)%s\n",
-                atom->code, atom->name.c_str());
-        fprintf(out, "    opt.primaryFields.clear();\n");
-        for (const auto& field : atom->primaryFields) {
-            fprintf(out, "    opt.primaryFields.push_back(%d);\n", field);
-        }
-
-        fprintf(out, "    opt.exclusiveField = %d;\n", atom->exclusiveField);
-        fprintf(out, "    options[static_cast<int>(%s)] = opt;\n",
-                make_constant_name(atom->name).c_str());
-    }
-
-    fprintf(out, "    return options;\n");
-    fprintf(out, "}\n");
-
-    fprintf(out,
-            "const std::map<int, StateAtomFieldOptions> "
-            "AtomsInfo::kStateAtomsFieldOptions = "
-            "getStateAtomFieldOptions();\n");
-
-    fprintf(out,
-            "static std::map<int, std::vector<int>> "
-            "getBinaryFieldAtoms() {\n");
-    fprintf(out, "    std::map<int, std::vector<int>> options;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->binaryFields.size() == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding binary fields for atom "
-                "(%d)%s\n",
-                atom->code, atom->name.c_str());
-
-        for (const auto& field : atom->binaryFields) {
-            fprintf(out, "    options[static_cast<int>(%s)].push_back(%d);\n",
-                    make_constant_name(atom->name).c_str(), field);
-        }
-    }
-
-    fprintf(out, "    return options;\n");
-    fprintf(out, "}\n");
-
-    fprintf(out,
-            "const std::map<int, std::vector<int>> "
-            "AtomsInfo::kBytesFieldAtoms = "
-            "getBinaryFieldAtoms();\n");
-}
-
-// Writes namespaces for the cpp and header files, returning the number of namespaces written.
-void write_namespace(FILE* out, const string& cppNamespaces) {
-    vector<string> cppNamespaceVec = android::base::Split(cppNamespaces, ",");
-    for (string cppNamespace : cppNamespaceVec) {
-        fprintf(out, "namespace %s {\n", cppNamespace.c_str());
-    }
-}
-
-// Writes namespace closing brackets for cpp and header files.
-void write_closing_namespace(FILE* out, const string& cppNamespaces) {
-    vector<string> cppNamespaceVec = android::base::Split(cppNamespaces, ",");
-    for (auto it = cppNamespaceVec.rbegin(); it != cppNamespaceVec.rend(); ++it) {
-        fprintf(out, "} // namespace %s\n", it->c_str());
-    }
-}
 
 static int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &attributionDecl,
                                const string& moduleName, const string& cppNamespace,
@@ -201,11 +54,6 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &at
     fprintf(out, "#else\n");
     fprintf(out, "const static bool kStatsdEnabled = false;\n");
     fprintf(out, "#endif\n");
-
-    // AtomsInfo is only used by statsd internally and is not needed for other modules.
-    if (moduleName == DEFAULT_MODULE_NAME) {
-        write_atoms_info_cpp(out, atoms);
-    }
 
     fprintf(out, "int64_t lastRetryTimestampNs = -1;\n");
     fprintf(out, "const int64_t kMinRetryIntervalNs = NS_PER_SEC * 60 * 20; // 20 minutes\n");
@@ -543,42 +391,6 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &at
     return 0;
 }
 
-static void write_cpp_usage(
-    FILE* out, const string& method_name, const string& atom_code_name,
-    const AtomDecl& atom, const AtomDecl &attributionDecl) {
-    fprintf(out, "     * Usage: %s(StatsLog.%s", method_name.c_str(),
-            atom_code_name.c_str());
-
-    for (vector<AtomField>::const_iterator field = atom.fields.begin();
-            field != atom.fields.end(); field++) {
-        if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-            for (auto chainField : attributionDecl.fields) {
-                if (chainField.javaType == JAVA_TYPE_STRING) {
-                    fprintf(out, ", const std::vector<%s>& %s",
-                         cpp_type_name(chainField.javaType),
-                         chainField.name.c_str());
-                } else {
-                    fprintf(out, ", const %s* %s, size_t %s_length",
-                         cpp_type_name(chainField.javaType),
-                         chainField.name.c_str(), chainField.name.c_str());
-                }
-            }
-        } else if (field->javaType == JAVA_TYPE_KEY_VALUE_PAIR) {
-            fprintf(out, ", const std::map<int, int32_t>& %s_int"
-                         ", const std::map<int, int64_t>& %s_long"
-                         ", const std::map<int, char const*>& %s_str"
-                         ", const std::map<int, float>& %s_float",
-                         field->name.c_str(),
-                         field->name.c_str(),
-                         field->name.c_str(),
-                         field->name.c_str());
-        } else {
-            fprintf(out, ", %s %s", cpp_type_name(field->javaType), field->name.c_str());
-        }
-    }
-    fprintf(out, ");\n");
-}
-
 static void write_cpp_method_header(
         FILE* out,
         const string& method_name,
@@ -645,45 +457,8 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, " * API For logging statistics events.\n");
     fprintf(out, " */\n");
     fprintf(out, "\n");
-    fprintf(out, "/**\n");
-    fprintf(out, " * Constants for atom codes.\n");
-    fprintf(out, " */\n");
-    fprintf(out, "enum {\n");
 
-    std::map<int, set<AtomDecl>::const_iterator> atom_code_to_non_chained_decl_map;
-    build_non_chained_decl_map(atoms, &atom_code_to_non_chained_decl_map);
-
-    size_t i = 0;
-    int maxPushedAtomId = 2;
-    // Print atom constants
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-        atom != atoms.decls.end(); atom++) {
-        // Skip if the atom is not needed for the module.
-        if (!atom_needed_for_module(*atom, moduleName)) {
-            continue;
-        }
-        string constant = make_constant_name(atom->name);
-        fprintf(out, "\n");
-        fprintf(out, "    /**\n");
-        fprintf(out, "     * %s %s\n", atom->message.c_str(), atom->name.c_str());
-        write_cpp_usage(out, "stats_write", constant, *atom, attributionDecl);
-
-        auto non_chained_decl = atom_code_to_non_chained_decl_map.find(atom->code);
-        if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
-            write_cpp_usage(out, "stats_write_non_chained", constant, *non_chained_decl->second,
-                attributionDecl);
-        }
-        fprintf(out, "     */\n");
-        char const* const comma = (i == atoms.decls.size() - 1) ? "" : ",";
-        fprintf(out, "    %s = %d%s\n", constant.c_str(), atom->code, comma);
-        if (atom->code < PULL_ATOM_START_ID && atom->code > maxPushedAtomId) {
-            maxPushedAtomId = atom->code;
-        }
-        i++;
-    }
-    fprintf(out, "\n");
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
+    write_native_atom_constants(out, atoms, attributionDecl, moduleName);
 
     // Print constants for the enum values.
     fprintf(out, "//\n");
@@ -722,36 +497,6 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, "  size_t arg_length;\n");
     fprintf(out, "};\n");
     fprintf(out, "\n");
-
-    // This metadata is only used by statsd, which uses the default libstatslog.
-    if (moduleName == DEFAULT_MODULE_NAME) {
-
-        fprintf(out, "struct StateAtomFieldOptions {\n");
-        fprintf(out, "  std::vector<int> primaryFields;\n");
-        fprintf(out, "  int exclusiveField;\n");
-        fprintf(out, "};\n");
-        fprintf(out, "\n");
-
-        fprintf(out, "struct AtomsInfo {\n");
-        fprintf(out,
-                "  const static std::set<int> "
-                "kTruncatingTimestampAtomBlackList;\n");
-        fprintf(out, "  const static std::map<int, int> kAtomsWithUidField;\n");
-        fprintf(out,
-                "  const static std::set<int> kAtomsWithAttributionChain;\n");
-        fprintf(out,
-                "  const static std::map<int, StateAtomFieldOptions> "
-                "kStateAtomsFieldOptions;\n");
-        fprintf(out,
-                "  const static std::map<int, std::vector<int>> "
-                "kBytesFieldAtoms;");
-        fprintf(out,
-                "  const static std::set<int> kWhitelistedAtoms;\n");
-        fprintf(out, "};\n");
-
-        fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n",
-                maxPushedAtomId);
-    }
 
     // Print write methods
     fprintf(out, "//\n");
@@ -1235,15 +980,21 @@ print_usage()
     fprintf(stderr, "usage: stats-log-api-gen OPTIONS\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "OPTIONS\n");
-    fprintf(stderr, "  --cpp FILENAME       the header file to output\n");
-    fprintf(stderr, "  --header FILENAME    the cpp file to output\n");
+    fprintf(stderr, "  --cpp FILENAME       the header file to output for write helpers\n");
+    fprintf(stderr, "  --header FILENAME    the cpp file to output for write helpers\n");
+    fprintf(stderr,
+            "  --atomsInfoCpp FILENAME       the header file to output for statsd metadata\n");
+    fprintf(stderr, "  --atomsInfoHeader FILENAME    the cpp file to output for statsd metadata\n");
     fprintf(stderr, "  --help               this message\n");
     fprintf(stderr, "  --java FILENAME      the java file to output\n");
     fprintf(stderr, "  --jni FILENAME       the jni file to output\n");
     fprintf(stderr, "  --module NAME        optional, module name to generate outputs for\n");
     fprintf(stderr, "  --namespace COMMA,SEP,NAMESPACE   required for cpp/header with module\n");
     fprintf(stderr, "                                    comma separated namespace of the files\n");
-    fprintf(stderr, "  --importHeader NAME  required for cpp/jni to say which header to import\n");
+    fprintf(stderr,"  --importHeader NAME  required for cpp/jni to say which header to import "
+            "for write helpers\n");
+    fprintf(stderr,"  --atomsInfoImportHeader NAME  required for cpp to say which header to import "
+            "for statsd metadata\n");
     fprintf(stderr, "  --javaPackage PACKAGE             the package for the java file.\n");
     fprintf(stderr, "                                    required for java with module\n");
     fprintf(stderr, "  --javaClass CLASS    the class name of the java class.\n");
@@ -1260,10 +1011,13 @@ run(int argc, char const*const* argv)
     string headerFilename;
     string javaFilename;
     string jniFilename;
+    string atomsInfoCppFilename;
+    string atomsInfoHeaderFilename;
 
     string moduleName = DEFAULT_MODULE_NAME;
     string cppNamespace = DEFAULT_CPP_NAMESPACE;
     string cppHeaderImport = DEFAULT_CPP_HEADER_IMPORT;
+    string atomsInfoCppHeaderImport = DEFAULT_ATOMS_INFO_CPP_HEADER_IMPORT;
     string javaPackage = DEFAULT_JAVA_PACKAGE;
     string javaClass = DEFAULT_JAVA_CLASS;
 
@@ -1335,14 +1089,38 @@ run(int argc, char const*const* argv)
                 return 1;
             }
             javaClass = argv[index];
+        } else if (0 == strcmp("--atomsInfoHeader", argv[index])) {
+            index++;
+            if (index >= argc) {
+                print_usage();
+                return 1;
+            }
+            atomsInfoHeaderFilename = argv[index];
+        } else if (0 == strcmp("--atomsInfoCpp", argv[index])) {
+            index++;
+            if (index >= argc) {
+                print_usage();
+                return 1;
+            }
+            atomsInfoCppFilename = argv[index];
+        } else if (0 == strcmp("--atomsInfoImportHeader", argv[index])) {
+            index++;
+            if (index >= argc) {
+                print_usage();
+                return 1;
+            }
+            atomsInfoCppHeaderImport = argv[index];
         }
+
         index++;
     }
 
     if (cppFilename.size() == 0
             && headerFilename.size() == 0
             && javaFilename.size() == 0
-            && jniFilename.size() == 0) {
+            && jniFilename.size() == 0
+            && atomsInfoHeaderFilename.size() == 0
+            && atomsInfoCppFilename.size() == 0) {
         print_usage();
         return 1;
     }
@@ -1358,6 +1136,30 @@ run(int argc, char const*const* argv)
     vector<java_type_t> attributionSignature;
     collate_atom(android::os::statsd::AttributionNode::descriptor(),
                  &attributionDecl, &attributionSignature);
+
+    // Write the atoms info .cpp file
+    if (atomsInfoCppFilename.size() != 0) {
+        FILE* out = fopen(atomsInfoCppFilename.c_str(), "w");
+        if (out == NULL) {
+            fprintf(stderr, "Unable to open file for write: %s\n", atomsInfoCppFilename.c_str());
+            return 1;
+        }
+        errorCount = android::stats_log_api_gen::write_atoms_info_cpp(
+            out, atoms, cppNamespace, atomsInfoCppHeaderImport, cppHeaderImport);
+        fclose(out);
+    }
+
+    // Write the atoms info .h file
+    if (atomsInfoHeaderFilename.size() != 0) {
+        FILE* out = fopen(atomsInfoHeaderFilename.c_str(), "w");
+        if (out == NULL) {
+            fprintf(stderr, "Unable to open file for write: %s\n", atomsInfoHeaderFilename.c_str());
+            return 1;
+        }
+        errorCount = android::stats_log_api_gen::write_atoms_info_header(out, atoms, cppNamespace);
+        fclose(out);
+    }
+
 
     // Write the .cpp file
     if (cppFilename.size() != 0) {

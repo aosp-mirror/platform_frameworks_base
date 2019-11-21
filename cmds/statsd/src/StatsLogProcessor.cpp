@@ -23,6 +23,7 @@
 #include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
 #include "StatsLogProcessor.h"
 #include "android-base/stringprintf.h"
+#include "atoms_info.h"
 #include "external/StatsPullerManager.h"
 #include "guardrail/StatsdStats.h"
 #include "metrics/CountMetricProducer.h"

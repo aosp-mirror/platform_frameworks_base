@@ -16,8 +16,18 @@
 
 #include "utils.h"
 
+#include "android-base/strings.h"
+
 namespace android {
 namespace stats_log_api_gen {
+
+static void build_non_chained_decl_map(const Atoms& atoms,
+                                std::map<int, set<AtomDecl>::const_iterator>* decl_map) {
+    for (set<AtomDecl>::const_iterator atom = atoms.non_chained_decls.begin();
+        atom != atoms.non_chained_decls.end(); atom++) {
+        decl_map->insert(std::make_pair(atom->code, atom));
+    }
+}
 
 /**
  * Turn lower and camel case into upper case with underscores.
@@ -102,12 +112,96 @@ bool signature_needed_for_module(const set<string>& modules, const string& modul
     return modules.find(moduleName) != modules.end();
 }
 
-void build_non_chained_decl_map(const Atoms& atoms,
-                                std::map<int, set<AtomDecl>::const_iterator>* decl_map) {
-    for (set<AtomDecl>::const_iterator atom = atoms.non_chained_decls.begin();
-        atom != atoms.non_chained_decls.end(); atom++) {
-        decl_map->insert(std::make_pair(atom->code, atom));
+// Native
+// Writes namespaces for the cpp and header files, returning the number of namespaces written.
+void write_namespace(FILE* out, const string& cppNamespaces) {
+    vector<string> cppNamespaceVec = android::base::Split(cppNamespaces, ",");
+    for (string cppNamespace : cppNamespaceVec) {
+        fprintf(out, "namespace %s {\n", cppNamespace.c_str());
     }
+}
+
+// Writes namespace closing brackets for cpp and header files.
+void write_closing_namespace(FILE* out, const string& cppNamespaces) {
+    vector<string> cppNamespaceVec = android::base::Split(cppNamespaces, ",");
+    for (auto it = cppNamespaceVec.rbegin(); it != cppNamespaceVec.rend(); ++it) {
+        fprintf(out, "} // namespace %s\n", it->c_str());
+    }
+}
+
+static void write_cpp_usage(
+    FILE* out, const string& method_name, const string& atom_code_name,
+    const AtomDecl& atom, const AtomDecl &attributionDecl) {
+    fprintf(out, "     * Usage: %s(StatsLog.%s", method_name.c_str(),
+            atom_code_name.c_str());
+
+    for (vector<AtomField>::const_iterator field = atom.fields.begin();
+            field != atom.fields.end(); field++) {
+        if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
+            for (auto chainField : attributionDecl.fields) {
+                if (chainField.javaType == JAVA_TYPE_STRING) {
+                    fprintf(out, ", const std::vector<%s>& %s",
+                         cpp_type_name(chainField.javaType),
+                         chainField.name.c_str());
+                } else {
+                    fprintf(out, ", const %s* %s, size_t %s_length",
+                         cpp_type_name(chainField.javaType),
+                         chainField.name.c_str(), chainField.name.c_str());
+                }
+            }
+        } else if (field->javaType == JAVA_TYPE_KEY_VALUE_PAIR) {
+            fprintf(out, ", const std::map<int, int32_t>& %s_int"
+                         ", const std::map<int, int64_t>& %s_long"
+                         ", const std::map<int, char const*>& %s_str"
+                         ", const std::map<int, float>& %s_float",
+                         field->name.c_str(),
+                         field->name.c_str(),
+                         field->name.c_str(),
+                         field->name.c_str());
+        } else {
+            fprintf(out, ", %s %s", cpp_type_name(field->javaType), field->name.c_str());
+        }
+    }
+    fprintf(out, ");\n");
+}
+
+void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl,
+        const string& moduleName) {
+    fprintf(out, "/**\n");
+    fprintf(out, " * Constants for atom codes.\n");
+    fprintf(out, " */\n");
+    fprintf(out, "enum {\n");
+
+    std::map<int, set<AtomDecl>::const_iterator> atom_code_to_non_chained_decl_map;
+    build_non_chained_decl_map(atoms, &atom_code_to_non_chained_decl_map);
+
+    size_t i = 0;
+    // Print atom constants
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+        atom != atoms.decls.end(); atom++) {
+        // Skip if the atom is not needed for the module.
+        if (!atom_needed_for_module(*atom, moduleName)) {
+            continue;
+        }
+        string constant = make_constant_name(atom->name);
+        fprintf(out, "\n");
+        fprintf(out, "    /**\n");
+        fprintf(out, "     * %s %s\n", atom->message.c_str(), atom->name.c_str());
+        write_cpp_usage(out, "stats_write", constant, *atom, attributionDecl);
+
+        auto non_chained_decl = atom_code_to_non_chained_decl_map.find(atom->code);
+        if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
+            write_cpp_usage(out, "stats_write_non_chained", constant, *non_chained_decl->second,
+                attributionDecl);
+        }
+        fprintf(out, "     */\n");
+        char const* const comma = (i == atoms.decls.size() - 1) ? "" : ",";
+        fprintf(out, "    %s = %d%s\n", constant.c_str(), atom->code, comma);
+        i++;
+    }
+    fprintf(out, "\n");
+    fprintf(out, "};\n");
+    fprintf(out, "\n");
 }
 
 // Java

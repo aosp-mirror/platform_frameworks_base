@@ -21,6 +21,7 @@ cc_binary_host {
     name: "stats-log-api-gen",
     srcs: [
         "Collation.cpp",
+        "atoms_info_writer.cpp",
         "java_writer.cpp",
         "java_writer_q.cpp",
         "main.cpp",
@@ -102,13 +103,19 @@ genrule {
 cc_library {
     name: "libstatslog",
     host_supported: true,
-    generated_sources: ["statslog.cpp"],
-    generated_headers: ["statslog.h"],
+    generated_sources: [
+        "statslog.cpp",
+    ],
+    generated_headers: [
+        "statslog.h"
+    ],
     cflags: [
         "-Wall",
         "-Werror",
     ],
-    export_generated_headers: ["statslog.h"],
+    export_generated_headers: [
+        "statslog.h"
+    ],
     shared_libs: [
         "liblog",
         "libcutils",
@@ -127,3 +134,4 @@ cc_library {
         },
     },
 }
+

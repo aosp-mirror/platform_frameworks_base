@@ -16,7 +16,7 @@
 #pragma once
 
 #include "config/ConfigKey.h"
-#include "statslog.h"
+#include "atoms_info.h"
 
 #include <gtest/gtest_prod.h>
 #include <log/log_time.h>
