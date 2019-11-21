@@ -164,7 +164,13 @@ class ClassPrinter(
         getSuppressedMembers(classAst)
     }
     val builderSuppressedMembers by lazy {
-        getSuppressedMembers(customBaseBuilderAst)
+        getSuppressedMembers(customBaseBuilderAst) + suppressedMembers.mapNotNull {
+            if (it.startsWith("$CANONICAL_BUILDER_CLASS.")) {
+                it.removePrefix("$CANONICAL_BUILDER_CLASS.")
+            } else {
+                null
+            }
+        }
     }
 
     private fun getSuppressedMembers(clazz: ClassOrInterfaceDeclaration?): List<String> {
