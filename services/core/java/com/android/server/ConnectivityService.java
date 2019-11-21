@@ -6336,10 +6336,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final ArrayMap<NetworkRequestInfo, NetworkAgentInfo> reassignedRequests = new ArrayMap<>();
 
-        // Find and migrate to this Network any NetworkRequests for
-        // which this network is now the best.
-        final ArrayList<NetworkAgentInfo> removedRequests = new ArrayList<>();
-        final ArrayList<NetworkRequestInfo> addedRequests = new ArrayList<>();
         NetworkCapabilities nc = newNetwork.networkCapabilities;
         if (VDBG) log(" network has: " + nc);
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
@@ -6366,49 +6362,54 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
                 if (currentNetwork == null || currentNetwork.getCurrentScore() < score) {
                     reassignedRequests.put(nri, newNetwork);
-                    if (VDBG) log("rematch for " + newNetwork.name());
-                    if (currentNetwork != null) {
-                        if (VDBG || DDBG){
-                            log("   accepting network in place of " + currentNetwork.name());
-                        }
-                        currentNetwork.removeRequest(nri.request.requestId);
-                        currentNetwork.lingerRequest(nri.request, now, mLingerDelayMs);
-                        removedRequests.add(currentNetwork);
-                    } else {
-                        if (VDBG || DDBG) log("   accepting network in place of null");
-                    }
-                    newNetwork.unlingerRequest(nri.request);
-                    nri.mSatisfier = newNetwork;
-                    if (!newNetwork.addRequest(nri.request)) {
-                        Slog.wtf(TAG, "BUG: " + newNetwork.name() + " already has " + nri.request);
-                    }
-                    addedRequests.add(nri);
-                    keep = true;
-                    // Tell NetworkFactories about the new score, so they can stop
-                    // trying to connect if they know they cannot match it.
-                    // TODO - this could get expensive if we have a lot of requests for this
-                    // network.  Think about if there is a way to reduce this.  Push
-                    // netid->request mapping to each factory?
-                    sendUpdatedScoreToFactories(nri.request, newNetwork);
-                    if (isDefaultRequest(nri)) {
-                        isNewDefault = true;
-                        oldDefaultNetwork = currentNetwork;
-                        if (currentNetwork != null) {
-                            mLingerMonitor.noteLingerDefaultNetwork(currentNetwork, newNetwork);
-                        }
-                    }
                 }
             } else if (newNetwork.isSatisfyingRequest(nri.request.requestId)) {
                 reassignedRequests.put(nri, null);
             }
         }
 
+        // Find and migrate to this Network any NetworkRequests for
+        // which this network is now the best.
+        final ArrayList<NetworkAgentInfo> removedRequests = new ArrayList<>();
+        final ArrayList<NetworkRequestInfo> addedRequests = new ArrayList<>();
         for (final Map.Entry<NetworkRequestInfo, NetworkAgentInfo> entry :
                 reassignedRequests.entrySet()) {
             final NetworkRequestInfo nri = entry.getKey();
             final NetworkAgentInfo previousSatisfier = nri.mSatisfier;
             final NetworkAgentInfo newSatisfier = entry.getValue();
-            if (newSatisfier == null) {
+            if (newSatisfier != null) {
+                if (VDBG) log("rematch for " + newSatisfier.name());
+                if (previousSatisfier != null) {
+                    if (VDBG || DDBG) {
+                        log("   accepting network in place of " + previousSatisfier.name());
+                    }
+                    previousSatisfier.removeRequest(nri.request.requestId);
+                    previousSatisfier.lingerRequest(nri.request, now, mLingerDelayMs);
+                    removedRequests.add(previousSatisfier);
+                } else {
+                    if (VDBG || DDBG) log("   accepting network in place of null");
+                }
+                newSatisfier.unlingerRequest(nri.request);
+                nri.mSatisfier = newSatisfier;
+                if (!newSatisfier.addRequest(nri.request)) {
+                    Slog.wtf(TAG, "BUG: " + newSatisfier.name() + " already has " + nri.request);
+                }
+                addedRequests.add(nri);
+                keep = true;
+                // Tell NetworkFactories about the new score, so they can stop
+                // trying to connect if they know they cannot match it.
+                // TODO - this could get expensive if we have a lot of requests for this
+                // network.  Think about if there is a way to reduce this.  Push
+                // netid->request mapping to each factory?
+                sendUpdatedScoreToFactories(nri.request, newSatisfier);
+                if (isDefaultRequest(nri)) {
+                    isNewDefault = true;
+                    oldDefaultNetwork = previousSatisfier;
+                    if (previousSatisfier != null) {
+                        mLingerMonitor.noteLingerDefaultNetwork(previousSatisfier, newSatisfier);
+                    }
+                }
+            } else {
                 // If "newNetwork" is listed as satisfying "nri" but no longer satisfies "nri",
                 // mark it as no longer satisfying "nri".  Because networks are processed by
                 // rematchAllNetworksAndRequests() in descending score order, "currentNetwork" will
