@@ -42,7 +42,6 @@ import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.IBinder;
-import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.WorkSource;
@@ -325,7 +324,6 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public void notifyUserOfApBandConversion(String packageName) {
         throw new UnsupportedOperationException();
     }

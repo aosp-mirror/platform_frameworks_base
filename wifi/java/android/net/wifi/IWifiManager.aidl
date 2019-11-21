@@ -161,8 +161,6 @@ interface IWifiManager
 
     boolean setWifiApConfiguration(in WifiConfiguration wifiConfig, String packageName);
 
-    void notifyUserOfApBandConversion(String packageName);
-
     void enableTdls(String remoteIPAddress, boolean enable);
 
     void enableTdlsWithMacAddress(String remoteMacAddress, boolean enable);
