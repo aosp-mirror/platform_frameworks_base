@@ -26,6 +26,9 @@ import android.util.MutableInt;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.CriticalNative;
+import dalvik.annotation.optimization.FastNative;
+
 import libcore.util.HexEncoding;
 
 import java.nio.charset.StandardCharsets;
@@ -93,18 +96,43 @@ public class SystemProperties {
         }
     }
 
+    // The one-argument version of native_get used to be a regular native function. Nowadays,
+    // we use the two-argument form of native_get all the time, but we can't just delete the
+    // one-argument overload: apps use it via reflection, as the UnsupportedAppUsage annotation
+    // indicates. Let's just live with having a Java function with a very unusual name.
     @UnsupportedAppUsage
-    private static native String native_get(String key);
+    private static String native_get(String key) {
+        return native_get(key, "");
+    }
+
+    @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native String native_get(String key, String def);
+    @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native int native_get_int(String key, int def);
+    @FastNative
     @UnsupportedAppUsage
     private static native long native_get_long(String key, long def);
+    @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native boolean native_get_boolean(String key, boolean def);
+
+    @FastNative
+    private static native long native_find(String name);
+    @FastNative
+    private static native String native_get(long handle);
+    @CriticalNative
+    private static native int native_get_int(long handle, int def);
+    @CriticalNative
+    private static native long native_get_long(long handle, long def);
+    @CriticalNative
+    private static native boolean native_get_boolean(long handle, boolean def);
+
+    // _NOT_ FastNative: native_set performs IPC and can block
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native void native_set(String key, String def);
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private static native void native_add_change_callback();
     private static native void native_report_sysprop_change();
@@ -229,25 +257,27 @@ public class SystemProperties {
 
     @SuppressWarnings("unused")  // Called from native code.
     private static void callChangeCallbacks() {
+        ArrayList<Runnable> callbacks = null;
         synchronized (sChangeCallbacks) {
             //Log.i("foo", "Calling " + sChangeCallbacks.size() + " change callbacks!");
             if (sChangeCallbacks.size() == 0) {
                 return;
             }
-            ArrayList<Runnable> callbacks = new ArrayList<Runnable>(sChangeCallbacks);
-            final long token = Binder.clearCallingIdentity();
-            try {
-                for (int i = 0; i < callbacks.size(); i++) {
-                    try {
-                        callbacks.get(i).run();
-                    } catch (Throwable t) {
-                        Log.wtf(TAG, "Exception in SystemProperties change callback", t);
-                        // Ignore and try to go on.
-                    }
+            callbacks = new ArrayList<Runnable>(sChangeCallbacks);
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            for (int i = 0; i < callbacks.size(); i++) {
+                try {
+                    callbacks.get(i).run();
+                } catch (Throwable t) {
+                    // Ignore and try to go on. Don't use wtf here: that
+                    // will cause the process to exit on some builds and break tests.
+                    Log.e(TAG, "Exception in SystemProperties change callback", t);
                 }
-            } finally {
-                Binder.restoreCallingIdentity(token);
             }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -283,5 +313,61 @@ public class SystemProperties {
 
     @UnsupportedAppUsage
     private SystemProperties() {
+    }
+
+    /**
+     * Look up a property location by name.
+     * @name name of the property
+     * @return property handle or {@code null} if property isn't set
+     * @hide
+     */
+    @Nullable public static Handle find(@NonNull String name) {
+        long nativeHandle = native_find(name);
+        if (nativeHandle == 0) {
+            return null;
+        }
+        return new Handle(nativeHandle);
+    }
+
+    /**
+     * Handle to a pre-located property. Looking up a property handle in advance allows
+     * for optimal repeated lookup of a single property.
+     * @hide
+     */
+    public static final class Handle {
+
+        private final long mNativeHandle;
+
+        /**
+         * @return Value of the property
+         */
+        @NonNull public String get() {
+            return native_get(mNativeHandle);
+        }
+        /**
+         * @param def default value
+         * @return value or {@code def} on parse error
+         */
+        public int getInt(int def) {
+            return native_get_int(mNativeHandle, def);
+        }
+        /**
+         * @param def default value
+         * @return value or {@code def} on parse error
+         */
+        public long getLong(long def) {
+            return native_get_long(mNativeHandle, def);
+        }
+        /**
+         * @param def default value
+         * @return value or {@code def} on parse error
+         */
+        public boolean getBoolean(boolean def) {
+            return native_get_boolean(mNativeHandle, def);
+        }
+
+        private Handle(long nativeHandle) {
+            mNativeHandle = nativeHandle;
+        }
     }
 }
