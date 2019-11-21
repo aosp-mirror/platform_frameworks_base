@@ -138,8 +138,8 @@ public final class SmsCbMessage implements Parcelable {
     public @interface MessagePriority {}
 
     /**
-     * ATIS-0700041 Section 5.2.8 WAC Geo-Fencing Maximum Wait Time Table 12.
-     * @hide
+     * Integer indicating that the maximum wait time is not set.
+     * Based on ATIS-0700041 Section 5.2.8 WAC Geo-Fencing Maximum Wait Time Table 12.
      */
     public static final int MAXIMUM_WAIT_TIME_NOT_SET = 255;
 
@@ -209,6 +209,7 @@ public final class SmsCbMessage implements Parcelable {
 
     /**
      * Create a new SmsCbMessage with the specified data.
+     * @hide
      */
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
             @NonNull SmsCbLocation location, int serviceCategory, @Nullable String language,
@@ -221,14 +222,14 @@ public final class SmsCbMessage implements Parcelable {
     }
 
     /**
-     * Create a new {@link SmsCbMessage} with the warning area coordinates information.
-     * @hide
+     * Create a new {@link SmsCbMessage} with the specified data, including warning area
+     * coordinates information.
      */
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
-            SmsCbLocation location, int serviceCategory, String language, String body,
-            int priority, SmsCbEtwsInfo etwsWarningInfo, SmsCbCmasInfo cmasWarningInfo,
-            int maximumWaitTimeSec, List<Geometry> geometries, long receivedTimeMillis,
-            int slotIndex) {
+            @NonNull SmsCbLocation location, int serviceCategory, @Nullable String language,
+            @Nullable String body, int priority, @Nullable SmsCbEtwsInfo etwsWarningInfo,
+            @Nullable SmsCbCmasInfo cmasWarningInfo, int maximumWaitTimeSec,
+            @Nullable List<Geometry> geometries, long receivedTimeMillis, int slotIndex) {
         mMessageFormat = messageFormat;
         mGeographicalScope = geographicalScope;
         mSerialNumber = serialNumber;
