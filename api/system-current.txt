@@ -8142,6 +8142,7 @@ package android.telephony {
   }
 
   public final class SmsCbLocation implements android.os.Parcelable {
+    ctor public SmsCbLocation(@NonNull String, int, int);
     method public int describeContents();
     method public int getCid();
     method public int getLac();
