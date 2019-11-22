@@ -356,7 +356,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10065
+    // Next: 10067
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -423,6 +423,7 @@ message Atom {
         SurfaceflingerStatsLayerInfo surfaceflinger_stats_layer_info = 10063;
         ProcessMemorySnapshot process_memory_snapshot = 10064;
         VmsClientStats vms_client_stats = 10065;
+        NotificationRemoteViews notification_remote_views = 10066;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -4945,6 +4946,24 @@ message ProcStats {
  */
 message ProcStatsPkgProc {
     optional ProcessStatsSectionProto proc_stats_section = 1;
+}
+
+// Next Tag: 2
+message PackageRemoteViewInfoProto {
+    optional string package_name = 1;
+    // add per-package additional info here (like channels)
+}
+
+// Next Tag: 2
+message NotificationRemoteViewsProto {
+    repeated PackageRemoteViewInfoProto package_remote_view_info = 1;
+}
+
+/**
+ * Pulled from NotificationManagerService.java
+ */
+message NotificationRemoteViews {
+    optional NotificationRemoteViewsProto notification_remote_views = 1;
 }
 
 message PowerProfileProto {
