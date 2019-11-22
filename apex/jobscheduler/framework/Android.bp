@@ -11,7 +11,7 @@ filegroup {
 }
 
 java_library {
-    name: "jobscheduler-framework",
+    name: "framework-jobscheduler",
     installable: false,
     compile_dex: true,
     sdk_version: "core_platform",

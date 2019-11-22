@@ -1,7 +1,7 @@
 // Job Scheduler Service jar, which will eventually be put in the jobscheduler mainline apex.
-// jobscheduler-service needs to be added to PRODUCT_SYSTEM_SERVER_JARS.
+// service-jobscheduler needs to be added to PRODUCT_SYSTEM_SERVER_JARS.
 java_library {
-    name: "jobscheduler-service",
+    name: "service-jobscheduler",
     installable: true,
 
     srcs: [
