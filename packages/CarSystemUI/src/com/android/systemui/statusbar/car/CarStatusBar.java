@@ -95,7 +95,6 @@ import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -344,7 +343,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mNavigationBarController = Dependency.get(NavigationBarController.class);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
-        mConfigurationController = Dependency.get(ConfigurationController.class);
     }
 
     @Override
