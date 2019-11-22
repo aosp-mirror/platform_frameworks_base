@@ -21,11 +21,14 @@ import static com.android.internal.util.BitUtils.bytesToLEInt;
 import static com.android.internal.util.BitUtils.getUint16;
 import static com.android.internal.util.BitUtils.getUint32;
 import static com.android.internal.util.BitUtils.getUint8;
+import static com.android.internal.util.BitUtils.packBits;
 import static com.android.internal.util.BitUtils.uint16;
 import static com.android.internal.util.BitUtils.uint32;
 import static com.android.internal.util.BitUtils.uint8;
+import static com.android.internal.util.BitUtils.unpackBits;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -34,6 +37,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Random;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -110,20 +115,66 @@ public class BitUtilsTest {
 
     @Test
     public void testUnsignedGetters() {
-      ByteBuffer b = ByteBuffer.allocate(4);
-      b.putInt(0xffff);
+        ByteBuffer b = ByteBuffer.allocate(4);
+        b.putInt(0xffff);
 
-      assertEquals(0x0, getUint8(b, 0));
-      assertEquals(0x0, getUint8(b, 1));
-      assertEquals(0xff, getUint8(b, 2));
-      assertEquals(0xff, getUint8(b, 3));
+        assertEquals(0x0, getUint8(b, 0));
+        assertEquals(0x0, getUint8(b, 1));
+        assertEquals(0xff, getUint8(b, 2));
+        assertEquals(0xff, getUint8(b, 3));
 
-      assertEquals(0x0, getUint16(b, 0));
-      assertEquals(0xffff, getUint16(b, 2));
+        assertEquals(0x0, getUint16(b, 0));
+        assertEquals(0xffff, getUint16(b, 2));
 
-      b.rewind();
-      b.putInt(0xffffffff);
-      assertEquals(0xffffffffL, getUint32(b, 0));
+        b.rewind();
+        b.putInt(0xffffffff);
+        assertEquals(0xffffffffL, getUint32(b, 0));
+    }
+
+    @Test
+    public void testBitsPacking() {
+        BitPackingTestCase[] testCases = {
+            new BitPackingTestCase(0, ints()),
+            new BitPackingTestCase(1, ints(0)),
+            new BitPackingTestCase(2, ints(1)),
+            new BitPackingTestCase(3, ints(0, 1)),
+            new BitPackingTestCase(4, ints(2)),
+            new BitPackingTestCase(6, ints(1, 2)),
+            new BitPackingTestCase(9, ints(0, 3)),
+            new BitPackingTestCase(~Long.MAX_VALUE, ints(63)),
+            new BitPackingTestCase(~Long.MAX_VALUE + 1, ints(0, 63)),
+            new BitPackingTestCase(~Long.MAX_VALUE + 2, ints(1, 63)),
+        };
+        for (BitPackingTestCase tc : testCases) {
+            int[] got = unpackBits(tc.packedBits);
+            assertTrue(
+                    "unpackBits("
+                            + tc.packedBits
+                            + "): expected "
+                            + Arrays.toString(tc.bits)
+                            + " but got "
+                            + Arrays.toString(got),
+                    Arrays.equals(tc.bits, got));
+        }
+        for (BitPackingTestCase tc : testCases) {
+            long got = packBits(tc.bits);
+            assertEquals(
+                    "packBits("
+                            + Arrays.toString(tc.bits)
+                            + "): expected "
+                            + tc.packedBits
+                            + " but got "
+                            + got,
+                    tc.packedBits,
+                    got);
+        }
+
+        long[] moreTestCases = {
+            0, 1, -1, 23895, -908235, Long.MAX_VALUE, Long.MIN_VALUE, new Random().nextLong(),
+        };
+        for (long l : moreTestCases) {
+            assertEquals(l, packBits(unpackBits(l)));
+        }
     }
 
     static byte[] bytes(int b1, int b2, int b3, int b4) {
@@ -132,5 +183,19 @@ public class BitUtilsTest {
 
     static byte b(int i) {
         return (byte) i;
+    }
+
+    static int[] ints(int... array) {
+        return array;
+    }
+
+    static class BitPackingTestCase {
+        final int[] bits;
+        final long packedBits;
+
+        BitPackingTestCase(long packedBits, int[] bits) {
+            this.bits = bits;
+            this.packedBits = packedBits;
+        }
     }
 }
