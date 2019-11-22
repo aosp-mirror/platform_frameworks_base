@@ -327,6 +327,8 @@ class ProcessRecord implements WindowProcessListener {
     int mCachedProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
     int mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
 
+    boolean mReachable; // Whether or not this process is reachable from given process
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
