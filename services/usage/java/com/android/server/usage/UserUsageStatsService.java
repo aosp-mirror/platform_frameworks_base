@@ -34,9 +34,10 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
+import android.os.Process;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -46,6 +47,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
 import com.android.server.usage.UsageStatsDatabase.StatCombiner;
 
 import java.io.File;
@@ -53,7 +55,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -113,9 +115,6 @@ class UserUsageStatsService {
     void init(final long currentTimeMillis) {
         readPackageMappingsLocked();
         mDatabase.init(currentTimeMillis);
-        if (mDatabase.wasUpgradePerformed()) {
-            mDatabase.prunePackagesDataOnUpgrade(getInstalledPackages());
-        }
 
         int nullCount = 0;
         for (int i = 0; i < mCurrentStats.length; i++) {
@@ -185,6 +184,7 @@ class UserUsageStatsService {
     private void readPackageMappingsLocked() {
         mDatabase.readMappingsLocked();
         updatePackageMappingsLocked();
+        cleanUpPackageMappingsLocked();
     }
 
     /**
@@ -216,24 +216,42 @@ class UserUsageStatsService {
     }
 
     /**
-     * Fetches a map of package names to their install times. This includes all installed packages,
-     * including those packages which have been uninstalled with the DONT_DELETE_DATA flag.
-     * Note: this is supposed be a helper method which is only used on database upgrades - it should
-     * not be called otherwise since it's implementation performs a heavy query to package manager.
+     * Queries Package Manager for a list of installed packages and removes those packages from
+     * mPackagesTokenData which are not installed any more.
+     * This will only happen once per device boot, when the user is unlocked for the first time.
      */
-    private HashMap<String, Long> getInstalledPackages() {
-        final PackageManager packageManager = mContext.getPackageManager();
-        if (packageManager == null) {
-            return null;
+    private void cleanUpPackageMappingsLocked() {
+        final long timeNow = System.currentTimeMillis();
+        /*
+         Note (b/142501248): PackageManagerInternal#getInstalledApplications is not lightweight.
+         Once its implementation is updated, or it's replaced with a better alternative, update
+         the call here to use it. For now, using the heavy #getInstalledApplications is okay since
+         this clean-up is only performed once every boot.
+         */
+        final PackageManagerInternal packageManagerInternal =
+                LocalServices.getService(PackageManagerInternal.class);
+        if (packageManagerInternal == null) {
+            return;
         }
-        final List<PackageInfo> installedPackages = packageManager.getInstalledPackagesAsUser(
-                PackageManager.MATCH_UNINSTALLED_PACKAGES, mUserId);
-        final HashMap<String, Long> packagesMap = new HashMap<>();
+        final List<ApplicationInfo> installedPackages =
+                packageManagerInternal.getInstalledApplications(0, mUserId, Process.SYSTEM_UID);
+        // convert the package list to a set for easy look-ups
+        final HashSet<String> packagesSet = new HashSet<>(installedPackages.size());
         for (int i = installedPackages.size() - 1; i >= 0; i--) {
-            final PackageInfo packageInfo = installedPackages.get(i);
-            packagesMap.put(packageInfo.packageName, packageInfo.firstInstallTime);
+            packagesSet.add(installedPackages.get(i).packageName);
         }
-        return packagesMap;
+        final List<String> removedPackages = new ArrayList<>();
+        // populate list of packages that are found in the mappings but not in the installed list
+        for (int i = mDatabase.mPackagesTokenData.packagesToTokensMap.size() - 1; i >= 0; i--) {
+            if (!packagesSet.contains(mDatabase.mPackagesTokenData.packagesToTokensMap.keyAt(i))) {
+                removedPackages.add(mDatabase.mPackagesTokenData.packagesToTokensMap.keyAt(i));
+            }
+        }
+
+        // remove packages in the mappings that are no longer installed
+        for (int i = removedPackages.size() - 1; i >= 0; i--) {
+            mDatabase.mPackagesTokenData.removePackage(removedPackages.get(i), timeNow);
+        }
     }
 
     boolean pruneUninstalledPackagesData() {
