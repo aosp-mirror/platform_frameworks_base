@@ -719,7 +719,20 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 || (mConfig != null && mConfig.shared != config.shared)) {
             return false;
         }
-        return security == getSecurity(config);
+
+        final int configSecurity = getSecurity(config);
+        final WifiManager wifiManager = getWifiManager();
+        switch (security) {
+            case SECURITY_PSK_SAE_TRANSITION:
+                return configSecurity == SECURITY_PSK
+                        || (wifiManager.isWpa3SaeSupported() && configSecurity == SECURITY_SAE);
+            case SECURITY_OWE_TRANSITION:
+                return configSecurity == SECURITY_NONE
+                        || (wifiManager.isEnhancedOpenSupported()
+                                && configSecurity == SECURITY_OWE);
+            default:
+                return security == configSecurity;
+        }
     }
 
     public WifiConfiguration getConfig() {
@@ -1258,9 +1271,33 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mAccessPointListener = listener;
     }
 
+    private static final String sPskSuffix = "," + String.valueOf(SECURITY_PSK);
+    private static final String sSaeSuffix = "," + String.valueOf(SECURITY_SAE);
+    private static final String sPskSaeSuffix = "," + String.valueOf(SECURITY_PSK_SAE_TRANSITION);
+    private static final String sOweSuffix = "," + String.valueOf(SECURITY_OWE);
+    private static final String sOpenSuffix = "," + String.valueOf(SECURITY_NONE);
+    private static final String sOweTransSuffix = "," + String.valueOf(SECURITY_OWE_TRANSITION);
+
     private boolean isKeyEqual(String compareTo) {
         if (mKey == null) {
             return false;
+        }
+
+        if (compareTo.endsWith(sPskSuffix) || compareTo.endsWith(sSaeSuffix)) {
+            if (mKey.endsWith(sPskSaeSuffix)) {
+                // Special handling for PSK-SAE transition mode. If the AP has advertised both,
+                // we compare the key with both PSK and SAE for a match.
+                return TextUtils.equals(mKey.substring(0, mKey.lastIndexOf(',')),
+                        compareTo.substring(0, compareTo.lastIndexOf(',')));
+            }
+        }
+        if (compareTo.endsWith(sOpenSuffix) || compareTo.endsWith(sOweSuffix)) {
+            if (mKey.endsWith(sOweTransSuffix)) {
+                // Special handling for OWE/Open networks. If AP advertises OWE in transition mode
+                // and we have an Open network saved, allow this connection to be established.
+                return TextUtils.equals(mKey.substring(0, mKey.lastIndexOf(',')),
+                        compareTo.substring(0, compareTo.lastIndexOf(',')));
+            }
         }
         return mKey.equals(compareTo);
     }
@@ -1598,6 +1635,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private static int getSecurity(ScanResult result) {
         if (result.capabilities.contains("WEP")) {
             return SECURITY_WEP;
+        } else if (result.capabilities.contains("PSK+SAE")) {
+            return SECURITY_PSK_SAE_TRANSITION;
         } else if (result.capabilities.contains("SAE")) {
             return SECURITY_SAE;
         } else if (result.capabilities.contains("PSK")) {
@@ -1606,6 +1645,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return SECURITY_EAP_SUITE_B;
         } else if (result.capabilities.contains("EAP")) {
             return SECURITY_EAP;
+        } else if (result.capabilities.contains("OWE_TRANSITION")) {
+            return SECURITY_OWE_TRANSITION;
         } else if (result.capabilities.contains("OWE")) {
             return SECURITY_OWE;
         }
@@ -1652,6 +1693,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return "SUITE_B";
         } else if (security == SECURITY_OWE) {
             return "OWE";
+        } else if (security == SECURITY_PSK_SAE_TRANSITION) {
+            return "PSK+SAE";
+        } else if (security == SECURITY_OWE_TRANSITION) {
+            return "OWE_TRANSITION";
         }
         return "NONE";
     }
@@ -1820,17 +1865,5 @@ public class AccessPoint implements Comparable<AccessPoint> {
                 mConnectListener.onFailure(0);
             }
         }
-    }
-
-    /**
-     * Lets the caller know if the network was cloned from another network
-     *
-     * @return true if the network is cloned
-     */
-    public boolean isCloned() {
-        if (mConfig == null) {
-            return false;
-        }
-        return mConfig.clonedNetworkConfigKey != null;
     }
 }
