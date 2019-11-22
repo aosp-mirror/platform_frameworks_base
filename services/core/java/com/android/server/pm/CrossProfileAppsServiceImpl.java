@@ -202,6 +202,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             final List<ResolveInfo> apps =
                     mInjector.getPackageManagerInternal().queryIntentActivities(
                             launchIntent,
+                            launchIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                             MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                             callingUid,
                             userId);

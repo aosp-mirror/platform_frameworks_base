@@ -23097,8 +23097,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public List<ResolveInfo> queryIntentActivities(
-                Intent intent, int flags, int filterCallingUid, int userId) {
-            final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
+                Intent intent, String resolvedType, int flags, int filterCallingUid, int userId) {
             return PackageManagerService.this
                     .queryIntentActivitiesInternal(intent, resolvedType, flags, filterCallingUid,
                             userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
