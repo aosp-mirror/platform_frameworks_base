@@ -1217,8 +1217,8 @@ public class AccessibilityWindowManager {
                     if (mAccessibilityFocusedWindowId != windowId) {
                         clearAccessibilityFocusLocked(mAccessibilityFocusedWindowId);
                         setAccessibilityFocusedWindowLocked(windowId);
-                        mAccessibilityFocusNodeId = nodeId;
                     }
+                    mAccessibilityFocusNodeId = nodeId;
                 }
             } break;
 
