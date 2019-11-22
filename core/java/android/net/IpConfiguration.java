@@ -16,6 +16,10 @@
 
 package android.net;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.StaticIpConfiguration;
 import android.os.Parcel;
@@ -27,13 +31,17 @@ import java.util.Objects;
  * A class representing a configured network.
  * @hide
  */
-public class IpConfiguration implements Parcelable {
+@SystemApi
+public final class IpConfiguration implements Parcelable {
     private static final String TAG = "IpConfiguration";
 
+    // This enum has been used by apps through reflection for many releases.
+    // Therefore they can't just be removed. Duplicating these constants to
+    // give an alternate SystemApi is a worse option than exposing them.
+    @SuppressLint("Enum")
     public enum IpAssignment {
         /* Use statically configured IP settings. Configuration can be accessed
          * with staticIpConfiguration */
-        @UnsupportedAppUsage
         STATIC,
         /* Use dynamically configured IP settings */
         DHCP,
@@ -42,14 +50,19 @@ public class IpConfiguration implements Parcelable {
         UNASSIGNED
     }
 
+    /** @hide */
     public IpAssignment ipAssignment;
 
+    /** @hide */
     public StaticIpConfiguration staticIpConfiguration;
 
+    // This enum has been used by apps through reflection for many releases.
+    // Therefore they can't just be removed. Duplicating these constants to
+    // give an alternate SystemApi is a worse option than exposing them.
+    @SuppressLint("Enum")
     public enum ProxySettings {
         /* No proxy is to be used. Any existing proxy settings
          * should be cleared. */
-        @UnsupportedAppUsage
         NONE,
         /* Use statically configured proxy. Configuration can be accessed
          * with httpProxy. */
@@ -62,8 +75,10 @@ public class IpConfiguration implements Parcelable {
         PAC
     }
 
+    /** @hide */
     public ProxySettings proxySettings;
 
+    /** @hide */
     @UnsupportedAppUsage
     public ProxyInfo httpProxy;
 
@@ -83,6 +98,7 @@ public class IpConfiguration implements Parcelable {
         init(IpAssignment.UNASSIGNED, ProxySettings.UNASSIGNED, null, null);
     }
 
+    /** @hide */
     @UnsupportedAppUsage
     public IpConfiguration(IpAssignment ipAssignment,
                            ProxySettings proxySettings,
@@ -91,7 +107,7 @@ public class IpConfiguration implements Parcelable {
         init(ipAssignment, proxySettings, staticIpConfiguration, httpProxy);
     }
 
-    public IpConfiguration(IpConfiguration source) {
+    public IpConfiguration(@NonNull IpConfiguration source) {
         this();
         if (source != null) {
             init(source.ipAssignment, source.proxySettings,
@@ -99,35 +115,35 @@ public class IpConfiguration implements Parcelable {
         }
     }
 
-    public IpAssignment getIpAssignment() {
+    public @NonNull IpAssignment getIpAssignment() {
         return ipAssignment;
     }
 
-    public void setIpAssignment(IpAssignment ipAssignment) {
+    public void setIpAssignment(@NonNull IpAssignment ipAssignment) {
         this.ipAssignment = ipAssignment;
     }
 
-    public StaticIpConfiguration getStaticIpConfiguration() {
+    public @Nullable StaticIpConfiguration getStaticIpConfiguration() {
         return staticIpConfiguration;
     }
 
-    public void setStaticIpConfiguration(StaticIpConfiguration staticIpConfiguration) {
+    public void setStaticIpConfiguration(@Nullable StaticIpConfiguration staticIpConfiguration) {
         this.staticIpConfiguration = staticIpConfiguration;
     }
 
-    public ProxySettings getProxySettings() {
+    public @NonNull ProxySettings getProxySettings() {
         return proxySettings;
     }
 
-    public void setProxySettings(ProxySettings proxySettings) {
+    public void setProxySettings(@NonNull ProxySettings proxySettings) {
         this.proxySettings = proxySettings;
     }
 
-    public ProxyInfo getHttpProxy() {
+    public @Nullable ProxyInfo getHttpProxy() {
         return httpProxy;
     }
 
-    public void setHttpProxy(ProxyInfo httpProxy) {
+    public void setHttpProxy(@Nullable ProxyInfo httpProxy) {
         this.httpProxy = httpProxy;
     }
 
@@ -175,13 +191,19 @@ public class IpConfiguration implements Parcelable {
                83 * httpProxy.hashCode();
     }
 
-    /** Implement the Parcelable interface */
+    /**
+     * Implement the Parcelable interface
+     * @hide
+     */
     public int describeContents() {
         return 0;
     }
 
-    /** Implement the Parcelable interface  */
-    public void writeToParcel(Parcel dest, int flags) {
+    /**
+     * Implement the Parcelable interface
+     * @hide
+     */
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(ipAssignment.name());
         dest.writeString(proxySettings.name());
         dest.writeParcelable(staticIpConfiguration, flags);
@@ -189,7 +211,7 @@ public class IpConfiguration implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final @android.annotation.NonNull Creator<IpConfiguration> CREATOR =
+    public static final @NonNull Creator<IpConfiguration> CREATOR =
         new Creator<IpConfiguration>() {
             public IpConfiguration createFromParcel(Parcel in) {
                 IpConfiguration config = new IpConfiguration();
