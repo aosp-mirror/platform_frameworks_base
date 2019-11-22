@@ -370,6 +370,7 @@ public abstract class CellInfo implements Parcelable {
             case Info.hidl_discriminator.lte: return new CellInfoLte(ci, timeStamp);
             case Info.hidl_discriminator.wcdma: return new CellInfoWcdma(ci, timeStamp);
             case Info.hidl_discriminator.tdscdma: return new CellInfoTdscdma(ci, timeStamp);
+            case Info.hidl_discriminator.nr: return new CellInfoNr(ci, timeStamp);
             default: return null;
         }
     }
