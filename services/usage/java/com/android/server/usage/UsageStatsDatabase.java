@@ -52,7 +52,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -123,7 +122,6 @@ public class UsageStatsDatabase {
     private int mCurrentVersion;
     private boolean mFirstUpdate;
     private boolean mNewUpdate;
-    private boolean mUpgradePerformed;
 
     // The obfuscated packages to tokens mappings file
     private final File mPackageMappingsFile;
@@ -327,13 +325,6 @@ public class UsageStatsDatabase {
         return mNewUpdate;
     }
 
-    /**
-     * Was an upgrade performed when this database was initialized?
-     */
-    boolean wasUpgradePerformed() {
-        return mUpgradePerformed;
-    }
-
     private void checkVersionAndBuildLocked() {
         int version;
         String buildFingerprint;
@@ -406,8 +397,6 @@ public class UsageStatsDatabase {
         if (mUpdateBreadcrumb.exists()) {
             // Files should be up to date with current version. Clear the version update breadcrumb
             mUpdateBreadcrumb.delete();
-            // update mUpgradePerformed after breadcrumb is deleted to indicate a successful upgrade
-            mUpgradePerformed = true;
         }
 
         if (mBackupsDir.exists() && !KEEP_BACKUP_DIR) {
@@ -556,117 +545,10 @@ public class UsageStatsDatabase {
         }
     }
 
-    /**
-     * Returns the token mapped to the package removed or {@code PackagesTokenData.UNASSIGNED_TOKEN}
-     * if not mapped.
-     */
-    int onPackageRemoved(String packageName, long timeRemoved) {
+    void onPackageRemoved(String packageName, long timeRemoved) {
         synchronized (mLock) {
-            return mPackagesTokenData.removePackage(packageName, timeRemoved);
+            mPackagesTokenData.removePackage(packageName, timeRemoved);
         }
-    }
-
-    /**
-     * Reads all the usage stats data on disk and rewrites it with any data related to uninstalled
-     * packages omitted.
-     */
-    boolean pruneUninstalledPackagesData() {
-        synchronized (mLock) {
-            for (int i = 0; i < mIntervalDirs.length; i++) {
-                final File[] files = mIntervalDirs[i].listFiles();
-                if (files == null) {
-                    continue;
-                }
-                for (int j = 0; j < files.length; j++) {
-                    try {
-                        final IntervalStats stats = new IntervalStats();
-                        final AtomicFile atomicFile = new AtomicFile(files[j]);
-                        if (!readLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData)) {
-                            continue; // no data was omitted when read so no need to rewrite
-                        }
-                        // Any data related to packages that have been removed would have failed
-                        // the deobfuscation step on read so the IntervalStats object here only
-                        // contains data for packages that are currently installed - all we need
-                        // to do here is write the data back to disk.
-                        writeLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Failed to prune data from: " + files[j].toString());
-                        return false;
-                    }
-                }
-            }
-            try {
-                writeMappingsLocked();
-            } catch (IOException e) {
-                Slog.e(TAG, "Failed to write package mappings after pruning data.");
-                return false;
-            }
-            return true;
-        }
-    }
-
-    /**
-     * Iterates through all the files on disk and prunes any data that belongs to packages that have
-     * been uninstalled (packages that are not in the given list).
-     * Note: this should only be called once, when there has been a database upgrade.
-     *
-     * @param installedPackages map of installed packages (package_name:package_install_time)
-     */
-    void prunePackagesDataOnUpgrade(HashMap<String, Long> installedPackages) {
-        if (installedPackages == null || installedPackages.isEmpty()) {
-            return;
-        }
-        synchronized (mLock) {
-            for (int i = 0; i < mIntervalDirs.length; i++) {
-                final File[] files = mIntervalDirs[i].listFiles();
-                if (files == null) {
-                    continue;
-                }
-                for (int j = 0; j < files.length; j++) {
-                    try {
-                        final IntervalStats stats = new IntervalStats();
-                        final AtomicFile atomicFile = new AtomicFile(files[j]);
-                        readLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData);
-                        if (!pruneStats(installedPackages, stats)) {
-                            continue; // no stats were pruned so no need to rewrite
-                        }
-                        writeLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Failed to prune data from: " + files[j].toString());
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean pruneStats(HashMap<String, Long> installedPackages, IntervalStats stats) {
-        boolean dataPruned = false;
-
-        // prune old package usage stats
-        for (int i = stats.packageStats.size() - 1; i >= 0; i--) {
-            final UsageStats usageStats = stats.packageStats.valueAt(i);
-            final Long timeInstalled = installedPackages.get(usageStats.mPackageName);
-            if (timeInstalled == null || timeInstalled > usageStats.mEndTimeStamp) {
-                stats.packageStats.removeAt(i);
-                dataPruned = true;
-            }
-        }
-        if (dataPruned) {
-            // ensure old stats don't linger around during the obfuscation step on write
-            stats.packageStatsObfuscated.clear();
-        }
-
-        // prune old events
-        for (int i = stats.events.size() - 1; i >= 0; i--) {
-            final UsageEvents.Event event = stats.events.get(i);
-            final Long timeInstalled = installedPackages.get(event.mPackage);
-            if (timeInstalled == null || timeInstalled > event.mTimeStamp) {
-                stats.events.remove(i);
-                dataPruned = true;
-            }
-        }
-
-        return dataPruned;
     }
 
     public void onTimeChanged(long timeDiffMillis) {
@@ -763,6 +645,7 @@ public class UsageStatsDatabase {
         }
 
         // filter out events
+        final int eventsSize = stats.events.size();
         for (int i = stats.events.size() - 1; i >= 0; i--) {
             final UsageEvents.Event event = stats.events.get(i);
             final Long timeRemoved = removedPackagesMap.get(event.mPackage);
@@ -1059,17 +942,13 @@ public class UsageStatsDatabase {
         readLocked(file, statsOut, mCurrentVersion, mPackagesTokenData);
     }
 
-    /**
-     * Returns {@code true} if any stats were omitted while reading, {@code false} otherwise.
-     */
-    private static boolean readLocked(AtomicFile file, IntervalStats statsOut, int version,
+    private static void readLocked(AtomicFile file, IntervalStats statsOut, int version,
             PackagesTokenData packagesTokenData) throws IOException {
-        boolean dataOmitted = false;
         try {
             FileInputStream in = file.openRead();
             try {
                 statsOut.beginTime = parseBeginTime(file);
-                dataOmitted = readLocked(in, statsOut, version, packagesTokenData);
+                readLocked(in, statsOut, version, packagesTokenData);
                 statsOut.lastTimeSaved = file.getLastModifiedTime();
             } finally {
                 try {
@@ -1082,15 +961,10 @@ public class UsageStatsDatabase {
             Slog.e(TAG, "UsageStatsDatabase", e);
             throw e;
         }
-        return dataOmitted;
     }
 
-    /**
-     * Returns {@code true} if any stats were omitted while reading, {@code false} otherwise.
-     */
-    private static boolean readLocked(InputStream in, IntervalStats statsOut, int version,
+    private static void readLocked(InputStream in, IntervalStats statsOut, int version,
             PackagesTokenData packagesTokenData) throws IOException {
-        boolean dataOmitted = false;
         switch (version) {
             case 1:
             case 2:
@@ -1115,14 +989,14 @@ public class UsageStatsDatabase {
                 } catch (IOException e) {
                     Slog.e(TAG, "Unable to read interval stats from proto.", e);
                 }
-                dataOmitted = statsOut.deobfuscateData(packagesTokenData);
+                statsOut.deobfuscateData(packagesTokenData);
                 break;
             default:
                 throw new RuntimeException(
                         "Unhandled UsageStatsDatabase version: " + Integer.toString(version)
                                 + " on read.");
         }
-        return dataOmitted;
+
     }
 
     /**

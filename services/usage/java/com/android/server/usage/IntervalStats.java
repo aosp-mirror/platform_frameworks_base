@@ -448,11 +448,8 @@ public class IntervalStats {
     /**
      * Parses all of the tokens to strings in the obfuscated usage stats data. This includes
      * deobfuscating each of the package tokens and chooser actions and categories.
-     *
-     * @return {@code true} if any stats were omitted while deobfuscating, {@code false} otherwise.
      */
-    private boolean deobfuscateUsageStats(PackagesTokenData packagesTokenData) {
-        boolean dataOmitted = false;
+    private void deobfuscateUsageStats(PackagesTokenData packagesTokenData) {
         final int usageStatsSize = packageStatsObfuscated.size();
         for (int statsIndex = 0; statsIndex < usageStatsSize; statsIndex++) {
             final int packageToken = packageStatsObfuscated.keyAt(statsIndex);
@@ -460,7 +457,6 @@ public class IntervalStats {
             usageStats.mPackageName = packagesTokenData.getPackageString(packageToken);
             if (usageStats.mPackageName == null) {
                 Slog.e(TAG, "Unable to parse usage stats package " + packageToken);
-                dataOmitted = true;
                 continue;
             }
 
@@ -493,18 +489,14 @@ public class IntervalStats {
             }
             packageStats.put(usageStats.mPackageName, usageStats);
         }
-        return dataOmitted;
     }
 
     /**
      * Parses all of the tokens to strings in the obfuscated events data. This includes
      * deobfuscating the package token, along with any class, task root package/class tokens, and
      * shortcut or notification channel tokens.
-     *
-     * @return {@code true} if any events were omitted while deobfuscating, {@code false} otherwise.
      */
-    private boolean deobfuscateEvents(PackagesTokenData packagesTokenData) {
-        boolean dataOmitted = false;
+    private void deobfuscateEvents(PackagesTokenData packagesTokenData) {
         for (int i = this.events.size() - 1; i >= 0; i--) {
             final Event event = this.events.get(i);
             final int packageToken = event.mPackageToken;
@@ -512,7 +504,6 @@ public class IntervalStats {
             if (event.mPackage == null) {
                 Slog.e(TAG, "Unable to parse event package " + packageToken);
                 this.events.remove(i);
-                dataOmitted = true;
                 continue;
             }
 
@@ -552,7 +543,6 @@ public class IntervalStats {
                         Slog.e(TAG, "Unable to parse shortcut " + event.mShortcutIdToken
                                 + " for package " + packageToken);
                         this.events.remove(i);
-                        dataOmitted = true;
                         continue;
                     }
                     break;
@@ -564,25 +554,21 @@ public class IntervalStats {
                                 + event.mNotificationChannelIdToken + " for package "
                                 + packageToken);
                         this.events.remove(i);
-                        dataOmitted = true;
                         continue;
                     }
                     break;
             }
         }
-        return dataOmitted;
     }
 
     /**
      * Parses the obfuscated tokenized data held in this interval stats object.
      *
-     * @return {@code true} if any data was omitted while deobfuscating, {@code false} otherwise.
      * @hide
      */
-    public boolean deobfuscateData(PackagesTokenData packagesTokenData) {
-        final boolean statsOmitted = deobfuscateUsageStats(packagesTokenData);
-        final boolean eventsOmitted = deobfuscateEvents(packagesTokenData);
-        return statsOmitted || eventsOmitted;
+    public void deobfuscateData(PackagesTokenData packagesTokenData) {
+        deobfuscateUsageStats(packagesTokenData);
+        deobfuscateEvents(packagesTokenData);
     }
 
     /**
