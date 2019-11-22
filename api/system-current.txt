@@ -4064,6 +4064,33 @@ package android.net {
     method public void onUpstreamChanged(@Nullable android.net.Network);
   }
 
+  public final class IpConfiguration implements android.os.Parcelable {
+    ctor public IpConfiguration();
+    ctor public IpConfiguration(@NonNull android.net.IpConfiguration);
+    method @Nullable public android.net.ProxyInfo getHttpProxy();
+    method @NonNull public android.net.IpConfiguration.IpAssignment getIpAssignment();
+    method @NonNull public android.net.IpConfiguration.ProxySettings getProxySettings();
+    method @Nullable public android.net.StaticIpConfiguration getStaticIpConfiguration();
+    method public void setHttpProxy(@Nullable android.net.ProxyInfo);
+    method public void setIpAssignment(@NonNull android.net.IpConfiguration.IpAssignment);
+    method public void setProxySettings(@NonNull android.net.IpConfiguration.ProxySettings);
+    method public void setStaticIpConfiguration(@Nullable android.net.StaticIpConfiguration);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.IpConfiguration> CREATOR;
+  }
+
+  public enum IpConfiguration.IpAssignment {
+    enum_constant public static final android.net.IpConfiguration.IpAssignment DHCP;
+    enum_constant public static final android.net.IpConfiguration.IpAssignment STATIC;
+    enum_constant public static final android.net.IpConfiguration.IpAssignment UNASSIGNED;
+  }
+
+  public enum IpConfiguration.ProxySettings {
+    enum_constant public static final android.net.IpConfiguration.ProxySettings NONE;
+    enum_constant public static final android.net.IpConfiguration.ProxySettings PAC;
+    enum_constant public static final android.net.IpConfiguration.ProxySettings STATIC;
+    enum_constant public static final android.net.IpConfiguration.ProxySettings UNASSIGNED;
+  }
+
   public final class IpPrefix implements android.os.Parcelable {
     ctor public IpPrefix(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public IpPrefix(@NonNull String);
