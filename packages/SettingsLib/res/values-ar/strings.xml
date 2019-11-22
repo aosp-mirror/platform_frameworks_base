@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"معدّل عيّنة صوت بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث: معدّل العيّنة"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"\"غير متوفّر\" تعني أن الهاتف أو سماعة الرأس لا يدعمان برنامج الترميز"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"وحدات البت لكل عيّنة في صوت بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث: عدد وحدات البت لكل عيّنة"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"وضع قناة صوت بلوتوث"</string>

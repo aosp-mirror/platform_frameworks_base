@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"觸發藍牙音訊轉碼器\n選項"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"藍牙音訊取樣率"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"觸發藍牙音訊轉碼器\n選項：取樣率"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"如果顯示為灰色，表示手機或耳機不支援這項功能"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"藍牙音訊每單位樣本位元數"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"觸發藍牙音訊轉碼器\n選項：每單位樣本位元數"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"藍牙音訊聲道模式"</string>

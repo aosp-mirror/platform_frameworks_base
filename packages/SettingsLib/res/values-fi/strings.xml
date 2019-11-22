@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Käynnistä Bluetooth-äänipakkaus\nValinta"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth-ääninäytteen siirtonopeus"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Käynnistä Bluetooth-äänipakkaus\nValinta: esimerkkinopeus"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Himmennys tarkoittaa, että puhelin tai kuulokemikrofoni ei tue tätä"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bluetooth-äänen bittiä/näyte-arvo"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Käynnistä Bluetooth-äänipakkaus\nValinta: bittiä/näyte"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Bluetooth-äänen kanavatila"</string>

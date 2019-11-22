@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"بلوٹوتھ آڈیو کوڈیک کو ٹریگر کریں\nانتخاب"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"بلوٹوتھ آڈیو کے نمونے کی شرح"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"بلوٹوتھ آڈیو کوڈیک کو ٹریگر کریں\nانتخاب: نمونے کی شرح"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"گرے آؤٹ کا مطلب ہے فون یا ہیڈ سیٹ کے ذریعہ تعاون یافتہ نہیں"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"بلوٹوتھ آڈیو بٹس فی نمونہ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"بلوٹوتھ آڈیو کوڈیک کو ٹریگر کریں\nانتخاب: بِٹس فی نمونہ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"بلوٹوتھ آڈیو چینل موڈ"</string>

@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Uruchom kodek dźwięku Bluetooth\nWybór"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Dźwięk Bluetooth – współczynnik próbkowania"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Uruchom kodek dźwięku Bluetooth\nWybór: częstotliwość próbkowania"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Elementy wyszarzone nie są obsługiwane przez telefon lub zestaw słuchawkowy"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Dźwięk Bluetooth – liczba bitów na próbkę"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Uruchom kodek dźwięku Bluetooth\nWybór: liczba bitów na próbkę"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Dźwięk Bluetooth – tryb kanału"</string>
