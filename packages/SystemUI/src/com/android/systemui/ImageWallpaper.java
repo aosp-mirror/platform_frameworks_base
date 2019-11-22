@@ -121,12 +121,13 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onOffsetsChanged(float xOffset, float yOffset, float xOffsetStep,
                 float yOffsetStep, int xPixelOffset, int yPixelOffset) {
+            if (mWorker == null) return;
             mWorker.getThreadHandler().post(() -> mRenderer.updateOffsets(xOffset, yOffset));
         }
 
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode, long animationDuration) {
-            if (!mNeedTransition) return;
+            if (mWorker == null || !mNeedTransition) return;
             if (DEBUG) {
                 Log.d(TAG, "onAmbientModeChanged: inAmbient=" + inAmbientMode
                         + ", duration=" + animationDuration);
@@ -174,6 +175,7 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onSurfaceCreated(SurfaceHolder holder) {
+            if (mWorker == null) return;
             mWorker.getThreadHandler().post(() -> {
                 mEglHelper.init(holder);
                 mRenderer.onSurfaceCreated();
@@ -182,6 +184,7 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onSurfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            if (mWorker == null) return;
             mWorker.getThreadHandler().post(() -> {
                 if (DEBUG) {
                     Log.d(TAG, "onSurfaceChanged: w=" + width + ", h=" + height);
@@ -194,6 +197,7 @@ public class ImageWallpaper extends WallpaperService {
 
         @Override
         public void onSurfaceRedrawNeeded(SurfaceHolder holder) {
+            if (mWorker == null) return;
             mWorker.getThreadHandler().post(() -> {
                 if (DEBUG) {
                     Log.d(TAG, "onSurfaceRedrawNeeded: mNeedRedraw=" + mNeedRedraw);
@@ -222,7 +226,7 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onStatePostChange() {
             // When back to home, we try to release EGL, which is preserved in lock screen or aod.
-            if (mController.getState() == StatusBarState.SHADE) {
+            if (mWorker != null && mController.getState() == StatusBarState.SHADE) {
                 mWorker.getThreadHandler().post(this::scheduleFinishRendering);
             }
         }
@@ -327,10 +331,12 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         private void cancelFinishRenderingTask() {
+            if (mWorker == null) return;
             mWorker.getThreadHandler().removeCallbacks(mFinishRenderingTask);
         }
 
         private void scheduleFinishRendering() {
+            if (mWorker == null) return;
             cancelFinishRenderingTask();
             mWorker.getThreadHandler().postDelayed(mFinishRenderingTask, DELAY_FINISH_RENDERING);
         }
