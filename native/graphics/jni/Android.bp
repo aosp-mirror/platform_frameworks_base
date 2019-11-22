@@ -25,15 +25,19 @@ cc_library_shared {
     // our source files
     //
     srcs: [
-        "bitmap.cpp",
         "aassetstreamadaptor.cpp",
+        "bitmap.cpp",
+        "imagedecoder.cpp",
     ],
 
     shared_libs: [
         "libandroid",
         "libandroid_runtime",
+        "libhwui",
         "liblog",
     ],
+
+    static_libs: ["libarect"],
 
     arch: {
         arm: {

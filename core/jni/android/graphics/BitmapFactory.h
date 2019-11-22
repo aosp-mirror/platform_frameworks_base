@@ -26,6 +26,6 @@ extern jfieldID gOptions_bitmapFieldID;
 extern jclass gBitmapConfig_class;
 extern jmethodID gBitmapConfig_nativeToConfigMethodID;
 
-jstring encodedFormatToString(JNIEnv* env, SkEncodedImageFormat format);
+jstring getMimeTypeAsJavaString(JNIEnv*, SkEncodedImageFormat);
 
 #endif  // _ANDROID_GRAPHICS_BITMAP_FACTORY_H_

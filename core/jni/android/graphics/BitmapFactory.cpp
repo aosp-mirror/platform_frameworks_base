@@ -53,42 +53,34 @@ jmethodID gBitmapConfig_nativeToConfigMethodID;
 
 using namespace android;
 
-jstring encodedFormatToString(JNIEnv* env, SkEncodedImageFormat format) {
-    const char* mimeType;
+const char* getMimeType(SkEncodedImageFormat format) {
     switch (format) {
         case SkEncodedImageFormat::kBMP:
-            mimeType = "image/bmp";
-            break;
+            return "image/bmp";
         case SkEncodedImageFormat::kGIF:
-            mimeType = "image/gif";
-            break;
+            return "image/gif";
         case SkEncodedImageFormat::kICO:
-            mimeType = "image/x-ico";
-            break;
+            return "image/x-ico";
         case SkEncodedImageFormat::kJPEG:
-            mimeType = "image/jpeg";
-            break;
+            return "image/jpeg";
         case SkEncodedImageFormat::kPNG:
-            mimeType = "image/png";
-            break;
+            return "image/png";
         case SkEncodedImageFormat::kWEBP:
-            mimeType = "image/webp";
-            break;
+            return "image/webp";
         case SkEncodedImageFormat::kHEIF:
-            mimeType = "image/heif";
-            break;
+            return "image/heif";
         case SkEncodedImageFormat::kWBMP:
-            mimeType = "image/vnd.wap.wbmp";
-            break;
+            return "image/vnd.wap.wbmp";
         case SkEncodedImageFormat::kDNG:
-            mimeType = "image/x-adobe-dng";
-            break;
+            return "image/x-adobe-dng";
         default:
-            mimeType = nullptr;
-            break;
+            return nullptr;
     }
+}
 
+jstring getMimeTypeAsJavaString(JNIEnv* env, SkEncodedImageFormat format) {
     jstring jstr = nullptr;
+    const char* mimeType = getMimeType(format);
     if (mimeType) {
         // NOTE: Caller should env->ExceptionCheck() for OOM
         // (can't check for nullptr as it's a valid return value)
@@ -290,10 +282,9 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
 
     // Set the options and return if the client only wants the size.
     if (options != NULL) {
-        jstring mimeType = encodedFormatToString(
-                env, (SkEncodedImageFormat)codec->getEncodedFormat());
+        jstring mimeType = getMimeTypeAsJavaString(env, codec->getEncodedFormat());
         if (env->ExceptionCheck()) {
-            return nullObjectReturn("OOM in encodedFormatToString()");
+            return nullObjectReturn("OOM in getMimeTypeAsJavaString()");
         }
         env->SetIntField(options, gOptions_widthFieldID, scaledWidth);
         env->SetIntField(options, gOptions_heightFieldID, scaledHeight);
