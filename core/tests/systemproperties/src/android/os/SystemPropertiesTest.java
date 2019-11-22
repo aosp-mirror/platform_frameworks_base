@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 public class SystemPropertiesTest extends TestCase {
     private static final String KEY = "sys.testkey";
+    private static final String UNSET_KEY = "Aiw7woh6ie4toh7W";
     private static final String PERSIST_KEY = "persist.sys.testkey";
 
     @SmallTest
@@ -130,6 +131,15 @@ public class SystemPropertiesTest extends TestCase {
         testLong("3147483647", 124, 3147483647L);
         testLong("0", 124, 0);
         testLong("-3147483647", 124, -3147483647L);
+    }
+
+    @SmallTest
+    public void testUnset() throws Exception {
+        assertEquals("abc", SystemProperties.get(UNSET_KEY, "abc"));
+        assertEquals(true, SystemProperties.getBoolean(UNSET_KEY, true));
+        assertEquals(false, SystemProperties.getBoolean(UNSET_KEY, false));
+        assertEquals(5, SystemProperties.getInt(UNSET_KEY, 5));
+        assertEquals(-10, SystemProperties.getLong(UNSET_KEY, -10));
     }
 
     @SmallTest
