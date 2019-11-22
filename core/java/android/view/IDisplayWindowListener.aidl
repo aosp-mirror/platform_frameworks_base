@@ -16,12 +16,16 @@
 
 package android.view;
 
+import android.content.res.Configuration;
+
 /**
  * Interface to listen for changes to display window-containers.
  *
- * This differs from DisplayManager's DisplayListener:
+ * This differs from DisplayManager's DisplayListener in a couple ways:
  *  - onDisplayAdded is always called after the display is actually added to the WM hierarchy.
  *    This corresponds to the DisplayContent and not the raw Dislay from DisplayManager.
+ *  - onDisplayConfigurationChanged is called for all configuration changes, not just changes
+ *    to displayinfo (eg. windowing-mode).
  *
  * @hide
  */
@@ -31,6 +35,11 @@ oneway interface IDisplayWindowListener {
      * Called when a display is added to the WM hierarchy.
      */
     void onDisplayAdded(int displayId);
+
+    /**
+     * Called when a display's window-container configuration has changed.
+     */
+    void onDisplayConfigurationChanged(int displayId, in Configuration newConfig);
 
     /**
      * Called when a display is removed from the hierarchy.

@@ -16,8 +16,10 @@
 
 package com.android.systemui.wm;
 
+import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IDisplayWindowListener;
 import android.view.IDisplayWindowRotationCallback;
@@ -40,6 +42,8 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class DisplayWindowController {
+    private static final String TAG = "DisplayWindowController";
+
     private final Handler mHandler;
 
     private final ArrayList<OnDisplayWindowRotationController> mRotationControllers =
@@ -84,8 +88,26 @@ public class DisplayWindowController {
                             DisplayRecord record = new DisplayRecord();
                             record.mDisplayId = displayId;
                             mDisplays.put(displayId, record);
-                            for (DisplayWindowListener l : mDisplayChangedListeners) {
-                                l.onDisplayAdded(displayId);
+                            for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
+                                mDisplayChangedListeners.get(i).onDisplayAdded(displayId);
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+                    mHandler.post(() -> {
+                        synchronized (mDisplays) {
+                            DisplayRecord dr = mDisplays.get(displayId);
+                            if (dr == null) {
+                                Slog.w(TAG, "Skipping Display Configuration change on non-added"
+                                        + " display.");
+                                return;
+                            }
+                            for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
+                                mDisplayChangedListeners.get(i).onDisplayConfigurationChanged(
+                                        displayId, newConfig);
                             }
                         }
                     });
@@ -118,8 +140,8 @@ public class DisplayWindowController {
     }
 
     /**
-     * Add a display window-container listener. It will get notified when displays are
-     * added/removed from the WM hierarchy.
+     * Add a display window-container listener. It will get notified whenever a display's
+     * configuration changes or when displays are added/removed from the WM hierarchy.
      */
     public void addDisplayWindowListener(DisplayWindowListener listener) {
         synchronized (mDisplays) {
@@ -165,7 +187,8 @@ public class DisplayWindowController {
     }
 
     /**
-     * Gets notified when a display is added/removed to the WM hierarchy.
+     * Gets notified when a display is added/removed to the WM hierarchy and when a display's
+     * window-configuration changes.
      *
      * @see IDisplayWindowListener
      */
@@ -174,6 +197,11 @@ public class DisplayWindowController {
          * Called when a display has been added to the WM hierarchy.
          */
         void onDisplayAdded(int displayId);
+
+        /**
+         * Called when a display's window-container configuration changes.
+         */
+        void onDisplayConfigurationChanged(int displayId, Configuration newConfig);
 
         /**
          * Called when a display is removed.

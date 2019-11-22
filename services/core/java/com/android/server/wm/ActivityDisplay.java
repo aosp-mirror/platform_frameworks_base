@@ -1080,6 +1080,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                         ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
                 mService.mH.sendMessage(msg);
             }
+            mService.mWindowManager.mDisplayNotificationController.dispatchDisplayChanged(
+                    this, getConfiguration());
         }
         return changes;
     }
