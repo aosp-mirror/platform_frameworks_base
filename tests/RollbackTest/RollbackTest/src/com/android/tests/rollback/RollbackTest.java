@@ -1054,4 +1054,48 @@ public class RollbackTest {
             InstallUtils.dropShellPermissionIdentity();
         }
     }
+
+    @Test
+    public void testEnableRollbackTimeoutFailsRollback_MultiPackage() throws Exception {
+        try {
+            InstallUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                    Manifest.permission.MANAGE_ROLLBACKS,
+                    Manifest.permission.WRITE_DEVICE_CONFIG);
+
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                    PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
+                    Long.toString(5000), false /* makeDefault*/);
+            RollbackManager rm = RollbackUtils.getRollbackManager();
+
+            Uninstall.packages(TestApp.A, TestApp.B);
+            Install.multi(TestApp.A1, TestApp.B1).commit();
+            waitForUnavailableRollback(TestApp.A);
+
+            // Block the 2nd session for 10s so it will not be able to enable the rollback in time.
+            rm.blockRollbackManager(TimeUnit.SECONDS.toMillis(0));
+            rm.blockRollbackManager(TimeUnit.SECONDS.toMillis(10));
+            Install.multi(TestApp.A2, TestApp.B2).setEnableRollback().commit();
+
+            assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+            assertThat(InstallUtils.getInstalledVersion(TestApp.B)).isEqualTo(2);
+
+            // Give plenty of time for RollbackManager to unblock and attempt
+            // to make the rollback available before asserting that the
+            // rollback was not made available.
+            Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+
+            List<RollbackInfo> available = rm.getAvailableRollbacks();
+            assertThat(getUniqueRollbackInfoForPackage(available, TestApp.A)).isNull();
+            assertThat(getUniqueRollbackInfoForPackage(available, TestApp.B)).isNull();
+        } finally {
+            //setting the timeout back to default
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                    PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
+                    null, false /* makeDefault*/);
+            InstallUtils.dropShellPermissionIdentity();
+        }
+    }
 }
