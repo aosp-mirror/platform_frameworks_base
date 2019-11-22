@@ -152,6 +152,13 @@ public final class StorageUserConnection {
 
     /** Starts all available sessions for a user without blocking. Any failures will be ignored. */
     public void startAllSessions() {
+        synchronized (mLock) {
+            if (mSessions.isEmpty()) {
+                // No point bringing up the remote if we don't have any sessions to start
+                return;
+            }
+        }
+
         try {
             prepareRemote();
         } catch (ExternalStorageServiceException e) {
@@ -168,6 +175,29 @@ public final class StorageUserConnection {
                     // TODO: Don't crash process? We could get into process crash loop
                     Slog.e(TAG, "Failed to start " + session, e);
                 }
+            }
+        }
+    }
+
+    /**
+     * Removes all sessions, without waiting.
+     */
+    public void removeAllSessions() {
+        synchronized (mLock) {
+            closeAllSessions();
+            Slog.i(TAG, "Removing  " + mSessions.size() + " sessions for user: " + mUserId + "...");
+            mSessions.clear();
+        }
+    }
+
+    /**
+     * Closes all sessions, but doesn't remove them or unbind the service.
+     */
+    public void closeAllSessions() {
+        synchronized (mLock) {
+            Slog.i(TAG, "Closing " + mSessions.size() + " sessions for user: " + mUserId + "...");
+            for (Session session : mSessions.values()) {
+                session.close();
             }
         }
     }

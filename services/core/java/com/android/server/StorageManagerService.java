@@ -49,6 +49,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
@@ -252,6 +253,11 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public void onCleanupUser(int userHandle) {
             mStorageManagerService.onCleanupUser(userHandle);
+        }
+
+        @Override
+        public void onStopUser(int userHandle) {
+            mStorageManagerService.onStopUser(userHandle);
         }
     }
 
@@ -1075,6 +1081,15 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    private void onStopUser(int userId) {
+        Slog.i(TAG, "onStopUser " + userId);
+        try {
+            mStorageSessionController.onUserStopping(userId);
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
+        }
+    }
+
     private boolean supportsBlockCheckpoint() throws RemoteException {
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
         return mVold.supportsBlockCheckpoint();
@@ -1307,6 +1322,15 @@ class StorageManagerService extends IStorageManager.Stub
     private void onVolumeCreatedLocked(VolumeInfo vol) {
         if (mPmInternal.isOnlyCoreApps()) {
             Slog.d(TAG, "System booted in core-only mode; ignoring volume " + vol.getId());
+            return;
+        }
+        final ActivityManagerInternal amInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+
+        if (mIsFuseEnabled && vol.mountUserId >= 0
+                && !amInternal.isUserRunning(vol.mountUserId, 0)) {
+            Slog.d(TAG, "Ignoring volume " + vol.getId() + " because user "
+                    + Integer.toString(vol.mountUserId) + " is no longer running.");
             return;
         }
 

@@ -43,7 +43,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 
 /**
  * Controls storage sessions for users initiated by the {@link StorageManagerService}.
@@ -196,6 +195,31 @@ public final class StorageSessionController {
         if (connection != null) {
             Slog.i(TAG, "Restarting all sessions for user: " + userId);
             connection.startAllSessions();
+        } else {
+            Slog.w(TAG, "No connection found for user: " + userId);
+        }
+    }
+
+    /**
+     * Called when a user is in the process is being stopped.
+     *
+     * Does nothing if {@link #shouldHandle} is {@code false}
+     *
+     * This call removes all sessions for the user that is being stopped;
+     * this will make sure that we don't rebind to the service needlessly.
+     */
+    public void onUserStopping(int userId) throws ExternalStorageServiceException {
+        if (!shouldHandle(null)) {
+            return;
+        }
+        StorageUserConnection connection = null;
+        synchronized (mLock) {
+            connection = mConnections.get(userId);
+        }
+
+        if (connection != null) {
+            Slog.i(TAG, "Closing all sessions for user: " + userId);
+            connection.removeAllSessions();
         } else {
             Slog.w(TAG, "No connection found for user: " + userId);
         }
