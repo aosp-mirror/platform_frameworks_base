@@ -20,7 +20,7 @@ import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -32,6 +32,7 @@ import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.util.DumpUtils;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -197,12 +198,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     private ApplicationInfo getApplicationInfo(String packageName, int userId) {
-        try {
-            return mContext.getPackageManager().getApplicationInfoAsUser(packageName, 0, userId);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "No installed package " + packageName);
-        }
-        return null;
+        return LocalServices.getService(PackageManagerInternal.class).getApplicationInfo(
+                packageName, 0, userId, userId);
     }
 
     private void reportChange(long changeId, int uid, int state) {
@@ -210,11 +207,11 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     private void killPackage(String packageName) {
-        int uid = -1;
-        try {
-            uid = mContext.getPackageManager().getPackageUid(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.w(TAG, "Didn't find package " + packageName + " on device.", e);
+        int uid = LocalServices.getService(PackageManagerInternal.class).getPackageUid(packageName,
+                    0, UserHandle.myUserId());
+
+        if (uid < 0) {
+            Slog.w(TAG, "Didn't find package " + packageName + " on device.");
             return;
         }
 
