@@ -393,7 +393,7 @@
 
     <dimen name="volume_dialog_panel_width">64dp</dimen>
 
-    <dimen name="volume_dialog_slider_height">116dp</dimen>
+    <dimen name="volume_dialog_slider_height">175dp</dimen>
 
     <dimen name="volume_dialog_ringer_size">64dp</dimen>
 
@@ -967,6 +967,7 @@
     <dimen name="default_burn_in_prevention_offset">15dp</dimen>
 
     <dimen name="corner_size">8dp</dimen>
+    <dimen name="corner_size_vol">8dp</dimen>
     <dimen name="top_padding">0dp</dimen>
     <dimen name="bottom_padding">48dp</dimen>
     <dimen name="edge_margin">8dp</dimen>

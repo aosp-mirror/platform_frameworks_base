@@ -18,32 +18,15 @@
     <item android:state_enabled="false">
         <shape
             android:shape="ring"
-            android:innerRadius="2dp"
-            android:thickness="2dp"
+            android:innerRadius="0dp"
+            android:thickness="0dp"
             android:useLevel="false"
-            android:tint="?attr/colorControlNormal"
-            android:opticalInsetLeft="3dp"
-            android:opticalInsetRight="3dp">
+            android:tint="?android:attr/colorAccent">
             <solid
-                android:color="@color/white" />
+                android:color="#ffffffff" />
             <size
-                android:width="18dp"
-                android:height="18dp" />
+                android:width="0dp"
+                android:height="0dp" />
         </shape>
     </item>
-    <item
-        android:id="@+id/pressed"
-        android:state_pressed="true"
-        android:drawable="@drawable/seekbar_thumb_pressed_to_unpressed" />
-    <item
-        android:id="@+id/unpressed"
-        android:drawable="@drawable/seekbar_thumb_unpressed_to_pressed" />
-    <transition
-        android:fromId="@+id/unpressed"
-        android:toId="@+id/pressed"
-        android:drawable="@drawable/seekbar_thumb_unpressed_to_pressed_animation" />
-    <transition
-        android:fromId="@+id/pressed"
-        android:toId="@+id/unpressed"
-        android:drawable="@drawable/seekbar_thumb_pressed_to_unpressed_animation" />
 </animated-selector>

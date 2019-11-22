@@ -15,47 +15,24 @@
 -->
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@id/background"
+    <item android:id="@android:id/background"
           android:gravity="center_vertical|fill_horizontal">
         <shape android:shape="rectangle"
-               android:tint="?attr/colorProgressBackgroundNormal">
-            <corners android:radius="?attr/progressBarCornerRadius" />
-            <size android:height="@dimen/seekbar_track_background_height_material" />
-            <solid android:color="@color/white_disabled_material" />
+               android:tint="#90808080">
+            <size android:width="100dp" />
+            <solid android:color="#90808080"/>
+            <corners android:radius="15dp" />
         </shape>
     </item>
-    <item android:id="@id/secondaryProgress"
+    <item android:id="@android:id/progress"
           android:gravity="center_vertical|fill_horizontal">
-        <scale android:scaleWidth="100%">
-            <selector>
-                <item android:state_enabled="false"
-                      android:drawable="@color/transparent" />
-                <item>
-                    <shape android:shape="rectangle"
-                           android:tint="?attr/colorControlActivated">
-                        <corners android:radius="?attr/progressBarCornerRadius" />
-                        <size android:height="@dimen/seekbar_track_progress_height_material" />
-                        <solid android:color="@color/white_disabled_material" />
-                    </shape>
-                </item>
-            </selector>
-        </scale>
-    </item>
-    <item android:id="@id/progress"
-          android:gravity="center_vertical|fill_horizontal">
-        <scale android:scaleWidth="100%">
-            <selector>
-                <item android:state_enabled="false"
-                      android:drawable="@color/transparent" />
-                <item>
-                    <shape android:shape="rectangle"
-                           android:tint="?attr/colorControlActivated">
-                        <corners android:radius="?attr/progressBarCornerRadius" />
-                        <size android:height="@dimen/seekbar_track_progress_height_material" />
-                        <solid android:color="@color/white" />
-                    </shape>
-                </item>
-            </selector>
+        <scale android:scaleWidth="90%">
+            <shape android:shape="rectangle"
+                   android:tint="?android:attr/colorAccent">
+                <size android:width="1000dp" />
+                <solid android:color="?android:attr/colorAccent" />
+                <corners android:radius="15dp" />
+            </shape>
         </scale>
     </item>
 </layer-list>

@@ -17,20 +17,11 @@
 <vector
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:name="seekbar_thumb_unpressed_to_pressed"
-    android:width="18dp"
-    android:height="18dp"
-    android:viewportWidth="18"
-    android:viewportHeight="18"
+    android:width="0dp"
+    android:height="0dp"
+    android:viewportWidth="0"
+    android:viewportHeight="0"
     android:tint="?attr/colorControlActivated"
     android:opticalInsetLeft="6dp"
     android:opticalInsetRight="6dp">
-    <group
-        android:name="thumb_0"
-        android:translateX="9"
-        android:translateY="9">
-        <path
-            android:name="thumb_path_0"
-            android:fillColor="#FF000000"
-            android:pathData="M 0.0,-6.0 c 3.3137084988,0.0 6.0,2.6862915012 6.0,6.0 c 0.0,3.3137084988 -2.6862915012,6.0 -6.0,6.0 c -3.3137084988,0.0 -6.0,-2.6862915012 -6.0,-6.0 c 0.0,-3.3137084988 2.6862915012,-6.0 6.0,-6.0 Z" />
-    </group>
 </vector>
