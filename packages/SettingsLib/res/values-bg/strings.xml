@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Задействане на аудиокодек за Bluetooth\nИзбор"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Честота на дискретизация за звука през Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Задействане на аудиокодек за Bluetooth\nИзбор: Честота на дискретизация"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Неактивното състояние означава, че елементът не се поддържа от телефона или слушалките"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Битове на дискрет за звука през Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Задействане на аудиокодек за Bluetooth\nИзбор: Битове на дискрет"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Режим на канала на звука през Bluetooth"</string>

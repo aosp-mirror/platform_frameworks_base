@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ब्लुटुथ अडियो कोडेक ट्रिगर गर्नुहोस्\nचयन"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ब्लुटुथ अडियोको नमूना दर"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ब्लुटुथ अडियो कोडेक ट्रिगर गर्नुहोस्\nचयन: नमुना दर"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"खरानी रङले भरिएको भन्नाले फोन वा हेडसेटले समर्थन नगरेको बुझाउँछ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"प्रति नमूना ब्लुटुथ अडियोका बिटहरू"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ब्लुटुथ अडियो कोडेक ट्रिगर गर्नुहोस्\nचयन: बिट प्रति नमुना"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ब्लुटुथ अडियो च्यानलको मोड"</string>

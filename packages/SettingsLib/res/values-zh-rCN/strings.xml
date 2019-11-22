@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"触发蓝牙音频编解码器\n选择"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"蓝牙音频采样率"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"触发蓝牙音频编解码器\n选择：采样率"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"灰显意味着手机或耳机不支持该功能"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"蓝牙音频每样本位数"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"触发蓝牙音频编解码器\n选择：每样本位数"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"蓝牙音频声道模式"</string>

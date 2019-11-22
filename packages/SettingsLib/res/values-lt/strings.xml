@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Suaktyvinti „Bluetooth“ garso kodeką\nPasirinkimas"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"„Bluetooth“ garso pavyzdžio dažnis"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Suaktyvinti „Bluetooth“ garso kodeką\nPasirinkimas: pavyzdžio dažnis"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Pilka spalva reiškia, kad telefonas arba ausinės nepalaiko tos funkcijos"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"„Bluetooth“ garso įrašo bitų skaičius pavyzdyje"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Suaktyvinti „Bluetooth“ garso kodeką\nPasirinkimas: bitų skaičius pavyzdyje"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"„Bluetooth“ garso kanalo režimas"</string>

@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង​\n​ប៊្លូធូស"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"អត្រា​គំរូ​សំឡេង​ប៊្លូធូស"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង\n​ប៊្លូធូស​៖ អត្រា​គំរូ"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"ការកំណត់ជា​ពណ៌ប្រផេះ​មានន័យថា​ទូរសព្ទ ឬ​កាស​មិនស្គាល់ទេ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"កម្រិត​ប៊ីត​ក្នុង​មួយ​គំរូ​នៃ​សំឡេង​ប៊្លូធូស"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ជំរុញ​ការជ្រើសរើស​កូឌិក​សំឡេង​\nប៊្លូធូស៖ កម្រិត​ប៊ីត​ក្នុង​មួយ​គំរូ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"មុខ​ងារ​រលកសញ្ញា​សំឡេង​ប៊្លូធូស"</string>

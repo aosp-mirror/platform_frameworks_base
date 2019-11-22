@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Sproži zvočni kodek za Bluetooth\nIzbor"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Hitrost vzorčenja zvoka prek Bluetootha"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Sproži zvočni kodek za Bluetooth\nIzbor: hitrost vzorčenja"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Če je možnost zatemnjena, to pomeni, da je telefon ali slušalke z mikrofonom ne podpirajo"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bitov na vzorec za zvok prek Bluetootha"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Sproži zvočni kodek za Bluetooth\nIzbor: število bitov na vzorec"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Način zvočnega kanala prek Bluetootha"</string>

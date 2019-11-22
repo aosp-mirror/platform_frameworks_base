@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"블루투스 오디오 코덱 실행\n선택"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"블루투스 오디오 샘플링 비율"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"블루투스 오디오 코덱 실행\n선택: 샘플링 비율"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"비활성화되어 있으면 스마트폰 또는 헤드셋에서 지원하지 않음을 의미함"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"블루투스 오디오 샘플당 비트"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"블루투스 오디오 코덱 실행\n선택: 샘플당 비트"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"블루투스 오디오 채널 모드"</string>

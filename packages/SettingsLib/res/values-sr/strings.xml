@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Изаберите Bluetooth аудио кодек\n"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Брзина узорковања за Bluetooth аудио"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Изаберите Bluetooth аудио кодек:\n брзина узорковања"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Ако је нека ставка засивљена, то значи да је телефон или слушалице не подржавају"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Битова по узорку за Bluetooth аудио"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Изаберите Bluetooth аудио кодек:\n број битова по узорку"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Режим канала за Bluetooth аудио"</string>

@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ब्लूटूथ ऑडियो कोडेक का\nविकल्प चालू करें"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ब्लूटूथ ऑडियो नमूना दर"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ब्लूटूथ ऑडियो कोडेक का\nयह विकल्प चालू करें: सैंपल की दर"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"धूसर किया गया का मतलब है कि फ़ोन या हेडसेट पर काम नहीं करता"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"ब्लूटूथ ऑडियो बिट प्रति नमूना"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ब्लूटूथ ऑडियो कोडेक का\nयह विकल्प चालू करें: हर सैंपल के लिए बिट की संख्या"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ब्लूटूथ ऑडियो चैनल मोड"</string>

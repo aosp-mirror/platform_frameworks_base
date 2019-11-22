@@ -234,6 +234,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Critère pour déclencher la sélection du codec audio\nBluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Taux d\'échantillonnage audio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Critère de sélection du codec audio\nBluetooth : taux d\'échantillonnage"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Si le codec est grisé, c\'est qu\'il n\'est pas compatible avec le téléphone ou le casque"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bits par échantillon pour l\'audio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Critère de sélection du codec audio\nBluetooth : nombre de bits par échantillon"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Mode de chaîne de l\'audio Bluetooth"</string>
