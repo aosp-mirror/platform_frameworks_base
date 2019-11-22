@@ -16,5 +16,6 @@
     <!-- Seekbars -->
     <dimen name="seekbar_track_material_width">100dp</dimen>
     <dimen name="seekbar_track_material_radius">15dp</dimen>
+    <dimen name="seekbar_track_material_height">20dp</dimen>
 
 </resources>

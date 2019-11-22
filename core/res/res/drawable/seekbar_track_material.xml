@@ -20,6 +20,7 @@
         <shape android:shape="rectangle"
                android:tint="#90808080">
             <size android:width="@dimen/seekbar_track_material_width" />
+            <size android:height="@dimen/seekbar_track_material_height" />
             <solid android:color="#90808080"/>
             <corners android:radius="@dimen/seekbar_track_material_radius"/>
         </shape>
@@ -30,6 +31,7 @@
             <shape android:shape="rectangle"
                    android:tint="?android:attr/colorAccent">
                 <size android:width="@dimen/seekbar_track_material_width" />
+                <size android:height="@dimen/seekbar_track_material_height" />
                 <solid android:color="?android:attr/colorAccent" />
                 <corners android:radius="@dimen/seekbar_track_material_radius"/>
             </shape>
