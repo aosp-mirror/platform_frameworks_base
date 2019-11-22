@@ -50,9 +50,6 @@ import javax.inject.Singleton;
 @Singleton
 public class FullscreenUserSwitcher {
     private static final String TAG = FullscreenUserSwitcher.class.getSimpleName();
-    // Because user 0 is headless, user count for single user is 2
-    private static final int NUMBER_OF_BACKGROUND_USERS = 1;
-
     private final Context mContext;
     private final Resources mResources;
     private final UserManager mUserManager;
@@ -137,24 +134,15 @@ public class FullscreenUserSwitcher {
                 /* isStartGuestSession= */ false,
                 /* isAddUser= */ false,
                 /* isForeground= */ true);
-        // For single user without trusted device, hide the user switcher.
-        if (!hasMultipleUsers() && !hasTrustedDevice(initialUser)) {
-            dismissUserSwitcher();
-            return;
-        }
-        // Show unlock dialog for initial user
+
+        // If the initial user has trusted device, display the unlock dialog on the keyguard.
         if (hasTrustedDevice(initialUser)) {
             mUnlockDialogHelper.showUnlockDialogAfterDelay(initialUser,
                     mOnHideListener);
+        } else {
+            // If no trusted device, dismiss the keyguard.
+            dismissUserSwitcher();
         }
-    }
-
-    /**
-     * Check if there is only one possible user to login in.
-     * In a Multi-User system there is always one background user (user 0)
-     */
-    private boolean hasMultipleUsers() {
-        return mUserManager.getUserCount() > NUMBER_OF_BACKGROUND_USERS + 1;
     }
 
     /**
