@@ -20,12 +20,14 @@ java_defaults {
     srcs: [
         "src/**/*.java",
         ":framework-tethering-shared-srcs",
+        ":net-module-utils-srcs",
         ":services-tethering-shared-srcs",
         ":servicescore-tethering-src",
     ],
     static_libs: [
         "androidx.annotation_annotation",
         "netd_aidl_interface-java",
+        "netlink-client",
         "networkstack-aidl-interfaces-java",
         "android.hardware.tetheroffload.control-V1.0-java",
         "tethering-client",
