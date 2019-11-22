@@ -7912,6 +7912,10 @@ package android.telephony {
     field public final double lng;
   }
 
+  public class CellBroadcastIntents {
+    method public static void sendOrderedBroadcastForBackgroundReceivers(@NonNull android.content.Context, @Nullable android.os.UserHandle, @NonNull android.content.Intent, @Nullable String, @Nullable String, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
+  }
+
   public abstract class CellBroadcastService extends android.app.Service {
     ctor public CellBroadcastService();
     method @CallSuper @NonNull public android.os.IBinder onBind(@Nullable android.content.Intent);
