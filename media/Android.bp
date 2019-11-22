@@ -109,3 +109,27 @@ java_library {
     srcs: [":framework-media-annotation-srcs"],
     installable: false,
 }
+
+aidl_interface {
+    name: "audio_common-aidl",
+    local_include_dir: "java",
+    srcs: [
+        "java/android/media/audio/common/AudioChannelMask.aidl",
+        "java/android/media/audio/common/AudioConfig.aidl",
+        "java/android/media/audio/common/AudioFormat.aidl",
+        "java/android/media/audio/common/AudioOffloadInfo.aidl",
+        "java/android/media/audio/common/AudioStreamType.aidl",
+        "java/android/media/audio/common/AudioUsage.aidl",
+    ],
+    backend:
+    {
+        cpp: {
+            enabled: true,
+        },
+        java: {
+            // Already generated as part of the entire media java library.
+            enabled: false,
+        },
+    },
+}
+
