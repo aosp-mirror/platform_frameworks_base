@@ -3309,18 +3309,24 @@ public class LocationManagerService extends ILocationManager.Stub {
                 ipw.decreaseIndent();
             }
 
-            mSettingsStore.dump(fd, pw, args);
+            ipw.println("Location Settings:");
+            ipw.increaseIndent();
+            mSettingsStore.dump(fd, ipw, args);
+            ipw.decreaseIndent();
 
             ipw.println("Location Providers:");
             ipw.increaseIndent();
             for (LocationProvider provider : mProviders) {
                 provider.dumpLocked(fd, ipw, args);
             }
+            ipw.decreaseIndent();
         }
 
         if (mGnssManagerService != null) {
+            ipw.println("GNSS:");
+            ipw.increaseIndent();
+            mGnssManagerService.dump(fd, ipw, args);
             ipw.decreaseIndent();
-            mGnssManagerService.dump(fd, pw, args);
         }
     }
 }
