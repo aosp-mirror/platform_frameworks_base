@@ -3185,7 +3185,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!nai.networkCapabilities.hasTransport(TRANSPORT_VPN)) {
             updateAllVpnsCapabilities();
         }
-        rematchAllNetworksAndRequests(null, 0);
+        rematchAllNetworksAndRequests();
         mLingerMonitor.noteDisconnect(nai);
         if (nai.created) {
             // Tell netd to clean up the configuration for this network
@@ -3271,8 +3271,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
-        rematchAllNetworksAndRequests(null, 0);
-        ensureRunningOnConnectivityServiceThread();
+        rematchAllNetworksAndRequests();
         if (nri.request.isRequest() && nri.mSatisfier == null) {
             sendUpdatedScoreToFactories(nri.request, null);
         }
@@ -3515,13 +3514,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (accept != nai.networkMisc.acceptUnvalidated) {
-            int oldScore = nai.getCurrentScore();
             nai.networkMisc.acceptUnvalidated = accept;
             // If network becomes partial connectivity and user already accepted to use this
             // network, we should respect the user's option and don't need to popup the
             // PARTIAL_CONNECTIVITY notification to user again.
             nai.networkMisc.acceptPartialConnectivity = accept;
-            rematchAllNetworksAndRequests(nai, oldScore);
+            rematchAllNetworksAndRequests();
             sendUpdatedScoreToFactories(nai);
         }
 
@@ -3590,9 +3588,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
         if (!nai.avoidUnvalidated) {
-            int oldScore = nai.getCurrentScore();
             nai.avoidUnvalidated = true;
-            rematchAllNetworksAndRequests(nai, oldScore);
+            rematchAllNetworksAndRequests();
             sendUpdatedScoreToFactories(nai);
         }
     }
@@ -3693,7 +3690,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
 
     private void rematchForAvoidBadWifiUpdate() {
-        rematchAllNetworksAndRequests(null, 0);
+        rematchAllNetworksAndRequests();
         for (NetworkAgentInfo nai: mNetworkAgentInfos.values()) {
             if (nai.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
                 sendUpdatedScoreToFactories(nai);
@@ -5965,7 +5962,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else {
             // If the requestable capabilities have changed or the score changed, we can't have been
             // called by rematchNetworkAndRequests, so it's safe to start a rematch.
-            rematchAllNetworksAndRequests(nai, oldScore);
+            rematchAllNetworksAndRequests();
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
 
@@ -6294,6 +6291,41 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private ArrayMap<NetworkRequestInfo, NetworkAgentInfo> computeRequestReassignmentForNetwork(
+            @NonNull final NetworkAgentInfo newNetwork) {
+        final int score = newNetwork.getCurrentScore();
+        final ArrayMap<NetworkRequestInfo, NetworkAgentInfo> reassignedRequests = new ArrayMap<>();
+        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+            // Process requests in the first pass and listens in the second pass. This allows us to
+            // change a network's capabilities depending on which requests it has. This is only
+            // correct if the change in capabilities doesn't affect whether the network satisfies
+            // requests or not, and doesn't affect the network's score.
+            if (nri.request.isListen()) continue;
+
+            final NetworkAgentInfo currentNetwork = nri.mSatisfier;
+            final boolean satisfies = newNetwork.satisfies(nri.request);
+            if (newNetwork == currentNetwork && satisfies) continue;
+
+            // check if it satisfies the NetworkCapabilities
+            if (VDBG) log("  checking if request is satisfied: " + nri.request);
+            if (satisfies) {
+                // next check if it's better than any current network we're using for
+                // this request
+                if (VDBG || DDBG) {
+                    log("currentScore = "
+                            + (currentNetwork != null ? currentNetwork.getCurrentScore() : 0)
+                            + ", newScore = " + score);
+                }
+                if (currentNetwork == null || currentNetwork.getCurrentScore() < score) {
+                    reassignedRequests.put(nri, newNetwork);
+                }
+            } else if (newNetwork.isSatisfyingRequest(nri.request.requestId)) {
+                reassignedRequests.put(nri, null);
+            }
+        }
+        return reassignedRequests;
+    }
+
     // Handles a network appearing or improving its score.
     //
     // - Evaluates all current NetworkRequests that can be
@@ -6307,10 +6339,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // - Tears down newNetwork if it just became validated
     //   but turns out to be unneeded.
     //
-    // - If reapUnvalidatedNetworks==REAP, tears down unvalidated
-    //   networks that have no chance (i.e. even if validated)
-    //   of becoming the highest scoring network.
-    //
     // NOTE: This function only adds NetworkRequests that "newNetwork" could satisfy,
     // it does not remove NetworkRequests that other Networks could better satisfy.
     // If you need to handle decreases in score, use {@link rematchAllNetworksAndRequests}.
@@ -6318,11 +6346,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // as it performs better by a factor of the number of Networks.
     //
     // @param newNetwork is the network to be matched against NetworkRequests.
-    // @param reapUnvalidatedNetworks indicates if an additional pass over all networks should be
-    //               performed to tear down unvalidated networks that have no chance (i.e. even if
-    //               validated) of becoming the highest scoring network.
-    private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork,
-            ReapUnvalidatedNetworks reapUnvalidatedNetworks, long now) {
+    // @param now the time the rematch starts, as returned by SystemClock.elapsedRealtime();
+    private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork, long now) {
         ensureRunningOnConnectivityServiceThread();
         if (!newNetwork.everConnected) return;
         boolean keep = newNetwork.isVPN();
@@ -6334,39 +6359,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (VDBG || DDBG) log("rematching " + newNetwork.name());
 
-        final ArrayMap<NetworkRequestInfo, NetworkAgentInfo> reassignedRequests = new ArrayMap<>();
+        final ArrayMap<NetworkRequestInfo, NetworkAgentInfo> reassignedRequests =
+                computeRequestReassignmentForNetwork(newNetwork);
 
         NetworkCapabilities nc = newNetwork.networkCapabilities;
         if (VDBG) log(" network has: " + nc);
-        for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-            // Process requests in the first pass and listens in the second pass. This allows us to
-            // change a network's capabilities depending on which requests it has. This is only
-            // correct if the change in capabilities doesn't affect whether the network satisfies
-            // requests or not, and doesn't affect the network's score.
-            if (nri.request.isListen()) continue;
-
-            ensureRunningOnConnectivityServiceThread();
-            final NetworkAgentInfo currentNetwork = nri.mSatisfier;
-            final boolean satisfies = newNetwork.satisfies(nri.request);
-            if (newNetwork == currentNetwork && satisfies) continue;
-
-            // check if it satisfies the NetworkCapabilities
-            if (VDBG) log("  checking if request is satisfied: " + nri.request);
-            if (satisfies) {
-                // next check if it's better than any current network we're using for
-                // this request
-                if (VDBG || DDBG) {
-                    log("currentScore = " +
-                            (currentNetwork != null ? currentNetwork.getCurrentScore() : 0) +
-                            ", newScore = " + score);
-                }
-                if (currentNetwork == null || currentNetwork.getCurrentScore() < score) {
-                    reassignedRequests.put(nri, newNetwork);
-                }
-            } else if (newNetwork.isSatisfyingRequest(nri.request.requestId)) {
-                reassignedRequests.put(nri, null);
-            }
-        }
 
         // Find and migrate to this Network any NetworkRequests for
         // which this network is now the best.
@@ -6549,66 +6546,43 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mLegacyTypeTracker.add(TYPE_VPN, newNetwork);
             }
         }
-        if (reapUnvalidatedNetworks == ReapUnvalidatedNetworks.REAP) {
-            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                if (unneeded(nai, UnneededFor.TEARDOWN)) {
-                    if (nai.getLingerExpiry() > 0) {
-                        // This network has active linger timers and no requests, but is not
-                        // lingering. Linger it.
-                        //
-                        // One way (the only way?) this can happen if this network is unvalidated
-                        // and became unneeded due to another network improving its score to the
-                        // point where this network will no longer be able to satisfy any requests
-                        // even if it validates.
-                        updateLingerState(nai, now);
-                    } else {
-                        if (DBG) log("Reaping " + nai.name());
-                        teardownUnneededNetwork(nai);
-                    }
-                }
-            }
-        }
     }
 
     /**
      * Attempt to rematch all Networks with NetworkRequests.  This may result in Networks
      * being disconnected.
-     * @param changed If only one Network's score or capabilities have been modified since the last
-     *         time this function was called, pass this Network in this argument, otherwise pass
-     *         null.
-     * @param oldScore If only one Network has been changed but its NetworkCapabilities have not
-     *         changed, pass in the Network's score (from getCurrentScore()) prior to the change via
-     *         this argument, otherwise pass {@code changed.getCurrentScore()} or 0 if
-     *         {@code changed} is {@code null}. This is because NetworkCapabilities influence a
-     *         network's score.
      */
-    private void rematchAllNetworksAndRequests(NetworkAgentInfo changed, int oldScore) {
-        // TODO: This may get slow.  The "changed" parameter is provided for future optimization
-        // to avoid the slowness.  It is not simply enough to process just "changed", for
-        // example in the case where "changed"'s score decreases and another network should begin
-        // satisfying a NetworkRequest that "changed" currently satisfies.
-
-        // Optimization: Only reprocess "changed" if its score improved.  This is safe because it
-        // can only add more NetworkRequests satisfied by "changed", and this is exactly what
-        // rematchNetworkAndRequests() handles.
+    private void rematchAllNetworksAndRequests() {
+        // TODO: This may be slow, and should be optimized. Unfortunately at this moment the
+        // processing is network-major instead of request-major (the code iterates through all
+        // networks, then for each it iterates for all requests), which is a problem for re-scoring
+        // requests. Once the code has switched to a request-major iteration style, this can
+        // be optimized to only do the processing needed.
         final long now = SystemClock.elapsedRealtime();
-        if (changed != null && oldScore < changed.getCurrentScore()) {
-            rematchNetworkAndRequests(changed, ReapUnvalidatedNetworks.REAP, now);
-        } else {
-            final NetworkAgentInfo[] nais = mNetworkAgentInfos.values().toArray(
-                    new NetworkAgentInfo[mNetworkAgentInfos.size()]);
-            // Rematch higher scoring networks first to prevent requests first matching a lower
-            // scoring network and then a higher scoring network, which could produce multiple
-            // callbacks and inadvertently unlinger networks.
-            Arrays.sort(nais);
-            for (NetworkAgentInfo nai : nais) {
-                rematchNetworkAndRequests(nai,
-                        // Only reap the last time through the loop.  Reaping before all rematching
-                        // is complete could incorrectly teardown a network that hasn't yet been
-                        // rematched.
-                        (nai != nais[nais.length-1]) ? ReapUnvalidatedNetworks.DONT_REAP
-                                : ReapUnvalidatedNetworks.REAP,
-                        now);
+        final NetworkAgentInfo[] nais = mNetworkAgentInfos.values().toArray(
+                new NetworkAgentInfo[mNetworkAgentInfos.size()]);
+        // Rematch higher scoring networks first to prevent requests first matching a lower
+        // scoring network and then a higher scoring network, which could produce multiple
+        // callbacks and inadvertently unlinger networks.
+        Arrays.sort(nais);
+        for (NetworkAgentInfo nai : nais) {
+            rematchNetworkAndRequests(nai, now);
+        }
+        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            if (unneeded(nai, UnneededFor.TEARDOWN)) {
+                if (nai.getLingerExpiry() > 0) {
+                    // This network has active linger timers and no requests, but is not
+                    // lingering. Linger it.
+                    //
+                    // One way (the only way?) this can happen if this network is unvalidated
+                    // and became unneeded due to another network improving its score to the
+                    // point where this network will no longer be able to satisfy any requests
+                    // even if it validates.
+                    updateLingerState(nai, now);
+                } else {
+                    if (DBG) log("Reaping " + nai.name());
+                    teardownUnneededNetwork(nai);
+                }
             }
         }
     }
@@ -6707,8 +6681,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
 
             // Consider network even though it is not yet validated.
-            final long now = SystemClock.elapsedRealtime();
-            rematchNetworkAndRequests(networkAgent, ReapUnvalidatedNetworks.REAP, now);
+            rematchAllNetworksAndRequests();
 
             // This has to happen after matching the requests, because callbacks are just requests.
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_PRECHECK);
@@ -6729,7 +6702,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 state == NetworkInfo.State.SUSPENDED)) {
             // going into or coming out of SUSPEND: re-score and notify
             if (networkAgent.getCurrentScore() != oldScore) {
-                rematchAllNetworksAndRequests(networkAgent, oldScore);
+                rematchAllNetworksAndRequests();
             }
             updateCapabilities(networkAgent.getCurrentScore(), networkAgent,
                     networkAgent.networkCapabilities);
@@ -6743,19 +6716,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void updateNetworkScore(NetworkAgentInfo nai, NetworkScore ns) {
-        int score = ns.getIntExtension(NetworkScore.LEGACY_SCORE);
-        if (VDBG || DDBG) log("updateNetworkScore for " + nai.name() + " to " + score);
-        if (score < 0) {
-            loge("updateNetworkScore for " + nai.name() + " got a negative score (" + score +
-                    ").  Bumping score to min of 0");
-            score = 0;
-        }
-
-        final int oldScore = nai.getCurrentScore();
+        if (VDBG || DDBG) log("updateNetworkScore for " + nai.name() + " to " + ns);
         nai.setNetworkScore(ns);
-
-        rematchAllNetworksAndRequests(nai, oldScore);
-
+        rematchAllNetworksAndRequests();
         sendUpdatedScoreToFactories(nai);
     }
 
