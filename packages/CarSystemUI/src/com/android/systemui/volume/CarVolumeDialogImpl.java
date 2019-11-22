@@ -197,6 +197,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     @Override
     public void init(int windowType, Callback callback) {
         initDialog();
+
         ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
                 .addListener(mCarServiceLifecycleListener);
     }
@@ -265,6 +266,19 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mListView.setLayoutManager(new LinearLayoutManager(mContext));
     }
 
+    /**
+     * Reveals volume dialog.
+     */
+    public void show(int reason) {
+        mHandler.obtainMessage(H.SHOW, reason).sendToTarget();
+    }
+
+    /**
+     * Hides volume dialog.
+     */
+    public void dismiss(int reason) {
+        mHandler.obtainMessage(H.DISMISS, reason).sendToTarget();
+    }
 
     private void showH(int reason) {
         if (D.BUG) {
