@@ -180,10 +180,13 @@ static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
     if (jsurface) {
         surface = android_view_Surface_getSurface(env, jsurface);
     }
+    bool enableTimeout = true;
     if (discardBuffer) {
+        // Currently only Surface#lockHardwareCanvas takes this path
+        enableTimeout = false;
         proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
     }
-    proxy->setSurface(surface);
+    proxy->setSurface(surface, enableTimeout);
 }
 
 static jboolean android_view_ThreadedRenderer_pause(JNIEnv* env, jobject clazz,
