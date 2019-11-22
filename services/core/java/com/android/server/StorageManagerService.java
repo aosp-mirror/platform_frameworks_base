@@ -2771,11 +2771,6 @@ class StorageManagerService extends IStorageManager.Stub
      */
     @Override
     public boolean supportsCheckpoint() throws RemoteException {
-        // Only the system process is permitted to start checkpoints
-        if (Binder.getCallingUid() != android.os.Process.SYSTEM_UID) {
-            throw new SecurityException("no permission to check filesystem checkpoint support");
-        }
-
         return mVold.supportsCheckpoint();
     }
 
