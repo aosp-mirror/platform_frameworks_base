@@ -1668,7 +1668,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInTouchMode) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
             }
-            if (win.mActivityRecord == null || !win.mActivityRecord.isClientHidden()) {
+            if (win.mActivityRecord == null || win.mActivityRecord.isClientVisible()) {
                 res |= WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
             }
 
@@ -2201,7 +2201,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // associated appToken is not hidden.
             final boolean shouldRelayout = viewVisibility == View.VISIBLE &&
                     (win.mActivityRecord == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
-                            || !win.mActivityRecord.isClientHidden());
+                            || win.mActivityRecord.isClientVisible());
 
             // If we are not currently running the exit animation, we need to see about starting
             // one.
