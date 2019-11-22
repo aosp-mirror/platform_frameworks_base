@@ -18,4 +18,12 @@
     <dimen name="seekbar_track_material_radius">15dp</dimen>
     <dimen name="seekbar_track_material_height">20dp</dimen>
 
+    <!-- Switch Thumb -->
+    <dimen name="switch_thumb_material_anim_width">21.0dip</dimen>
+    <dimen name="switch_thumb_material_anim_height">21.0dip</dimen>
+    <dimen name="switch_thumb_material_anim_stroke_width">1dip</dimen>
+
+    <!-- Switch Track Material -->
+    <dimen name="switch_track_material_height">14dp</dimen>
+    <dimen name="switch_track_material_radius">7dp</dimen>
 </resources>

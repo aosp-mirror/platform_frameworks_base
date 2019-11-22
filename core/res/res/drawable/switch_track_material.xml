@@ -23,7 +23,7 @@
                   android:end="4dp">
                 <shape android:shape="rectangle" >
                     <size android:height="14dp" android:width="5dp" />
-                    <corners android:radius="7dp" />
+                    <corners android:radius="@dimen/switch_track_material_radius" />
 	                <gravity android:gravity="center_vertical" />
                     <solid android:color="@android:color/transparent" />
                     <stroke
@@ -40,7 +40,7 @@
                   android:end="4dp">
                 <shape android:shape="rectangle" >
                     <size android:height="14dp" android:width="5dp" />
-                    <corners android:radius="7dp" />
+                    <corners android:radius="@dimen/switch_track_material_radius" />
 	                <gravity android:gravity="center_vertical" />
                     <solid android:color="@android:color/transparent" />
                     <stroke
