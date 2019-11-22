@@ -6271,8 +6271,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
         updateAllVpnsCapabilities();
     }
 
-    private void processListenRequests(NetworkAgentInfo nai, boolean capabilitiesChanged) {
+    private void processListenRequests(@NonNull NetworkAgentInfo nai, boolean capabilitiesChanged) {
         // For consistency with previous behaviour, send onLost callbacks before onAvailable.
+        processNewlyLostListenRequests(nai);
+
+        if (capabilitiesChanged) {
+            notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
+        }
+
+        processNewlySatisfiedListenRequests(nai);
+    }
+
+    private void processNewlyLostListenRequests(@NonNull final NetworkAgentInfo nai) {
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             NetworkRequest nr = nri.request;
             if (!nr.isListen()) continue;
@@ -6281,11 +6291,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_LOST, 0);
             }
         }
+    }
 
-        if (capabilitiesChanged) {
-            notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
-        }
-
+    private void processNewlySatisfiedListenRequests(@NonNull final NetworkAgentInfo nai) {
         for (NetworkRequestInfo nri : mNetworkRequests.values()) {
             NetworkRequest nr = nri.request;
             if (!nr.isListen()) continue;
