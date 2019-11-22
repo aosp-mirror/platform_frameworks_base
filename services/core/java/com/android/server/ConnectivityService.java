@@ -5596,7 +5596,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 ns, mContext, mTrackerHandler, new NetworkMisc(networkMisc), this, mNetd,
                 mDnsResolver, mNMS, factorySerialNumber);
         // Make sure the network capabilities reflect what the agent info says.
-        nai.setNetworkCapabilities(mixInCapabilities(nai, nc));
+        nai.getAndSetNetworkCapabilities(mixInCapabilities(nai, nc));
         final String extraInfo = networkInfo.getExtraInfo();
         final String name = TextUtils.isEmpty(extraInfo)
                 ? nai.networkCapabilities.getSSID() : extraInfo;
@@ -5950,11 +5950,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
 
-        final NetworkCapabilities prevNc;
-        synchronized (nai) {
-            prevNc = nai.networkCapabilities;
-            nai.setNetworkCapabilities(newNc);
-        }
+        final NetworkCapabilities prevNc = nai.getAndSetNetworkCapabilities(newNc);
 
         updateUids(nai, prevNc, newNc);
 
@@ -6476,6 +6472,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // before LegacyTypeTracker sends legacy broadcasts
         for (NetworkRequestInfo nri : addedRequests) notifyNetworkAvailable(newNetwork, nri);
 
+        // Finally, process listen requests and update capabilities if the background state has
+        // changed for this network. For consistency with previous behavior, send onLost callbacks
+        // before onAvailable.
+        processNewlyLostListenRequests(newNetwork);
+
         // Maybe the network changed background states. Update its capabilities.
         final boolean backgroundChanged = wasBackgroundNetwork != newNetwork.isBackgroundNetwork();
         if (backgroundChanged) {
@@ -6492,13 +6493,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
 
-            synchronized (newNetwork) {
-                newNetwork.setNetworkCapabilities(newNc);
-            }
+            newNetwork.getAndSetNetworkCapabilities(newNc);
+            notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
 
-        // Finally, process listen requests.
-        processListenRequests(newNetwork, backgroundChanged);
+        processNewlySatisfiedListenRequests(newNetwork);
     }
 
     /**
@@ -6683,9 +6682,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // NetworkCapabilities need to be set before sending the private DNS config to
             // NetworkMonitor, otherwise NetworkMonitor cannot determine if validation is required.
-            synchronized (networkAgent) {
-                networkAgent.setNetworkCapabilities(networkAgent.networkCapabilities);
-            }
+            networkAgent.getAndSetNetworkCapabilities(networkAgent.networkCapabilities);
+
             handlePerNetworkPrivateDnsConfig(networkAgent, mDnsManager.getPrivateDnsConfig());
             updateLinkProperties(networkAgent, new LinkProperties(networkAgent.linkProperties),
                     null);
