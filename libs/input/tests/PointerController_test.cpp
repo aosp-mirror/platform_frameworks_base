@@ -32,8 +32,8 @@ enum TestCursorType {
     CURSOR_TYPE_HOVER,
     CURSOR_TYPE_TOUCH,
     CURSOR_TYPE_ANCHOR,
-    CURSOR_TYPE_ADDITIONAL_1,
-    CURSOR_TYPE_ADDITIONAL_2,
+    CURSOR_TYPE_ADDITIONAL,
+    CURSOR_TYPE_ADDITIONAL_ANIM,
     CURSOR_TYPE_CUSTOM = -1,
 };
 
@@ -79,13 +79,18 @@ void MockPointerControllerPolicyInterface::loadAdditionalMouseResources(
     SpriteIcon icon;
     PointerAnimation anim;
 
-    for (int32_t cursorType : {CURSOR_TYPE_ADDITIONAL_1, CURSOR_TYPE_ADDITIONAL_2}) {
-        loadPointerIconForType(&icon, cursorType);
-        anim.animationFrames.push_back(icon);
-        anim.durationPerFrame = 10;
-        (*outResources)[cursorType] = icon;
-        (*outAnimationResources)[cursorType] = anim;
-    }
+    // CURSOR_TYPE_ADDITIONAL doesn't have animation resource.
+    int32_t cursorType = CURSOR_TYPE_ADDITIONAL;
+    loadPointerIconForType(&icon, cursorType);
+    (*outResources)[cursorType] = icon;
+
+    // CURSOR_TYPE_ADDITIONAL_ANIM has animation resource.
+    cursorType = CURSOR_TYPE_ADDITIONAL_ANIM;
+    loadPointerIconForType(&icon, cursorType);
+    anim.animationFrames.push_back(icon);
+    anim.durationPerFrame = 10;
+    (*outResources)[cursorType] = icon;
+    (*outAnimationResources)[cursorType] = anim;
 }
 
 int32_t MockPointerControllerPolicyInterface::getDefaultPointerIconId() {
@@ -178,7 +183,7 @@ TEST_F(PointerControllerTest, useDefaultCursorTypeByDefault) {
 TEST_F(PointerControllerTest, updatePointerIcon) {
     mPointerController->unfade(PointerController::TRANSITION_IMMEDIATE);
 
-    int32_t type = CURSOR_TYPE_ADDITIONAL_1;
+    int32_t type = CURSOR_TYPE_ADDITIONAL;
     std::pair<float, float> hotspot = getHotSpotCoordinatesForType(type);
     EXPECT_CALL(*mPointerSprite, setVisible(true));
     EXPECT_CALL(*mPointerSprite, setAlpha(1.0f));
