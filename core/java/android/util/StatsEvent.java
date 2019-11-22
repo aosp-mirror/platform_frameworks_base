@@ -43,6 +43,166 @@ import com.android.internal.annotations.VisibleForTesting;
  * @hide
  **/
 public final class StatsEvent {
+    // Type Ids.
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_INT = 0x00;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_LONG = 0x01;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_STRING = 0x02;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_LIST = 0x03;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_FLOAT = 0x04;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_BOOLEAN = 0x05;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_BYTE_ARRAY = 0x06;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_OBJECT = 0x07;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_KEY_VALUE_PAIRS = 0x08;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_ATTRIBUTION_CHAIN = 0x09;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final byte TYPE_ERRORS = 0x0F;
+
+    // Error flags.
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_NO_TIMESTAMP = 0x1;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_NO_ATOM_ID = 0x2;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_OVERFLOW = 0x4;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_ATTRIBUTION_CHAIN_TOO_LONG = 0x8;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_TOO_MANY_KEY_VALUE_PAIRS = 0x10;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD = 0x20;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_INVALID_ANNOTATION_ID = 0x40;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_ANNOTATION_ID_TOO_LARGE = 0x80;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_TOO_MANY_ANNOTATIONS = 0x100;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_TOO_MANY_FIELDS = 0x200;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_ATTRIBUTION_UIDS_TAGS_SIZES_NOT_EQUAL = 0x400;
+
+    // Size limits.
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int MAX_ANNOTATION_COUNT = 15;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int MAX_ATTRIBUTION_NODES = 127;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int MAX_NUM_ELEMENTS = 127;
+
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int MAX_KEY_VALUE_PAIRS = 127;
+
     private static final int LOGGER_ENTRY_MAX_PAYLOAD = 4068;
 
     // Max payload size is 4 bytes less as 4 bytes are reserved for statsEventTag.
@@ -67,20 +227,38 @@ public final class StatsEvent {
         return new StatsEvent.Builder(Buffer.obtain());
     }
 
-    int getAtomId() {
+    /**
+     * Get the atom Id of the atom encoded in this StatsEvent object.
+     *
+     * @hide
+     **/
+    public int getAtomId() {
         return mAtomId;
     }
 
+    /**
+     * Get the byte array that contains the encoded payload that can be sent to statsd.
+     *
+     * @hide
+     **/
     @NonNull
-    byte[] getBytes() {
+    public byte[] getBytes() {
         return mBuffer.getBytes();
     }
 
-    int getNumBytes() {
+    /**
+     * Get the number of bytes used to encode the StatsEvent payload.
+     *
+     * @hide
+     **/
+    public int getNumBytes() {
         return mNumBytes;
     }
 
-    void release() {
+    /**
+     * Recycle this StatsEvent object.
+     **/
+    public void release() {
         mBuffer.release();
     }
 
@@ -112,41 +290,8 @@ public final class StatsEvent {
      *         .addBooleanAnnotation(annotation1Id, true)
      *         .build();
      * </pre>
-     * @hide
      **/
     public static final class Builder {
-        // Type Ids.
-        private static final byte TYPE_INT = 0x00;
-        private static final byte TYPE_LONG = 0x01;
-        private static final byte TYPE_STRING = 0x02;
-        private static final byte TYPE_LIST = 0x03;
-        private static final byte TYPE_FLOAT = 0x04;
-        private static final byte TYPE_BOOLEAN = 0x05;
-        private static final byte TYPE_BYTE_ARRAY = 0x06;
-        private static final byte TYPE_OBJECT = 0x07;
-        private static final byte TYPE_KEY_VALUE_PAIRS = 0x08;
-        private static final byte TYPE_ATTRIBUTION_CHAIN = 0x09;
-        private static final byte TYPE_ERRORS = 0x0F;
-
-        // Error flags.
-        private static final int ERROR_NO_TIMESTAMP = 0x1;
-        private static final int ERROR_NO_ATOM_ID = 0x2;
-        private static final int ERROR_OVERFLOW = 0x4;
-        private static final int ERROR_ATTRIBUTION_CHAIN_TOO_LONG = 0x8;
-        private static final int ERROR_TOO_MANY_KEY_VALUE_PAIRS = 0x10;
-        private static final int ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD = 0x20;
-        private static final int ERROR_INVALID_ANNOTATION_ID = 0x40;
-        private static final int ERROR_ANNOTATION_ID_TOO_LARGE = 0x80;
-        private static final int ERROR_TOO_MANY_ANNOTATIONS = 0x100;
-        private static final int ERROR_TOO_MANY_FIELDS = 0x200;
-        private static final int ERROR_ATTRIBUTION_UIDS_TAGS_SIZES_NOT_EQUAL = 0x400;
-
-        // Size limits.
-        private static final int MAX_ANNOTATION_COUNT = 15;
-        private static final int MAX_ATTRIBUTION_NODES = 127;
-        private static final int MAX_NUM_ELEMENTS = 127;
-        private static final int MAX_KEY_VALUE_PAIRS = 127;
-
         // Fixed positions.
         private static final int POS_NUM_ELEMENTS = 1;
         private static final int POS_TIMESTAMP_NS = POS_NUM_ELEMENTS + Byte.BYTES;
@@ -288,7 +433,7 @@ public final class StatsEvent {
          * @param tags array of tags in the attribution nodes.
          **/
         @NonNull
-        public Builder writeAttributionNode(
+        public Builder writeAttributionChain(
                 @NonNull final int[] uids, @NonNull final String[] tags) {
             final byte numUids = (byte) uids.length;
             final byte numTags = (byte) tags.length;
