@@ -154,4 +154,9 @@ public final class NetworkScore implements Parcelable {
         }
         return true;
     }
+
+    /** Convert to a string */
+    public String toString() {
+        return "NetworkScore[" + mExtensions.toString() + "]";
+    }
 }
