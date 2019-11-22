@@ -162,18 +162,15 @@ public final class PackagesTokenData {
      *
      * @param packageName the package to be removed
      * @param timeRemoved the time stamp of when the package was removed
-     * @return the token mapped to the package removed or {@code PackagesTokenData.UNASSIGNED_TOKEN}
-     *         if not mapped
      */
-    public int removePackage(String packageName, long timeRemoved) {
+    public void removePackage(String packageName, long timeRemoved) {
         removedPackagesMap.put(packageName, timeRemoved);
 
         if (!packagesToTokensMap.containsKey(packageName)) {
-            return UNASSIGNED_TOKEN;
+            return;
         }
         final int packageToken = packagesToTokensMap.get(packageName).get(packageName);
         packagesToTokensMap.remove(packageName);
         tokensToPackagesMap.delete(packageToken);
-        return packageToken;
     }
 }

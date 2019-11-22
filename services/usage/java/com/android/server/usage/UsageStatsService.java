@@ -846,8 +846,6 @@ public class UsageStatsService extends SystemService implements
             mUserState.remove(userId);
             mAppStandby.onUserRemoved(userId);
             mAppTimeLimit.onUserRemoved(userId);
-            // Cancel any scheduled jobs for this user since the user is being removed.
-            UsageStatsIdleService.cancelJob(getContext(), userId);
         }
     }
 
@@ -857,7 +855,7 @@ public class UsageStatsService extends SystemService implements
     private void onPackageRemoved(int userId, String packageName) {
         synchronized (mLock) {
             final long timeRemoved = System.currentTimeMillis();
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.get(userId, false)) {
                 // If user is not unlocked and a package is removed for them, we will handle it
                 // when the user service is initialized and package manager is queried.
                 return;
@@ -868,24 +866,6 @@ public class UsageStatsService extends SystemService implements
             }
 
             userService.onPackageRemoved(packageName, timeRemoved);
-        }
-    }
-
-    /**
-     * Called by the Binder stub.
-     */
-    private boolean pruneUninstalledPackagesData(int userId) {
-        synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
-                return false; // user is no longer unlocked
-            }
-
-            final UserUsageStatsService userService = mUserState.get(userId);
-            if (userService == null) {
-                return false; // user was stopped or removed
-            }
-
-            return userService.pruneUninstalledPackagesData();
         }
     }
 
@@ -2143,11 +2123,6 @@ public class UsageStatsService extends SystemService implements
         @Override
         public AppUsageLimitData getAppUsageLimit(String packageName, UserHandle user) {
             return mAppTimeLimit.getAppUsageLimit(packageName, user);
-        }
-
-        @Override
-        public boolean pruneUninstalledPackagesData(int userId) {
-            return UsageStatsService.this.pruneUninstalledPackagesData(userId);
         }
     }
 

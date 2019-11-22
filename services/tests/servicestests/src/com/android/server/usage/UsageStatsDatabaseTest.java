@@ -45,7 +45,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -94,8 +93,6 @@ public class UsageStatsDatabaseTest {
                 for (File f : usageFiles) {
                     f.delete();
                 }
-            } else {
-                intervalDir.delete();
             }
         }
     }
@@ -590,7 +587,6 @@ public class UsageStatsDatabaseTest {
         db.readMappingsLocked();
         db.init(1);
         db.putUsageStats(interval, mIntervalStats);
-        db.writeMappingsLocked();
 
         final String removedPackage = "fake.package.name0";
         // invoke handler call directly from test to remove package
@@ -598,18 +594,18 @@ public class UsageStatsDatabaseTest {
 
         List<IntervalStats> stats = db.queryUsageStats(interval, 0, mEndTime,
                 mIntervalStatsVerifier);
-        assertEquals(1, stats.size(),
-                "Only one interval stats object should exist for the given time range.");
-        final IntervalStats stat = stats.get(0);
-        if (stat.packageStats.containsKey(removedPackage)) {
-            fail("Found removed package " + removedPackage + " in package stats.");
-            return;
-        }
-        for (int i = 0; i < stat.events.size(); i++) {
-            final Event event = stat.events.get(i);
-            if (removedPackage.equals(event.mPackage)) {
-                fail("Found an event from removed package " + removedPackage);
+        for (int i = 0; i < stats.size(); i++) {
+            final IntervalStats stat = stats.get(i);
+            if (stat.packageStats.containsKey(removedPackage)) {
+                fail("Found removed package " + removedPackage + " in package stats.");
                 return;
+            }
+            for (int j = 0; j < stat.events.size(); j++) {
+                final Event event = stat.events.get(j);
+                if (removedPackage.equals(event.mPackage)) {
+                    fail("Found an event from removed package " + removedPackage);
+                    return;
+                }
             }
         }
     }
@@ -620,91 +616,5 @@ public class UsageStatsDatabaseTest {
         verifyPackageNotRetained(UsageStatsManager.INTERVAL_WEEKLY);
         verifyPackageNotRetained(UsageStatsManager.INTERVAL_MONTHLY);
         verifyPackageNotRetained(UsageStatsManager.INTERVAL_YEARLY);
-    }
-
-    private void verifyPackageDataIsRemoved(UsageStatsDatabase db, int interval,
-            String removedPackage) {
-        List<IntervalStats> stats = db.queryUsageStats(interval, 0, mEndTime,
-                mIntervalStatsVerifier);
-        assertEquals(1, stats.size(),
-                "Only one interval stats object should exist for the given time range.");
-        final IntervalStats stat = stats.get(0);
-        if (stat.packageStats.containsKey(removedPackage)) {
-            fail("Found removed package " + removedPackage + " in package stats.");
-            return;
-        }
-        for (int i = 0; i < stat.events.size(); i++) {
-            final Event event = stat.events.get(i);
-            if (removedPackage.equals(event.mPackage)) {
-                fail("Found an event from removed package " + removedPackage);
-                return;
-            }
-        }
-    }
-
-    private void verifyPackageDataIsNotRemoved(UsageStatsDatabase db, int interval,
-            Set<String> installedPackages) {
-        List<IntervalStats> stats = db.queryUsageStats(interval, 0, mEndTime,
-                mIntervalStatsVerifier);
-        assertEquals(1, stats.size(),
-                "Only one interval stats object should exist for the given time range.");
-        final IntervalStats stat = stats.get(0);
-        if (!stat.packageStats.containsAll(installedPackages)) {
-            fail("Could not find some installed packages in package stats.");
-            return;
-        }
-        // attempt to find an event from each installed package
-        for (String installedPackage : installedPackages) {
-            for (int i = 0; i < stat.events.size(); i++) {
-                if (installedPackage.equals(stat.events.get(i).mPackage)) {
-                    break;
-                }
-                if (i == stat.events.size() - 1) {
-                    fail("Could not find any event for: " + installedPackage);
-                    return;
-                }
-            }
-        }
-    }
-
-    @Test
-    public void testPackageDataIsRemoved() throws IOException {
-        UsageStatsDatabase db = new UsageStatsDatabase(mTestDir);
-        db.readMappingsLocked();
-        db.init(1);
-
-        // write stats to disk for each interval
-        db.putUsageStats(UsageStatsManager.INTERVAL_DAILY, mIntervalStats);
-        db.putUsageStats(UsageStatsManager.INTERVAL_WEEKLY, mIntervalStats);
-        db.putUsageStats(UsageStatsManager.INTERVAL_MONTHLY, mIntervalStats);
-        db.putUsageStats(UsageStatsManager.INTERVAL_YEARLY, mIntervalStats);
-        db.writeMappingsLocked();
-
-        final Set<String> installedPackages = mIntervalStats.packageStats.keySet();
-        final String removedPackage = installedPackages.iterator().next();
-        installedPackages.remove(removedPackage);
-
-        // mimic a package uninstall
-        db.onPackageRemoved(removedPackage, System.currentTimeMillis());
-
-        // mimic the idle prune job being triggered
-        db.pruneUninstalledPackagesData();
-
-        // read data from disk into a new db instance
-        UsageStatsDatabase newDB = new UsageStatsDatabase(mTestDir);
-        newDB.readMappingsLocked();
-        newDB.init(mEndTime);
-
-        // query data for each interval and ensure data for package doesn't exist
-        verifyPackageDataIsRemoved(newDB, UsageStatsManager.INTERVAL_DAILY, removedPackage);
-        verifyPackageDataIsRemoved(newDB, UsageStatsManager.INTERVAL_WEEKLY, removedPackage);
-        verifyPackageDataIsRemoved(newDB, UsageStatsManager.INTERVAL_MONTHLY, removedPackage);
-        verifyPackageDataIsRemoved(newDB, UsageStatsManager.INTERVAL_YEARLY, removedPackage);
-
-        // query data for each interval and ensure some data for installed packages exists
-        verifyPackageDataIsNotRemoved(newDB, UsageStatsManager.INTERVAL_DAILY, installedPackages);
-        verifyPackageDataIsNotRemoved(newDB, UsageStatsManager.INTERVAL_WEEKLY, installedPackages);
-        verifyPackageDataIsNotRemoved(newDB, UsageStatsManager.INTERVAL_MONTHLY, installedPackages);
-        verifyPackageDataIsNotRemoved(newDB, UsageStatsManager.INTERVAL_YEARLY, installedPackages);
     }
 }

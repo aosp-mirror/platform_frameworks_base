@@ -545,52 +545,9 @@ public class UsageStatsDatabase {
         }
     }
 
-    /**
-     * Returns the token mapped to the package removed or {@code PackagesTokenData.UNASSIGNED_TOKEN}
-     * if not mapped.
-     */
-    int onPackageRemoved(String packageName, long timeRemoved) {
+    void onPackageRemoved(String packageName, long timeRemoved) {
         synchronized (mLock) {
-            return mPackagesTokenData.removePackage(packageName, timeRemoved);
-        }
-    }
-
-    /**
-     * Reads all the usage stats data on disk and rewrites it with any data related to uninstalled
-     * packages omitted.
-     */
-    boolean pruneUninstalledPackagesData() {
-        synchronized (mLock) {
-            for (int i = 0; i < mIntervalDirs.length; i++) {
-                final File[] files = mIntervalDirs[i].listFiles();
-                if (files == null) {
-                    continue;
-                }
-                for (int j = 0; j < files.length; j++) {
-                    try {
-                        final IntervalStats stats = new IntervalStats();
-                        final AtomicFile atomicFile = new AtomicFile(files[j]);
-                        if (!readLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData)) {
-                            continue; // no data was omitted when read so no need to rewrite
-                        }
-                        // Any data related to packages that have been removed would have failed
-                        // the deobfuscation step on read so the IntervalStats object here only
-                        // contains data for packages that are currently installed - all we need
-                        // to do here is write the data back to disk.
-                        writeLocked(atomicFile, stats, mCurrentVersion, mPackagesTokenData);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Failed to prune data from: " + files[j].toString());
-                        return false;
-                    }
-                }
-            }
-            try {
-                writeMappingsLocked();
-            } catch (IOException e) {
-                Slog.e(TAG, "Failed to write package mappings after pruning data.");
-                return false;
-            }
-            return true;
+            mPackagesTokenData.removePackage(packageName, timeRemoved);
         }
     }
 
@@ -688,6 +645,7 @@ public class UsageStatsDatabase {
         }
 
         // filter out events
+        final int eventsSize = stats.events.size();
         for (int i = stats.events.size() - 1; i >= 0; i--) {
             final UsageEvents.Event event = stats.events.get(i);
             final Long timeRemoved = removedPackagesMap.get(event.mPackage);
@@ -984,17 +942,13 @@ public class UsageStatsDatabase {
         readLocked(file, statsOut, mCurrentVersion, mPackagesTokenData);
     }
 
-    /**
-     * Returns {@code true} if any stats were omitted while reading, {@code false} otherwise.
-     */
-    private static boolean readLocked(AtomicFile file, IntervalStats statsOut, int version,
+    private static void readLocked(AtomicFile file, IntervalStats statsOut, int version,
             PackagesTokenData packagesTokenData) throws IOException {
-        boolean dataOmitted = false;
         try {
             FileInputStream in = file.openRead();
             try {
                 statsOut.beginTime = parseBeginTime(file);
-                dataOmitted = readLocked(in, statsOut, version, packagesTokenData);
+                readLocked(in, statsOut, version, packagesTokenData);
                 statsOut.lastTimeSaved = file.getLastModifiedTime();
             } finally {
                 try {
@@ -1007,15 +961,10 @@ public class UsageStatsDatabase {
             Slog.e(TAG, "UsageStatsDatabase", e);
             throw e;
         }
-        return dataOmitted;
     }
 
-    /**
-     * Returns {@code true} if any stats were omitted while reading, {@code false} otherwise.
-     */
-    private static boolean readLocked(InputStream in, IntervalStats statsOut, int version,
+    private static void readLocked(InputStream in, IntervalStats statsOut, int version,
             PackagesTokenData packagesTokenData) throws IOException {
-        boolean dataOmitted = false;
         switch (version) {
             case 1:
             case 2:
@@ -1040,14 +989,14 @@ public class UsageStatsDatabase {
                 } catch (IOException e) {
                     Slog.e(TAG, "Unable to read interval stats from proto.", e);
                 }
-                dataOmitted = statsOut.deobfuscateData(packagesTokenData);
+                statsOut.deobfuscateData(packagesTokenData);
                 break;
             default:
                 throw new RuntimeException(
                         "Unhandled UsageStatsDatabase version: " + Integer.toString(version)
                                 + " on read.");
         }
-        return dataOmitted;
+
     }
 
     /**
