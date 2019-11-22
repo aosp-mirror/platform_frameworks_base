@@ -8946,6 +8946,14 @@ public final class Settings {
                 new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1", "2"});
 
         /**
+         * Current provider of proximity-based sharing services.
+         * Default value in @string/config_defaultNearbySharingComponent.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String NEARBY_SHARING_COMPONENT = "nearby_sharing_component";
+
+        /**
          * Controls whether aware is enabled.
          * @hide
          */

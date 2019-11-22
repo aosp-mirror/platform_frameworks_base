@@ -66,8 +66,7 @@
   <java-symbol type="id" name="content_preview_text_layout" />
   <java-symbol type="id" name="content_preview_title" />
   <java-symbol type="id" name="content_preview_title_layout" />
-  <java-symbol type="id" name="copy_button" />
-  <java-symbol type="id" name="file_copy_button" />
+  <java-symbol type="id" name="chooser_action_row" />
   <java-symbol type="id" name="current_scene" />
   <java-symbol type="id" name="scene_layoutid_cache" />
   <java-symbol type="id" name="customPanel" />
@@ -3838,6 +3837,11 @@
 
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
+
+  <java-symbol type="id" name="chooser_copy_button" />
+  <java-symbol type="layout" name="chooser_action_button" />
+  <java-symbol type="dimen" name="chooser_action_button_icon_size" />
+  <java-symbol type="string" name="config_defaultNearbySharingComponent" />
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
   <java-symbol type="bool" name="reset_geo_fencing_check_after_boot_or_apm" />
