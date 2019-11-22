@@ -1,6 +1,13 @@
+filegroup {
+    name: "services.devicepolicy-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
 java_library_static {
     name: "services.devicepolicy",
-    srcs: ["java/**/*.java"],
+    srcs: [":services.devicepolicy-sources"],
 
     libs: [
         "services.core",

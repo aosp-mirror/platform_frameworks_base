@@ -12,19 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+filegroup {
+  name: "services.startop.iorap-javasources",
+  srcs: ["src/**/*.java"],
+  path: "src",
+  visibility: ["//visibility:private"],
+}
+
+filegroup {
+  name: "services.startop.iorap-sources",
+  srcs: [
+    ":services.startop.iorap-javasources",
+    ":iorap-aidl",
+  ],
+  visibility: ["//frameworks/base/services:__subpackages__"],
+}
+
 java_library_static {
   name: "services.startop.iorap",
-
-  aidl: {
-    include_dirs: [
-      "system/iorap/binder",
-    ],
-  },
-
+  srcs: [":services.startop.iorap-sources"],
   libs: ["services.core"],
-
-  srcs: [
-      ":iorap-aidl",
-      "**/*.java",
-  ],
 }
