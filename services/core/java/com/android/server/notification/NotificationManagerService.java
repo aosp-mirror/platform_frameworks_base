@@ -2083,10 +2083,10 @@ public class NotificationManagerService extends SystemService {
 
             @Override
             public void updateAutogroupSummary(String key, boolean needsOngoingFlag) {
-                String pkg = null;
+                String pkg;
                 synchronized (mNotificationLock) {
                     NotificationRecord r = mNotificationsByKey.get(key);
-                    pkg = r.sbn.getPackageName();
+                    pkg = r != null && r.sbn != null ? r.sbn.getPackageName() : null;
                 }
                 boolean isAppForeground = pkg != null
                         && mActivityManager.getPackageImportance(pkg) == IMPORTANCE_FOREGROUND;
