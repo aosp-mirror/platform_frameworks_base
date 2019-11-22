@@ -1960,6 +1960,11 @@ public final class Settings {
      */
     public static final String CALL_METHOD_PREFIX_KEY = "_prefix";
 
+    /**
+     * @hide - String argument extra to the fast-path call()-based requests
+     */
+    public static final String CALL_METHOD_FLAGS_KEY = "_flags";
+
     /** @hide - Private call() method to write to 'system' table */
     public static final String CALL_METHOD_PUT_SYSTEM = "PUT_system";
 
@@ -1971,6 +1976,9 @@ public final class Settings {
 
     /** @hide - Private call() method to write to 'configuration' table */
     public static final String CALL_METHOD_PUT_CONFIG = "PUT_config";
+
+    /** @hide - Private call() method to write to and delete from the 'configuration' table */
+    public static final String CALL_METHOD_SET_ALL_CONFIG = "SET_ALL_config";
 
     /** @hide - Private call() method to delete from the 'system' table */
     public static final String CALL_METHOD_DELETE_SYSTEM = "DELETE_system";
@@ -2304,21 +2312,23 @@ public final class Settings {
         private final String mCallGetCommand;
         private final String mCallSetCommand;
         private final String mCallListCommand;
+        private final String mCallSetAllCommand;
 
         @GuardedBy("this")
         private GenerationTracker mGenerationTracker;
 
         public NameValueCache(Uri uri, String getCommand, String setCommand,
                 ContentProviderHolder providerHolder) {
-            this(uri, getCommand, setCommand, null, providerHolder);
+            this(uri, getCommand, setCommand, null, null, providerHolder);
         }
 
         NameValueCache(Uri uri, String getCommand, String setCommand, String listCommand,
-                ContentProviderHolder providerHolder) {
+                String setAllCommand, ContentProviderHolder providerHolder) {
             mUri = uri;
             mCallGetCommand = getCommand;
             mCallSetCommand = setCommand;
             mCallListCommand = listCommand;
+            mCallSetAllCommand = setAllCommand;
             mProviderHolder = providerHolder;
         }
 
@@ -2339,6 +2349,26 @@ public final class Settings {
                         mProviderHolder.mUri.getAuthority(), mCallSetCommand, name, arg);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't set key " + name + " in " + mUri, e);
+                return false;
+            }
+            return true;
+        }
+
+        public boolean setStringsForPrefix(ContentResolver cr, String prefix,
+                HashMap<String, String> keyValues) {
+            if (mCallSetAllCommand == null) {
+                // This NameValueCache does not support atomically setting multiple flags
+                return false;
+            }
+            try {
+                Bundle args = new Bundle();
+                args.putString(CALL_METHOD_PREFIX_KEY, prefix);
+                args.putSerializable(CALL_METHOD_FLAGS_KEY, keyValues);
+                IContentProvider cp = mProviderHolder.getProvider(cr);
+                cp.call(cr.getPackageName(), cr.getFeatureId(), mProviderHolder.mUri.getAuthority(),
+                        mCallSetAllCommand, null, args);
+            } catch (RemoteException e) {
+                // Not supported by the remote side
                 return false;
             }
             return true;
@@ -13718,6 +13748,7 @@ public final class Settings {
                 CALL_METHOD_GET_CONFIG,
                 CALL_METHOD_PUT_CONFIG,
                 CALL_METHOD_LIST_CONFIG,
+                CALL_METHOD_SET_ALL_CONFIG,
                 sProviderHolder);
 
         /**
@@ -13789,6 +13820,29 @@ public final class Settings {
                 @NonNull String name, @Nullable String value, boolean makeDefault) {
             return sNameValueCache.putStringForUser(resolver, createCompositeName(namespace, name),
                     value, null, makeDefault, resolver.getUserId());
+        }
+
+        /**
+         * Clear all name/value pairs for the provided namespace and save new name/value pairs in
+         * their place.
+         *
+         * @param resolver to access the database with.
+         * @param namespace to which the names should be set.
+         * @param keyValues map of key names (without the prefix) to values.
+         * @return
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
+        static boolean setStrings(@NonNull ContentResolver resolver, @NonNull String namespace,
+                @NonNull Map<String, String> keyValues) {
+            HashMap<String, String> compositeKeyValueMap = new HashMap<>(keyValues.keySet().size());
+            for (Map.Entry<String, String> entry : keyValues.entrySet()) {
+                compositeKeyValueMap.put(
+                        createCompositeName(namespace, entry.getKey()), entry.getValue());
+            }
+            return sNameValueCache.setStringsForPrefix(resolver, createPrefix(namespace),
+                    compositeKeyValueMap);
         }
 
         /**

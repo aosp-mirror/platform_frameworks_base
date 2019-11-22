@@ -64,6 +64,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -413,6 +414,57 @@ final class SettingsState {
         scheduleWriteIfNeededLocked();
 
         return true;
+    }
+
+    // The settings provider must hold its lock when calling here.
+    // Returns the list of keys which changed (added, updated, or deleted).
+    @GuardedBy("mLock")
+    public List<String> setSettingsLocked(String prefix, Map<String, String> keyValues,
+            String packageName) {
+        List<String> changedKeys = new ArrayList<>();
+        // Delete old keys with the prefix that are not part of the new set.
+        for (int i = 0; i < mSettings.keySet().size(); ++i) {
+            String key = mSettings.keyAt(i);
+            if (key.startsWith(prefix) && !keyValues.containsKey(key)) {
+                Setting oldState = mSettings.remove(key);
+
+                StatsLog.write(StatsLog.SETTING_CHANGED, key, /* value= */ "", /* newValue= */ "",
+                        oldState.value, /* tag */ "", false, getUserIdFromKey(mKey),
+                        StatsLog.SETTING_CHANGED__REASON__DELETED);
+                addHistoricalOperationLocked(HISTORICAL_OPERATION_DELETE, oldState);
+                changedKeys.add(key); // key was removed
+            }
+        }
+
+        // Update/add new keys
+        for (String key : keyValues.keySet()) {
+            String value = keyValues.get(key);
+            String oldValue = null;
+            Setting state = mSettings.get(key);
+            if (state == null) {
+                state = new Setting(key, value, false, packageName, null);
+                mSettings.put(key, state);
+                changedKeys.add(key); // key was added
+            } else if (state.value != value) {
+                oldValue = state.value;
+                state.update(value, false, packageName, null, true);
+                changedKeys.add(key); // key was updated
+            } else {
+                // this key/value already exists, no change and no logging necessary
+                continue;
+            }
+
+            StatsLog.write(StatsLog.SETTING_CHANGED, key, value, state.value, oldValue,
+                    /* tag */ null, /* make default */ false,
+                    getUserIdFromKey(mKey), StatsLog.SETTING_CHANGED__REASON__UPDATED);
+            addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, state);
+        }
+
+        if (!changedKeys.isEmpty()) {
+            scheduleWriteIfNeededLocked();
+        }
+
+        return changedKeys;
     }
 
     // The settings provider must hold its lock when calling here.
