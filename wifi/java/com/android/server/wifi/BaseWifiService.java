@@ -535,4 +535,9 @@ public class BaseWifiService extends IWifiManager.Stub {
             String packageName) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public int calculateSignalLevel(int rssi) {
+        throw new UnsupportedOperationException();
+    }
 }
