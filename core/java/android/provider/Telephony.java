@@ -4119,20 +4119,6 @@ public final class Telephony {
         public static final String CID = "cid";
 
         /**
-         * Message code. <em>OBSOLETE: merged into SERIAL_NUMBER.</em>
-         * <P>Type: INTEGER</P>
-         * @hide
-         */
-        public static final String V1_MESSAGE_CODE = "message_code";
-
-        /**
-         * Message identifier. <em>OBSOLETE: renamed to SERVICE_CATEGORY.</em>
-         * <P>Type: INTEGER</P>
-         * @hide
-         */
-        public static final String V1_MESSAGE_IDENTIFIER = "message_id";
-
-        /**
          * Service category which represents the general topic of the message.
          * <p>
          * For GSM/UMTS: message identifier (see 3GPP TS 23.041 section 9.4.1.2.2)
