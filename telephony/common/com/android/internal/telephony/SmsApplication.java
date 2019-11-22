@@ -195,7 +195,7 @@ public final class SmsApplication {
      * @return
      */
     private static int getIncomingUserId(Context context) {
-        int contextUserId = context.getUserId();
+        int contextUserId = UserHandle.myUserId();
         final int callingUid = Binder.getCallingUid();
         if (DEBUG_MULTIUSER) {
             Log.i(LOG_TAG, "getIncomingUserHandle caller=" + callingUid + ", myuid="
