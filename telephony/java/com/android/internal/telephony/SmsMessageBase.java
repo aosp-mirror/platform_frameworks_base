@@ -20,7 +20,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
-import android.text.Emoji;
 
 import com.android.internal.telephony.GsmAlphabet.TextEncodingDetails;
 
@@ -404,9 +403,9 @@ public abstract class SmsMessageBase {
             if (!breakIterator.isBoundary(nextPos)) {
                 int breakPos = breakIterator.preceding(nextPos);
                 while (breakPos + 4 <= nextPos
-                        && Emoji.isRegionalIndicatorSymbol(
+                        && isRegionalIndicatorSymbol(
                             Character.codePointAt(msgBody, breakPos))
-                        && Emoji.isRegionalIndicatorSymbol(
+                        && isRegionalIndicatorSymbol(
                             Character.codePointAt(msgBody, breakPos + 2))) {
                     // skip forward over flags (pairs of Regional Indicator Symbol)
                     breakPos += 4;
@@ -420,6 +419,11 @@ public abstract class SmsMessageBase {
             }
         }
         return nextPos;
+    }
+
+    private static boolean isRegionalIndicatorSymbol(int codePoint) {
+        /** Based on http://unicode.org/Public/emoji/3.0/emoji-sequences.txt */
+        return 0x1F1E6 <= codePoint && codePoint <= 0x1F1FF;
     }
 
     /**
