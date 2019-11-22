@@ -1067,12 +1067,30 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     /** Returns the first non-finishing activity from the bottom. */
     ActivityRecord getRootActivity() {
-        final int rootActivityIndex = findRootIndex(false /* effectiveRoot */);
-        if (rootActivityIndex == -1) {
-            // There are no non-finishing activities in the task.
-            return null;
+        // TODO: Figure out why we historical ignore relinquish identity for this case...
+        return getRootActivity(true /*ignoreRelinquishIdentity*/, false /*setToBottomIfNone*/);
+    }
+
+    ActivityRecord getRootActivity(boolean setToBottomIfNone) {
+        return getRootActivity(false /*ignoreRelinquishIdentity*/, false /*setToBottomIfNone*/);
+    }
+
+    ActivityRecord getRootActivity(boolean ignoreRelinquishIdentity, boolean setToBottomIfNone) {
+        ActivityRecord root;
+        if (ignoreRelinquishIdentity) {
+            root = getActivity((r) -> !r.finishing, false /*traverseTopToBottom*/);
+        } else {
+            root = getActivity((r) ->
+                            !r.finishing && (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0,
+                    false /*traverseTopToBottom*/);
         }
-        return getChildAt(rootActivityIndex);
+
+        if (root == null && setToBottomIfNone) {
+            // All activities in the task are either finishing or relinquish task identity.
+            // But we still want to update the intent, so let's use the bottom activity.
+            root = getActivity((r) -> true, false /*traverseTopToBottom*/);
+        }
+        return root;
     }
 
     ActivityRecord getTopNonFinishingActivity() {

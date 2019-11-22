@@ -1096,7 +1096,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         taskTop.finishing = true;
 
         final ActivityRecord newR = new ActivityBuilder(mService).build();
-        final ActivityRecord result = mStack.resetTaskIfNeededLocked(taskTop, newR);
+        final ActivityRecord result = mStack.resetTaskIfNeeded(taskTop, newR);
         assertThat(result).isEqualTo(taskTop);
     }
 
@@ -1118,7 +1118,7 @@ public class ActivityStackTests extends ActivityTestsBase {
             r.setState(ActivityStack.ActivityState.INITIALIZING, "test");
             // Ensure precondition that the activity is opaque.
             assertTrue(r.occludesParent());
-            mSupervisor.startSpecificActivityLocked(r, false /* andResume */,
+            mSupervisor.startSpecificActivity(r, false /* andResume */,
                     false /* checkConfig */);
         }
         mSupervisor.endDeferResume();
@@ -1145,12 +1145,12 @@ public class ActivityStackTests extends ActivityTestsBase {
         new ActivityBuilder(mService).setTask(mTask).build();
         doReturn(false).when(nonTopVisibleActivity).attachedToProcess();
         doReturn(true).when(nonTopVisibleActivity).shouldBeVisible(anyBoolean(), anyBoolean());
-        doNothing().when(mSupervisor).startSpecificActivityLocked(any(), anyBoolean(),
+        doNothing().when(mSupervisor).startSpecificActivity(any(), anyBoolean(),
                 anyBoolean());
 
-        mStack.ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
+        mStack.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                 false /* preserveWindows */);
-        verify(mSupervisor).startSpecificActivityLocked(any(), eq(false) /* andResume */,
+        verify(mSupervisor).startSpecificActivity(any(), eq(false) /* andResume */,
                 anyBoolean());
     }
 

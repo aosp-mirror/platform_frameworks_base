@@ -4512,6 +4512,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mName = name;
         }
 
+        @Override
+        boolean hasActivity() {
+            // I am a non-app-window-container :P
+            return false;
+        }
+
         void addChild(WindowToken token) {
             addChild(token, mWindowComparator);
         }

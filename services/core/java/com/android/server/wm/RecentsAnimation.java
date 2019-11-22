@@ -134,7 +134,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         if (!targetActivity.attachedToProcess()) {
             ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Real start recents");
-            mStackSupervisor.startSpecificActivityLocked(targetActivity, false /* andResume */,
+            mStackSupervisor.startSpecificActivity(targetActivity, false /* andResume */,
                     false /* checkConfig */);
             // Make sure the activity won't be involved in transition.
             if (targetActivity.getDisplayContent() != null) {
@@ -368,7 +368,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         // transition (the target activity will be one of closing apps).
                         if (!controller.shouldDeferCancelWithScreenshot()
                                 && !targetStack.isFocusedStackOnDisplay()) {
-                            targetStack.ensureActivitiesVisibleLocked(null /* starting */,
+                            targetStack.ensureActivitiesVisible(null /* starting */,
                                     0 /* starting */, false /* preserveWindows */);
                         }
                         // Keep target stack in place, nothing changes, so ignore the transition
