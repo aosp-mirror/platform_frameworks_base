@@ -109,10 +109,11 @@ public class LocalDisplayAdapterTest {
      */
     @Test
     public void testPrivateDisplay() throws Exception {
-        setUpDisplay(new DisplayConfig(createDisplayAddress(PORT_A), createDummyDisplayInfo()));
-        setUpDisplay(new DisplayConfig(createDisplayAddress(PORT_B), createDummyDisplayInfo()));
-        setUpDisplay(new DisplayConfig(createDisplayAddress(PORT_C), createDummyDisplayInfo()));
+        setUpDisplay(new FakeDisplay(PORT_A));
+        setUpDisplay(new FakeDisplay(PORT_B));
+        setUpDisplay(new FakeDisplay(PORT_C));
         updateAvailableDisplays();
+
         doReturn(new int[]{ PORT_B }).when(mMockedResources)
                 .getIntArray(com.android.internal.R.array.config_localPrivateDisplayPorts);
         mAdapter.registerLocked();
@@ -135,9 +136,10 @@ public class LocalDisplayAdapterTest {
      */
     @Test
     public void testPublicDisplaysForNoConfigLocalPrivateDisplayPorts() throws Exception {
-        setUpDisplay(new DisplayConfig(createDisplayAddress(PORT_A), createDummyDisplayInfo()));
-        setUpDisplay(new DisplayConfig(createDisplayAddress(PORT_C), createDummyDisplayInfo()));
+        setUpDisplay(new FakeDisplay(PORT_A));
+        setUpDisplay(new FakeDisplay(PORT_C));
         updateAvailableDisplays();
+
         // config_localPrivateDisplayPorts is null
         mAdapter.registerLocked();
 
@@ -165,9 +167,8 @@ public class LocalDisplayAdapterTest {
      */
     @Test
     public void testDpiValues() throws Exception {
-        // needs default one always
-        setUpDisplay(new DisplayConfig(createDisplayAddress(PORT_A), createDummyDisplayInfo()));
-        setUpDisplay(new DisplayConfig(createDisplayAddress(PORT_B), createDummyDisplayInfo()));
+        setUpDisplay(new FakeDisplay(PORT_A));
+        setUpDisplay(new FakeDisplay(PORT_B));
         updateAvailableDisplays();
         mAdapter.registerLocked();
 
@@ -193,32 +194,32 @@ public class LocalDisplayAdapterTest {
         assertEquals(expectedDensityDpi, info.densityDpi);
     }
 
-    private class DisplayConfig {
+    private static class FakeDisplay {
         public final DisplayAddress.Physical address;
-        public final IBinder displayToken = new Binder();
-        public final SurfaceControl.PhysicalDisplayInfo displayInfo;
+        public final IBinder token = new Binder();
+        public final SurfaceControl.DisplayInfo info;
+        public final SurfaceControl.DisplayConfig config;
 
-        private DisplayConfig(
-                DisplayAddress.Physical address, SurfaceControl.PhysicalDisplayInfo displayInfo) {
-            this.address = address;
-            this.displayInfo = displayInfo;
+        private FakeDisplay(int port) {
+            this.address = createDisplayAddress(port);
+            this.info = createFakeDisplayInfo();
+            this.config = createFakeDisplayConfig();
         }
     }
 
-    private void setUpDisplay(DisplayConfig config) {
-        mAddresses.add(config.address);
-        doReturn(config.displayToken).when(() ->
-                SurfaceControl.getPhysicalDisplayToken(config.address.getPhysicalDisplayId()));
-        doReturn(new SurfaceControl.PhysicalDisplayInfo[]{
-                config.displayInfo
-        }).when(() -> SurfaceControl.getDisplayConfigs(config.displayToken));
-        doReturn(0).when(() -> SurfaceControl.getActiveConfig(config.displayToken));
-        doReturn(0).when(() -> SurfaceControl.getActiveColorMode(config.displayToken));
-        doReturn(new int[]{
-                0
-        }).when(() -> SurfaceControl.getDisplayColorModes(config.displayToken));
+    private void setUpDisplay(FakeDisplay display) {
+        mAddresses.add(display.address);
+        doReturn(display.token).when(() ->
+                SurfaceControl.getPhysicalDisplayToken(display.address.getPhysicalDisplayId()));
+        doReturn(display.info).when(() -> SurfaceControl.getDisplayInfo(display.token));
+        doReturn(new SurfaceControl.DisplayConfig[] { display.config }).when(
+                () -> SurfaceControl.getDisplayConfigs(display.token));
+        doReturn(0).when(() -> SurfaceControl.getActiveConfig(display.token));
+        doReturn(0).when(() -> SurfaceControl.getActiveColorMode(display.token));
+        doReturn(new int[] { 0 }).when(
+                () -> SurfaceControl.getDisplayColorModes(display.token));
         doReturn(new SurfaceControl.DesiredDisplayConfigSpecs(0, 60.f, 60.f))
-                .when(() -> SurfaceControl.getDesiredDisplayConfigSpecs(config.displayToken));
+                .when(() -> SurfaceControl.getDesiredDisplayConfigSpecs(display.token));
     }
 
     private void updateAvailableDisplays() {
@@ -235,16 +236,19 @@ public class LocalDisplayAdapterTest {
         return DisplayAddress.fromPortAndModel((byte) port, DISPLAY_MODEL);
     }
 
-    private static SurfaceControl.PhysicalDisplayInfo createDummyDisplayInfo() {
-        SurfaceControl.PhysicalDisplayInfo info = new SurfaceControl.PhysicalDisplayInfo();
+    private static SurfaceControl.DisplayInfo createFakeDisplayInfo() {
+        final SurfaceControl.DisplayInfo info = new SurfaceControl.DisplayInfo();
         info.density = 100;
-        info.xDpi = 100;
-        info.yDpi = 100;
-        info.secure = false;
-        info.width = 800;
-        info.height = 600;
-
         return info;
+    }
+
+    private static SurfaceControl.DisplayConfig createFakeDisplayConfig() {
+        final SurfaceControl.DisplayConfig config = new SurfaceControl.DisplayConfig();
+        config.width = 800;
+        config.height = 600;
+        config.xDpi = 100;
+        config.yDpi = 100;
+        return config;
     }
 
     private void waitForHandlerToComplete(Handler handler, long waitTimeMs)

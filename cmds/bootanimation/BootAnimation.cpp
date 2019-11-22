@@ -42,10 +42,10 @@
 
 #include <android-base/properties.h>
 
+#include <ui/DisplayConfig.h>
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
-#include <ui/DisplayInfo.h>
 
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
@@ -283,16 +283,19 @@ status_t BootAnimation::readyToRun() {
 
     mDisplayToken = SurfaceComposerClient::getInternalDisplayToken();
     if (mDisplayToken == nullptr)
-        return -1;
+        return NAME_NOT_FOUND;
 
-    DisplayInfo dinfo;
-    status_t status = SurfaceComposerClient::getDisplayInfo(mDisplayToken, &dinfo);
-    if (status)
-        return -1;
+    DisplayConfig displayConfig;
+    const status_t error =
+            SurfaceComposerClient::getActiveDisplayConfig(mDisplayToken, &displayConfig);
+    if (error != NO_ERROR)
+        return error;
+
+    const ui::Size& resolution = displayConfig.resolution;
 
     // create the native surface
     sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
-            dinfo.w, dinfo.h, PIXEL_FORMAT_RGB_565);
+            resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565);
 
     SurfaceComposerClient::Transaction t;
 
