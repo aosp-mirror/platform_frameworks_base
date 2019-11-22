@@ -21,6 +21,7 @@ import android.app.SystemServiceRegistry;
 import android.content.Context;
 import android.os.DeviceIdleManager;
 import android.os.IDeviceIdleController;
+import android.os.PowerWhitelistManager;
 
 /**
  * Class holding initialization code for the job scheduler module.
@@ -48,5 +49,8 @@ public class JobSchedulerFrameworkInitializer {
                 Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
                 (context, b) -> new DeviceIdleManager(
                         context, IDeviceIdleController.Stub.asInterface(b)));
+        SystemServiceRegistry.registerContextAwareService(
+                Context.POWER_WHITELIST_MANAGER, PowerWhitelistManager.class,
+                PowerWhitelistManager::new);
     }
 }
