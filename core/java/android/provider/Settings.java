@@ -8712,6 +8712,14 @@ public final class Settings {
                 "back_gesture_inset_scale_right";
 
         /**
+         * Current provider of proximity-based sharing services.
+         * Default value in @string/config_defaultNearbySharingComponent.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String NEARBY_SHARING_COMPONENT = "nearby_sharing_component";
+
+        /**
          * Controls whether aware is enabled.
          * @hide
          */

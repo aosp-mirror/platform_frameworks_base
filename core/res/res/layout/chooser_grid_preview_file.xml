@@ -65,13 +65,15 @@
         android:gravity="start|top"
         android:paddingRight="24dp"
         android:singleLine="true"/>
-    <Button
-        android:id="@+id/file_copy_button"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:gravity="center"
-        android:layout_gravity="center_vertical"
-        android:background="@drawable/ic_content_copy_gm2"/>
   </LinearLayout>
+
+  <include
+      android:id="@+id/chooser_action_row"
+      layout="@layout/chooser_action_row"
+      android:layout_width="@dimen/chooser_preview_width"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="@dimen/chooser_view_spacing"
+      android:layout_gravity="center"
+  />
 </LinearLayout>
 
