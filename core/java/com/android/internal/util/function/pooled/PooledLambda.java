@@ -383,7 +383,7 @@ public interface PooledLambda {
             QuadPredicate<? super A, ? super B, ? super C, ? super D> function,
             ArgumentPlaceholder<A> arg1, B arg2, C arg3, D arg4) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.BOOLEAN, arg1, arg2, arg3, arg4, null, null, null, null,
+                function, 4, 1, ReturnType.BOOLEAN, arg1, arg2, arg3, arg4, null, null, null, null,
                 null, null, null);
     }
 
@@ -404,7 +404,7 @@ public interface PooledLambda {
             QuintPredicate<? super A, ? super B, ? super C, ? super D, ? super E> function,
             ArgumentPlaceholder<A> arg1, B arg2, C arg3, D arg4, E arg5) {
         return acquire(PooledLambdaImpl.sPool,
-                function, 3, 1, ReturnType.BOOLEAN, arg1, arg2, arg3, arg4, arg5, null, null, null,
+                function, 5, 1, ReturnType.BOOLEAN, arg1, arg2, arg3, arg4, arg5, null, null, null,
                 null, null, null);
     }
 
