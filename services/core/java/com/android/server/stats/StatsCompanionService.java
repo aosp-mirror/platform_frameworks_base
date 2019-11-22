@@ -41,6 +41,7 @@ import android.app.AppOpsManager.HistoricalOps;
 import android.app.AppOpsManager.HistoricalOpsRequest;
 import android.app.AppOpsManager.HistoricalPackageOps;
 import android.app.AppOpsManager.HistoricalUidOps;
+import android.app.INotificationManager;
 import android.app.ProcessMemoryState;
 import android.app.StatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -140,6 +141,7 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.IonAllocations;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
+import com.android.server.notification.NotificationManagerService;
 import com.android.server.role.RoleManagerInternal;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
@@ -1625,14 +1627,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 if (statsFiles.size() != 1) {
                     return;
                 }
-                InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(
-                        statsFiles.get(0));
-                int[] len = new int[1];
-                byte[] stats = readFully(stream, len);
-                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                        wallClockNanos);
-                e.writeStorage(Arrays.copyOf(stats, len[0]));
-                pulledData.add(e);
+                unpackStreamedData(tagId, elapsedNanos, wallClockNanos, pulledData, statsFiles);
                 new File(mBaseDir.getAbsolutePath() + "/" + section + "_"
                         + lastHighWaterMark).delete();
                 new File(
@@ -1646,6 +1641,52 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 Log.e(TAG, "Getting procstats failed: ", e);
             }
         }
+    }
+
+    private INotificationManager mNotificationManager =
+            INotificationManager.Stub.asInterface(
+                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+
+    private void pullNotificationStats(int reportId, int tagId, long elapsedNanos,
+            long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        final long callingToken = Binder.clearCallingIdentity();
+        try {
+            // determine last pull tine. Copy file trick from pullProcessStats?
+            long lastNotificationStatsNs = wallClockNanos -
+                    TimeUnit.NANOSECONDS.convert(1, TimeUnit.DAYS);
+
+            List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
+            long notificationStatsNs = mNotificationManager.pullStats(
+                    lastNotificationStatsNs, reportId, true, statsFiles);
+            if (statsFiles.size() != 1) {
+                return;
+            }
+            unpackStreamedData(tagId, elapsedNanos, wallClockNanos, pulledData, statsFiles);
+        } catch (IOException e) {
+            Log.e(TAG, "Getting notistats failed: ", e);
+
+        } catch (RemoteException e) {
+            Log.e(TAG, "Getting notistats failed: ", e);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Getting notistats failed: ", e);
+        } finally {
+            Binder.restoreCallingIdentity(callingToken);
+        }
+
+    }
+
+    static void unpackStreamedData(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData, List<ParcelFileDescriptor> statsFiles)
+            throws IOException {
+        InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(
+                statsFiles.get(0));
+        int[] len = new int[1];
+        byte[] stats = readFully(stream, len);
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                wallClockNanos);
+        e.writeStorage(Arrays.copyOf(stats, len[0]));
+        pulledData.add(e);
     }
 
     static byte[] readFully(InputStream stream, int[] outLen) throws IOException {
@@ -2475,6 +2516,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.APP_OPS: {
                 pullAppOps(elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.NOTIFICATION_REMOTE_VIEWS: {
+                pullNotificationStats(NotificationManagerService.REPORT_REMOTE_VIEWS,
+                        tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:
