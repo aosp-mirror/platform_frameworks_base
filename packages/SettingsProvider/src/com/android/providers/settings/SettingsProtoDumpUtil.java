@@ -1162,9 +1162,6 @@ class SettingsProtoDumpUtil {
 
         final long pkgVerifierToken = p.start(GlobalSettingsProto.PACKAGE_VERIFIER);
         dumpSetting(s, p,
-                Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                GlobalSettingsProto.PackageVerifier.ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.PACKAGE_VERIFIER_TIMEOUT,
                 GlobalSettingsProto.PackageVerifier.TIMEOUT);
         dumpSetting(s, p,

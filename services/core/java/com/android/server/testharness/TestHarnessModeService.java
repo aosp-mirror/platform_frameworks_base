@@ -165,7 +165,7 @@ public class TestHarnessModeService extends SystemService {
         Settings.Global.putLong(cr, Settings.Global.ADB_ALLOWED_CONNECTION_TIME, 0);
         Settings.Global.putInt(cr, Settings.Global.ADB_ENABLED, 1);
         Settings.Global.putInt(cr, Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
-        Settings.Global.putInt(cr, Settings.Global.PACKAGE_VERIFIER_ENABLE, 0);
+        Settings.Global.putInt(cr, Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 0);
         Settings.Global.putInt(
                 cr,
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN,

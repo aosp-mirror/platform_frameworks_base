@@ -387,7 +387,6 @@ public class SettingsBackupTest {
                     Settings.Global.OVERLAY_DISPLAY_DEVICES,
                     Settings.Global.PAC_CHANGE_DELAY,
                     Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
-                    Settings.Global.PACKAGE_VERIFIER_ENABLE,
                     Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB,
                     Settings.Global.PACKAGE_VERIFIER_SETTING_VISIBLE,
                     Settings.Global.PACKAGE_VERIFIER_TIMEOUT,

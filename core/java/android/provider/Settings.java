@@ -4923,7 +4923,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_P2P_PENDING_FACTORY_RESET);
             MOVED_TO_GLOBAL.add(Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
-            MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_ENABLE);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_TIMEOUT);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE);
             MOVED_TO_GLOBAL.add(Settings.Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS);
@@ -9233,16 +9232,6 @@ public final class Settings {
         */
        @SystemApi
        public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
-
-       /**
-        * Whether the package manager should send package verification broadcasts for verifiers to
-        * review apps prior to installation.
-        * 1 = request apps to be verified prior to installation, if a verifier exists.
-        * 0 = do not verify apps before installation
-        * @hide
-        */
-       @UnsupportedAppUsage
-       public static final String PACKAGE_VERIFIER_ENABLE = "package_verifier_enable";
 
        /** Timeout for package verification.
         * @hide */

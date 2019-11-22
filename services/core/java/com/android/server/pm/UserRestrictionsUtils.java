@@ -569,10 +569,6 @@ public class UserRestrictionsUtils {
                     if (newValue) {
                         android.provider.Settings.Global.putStringForUser(
                                 context.getContentResolver(),
-                                android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE, "1",
-                                userId);
-                        android.provider.Settings.Global.putStringForUser(
-                                context.getContentResolver(),
                                 android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, "1",
                                 userId);
                     }
@@ -708,7 +704,6 @@ public class UserRestrictionsUtils {
                 restriction = UserManager.DISALLOW_DEBUGGING_FEATURES;
                 break;
 
-            case android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE:
             case android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB:
                 if ("1".equals(value)) {
                     return false;
