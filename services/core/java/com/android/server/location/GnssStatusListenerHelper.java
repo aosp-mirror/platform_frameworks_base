@@ -71,7 +71,8 @@ public abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGns
             final float[] cn0s,
             final float[] elevations,
             final float[] azimuths,
-            final float[] carrierFreqs) {
+            final float[] carrierFreqs,
+            final float[] basebandCn0s) {
         foreach((IGnssStatusListener listener, CallerIdentity callerIdentity) -> {
             if (!hasPermission(mContext, callerIdentity)) {
                 logPermissionDisabledEventNotReported(TAG, callerIdentity.mPackageName,
@@ -79,7 +80,7 @@ public abstract class GnssStatusListenerHelper extends RemoteListenerHelper<IGns
                 return;
             }
             listener.onSvStatusChanged(svCount, prnWithFlags, cn0s, elevations, azimuths,
-                    carrierFreqs);
+                    carrierFreqs, basebandCn0s);
         });
     }
 
