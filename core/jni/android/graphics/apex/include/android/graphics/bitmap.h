@@ -27,6 +27,20 @@ __BEGIN_DECLS
  */
 typedef struct ABitmap ABitmap;
 
+/**
+ * Retrieve bitmapInfo for the provided java bitmap even if it has been recycled.  In the case of a
+ * recycled bitmap the values contained in the bitmap before it was recycled are returned.
+ *
+ * NOTE: This API does not need to remain as an APEX API if/when we pull libjnigraphics into the
+ *       UI module.
+ */
+AndroidBitmapInfo ABitmap_getInfoFromJava(JNIEnv* env, jobject bitmapObj);
+
+/**
+ *
+ * @return ptr to an opaque handle to the native bitmap or null if the java bitmap has been recycled
+ *         or does not exist.
+ */
 ABitmap* ABitmap_acquireBitmapFromJava(JNIEnv* env, jobject bitmapObj);
 
 ABitmap* ABitmap_copy(ABitmap* srcBitmap, AndroidBitmapFormat dstFormat);
@@ -37,6 +51,7 @@ void ABitmap_releaseRef(ABitmap* bitmap);
 AndroidBitmapInfo ABitmap_getInfo(ABitmap* bitmap);
 
 void* ABitmap_getPixels(ABitmap* bitmap);
+void ABitmap_notifyPixelsChanged(ABitmap* bitmap);
 
 AndroidBitmapFormat ABitmapConfig_getFormatFromConfig(JNIEnv* env, jobject bitmapConfigObj);
 jobject ABitmapConfig_getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format);
@@ -88,10 +103,12 @@ namespace graphics {
             mBitmap = nullptr;
         }
 
-        const ABitmap* get() const { return mBitmap; }
+        ABitmap* get() const { return mBitmap; }
 
         AndroidBitmapInfo getInfo() const { return ABitmap_getInfo(mBitmap); }
         void* getPixels() const { return ABitmap_getPixels(mBitmap); }
+        void notifyPixelsChanged() const { ABitmap_notifyPixelsChanged(mBitmap); }
+
     private:
         // takes ownership of the provided ABitmap
         Bitmap(ABitmap* bitmap) : mBitmap(bitmap) {}

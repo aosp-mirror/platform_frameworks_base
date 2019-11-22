@@ -223,95 +223,9 @@ void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap) {
     bitmap->getSkBitmap(outBitmap);
 }
 
-Bitmap& toBitmap(JNIEnv* env, jobject bitmap) {
-    SkASSERT(env);
-    SkASSERT(bitmap);
-    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
-    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
-    LocalScopedBitmap localBitmap(bitmapHandle);
-    return localBitmap->bitmap();
-}
-
 Bitmap& toBitmap(jlong bitmapHandle) {
     LocalScopedBitmap localBitmap(bitmapHandle);
     return localBitmap->bitmap();
-}
-
-void imageInfo(JNIEnv* env, jobject bitmap, AndroidBitmapInfo* info) {
-    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
-    LocalScopedBitmap localBitmap(bitmapHandle);
-
-    const SkImageInfo& imageInfo = localBitmap->info();
-    info->width = imageInfo.width();
-    info->height = imageInfo.height();
-    info->stride = localBitmap->rowBytes();
-    info->flags = 0;
-    switch (imageInfo.colorType()) {
-        case kN32_SkColorType:
-            info->format = ANDROID_BITMAP_FORMAT_RGBA_8888;
-            break;
-        case kRGB_565_SkColorType:
-            info->format = ANDROID_BITMAP_FORMAT_RGB_565;
-            break;
-        case kARGB_4444_SkColorType:
-            info->format = ANDROID_BITMAP_FORMAT_RGBA_4444;
-            break;
-        case kAlpha_8_SkColorType:
-            info->format = ANDROID_BITMAP_FORMAT_A_8;
-            break;
-        case kRGBA_F16_SkColorType:
-            info->format = ANDROID_BITMAP_FORMAT_RGBA_F16;
-            break;
-        default:
-            info->format = ANDROID_BITMAP_FORMAT_NONE;
-            break;
-    }
-    switch (imageInfo.alphaType()) {
-        case kUnknown_SkAlphaType:
-            LOG_ALWAYS_FATAL("Bitmap has no alpha type");
-            break;
-        case kOpaque_SkAlphaType:
-            info->flags |= ANDROID_BITMAP_FLAGS_ALPHA_OPAQUE;
-            break;
-        case kPremul_SkAlphaType:
-            info->flags |= ANDROID_BITMAP_FLAGS_ALPHA_PREMUL;
-            break;
-        case kUnpremul_SkAlphaType:
-            info->flags |= ANDROID_BITMAP_FLAGS_ALPHA_UNPREMUL;
-            break;
-    }
-}
-
-void* lockPixels(JNIEnv* env, jobject bitmap) {
-    SkASSERT(env);
-    SkASSERT(bitmap);
-    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
-    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
-
-    LocalScopedBitmap localBitmap(bitmapHandle);
-    if (!localBitmap->valid()) return nullptr;
-
-    SkPixelRef& pixelRef = localBitmap->bitmap();
-    if (!pixelRef.pixels()) {
-        return nullptr;
-    }
-    pixelRef.ref();
-    return pixelRef.pixels();
-}
-
-bool unlockPixels(JNIEnv* env, jobject bitmap) {
-    SkASSERT(env);
-    SkASSERT(bitmap);
-    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
-    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
-
-    LocalScopedBitmap localBitmap(bitmapHandle);
-    if (!localBitmap->valid()) return false;
-
-    SkPixelRef& pixelRef = localBitmap->bitmap();
-    pixelRef.notifyPixelsChanged();
-    pixelRef.unref();
-    return true;
 }
 
 } // namespace bitmap
@@ -320,6 +234,27 @@ bool unlockPixels(JNIEnv* env, jobject bitmap) {
 
 using namespace android;
 using namespace android::bitmap;
+
+Bitmap* GraphicsJNI::getNativeBitmap(JNIEnv* env, jobject bitmap) {
+    SkASSERT(env);
+    SkASSERT(bitmap);
+    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
+    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
+    LocalScopedBitmap localBitmap(bitmapHandle);
+    return localBitmap.valid() ? &localBitmap->bitmap() : nullptr;
+}
+
+SkImageInfo GraphicsJNI::getBitmapInfo(JNIEnv* env, jobject bitmap, uint32_t* outRowBytes) {
+    SkASSERT(env);
+    SkASSERT(bitmap);
+    SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
+    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativePtr);
+    LocalScopedBitmap localBitmap(bitmapHandle);
+    if (outRowBytes) {
+        *outRowBytes = localBitmap->rowBytes();
+    }
+    return localBitmap->info();
+}
 
 bool GraphicsJNI::SetPixels(JNIEnv* env, jintArray srcColors, int srcOffset, int srcStride,
         int x, int y, int width, int height, SkBitmap* dstBitmap) {

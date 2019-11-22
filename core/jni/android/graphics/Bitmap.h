@@ -38,16 +38,7 @@ jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
             int bitmapCreateFlags, jbyteArray ninePatchChunk = nullptr,
             jobject ninePatchInsets = nullptr, int density = -1);
 
-
-Bitmap& toBitmap(JNIEnv* env, jobject bitmap);
 Bitmap& toBitmap(jlong bitmapHandle);
-
-// NDK access
-void imageInfo(JNIEnv* env, jobject bitmap, AndroidBitmapInfo* info);
-// Returns a pointer to the pixels or nullptr if the bitmap is not valid
-void* lockPixels(JNIEnv* env, jobject bitmap);
-// Returns true if unlocked, false if the bitmap is no longer valid (destroyed)
-bool unlockPixels(JNIEnv* env, jobject bitmap);
 
 /** Reinitialize a bitmap. bitmap must already have its SkAlphaType set in
     sync with isPremultiplied

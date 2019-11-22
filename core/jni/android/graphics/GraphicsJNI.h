@@ -61,7 +61,8 @@ public:
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
 
     static android::Canvas* getNativeCanvas(JNIEnv*, jobject canvas);
-    static void getSkBitmap(JNIEnv*, jobject bitmap, SkBitmap* outBitmap);
+    static android::Bitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
+    static SkImageInfo getBitmapInfo(JNIEnv*, jobject bitmap, uint32_t* outRowBytes);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
     /*
