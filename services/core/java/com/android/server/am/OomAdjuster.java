@@ -306,7 +306,7 @@ public final class OomAdjuster {
     @GuardedBy("mService")
     void updateOomAdjLocked(String oomAdjReason) {
         final ProcessRecord topApp = mService.getTopAppLocked();
-        updateOomAdjLockedInner(oomAdjReason, topApp , null, null, true);
+        updateOomAdjLockedInner(oomAdjReason, topApp , null, null, true, true);
     }
 
     /**
@@ -361,8 +361,10 @@ public final class OomAdjuster {
         uids.clear();
         queue.clear();
 
-        // borrow the "containsCycle" flag to mark it being scanned
-        app.containsCycle = true;
+        // Track if any of them reachables could include a cycle
+        boolean containsCycle = false;
+        // Scan downstreams of the process record
+        app.mReachable = true;
         for (ProcessRecord pr = app; pr != null; pr = queue.poll()) {
             if (pr != app) {
                 processes.add(pr);
@@ -374,7 +376,7 @@ public final class OomAdjuster {
                 ConnectionRecord cr = pr.connections.valueAt(i);
                 ProcessRecord service = (cr.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
                         ? cr.binding.service.isolatedProc : cr.binding.service.app;
-                if (service == null || service.containsCycle) {
+                if (service == null || service == pr || (containsCycle |= service.mReachable)) {
                     continue;
                 }
                 if ((cr.flags & (Context.BIND_WAIVE_PRIORITY
@@ -384,21 +386,21 @@ public final class OomAdjuster {
                     continue;
                 }
                 queue.offer(service);
-                service.containsCycle = true;
+                service.mReachable = true;
             }
             for (int i = pr.conProviders.size() - 1; i >= 0; i--) {
                 ContentProviderConnection cpc = pr.conProviders.get(i);
                 ProcessRecord provider = cpc.provider.proc;
-                if (provider == null || provider.containsCycle) {
+                if (provider == null || provider == pr || (containsCycle |= provider.mReachable)) {
                     continue;
                 }
                 queue.offer(provider);
-                provider.containsCycle = true;
+                provider.mReachable = true;
             }
         }
 
         // Reset the flag
-        app.containsCycle = false;
+        app.mReachable = false;
         int size = processes.size();
         if (size > 0) {
             // Reverse the process list, since the updateOomAdjLockedInner scans from the end of it.
@@ -409,7 +411,7 @@ public final class OomAdjuster {
             }
             mAdjSeq--;
             // Update these reachable processes
-            updateOomAdjLockedInner(oomAdjReason, topApp, processes, uids, false);
+            updateOomAdjLockedInner(oomAdjReason, topApp, processes, uids, containsCycle, false);
         } else if (app.getCurRawAdj() == ProcessList.UNKNOWN_ADJ) {
             // In case the app goes from non-cached to cached but it doesn't have other reachable
             // processes, its adj could be still unknown as of now, assign one.
@@ -430,7 +432,8 @@ public final class OomAdjuster {
      */
     @GuardedBy("mService")
     private void updateOomAdjLockedInner(String oomAdjReason, final ProcessRecord topApp,
-            ArrayList<ProcessRecord> processes, ActiveUids uids, boolean startProfiling) {
+            ArrayList<ProcessRecord> processes, ActiveUids uids, boolean potentialCycles,
+            boolean startProfiling) {
         if (startProfiling) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, oomAdjReason);
             mService.mOomAdjProfiler.oomAdjStarted();
@@ -474,11 +477,13 @@ public final class OomAdjuster {
         }
 
         boolean retryCycles = false;
+        boolean computeClients = fullUpdate || potentialCycles;
 
         // need to reset cycle state before calling computeOomAdjLocked because of service conns
         for (int i = numProc - 1; i >= 0; i--) {
             ProcessRecord app = activeProcesses.get(i);
             app.containsCycle = false;
+            app.mReachable = false;
             app.setCurRawProcState(PROCESS_STATE_CACHED_EMPTY);
             app.setCurRawAdj(ProcessList.UNKNOWN_ADJ);
             app.setCapability = PROCESS_CAPABILITY_NONE;
@@ -489,7 +494,7 @@ public final class OomAdjuster {
             if (!app.killedByAm && app.thread != null) {
                 app.procStateChanged = false;
                 computeOomAdjLocked(app, ProcessList.UNKNOWN_ADJ, topApp, fullUpdate, now, false,
-                        fullUpdate); // It won't enter cycle if not computing clients.
+                        computeClients); // It won't enter cycle if not computing clients.
                 // if any app encountered a cycle, we need to perform an additional loop later
                 retryCycles |= app.containsCycle;
                 // Keep the completedAdjSeq to up to date.
@@ -499,7 +504,7 @@ public final class OomAdjuster {
 
         assignCachedAdjIfNecessary(mProcessList.mLruProcesses);
 
-        if (fullUpdate) { // There won't be cycles if we didn't compute clients above.
+        if (computeClients) { // There won't be cycles if we didn't compute clients above.
             // Cycle strategy:
             // - Retry computing any process that has encountered a cycle.
             // - Continue retrying until no process was promoted.
