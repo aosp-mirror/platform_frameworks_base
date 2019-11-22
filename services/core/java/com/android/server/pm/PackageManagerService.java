@@ -13218,10 +13218,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Check if installing from ADB
         if ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
-            // Do not run verification in a test harness environment
-            if (ActivityManager.isRunningInTestHarness()) {
-                return false;
-            }
             if (isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
                 return true;
             }
