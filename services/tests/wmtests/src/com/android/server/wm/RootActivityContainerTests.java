@@ -35,7 +35,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.RootActivityContainer.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 
@@ -61,7 +60,6 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
-import android.view.DisplayInfo;
 
 import androidx.test.filters.MediumTest;
 
@@ -518,9 +516,9 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         mockResolveSecondaryHomeActivity();
 
         // Create secondary displays.
-        final TestActivityDisplay secondDisplay = createNewActivityDisplay();
-        mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
-        doReturn(true).when(secondDisplay).supportsSystemDecorations();
+        final TestActivityDisplay secondDisplay =
+                new TestActivityDisplay.Builder(mService, 1000, 1500)
+                        .setSystemDecorations(true).build();
 
         doReturn(true).when(mRootActivityContainer)
                 .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean(), anyBoolean());
@@ -585,10 +583,10 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     @Test
     public void testStartSecondaryHomeOnDisplayWithUserKeyLocked() {
         // Create secondary displays.
-        final TestActivityDisplay secondDisplay = createNewActivityDisplay();
-        mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
+        final TestActivityDisplay secondDisplay =
+                new TestActivityDisplay.Builder(mService, 1000, 1500)
+                        .setSystemDecorations(true).build();
 
-        doReturn(true).when(secondDisplay).supportsSystemDecorations();
         // Use invalid user id to let StorageManager.isUserKeyUnlocked() return false.
         final int currentUser = mRootActivityContainer.mCurrentUser;
         mRootActivityContainer.mCurrentUser = -1;
@@ -611,9 +609,9 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     @Test
     public void testStartSecondaryHomeOnDisplayWithoutSysDecorations() {
         // Create secondary displays.
-        final TestActivityDisplay secondDisplay = createNewActivityDisplay();
-        mRootActivityContainer.addChild(secondDisplay, POSITION_TOP);
-        doReturn(false).when(secondDisplay).supportsSystemDecorations();
+        final TestActivityDisplay secondDisplay =
+                new TestActivityDisplay.Builder(mService, 1000, 1500)
+                        .setSystemDecorations(false).build();
 
         mRootActivityContainer.startHomeOnDisplay(0 /* userId */, "testStartSecondaryHome",
                 secondDisplay.mDisplayId, true /* allowInstrumenting */, true /* fromHomeKey */);
@@ -834,12 +832,9 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     @Test
     public void testGetLaunchStackWithRealCallerId() {
         // Create a non-system owned virtual display.
-        final DisplayInfo info = new DisplayInfo();
-        mSupervisor.mService.mContext.getDisplay().getDisplayInfo(info);
-        info.type = TYPE_VIRTUAL;
-        info.ownerUid = 100;
-        final TestActivityDisplay secondaryDisplay = TestActivityDisplay.create(mSupervisor, info);
-        mRootActivityContainer.addChild(secondaryDisplay, POSITION_TOP);
+        final TestActivityDisplay secondaryDisplay =
+                new TestActivityDisplay.Builder(mService, 1000, 1500)
+                        .setType(TYPE_VIRTUAL).setOwnerUid(100).build();
 
         // Create an activity with specify the original launch pid / uid.
         final ActivityRecord r = new ActivityBuilder(mService).setLaunchedFromPid(200)

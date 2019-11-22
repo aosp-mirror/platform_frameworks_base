@@ -36,7 +36,6 @@ import android.content.pm.PackageManagerInternal;
 import android.graphics.Rect;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
-import android.view.DisplayInfo;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
@@ -103,11 +102,8 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         deleteRecursively(mFolder);
 
         mDisplayUniqueId = "test:" + Integer.toString(sNextUniqueId++);
-        final DisplayInfo info = new DisplayInfo();
-        mService.mContext.getDisplay().getDisplayInfo(info);
-        info.uniqueId = mDisplayUniqueId;
-        mTestDisplay = createNewActivityDisplay(info);
-        mRootActivityContainer.addChild(mTestDisplay, ActivityDisplay.POSITION_TOP);
+        mTestDisplay = new TestActivityDisplay.Builder(mService, 1000, 1500)
+                .setUniqueId(mDisplayUniqueId).build();
         when(mRootActivityContainer.getActivityDisplay(eq(mDisplayUniqueId)))
                 .thenReturn(mTestDisplay);
 
