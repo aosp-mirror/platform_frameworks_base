@@ -1213,11 +1213,13 @@ public class WifiManager {
      * Applications will almost always want to use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
      * the standard {@link android.content.Context#WIFI_SERVICE Context.WIFI_SERVICE}.
+     *
      * @param context the application context
-     * @hide - hide this because it takes in a parameter of type IWifiManager, which
-     * is a system private class.
+     * @param looper the Looper used to deliver callbacks
+     *
+     * @hide
      */
-    public WifiManager(Context context, Looper looper) {
+    public WifiManager(@NonNull Context context, @NonNull Looper looper) {
         mContext = context;
         mLooper = looper;
         mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;

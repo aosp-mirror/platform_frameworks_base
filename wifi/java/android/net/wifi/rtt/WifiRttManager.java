@@ -77,7 +77,7 @@ public class WifiRttManager {
             "android.net.wifi.rtt.action.WIFI_RTT_STATE_CHANGED";
 
     /** @hide */
-    public WifiRttManager(Context context, IWifiRttManager service) {
+    public WifiRttManager(@NonNull Context context, @NonNull IWifiRttManager service) {
         mContext = context;
         mService = service;
     }

@@ -4853,6 +4853,10 @@ package android.net.wifi {
     field @Deprecated public static final int WPA2_PSK = 4; // 0x4
   }
 
+  public class WifiFrameworkInitializer {
+    method public static void registerServiceWrappers();
+  }
+
   public class WifiInfo implements android.os.Parcelable {
     method @Nullable public String getAppPackageName();
     method public double getRxSuccessRate();

@@ -94,7 +94,7 @@ public class Svc {
             COMMAND_HELP,
             new PowerCommand(),
             new DataCommand(),
-            new WifiCommand(),
+            // `svc wifi` has been migrated to WifiShellCommand
             new UsbCommand(),
             new NfcCommand(),
             new BluetoothCommand(),

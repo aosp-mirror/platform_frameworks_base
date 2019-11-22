@@ -1291,12 +1291,15 @@ public class WifiScanner {
      * Applications will almost always want to use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
      * the standard {@link android.content.Context#WIFI_SERVICE Context.WIFI_SERVICE}.
+     *
      * @param context the application context
-     * @param service the Binder interface
+     * @param service the Binder interface for {@link Context#WIFI_SCANNING_SERVICE}
      * @param looper the Looper used to deliver callbacks
+     *
      * @hide
      */
-    public WifiScanner(Context context, IWifiScanner service, Looper looper) {
+    public WifiScanner(@NonNull Context context, @NonNull IWifiScanner service,
+            @NonNull Looper looper) {
         mContext = context;
         mService = service;
 
