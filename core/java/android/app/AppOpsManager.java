@@ -1213,7 +1213,6 @@ public class AppOpsManager {
             OP_START_FOREGROUND,
             OP_SMS_FINANCIAL_TRANSACTIONS,
             OP_MANAGE_IPSEC_TUNNELS,
-            OP_GET_USAGE_STATS,
             OP_INSTANT_APP_START_FOREGROUND
     };
 
