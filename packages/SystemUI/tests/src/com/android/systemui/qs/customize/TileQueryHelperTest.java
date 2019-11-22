@@ -36,6 +36,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
@@ -46,7 +48,6 @@ import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile;
@@ -99,12 +100,12 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private QSTile.State mState;
     private TestableLooper mBGLooper;
     private TileQueryHelper mTileQueryHelper;
+    private Handler mMainHandler;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mBGLooper = TestableLooper.get(this);
-        mDependency.injectTestDependency(Dependency.BG_LOOPER, mBGLooper.getLooper());
         mContext.setMockPackageManager(mPackageManager);
 
         mState = new QSTile.State();
@@ -122,7 +123,10 @@ public class TileQueryHelperTest extends SysuiTestCase {
                 }
         ).when(mQSTileHost).createTile(anyString());
 
-        mTileQueryHelper = new TileQueryHelper(mContext, mListener);
+        mMainHandler = new Handler(Looper.getMainLooper());
+        mTileQueryHelper = new TileQueryHelper(mContext, mMainHandler,
+                new Handler(mBGLooper.getLooper()));
+        mTileQueryHelper.setListener(mListener);
     }
 
     @Test
@@ -135,7 +139,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mTileQueryHelper.queryTiles(mQSTileHost);
 
         mBGLooper.processAllMessages();
-        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+        waitForIdleSync(mMainHandler);
 
         assertTrue(mTileQueryHelper.isFinished());
     }
@@ -145,7 +149,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mTileQueryHelper.queryTiles(mQSTileHost);
 
         mBGLooper.processAllMessages();
-        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+        waitForIdleSync(mMainHandler);
 
         verify(mListener, times(2)).onTilesChanged(any());
     }
@@ -160,7 +164,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mTileQueryHelper.queryTiles(mQSTileHost);
 
         mBGLooper.processAllMessages();
-        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+        waitForIdleSync(mMainHandler);
 
         assertTrue(mTileQueryHelper.isFinished());
     }
@@ -175,7 +179,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mTileQueryHelper.queryTiles(mQSTileHost);
 
         mBGLooper.processAllMessages();
-        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+        waitForIdleSync(mMainHandler);
 
         verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<String> specs = new ArrayList<>();
@@ -196,7 +200,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mTileQueryHelper.queryTiles(mQSTileHost);
 
         mBGLooper.processAllMessages();
-        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+        waitForIdleSync(mMainHandler);
 
         verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<String> specs = new ArrayList<>();
@@ -217,7 +221,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mTileQueryHelper.queryTiles(mQSTileHost);
 
         mBGLooper.processAllMessages();
-        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+        waitForIdleSync(mMainHandler);
 
         verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<String> specs = new ArrayList<>();
@@ -248,7 +252,7 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
         mTileQueryHelper.queryTiles(mQSTileHost);
         mBGLooper.processAllMessages();
-        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+        waitForIdleSync(mMainHandler);
 
         verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<TileQueryHelper.TileInfo> tileInfos = mCaptor.getValue();

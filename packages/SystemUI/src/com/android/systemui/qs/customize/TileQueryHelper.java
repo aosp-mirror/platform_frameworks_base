@@ -33,8 +33,9 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.widget.Button;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.BgHandler;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSTileHost;
@@ -47,6 +48,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import javax.inject.Inject;
+
 public class TileQueryHelper {
     private static final String TAG = "TileQueryHelper";
 
@@ -55,15 +58,20 @@ public class TileQueryHelper {
     private final Handler mBgHandler;
     private final Handler mMainHandler;
     private final Context mContext;
-    private final TileStateListener mListener;
+    private TileStateListener mListener;
 
     private boolean mFinished;
 
-    public TileQueryHelper(Context context, TileStateListener listener) {
+    @Inject
+    public TileQueryHelper(Context context,
+            @MainHandler Handler mainHandler, @BgHandler Handler bgHandler) {
         mContext = context;
+        mMainHandler = mainHandler;
+        mBgHandler = bgHandler;
+    }
+
+    public void setListener(TileStateListener listener) {
         mListener = listener;
-        mBgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
-        mMainHandler = Dependency.get(Dependency.MAIN_HANDLER);
     }
 
     public void queryTiles(QSTileHost host) {
@@ -178,7 +186,9 @@ public class TileQueryHelper {
     private void notifyTilesChanged(final boolean finished) {
         final ArrayList<TileInfo> tilesToReturn = new ArrayList<>(mTiles);
         mMainHandler.post(() -> {
-            mListener.onTilesChanged(tilesToReturn);
+            if (mListener != null) {
+                mListener.onTilesChanged(tilesToReturn);
+            }
             mFinished = finished;
         });
     }
