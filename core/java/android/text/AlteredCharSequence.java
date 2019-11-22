@@ -16,12 +16,14 @@
 
 package android.text;
 
-// XXX should this really be in the public API at all?
 /**
  * An AlteredCharSequence is a CharSequence that is largely mirrored from
  * another CharSequence, except that a specified range of characters are
  * mirrored from a different char array instead.
+ *
+ * @deprecated The functionality this class offers is easily implemented outside the framework.
  */
+@Deprecated
 public class AlteredCharSequence
 implements CharSequence, GetChars
 {
