@@ -121,8 +121,7 @@ class Watermark {
                     .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
-            t.setLayerStack(ctrl, mDisplay.getLayerStack())
-                    .setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 100)
+            t.setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 100)
                     .setPosition(ctrl, 0, 0)
                     .show(ctrl);
             mSurface.copyFrom(ctrl);
