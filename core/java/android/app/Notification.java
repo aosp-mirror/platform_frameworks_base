@@ -10410,6 +10410,16 @@ public class Notification implements Parcelable
             p.recycle();
             return brv;
         }
+
+        /**
+         * Override and return true, since {@link RemoteViews#onLoadClass(Class)} is not overridden.
+         *
+         * @see RemoteViews#shouldUseStaticFilter()
+         */
+        @Override
+        protected boolean shouldUseStaticFilter() {
+            return true;
+        }
     }
 
     /**
