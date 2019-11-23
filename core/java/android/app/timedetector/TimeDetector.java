@@ -17,19 +17,22 @@
 package android.app.timedetector;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.SystemClock;
 import android.util.Log;
+import android.util.TimestampedValue;
 
 /**
  * The interface through which system components can send signals to the TimeDetectorService.
  * @hide
  */
 @SystemService(Context.TIME_DETECTOR_SERVICE)
-public final class TimeDetector {
+public class TimeDetector {
     private static final String TAG = "timedetector.TimeDetector";
     private static final boolean DEBUG = false;
 
@@ -41,10 +44,11 @@ public final class TimeDetector {
     }
 
     /**
-     * Suggests the current time to the detector. The detector may ignore the signal if better
-     * signals are available such as those that come from more reliable sources or were
-     * determined more recently.
+     * Suggests the current phone-signal derived time to the detector. The detector may ignore the
+     * signal if better signals are available such as those that come from more reliable sources or
+     * were determined more recently.
      */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
     public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestPhoneTime called: " + timeSuggestion);
@@ -56,4 +60,29 @@ public final class TimeDetector {
         }
     }
 
+    /**
+     * Suggests the user's manually entered current time to the detector.
+     */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
+    public void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion) {
+        if (DEBUG) {
+            Log.d(TAG, "suggestManualTime called: " + timeSuggestion);
+        }
+        try {
+            mITimeDetectorService.suggestManualTime(timeSuggestion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * A shared utility method to create a {@link ManualTimeSuggestion}.
+     */
+    public static ManualTimeSuggestion createManualTimeSuggestion(long when, String why) {
+        TimestampedValue<Long> utcTime =
+                new TimestampedValue<>(SystemClock.elapsedRealtime(), when);
+        ManualTimeSuggestion manualTimeSuggestion = new ManualTimeSuggestion(utcTime);
+        manualTimeSuggestion.addDebugInfo(why);
+        return manualTimeSuggestion;
+    }
 }
