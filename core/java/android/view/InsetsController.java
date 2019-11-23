@@ -361,12 +361,12 @@ public class InsetsController implements WindowInsetsController {
             listener.onCancelled();
             return;
         }
-        controlAnimationUnchecked(types, listener, mFrame, fromIme, durationMs);
+        controlAnimationUnchecked(types, listener, mFrame, fromIme, durationMs, false /* fade */);
     }
 
     private void controlAnimationUnchecked(@InsetsType int types,
             WindowInsetsAnimationControlListener listener, Rect frame, boolean fromIme,
-            long durationMs) {
+            long durationMs, boolean fade) {
         if (types == 0) {
             // nothing to animate.
             return;
@@ -397,7 +397,7 @@ public class InsetsController implements WindowInsetsController {
 
         final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(consumers,
                 frame, mState, listener, typesReady,
-                () -> new SyncRtSurfaceTransactionApplier(mViewRoot.mView), this, durationMs);
+                () -> new SyncRtSurfaceTransactionApplier(mViewRoot.mView), this, durationMs, fade);
         mAnimationControls.add(controller);
     }
 
@@ -588,7 +588,8 @@ public class InsetsController implements WindowInsetsController {
         // Show/hide animations always need to be relative to the display frame, in order that shown
         // and hidden state insets are correct.
         controlAnimationUnchecked(
-                types, listener, mState.getDisplayFrame(), fromIme, listener.getDurationMs());
+                types, listener, mState.getDisplayFrame(), fromIme, listener.getDurationMs(),
+                true /* fade */);
     }
 
     private void hideDirectly(@InsetsType int types) {

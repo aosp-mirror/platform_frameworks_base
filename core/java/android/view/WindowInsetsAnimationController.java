@@ -93,6 +93,12 @@ public interface WindowInsetsAnimationController {
     float getCurrentFraction();
 
     /**
+     * Current alpha value of the window.
+     * @return float value between 0 and 1.
+     */
+    float getCurrentAlpha();
+
+    /**
      * @return The {@link InsetsType}s this object is currently controlling.
      */
     @InsetsType int getTypes();

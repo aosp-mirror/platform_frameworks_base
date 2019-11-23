@@ -116,7 +116,8 @@ public class InsetsAnimationControlImplTest {
         consumers.put(ITYPE_NAVIGATION_BAR, navConsumer);
         mController = new InsetsAnimationControlImpl(consumers,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
-                () -> mMockTransactionApplier, mMockController, 10 /* durationMs */);
+                () -> mMockTransactionApplier, mMockController, 10 /* durationMs */,
+                false /* fade */);
     }
 
     @Test
@@ -133,6 +134,7 @@ public class InsetsAnimationControlImplTest {
                 0f /* fraction */);
         mController.applyChangeInsets(new InsetsState());
         assertEquals(Insets.of(0, 30, 40, 0), mController.getCurrentInsets());
+        assertEquals(1f, mController.getCurrentAlpha(), 1f - mController.getCurrentAlpha());
 
         ArgumentCaptor<SurfaceParams> captor = ArgumentCaptor.forClass(SurfaceParams.class);
         verify(mMockTransactionApplier).scheduleApply(captor.capture());
@@ -144,6 +146,23 @@ public class InsetsAnimationControlImplTest {
         SurfaceParams navParams = first.surface == mNavLeash ? first : second;
         assertPosition(topParams.matrix, new Rect(0, 0, 500, 100), new Rect(0, -70, 500, 30));
         assertPosition(navParams.matrix, new Rect(400, 0, 500, 500), new Rect(460, 0, 560, 500));
+    }
+
+    @Test
+    public void testChangeAlphaNoInsets() {
+        Insets initialInsets = mController.getCurrentInsets();
+        mController.setInsetsAndAlpha(null, 0.5f, 0f /* fraction*/);
+        mController.applyChangeInsets(new InsetsState());
+        assertEquals(0.5f, mController.getCurrentAlpha(), 0.5f - mController.getCurrentAlpha());
+        assertEquals(initialInsets, mController.getCurrentInsets());
+    }
+
+    @Test
+    public void testChangeInsetsAndAlpha() {
+        mController.setInsetsAndAlpha(Insets.of(0, 30, 40, 0), 0.5f, 1f);
+        mController.applyChangeInsets(new InsetsState());
+        assertEquals(0.5f, mController.getCurrentAlpha(), 0.5f - mController.getCurrentAlpha());
+        assertEquals(Insets.of(0, 30, 40, 0), mController.getCurrentInsets());
     }
 
     @Test
