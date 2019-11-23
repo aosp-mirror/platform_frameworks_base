@@ -564,6 +564,23 @@ public final class MediaStore {
     public static final String UNKNOWN_STRING = "<unknown>";
 
     /**
+     * Specify a {@link Uri} that is "related" to the current operation being
+     * performed.
+     * <p>
+     * This is typically used to allow an operation that may normally be
+     * rejected, such as making a copy of a pre-existing image located under a
+     * {@link MediaColumns#RELATIVE_PATH} where new images are not allowed.
+     * <p>
+     * It's strongly recommended that when making a copy of pre-existing content
+     * that you define the "original document ID" GUID as defined by the <em>XMP
+     * Media Management</em> standard.
+     * <p>
+     * This key can be placed in a {@link Bundle} of extras and passed to
+     * {@link ContentResolver#insert}.
+     */
+    public static final String QUERY_ARG_RELATED_URI = "android:query-arg-related-uri";
+
+    /**
      * Specify how {@link MediaColumns#IS_PENDING} items should be filtered when
      * performing a {@link MediaStore} operation.
      * <p>
