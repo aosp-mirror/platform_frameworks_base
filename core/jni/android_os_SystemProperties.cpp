@@ -123,7 +123,7 @@ static jboolean jbooleanFromParseBoolResult(ParseBoolResult parseResult, jboolea
 jboolean SystemProperties_get_boolean(JNIEnv *env, jclass, jstring keyJ,
                                       jboolean defJ)
 {
-    ParseBoolResult parseResult;
+    ParseBoolResult parseResult = ParseBoolResult::kError;
     ReadProperty(env, keyJ, [&](const char* value) {
         parseResult = android::base::ParseBool(value);
     });
@@ -168,7 +168,7 @@ T SystemProperties_get_integralH(CRITICAL_JNI_PARAMS_COMMA jlong propJ, T defJ)
 
 jboolean SystemProperties_get_booleanH(CRITICAL_JNI_PARAMS_COMMA jlong propJ, jboolean defJ)
 {
-    ParseBoolResult parseResult;
+    ParseBoolResult parseResult = ParseBoolResult::kError;
     auto prop = reinterpret_cast<const prop_info*>(propJ);
     ReadProperty(prop, [&](const char* value) {
         parseResult = android::base::ParseBool(value);
