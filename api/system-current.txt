@@ -5733,6 +5733,9 @@ package android.os {
     field public static final int USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS = 1; // 0x1
   }
 
+  public class PowerWhitelistManager {
+  }
+
   public class RecoverySystem {
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void cancelScheduledUpdate(android.content.Context) throws java.io.IOException;
     method @RequiresPermission(android.Manifest.permission.RECOVERY) public static void installPackage(android.content.Context, java.io.File, boolean) throws java.io.IOException;

@@ -707,6 +707,7 @@ package android.content {
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
     field public static final String PERMISSION_SERVICE = "permission";
+    field public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
     field public static final String ROLLBACK_SERVICE = "rollback";
     field public static final String STATUS_BAR_SERVICE = "statusbar";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
@@ -2040,6 +2041,9 @@ package android.os {
     method @RequiresPermission(anyOf={"android.permission.DEVICE_POWER", "android.permission.POWER_SAVER"}) public boolean setPowerSaveModeEnabled(boolean);
     field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
+  }
+
+  public class PowerWhitelistManager {
   }
 
   public class Process {

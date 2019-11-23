@@ -3335,6 +3335,7 @@ public abstract class Context {
             ROLLBACK_SERVICE,
             DROPBOX_SERVICE,
             //@hide: DEVICE_IDLE_CONTROLLER,
+            //@hide: POWER_WHITELIST_MANAGER,
             DEVICE_POLICY_SERVICE,
             UI_MODE_SERVICE,
             DOWNLOAD_SERVICE,
@@ -4343,6 +4344,15 @@ public abstract class Context {
      */
     @TestApi
     public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
+
+    /**
+     * System service name for the PowerWhitelistManager.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @TestApi
+    public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
