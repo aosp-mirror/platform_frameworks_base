@@ -44,7 +44,6 @@ import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NfcTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
-import com.android.systemui.qs.tiles.RebootTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.UiModeNightTile;
 import com.android.systemui.qs.tiles.UsbTetherTile;
@@ -86,7 +85,6 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<UsbTetherTile> mUsbTetherTileProvider;
     private final Provider<HeadsUpTile> mHeadsUpTileProvider;
     private final Provider<VpnTile> mVpnTileProvider;
-    private final Provider<RebootTile> mRebootTileProvider;
     private final Provider<AdbOverNetworkTile> mAdbOverNetworkProvider;
 
     private QSTileHost mHost;
@@ -115,7 +113,6 @@ public class QSFactoryImpl implements QSFactory {
             Provider<UsbTetherTile> usbTetherTileProvider,
             Provider<HeadsUpTile> headsUpTileProvider,
             Provider<VpnTile> vpnTileProvider,
-            Provider<RebootTile> rebootTileProvider,
             Provider<AdbOverNetworkTile> adbOverNetworkProvider) {
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
@@ -140,7 +137,6 @@ public class QSFactoryImpl implements QSFactory {
         mUsbTetherTileProvider = usbTetherTileProvider;
         mHeadsUpTileProvider = headsUpTileProvider;
         mVpnTileProvider = vpnTileProvider;
-        mRebootTileProvider = rebootTileProvider;
         mAdbOverNetworkProvider = adbOverNetworkProvider;
     }
 
@@ -204,8 +200,6 @@ public class QSFactoryImpl implements QSFactory {
                 return mHeadsUpTileProvider.get();
             case "vpn":
                 return mVpnTileProvider.get();
-            case "reboot":
-                return mRebootTileProvider.get();
             case "adb_network":
                 return mAdbOverNetworkProvider.get();
         }
