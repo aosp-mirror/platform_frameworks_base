@@ -50,6 +50,5 @@
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
-        <permission name="android.permission.ADBROOT" />
     </privapp-permissions>
 </permissions>
