@@ -11091,14 +11091,66 @@ public class TelephonyManager {
     }
 
     /**
-     * Broadcast intent action for Ota emergency number database installation complete.
+     * Indicates Emergency number database version is invalid.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @TestApi
     @SystemApi
-    public static final String ACTION_OTA_EMERGENCY_NUMBER_DB_INSTALLED =
-            "android.telephony.action.OTA_EMERGENCY_NUMBER_DB_INSTALLED";
+    public static final int INVALID_EMERGENCY_NUMBER_DB_VERSION = -1;
+
+    /**
+     * Notify Telephony for OTA emergency number database installation complete.
+     *
+     * <p> Requires permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public void notifyOtaEmergencyNumberDbInstalled() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.notifyOtaEmergencyNumberDbInstalled();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "notifyOtaEmergencyNumberDatabaseInstalled RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Override the file path for testing OTA emergency number database in a file partition.
+     *
+     * @param otaFilePath The test OTA emergency number database file path;
+     *                    if "RESET", recover the original database file partition.
+     *                    Format: <root file folder>@<file path>
+     *
+     * <p> Requires permission:
+     * {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
+    @SystemApi
+    @TestApi
+    public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String otaFilePath) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.updateTestOtaEmergencyNumberDbFilePath(otaFilePath);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "notifyOtaEmergencyNumberDatabaseInstalled RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
 
     /**
      * Returns whether {@link TelephonyManager#ACTION_EMERGENCY_ASSISTANCE emergency assistance} is
@@ -11294,6 +11346,29 @@ public class TelephonyManager {
             ex.rethrowAsRuntimeException();
         }
         return false;
+    }
+
+    /**
+     * A test API to return the emergency number db version.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public int getEmergencyNumberDbVersion() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getEmergencyNumberDbVersion(getSubId());
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getEmergencyNumberDbVersion RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return INVALID_EMERGENCY_NUMBER_DB_VERSION;
     }
 
     /** @hide */
