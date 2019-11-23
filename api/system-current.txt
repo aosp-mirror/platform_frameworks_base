@@ -4448,6 +4448,14 @@ package android.net.ipsec.ike {
     method @NonNull public android.net.ipsec.ike.IkeSaProposal build();
   }
 
+  public final class IkeSession implements java.lang.AutoCloseable {
+    ctor public IkeSession(@NonNull android.content.Context, @NonNull android.net.ipsec.ike.IkeSessionOptions, @NonNull android.net.ipsec.ike.ChildSessionOptions, @NonNull java.util.concurrent.Executor, @NonNull android.net.ipsec.ike.IkeSessionCallback, @NonNull android.net.ipsec.ike.ChildSessionCallback);
+    method public void close();
+    method public void closeChildSession(@NonNull android.net.ipsec.ike.ChildSessionCallback);
+    method public void kill();
+    method public void openChildSession(@NonNull android.net.ipsec.ike.ChildSessionOptions, @NonNull android.net.ipsec.ike.ChildSessionCallback);
+  }
+
   public interface IkeSessionCallback {
     method public void onClosed();
     method public void onClosedExceptionally(@NonNull android.net.ipsec.ike.exceptions.IkeException);
