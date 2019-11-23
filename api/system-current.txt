@@ -4332,6 +4332,96 @@ package android.net.apf {
 
 }
 
+package android.net.ipsec.ike {
+
+  public final class ChildSaProposal extends android.net.ipsec.ike.SaProposal {
+  }
+
+  public static final class ChildSaProposal.Builder {
+    ctor public ChildSaProposal.Builder();
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addDhGroup(int);
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addEncryptionAlgorithm(int, int);
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addIntegrityAlgorithm(int);
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal build();
+  }
+
+  public class IkeFqdnIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeFqdnIdentification(@NonNull String);
+    field @NonNull public final String fqdn;
+  }
+
+  public abstract class IkeIdentification {
+  }
+
+  public final class IkeIpv4AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeIpv4AddrIdentification(@NonNull java.net.Inet4Address);
+    field @NonNull public final java.net.Inet4Address ipv4Address;
+  }
+
+  public class IkeIpv6AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeIpv6AddrIdentification(@NonNull java.net.Inet6Address);
+    field @NonNull public final java.net.Inet6Address ipv6Address;
+  }
+
+  public final class IkeKeyIdIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeKeyIdIdentification(@NonNull byte[]);
+    field @NonNull public final byte[] keyId;
+  }
+
+  public final class IkeRfc822AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeRfc822AddrIdentification(@NonNull String);
+    field @NonNull public final String rfc822Name;
+  }
+
+  public final class IkeSaProposal extends android.net.ipsec.ike.SaProposal {
+    method @NonNull public java.util.List<java.lang.Integer> getPseudorandomFunctions();
+  }
+
+  public static final class IkeSaProposal.Builder {
+    ctor public IkeSaProposal.Builder();
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addDhGroup(int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addEncryptionAlgorithm(int, int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addIntegrityAlgorithm(int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addPseudorandomFunction(int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal build();
+  }
+
+  public final class IkeTrafficSelector {
+    ctor public IkeTrafficSelector(int, int, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress);
+    field public final int endPort;
+    field @NonNull public final java.net.InetAddress endingAddress;
+    field public final int startPort;
+    field @NonNull public final java.net.InetAddress startingAddress;
+  }
+
+  public abstract class SaProposal {
+    method @NonNull public java.util.List<java.lang.Integer> getDhGroups();
+    method @NonNull public java.util.List<android.util.Pair<java.lang.Integer,java.lang.Integer>> getEncryptionAlgorithms();
+    method @NonNull public java.util.List<java.lang.Integer> getIntegrityAlgorithms();
+    field public static final int DH_GROUP_1024_BIT_MODP = 2; // 0x2
+    field public static final int DH_GROUP_2048_BIT_MODP = 14; // 0xe
+    field public static final int DH_GROUP_NONE = 0; // 0x0
+    field public static final int ENCRYPTION_ALGORITHM_3DES = 3; // 0x3
+    field public static final int ENCRYPTION_ALGORITHM_AES_CBC = 12; // 0xc
+    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_12 = 19; // 0x13
+    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_16 = 20; // 0x14
+    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_8 = 18; // 0x12
+    field public static final int INTEGRITY_ALGORITHM_AES_XCBC_96 = 5; // 0x5
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA1_96 = 2; // 0x2
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_256_128 = 12; // 0xc
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_384_192 = 13; // 0xd
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_512_256 = 14; // 0xe
+    field public static final int INTEGRITY_ALGORITHM_NONE = 0; // 0x0
+    field public static final int KEY_LEN_AES_128 = 128; // 0x80
+    field public static final int KEY_LEN_AES_192 = 192; // 0xc0
+    field public static final int KEY_LEN_AES_256 = 256; // 0x100
+    field public static final int KEY_LEN_UNUSED = 0; // 0x0
+    field public static final int PSEUDORANDOM_FUNCTION_AES128_XCBC = 4; // 0x4
+    field public static final int PSEUDORANDOM_FUNCTION_HMAC_SHA1 = 2; // 0x2
+  }
+
+}
+
 package android.net.metrics {
 
   public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
