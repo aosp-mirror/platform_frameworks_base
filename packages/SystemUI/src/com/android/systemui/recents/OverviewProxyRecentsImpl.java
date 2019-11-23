@@ -162,6 +162,8 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
             if (runningTask.supportsSplitScreenMultiWindow) {
                 if (ActivityManagerWrapper.getInstance().setTaskWindowingModeSplitScreenPrimary(
                         runningTask.id, stackCreateMode, initialBounds)) {
+                    mDividerOptional.ifPresent(Divider::onDockedTopTask);
+
                     // The overview service is handling split screen, so just skip the wait for the
                     // first draw and notify the divider to start animating now
                     mDividerOptional.ifPresent(Divider::onRecentsDrawn);
