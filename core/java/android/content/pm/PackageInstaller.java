@@ -29,6 +29,8 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.DeleteFlags;
@@ -36,9 +38,11 @@ import android.content.pm.PackageManager.InstallReason;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -67,6 +71,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -176,7 +182,7 @@ public class PackageInstaller {
      * {@link #STATUS_PENDING_USER_ACTION}, {@link #STATUS_SUCCESS},
      * {@link #STATUS_FAILURE}, {@link #STATUS_FAILURE_ABORTED},
      * {@link #STATUS_FAILURE_BLOCKED}, {@link #STATUS_FAILURE_CONFLICT},
-     * {@link #STATUS_FAILURE_INCOMPATIBLE}, {@link #STATUS_FAILURE_INVALID}, or
+     * {@link #STATUS_FAILURE_INCOMPATIBLE}, {@link #STATUS_FAILURE_INVALID},
      * {@link #STATUS_FAILURE_STORAGE}.
      * <p>
      * More information about a status may be available through additional
@@ -315,6 +321,34 @@ public class PackageInstaller {
      * @see #EXTRA_STATUS_MESSAGE
      */
     public static final int STATUS_FAILURE_INCOMPATIBLE = 7;
+
+    /**
+     * The transfer failed because a target package can't be found. For example
+     * transferring a session to a non-existing package.
+     * <p>
+     * The result may also contain {@link #EXTRA_OTHER_PACKAGE_NAME} with the
+     * missing package.
+     *
+     * @see #EXTRA_STATUS_MESSAGE
+     * @see #EXTRA_OTHER_PACKAGE_NAME
+     */
+    public static final int STATUS_FAILURE_NAME_NOT_FOUND = 8;
+
+    /**
+     * The transfer failed because a session is in invalid state. For example
+     * transferring an already committed session.
+     *
+     * @see #EXTRA_STATUS_MESSAGE
+     */
+    public static final int STATUS_FAILURE_ILLEGAL_STATE = 9;
+
+    /**
+     * The transfer failed for security reasons. For example transferring
+     * to a package which does not have INSTALL_PACKAGES permission.
+     *
+     * @see #EXTRA_STATUS_MESSAGE
+     */
+    public static final int STATUS_FAILURE_SECURITY = 10;
 
     private final IPackageInstaller mInstaller;
     private final int mUserId;
@@ -1052,7 +1086,8 @@ public class PackageInstaller {
         }
 
         /**
-         * Attempt to commit a session that has been {@link #transfer(String) transferred}.
+         * Attempt to commit a session that has been {@link #transfer(String, IntentSender)
+         * transferred}.
          *
          * <p>If the device reboots before the session has been finalized, you may commit the
          * session again.
@@ -1093,6 +1128,38 @@ public class PackageInstaller {
          *
          * @param packageName The package of the new owner. Needs to hold the INSTALL_PACKAGES
          *                    permission.
+         * @param statusReceiver Called when the state of the session changes. Intents sent to this
+         *                       receiver contain {@link #EXTRA_STATUS}. Refer to the individual
+         *                       transfer status codes on how to handle them.
+         *
+         * @throws PackageManager.NameNotFoundException if the new owner could not be found.
+         * @throws SecurityException if called after the session has been committed or abandoned.
+         * @throws SecurityException if the session does not update the original installer
+         * @throws SecurityException if streams opened through
+         *                           {@link #openWrite(String, long, long) are still open.
+         */
+        public void transfer(@NonNull String packageName, @NonNull IntentSender statusReceiver)
+                throws PackageManager.NameNotFoundException {
+            Preconditions.checkNotNull(statusReceiver);
+            Preconditions.checkNotNull(packageName);
+
+            try {
+                mSession.transfer(packageName, statusReceiver);
+            } catch (ParcelableException e) {
+                e.maybeRethrow(PackageManager.NameNotFoundException.class);
+                throw new RuntimeException(e);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Transfer the session to a new owner.
+         * This is a convenience blocking wrapper around {@link #transfer(String, IntentSender)}.
+         * Converts all statuses into exceptions.
+         *
+         * @param packageName The package of the new owner. Needs to hold the INSTALL_PACKAGES
+         *                    permission.
          *
          * @throws PackageManager.NameNotFoundException if the new owner could not be found.
          * @throws SecurityException if called after the session has been committed or abandoned.
@@ -1104,13 +1171,43 @@ public class PackageInstaller {
                 throws PackageManager.NameNotFoundException {
             Preconditions.checkNotNull(packageName);
 
+            CompletableFuture<Intent> intentFuture = new CompletableFuture<Intent>();
             try {
-                mSession.transfer(packageName);
+                IIntentSender localSender = new IIntentSender.Stub() {
+                    @Override
+                    public void send(int code, Intent intent, String resolvedType,
+                            IBinder whitelistToken,
+                            IIntentReceiver finishedReceiver, String requiredPermission,
+                            Bundle options) {
+                        intentFuture.complete(intent);
+                    }
+                };
+                transfer(packageName, new IntentSender(localSender));
             } catch (ParcelableException e) {
                 e.maybeRethrow(PackageManager.NameNotFoundException.class);
                 throw new RuntimeException(e);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
+            }
+
+            try {
+                Intent intent = intentFuture.get();
+                final int status = intent.getIntExtra(EXTRA_STATUS, Integer.MIN_VALUE);
+                final String statusMessage = intent.getStringExtra(EXTRA_STATUS_MESSAGE);
+                switch (status) {
+                    case STATUS_SUCCESS:
+                        break;
+                    case STATUS_FAILURE_NAME_NOT_FOUND:
+                        throw new PackageManager.NameNotFoundException(statusMessage);
+                    case STATUS_FAILURE_ILLEGAL_STATE:
+                        throw new IllegalStateException(statusMessage);
+                    case STATUS_FAILURE_SECURITY:
+                        throw new SecurityException(statusMessage);
+                    default:
+                        throw new RuntimeException(statusMessage);
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
             }
         }
 
