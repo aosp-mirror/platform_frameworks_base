@@ -4332,6 +4332,258 @@ package android.net.apf {
 
 }
 
+package android.net.eap {
+
+  public final class EapSessionConfig {
+  }
+
+  public static final class EapSessionConfig.Builder {
+    ctor public EapSessionConfig.Builder();
+    method @NonNull public android.net.eap.EapSessionConfig build();
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapAkaConfig(int, int);
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapAkaPrimeConfig(int, int, @NonNull String, boolean);
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapIdentity(@NonNull byte[]);
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapMsChapV2Config(@NonNull String, @NonNull String);
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapSimConfig(int, int);
+  }
+
+  public static class EapSessionConfig.EapAkaConfig extends android.net.eap.EapSessionConfig.EapUiccConfig {
+  }
+
+  public static class EapSessionConfig.EapAkaPrimeConfig extends android.net.eap.EapSessionConfig.EapAkaConfig {
+    method public boolean allowsMismatchedNetworkNames();
+    method @NonNull public String getNetworkName();
+  }
+
+  public abstract static class EapSessionConfig.EapMethodConfig {
+    method public int getMethodType();
+  }
+
+  public static class EapSessionConfig.EapMsChapV2Config extends android.net.eap.EapSessionConfig.EapMethodConfig {
+    method @NonNull public String getPassword();
+    method @NonNull public String getUsername();
+  }
+
+  public static class EapSessionConfig.EapSimConfig extends android.net.eap.EapSessionConfig.EapUiccConfig {
+  }
+
+  public abstract static class EapSessionConfig.EapUiccConfig extends android.net.eap.EapSessionConfig.EapMethodConfig {
+    method public int getAppType();
+    method public int getSubId();
+  }
+
+}
+
+package android.net.ipsec.ike {
+
+  public final class ChildSaProposal extends android.net.ipsec.ike.SaProposal {
+  }
+
+  public static final class ChildSaProposal.Builder {
+    ctor public ChildSaProposal.Builder();
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addDhGroup(int);
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addEncryptionAlgorithm(int, int);
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addIntegrityAlgorithm(int);
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal build();
+  }
+
+  public interface ChildSessionCallback {
+    method public void onClosed();
+    method public void onClosedExceptionally(@NonNull android.net.ipsec.ike.exceptions.IkeException);
+    method public void onIpSecTransformCreated(@NonNull android.net.IpSecTransform, int);
+    method public void onIpSecTransformDeleted(@NonNull android.net.IpSecTransform, int);
+    method public void onOpened(@NonNull android.net.ipsec.ike.ChildSessionConfiguration);
+  }
+
+  public final class ChildSessionConfiguration {
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getInboundTrafficSelectors();
+    method @NonNull public java.util.List<android.net.LinkAddress> getInternalAddresses();
+    method @NonNull public java.util.List<java.net.InetAddress> getInternalDhcpServers();
+    method @NonNull public java.util.List<java.net.InetAddress> getInternalDnsServers();
+    method @NonNull public java.util.List<android.net.LinkAddress> getInternalSubnets();
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getOutboundTrafficSelectors();
+  }
+
+  public abstract class ChildSessionOptions {
+  }
+
+  public class IkeFqdnIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeFqdnIdentification(@NonNull String);
+    field @NonNull public final String fqdn;
+  }
+
+  public abstract class IkeIdentification {
+  }
+
+  public final class IkeIpv4AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeIpv4AddrIdentification(@NonNull java.net.Inet4Address);
+    field @NonNull public final java.net.Inet4Address ipv4Address;
+  }
+
+  public class IkeIpv6AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeIpv6AddrIdentification(@NonNull java.net.Inet6Address);
+    field @NonNull public final java.net.Inet6Address ipv6Address;
+  }
+
+  public final class IkeKeyIdIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeKeyIdIdentification(@NonNull byte[]);
+    field @NonNull public final byte[] keyId;
+  }
+
+  public final class IkeRfc822AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeRfc822AddrIdentification(@NonNull String);
+    field @NonNull public final String rfc822Name;
+  }
+
+  public final class IkeSaProposal extends android.net.ipsec.ike.SaProposal {
+    method @NonNull public java.util.List<java.lang.Integer> getPseudorandomFunctions();
+  }
+
+  public static final class IkeSaProposal.Builder {
+    ctor public IkeSaProposal.Builder();
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addDhGroup(int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addEncryptionAlgorithm(int, int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addIntegrityAlgorithm(int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addPseudorandomFunction(int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal build();
+  }
+
+  public final class IkeSession implements java.lang.AutoCloseable {
+    ctor public IkeSession(@NonNull android.content.Context, @NonNull android.net.ipsec.ike.IkeSessionOptions, @NonNull android.net.ipsec.ike.ChildSessionOptions, @NonNull java.util.concurrent.Executor, @NonNull android.net.ipsec.ike.IkeSessionCallback, @NonNull android.net.ipsec.ike.ChildSessionCallback);
+    method public void close();
+    method public void closeChildSession(@NonNull android.net.ipsec.ike.ChildSessionCallback);
+    method public void kill();
+    method public void openChildSession(@NonNull android.net.ipsec.ike.ChildSessionOptions, @NonNull android.net.ipsec.ike.ChildSessionCallback);
+  }
+
+  public interface IkeSessionCallback {
+    method public void onClosed();
+    method public void onClosedExceptionally(@NonNull android.net.ipsec.ike.exceptions.IkeException);
+    method public void onError(@NonNull android.net.ipsec.ike.exceptions.IkeProtocolException);
+    method public void onOpened(@NonNull android.net.ipsec.ike.IkeSessionConfiguration);
+  }
+
+  public final class IkeSessionConfiguration {
+    ctor public IkeSessionConfiguration();
+    method @NonNull public String getRemoteApplicationVersion();
+    method public boolean isIkeExtensionEnabled(int);
+    field public static final int EXTENSION_TYPE_FRAGMENTATION = 1; // 0x1
+    field public static final int EXTENSION_TYPE_MOBIKE = 2; // 0x2
+  }
+
+  public final class IkeSessionOptions {
+  }
+
+  public static final class IkeSessionOptions.Builder {
+    ctor public IkeSessionOptions.Builder();
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder addSaProposal(@NonNull android.net.ipsec.ike.IkeSaProposal);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions build();
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.security.PrivateKey);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.util.List<java.security.cert.X509Certificate>, @NonNull java.security.PrivateKey);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthEap(@NonNull java.security.cert.X509Certificate, @NonNull android.net.eap.EapSessionConfig);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthPsk(@NonNull byte[]);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setLocalIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setRemoteIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setServerAddress(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setUdpEncapsulationSocket(@NonNull android.net.IpSecManager.UdpEncapsulationSocket);
+  }
+
+  public final class IkeTrafficSelector {
+    ctor public IkeTrafficSelector(int, int, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress);
+    field public final int endPort;
+    field @NonNull public final java.net.InetAddress endingAddress;
+    field public final int startPort;
+    field @NonNull public final java.net.InetAddress startingAddress;
+  }
+
+  public abstract class SaProposal {
+    method @NonNull public java.util.List<java.lang.Integer> getDhGroups();
+    method @NonNull public java.util.List<android.util.Pair<java.lang.Integer,java.lang.Integer>> getEncryptionAlgorithms();
+    method @NonNull public java.util.List<java.lang.Integer> getIntegrityAlgorithms();
+    field public static final int DH_GROUP_1024_BIT_MODP = 2; // 0x2
+    field public static final int DH_GROUP_2048_BIT_MODP = 14; // 0xe
+    field public static final int DH_GROUP_NONE = 0; // 0x0
+    field public static final int ENCRYPTION_ALGORITHM_3DES = 3; // 0x3
+    field public static final int ENCRYPTION_ALGORITHM_AES_CBC = 12; // 0xc
+    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_12 = 19; // 0x13
+    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_16 = 20; // 0x14
+    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_8 = 18; // 0x12
+    field public static final int INTEGRITY_ALGORITHM_AES_XCBC_96 = 5; // 0x5
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA1_96 = 2; // 0x2
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_256_128 = 12; // 0xc
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_384_192 = 13; // 0xd
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_512_256 = 14; // 0xe
+    field public static final int INTEGRITY_ALGORITHM_NONE = 0; // 0x0
+    field public static final int KEY_LEN_AES_128 = 128; // 0x80
+    field public static final int KEY_LEN_AES_192 = 192; // 0xc0
+    field public static final int KEY_LEN_AES_256 = 256; // 0x100
+    field public static final int KEY_LEN_UNUSED = 0; // 0x0
+    field public static final int PSEUDORANDOM_FUNCTION_AES128_XCBC = 4; // 0x4
+    field public static final int PSEUDORANDOM_FUNCTION_HMAC_SHA1 = 2; // 0x2
+  }
+
+  public final class TransportModeChildSessionOptions extends android.net.ipsec.ike.ChildSessionOptions {
+  }
+
+  public static final class TransportModeChildSessionOptions.Builder {
+    ctor public TransportModeChildSessionOptions.Builder();
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions build();
+  }
+
+  public final class TunnelModeChildSessionOptions extends android.net.ipsec.ike.ChildSessionOptions {
+  }
+
+  public static final class TunnelModeChildSessionOptions.Builder {
+    ctor public TunnelModeChildSessionOptions.Builder();
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalAddressRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalAddressRequest(@NonNull java.net.InetAddress, int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDhcpServerRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDhcpServerRequest(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDnsServerRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDnsServerRequest(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalSubnetRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions build();
+  }
+
+}
+
+package android.net.ipsec.ike.exceptions {
+
+  public abstract class IkeException extends java.lang.Exception {
+  }
+
+  public final class IkeInternalException extends android.net.ipsec.ike.exceptions.IkeException {
+  }
+
+  public abstract class IkeProtocolException extends android.net.ipsec.ike.exceptions.IkeException {
+    method @Nullable public byte[] getErrorData();
+    method public int getErrorType();
+    field public static final int ERROR_TYPE_AUTHENTICATION_FAILED = 24; // 0x18
+    field public static final int ERROR_TYPE_CHILD_SA_NOT_FOUND = 44; // 0x2c
+    field public static final int ERROR_TYPE_FAILED_CP_REQUIRED = 37; // 0x25
+    field public static final int ERROR_TYPE_INTERNAL_ADDRESS_FAILURE = 36; // 0x24
+    field public static final int ERROR_TYPE_INVALID_IKE_SPI = 4; // 0x4
+    field public static final int ERROR_TYPE_INVALID_KE_PAYLOAD = 17; // 0x11
+    field public static final int ERROR_TYPE_INVALID_MAJOR_VERSION = 5; // 0x5
+    field public static final int ERROR_TYPE_INVALID_MESSAGE_ID = 9; // 0x9
+    field public static final int ERROR_TYPE_INVALID_SELECTORS = 39; // 0x27
+    field public static final int ERROR_TYPE_INVALID_SYNTAX = 7; // 0x7
+    field public static final int ERROR_TYPE_NO_ADDITIONAL_SAS = 35; // 0x23
+    field public static final int ERROR_TYPE_NO_PROPOSAL_CHOSEN = 14; // 0xe
+    field public static final int ERROR_TYPE_SINGLE_PAIR_REQUIRED = 34; // 0x22
+    field public static final int ERROR_TYPE_TEMPORARY_FAILURE = 43; // 0x2b
+    field public static final int ERROR_TYPE_TS_UNACCEPTABLE = 38; // 0x26
+    field public static final int ERROR_TYPE_UNSUPPORTED_CRITICAL_PAYLOAD = 1; // 0x1
+  }
+
+}
+
 package android.net.metrics {
 
   public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
