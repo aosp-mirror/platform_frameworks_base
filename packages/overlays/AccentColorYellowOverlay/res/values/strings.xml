@@ -17,6 +17,7 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Purple accent color name application label. [CHAR LIMIT=50] -->
-    <string name="accent_color_discord" translatable="false">Light Purple</string>
+    <!-- Gold accent color name application label. [CHAR LIMIT=50] -->
+    <string name="accent_color_yellow" translatable="false">Light Yellow</string>
 </resources>
+

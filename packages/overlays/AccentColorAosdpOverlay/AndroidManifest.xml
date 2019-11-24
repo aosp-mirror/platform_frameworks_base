@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
 /**
- * Copyright (c) 2018, The Android Open Source Project
+ * Copyright (c) 2019, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +15,11 @@
  * limitations under the License.
  */
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Purple accent color name application label. [CHAR LIMIT=50] -->
-    <string name="accent_color_discord" translatable="false">Light Purple</string>
-</resources>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.theme.color.aosdp"
+          android:versionCode="1"
+          android:versionName="1.0">
+    <overlay android:targetPackage="android" android:category="android.theme.customization.accent_color" android:priority="1"/>
+
+    <application android:label="@string/accent_color_aosdp" android:hasCode="false"/>
+</manifest>

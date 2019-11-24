@@ -17,26 +17,21 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := frameworks-base-overlays
 LOCAL_REQUIRED_MODULES := \
-	AccentColorBlackOverlay \
-	AccentColorCinnamonOverlay \
-	AccentColorOceanOverlay \
-	AccentColorOrchidOverlay \
-	AccentColorSpaceOverlay \
-	AccentColorGreenOverlay \
-	AccentColorPurpleOverlay \
+        AccentColorAosdpOverlay \
+        AccentColorBlackOverlay \
+        AccentColorCinnamonOverlay \
         AccentColorCocaColaOverlay \
-	AccentColorDiscordOverlay \
-	AccentColorGoldenShowerOverlay \
-	AccentColorJollibeeOverlay \
-        AccentColorMoonshineOverlay \
-        AccentColorNextbitOverlay \
-	AccentColorOnePlusOverlay \
-	AccentColorParanoidOverlay \
-	AccentColorPepsiOverlay \
-        AccentColorRazerOverlay \
-        AccentColorStarbucksOverlay \
-	AccentColorXboxOverlay \
-	AccentColorXiaomiOverlay \
+        AccentColorDiscordOverlay \
+        AccentColorGoldenShowerOverlay \
+        AccentColorGreenOverlay \
+        AccentColorOceanOverlay \
+        AccentColorOrchidOverlay \
+        AccentColorParanoidOverlay \
+        AccentColorPepsiOverlay \
+        AccentColorPinkOverlay \
+        AccentColorPurpleOverlay \
+        AccentColorXiaomiOverlay \
+        AccentColorYellowOverlay \
 	DisplayCutoutEmulationCornerOverlay \
 	DisplayCutoutEmulationDoubleOverlay \
 	DisplayCutoutEmulationTallOverlay \
