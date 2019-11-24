@@ -353,4 +353,9 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DYNAMIC_SYSTEM"/>
     </privapp-permissions>
 
+    <privapp-permissions package="org.fdroid.fdroid.privileged">
+        <permission name="android.permission.INSTALL_PACKAGES"/>
+        <permission name="android.permission.DELETE_PACKAGES"/>
+    </privapp-permissions>
+
 </permissions>
