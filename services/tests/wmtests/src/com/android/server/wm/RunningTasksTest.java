@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -59,13 +58,15 @@ public class RunningTasksTest extends ActivityTestsBase {
     public void testCollectTasksByLastActiveTime() {
         // Create a number of stacks with tasks (of incrementing active time)
         final ArrayList<ActivityDisplay> displays = new ArrayList<>();
-        final ActivityDisplay display = TestActivityDisplay.create(mSupervisor, DEFAULT_DISPLAY);
+        final ActivityDisplay display =
+                new TestActivityDisplay.Builder(mService, 1000, 2500).build();
         displays.add(display);
 
         final int numStacks = 2;
         for (int stackIndex = 0; stackIndex < numStacks; stackIndex++) {
             final ActivityStack stack = new StackBuilder(mRootActivityContainer)
                     .setCreateActivity(false)
+                    .setDisplay(display)
                     .setOnTop(false)
                     .build();
         }

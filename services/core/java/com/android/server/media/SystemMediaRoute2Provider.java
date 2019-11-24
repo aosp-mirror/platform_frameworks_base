@@ -42,8 +42,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private static final String TAG = "MR2SystemProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
-    private static final String BLUETOOTH_ROUTE_ID = "BLUETOOTH_ROUTE";
+    static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
+    static final String BLUETOOTH_ROUTE_ID = "BLUETOOTH_ROUTE";
 
     // TODO: Move these to a proper place
     public static final String CATEGORY_LIVE_AUDIO = "android.media.intent.category.LIVE_AUDIO";
@@ -191,12 +191,20 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
         publishRoutes();
     }
+
+    /**
+     * The first route should be the currently selected system route.
+     * For example, if there are two system routes (BT and device speaker),
+     * BT will be the first route in the list.
+     *
+     * TODO: Support multiple BT devices
+     */
     void publishRoutes() {
-        MediaRoute2ProviderInfo.Builder builder = new MediaRoute2ProviderInfo.Builder()
-                .addRoute(mDefaultRoute);
+        MediaRoute2ProviderInfo.Builder builder = new MediaRoute2ProviderInfo.Builder();
         if (mBluetoothA2dpRoute != null) {
             builder.addRoute(mBluetoothA2dpRoute);
         }
+        builder.addRoute(mDefaultRoute);
         setAndNotifyProviderInfo(builder.build());
     }
 }

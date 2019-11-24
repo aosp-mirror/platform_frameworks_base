@@ -18,7 +18,6 @@ package com.android.systemui.statusbar;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -118,11 +117,11 @@ public class KeyguardIndicationController implements StateListener,
     private int mChargingSpeed;
     private int mChargingWattage;
     private int mBatteryLevel;
+    private long mChargingTimeRemaining;
     private String mMessageToShowOnScreenOn;
 
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
 
-    private final DevicePolicyManager mDevicePolicyManager;
     private boolean mDozing;
     private final ViewClippingUtil.ClippingParameters mClippingParams =
             new ViewClippingUtil.ClippingParameters() {
@@ -144,7 +143,9 @@ public class KeyguardIndicationController implements StateListener,
                 Dependency.get(KeyguardStateController.class),
                 Dependency.get(StatusBarStateController.class),
                 Dependency.get(KeyguardUpdateMonitor.class),
-                Dependency.get(DockManager.class));
+                Dependency.get(DockManager.class),
+                IBatteryStats.Stub.asInterface(
+                        ServiceManager.getService(BatteryStats.SERVICE_NAME)));
     }
 
     /**
@@ -157,7 +158,8 @@ public class KeyguardIndicationController implements StateListener,
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DockManager dockManager) {
+            DockManager dockManager,
+            IBatteryStats iBatteryStats) {
         mContext = context;
         mLockIcon = lockIcon;
         mShadeController = shadeController;
@@ -180,11 +182,8 @@ public class KeyguardIndicationController implements StateListener,
         mFastThreshold = res.getInteger(R.integer.config_chargingFastThreshold);
 
         mUserManager = context.getSystemService(UserManager.class);
-        mBatteryInfo = IBatteryStats.Stub.asInterface(
-                ServiceManager.getService(BatteryStats.SERVICE_NAME));
+        mBatteryInfo = iBatteryStats;
 
-        mDevicePolicyManager = (DevicePolicyManager) context.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
         setIndicationArea(indicationArea);
 
         mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
@@ -480,16 +479,7 @@ public class KeyguardIndicationController implements StateListener,
             return mContext.getResources().getString(R.string.keyguard_charged);
         }
 
-        // Try fetching charging time from battery stats.
-        long chargingTimeRemaining = 0;
-        try {
-            chargingTimeRemaining = mBatteryInfo.computeChargeTimeRemaining();
-
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling IBatteryStats: ", e);
-        }
-        final boolean hasChargingTime = chargingTimeRemaining > 0;
-
+        final boolean hasChargingTime = mChargingTimeRemaining > 0;
         int chargingId;
         if (mPowerPluggedInWired) {
             switch (mChargingSpeed) {
@@ -522,7 +512,7 @@ public class KeyguardIndicationController implements StateListener,
             // locales will also have it in the future. For now, we still have to support the old
             // format until all languages get the new translations.
             String chargingTimeFormatted = Formatter.formatShortElapsedTimeRoundingUpToMinutes(
-                    mContext, chargingTimeRemaining);
+                    mContext, mChargingTimeRemaining);
             try {
                 return mContext.getResources().getString(chargingId, chargingTimeFormatted,
                         percentage);
@@ -639,6 +629,13 @@ public class KeyguardIndicationController implements StateListener,
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             mBatteryLevel = status.level;
+            try {
+                mChargingTimeRemaining = mPowerPluggedIn
+                        ? mBatteryInfo.computeChargeTimeRemaining() : -1;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling IBatteryStats: ", e);
+                mChargingTimeRemaining = -1;
+            }
             updateIndication(!wasPluggedIn && mPowerPluggedInWired);
             if (mDozing) {
                 if (!wasPluggedIn && mPowerPluggedIn) {

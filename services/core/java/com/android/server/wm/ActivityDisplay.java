@@ -1080,6 +1080,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                         ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
                 mService.mH.sendMessage(msg);
             }
+            mService.mWindowManager.mDisplayNotificationController.dispatchDisplayChanged(
+                    this, getConfiguration());
         }
         return changes;
     }
@@ -1408,7 +1410,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             boolean preserveWindows, boolean notifyClients) {
         for (int stackNdx = getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = getChildAt(stackNdx);
-            stack.ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
+            stack.ensureActivitiesVisible(starting, configChanges, preserveWindows,
                     notifyClients);
         }
     }

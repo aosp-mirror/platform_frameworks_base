@@ -25,6 +25,7 @@ import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
 
 import javax.inject.Named;
@@ -45,6 +46,12 @@ import dagger.Component;
         SystemUIModule.class,
         SystemUIDefaultModule.class})
 public interface SystemUIRootComponent {
+
+    /**
+     * Creates a ContextComponentHelper.
+     */
+    @Singleton
+    ConfigurationController getConfigurationController();
 
     /**
      * Creates a ContextComponentHelper.

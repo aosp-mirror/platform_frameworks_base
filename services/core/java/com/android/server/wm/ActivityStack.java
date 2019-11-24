@@ -62,7 +62,6 @@ import static com.android.server.am.ActivityStackProto.DISPLAY_ID;
 import static com.android.server.am.ActivityStackProto.FULLSCREEN;
 import static com.android.server.am.ActivityStackProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityStackProto.STACK;
-import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
@@ -119,7 +118,6 @@ import static com.android.server.wm.StackProto.DEFER_REMOVAL;
 import static com.android.server.wm.StackProto.FILLS_PARENT;
 import static com.android.server.wm.StackProto.MINIMIZE_AMOUNT;
 import static com.android.server.wm.StackProto.WINDOW_CONTAINER;
-import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
@@ -203,7 +201,7 @@ import java.util.function.Consumer;
 class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarget,
         ConfigurationContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_ATM;
-    private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
+    static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_APP = TAG + POSTFIX_APP;
     private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
@@ -212,10 +210,10 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
-    private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
+    static final String TAG_TASKS = TAG + POSTFIX_TASKS;
     private static final String TAG_TRANSITION = TAG + POSTFIX_TRANSITION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
-    private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
+    static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
 
     // Ticks during which we check progress while waiting for an app to launch.
     private static final int LAUNCH_TICK = 500;
@@ -515,6 +513,10 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             }
         }
     }
+
+    private static final ResetTargetTaskHelper sResetTargetTaskHelper = new ResetTargetTaskHelper();
+    private final EnsureActivitiesVisibleHelper mEnsureActivitiesVisibleHelper =
+            new EnsureActivitiesVisibleHelper(this);
 
     int numActivities() {
         int count = 0;
@@ -1492,8 +1494,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
     void goToSleep() {
         // Ensure visibility without updating configuration, as activities are about to sleep.
-        ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
-                !PRESERVE_WINDOWS);
+        ensureActivitiesVisible(null /* starting */, 0 /* configChanges */, !PRESERVE_WINDOWS);
 
         // Make sure any paused or stopped but visible activities are now sleeping.
         // This ensures that the activity's onStop() is called.
@@ -1693,7 +1694,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 prev = prev.completeFinishing("completePausedLocked");
             } else if (prev.hasProcess()) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueue pending stop if needed: " + prev
-                        + " wasStopping=" + wasStopping + " visible=" + prev.visible);
+                        + " wasStopping=" + wasStopping
+                        + " visibleRequested=" + prev.mVisibleRequested);
                 if (prev.deferRelaunchUntilPaused) {
                     // Complete the deferred relaunch that was waiting for pause to complete.
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Re-launching after pause: " + prev);
@@ -1703,7 +1705,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                     // We can't clobber it, because the stop confirmation will not be handled.
                     // We don't need to schedule another stop, we only need to let it happen.
                     prev.setState(STOPPING, "completePausedLocked");
-                } else if (!prev.visible || shouldSleepOrShutDownActivities()) {
+                } else if (!prev.mVisibleRequested || shouldSleepOrShutDownActivities()) {
                     // Clear out any deferred client hide we might currently have.
                     prev.setDeferHidingClient(false);
                     // If we were visible then resumeTopActivities will release resources before
@@ -1824,7 +1826,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
     boolean isTopActivityVisible() {
         final ActivityRecord topActivity = getTopNonFinishingActivity();
-        return topActivity != null && topActivity.visible;
+        return topActivity != null && topActivity.mVisibleRequested;
     }
 
     /**
@@ -1965,7 +1967,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
             final Task task = getChildAt(taskNdx);
             ActivityRecord r = task.topRunningActivityLocked();
-            if (r == null || r.finishing || !r.visible) {
+            if (r == null || r.finishing || !r.mVisibleRequested) {
                 task.mLayerRank = -1;
             } else {
                 task.mLayerRank = baseLayer + layer++;
@@ -1978,127 +1980,25 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
      * Make sure that all activities that need to be visible in the stack (that is, they
      * currently can be seen by the user) actually are and update their configuration.
      */
-    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
+    void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        ensureActivitiesVisibleLocked(starting, configChanges, preserveWindows,
-                true /* notifyClients */);
+        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */);
     }
 
     /**
      * Ensure visibility with an option to also update the configuration of visible activities.
-     * @see #ensureActivitiesVisibleLocked(ActivityRecord, int, boolean)
+     * @see #ensureActivitiesVisible(ActivityRecord, int, boolean)
      * @see RootActivityContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
      */
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
-    final void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
+    void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
         mTopActivityOccludesKeyguard = false;
         mTopDismissingKeyguardActivity = null;
         mStackSupervisor.getKeyguardController().beginActivityVisibilityUpdate();
         try {
-            ActivityRecord top = topRunningActivityLocked();
-            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + top
-                    + " configChanges=0x" + Integer.toHexString(configChanges));
-            if (top != null) {
-                checkTranslucentActivityWaiting(top);
-            }
-
-            // If the top activity is not fullscreen, then we need to
-            // make sure any activities under it are now visible.
-            boolean aboveTop = top != null;
-            final boolean stackShouldBeVisible = shouldBeVisible(starting);
-            boolean behindFullscreenActivity = !stackShouldBeVisible;
-            // We should not resume activities that being launched behind because these
-            // activities are actually behind other fullscreen activities, but still required
-            // to be visible (such as performing Recents animation).
-            final boolean resumeTopActivity = isFocusable() && isInStackLocked(starting) == null
-                    && top != null && !top.mLaunchTaskBehind;
-            for (int taskNdx = getChildCount() - 1; taskNdx >= 0; --taskNdx) {
-                final Task task = getChildAt(taskNdx);
-                for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
-                    final ActivityRecord r = task.getChildAt(activityNdx);
-                    final boolean isTop = r == top;
-                    if (aboveTop && !isTop) {
-                        continue;
-                    }
-                    aboveTop = false;
-
-                    final boolean reallyVisible = r.shouldBeVisible(behindFullscreenActivity,
-                            false /* ignoringKeyguard */);
-                    // Check whether activity should be visible without Keyguard influence
-                    if (r.visibleIgnoringKeyguard) {
-                        if (r.occludesParent()) {
-                            // At this point, nothing else needs to be shown in this task.
-                            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
-                                    + " stackVisible=" + stackShouldBeVisible
-                                    + " behindFullscreen=" + behindFullscreenActivity);
-                            behindFullscreenActivity = true;
-                        } else {
-                            behindFullscreenActivity = false;
-                        }
-                    }
-
-                    if (reallyVisible) {
-                        if (r.finishing) {
-                            continue;
-                        }
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make visible? " + r
-                                + " finishing=" + r.finishing + " state=" + r.getState());
-                        // First: if this is not the current activity being started, make
-                        // sure it matches the current configuration.
-                        if (r != starting && notifyClients) {
-                            r.ensureActivityConfiguration(0 /* globalChanges */, preserveWindows,
-                                    true /* ignoreVisibility */);
-                        }
-
-                        if (!r.attachedToProcess()) {
-                            makeVisibleAndRestartIfNeeded(starting, configChanges, isTop,
-                                    resumeTopActivity && isTop, r);
-                        } else if (r.visible) {
-                            // If this activity is already visible, then there is nothing to do here.
-                            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                                    "Skipping: already visible at " + r);
-
-                            if (r.mClientVisibilityDeferred && notifyClients) {
-                                r.makeClientVisible();
-                            }
-
-                            r.handleAlreadyVisible();
-                            if (notifyClients) {
-                                r.makeActiveIfNeeded(starting);
-                            }
-                        } else {
-                            r.makeVisibleIfNeeded(starting, notifyClients);
-                        }
-                        // Aggregate current change flags.
-                        configChanges |= r.configChangeFlags;
-                    } else {
-                        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Make invisible? " + r
-                                + " finishing=" + r.finishing + " state=" + r.getState()
-                                + " stackShouldBeVisible=" + stackShouldBeVisible
-                                + " behindFullscreenActivity=" + behindFullscreenActivity
-                                + " mLaunchTaskBehind=" + r.mLaunchTaskBehind);
-                        r.makeInvisible();
-                    }
-                }
-                final int windowingMode = getWindowingMode();
-                if (windowingMode == WINDOWING_MODE_FREEFORM) {
-                    // The visibility of tasks and the activities they contain in freeform stack are
-                    // determined individually unlike other stacks where the visibility or fullscreen
-                    // status of an activity in a previous task affects other.
-                    behindFullscreenActivity = !stackShouldBeVisible;
-                } else if (isActivityTypeHome()) {
-                    if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Home task: at " + task
-                            + " stackShouldBeVisible=" + stackShouldBeVisible
-                            + " behindFullscreenActivity=" + behindFullscreenActivity);
-                    // No other task in the home stack should be visible behind the home activity.
-                    // Home activities is usually a translucent activity with the wallpaper behind
-                    // them. However, when they don't have the wallpaper behind them, we want to
-                    // show activities in the next application stack behind them vs. another
-                    // task in the home stack like recents.
-                    behindFullscreenActivity = true;
-                }
-            }
+            mEnsureActivitiesVisibleHelper.process(
+                    starting, configChanges, preserveWindows, notifyClients);
 
             if (mTranslucentActivityWaiting != null &&
                     mUndrawnActivitiesBelowTopTranslucent.isEmpty()) {
@@ -2213,7 +2113,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         return (flags & FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0;
     }
 
-    private void checkTranslucentActivityWaiting(ActivityRecord top) {
+    void checkTranslucentActivityWaiting(ActivityRecord top) {
         if (mTranslucentActivityWaiting != top) {
             mUndrawnActivitiesBelowTopTranslucent.clear();
             if (mTranslucentActivityWaiting != null) {
@@ -2223,31 +2123,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             }
             mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
         }
-    }
-
-    private boolean makeVisibleAndRestartIfNeeded(ActivityRecord starting, int configChanges,
-            boolean isTop, boolean andResume, ActivityRecord r) {
-        // We need to make sure the app is running if it's the top, or it is just made visible from
-        // invisible. If the app is already visible, it must have died while it was visible. In this
-        // case, we'll show the dead window but will not restart the app. Otherwise we could end up
-        // thrashing.
-        if (isTop || !r.visible) {
-            // This activity needs to be visible, but isn't even running...
-            // get it started and resume if no other stack in this stack is resumed.
-            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
-            if (r != starting) {
-                r.startFreezingScreenLocked(configChanges);
-            }
-            if (!r.visible || r.mLaunchTaskBehind) {
-                if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
-                r.setVisible(true);
-            }
-            if (r != starting) {
-                mStackSupervisor.startSpecificActivityLocked(r, andResume, true /* checkConfig */);
-                return true;
-            }
-        }
-        return false;
     }
 
     void convertActivityToTranslucent(ActivityRecord r) {
@@ -2489,7 +2364,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         && next.containsDismissKeyguardWindow();
 
                 if (canShowWhenLocked || mayDismissKeyguard) {
-                    ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
+                    ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                             !PRESERVE_WINDOWS);
                     nothingToResume = shouldSleepActivities();
                 }
@@ -2683,7 +2558,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
         if (next.attachedToProcess()) {
             if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next
-                    + " stopped=" + next.stopped + " visible=" + next.visible);
+                    + " stopped=" + next.stopped
+                    + " visibleRequested=" + next.mVisibleRequested);
 
             // If the previous activity is translucent, force a visibility update of
             // the next activity, so that it's added to WM's opening app list, and
@@ -2698,7 +2574,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                     && !lastFocusedStack.mLastPausedActivity.occludesParent()));
 
             // This activity is now becoming visible.
-            if (!next.visible || next.stopped || lastActivityTranslucent) {
+            if (!next.mVisibleRequested || next.stopped || lastActivityTranslucent) {
                 next.setVisibility(true);
             }
 
@@ -2753,7 +2629,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                     // Do over!
                     mStackSupervisor.scheduleResumeTopActivities();
                 }
-                if (!next.visible || next.stopped) {
+                if (!next.mVisibleRequested || next.stopped) {
                     next.setVisibility(true);
                 }
                 next.completeResumeLocked();
@@ -2817,7 +2693,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                     next.showStartingWindow(null /* prev */, false /* newTask */,
                             false /* taskSwitch */);
                 }
-                mStackSupervisor.startSpecificActivityLocked(next, true, false);
+                mStackSupervisor.startSpecificActivity(next, true, false);
                 return true;
             }
 
@@ -2844,7 +2720,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
             }
             if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Restarting " + next);
-            mStackSupervisor.startSpecificActivityLocked(next, true, true);
+            mStackSupervisor.startSpecificActivity(next, true, true);
         }
 
         return true;
@@ -2978,7 +2854,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 // If the caller has requested that the target task be
                 // reset, then do so.
                 if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
-                    resetTaskIfNeededLocked(r, r);
+                    resetTaskIfNeeded(r, r);
                     doShow = topRunningNonDelayedActivityLocked(null) == r;
                 }
             } else if (options != null && options.getAnimationType()
@@ -2989,7 +2865,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 // Don't do a starting window for mLaunchTaskBehind. More importantly make sure we
                 // tell WindowManager that r is visible even though it is at the back of the stack.
                 r.setVisibility(true);
-                ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
                 // Go ahead to execute app transition for this activity since the app transition
                 // will not be triggered through the resume channel.
                 getDisplay().mDisplayContent.executeAppTransition();
@@ -3050,297 +2926,6 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
     }
 
     /**
-     * Helper method for {@link #resetTaskIfNeededLocked(ActivityRecord, ActivityRecord)}.
-     * Performs a reset of the given task, if needed for new activity start.
-     * @param task The task containing the Activity (taskTop) that might be reset.
-     * @param forceReset Flag indicating if clear task was requested
-     * @return An ActivityOptions that needs to be processed.
-     */
-    private ActivityOptions resetTargetTaskIfNeededLocked(Task task, boolean forceReset) {
-        ActivityOptions topOptions = null;
-
-        // Tracker of the end of currently handled reply chain (sublist) of activities. What happens
-        // to activities in the same chain will depend on what the end activity of the chain needs.
-        int replyChainEnd = -1;
-        boolean canMoveOptions = true;
-        int numTasksCreated = 0;
-
-        // We only do this for activities that are not the root of the task (since if we finish
-        // the root, we may no longer have the task!).
-        final int numActivities = task.getChildCount();
-        int lastActivityNdx = task.findRootIndex(true /* effectiveRoot */);
-        if (lastActivityNdx == -1) {
-            lastActivityNdx = 0;
-        }
-        for (int i = numActivities - 1; i > lastActivityNdx; --i) {
-            ActivityRecord target = task.getChildAt(i);
-            // TODO: Why is this needed? Looks like we're breaking the loop before we reach the root
-            if (target.isRootOfTask()) break;
-
-            final int flags = target.info.flags;
-            final boolean finishOnTaskLaunch =
-                    (flags & ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0;
-            final boolean allowTaskReparenting =
-                    (flags & ActivityInfo.FLAG_ALLOW_TASK_REPARENTING) != 0;
-            final boolean clearWhenTaskReset =
-                    (target.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0;
-
-            if (!finishOnTaskLaunch
-                    && !clearWhenTaskReset
-                    && target.resultTo != null) {
-                // If this activity is sending a reply to a previous
-                // activity, we can't do anything with it now until
-                // we reach the start of the reply chain.
-                // XXX note that we are assuming the result is always
-                // to the previous activity, which is almost always
-                // the case but we really shouldn't count on.
-                if (replyChainEnd < 0) {
-                    replyChainEnd = i;
-                }
-            } else if (!finishOnTaskLaunch
-                    && !clearWhenTaskReset
-                    && allowTaskReparenting
-                    && target.taskAffinity != null
-                    && !target.taskAffinity.equals(task.affinity)) {
-                // If this activity has an affinity for another
-                // task, then we need to move it out of here.  We will
-                // move it as far out of the way as possible, to the
-                // bottom of the activity stack.  This also keeps it
-                // correctly ordered with any activities we previously
-                // moved.
-                // TODO: We should probably look for other stacks also, since corresponding task
-                // with the same affinity is unlikely to be in the same stack.
-                final Task targetTask;
-                final ActivityRecord bottom =
-                        hasChild() && getChildAt(0).hasChild() ?
-                                getChildAt(0).getChildAt(0) : null;
-                if (bottom != null && target.taskAffinity.equals(bottom.getTask().affinity)) {
-                    // If the activity currently at the bottom has the
-                    // same task affinity as the one we are moving,
-                    // then merge it into the same task.
-                    targetTask = bottom.getTask();
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity " + target
-                            + " out to bottom task " + targetTask);
-                } else {
-                    targetTask = createTask(
-                            mStackSupervisor.getNextTaskIdForUserLocked(target.mUserId),
-                            target.info, null /* intent */, null /* voiceSession */,
-                            null /* voiceInteractor */, false /* toTop */);
-                    targetTask.affinityIntent = target.intent;
-                    numTasksCreated++;
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity " + target
-                            + " out to new task " + targetTask);
-                }
-
-                boolean noOptions = canMoveOptions;
-                final int start = replyChainEnd < 0 ? i : replyChainEnd;
-                for (int srcPos = start; srcPos >= i; --srcPos) {
-                    final ActivityRecord p = task.getChildAt(srcPos);
-                    if (p.finishing) {
-                        continue;
-                    }
-
-                    canMoveOptions = false;
-                    if (noOptions && topOptions == null) {
-                        topOptions = p.takeOptionsLocked(false /* fromClient */);
-                        if (topOptions != null) {
-                            noOptions = false;
-                        }
-                    }
-                    if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
-                            "Removing activity " + p + " from task=" + task + " adding to task="
-                            + targetTask + " Callers=" + Debug.getCallers(4));
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                            "Pushing next activity " + p + " out to target's task " + target);
-                    p.reparent(targetTask, 0 /* position - bottom */, "resetTargetTaskIfNeeded");
-                }
-
-                positionChildAtBottom(targetTask);
-                mStackSupervisor.mRecentTasks.add(targetTask);
-                replyChainEnd = -1;
-            } else if (forceReset || finishOnTaskLaunch || clearWhenTaskReset) {
-                // If the activity should just be removed -- either
-                // because it asks for it, or the task should be
-                // cleared -- then finish it and anything that is
-                // part of its reply chain.
-                int end;
-                if (clearWhenTaskReset) {
-                    // In this case, we want to finish this activity
-                    // and everything above it, so be sneaky and pretend
-                    // like these are all in the reply chain.
-                    end = task.getChildCount() - 1;
-                } else if (replyChainEnd < 0) {
-                    end = i;
-                } else {
-                    end = replyChainEnd;
-                }
-                boolean noOptions = canMoveOptions;
-                for (int srcPos = i; srcPos <= end; srcPos++) {
-                    ActivityRecord p = task.getChildAt(srcPos);
-                    if (p.finishing) {
-                        continue;
-                    }
-                    canMoveOptions = false;
-                    if (noOptions && topOptions == null) {
-                        topOptions = p.takeOptionsLocked(false /* fromClient */);
-                        if (topOptions != null) {
-                            noOptions = false;
-                        }
-                    }
-                    if (DEBUG_TASKS) Slog.w(TAG_TASKS,
-                            "resetTaskIntendedTask: calling finishActivity on " + p);
-                    if (p.finishIfPossible("reset-task", false /* oomAdj */)
-                            == FINISH_RESULT_REMOVED) {
-                        end--;
-                        srcPos--;
-                    }
-                }
-                replyChainEnd = -1;
-            } else {
-                // If we were in the middle of a chain, well the
-                // activity that started it all doesn't want anything
-                // special, so leave it all as-is.
-                replyChainEnd = -1;
-            }
-        }
-
-        // Create target stack for the newly created tasks if necessary
-        if (numTasksCreated > 0) {
-            ActivityDisplay display = getDisplay();
-            final boolean singleTaskInstanceDisplay = display.isSingleTaskInstance();
-            if (singleTaskInstanceDisplay) {
-                display = mRootActivityContainer.getDefaultDisplay();
-            }
-
-            if (singleTaskInstanceDisplay || display.alwaysCreateStack(getWindowingMode(),
-                    getActivityType())) {
-                for (int index = numTasksCreated - 1; index >= 0; index--) {
-                    final Task targetTask = getChildAt(index);
-                    final ActivityStack targetStack = display.getOrCreateStack(getWindowingMode(),
-                            getActivityType(), false /* onTop */);
-                    targetTask.reparent(targetStack, false /* toTop */,
-                            REPARENT_LEAVE_STACK_IN_PLACE, false /* animate */,
-                            true /* deferResume */, "resetTargetTask");
-                }
-            }
-        }
-
-        return topOptions;
-    }
-
-    /**
-     * Helper method for {@link #resetTaskIfNeededLocked(ActivityRecord, ActivityRecord)}.
-     * Processes all of the activities in a given Task looking for an affinity with the task
-     * of resetTaskIfNeededLocked.taskTop.
-     * @param affinityTask The task we are looking for an affinity to.
-     * @param task Task that resetTaskIfNeededLocked.taskTop belongs to.
-     * @param topTaskIsHigher True if #task has already been processed by resetTaskIfNeededLocked.
-     * @param forceReset Flag indicating if clear task was requested
-     */
-    // TODO: Consider merging with #resetTargetTaskIfNeededLocked() above
-    private int resetAffinityTaskIfNeededLocked(Task affinityTask, Task task,
-            boolean topTaskIsHigher, boolean forceReset, int taskInsertionPoint) {
-        // Tracker of the end of currently handled reply chain (sublist) of activities. What happens
-        // to activities in the same chain will depend on what the end activity of the chain needs.
-        int replyChainEnd = -1;
-        final String taskAffinity = task.affinity;
-
-        final int numActivities = task.getChildCount();
-
-        // Do not operate on or below the effective root Activity.
-        int lastActivityNdx = affinityTask.findRootIndex(true /* effectiveRoot */);
-        if (lastActivityNdx == -1) {
-            lastActivityNdx = 0;
-        }
-        for (int i = numActivities - 1; i > lastActivityNdx; --i) {
-            ActivityRecord target = task.getChildAt(i);
-            // TODO: Why is this needed? Looks like we're breaking the loop before we reach the root
-            if (target.isRootOfTask()) break;
-
-            final int flags = target.info.flags;
-            boolean finishOnTaskLaunch = (flags & ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH) != 0;
-            boolean allowTaskReparenting = (flags & ActivityInfo.FLAG_ALLOW_TASK_REPARENTING) != 0;
-
-            if (target.resultTo != null) {
-                // If this activity is sending a reply to a previous
-                // activity, we can't do anything with it now until
-                // we reach the start of the reply chain.
-                // XXX note that we are assuming the result is always
-                // to the previous activity, which is almost always
-                // the case but we really shouldn't count on.
-                if (replyChainEnd < 0) {
-                    replyChainEnd = i;
-                }
-            } else if (topTaskIsHigher
-                    && allowTaskReparenting
-                    && taskAffinity != null
-                    && taskAffinity.equals(target.taskAffinity)) {
-                // This activity has an affinity for our task. Either remove it if we are
-                // clearing or move it over to our task.  Note that
-                // we currently punt on the case where we are resetting a
-                // task that is not at the top but who has activities above
-                // with an affinity to it...  this is really not a normal
-                // case, and we will need to later pull that task to the front
-                // and usually at that point we will do the reset and pick
-                // up those remaining activities.  (This only happens if
-                // someone starts an activity in a new task from an activity
-                // in a task that is not currently on top.)
-                if (forceReset || finishOnTaskLaunch) {
-                    final int start = replyChainEnd >= 0 ? replyChainEnd : i;
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                            "Finishing task at index " + start + " to " + i);
-                    for (int srcPos = start; srcPos >= i; --srcPos) {
-                        final ActivityRecord p = task.getChildAt(srcPos);
-                        if (p.finishing) {
-                            continue;
-                        }
-                        p.finishIfPossible("move-affinity", false /* oomAdj */);
-                    }
-                } else {
-                    if (taskInsertionPoint < 0) {
-                        taskInsertionPoint = task.getChildCount();
-
-                    }
-
-                    final int start = replyChainEnd >= 0 ? replyChainEnd : i;
-                    if (DEBUG_TASKS) Slog.v(TAG_TASKS,
-                            "Reparenting from task=" + affinityTask + ":" + start + "-" + i
-                            + " to task=" + task + ":" + taskInsertionPoint);
-                    for (int srcPos = start; srcPos >= i; --srcPos) {
-                        final ActivityRecord p = task.getChildAt(srcPos);
-                        p.reparent(task, taskInsertionPoint, "resetAffinityTaskIfNeededLocked");
-
-                        if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
-                                "Removing and adding activity " + p + " to stack at " + task
-                                + " callers=" + Debug.getCallers(3));
-                        if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Pulling activity " + p
-                                + " from " + srcPos + " in to resetting task " + task);
-                    }
-                    positionChildAtTop(task);
-
-                    // Now we've moved it in to place...  but what if this is
-                    // a singleTop activity and we have put it on top of another
-                    // instance of the same activity?  Then we drop the instance
-                    // below so it remains singleTop.
-                    if (target.info.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP) {
-                        final ArrayList<ActivityRecord> taskActivities = task.mChildren;
-                        final int targetNdx = taskActivities.indexOf(target);
-                        if (targetNdx > 0) {
-                            final ActivityRecord p = taskActivities.get(targetNdx - 1);
-                            if (p.intent.getComponent().equals(target.intent.getComponent())) {
-                                p.finishIfPossible("replace", false /* oomAdj */);
-                            }
-                        }
-                    }
-                }
-
-                replyChainEnd = -1;
-            }
-        }
-        return taskInsertionPoint;
-    }
-
-    /**
      * Reset the task by reparenting the activities that have same affinity to the task or
      * reparenting the activities that have different affinityies out of the task, while these
      * activities allow task reparenting.
@@ -3350,37 +2935,16 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
      * @return The non-finishing top activity of the task after reset or the original task top
      *         activity if all activities within the task are finishing.
      */
-    final ActivityRecord resetTaskIfNeededLocked(ActivityRecord taskTop,
-            ActivityRecord newActivity) {
+    ActivityRecord resetTaskIfNeeded(ActivityRecord taskTop, ActivityRecord newActivity) {
         final boolean forceReset =
                 (newActivity.info.flags & ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH) != 0;
         final Task task = taskTop.getTask();
 
-        // False until we evaluate the Task associated with taskTop. Switches to true
-        // for remaining tasks. Used for later tasks to reparent to task.
-        boolean taskFound = false;
-
         // If ActivityOptions are moved out and need to be aborted or moved to taskTop.
-        ActivityOptions topOptions = null;
+        final ActivityOptions topOptions = sResetTargetTaskHelper.process(this, task, forceReset);
 
-        // Preserve the location for reparenting in the new task.
-        int reparentInsertionPoint = -1;
-
-        for (int i = getChildCount() - 1; i >= 0; --i) {
-            final Task targetTask = getChildAt(i);
-
-            if (targetTask == task) {
-                topOptions = resetTargetTaskIfNeededLocked(task, forceReset);
-                taskFound = true;
-            } else {
-                reparentInsertionPoint = resetAffinityTaskIfNeededLocked(targetTask, task,
-                        taskFound, forceReset, reparentInsertionPoint);
-            }
-        }
-
-        int taskNdx = mChildren.indexOf(task);
-        if (taskNdx >= 0) {
-            ActivityRecord newTop = getChildAt(taskNdx).getTopNonFinishingActivity();
+        if (mChildren.contains(task)) {
+            final ActivityRecord newTop = task.getTopNonFinishingActivity();
             if (newTop != null) {
                 taskTop = newTop;
             }
@@ -3389,11 +2953,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         if (topOptions != null) {
             // If we got some ActivityOptions from an activity on top that
             // was removed from the task, propagate them to the new real top.
-            if (taskTop != null) {
-                taskTop.updateOptionsLocked(topOptions);
-            } else {
-                topOptions.abort();
-            }
+            taskTop.updateOptionsLocked(topOptions);
         }
 
         return taskTop;
@@ -3422,7 +2982,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
         final ActivityRecord top = stack.topRunningActivityLocked();
 
-        if (stack.isActivityTypeHome() && (top == null || !top.visible)) {
+        if (stack.isActivityTypeHome() && (top == null || !top.mVisibleRequested)) {
             // If we will be focusing on the home stack next and its current top activity isn't
             // visible, then use the move the home stack task to top to make the activity visible.
             stack.getDisplay().moveHomeActivityToTop(reason);
@@ -3919,7 +3479,10 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         "Record #" + targetIndex + " " + r + ": app=" + r.app);
 
                 if (r.app == app) {
-                    if (r.visible) {
+                    if (r.isVisible() || r.mVisibleRequested) {
+                        // While an activity launches a new activity, it's possible that the old
+                        // activity is already requested to be hidden (mVisibleRequested=false), but
+                        // this visibility is not yet committed, so isVisible()=true.
                         hasVisibleActivities = true;
                     }
                     final boolean remove;
@@ -3935,8 +3498,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         // Don't currently have state for the activity, or
                         // it is finishing -- always remove it.
                         remove = true;
-                    } else if (!r.visible && r.launchCount > 2 &&
-                            r.lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
+                    } else if (!r.mVisibleRequested && r.launchCount > 2
+                            && r.lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
                         // We have launched this activity too many times since it was
                         // able to run, so give up and remove it.
                         // (Note if the activity is visible, we don't remove the record.
@@ -3972,7 +3535,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                         // it died, we leave the dead window on screen so it's basically visible.
                         // This is needed when user later tap on the dead window, we need to stop
                         // other apps when user transfers focus to the restarted activity.
-                        r.nowVisible = r.visible;
+                        r.nowVisible = r.mVisibleRequested;
                     }
                     r.cleanUp(true /* cleanServices */, true /* setState */);
                     if (remove) {
@@ -4155,7 +3718,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
      * Ensures all visible activities at or below the input activity have the right configuration.
      */
     void ensureVisibleActivitiesConfigurationLocked(ActivityRecord start, boolean preserveWindow) {
-        if (start == null || !start.visible) {
+        if (start == null || !start.mVisibleRequested) {
             return;
         }
 
@@ -4550,7 +4113,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 final ActivityRecord a = task.getChildAt(activityNdx);
                 if (a.info.packageName.equals(packageName)) {
                     a.forceNewConfig = true;
-                    if (starting != null && a == starting && a.visible) {
+                    if (starting != null && a == starting && a.mVisibleRequested) {
                         a.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
                     }
                 }
@@ -4692,7 +4255,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
-        ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+        ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         mRootActivityContainer.resumeFocusedStacksTopActivities();
     }
 
@@ -5214,7 +4777,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         displayContent.layoutAndAssignWindowLayersIfNeeded();
     }
 
-    private void positionChildAtBottom(Task child) {
+    void positionChildAtBottom(Task child) {
         // If there are other focusable stacks on the display, the z-order of the display should not
         // be changed just because a task was placed at the bottom. E.g. if it is moving the topmost
         // task to bottom, the next focusable stack on the same display should be focused.

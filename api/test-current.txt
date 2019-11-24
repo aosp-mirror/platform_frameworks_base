@@ -707,6 +707,7 @@ package android.content {
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
     field public static final String PERMISSION_SERVICE = "permission";
+    field public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
     field public static final String ROLLBACK_SERVICE = "rollback";
     field public static final String STATUS_BAR_SERVICE = "statusbar";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
@@ -1808,6 +1809,17 @@ package android.os {
     method public static boolean contains(java.io.File, java.io.File);
   }
 
+  public class HidlMemory implements java.io.Closeable {
+    ctor public HidlMemory(@NonNull String, @IntRange(from=0) long, @Nullable android.os.NativeHandle);
+    method public void close() throws java.io.IOException;
+    method @NonNull public android.os.HidlMemory dup() throws java.io.IOException;
+    method protected void finalize();
+    method @Nullable public android.os.NativeHandle getHandle();
+    method @NonNull public String getName();
+    method public long getSize();
+    method @NonNull public android.os.NativeHandle releaseHandle();
+  }
+
   public abstract class HwBinder implements android.os.IHwBinder {
     ctor public HwBinder();
     method public static final void configureRpcThreadpool(long, boolean);
@@ -1831,6 +1843,7 @@ package android.os {
     method public final void copyToInt8Array(long, byte[], int);
     method public final boolean getBool(long);
     method public final double getDouble(long);
+    method public final long getFieldHandle(long);
     method public final float getFloat(long);
     method public final short getInt16(long);
     method public final int getInt32(long);
@@ -1845,6 +1858,7 @@ package android.os {
     method public final void putDoubleArray(long, double[]);
     method public final void putFloat(long, float);
     method public final void putFloatArray(long, float[]);
+    method public final void putHidlMemory(long, @NonNull android.os.HidlMemory);
     method public final void putInt16(long, short);
     method public final void putInt16Array(long, short[]);
     method public final void putInt32(long, int);
@@ -1873,9 +1887,11 @@ package android.os {
     method public final double readDouble();
     method public final java.util.ArrayList<java.lang.Double> readDoubleVector();
     method public final android.os.HwBlob readEmbeddedBuffer(long, long, long, boolean);
+    method @NonNull @Nullable public final android.os.HidlMemory readEmbeddedHidlMemory(long, long, long);
     method @Nullable public final android.os.NativeHandle readEmbeddedNativeHandle(long, long);
     method public final float readFloat();
     method public final java.util.ArrayList<java.lang.Float> readFloatVector();
+    method @NonNull public final android.os.HidlMemory readHidlMemory();
     method public final short readInt16();
     method public final java.util.ArrayList<java.lang.Short> readInt16Vector();
     method public final int readInt32();
@@ -1900,6 +1916,7 @@ package android.os {
     method public final void writeDoubleVector(java.util.ArrayList<java.lang.Double>);
     method public final void writeFloat(float);
     method public final void writeFloatVector(java.util.ArrayList<java.lang.Float>);
+    method public final void writeHidlMemory(@NonNull android.os.HidlMemory);
     method public final void writeInt16(short);
     method public final void writeInt16Vector(java.util.ArrayList<java.lang.Short>);
     method public final void writeInt32(int);
@@ -2024,6 +2041,9 @@ package android.os {
     method @RequiresPermission(anyOf={"android.permission.DEVICE_POWER", "android.permission.POWER_SAVER"}) public boolean setPowerSaveModeEnabled(boolean);
     field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
+  }
+
+  public class PowerWhitelistManager {
   }
 
   public class Process {
@@ -2185,10 +2205,12 @@ package android.os {
     method public boolean add(int);
     method public boolean add(int, String);
     method @Deprecated public android.os.WorkSource addReturningNewbs(android.os.WorkSource);
-    method public int get(int);
-    method public String getName(int);
+    method @Nullable public String getPackageName(int);
+    method public int getUid(int);
+    method public boolean isEmpty();
     method @Deprecated public android.os.WorkSource[] setReturningDiffs(android.os.WorkSource);
     method public int size();
+    method @NonNull public android.os.WorkSource withoutNames();
   }
 
 }
@@ -2447,6 +2469,7 @@ package android.provider {
     field public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
     field public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
+    field public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
     field public static final String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST = "location_ignore_settings_package_whitelist";
     field public static final String LOW_POWER_MODE = "low_power";
@@ -2508,6 +2531,7 @@ package android.provider {
     field public static final String SERIAL_NUMBER = "serial_number";
     field public static final String SERVICE_CATEGORY = "service_category";
     field public static final String SLOT_INDEX = "slot_index";
+    field public static final String SUB_ID = "sub_id";
   }
 
   public static final class Telephony.Sms.Intents {
@@ -3133,16 +3157,19 @@ package android.telephony {
     method public int getCarrierIdListVersion();
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method @Nullable public static android.content.ComponentName getDefaultRespondViaMessageApplication(@NonNull android.content.Context, boolean);
+    method public int getEmergencyNumberDbVersion();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getNetworkCountryIso(int);
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);
     method public void setCarrierTestOverride(String, String, String, String, String, String, String, String, String);
+    method @RequiresPermission("android.permission.READ_ACTIVE_EMERGENCY_SESSION") public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String);
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
+    field public static final int INVALID_EMERGENCY_NUMBER_DB_VERSION = -1; // 0xffffffff
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
   }
 

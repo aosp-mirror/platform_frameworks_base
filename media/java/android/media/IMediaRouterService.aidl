@@ -43,6 +43,7 @@ interface IMediaRouterService {
     void setControlCategories(IMediaRouterClient client, in List<String> categories);
 
     // Methods for media router 2
+    List<MediaRoute2Info> getSystemRoutes();
     void registerClient2(IMediaRouter2Client client, String packageName);
     void unregisterClient2(IMediaRouter2Client client);
     void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route, in Intent request);

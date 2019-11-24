@@ -139,6 +139,14 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         when(mMockCm.getDefaultNetworkCapabilitiesForUser(0)).thenReturn(
                 new NetworkCapabilities[] { mNetCapabilities });
         when(mMockTm.createForSubscriptionId(anyInt())).thenReturn(mMockTm);
+        doAnswer(invocation -> {
+            int rssi = invocation.getArgument(0);
+            if (rssi < -88) return 0;
+            if (rssi < -77) return 1;
+            if (rssi < -66) return 2;
+            if (rssi < -55) return 3;
+            return 4;
+        }).when(mMockWm).calculateSignalLevel(anyInt());
 
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);

@@ -237,9 +237,6 @@ public class LocationSettingsStore {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         int userId = ActivityManager.getCurrentUser();
 
-        ipw.println("--Location Settings--");
-        ipw.increaseIndent();
-
         ipw.print("Location Enabled: ");
         ipw.println(isLocationEnabled(userId));
 

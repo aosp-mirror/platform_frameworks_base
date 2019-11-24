@@ -134,10 +134,9 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     public void testNotResumeHomeStackOnRemovingDisplay() {
         // Create a display which supports system decoration and allows reparenting stacks to
         // another display when the display is removed.
-        final ActivityDisplay display = createNewActivityDisplay();
+        final ActivityDisplay display = new TestActivityDisplay.Builder(
+                mService, 1000, 1500).setSystemDecorations(true).build();
         doReturn(false).when(display).shouldDestroyContentOnRemove();
-        doReturn(true).when(display).supportsSystemDecorations();
-        mRootActivityContainer.addChild(display, ActivityDisplay.POSITION_TOP);
 
         // Put home stack on the display.
         final ActivityStack homeStack = new StackBuilder(mRootActivityContainer)

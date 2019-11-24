@@ -52,7 +52,6 @@ public class BlackFrame {
                     .setParent(surfaceControl)
                     .build();
             transaction.setWindowCrop(surface, w, h);
-            transaction.setLayerStack(surface, dc.getDisplayId());
             transaction.setAlpha(surface, 1);
             transaction.setLayer(surface, layer);
             transaction.setPosition(surface, left, top);

@@ -627,6 +627,13 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_BUBBLE = 0x00001000;
 
+    /** @hide */
+    @IntDef({FLAG_SHOW_LIGHTS, FLAG_ONGOING_EVENT, FLAG_INSISTENT, FLAG_ONLY_ALERT_ONCE,
+            FLAG_AUTO_CANCEL, FLAG_NO_CLEAR, FLAG_FOREGROUND_SERVICE, FLAG_HIGH_PRIORITY,
+            FLAG_LOCAL_ONLY, FLAG_GROUP_SUMMARY, FLAG_AUTOGROUP_SUMMARY, FLAG_BUBBLE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NotificationFlags{};
+
     public int flags;
 
     /** @hide */
@@ -4545,10 +4552,15 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @hide
+         * Set the value for a notification flag
+         *
+         * @param mask Bit mask of the flag
+         * @param value Status (on/off) of the flag
+         *
+         * @return The same Builder.
          */
         @NonNull
-        public Builder setFlag(int mask, boolean value) {
+        public Builder setFlag(@NotificationFlags int mask, boolean value) {
             if (value) {
                 mN.flags |= mask;
             } else {
@@ -10409,6 +10421,16 @@ public class Notification implements Parcelable
             BuilderRemoteViews brv = new BuilderRemoteViews(p);
             p.recycle();
             return brv;
+        }
+
+        /**
+         * Override and return true, since {@link RemoteViews#onLoadClass(Class)} is not overridden.
+         *
+         * @see RemoteViews#shouldUseStaticFilter()
+         */
+        @Override
+        protected boolean shouldUseStaticFilter() {
+            return true;
         }
     }
 

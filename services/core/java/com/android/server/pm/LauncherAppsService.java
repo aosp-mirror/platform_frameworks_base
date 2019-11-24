@@ -344,6 +344,7 @@ public class LauncherAppsService extends SystemService {
             final PackageManagerInternal pmInt =
                     LocalServices.getService(PackageManagerInternal.class);
             List<ResolveInfo> apps = pmInt.queryIntentActivities(intent,
+                    intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                     PackageManager.MATCH_DIRECT_BOOT_AWARE
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                     callingUid, user.getIdentifier());
@@ -468,6 +469,7 @@ public class LauncherAppsService extends SystemService {
             matchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
             matchIntent.setPackage(packageName);
             final List<ResolveInfo> infoList = pmInt.queryIntentActivities(matchIntent,
+                    matchIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                     PackageManager.MATCH_DISABLED_COMPONENTS, Binder.getCallingUid(),
                     getCallingUserId());
             final int size = infoList.size();
@@ -539,6 +541,7 @@ public class LauncherAppsService extends SystemService {
                 final PackageManagerInternal pmInt =
                         LocalServices.getService(PackageManagerInternal.class);
                 List<ResolveInfo> apps = pmInt.queryIntentActivities(intent,
+                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                         callingUid, user.getIdentifier());
@@ -842,6 +845,7 @@ public class LauncherAppsService extends SystemService {
                 // as calling startActivityAsUser ignores the category and just
                 // resolves based on the component if present.
                 List<ResolveInfo> apps = pmInt.queryIntentActivities(launchIntent,
+                        launchIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                         callingUid, user.getIdentifier());

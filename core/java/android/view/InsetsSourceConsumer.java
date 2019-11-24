@@ -18,7 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -55,12 +55,12 @@ public class InsetsSourceConsumer {
     protected final InsetsController mController;
     protected boolean mVisible;
     private final Supplier<Transaction> mTransactionSupplier;
-    private final @InternalInsetType int mType;
+    private final @InternalInsetsType int mType;
     private final InsetsState mState;
     private @Nullable InsetsSourceControl mSourceControl;
     private boolean mHasWindowFocus;
 
-    public InsetsSourceConsumer(@InternalInsetType int type, InsetsState state,
+    public InsetsSourceConsumer(@InternalInsetsType int type, InsetsState state,
             Supplier<Transaction> transactionSupplier, InsetsController controller) {
         mType = type;
         mState = state;

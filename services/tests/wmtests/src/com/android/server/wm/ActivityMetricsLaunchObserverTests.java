@@ -160,7 +160,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     public void testOnActivityLaunchCancelled_hasDrawn() {
         onActivityLaunched();
 
-        mTopActivity.visible = mTopActivity.mDrawn = true;
+        mTopActivity.mVisibleRequested = mTopActivity.mDrawn = true;
 
         // Cannot time already-visible activities.
         mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT, mTopActivity);
@@ -171,7 +171,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
     @Test
     public void testOnActivityLaunchCancelled_finishedBeforeDrawn() {
-        mTopActivity.visible = mTopActivity.mDrawn = true;
+        mTopActivity.mVisibleRequested = mTopActivity.mDrawn = true;
 
         // Suppress resume when creating the record because we want to notify logger manually.
         mSupervisor.beginDeferResume();

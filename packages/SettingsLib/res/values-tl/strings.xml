@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Sample na Rate ng Bluetooth Audio"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth: Rate ng Sample"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Ang ibig sabihin ng na-gray out ay hindi sinusuportahan ng telepono o headset"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bits Per Sample ng Bluetooth Audio"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"I-trigger ang Pagpili sa Audio Codec ng\nBluetooth: Bits Per Sample"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Channel Mode ng Bluetooth Audio"</string>

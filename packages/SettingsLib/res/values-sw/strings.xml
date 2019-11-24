@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Weka Kodeki ya Sauti ya Bluetooth\nUteuzi"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Kiwango cha Sampuli ya Sauti ya Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Weka Kodeki ya Sauti ya Bluetooth\nUteuzi: Kasi ya Sampuli"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Kipengele cha Haiwezi kutumiwa kina maana kuwa hakitumiki kwenye simu au vifaa vya sauti"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Biti za Sauti ya Bluetooth kwa Kila Sampuli"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Weka Kodeki ya Sauti ya Bluetooth\nUteuzi: Biti Kwa Kila Sampuli"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Hali ya Mkondo wa Sauti ya Bluetooth"</string>

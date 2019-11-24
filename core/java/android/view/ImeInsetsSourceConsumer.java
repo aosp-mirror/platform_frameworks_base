@@ -16,7 +16,7 @@
 
 package android.view;
 
-import static android.view.InsetsState.TYPE_IME;
+import static android.view.InsetsState.ITYPE_IME;
 
 import android.inputmethodservice.InputMethodService;
 import android.os.Parcel;
@@ -46,7 +46,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public ImeInsetsSourceConsumer(
             InsetsState state, Supplier<Transaction> transactionSupplier,
             InsetsController controller) {
-        super(TYPE_IME, state, transactionSupplier, controller);
+        super(ITYPE_IME, state, transactionSupplier, controller);
     }
 
     public void onPreRendered(EditorInfo info) {

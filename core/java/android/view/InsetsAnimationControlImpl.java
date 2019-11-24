@@ -16,11 +16,11 @@
 
 package android.view;
 
-import static android.view.InsetsState.INSET_SIDE_BOTTOM;
-import static android.view.InsetsState.INSET_SIDE_FLOATING;
-import static android.view.InsetsState.INSET_SIDE_LEFT;
-import static android.view.InsetsState.INSET_SIDE_RIGHT;
-import static android.view.InsetsState.INSET_SIDE_TOP;
+import static android.view.InsetsState.ISIDE_BOTTOM;
+import static android.view.InsetsState.ISIDE_FLOATING;
+import static android.view.InsetsState.ISIDE_LEFT;
+import static android.view.InsetsState.ISIDE_RIGHT;
+import static android.view.InsetsState.ISIDE_TOP;
 import static android.view.InsetsState.toPublicType;
 
 import android.annotation.Nullable;
@@ -31,9 +31,9 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseSetArray;
-import android.view.InsetsState.InsetSide;
+import android.view.InsetsState.InternalInsetsSide;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
-import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimationListener.InsetsAnimation;
 import android.view.WindowManager.LayoutParams;
 
@@ -63,7 +63,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private final Insets mShownInsets;
     private final Matrix mTmpMatrix = new Matrix();
     private final InsetsState mInitialInsetsState;
-    private final @InsetType int mTypes;
+    private final @InsetsType int mTypes;
     private final Supplier<SyncRtSurfaceTransactionApplier> mTransactionApplierSupplier;
     private final InsetsController mController;
     private final WindowInsetsAnimationListener.InsetsAnimation mAnimation;
@@ -77,7 +77,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @VisibleForTesting
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceConsumer> consumers, Rect frame,
             InsetsState state, WindowInsetsAnimationControlListener listener,
-            @InsetType int types,
+            @InsetsType int types,
             Supplier<SyncRtSurfaceTransactionApplier> transactionApplierSupplier,
             InsetsController controller) {
         mConsumers = consumers;
@@ -118,8 +118,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     }
 
     @Override
-    @InsetType
-    public int getTypes() {
+    @InsetsType public int getTypes() {
         return mTypes;
     }
 
@@ -147,12 +146,11 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         }
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
         ArrayList<SurfaceParams> params = new ArrayList<>();
-        updateLeashesForSide(INSET_SIDE_LEFT, offset.left, mPendingInsets.left, params, state);
-        updateLeashesForSide(INSET_SIDE_TOP, offset.top, mPendingInsets.top, params, state);
-        updateLeashesForSide(INSET_SIDE_RIGHT, offset.right, mPendingInsets.right, params, state);
-        updateLeashesForSide(INSET_SIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params,
-                state);
-        updateLeashesForSide(INSET_SIDE_FLOATING, 0 /* offset */, 0 /* inset */, params, state);
+        updateLeashesForSide(ISIDE_LEFT, offset.left, mPendingInsets.left, params, state);
+        updateLeashesForSide(ISIDE_TOP, offset.top, mPendingInsets.top, params, state);
+        updateLeashesForSide(ISIDE_RIGHT, offset.right, mPendingInsets.right, params, state);
+        updateLeashesForSide(ISIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params, state);
+        updateLeashesForSide(ISIDE_FLOATING, 0 /* offset */, 0 /* inset */, params, state);
 
         SyncRtSurfaceTransactionApplier applier = mTransactionApplierSupplier.get();
         applier.scheduleApply(params.toArray(new SurfaceParams[params.size()]));
@@ -195,7 +193,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
 
     private Insets calculateInsets(InsetsState state, Rect frame,
             SparseArray<InsetsSourceConsumer> consumers, boolean shown,
-            @Nullable @InsetSide SparseIntArray typeSideMap) {
+            @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         for (int i = consumers.size() - 1; i >= 0; i--) {
             state.getSource(consumers.valueAt(i).getType()).setVisible(shown);
         }
@@ -203,7 +201,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     }
 
     private Insets getInsetsFromState(InsetsState state, Rect frame,
-            @Nullable @InsetSide SparseIntArray typeSideMap) {
+            @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         return state.calculateInsets(frame, false /* isScreenRound */,
                 false /* alwaysConsumerNavBar */, null /* displayCutout */,
                 null /* legacyContentInsets */, null /* legacyStableInsets */,
@@ -215,7 +213,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         return Insets.max(Insets.min(insets, mShownInsets), mHiddenInsets);
     }
 
-    private void updateLeashesForSide(@InsetSide int side, int offset, int inset,
+    private void updateLeashesForSide(@InternalInsetsSide int side, int offset, int inset,
             ArrayList<SurfaceParams> surfaceParams, InsetsState state) {
         ArraySet<InsetsSourceConsumer> items = mSideSourceMap.get(side);
         if (items == null) {
@@ -242,27 +240,27 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             if (leash != null) {
                 surfaceParams.add(new SurfaceParams(leash, 1f /* alpha */, mTmpMatrix,
                         null /* windowCrop */, 0 /* layer */, 0f /* cornerRadius*/,
-                        side == INSET_SIDE_FLOATING
-                                ? consumer.isVisible() : inset != 0 /* visible */));
+                        side == ISIDE_FLOATING ? consumer.isVisible() : inset != 0 /* visible */));
             }
         }
     }
 
-    private void addTranslationToMatrix(@InsetSide int side, int inset, Matrix m, Rect frame) {
+    private void addTranslationToMatrix(@InternalInsetsSide int side, int inset, Matrix m,
+            Rect frame) {
         switch (side) {
-            case INSET_SIDE_LEFT:
+            case ISIDE_LEFT:
                 m.postTranslate(-inset, 0);
                 frame.offset(-inset, 0);
                 break;
-            case INSET_SIDE_TOP:
+            case ISIDE_TOP:
                 m.postTranslate(0, -inset);
                 frame.offset(0, -inset);
                 break;
-            case INSET_SIDE_RIGHT:
+            case ISIDE_RIGHT:
                 m.postTranslate(inset, 0);
                 frame.offset(inset, 0);
                 break;
-            case INSET_SIDE_BOTTOM:
+            case ISIDE_BOTTOM:
                 m.postTranslate(0, inset);
                 frame.offset(0, inset);
                 break;

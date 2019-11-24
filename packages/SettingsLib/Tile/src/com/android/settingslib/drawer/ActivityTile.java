@@ -53,15 +53,6 @@ public class ActivityTile extends Tile {
     }
 
     @Override
-    protected CharSequence getComponentLabel(Context context) {
-        final PackageManager pm = context.getPackageManager();
-        final ComponentInfo info = getComponentInfo(context);
-        return info == null
-                ? null
-                : info.loadLabel(pm);
-    }
-
-    @Override
     protected ComponentInfo getComponentInfo(Context context) {
         if (mComponentInfo == null) {
             final PackageManager pm = context.getApplicationContext().getPackageManager();
@@ -77,5 +68,19 @@ public class ActivityTile extends Tile {
             }
         }
         return mComponentInfo;
+    }
+
+    @Override
+    protected CharSequence getComponentLabel(Context context) {
+        final PackageManager pm = context.getPackageManager();
+        final ComponentInfo info = getComponentInfo(context);
+        return info == null
+                ? null
+                : info.loadLabel(pm);
+    }
+
+    @Override
+    protected int getComponentIcon(ComponentInfo componentInfo) {
+        return componentInfo.icon;
     }
 }

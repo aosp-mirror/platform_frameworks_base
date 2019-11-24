@@ -20,7 +20,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 
 import java.io.PrintWriter;
 
@@ -30,7 +30,7 @@ import java.io.PrintWriter;
  */
 public class InsetsSource implements Parcelable {
 
-    private final @InternalInsetType int mType;
+    private final @InternalInsetsType int mType;
 
     /** Frame of the source in screen coordinate space */
     private final Rect mFrame;
@@ -38,7 +38,7 @@ public class InsetsSource implements Parcelable {
 
     private final Rect mTmpFrame = new Rect();
 
-    public InsetsSource(@InternalInsetType int type) {
+    public InsetsSource(@InternalInsetsType int type) {
         mType = type;
         mFrame = new Rect();
     }
@@ -57,7 +57,7 @@ public class InsetsSource implements Parcelable {
         mVisible = visible;
     }
 
-    public @InternalInsetType int getType() {
+    public @InternalInsetsType int getType() {
         return mType;
     }
 

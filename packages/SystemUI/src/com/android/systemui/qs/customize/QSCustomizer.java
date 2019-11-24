@@ -90,7 +90,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public QSCustomizer(Context context, AttributeSet attrs,
             LightBarController lightBarController,
             KeyguardStateController keyguardStateController,
-            ScreenLifecycle screenLifecycle) {
+            ScreenLifecycle screenLifecycle,
+            TileQueryHelper tileQueryHelper) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
 
         LayoutInflater.from(getContext()).inflate(R.layout.qs_customize_panel_content, this);
@@ -113,7 +114,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);
         mTileAdapter = new TileAdapter(getContext());
-        mTileQueryHelper = new TileQueryHelper(context, mTileAdapter);
+        mTileQueryHelper = tileQueryHelper;
+        mTileQueryHelper.setListener(mTileAdapter);
         mRecyclerView.setAdapter(mTileAdapter);
         mTileAdapter.getItemTouchHelper().attachToRecyclerView(mRecyclerView);
         GridLayoutManager layout = new GridLayoutManager(getContext(), 3);

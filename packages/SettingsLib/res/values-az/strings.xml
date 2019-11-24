@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Bluetooth Audio KodeK\nSeçimini aktiv edin"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Bluetooth Audio Nümunə Göstəricisi"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Bluetooth Audio Kodek\nSeçimini aktiv edin: Nümunə Göstəricisi"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Boz rəng telefon və ya qulaqlıq tərəfindən dəstəklənmədiyini bildirir"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Hər Nümunə Üçün Bluetooth Audio Bit"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Bluetooth Audio Kodek\nSeçimini aktiv edin: Hər Nümunə üçün Bit"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Bluetooth Audio Kanal Rejimi"</string>

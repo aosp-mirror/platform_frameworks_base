@@ -21,11 +21,11 @@ import static android.view.WindowInsets.Type.FIRST;
 import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.MANDATORY_SYSTEM_GESTURES;
-import static android.view.WindowInsets.Type.SIDE_BARS;
+import static android.view.WindowInsets.Type.NAVIGATION_BARS;
 import static android.view.WindowInsets.Type.SIZE;
+import static android.view.WindowInsets.Type.STATUS_BARS;
 import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.TAPPABLE_ELEMENT;
-import static android.view.WindowInsets.Type.TOP_BAR;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.compatSystemInsets;
 import static android.view.WindowInsets.Type.indexOf;
@@ -39,7 +39,7 @@ import android.content.Intent;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
-import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethod;
 
@@ -175,9 +175,9 @@ public final class WindowInsets {
 
     /**
      * @return The insets that include system bars indicated by {@code typeMask}, taken from
-     *         {@code typeInsetMap}.
+     *         {@code typeInsetsMap}.
      */
-    private static Insets getInsets(Insets[] typeInsetsMap, @InsetType int typeMask) {
+    private static Insets getInsets(Insets[] typeInsetsMap, @InsetsType int typeMask) {
         Insets result = null;
         for (int i = FIRST; i <= LAST; i = i << 1) {
             if ((typeMask & i) == 0) {
@@ -199,7 +199,7 @@ public final class WindowInsets {
     /**
      * Sets all entries in {@code typeInsetsMap} that belong to {@code typeMask} to {@code insets},
      */
-    private static void setInsets(Insets[] typeInsetsMap, @InsetType int typeMask, Insets insets) {
+    private static void setInsets(Insets[] typeInsetsMap, @InsetsType int typeMask, Insets insets) {
         for (int i = FIRST; i <= LAST; i = i << 1) {
             if ((typeMask & i) == 0) {
                 continue;
@@ -216,34 +216,35 @@ public final class WindowInsets {
 
     /**
      * Creates a indexOf(type) -> inset map for which the {@code insets} is just mapped to
-     * {@link InsetType#topBar()} and {@link InsetType#sideBars()}, depending on the location of the
-     * inset.
+     * {@link InsetsType#statusBars()} and {@link InsetsType#navigationBars()}, depending on the
+     * location of the inset.
      */
     private static Insets[] createCompatTypeMap(@Nullable Rect insets) {
         if (insets == null) {
             return null;
         }
-        Insets[] typeInsetMap = new Insets[SIZE];
-        assignCompatInsets(typeInsetMap, insets);
-        return typeInsetMap;
+        Insets[] typeInsetsMap = new Insets[SIZE];
+        assignCompatInsets(typeInsetsMap, insets);
+        return typeInsetsMap;
     }
 
     /**
      * @hide
      */
-    static void assignCompatInsets(Insets[] typeInsetMap, Rect insets) {
-        typeInsetMap[indexOf(TOP_BAR)] = Insets.of(0, insets.top, 0, 0);
-        typeInsetMap[indexOf(SIDE_BARS)] = Insets.of(insets.left, 0, insets.right, insets.bottom);
+    static void assignCompatInsets(Insets[] typeInsetsMap, Rect insets) {
+        typeInsetsMap[indexOf(STATUS_BARS)] = Insets.of(0, insets.top, 0, 0);
+        typeInsetsMap[indexOf(NAVIGATION_BARS)] =
+                Insets.of(insets.left, 0, insets.right, insets.bottom);
     }
 
-    private static boolean[] createCompatVisibilityMap(@Nullable Insets[] typeInsetMap) {
+    private static boolean[] createCompatVisibilityMap(@Nullable Insets[] typeInsetsMap) {
         boolean[] typeVisibilityMap = new boolean[SIZE];
-        if (typeInsetMap == null) {
+        if (typeInsetsMap == null) {
             return typeVisibilityMap;
         }
         for (int i = FIRST; i <= LAST; i = i << 1) {
             int index = indexOf(i);
-            if (!Insets.NONE.equals(typeInsetMap[index])) {
+            if (!Insets.NONE.equals(typeInsetsMap[index])) {
                 typeVisibilityMap[index] = true;
             }
         }
@@ -284,20 +285,20 @@ public final class WindowInsets {
 
     /**
      * Returns the insets of a specific set of windows causing insets, denoted by the
-     * {@code typeMask} bit mask of {@link InsetType}s.
+     * {@code typeMask} bit mask of {@link InsetsType}s.
      *
-     * @param typeMask Bit mask of {@link InsetType}s to query the insets for.
+     * @param typeMask Bit mask of {@link InsetsType}s to query the insets for.
      * @return The insets.
      *
      * @hide pending unhide
      */
-    public Insets getInsets(@InsetType int typeMask) {
+    public Insets getInsets(@InsetsType int typeMask) {
         return getInsets(mTypeInsetsMap, typeMask);
     }
 
     /**
      * Returns the maximum amount of insets a specific set of windows can cause, denoted by the
-     * {@code typeMask} bit mask of {@link InsetType}s.
+     * {@code typeMask} bit mask of {@link InsetsType}s.
      *
      * <p>The maximum insets represents the area of a a window that that <b>may</b> be partially
      * or fully obscured by the system window identified by {@code type}. This value does not
@@ -305,7 +306,7 @@ public final class WindowInsets {
      * normally shown, but temporarily hidden, the maximum inset will still provide the inset
      * associated with the status bar being shown.</p>
      *
-     * @param typeMask Bit mask of {@link InsetType}s to query the insets for.
+     * @param typeMask Bit mask of {@link InsetsType}s to query the insets for.
      * @return The insets.
      *
      * @throws IllegalArgumentException If the caller tries to query {@link Type#ime()}. Maximum
@@ -314,7 +315,7 @@ public final class WindowInsets {
      *                                  currently focused view, as well as the UI state of the IME.
      * @hide pending unhide
      */
-    public Insets getMaxInsets(@InsetType int typeMask) throws IllegalArgumentException {
+    public Insets getMaxInsets(@InsetsType int typeMask) throws IllegalArgumentException {
         if ((typeMask & IME) != 0) {
             throw new IllegalArgumentException("Unable to query the maximum insets for IME");
         }
@@ -325,12 +326,12 @@ public final class WindowInsets {
      * Returns whether a set of windows that may cause insets is currently visible on screen,
      * regardless of whether it actually overlaps with this window.
      *
-     * @param typeMask Bit mask of {@link InsetType}s to query visibility status.
+     * @param typeMask Bit mask of {@link Type.InsetsType}s to query visibility status.
      * @return {@code true} if and only if all windows included in {@code typeMask} are currently
      *         visible on screen.
      * @hide pending unhide
      */
-    public boolean isVisible(@InsetType int typeMask) {
+    public boolean isVisible(@InsetsType int typeMask) {
         for (int i = FIRST; i <= LAST; i = i << 1) {
             if ((typeMask & i) == 0) {
                 continue;
@@ -1010,14 +1011,14 @@ public final class WindowInsets {
          *
          * @see #getInsets(int)
          *
-         * @param typeMask The bitmask of {@link InsetType} to set the insets for.
+         * @param typeMask The bitmask of {@link InsetsType} to set the insets for.
          * @param insets The insets to set.
          *
          * @return itself
          * @hide pending unhide
          */
         @NonNull
-        public Builder setInsets(@InsetType int typeMask, @NonNull Insets insets) {
+        public Builder setInsets(@InsetsType int typeMask, @NonNull Insets insets) {
             Preconditions.checkNotNull(insets);
             WindowInsets.setInsets(mTypeInsetsMap, typeMask, insets);
             mSystemInsetsConsumed = false;
@@ -1035,7 +1036,7 @@ public final class WindowInsets {
          *
          * @see #getMaxInsets(int)
          *
-         * @param typeMask The bitmask of {@link InsetType} to set the insets for.
+         * @param typeMask The bitmask of {@link InsetsType} to set the insets for.
          * @param insets The insets to set.
          *
          * @return itself
@@ -1048,7 +1049,7 @@ public final class WindowInsets {
          * @hide pending unhide
          */
         @NonNull
-        public Builder setMaxInsets(@InsetType int typeMask, @NonNull Insets insets)
+        public Builder setMaxInsets(@InsetsType int typeMask, @NonNull Insets insets)
                 throws IllegalArgumentException{
             if (typeMask == IME) {
                 throw new IllegalArgumentException("Maximum inset not available for IME");
@@ -1065,14 +1066,14 @@ public final class WindowInsets {
          *
          * @see #isVisible(int)
          *
-         * @param typeMask The bitmask of {@link InsetType} to set the visibility for.
+         * @param typeMask The bitmask of {@link InsetsType} to set the visibility for.
          * @param visible Whether to mark the windows as visible or not.
          *
          * @return itself
          * @hide pending unhide
          */
         @NonNull
-        public Builder setVisible(@InsetType int typeMask, boolean visible) {
+        public Builder setVisible(@InsetsType int typeMask, boolean visible) {
             for (int i = FIRST; i <= LAST; i = i << 1) {
                 if ((typeMask & i) == 0) {
                     continue;
@@ -1149,35 +1150,38 @@ public final class WindowInsets {
     public static final class Type {
 
         static final int FIRST = 1 << 0;
-        static final int TOP_BAR = FIRST;
+        static final int STATUS_BARS = FIRST;
+        static final int NAVIGATION_BARS = 1 << 1;
+        static final int CAPTION_BAR = 1 << 2;
 
-        static final int IME = 1 << 1;
-        static final int SIDE_BARS = 1 << 2;
+        static final int IME = 1 << 3;
 
-        static final int SYSTEM_GESTURES = 1 << 3;
-        static final int MANDATORY_SYSTEM_GESTURES = 1 << 4;
-        static final int TAPPABLE_ELEMENT = 1 << 5;
+        static final int SYSTEM_GESTURES = 1 << 4;
+        static final int MANDATORY_SYSTEM_GESTURES = 1 << 5;
+        static final int TAPPABLE_ELEMENT = 1 << 6;
 
-        static final int LAST = 1 << 6;
-        static final int SIZE = 7;
+        static final int LAST = 1 << 7;
+        static final int SIZE = 8;
         static final int WINDOW_DECOR = LAST;
 
-        static int indexOf(@InsetType int type) {
+        static int indexOf(@InsetsType int type) {
             switch (type) {
-                case TOP_BAR:
+                case STATUS_BARS:
                     return 0;
-                case IME:
+                case NAVIGATION_BARS:
                     return 1;
-                case SIDE_BARS:
+                case CAPTION_BAR:
                     return 2;
-                case SYSTEM_GESTURES:
+                case IME:
                     return 3;
-                case MANDATORY_SYSTEM_GESTURES:
+                case SYSTEM_GESTURES:
                     return 4;
-                case TAPPABLE_ELEMENT:
+                case MANDATORY_SYSTEM_GESTURES:
                     return 5;
-                case WINDOW_DECOR:
+                case TAPPABLE_ELEMENT:
                     return 6;
+                case WINDOW_DECOR:
+                    return 7;
                 default:
                     throw new IllegalArgumentException("type needs to be >= FIRST and <= LAST,"
                             + " type=" + type);
@@ -1189,42 +1193,48 @@ public final class WindowInsets {
 
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(flag = true, value = { TOP_BAR, IME, SIDE_BARS, WINDOW_DECOR, SYSTEM_GESTURES,
-                MANDATORY_SYSTEM_GESTURES, TAPPABLE_ELEMENT})
-        public @interface InsetType {
+        @IntDef(flag = true, value = {STATUS_BARS, NAVIGATION_BARS, CAPTION_BAR, IME, WINDOW_DECOR,
+                SYSTEM_GESTURES, MANDATORY_SYSTEM_GESTURES, TAPPABLE_ELEMENT})
+        public @interface InsetsType {
         }
 
         /**
-         * @return An inset type representing the top bar of a window, which can be the status
-         *         bar on handheld-like devices as well as a caption bar.
+         * @return An insets type representing any system bars for displaying status.
          */
-        public static @InsetType int topBar() {
-            return TOP_BAR;
+        public static @InsetsType int statusBars() {
+            return STATUS_BARS;
         }
 
         /**
-         * @return An inset type representing the window of an {@link InputMethod}.
+         * @return An insets type representing any system bars for navigation.
          */
-        public static @InsetType int ime() {
+        public static @InsetsType int navigationBars() {
+            return NAVIGATION_BARS;
+        }
+
+        /**
+         * @return An insets type representing the window of a caption bar.
+         */
+        public static @InsetsType int captionBar() {
+            return CAPTION_BAR;
+        }
+
+        /**
+         * @return An insets type representing the window of an {@link InputMethod}.
+         */
+        public static @InsetsType int ime() {
             return IME;
         }
 
         /**
-         * @return An inset type representing any system bars that are not {@link #topBar()}.
+         * @return An insets type representing decor that is being app-controlled.
          */
-        public static @InsetType int sideBars() {
-            return SIDE_BARS;
-        }
-
-        /**
-         * @return An inset type representing decor that is being app-controlled.
-         */
-        public static @InsetType int windowDecor() {
+        public static @InsetsType int windowDecor() {
             return WINDOW_DECOR;
         }
 
         /**
-         * Returns an inset type representing the system gesture insets.
+         * Returns an insets type representing the system gesture insets.
          *
          * <p>The system gesture insets represent the area of a window where system gestures have
          * priority and may consume some or all touch input, e.g. due to the a system bar
@@ -1240,30 +1250,30 @@ public final class WindowInsets {
          *
          * @see #getSystemGestureInsets()
          */
-        public static @InsetType int systemGestures() {
+        public static @InsetsType int systemGestures() {
             return SYSTEM_GESTURES;
         }
 
         /**
          * @see #getMandatorySystemGestureInsets
          */
-        public static @InsetType int mandatorySystemGestures() {
+        public static @InsetsType int mandatorySystemGestures() {
             return MANDATORY_SYSTEM_GESTURES;
         }
 
         /**
          * @see #getTappableElementInsets
          */
-        public static @InsetType int tappableElement() {
+        public static @InsetsType int tappableElement() {
             return TAPPABLE_ELEMENT;
         }
 
         /**
-         * @return All system bars. Includes {@link #topBar()} as well as {@link #sideBars()}, but
-         *         not {@link #ime()}.
+         * @return All system bars. Includes {@link #statusBars()} as well as
+         *         {@link #navigationBars()}, but not {@link #ime()}.
          */
-        public static @InsetType int systemBars() {
-            return TOP_BAR | SIDE_BARS;
+        public static @InsetsType int systemBars() {
+            return STATUS_BARS | NAVIGATION_BARS;
         }
 
         /**
@@ -1271,8 +1281,8 @@ public final class WindowInsets {
          *         system insets.
          * @hide
          */
-        static @InsetType int compatSystemInsets() {
-            return TOP_BAR | SIDE_BARS | IME;
+        static @InsetsType int compatSystemInsets() {
+            return STATUS_BARS | NAVIGATION_BARS | IME;
         }
 
         /**
@@ -1281,7 +1291,7 @@ public final class WindowInsets {
          * TODO: Figure out if this makes sense at all, mixing e.g {@link #systemGestures()} and
          *       {@link #ime()} does not seem very useful.
          */
-        public static @InsetType int all() {
+        public static @InsetsType int all() {
             return 0xFFFFFFFF;
         }
     }

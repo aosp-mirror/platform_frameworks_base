@@ -37,7 +37,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
 import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
-import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -266,11 +265,8 @@ public class TaskRecordTests extends ActivityTestsBase {
     public void testFullscreenBoundsForcedOrientation() {
         final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
         final Rect fullScreenBoundsPort = new Rect(0, 0, 1080, 1920);
-        DisplayInfo info = new DisplayInfo();
-        mService.mContext.getDisplay().getDisplayInfo(info);
-        info.logicalWidth = fullScreenBounds.width();
-        info.logicalHeight = fullScreenBounds.height();
-        ActivityDisplay display = addNewActivityDisplayAt(info, POSITION_TOP);
+        ActivityDisplay display = new TestActivityDisplay.Builder(
+                mService, fullScreenBounds.width(), fullScreenBounds.height()).build();
         assertTrue(mRootActivityContainer.getActivityDisplay(display.mDisplayId) != null);
         // Fix the display orientation to landscape which is the natural rotation (0) for the test
         // display.
@@ -332,11 +328,8 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testIgnoresForcedOrientationWhenParentHandles() {
         final Rect fullScreenBounds = new Rect(0, 0, 1920, 1080);
-        DisplayInfo info = new DisplayInfo();
-        mService.mContext.getDisplay().getDisplayInfo(info);
-        info.logicalWidth = fullScreenBounds.width();
-        info.logicalHeight = fullScreenBounds.height();
-        ActivityDisplay display = addNewActivityDisplayAt(info, POSITION_TOP);
+        ActivityDisplay display = new TestActivityDisplay.Builder(
+                mService, fullScreenBounds.width(), fullScreenBounds.height()).build();
 
         display.getRequestedOverrideConfiguration().orientation =
                 Configuration.ORIENTATION_LANDSCAPE;

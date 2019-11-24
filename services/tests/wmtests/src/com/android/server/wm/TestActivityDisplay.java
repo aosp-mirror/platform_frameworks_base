@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
@@ -38,36 +37,6 @@ import android.view.DisplayInfo;
 
 class TestActivityDisplay extends ActivityDisplay {
     private final ActivityStackSupervisor mSupervisor;
-
-    static TestActivityDisplay create(ActivityStackSupervisor supervisor) {
-        return create(supervisor, SystemServicesTestRule.sNextDisplayId++);
-    }
-
-    static TestActivityDisplay create(ActivityStackSupervisor supervisor, DisplayInfo info) {
-        return create(supervisor, SystemServicesTestRule.sNextDisplayId++, info);
-    }
-
-    static TestActivityDisplay create(ActivityStackSupervisor supervisor, int displayId) {
-        final DisplayInfo info = new DisplayInfo();
-        supervisor.mService.mContext.getDisplay().getDisplayInfo(info);
-        return create(supervisor, displayId, info);
-    }
-
-    static TestActivityDisplay create(ActivityStackSupervisor supervisor, int displayId,
-            DisplayInfo info) {
-        if (displayId == DEFAULT_DISPLAY) {
-            synchronized (supervisor.mService.mGlobalLock) {
-                return new TestActivityDisplay(supervisor,
-                        supervisor.mRootActivityContainer.mDisplayManager.getDisplay(displayId));
-            }
-        }
-        final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
-                info, DEFAULT_DISPLAY_ADJUSTMENTS);
-
-        synchronized (supervisor.mService.mGlobalLock) {
-            return new TestActivityDisplay(supervisor, display);
-        }
-    }
 
     private TestActivityDisplay(ActivityStackSupervisor supervisor, Display display) {
         super(supervisor.mService.mRootActivityContainer, display);

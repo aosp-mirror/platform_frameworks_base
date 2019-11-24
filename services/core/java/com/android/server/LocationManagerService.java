@@ -1947,11 +1947,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (workSource.size() > 0) {
             // If the WorkSource has one or more non-chained UIDs, make sure they're accompanied
             // by tags.
-            return workSource.getName(0) != null;
+            return workSource.getPackageName(0) != null;
         } else {
             // For now, make sure callers have supplied an attribution tag for use with
             // AppOpsManager. This might be relaxed in the future.
-            final ArrayList<WorkChain> workChains = workSource.getWorkChains();
+            final List<WorkChain> workChains = workSource.getWorkChains();
             return workChains != null && !workChains.isEmpty() &&
                     workChains.get(0).getAttributionTag() != null;
         }
@@ -3309,18 +3309,24 @@ public class LocationManagerService extends ILocationManager.Stub {
                 ipw.decreaseIndent();
             }
 
-            mSettingsStore.dump(fd, pw, args);
+            ipw.println("Location Settings:");
+            ipw.increaseIndent();
+            mSettingsStore.dump(fd, ipw, args);
+            ipw.decreaseIndent();
 
             ipw.println("Location Providers:");
             ipw.increaseIndent();
             for (LocationProvider provider : mProviders) {
                 provider.dumpLocked(fd, ipw, args);
             }
+            ipw.decreaseIndent();
         }
 
         if (mGnssManagerService != null) {
+            ipw.println("GNSS:");
+            ipw.increaseIndent();
+            mGnssManagerService.dump(fd, ipw, args);
             ipw.decreaseIndent();
-            mGnssManagerService.dump(fd, pw, args);
         }
     }
 }

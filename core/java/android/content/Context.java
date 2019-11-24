@@ -2081,10 +2081,36 @@ public abstract class Context {
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      * @hide
      */
-    @SystemApi
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Broadcast the given intent to all interested BroadcastReceivers, allowing
+     * an array of required permissions to be enforced.  This call is asynchronous; it returns
+     * immediately, and you will continue executing while the receivers are run.  No results are
+     * propagated from receivers and receivers can not abort the broadcast. If you want to allow
+     * receivers to propagate results or abort the broadcast, you must send an ordered broadcast
+     * using {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermissions Array of names of permissions that a receiver must hold
+     *                            in order to receive your broadcast.
+     *                            If empty, no permissions are required.
+     *
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see #sendBroadcast(Intent)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    public void sendBroadcastWithMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions) {
+        sendBroadcastMultiplePermissions(intent, receiverPermissions);
     }
 
     /**
@@ -3309,6 +3335,7 @@ public abstract class Context {
             ROLLBACK_SERVICE,
             DROPBOX_SERVICE,
             //@hide: DEVICE_IDLE_CONTROLLER,
+            //@hide: POWER_WHITELIST_MANAGER,
             DEVICE_POLICY_SERVICE,
             UI_MODE_SERVICE,
             DOWNLOAD_SERVICE,
@@ -4319,6 +4346,15 @@ public abstract class Context {
     public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
 
     /**
+     * System service name for the PowerWhitelistManager.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @TestApi
+    public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.admin.DevicePolicyManager} for working with global
      * device policy management.
@@ -4870,6 +4906,15 @@ public abstract class Context {
      */
     @SystemApi
     public static final String BATTERY_STATS_SERVICE = "batterystats";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * AppSearchManager for indexing and querying app data managed
+     * by the system.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String APP_SEARCH_SERVICE = "app_search";
 
     /**
      * Determine whether the given permission is allowed for a particular

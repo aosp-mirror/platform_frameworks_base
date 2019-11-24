@@ -1153,8 +1153,6 @@ public class WifiManager {
      * @hide
      */
     @UnsupportedAppUsage
-    // TODO(b/140781184): need to support custom number of RSSI levels, as well as levels that are
-    //  not evenly spaced
     public static final int RSSI_LEVELS = 5;
 
     /**
@@ -1215,11 +1213,13 @@ public class WifiManager {
      * Applications will almost always want to use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
      * the standard {@link android.content.Context#WIFI_SERVICE Context.WIFI_SERVICE}.
+     *
      * @param context the application context
-     * @hide - hide this because it takes in a parameter of type IWifiManager, which
-     * is a system private class.
+     * @param looper the Looper used to deliver callbacks
+     *
+     * @hide
      */
-    public WifiManager(Context context, Looper looper) {
+    public WifiManager(@NonNull Context context, @NonNull Looper looper) {
         mContext = context;
         mLooper = looper;
         mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
@@ -2782,11 +2782,13 @@ public class WifiManager {
      * is being shown.
      *
      * @param rssi The power of the signal measured in RSSI.
-     * @param numLevels The number of levels to consider in the calculated
-     *            level.
-     * @return A level of the signal, given in the range of 0 to numLevels-1
-     *         (both inclusive).
+     * @param numLevels The number of levels to consider in the calculated level.
+     * @return A level of the signal, given in the range of 0 to numLevels-1 (both inclusive).
+     * @deprecated Callers should use {@link #calculateSignalLevel(int)} instead to get the
+     * signal level using the system default RSSI thresholds, or otherwise compute the RSSI level
+     * themselves using their own formula.
      */
+    @Deprecated
     public static int calculateSignalLevel(int rssi, int numLevels) {
         if (rssi <= MIN_RSSI) {
             return 0;
@@ -2797,6 +2799,34 @@ public class WifiManager {
             float outputRange = (numLevels - 1);
             return (int)((float)(rssi - MIN_RSSI) * outputRange / inputRange);
         }
+    }
+
+    /**
+     * Given a raw RSSI, return the RSSI signal quality rating using the system default RSSI
+     * quality rating thresholds.
+     * @param rssi a raw RSSI value, in dBm, usually between -55 and -90
+     * @return the RSSI signal quality rating, in the range
+     * [0, {@link #getMaxSignalLevel()}], where 0 is the lowest (worst signal) RSSI
+     * rating and {@link #getMaxSignalLevel()} is the highest (best signal) RSSI rating.
+     */
+    public int calculateSignalLevel(int rssi) {
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            return iWifiManager.calculateSignalLevel(rssi);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the system default maximum signal level.
+     * This is the maximum RSSI level returned by {@link #calculateSignalLevel(int)}.
+     */
+    public int getMaxSignalLevel() {
+        return calculateSignalLevel(Integer.MAX_VALUE);
     }
 
     /**
@@ -3201,27 +3231,6 @@ public class WifiManager {
             if (iWifiManager == null) return false;
             return iWifiManager.setWifiApConfiguration(
                     wifiConfig, mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Method that triggers a notification to the user about a band conversion
-     * (e.g. 5 GHz to 2.4 GHz) to their saved AP config.
-     *
-     * @hide
-     */
-    // TODO(b/144218444): move the notification to Settings instead of making this @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
-    public void notifyUserOfApBandConversion() {
-        Log.d(TAG, "apBand was converted, notify the user");
-        try {
-            IWifiManager iWifiManager = getIWifiManager();
-            if (iWifiManager == null) {
-                throw new RemoteException("Wifi service is not running");
-            }
-            iWifiManager.notifyUserOfApBandConversion(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4327,7 +4336,7 @@ public class WifiManager {
                 if (ws == null) {
                     mWorkSource = null;
                 } else {
-                    ws.clearNames();
+                    ws = ws.withoutNames();
                     if (mWorkSource == null) {
                         changed = mWorkSource != null;
                         mWorkSource = new WorkSource(ws);

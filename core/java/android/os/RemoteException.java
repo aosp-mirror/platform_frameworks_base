@@ -44,6 +44,8 @@ public class RemoteException extends AndroidException {
      * state or making security decisions based on the perceived success or
      * failure of a call, or any default values returned. For this reason, we
      * want to strongly throw when there was trouble with the transaction.
+     *
+     * @throws RuntimeException
      */
     @NonNull
     public RuntimeException rethrowAsRuntimeException() {
@@ -60,6 +62,8 @@ public class RemoteException extends AndroidException {
      * state or making security decisions based on the perceived success or
      * failure of a call, or any default values returned. For this reason, we
      * want to strongly throw when there was trouble with the transaction.
+     *
+     * @throws RuntimeException
      */
     @NonNull
     public RuntimeException rethrowFromSystemServer() {

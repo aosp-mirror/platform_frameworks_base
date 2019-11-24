@@ -158,7 +158,7 @@ public class WifiAwareManager {
     private final Object mLock = new Object(); // lock access to the following vars
 
     /** @hide */
-    public WifiAwareManager(Context context, IWifiAwareManager service) {
+    public WifiAwareManager(@NonNull Context context, @NonNull IWifiAwareManager service) {
         mContext = context;
         mService = service;
     }

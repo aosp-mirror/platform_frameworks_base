@@ -85,6 +85,7 @@ public final class FillResponse implements Parcelable {
     private final int mFlags;
     private int mRequestId;
     private final @Nullable UserData mUserData;
+    private final @Nullable int[] mCancelIds;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
@@ -101,6 +102,7 @@ public final class FillResponse implements Parcelable {
         mFlags = builder.mFlags;
         mRequestId = INVALID_REQUEST_ID;
         mUserData = builder.mUserData;
+        mCancelIds = builder.mCancelIds;
     }
 
     /** @hide */
@@ -187,6 +189,12 @@ public final class FillResponse implements Parcelable {
         return mRequestId;
     }
 
+    /** @hide */
+    @Nullable
+    public int[] getCancelIds() {
+        return mCancelIds;
+    }
+
     /**
      * Builder for {@link FillResponse} objects. You must to provide at least
      * one dataset or set an authentication intent with a presentation view.
@@ -206,6 +214,7 @@ public final class FillResponse implements Parcelable {
         private int mFlags;
         private boolean mDestroyed;
         private UserData mUserData;
+        private int[] mCancelIds;
 
         /**
          * Triggers a custom UI before before autofilling the screen with any data set in this
@@ -542,6 +551,25 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
+         * Sets targets with the resources IDs of the child view of
+         * {@link RemoteViews Presentation Template} which will cancel the session when clicked.
+         * Those targets will be respectively applied to a child of the header, footer and
+         * each {@link Dataset}.
+         *
+         * @param ids array of the resource id. Empty list or non-existing id has no effect.
+         *
+         * @return this builder
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
+         */
+        @NonNull
+        public Builder setCancelTargetIds(@Nullable int[] ids) {
+            throwIfDestroyed();
+            mCancelIds = ids;
+            return this;
+        }
+
+        /**
          * Builds a new {@link FillResponse} instance.
          *
          * @throws IllegalStateException if any of the following conditions occur:
@@ -639,6 +667,10 @@ public final class FillResponse implements Parcelable {
         if (mUserData != null) {
             builder.append(", userData=").append(mUserData);
         }
+        if (mCancelIds != null) {
+            builder.append(", mCancelIds=").append(mCancelIds.length);
+        }
+
         return builder.append("]").toString();
     }
 
@@ -666,6 +698,8 @@ public final class FillResponse implements Parcelable {
         parcel.writeLong(mDisableDuration);
         parcel.writeParcelableArray(mFieldClassificationIds, flags);
         parcel.writeInt(mFlags);
+        parcel.writeIntArray(mCancelIds);
+
         parcel.writeInt(mRequestId);
     }
 
@@ -718,6 +752,8 @@ public final class FillResponse implements Parcelable {
                 builder.setFieldClassificationIds(fieldClassifactionIds);
             }
             builder.setFlags(parcel.readInt());
+            final int[] cancelIds = parcel.createIntArray();
+            builder.setCancelTargetIds(cancelIds);
 
             final FillResponse response = builder.build();
             response.setRequestId(parcel.readInt());

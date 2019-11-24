@@ -270,7 +270,7 @@ fun ClassPrinter.generateBuilder() {
 private fun ClassPrinter.generateBuilderMethod(
         defVisibility: String,
         name: String,
-        ParamAnnotations: String? = null,
+        paramAnnotations: String? = null,
         paramTypes: List<String>,
         paramNames: List<String> = listOf("value"),
         genJavadoc: ClassPrinter.() -> Unit,
@@ -292,8 +292,12 @@ private fun ClassPrinter.generateBuilderMethod(
         +GENERATED_MEMBER_HEADER
         if (providedMethod?.isAbstract == true) +"@Override"
         if (!Annotations.isNullOrEmpty()) +Annotations
-        "$visibility @$NonNull $ReturnType $name(${if_(!ParamAnnotations.isNullOrEmpty(), "$ParamAnnotations ")}${
-                paramTypes.zip(paramNames).joinToString(", ") { (Type, paramName) -> "$Type $paramName" }
+        val ParamAnnotations = if (!paramAnnotations.isNullOrEmpty()) "$paramAnnotations " else ""
+
+        "$visibility @$NonNull $ReturnType $name(${
+            paramTypes.zip(paramNames).joinToString(", ") { (Type, paramName) ->
+                "$ParamAnnotations$Type $paramName"
+            }
         })" {
             genBody()
         }
@@ -311,7 +315,7 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
         generateBuilderMethod(
                 name = setterName,
                 defVisibility = visibility,
-                ParamAnnotations = annotationsNoInternal.joinToString(" "),
+                paramAnnotations = annotationsNoInternal.joinToString(" "),
                 paramTypes = listOf(SetterParamType),
                 genJavadoc = { generateFieldJavadoc() }) {
             +"checkNotUsed();"
@@ -333,6 +337,7 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
             generateBuilderMethod(
                     name = adderName,
                     defVisibility = visibility,
+                    paramAnnotations = "@$NonNull",
                     paramTypes = listOf(FieldInnerType),
                     genJavadoc = { +javadocSeeSetter }) {
 
@@ -347,6 +352,7 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
             generateBuilderMethod(
                     name = adderName,
                     defVisibility = visibility,
+                    paramAnnotations = "@$NonNull",
                     paramTypes = fieldTypeGenegicArgs,
                     paramNames = listOf("key", "value"),
                     genJavadoc = { +javadocSeeSetter }) {

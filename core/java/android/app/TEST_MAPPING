@@ -35,6 +35,19 @@
                     "include-filter": "android.permission2.cts.RuntimePermissionProperties"
                 }
             ]
+        },
+        {
+            "name": "CtsToastTestCases",
+            "file_patterns": ["INotificationManager\\.aidl"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceTestCases",
+            "options": [
+                {
+                    "include-filter": "android.server.wm.ToastTest"
+                }
+            ],
+            "file_patterns": ["INotificationManager\\.aidl"]
         }
     ],
     "postsubmit": [

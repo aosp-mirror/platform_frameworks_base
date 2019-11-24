@@ -88,6 +88,7 @@ final class FillUi {
         void requestHideFillUi();
         void startIntentSender(IntentSender intentSender);
         void dispatchUnhandledKey(KeyEvent keyEvent);
+        void cancelSession();
     }
 
     private final @NonNull Point mTempPoint = new Point();
@@ -263,6 +264,7 @@ final class FillUi {
                 mHeader = headerPresentation.applyWithTheme(mContext, null, clickBlocker, mThemeId);
                 final LinearLayout headerContainer =
                         decor.findViewById(R.id.autofill_dataset_header);
+                applyCancelAction(mHeader, response.getCancelIds());
                 if (sVerbose) Slog.v(TAG, "adding header");
                 headerContainer.addView(mHeader);
                 headerContainer.setVisibility(View.VISIBLE);
@@ -279,6 +281,7 @@ final class FillUi {
                     }
                     mFooter = footerPresentation.applyWithTheme(
                             mContext, null, clickBlocker, mThemeId);
+                    applyCancelAction(mFooter, response.getCancelIds());
                     // Footer not supported on some platform e.g. TV
                     if (sVerbose) Slog.v(TAG, "adding footer");
                     footerContainer.addView(mFooter);
@@ -330,6 +333,7 @@ final class FillUi {
                         }
                     }
 
+                    applyCancelAction(view, response.getCancelIds());
                     items.add(new ViewItem(dataset, filterPattern, filterable, valueText, view));
                 }
             }
@@ -352,6 +356,37 @@ final class FillUi {
 
             applyNewFilterText();
             mWindow = new AnchoredWindow(decor, overlayControl);
+        }
+    }
+
+    private void applyCancelAction(View rootView, int[] ids) {
+        if (ids == null) {
+            return;
+        }
+
+        if (sDebug) Slog.d(TAG, "fill UI has " + ids.length + " actions");
+        if (!(rootView instanceof ViewGroup)) {
+            Slog.w(TAG, "cannot apply actions because fill UI root is not a "
+                    + "ViewGroup: " + rootView);
+            return;
+        }
+
+        // Apply click actions.
+        final ViewGroup root = (ViewGroup) rootView;
+        for (int i = 0; i < ids.length; i++) {
+            final int id = ids[i];
+            final View child = root.findViewById(id);
+            if (child == null) {
+                Slog.w(TAG, "Ignoring cancel action for view " + id
+                        + " because it's not on " + root);
+                continue;
+            }
+            child.setOnClickListener((v) -> {
+                if (sVerbose) {
+                    Slog.v(TAG, "Applying " + id + " after " + v + " was clicked");
+                }
+                mCallback.cancelSession();
+            });
         }
     }
 

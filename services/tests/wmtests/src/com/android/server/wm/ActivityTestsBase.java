@@ -43,7 +43,6 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
-import android.view.DisplayInfo;
 
 import com.android.server.AttributeCache;
 
@@ -78,27 +77,9 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         mRootActivityContainer = mService.mRootActivityContainer;
     }
 
-    /** Creates a {@link TestActivityDisplay}. */
-    TestActivityDisplay createNewActivityDisplay() {
-        return TestActivityDisplay.create(mSupervisor);
-    }
-
-    TestActivityDisplay createNewActivityDisplay(DisplayInfo info) {
-        return TestActivityDisplay.create(mSupervisor, info);
-    }
-
     /** Creates and adds a {@link TestActivityDisplay} to supervisor at the given position. */
     TestActivityDisplay addNewActivityDisplayAt(int position) {
-        final TestActivityDisplay display = createNewActivityDisplay();
-        mRootActivityContainer.addChild(display, position);
-        return display;
-    }
-
-    /** Creates and adds a {@link TestActivityDisplay} to supervisor at the given position. */
-    TestActivityDisplay addNewActivityDisplayAt(DisplayInfo info, int position) {
-        final TestActivityDisplay display = createNewActivityDisplay(info);
-        mRootActivityContainer.addChild(display, position);
-        return display;
+        return new TestActivityDisplay.Builder(mService, 1000, 1500).setPosition(position).build();
     }
 
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */
@@ -271,7 +252,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                 doReturn(true).when(activity).occludesParent();
                 mTask.addChild(activity);
                 // Make visible by default...
-                activity.setHidden(false);
+                activity.setVisible(true);
             }
 
             final WindowProcessController wpc = new WindowProcessController(mService,

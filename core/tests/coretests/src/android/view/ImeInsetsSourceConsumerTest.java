@@ -17,9 +17,9 @@
 package android.view;
 
 import static android.view.ImeInsetsSourceConsumer.areEditorsSimilar;
-import static android.view.InsetsState.TYPE_IME;
-
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -82,7 +82,7 @@ public class ImeInsetsSourceConsumerTest {
 
     @Test
     public void testImeVisibility() {
-        final InsetsSourceControl ime = new InsetsSourceControl(TYPE_IME, mLeash, new Point());
+        final InsetsSourceControl ime = new InsetsSourceControl(ITYPE_IME, mLeash, new Point());
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {

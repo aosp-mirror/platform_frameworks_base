@@ -346,7 +346,7 @@ public final class CompatModePackages {
                         false /* preserveWindow */);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
-                stack.ensureActivitiesVisibleLocked(starting, 0, !PRESERVE_WINDOWS);
+                stack.ensureActivitiesVisible(starting, 0, !PRESERVE_WINDOWS);
             }
         }
     }

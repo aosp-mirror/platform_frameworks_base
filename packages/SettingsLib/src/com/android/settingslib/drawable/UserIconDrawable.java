@@ -39,7 +39,6 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
-import android.os.UserManager;
 
 import com.android.settingslib.R;
 
@@ -177,8 +176,8 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
             boolean isManaged = context.getSystemService(DevicePolicyManager.class)
                     .getProfileOwnerAsUser(userId) != null;
             if (isManaged) {
-                badge = getDrawableForDisplayDensity(context,
-                        context.getSystemService(UserManager.class).getUserBadgeResId(userId));
+                badge = getDrawableForDisplayDensity(
+                        context, com.android.internal.R.drawable.ic_corp_badge_case);
             }
         }
         return setBadge(badge);

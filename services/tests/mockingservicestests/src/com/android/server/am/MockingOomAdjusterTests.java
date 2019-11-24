@@ -1027,11 +1027,28 @@ public class MockingOomAdjusterTests {
         bindService(client, client2, null, 0, mock(IBinder.class));
         client2.setHasForegroundServices(true, 0);
         bindService(client2, app, null, 0, mock(IBinder.class));
+        ArrayList<ProcessRecord> lru = sService.mProcessList.mLruProcesses;
+        lru.clear();
+        lru.add(app);
+        lru.add(client);
+        lru.add(client2);
         sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
-        sService.mOomAdjuster.updateOomAdjLocked(app, false, OomAdjuster.OOM_ADJ_REASON_NONE);
+        sService.mOomAdjuster.updateOomAdjLocked(app, true, OomAdjuster.OOM_ADJ_REASON_NONE);
 
         assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertProcStates(client, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
+                SCHED_GROUP_DEFAULT);
+        assertProcStates(client2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
+                SCHED_GROUP_DEFAULT);
+
+        client2.setHasForegroundServices(false, 0);
+        sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
+        sService.mOomAdjuster.updateOomAdjLocked(client2, true, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertEquals(PROCESS_STATE_CACHED_EMPTY, client2.setProcState);
+        assertEquals(PROCESS_STATE_CACHED_EMPTY, client.setProcState);
+        assertEquals(PROCESS_STATE_CACHED_EMPTY, app.setProcState);
     }
 
     @SuppressWarnings("GuardedBy")

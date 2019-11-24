@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
@@ -244,12 +245,16 @@ public abstract class PackageManagerInternal {
 
     /**
      * Retrieve all activities that can be performed for the given intent.
+     * @param resolvedType the resolved type of the intent, which should be resolved via
+     * {@link Intent#resolveTypeIfNeeded(ContentResolver)} before passing to {@link PackageManager}
      * @param filterCallingUid The results will be filtered in the context of this UID instead
      * of the calling UID.
      * @see PackageManager#queryIntentActivities(Intent, int)
      */
-    public abstract List<ResolveInfo> queryIntentActivities(Intent intent,
-            @ResolveInfoFlags int flags, int filterCallingUid, int userId);
+    public abstract List<ResolveInfo> queryIntentActivities(
+            Intent intent, @Nullable String resolvedType, @ResolveInfoFlags int flags,
+            int filterCallingUid, int userId);
+
 
     /**
      * Retrieve all services that can be performed for the given intent.

@@ -106,12 +106,12 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         RecentsAnimationCallbacks recentsAnimation = startRecentsActivity(
                 mRecentsComponent, true /* getRecentsAnimation */);
         // The launch-behind state should make the recents activity visible.
-        assertTrue(recentActivity.visible);
+        assertTrue(recentActivity.mVisibleRequested);
 
         // Simulate the animation is cancelled without changing the stack order.
         recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, false /* sendUserLeaveHint */);
         // The non-top recents activity should be invisible by the restored launch-behind state.
-        assertFalse(recentActivity.visible);
+        assertFalse(recentActivity.mVisibleRequested);
     }
 
     @Test
@@ -158,7 +158,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         // The activity is started in background so it should be invisible and will be stopped.
         assertThat(recentsActivity).isNotNull();
         assertThat(mSupervisor.mStoppingActivities).contains(recentsActivity);
-        assertFalse(recentsActivity.visible);
+        assertFalse(recentsActivity.mVisibleRequested);
 
         // Assume it is stopped to test next use case.
         recentsActivity.activityStoppedLocked(null /* newIcicle */, null /* newPersistentState */,
@@ -200,7 +200,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         startRecentsActivity();
 
         // Recents activity must be restarted, but not be resumed while running recents animation.
-        verify(mRootActivityContainer.mStackSupervisor).startSpecificActivityLocked(
+        verify(mRootActivityContainer.mStackSupervisor).startSpecificActivity(
                 eq(recentActivity), eq(false), anyBoolean());
         assertThat(recentActivity.getState()).isEqualTo(PAUSED);
     }
@@ -361,7 +361,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 true);
 
         // Ensure we find the task for the right user and it is made visible
-        assertTrue(otherUserHomeActivity.visible);
+        assertTrue(otherUserHomeActivity.mVisibleRequested);
     }
 
     private void startRecentsActivity() {

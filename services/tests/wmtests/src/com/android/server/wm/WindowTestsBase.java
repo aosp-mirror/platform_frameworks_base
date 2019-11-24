@@ -36,8 +36,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
-
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
@@ -175,7 +173,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             // Cleaned up everything in Handler.
-            mSystemServicesTestRule.cleanupWindowManagerHandlers();
+            cleanupWindowManagerHandlers();
         } catch (Exception e) {
             Log.e(TAG, "Failed to tear down test", e);
             throw e;
@@ -343,8 +341,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     /** Creates a {@link DisplayContent} and adds it to the system. */
     DisplayContent createNewDisplay(DisplayInfo info) {
         final ActivityDisplay display =
-                TestActivityDisplay.create(mWm.mAtmService.mStackSupervisor, info);
-        mWm.mAtmService.mRootActivityContainer.addChild(display, POSITION_TOP);
+                new TestActivityDisplay.Builder(mWm.mAtmService, info).build();
         return display.mDisplayContent;
     }
 

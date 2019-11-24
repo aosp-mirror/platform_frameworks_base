@@ -235,8 +235,8 @@ message AppWindowTokenProto {
     optional WindowContainerThumbnailProto thumbnail = 6;
     optional bool fills_parent = 7;
     optional bool app_stopped = 8;
-    optional bool hidden_requested = 9;
-    optional bool client_hidden = 10;
+    optional bool visible_requested = 9;
+    optional bool client_visible = 10;
     optional bool defer_hiding_client = 11;
     optional bool reported_drawn = 12;
     optional bool reported_visible = 13;
@@ -249,8 +249,9 @@ message AppWindowTokenProto {
     optional IdentifierProto starting_window = 19;
     optional bool starting_displayed = 20;
     optional bool starting_moved = 21;
-    optional bool hidden_set_from_transferred_starting_window = 22;
+    optional bool visible_set_from_transferred_starting_window = 22;
     repeated .android.graphics.RectProto frozen_bounds = 23;
+    optional bool visible = 24;
 }
 
 /* represents WindowToken */
@@ -260,7 +261,6 @@ message WindowTokenProto {
     optional WindowContainerProto window_container = 1;
     optional int32 hash_code = 2;
     repeated WindowStateProto windows = 3;
-    optional bool hidden = 4;
     optional bool waiting_to_show = 5;
     optional bool paused = 6;
 }

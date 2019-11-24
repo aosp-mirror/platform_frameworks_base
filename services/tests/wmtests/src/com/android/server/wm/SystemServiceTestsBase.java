@@ -40,6 +40,10 @@ class SystemServiceTestsBase {
         mLockRule.waitForLocked(mSystemServicesTestRule::waitUntilWindowManagerHandlersIdle);
     }
 
+    void cleanupWindowManagerHandlers() {
+        mLockRule.waitForLocked(mSystemServicesTestRule::cleanupWindowManagerHandlers);
+    }
+
     boolean waitHandlerIdle(Handler handler) {
         return waitHandlerIdle(handler, 0 /* timeout */);
     }

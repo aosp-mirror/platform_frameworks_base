@@ -369,7 +369,7 @@ message IncidentProto {
     ];
 
     // Dropbox entries split by tags.
-    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_crashes = 3027 [
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_crash = 3027 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "dropbox --proto data_app_crash"
     ];
@@ -382,6 +382,91 @@ message IncidentProto {
     optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_native_crash = 3029 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "dropbox --proto data_app_native_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_strictmode = 3030 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_strictmode"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_data_app_wtf = 3031 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto data_app_wtf"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_crash = 3032 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_anr = 3033 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_anr"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_native_crash = 3034 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_native_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_strictmode = 3035 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_strictmode"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_app_wtf = 3036 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_app_wtf"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_crashes = 3037 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_anr = 3038 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_anr"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_native_crash = 3039 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_native_crash"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_lowmem= 3040 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_lowmem"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_strictmode = 3041 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_strictmode"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_watchdog = 3042 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_watchdog"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_server_wtf = 3043 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto system_server_wtf"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_recovery_log = 3044 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto SYSTEM_RECOVERY_LOG"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_system_tombstone = 3045 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto SYSTEM_TOMBSTONE"
+    ];
+
+    optional android.service.dropbox.DropBoxManagerServiceDumpProto dropbox_subsystem_restart = 3046 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "dropbox --proto SubsystemRestart"
     ];
 
     // Reserved for OEMs.

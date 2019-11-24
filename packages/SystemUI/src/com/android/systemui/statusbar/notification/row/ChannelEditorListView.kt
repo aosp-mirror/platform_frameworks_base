@@ -129,6 +129,8 @@ class AppControlView(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
         iconView = findViewById(R.id.icon)
         channelName = findViewById(R.id.app_name)
         switch = findViewById(R.id.toggle)
+
+        setOnClickListener { switch.toggle() }
     }
 }
 
@@ -156,6 +158,7 @@ class ChannelRow(c: Context, attrs: AttributeSet) : LinearLayout(c, attrs) {
                 controller.proposeEditForChannel(it, if (b) it.importance else IMPORTANCE_NONE)
             }
         }
+        setOnClickListener { switch.toggle() }
     }
 
     private fun updateViews() {

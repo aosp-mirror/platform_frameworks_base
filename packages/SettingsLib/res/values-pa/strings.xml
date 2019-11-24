@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਕੋਡੇਕ\nਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਸੈਂਪਲ ਰੇਟ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਕੋਡੇਕ\nਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ: ਸੈਂਪਲ ਰੇਟ"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"ਅਯੋਗ ਦਾ ਮਤਲਬ ਹੈ ਫ਼ੋਨ ਜਾਂ ਹੈੱਡਸੈੱਟ ਵੱਲੋਂ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"ਪ੍ਰਤੀ ਸੈਂਪਲ ਬਲੂਟੁੱਥ ਆਡੀਓ ਬਿਟਾਂ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਕੋਡੇਕ\nਚੋਣ ਨੂੰ ਟ੍ਰਿਗਰ ਕਰੋ: ਪ੍ਰਤੀ ਸੈਂਪਲ ਬਿਟਾਂ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ਬਲੂਟੁੱਥ ਆਡੀਓ ਚੈਨਲ ਮੋਡ"</string>

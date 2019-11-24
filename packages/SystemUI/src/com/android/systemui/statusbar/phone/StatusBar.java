@@ -24,10 +24,10 @@ import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
-import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_TOP_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
@@ -100,7 +100,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindowManager;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.RemoteAnimationAdapter;
@@ -839,7 +839,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
 
-        if (containsType(result.mTransientBarTypes, TYPE_TOP_BAR)) {
+        if (containsType(result.mTransientBarTypes, ITYPE_STATUS_BAR)) {
             showTransientUnchecked();
         }
         onSystemBarAppearanceChanged(mDisplayId, result.mAppearance, result.mAppearanceRegions,
@@ -2239,11 +2239,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void showTransient(int displayId, @InternalInsetType int[] types) {
+    public void showTransient(int displayId, @InternalInsetsType int[] types) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, TYPE_TOP_BAR)) {
+        if (!containsType(types, ITYPE_STATUS_BAR)) {
             return;
         }
         showTransientUnchecked();
@@ -2258,11 +2258,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void abortTransient(int displayId, @InternalInsetType int[] types) {
+    public void abortTransient(int displayId, @InternalInsetsType int[] types) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, TYPE_TOP_BAR)) {
+        if (!containsType(types, ITYPE_STATUS_BAR)) {
             return;
         }
         clearTransient();
@@ -2293,14 +2293,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     private static @TransitionMode int barMode(boolean isTransient, int appearance) {
-        final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_TOP_BAR;
+        final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
         if (isTransient) {
             return MODE_SEMI_TRANSPARENT;
         } else if ((appearance & lightsOutOpaque) == lightsOutOpaque) {
             return MODE_LIGHTS_OUT;
         } else if ((appearance & APPEARANCE_LOW_PROFILE_BARS) != 0) {
             return MODE_LIGHTS_OUT_TRANSPARENT;
-        } else if ((appearance & APPEARANCE_OPAQUE_TOP_BAR) != 0) {
+        } else if ((appearance & APPEARANCE_OPAQUE_STATUS_BARS) != 0) {
             return MODE_OPAQUE;
         } else {
             return MODE_TRANSPARENT;

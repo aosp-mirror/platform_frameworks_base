@@ -33,6 +33,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /** Tests that ensure appropriate settings are backed up. */
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -484,12 +487,74 @@ public class DeviceConfigTest {
         assertThat(properties.getString(KEY3, DEFAULT_VALUE)).isEqualTo(DEFAULT_VALUE);
     }
 
-    // TODO(mpape): resolve b/142727848 and re-enable this test
+    @Test
+    public void setProperties() {
+        Map<String, String> keyValues = new HashMap<>();
+        keyValues.put(KEY, VALUE);
+        keyValues.put(KEY2, VALUE2);
+
+        DeviceConfig.setProperties(new Properties(NAMESPACE, keyValues));
+        Properties properties = DeviceConfig.getProperties(NAMESPACE);
+        assertThat(properties.getKeyset()).containsExactly(KEY, KEY2);
+        assertThat(properties.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE);
+        assertThat(properties.getString(KEY2, DEFAULT_VALUE)).isEqualTo(VALUE2);
+
+        Map<String, String> newKeyValues = new HashMap<>();
+        newKeyValues.put(KEY, VALUE2);
+        newKeyValues.put(KEY3, VALUE3);
+
+        DeviceConfig.setProperties(new Properties(NAMESPACE, newKeyValues));
+        properties = DeviceConfig.getProperties(NAMESPACE);
+        assertThat(properties.getKeyset()).containsExactly(KEY, KEY3);
+        assertThat(properties.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE2);
+        assertThat(properties.getString(KEY3, DEFAULT_VALUE)).isEqualTo(VALUE3);
+
+        assertThat(properties.getKeyset()).doesNotContain(KEY2);
+        assertThat(properties.getString(KEY2, DEFAULT_VALUE)).isEqualTo(DEFAULT_VALUE);
+    }
+
+    @Test
+    public void setProperties_multipleNamespaces() {
+        Map<String, String> keyValues = new HashMap<>();
+        keyValues.put(KEY, VALUE);
+        keyValues.put(KEY2, VALUE2);
+
+        Map<String, String> keyValues2 = new HashMap<>();
+        keyValues2.put(KEY2, VALUE);
+        keyValues2.put(KEY3, VALUE2);
+
+        final String namespace2 = "namespace2";
+        DeviceConfig.setProperties(new Properties(NAMESPACE, keyValues));
+        DeviceConfig.setProperties(new Properties(namespace2, keyValues2));
+
+        Properties properties = DeviceConfig.getProperties(NAMESPACE);
+        assertThat(properties.getKeyset()).containsExactly(KEY, KEY2);
+        assertThat(properties.getString(KEY, DEFAULT_VALUE)).isEqualTo(VALUE);
+        assertThat(properties.getString(KEY2, DEFAULT_VALUE)).isEqualTo(VALUE2);
+
+        assertThat(properties.getKeyset()).doesNotContain(KEY3);
+        assertThat(properties.getString(KEY3, DEFAULT_VALUE)).isEqualTo(DEFAULT_VALUE);
+
+        properties = DeviceConfig.getProperties(namespace2);
+        assertThat(properties.getKeyset()).containsExactly(KEY2, KEY3);
+        assertThat(properties.getString(KEY2, DEFAULT_VALUE)).isEqualTo(VALUE);
+        assertThat(properties.getString(KEY3, DEFAULT_VALUE)).isEqualTo(VALUE2);
+
+        assertThat(properties.getKeyset()).doesNotContain(KEY);
+        assertThat(properties.getString(KEY, DEFAULT_VALUE)).isEqualTo(DEFAULT_VALUE);
+
+        // clean up
+        deleteViaContentProvider(namespace2, KEY);
+        deleteViaContentProvider(namespace2, KEY2);
+        deleteViaContentProvider(namespace2, KEY3);
+    }
+
+    // TODO(mpape): resolve b/142727848 and re-enable listener tests
 //    @Test
-//    public void testOnPropertiesChangedListener() throws InterruptedException {
+//    public void onPropertiesChangedListener_setPropertyCallback() throws InterruptedException {
 //        final CountDownLatch countDownLatch = new CountDownLatch(1);
 //
-//        OnPropertiesChangedListener changeListener = (properties) -> {
+//        DeviceConfig.OnPropertiesChangedListener changeListener = (properties) -> {
 //            assertThat(properties.getNamespace()).isEqualTo(NAMESPACE);
 //            assertThat(properties.getKeyset()).contains(KEY);
 //            assertThat(properties.getString(KEY, "default_value")).isEqualTo(VALUE);
@@ -500,6 +565,42 @@ public class DeviceConfigTest {
 //            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE,
 //                    ActivityThread.currentApplication().getMainExecutor(), changeListener);
 //            DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, false);
+//            assertThat(countDownLatch.await(
+//                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
+//        } catch (InterruptedException e) {
+//            Assert.fail(e.getMessage());
+//        } finally {
+//            DeviceConfig.removeOnPropertiesChangedListener(changeListener);
+//        }
+//    }
+//
+//    @Test
+//    public void onPropertiesChangedListener_setPropertiesCallback() throws InterruptedException {
+//        final CountDownLatch countDownLatch = new CountDownLatch(1);
+//        DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, false);
+//        DeviceConfig.setProperty(NAMESPACE, KEY2, VALUE2, false);
+//
+//        Map<String, String> keyValues = new HashMap<>(2);
+//        keyValues.put(KEY, VALUE2);
+//        keyValues.put(KEY3, VALUE3);
+//        Properties setProperties = new Properties(NAMESPACE, keyValues);
+//
+//        DeviceConfig.OnPropertiesChangedListener changeListener = (properties) -> {
+//            assertThat(properties.getNamespace()).isEqualTo(NAMESPACE);
+//            assertThat(properties.getKeyset()).containsExactly(KEY, KEY2, KEY3);
+//            // KEY updated from VALUE to VALUE2
+//            assertThat(properties.getString(KEY, "default_value")).isEqualTo(VALUE2);
+//            // KEY2 deleted (returns default_value)
+//            assertThat(properties.getString(KEY2, "default_value")).isEqualTo("default_value");
+//            //KEY3 added with VALUE3
+//            assertThat(properties.getString(KEY3, "default_value")).isEqualTo(VALUE3);
+//            countDownLatch.countDown();
+//        };
+//
+//        try {
+//            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE,
+//                    ActivityThread.currentApplication().getMainExecutor(), changeListener);
+//            DeviceConfig.setProperties(setProperties);
 //            assertThat(countDownLatch.await(
 //                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
 //        } catch (InterruptedException e) {

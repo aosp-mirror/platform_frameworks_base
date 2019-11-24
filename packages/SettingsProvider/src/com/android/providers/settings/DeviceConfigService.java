@@ -196,7 +196,9 @@ public final class DeviceConfigService extends Binder {
                 case LIST:
                     if (namespace != null) {
                         DeviceConfig.Properties properties = DeviceConfig.getProperties(namespace);
-                        for (String name : properties.getKeyset()) {
+                        List<String> keys = new ArrayList<>(properties.getKeyset());
+                        Collections.sort(keys);
+                        for (String name : keys) {
                             pout.println(name + "=" + properties.getString(name, null));
                         }
                     } else {

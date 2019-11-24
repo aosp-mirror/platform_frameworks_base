@@ -1067,12 +1067,30 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     /** Returns the first non-finishing activity from the bottom. */
     ActivityRecord getRootActivity() {
-        final int rootActivityIndex = findRootIndex(false /* effectiveRoot */);
-        if (rootActivityIndex == -1) {
-            // There are no non-finishing activities in the task.
-            return null;
+        // TODO: Figure out why we historical ignore relinquish identity for this case...
+        return getRootActivity(true /*ignoreRelinquishIdentity*/, false /*setToBottomIfNone*/);
+    }
+
+    ActivityRecord getRootActivity(boolean setToBottomIfNone) {
+        return getRootActivity(false /*ignoreRelinquishIdentity*/, false /*setToBottomIfNone*/);
+    }
+
+    ActivityRecord getRootActivity(boolean ignoreRelinquishIdentity, boolean setToBottomIfNone) {
+        ActivityRecord root;
+        if (ignoreRelinquishIdentity) {
+            root = getActivity((r) -> !r.finishing, false /*traverseTopToBottom*/);
+        } else {
+            root = getActivity((r) ->
+                            !r.finishing && (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0,
+                    false /*traverseTopToBottom*/);
         }
-        return getChildAt(rootActivityIndex);
+
+        if (root == null && setToBottomIfNone) {
+            // All activities in the task are either finishing or relinquish task identity.
+            // But we still want to update the intent, so let's use the bottom activity.
+            root = getActivity((r) -> true, false /*traverseTopToBottom*/);
+        }
+        return root;
     }
 
     ActivityRecord getTopNonFinishingActivity() {
@@ -2204,7 +2222,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
         for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
             final ActivityRecord r = getChildAt(activityNdx);
-            if (r.visible) {
+            if (r.mVisibleRequested) {
                 r.showStartingWindow(null /* prev */, false /* newTask */, taskSwitch);
             }
         }
@@ -2508,7 +2526,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final ActivityRecord token = mChildren.get(i);
             // skip hidden (or about to hide) apps
-            if (token.mIsExiting || token.isClientHidden() || token.hiddenRequested) {
+            if (token.mIsExiting || !token.isClientVisible() || !token.mVisibleRequested) {
                 continue;
             }
             final WindowState win = token.findMainWindow();
@@ -2726,10 +2744,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     ActivityRecord getTopVisibleActivity() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final ActivityRecord token = mChildren.get(i);
-            // skip hidden (or about to hide) apps
-            if (!token.mIsExiting && !token.isClientHidden() && !token.hiddenRequested) {
-                return token;
+            final ActivityRecord activity = mChildren.get(i);
+            if (!activity.mIsExiting && activity.isClientVisible() && activity.mVisibleRequested) {
+                return activity;
             }
         }
         return null;

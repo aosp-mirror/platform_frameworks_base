@@ -4090,9 +4090,7 @@ public final class Telephony {
 
         /**
          * The subscription which received this cell broadcast message.
-         * @deprecated use {@link #SLOT_INDEX} instead.
          * <P>Type: INTEGER</P>
-         * @hide
          */
         public static final String SUB_ID = "sub_id";
 
@@ -4366,6 +4364,7 @@ public final class Telephony {
         public static final String[] QUERY_COLUMNS_FWK = {
                 _ID,
                 SLOT_INDEX,
+                SUB_ID,
                 GEOGRAPHICAL_SCOPE,
                 PLMN,
                 LAC,

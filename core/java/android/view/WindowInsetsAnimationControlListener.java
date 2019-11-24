@@ -17,7 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
-import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.inputmethod.EditorInfo;
 
 /**
@@ -32,13 +32,13 @@ public interface WindowInsetsAnimationControlListener {
      * window is starting up.
      *
      * @param controller The controller to control the inset animation.
-     * @param types The {@link InsetType}s it was able to gain control over. Note that this may be
+     * @param types The {@link InsetsType}s it was able to gain control over. Note that this may be
      *              different than the types passed into
      *              {@link WindowInsetsController#controlWindowInsetsAnimation} in case the window
      *              wasn't able to gain the controls because it wasn't the IME target or not
      *              currently the window that's controlling the system bars.
      */
-    void onReady(@NonNull WindowInsetsAnimationController controller, @InsetType int types);
+    void onReady(@NonNull WindowInsetsAnimationController controller, @InsetsType int types);
 
     /**
      * Called when the window no longer has control over the requested types. If it loses control

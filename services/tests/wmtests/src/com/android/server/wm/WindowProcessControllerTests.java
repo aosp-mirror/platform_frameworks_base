@@ -18,8 +18,6 @@ package com.android.server.wm;
 
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -132,8 +130,6 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
     }
 
     private TestActivityDisplay createTestActivityDisplayInContainer() {
-        final TestActivityDisplay testActivityDisplay = createNewActivityDisplay();
-        mRootActivityContainer.addChild(testActivityDisplay, POSITION_TOP);
-        return testActivityDisplay;
+        return new TestActivityDisplay.Builder(mService, 1000, 1500).build();
     }
 }

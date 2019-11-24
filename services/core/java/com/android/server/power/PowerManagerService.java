@@ -107,6 +107,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -1174,9 +1175,9 @@ public final class PowerManagerService extends SystemService
                     opPackageName = workChain.getAttributionTag();
                     opUid = workChain.getAttributionUid();
                 } else {
-                    opPackageName = workSource.getName(0) != null
-                            ? workSource.getName(0) : wakeLock.mPackageName;
-                    opUid = workSource.get(0);
+                    opPackageName = workSource.getPackageName(0) != null
+                            ? workSource.getPackageName(0) : wakeLock.mPackageName;
+                    opUid = workSource.getUid(0);
                 }
             } else {
                 opPackageName = wakeLock.mPackageName;
@@ -2004,13 +2005,13 @@ public final class PowerManagerService extends SystemService
     private boolean wakeLockAffectsUser(WakeLock wakeLock, @UserIdInt int userId) {
         if (wakeLock.mWorkSource != null) {
             for (int k = 0; k < wakeLock.mWorkSource.size(); k++) {
-                final int uid = wakeLock.mWorkSource.get(k);
+                final int uid = wakeLock.mWorkSource.getUid(k);
                 if (userId == UserHandle.getUserId(uid)) {
                     return true;
                 }
             }
 
-            final ArrayList<WorkChain> workChains = wakeLock.mWorkSource.getWorkChains();
+            final List<WorkChain> workChains = wakeLock.mWorkSource.getWorkChains();
             if (workChains != null) {
                 for (int k = 0; k < workChains.size(); k++) {
                     final int uid = workChains.get(k).getAttributionUid();

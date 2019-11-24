@@ -270,6 +270,9 @@ interface IActivityTaskManager {
 
     List<ActivityManager.StackInfo> getAllStackInfos();
     ActivityManager.StackInfo getStackInfo(int windowingMode, int activityType);
+    List<ActivityManager.StackInfo> getAllStackInfosOnDisplay(int displayId);
+    ActivityManager.StackInfo getStackInfoOnDisplay(int windowingMode, int activityType,
+            int displayId);
 
     /**
      * Informs ActivityTaskManagerService that the keyguard is showing.

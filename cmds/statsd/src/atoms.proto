@@ -164,7 +164,7 @@ message Atom {
         BiometricAcquired biometric_acquired = 87;
         BiometricAuthenticated biometric_authenticated = 88;
         BiometricErrorOccurred biometric_error_occurred = 89;
-        // Atom number 90 is available for use.
+        UiEventReported ui_event_reported = 90;
         BatteryHealthSnapshot battery_health_snapshot = 91;
         SlowIo slow_io = 92;
         BatteryCausedShutdown battery_caused_shutdown = 93;
@@ -340,6 +340,8 @@ message Atom {
         PerfettoUploaded perfetto_uploaded =
             229 [(log_from_module) = "perfetto"];
         VmsClientConnectionStateChanged vms_client_connection_state_changed = 230;
+        GpsLocationStatusReported gps_location_status_reported = 231;
+        GpsTimeToFirstFixReported gps_time_to_first_fix_reported = 232;
     }
 
     // Pulled events will start at field 10000.
@@ -734,6 +736,27 @@ message GpsSignalQualityChanged {
     optional android.server.location.GpsSignalQualityEnum level = 1;
 }
 
+/**
+ * Gps location status report
+ *
+ * Logged from:
+ *   /frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
+ */
+message GpsLocationStatusReported {
+    // Boolean stating if location was acquired
+    optional bool location_success = 1;
+}
+
+/**
+ * Gps log time to first fix report
+ *
+ * Logged from:
+ *   /frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
+ */
+message GpsTimeToFirstFixReported {
+    // int32 reporting the time to first fix in milliseconds
+    optional int32 time_to_first_fix_millis = 1;
+}
 
 /**
  * Logs when a sync manager sync state changes.
@@ -3263,6 +3286,21 @@ message GenericAtom {
 
     // An event_id indicates the type of event.
     optional android.stats.EventType event_id = 2;
+}
+
+/**
+ * Atom for simple logging of user interaction and impression events, such as "the user touched
+ * this button" or "this dialog was displayed".
+ * Keep the UI event stream clean: don't use for system or background events.
+ * Log using the UiEventLogger wrapper - don't write with the StatsLog API directly.
+ */
+message UiEventReported {
+    // The event_id.
+    optional int32 event_id = 1;
+    // The event's source or target uid and package, if applicable.
+    // For example, the package posting a notification, or the destination package of a share.
+    optional int32 uid = 2 [(is_uid) = true];
+    optional string package_name = 3;
 }
 
 /**

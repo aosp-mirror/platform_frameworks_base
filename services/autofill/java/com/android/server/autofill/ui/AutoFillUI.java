@@ -89,6 +89,7 @@ public final class AutoFillUI {
         void startIntentSenderAndFinishSession(IntentSender intentSender);
         void startIntentSender(IntentSender intentSender, Intent intent);
         void dispatchUnhandledKey(AutofillId id, KeyEvent keyEvent);
+        void cancelSession();
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -270,6 +271,13 @@ public final class AutoFillUI {
                 public void dispatchUnhandledKey(KeyEvent keyEvent) {
                     if (mCallback != null) {
                         mCallback.dispatchUnhandledKey(focusedId, keyEvent);
+                    }
+                }
+
+                @Override
+                public void cancelSession() {
+                    if (mCallback != null) {
+                        mCallback.cancelSession();
                     }
                 }
             });

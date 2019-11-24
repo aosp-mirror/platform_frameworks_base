@@ -281,7 +281,8 @@ public final class SystemServer {
             "com.android.server.DeviceIdleController";
     private static final String BLOB_STORE_MANAGER_SERVICE_CLASS =
             "com.android.server.blob.BlobStoreManagerService";
-
+    private static final String APP_SEARCH_MANAGER_SERVICE_CLASS =
+            "com.android.server.appsearch.AppSearchManagerService";
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
     private static final String UNCRYPT_PACKAGE_FILE = "/cache/recovery/uncrypt_file";
@@ -704,7 +705,7 @@ public final class SystemServer {
 
         // Bring up recovery system in case a rescue party needs a reboot
         t.traceBegin("StartRecoverySystemService");
-        mSystemServiceManager.startService(RecoverySystemService.class);
+        mSystemServiceManager.startService(RecoverySystemService.Lifecycle.class);
         t.traceEnd();
 
         // Now that we have the bare essentials of the OS up and running, take
@@ -2021,6 +2022,10 @@ public final class SystemServer {
 
         t.traceBegin("StartBootPhaseDeviceSpecificServicesReady");
         mSystemServiceManager.startBootPhase(t, SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY);
+        t.traceEnd();
+
+        t.traceBegin("AppSearchManagerService");
+        mSystemServiceManager.startService(APP_SEARCH_MANAGER_SERVICE_CLASS);
         t.traceEnd();
 
         // These are needed to propagate to the runnable below.

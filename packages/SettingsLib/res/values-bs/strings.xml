@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Aktivirajte Bluetooth Audio Codec\nOdabir"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Brzina uzorkovanja za Bluetooth audio"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Aktivirajte Bluetooth Audio Codec\nOdabir: Brzina uzorkovanja"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Ako je stavka nedostupna, to znači da je telefon ili slušalice ne podržavaju"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bluetooth audio bitovi po uzorku"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Aktivirajte Bluetooth Audio Codec\nOdabir: Bitovi po uzorku"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Način Bluetooth audio kanala"</string>

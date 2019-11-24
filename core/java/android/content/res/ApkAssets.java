@@ -18,6 +18,7 @@ package android.content.res;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.content.om.OverlayableInfo;
 import android.content.res.loader.ResourcesProvider;
 import android.text.TextUtils;
 
@@ -254,6 +255,17 @@ public final class ApkAssets {
         }
     }
 
+    /** @hide */
+    @Nullable
+    public OverlayableInfo getOverlayableInfo(String overlayableName) throws IOException {
+        return nativeGetOverlayableInfo(mNativePtr, overlayableName);
+    }
+
+    /** @hide */
+    public boolean definesOverlayable() throws IOException {
+        return nativeDefinesOverlayable(mNativePtr);
+    }
+
     /**
      * Returns false if the underlying APK was changed since this ApkAssets was loaded.
      */
@@ -305,4 +317,7 @@ public final class ApkAssets {
     private static native long nativeGetStringBlock(long ptr);
     private static native boolean nativeIsUpToDate(long ptr);
     private static native long nativeOpenXml(long ptr, @NonNull String fileName) throws IOException;
+    private static native @Nullable OverlayableInfo nativeGetOverlayableInfo(long ptr,
+            String overlayableName) throws IOException;
+    private static native boolean nativeDefinesOverlayable(long ptr) throws IOException;
 }

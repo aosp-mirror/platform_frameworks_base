@@ -13218,10 +13218,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Check if installing from ADB
         if ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
-            // Do not run verification in a test harness environment
-            if (ActivityManager.isRunningInTestHarness()) {
-                return false;
-            }
             if (isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
                 return true;
             }
@@ -22874,39 +22870,79 @@ public class PackageManagerService extends IPackageManager.Stub
             return pkg == null ? null : pkg.packageName;
         }
 
+        /**
+         * Only keep package names that refer to {@link PackageParser.Package#isSystem system}
+         * packages.
+         *
+         * @param pkgNames The packages to filter
+         *
+         * @return The filtered packages
+         */
+        private @NonNull String[] filterOnlySystemPackages(@Nullable String... pkgNames) {
+            if (pkgNames == null) {
+                return ArrayUtils.emptyArray(String.class);
+            }
+
+            ArrayList<String> systemPackageNames = new ArrayList<>(pkgNames.length);
+
+            for (String pkgName: pkgNames) {
+                synchronized (mPackages) {
+                    if (pkgName == null) {
+                        continue;
+                    }
+
+                    PackageParser.Package pkg = getPackage(pkgName);
+                    if (pkg == null) {
+                        Log.w(TAG, "Could not find package " + pkgName);
+                        continue;
+                    }
+
+                    if (!pkg.isSystem()) {
+                        Log.w(TAG, pkgName + " is not system");
+                        continue;
+                    }
+
+                    systemPackageNames.add(pkgName);
+                }
+            }
+
+            return systemPackageNames.toArray(new String[]{});
+        }
+
         @Override
         public @NonNull String[] getKnownPackageNames(int knownPackage, int userId) {
-            switch(knownPackage) {
+            switch (knownPackage) {
                 case PackageManagerInternal.PACKAGE_BROWSER:
                     return new String[]{mPermissionManager.getDefaultBrowser(userId)};
                 case PackageManagerInternal.PACKAGE_INSTALLER:
-                    return new String[]{mRequiredInstallerPackage};
+                    return filterOnlySystemPackages(mRequiredInstallerPackage);
                 case PackageManagerInternal.PACKAGE_SETUP_WIZARD:
-                    return new String[]{mSetupWizardPackage};
+                    return filterOnlySystemPackages(mSetupWizardPackage);
                 case PackageManagerInternal.PACKAGE_SYSTEM:
                     return new String[]{"android"};
                 case PackageManagerInternal.PACKAGE_VERIFIER:
-                    return new String[]{mRequiredVerifierPackage};
+                    return filterOnlySystemPackages(mRequiredVerifierPackage);
                 case PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER:
-                    return new String[]{mSystemTextClassifierPackage};
+                    return filterOnlySystemPackages(mSystemTextClassifierPackage);
                 case PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER:
-                    return new String[]{mRequiredPermissionControllerPackage};
+                    return filterOnlySystemPackages(mRequiredPermissionControllerPackage);
                 case PackageManagerInternal.PACKAGE_WELLBEING:
-                    return new String[]{mWellbeingPackage};
+                    return filterOnlySystemPackages(mWellbeingPackage);
                 case PackageManagerInternal.PACKAGE_DOCUMENTER:
-                    return new String[]{mDocumenterPackage};
+                    return filterOnlySystemPackages(mDocumenterPackage);
                 case PackageManagerInternal.PACKAGE_CONFIGURATOR:
-                    return new String[]{mConfiguratorPackage};
+                    return filterOnlySystemPackages(mConfiguratorPackage);
                 case PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER:
-                    return new String[]{mIncidentReportApproverPackage};
+                    return filterOnlySystemPackages(mIncidentReportApproverPackage);
                 case PackageManagerInternal.PACKAGE_APP_PREDICTOR:
-                    return new String[]{mAppPredictionServicePackage};
+                    return filterOnlySystemPackages(mAppPredictionServicePackage);
                 case PackageManagerInternal.PACKAGE_TELEPHONY:
-                    return mTelephonyPackages;
+                    return filterOnlySystemPackages(mTelephonyPackages);
                 case PackageManagerInternal.PACKAGE_WIFI:
-                    return new String[]{mWifiPackage};
+                    return filterOnlySystemPackages(mWifiPackage);
+                default:
+                    return ArrayUtils.emptyArray(String.class);
             }
-            return ArrayUtils.emptyArray(String.class);
         }
 
         @Override
@@ -23061,8 +23097,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public List<ResolveInfo> queryIntentActivities(
-                Intent intent, int flags, int filterCallingUid, int userId) {
-            final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
+                Intent intent, String resolvedType, int flags, int filterCallingUid, int userId) {
             return PackageManagerService.this
                     .queryIntentActivitiesInternal(intent, resolvedType, flags, filterCallingUid,
                             userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);

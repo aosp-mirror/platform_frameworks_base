@@ -206,7 +206,7 @@ public final class AssetManager implements AutoCloseable {
     @VisibleForTesting
     public static void createSystemAssetsInZygoteLocked(boolean reinitialize,
             String frameworkPath) {
-        if (sSystem != null || reinitialize) {
+        if (sSystem != null && !reinitialize) {
             return;
         }
 
@@ -225,7 +225,9 @@ public final class AssetManager implements AutoCloseable {
 
             sSystemApkAssetsSet = new ArraySet<>(apkAssets);
             sSystemApkAssets = apkAssets.toArray(new ApkAssets[apkAssets.size()]);
-            sSystem = new AssetManager(true /*sentinel*/);
+            if (sSystem == null) {
+                sSystem = new AssetManager(true /*sentinel*/);
+            }
             sSystem.setApkAssets(sSystemApkAssets, false /*invalidateCaches*/);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to create system AssetManager", e);

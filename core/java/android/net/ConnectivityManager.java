@@ -52,13 +52,12 @@ import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.Protocol;
 
@@ -710,6 +709,12 @@ public class ConnectivityManager {
      */
     @Deprecated
     public static final int TYPE_TEST = 18; // TODO: Remove this once NetworkTypes are unused.
+
+    // Deprecated constants for return values of startUsingNetworkFeature. They used to live
+    // in com.android.internal.telephony.PhoneConstants until they were made inaccessible.
+    private static final int DEPRECATED_PHONE_CONSTANT_APN_ALREADY_ACTIVE = 0;
+    private static final int DEPRECATED_PHONE_CONSTANT_APN_REQUEST_STARTED = 1;
+    private static final int DEPRECATED_PHONE_CONSTANT_APN_REQUEST_FAILED = 3;
 
     /** {@hide} */
     public static final int MAX_RADIO_TYPE = TYPE_TEST;
@@ -1407,7 +1412,7 @@ public class ConnectivityManager {
         if (netCap == null) {
             Log.d(TAG, "Can't satisfy startUsingNetworkFeature for " + networkType + ", " +
                     feature);
-            return PhoneConstants.APN_REQUEST_FAILED;
+            return DEPRECATED_PHONE_CONSTANT_APN_REQUEST_FAILED;
         }
 
         NetworkRequest request = null;
@@ -1417,9 +1422,9 @@ public class ConnectivityManager {
                 Log.d(TAG, "renewing startUsingNetworkFeature request " + l.networkRequest);
                 renewRequestLocked(l);
                 if (l.currentNetwork != null) {
-                    return PhoneConstants.APN_ALREADY_ACTIVE;
+                    return DEPRECATED_PHONE_CONSTANT_APN_ALREADY_ACTIVE;
                 } else {
-                    return PhoneConstants.APN_REQUEST_STARTED;
+                    return DEPRECATED_PHONE_CONSTANT_APN_REQUEST_STARTED;
                 }
             }
 
@@ -1427,10 +1432,10 @@ public class ConnectivityManager {
         }
         if (request != null) {
             Log.d(TAG, "starting startUsingNetworkFeature for request " + request);
-            return PhoneConstants.APN_REQUEST_STARTED;
+            return DEPRECATED_PHONE_CONSTANT_APN_REQUEST_STARTED;
         } else {
             Log.d(TAG, " request Failed");
-            return PhoneConstants.APN_REQUEST_FAILED;
+            return DEPRECATED_PHONE_CONSTANT_APN_REQUEST_FAILED;
         }
     }
 
@@ -2148,19 +2153,14 @@ public class ConnectivityManager {
     @Deprecated
     @UnsupportedAppUsage
     public boolean getMobileDataEnabled() {
-        IBinder b = ServiceManager.getService(Context.TELEPHONY_SERVICE);
-        if (b != null) {
-            try {
-                ITelephony it = ITelephony.Stub.asInterface(b);
-                int subId = SubscriptionManager.getDefaultDataSubscriptionId();
-                Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
-                boolean retVal = it.isUserDataEnabled(subId);
-                Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
-                        + " retVal=" + retVal);
-                return retVal;
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        if (tm != null) {
+            int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+            Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
+            boolean retVal = tm.createForSubscriptionId(subId).isDataEnabled();
+            Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
+                    + " retVal=" + retVal);
+            return retVal;
         }
         Log.d("ConnectivityManager", "getMobileDataEnabled()- remote exception retVal=false");
         return false;

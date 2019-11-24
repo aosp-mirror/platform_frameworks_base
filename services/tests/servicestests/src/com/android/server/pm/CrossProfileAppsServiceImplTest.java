@@ -509,7 +509,7 @@ public class CrossProfileAppsServiceImplTest {
         mActivityInfo = activityInfo;
 
         when(mPackageManagerInternal.queryIntentActivities(
-                any(Intent.class), anyInt(), anyInt(), anyInt()))
+                any(Intent.class), nullable(String.class), anyInt(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(resolveInfo));
     }
 

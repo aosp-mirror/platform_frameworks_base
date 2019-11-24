@@ -25,14 +25,19 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.TYPE_BUILT_IN;
-import static android.view.InsetsState.TYPE_TOP_BAR;
-import static android.view.InsetsState.TYPE_TOP_GESTURES;
-import static android.view.InsetsState.TYPE_TOP_TAPPABLE_ELEMENT;
+import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
+import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
+import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_TOP_GESTURES;
+import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
-import static android.view.WindowInsetsController.APPEARANCE_LIGHT_TOP_BAR;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
@@ -144,8 +149,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InsetsFlags;
-import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetType;
+import android.view.InsetsState.InternalInsetsType;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -970,36 +974,36 @@ public class DisplayPolicy {
                             rect.top = 0;
                             rect.bottom = getStatusBarHeight(displayFrames);
                         };
-                mDisplayContent.setInsetProvider(TYPE_TOP_BAR, win, frameProvider);
-                mDisplayContent.setInsetProvider(TYPE_TOP_GESTURES, win, frameProvider);
-                mDisplayContent.setInsetProvider(TYPE_TOP_TAPPABLE_ELEMENT, win, frameProvider);
+                mDisplayContent.setInsetProvider(ITYPE_STATUS_BAR, win, frameProvider);
+                mDisplayContent.setInsetProvider(ITYPE_TOP_GESTURES, win, frameProvider);
+                mDisplayContent.setInsetProvider(ITYPE_TOP_TAPPABLE_ELEMENT, win, frameProvider);
                 break;
             case TYPE_NAVIGATION_BAR:
                 mNavigationBar = win;
                 mNavigationBarController.setWindow(win);
                 mNavigationBarController.setOnBarVisibilityChangedListener(
                         mNavBarVisibilityListener, true);
-                mDisplayContent.setInsetProvider(InsetsState.TYPE_NAVIGATION_BAR,
+                mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR,
                         win, null /* frameProvider */);
-                mDisplayContent.setInsetProvider(InsetsState.TYPE_BOTTOM_GESTURES, win,
+                mDisplayContent.setInsetProvider(ITYPE_BOTTOM_GESTURES, win,
                         (displayFrames, windowState, inOutFrame) -> {
                             inOutFrame.top -= mBottomGestureAdditionalInset;
                         });
-                mDisplayContent.setInsetProvider(InsetsState.TYPE_LEFT_GESTURES, win,
+                mDisplayContent.setInsetProvider(ITYPE_LEFT_GESTURES, win,
                         (displayFrames, windowState, inOutFrame) -> {
                             inOutFrame.left = 0;
                             inOutFrame.top = 0;
                             inOutFrame.bottom = displayFrames.mDisplayHeight;
                             inOutFrame.right = displayFrames.mUnrestricted.left + mSideGestureInset;
                         });
-                mDisplayContent.setInsetProvider(InsetsState.TYPE_RIGHT_GESTURES, win,
+                mDisplayContent.setInsetProvider(ITYPE_RIGHT_GESTURES, win,
                         (displayFrames, windowState, inOutFrame) -> {
                             inOutFrame.left = displayFrames.mUnrestricted.right - mSideGestureInset;
                             inOutFrame.top = 0;
                             inOutFrame.bottom = displayFrames.mDisplayHeight;
                             inOutFrame.right = displayFrames.mDisplayWidth;
                         });
-                mDisplayContent.setInsetProvider(InsetsState.TYPE_BOTTOM_TAPPABLE_ELEMENT, win,
+                mDisplayContent.setInsetProvider(ITYPE_BOTTOM_TAPPABLE_ELEMENT, win,
                         (displayFrames, windowState, inOutFrame) -> {
                             if ((windowState.getAttrs().flags & FLAG_NOT_TOUCHABLE) != 0
                                     || mNavigationBarLetsThroughTaps) {
@@ -1024,11 +1028,11 @@ public class DisplayPolicy {
             if (mDisplayContent.isDefaultDisplay) {
                 mService.mPolicy.setKeyguardCandidateLw(null);
             }
-            mDisplayContent.setInsetProvider(TYPE_TOP_BAR, null, null);
+            mDisplayContent.setInsetProvider(ITYPE_STATUS_BAR, null, null);
         } else if (mNavigationBar == win) {
             mNavigationBar = null;
             mNavigationBarController.setWindow(null);
-            mDisplayContent.setInsetProvider(InsetsState.TYPE_NAVIGATION_BAR, null, null);
+            mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, null, null);
         }
         if (mLastFocusedWindow == win) {
             mLastFocusedWindow = null;
@@ -2955,7 +2959,7 @@ public class DisplayPolicy {
             }
             if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
                 if (swipeTarget == mNavigationBar
-                        && !getInsetsPolicy().isHidden(InsetsState.TYPE_NAVIGATION_BAR)) {
+                        && !getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)) {
                     // Don't show status bar when swiping on already visible navigation bar
                     return;
                 }
@@ -2966,7 +2970,7 @@ public class DisplayPolicy {
                 }
                 if (controlTarget.canShowTransient()) {
                     mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
-                            new int[]{TYPE_TOP_BAR, InsetsState.TYPE_NAVIGATION_BAR}));
+                            new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
                 } else {
                     controlTarget.showInsets(WindowInsets.Type.systemBars(), false);
                 }
@@ -3080,9 +3084,9 @@ public class DisplayPolicy {
         final boolean isFullscreen = (visibility & (View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)) != 0
                 || (PolicyControl.getWindowFlags(win, win.mAttrs) & FLAG_FULLSCREEN) != 0
-                || (mStatusBar != null && insetsPolicy.isHidden(TYPE_TOP_BAR))
+                || (mStatusBar != null && insetsPolicy.isHidden(ITYPE_STATUS_BAR))
                 || (mNavigationBar != null && insetsPolicy.isHidden(
-                        InsetsState.TYPE_NAVIGATION_BAR));
+                        ITYPE_NAVIGATION_BAR));
         final int behavior = win.mAttrs.insetsFlags.behavior;
         final boolean isImmersive = (visibility & (View.SYSTEM_UI_FLAG_IMMERSIVE
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)) != 0
@@ -3122,12 +3126,13 @@ public class DisplayPolicy {
                 : new AppearanceRegion[]{
                         new AppearanceRegion(fullscreenAppearance, fullscreenStackBounds)};
         final boolean isNavbarColorManagedByIme = result.second;
+        String cause = win.toString();
         mHandler.post(() -> {
             StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
             if (statusBar != null) {
                 final int displayId = getDisplayId();
                 statusBar.setDisableFlags(displayId, visibility & StatusBarManager.DISABLE_MASK,
-                        win.toString());
+                        cause);
                 if (transientState.first.length > 0) {
                     statusBar.showTransient(displayId, transientState.first);
                 }
@@ -3139,8 +3144,10 @@ public class DisplayPolicy {
                 statusBar.topAppWindowChanged(displayId, isFullscreen, isImmersive);
 
                 // TODO(b/118118435): Remove this after removing system UI visibilities.
-                mDisplayContent.statusBarVisibilityChanged(
-                        visibility & ~(View.STATUS_BAR_UNHIDE | View.NAVIGATION_BAR_UNHIDE));
+                synchronized (mLock) {
+                    mDisplayContent.statusBarVisibilityChanged(
+                            visibility & ~(View.STATUS_BAR_UNHIDE | View.NAVIGATION_BAR_UNHIDE));
+                }
             }
         });
         return diff;
@@ -3149,15 +3156,15 @@ public class DisplayPolicy {
     private static Pair<int[], int[]> getTransientState(int vis, int oldVis) {
         final IntArray typesToShow = new IntArray(0);
         final IntArray typesToAbort = new IntArray(0);
-        updateTransientState(vis, oldVis, View.STATUS_BAR_TRANSIENT, TYPE_TOP_BAR, typesToShow,
+        updateTransientState(vis, oldVis, View.STATUS_BAR_TRANSIENT, ITYPE_STATUS_BAR, typesToShow,
                 typesToAbort);
         updateTransientState(vis, oldVis, View.NAVIGATION_BAR_TRANSIENT,
-                InsetsState.TYPE_NAVIGATION_BAR, typesToShow, typesToAbort);
+                ITYPE_NAVIGATION_BAR, typesToShow, typesToAbort);
         return Pair.create(typesToShow.toArray(), typesToAbort.toArray());
     }
 
     private static void updateTransientState(int vis, int oldVis, int transientFlag,
-            @InternalInsetType int type, IntArray typesToShow, IntArray typesToAbort) {
+            @InternalInsetsType int type, IntArray typesToShow, IntArray typesToAbort) {
         final boolean wasTransient = (oldVis & transientFlag) != 0;
         final boolean isTransient = (vis & transientFlag) != 0;
         if (!wasTransient && isTransient) {
@@ -3174,14 +3181,14 @@ public class DisplayPolicy {
         if (statusColorWin != null && (statusColorWin == opaque || onKeyguard)) {
             // If the top fullscreen-or-dimming window is also the top fullscreen, respect
             // its light flag.
-            appearance &= ~APPEARANCE_LIGHT_TOP_BAR;
+            appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
             final int legacyAppearance = InsetsFlags.getAppearance(
                     PolicyControl.getSystemUiVisibility(statusColorWin, null));
             appearance |= (statusColorWin.mAttrs.insetsFlags.appearance | legacyAppearance)
-                    & APPEARANCE_LIGHT_TOP_BAR;
+                    & APPEARANCE_LIGHT_STATUS_BARS;
         } else if (statusColorWin != null && statusColorWin.isDimming()) {
             // Otherwise if it's dimming, clear the light flag.
-            appearance &= ~APPEARANCE_LIGHT_TOP_BAR;
+            appearance &= ~APPEARANCE_LIGHT_STATUS_BARS;
         }
         return appearance;
     }
@@ -3508,7 +3515,7 @@ public class DisplayPolicy {
                 if (!isNavBarEmpty(mLastSystemUiFlags)) {
                     mNavigationBarController.showTransient();
                     mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
-                            new int[] {InsetsState.TYPE_NAVIGATION_BAR}));
+                            new int[] {ITYPE_NAVIGATION_BAR}));
                 }
             }
         }

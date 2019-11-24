@@ -45,6 +45,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.storage.StorageManager;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -75,6 +76,7 @@ public class StagingManager {
     private final PackageInstallerService mPi;
     private final ApexManager mApexManager;
     private final PowerManager mPowerManager;
+    private final Context mContext;
     private final PreRebootVerificationHandler mPreRebootVerificationHandler;
 
     @GuardedBy("mStagedSessions")
@@ -83,6 +85,7 @@ public class StagingManager {
     StagingManager(PackageInstallerService pi, ApexManager am, Context context) {
         mPi = pi;
         mApexManager = am;
+        mContext = context;
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mPreRebootVerificationHandler = new PreRebootVerificationHandler(
                 BackgroundThread.get().getLooper());
@@ -539,6 +542,10 @@ public class StagingManager {
         mPreRebootVerificationHandler.startPreRebootVerification(session.sessionId);
     }
 
+    private int parentOrOwnSessionId(PackageInstallerSession session) {
+        return session.hasParentSessionId() ? session.getParentSessionId() : session.sessionId;
+    }
+
     /**
      * <p> Check if the session provided is non-overlapping with the active staged sessions.
      *
@@ -560,6 +567,9 @@ public class StagingManager {
             throw new PackageManagerException(PackageManager.INSTALL_FAILED_INVALID_APK,
                     "Cannot stage session " + session.sessionId + " with package name null");
         }
+
+        boolean supportsCheckpoint = ((StorageManager) mContext.getSystemService(
+                Context.STORAGE_SERVICE)).isCheckpointSupported();
 
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
@@ -601,7 +611,17 @@ public class StagingManager {
                                     + stagedSession.sessionId, null);
                 }
 
-                // TODO(b/141843321): Add support for staging multiple sessions in apexd
+                // Staging multiple root sessions is not allowed if device doesn't support
+                // checkpoint. If session and stagedSession do not have common ancestor, they are
+                // from two different root sessions.
+                if (!supportsCheckpoint
+                        && parentOrOwnSessionId(session) != parentOrOwnSessionId(stagedSession)) {
+                    throw new PackageManagerException(
+                            PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                            "Cannot stage multiple sessions without checkpoint support", null);
+                }
+
+                // TODO:b/141843321 Add support for staging multiple sessions in apexd
                 // Since apexd doesn't support multiple staged sessions yet, we have to careful how
                 // we handle apex sessions. We want to allow a set of apex sessions under the same
                 // parent to be staged when there is no previously staged apex sessions.
@@ -665,15 +685,15 @@ public class StagingManager {
     private boolean isApexSessionFinalized(ApexSessionInfo session) {
         /* checking if the session is in a final state, i.e., not active anymore */
         return session.isUnknown || session.isActivationFailed || session.isSuccess
-                || session.isRolledBack;
+                || session.isReverted;
     }
 
     private static boolean isApexSessionFailed(ApexSessionInfo apexSessionInfo) {
-        // isRollbackInProgress is included to cover the scenario, when a device is rebooted in
-        // during the rollback, and apexd fails to resume the rollback after reboot.
+        // isRevertInProgress is included to cover the scenario, when a device is rebooted
+        // during the revert, and apexd fails to resume the revert after reboot.
         return apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown
-                || apexSessionInfo.isRolledBack || apexSessionInfo.isRollbackInProgress
-                || apexSessionInfo.isRollbackFailed;
+                || apexSessionInfo.isReverted || apexSessionInfo.isRevertInProgress
+                || apexSessionInfo.isRevertFailed;
     }
 
     @GuardedBy("mStagedSessions")

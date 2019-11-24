@@ -233,6 +233,7 @@
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ဘလူးတုသ် အသံ LDAC ကိုးဒက်ခ် ဖွင့်ခြင်း\nရွေးချယ်မှု"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"ဘလူးတုသ်အသံနမူနာနှုန်း"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ဘလူးတုသ် အသံ ကိုးဒက်ခ် ဖွင့်ခြင်း\nရွေးချယ်မှု- နမူနာနှုန်း"</string>
+    <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"မီးခိုးရောင် ခြယ်ထားခြင်းသည် ဖုန်း သို့မဟုတ် မိုက်ခွက်ပါနားကြပ်မှ ပံ့ပိုးထားမှုမရှိခြင်းကို ဆိုလိုသည်။"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"နမူနာတစ်ခုစီတွင် ပါဝင်သော ဘလူးတုသ်အသံပမာဏ Bits"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ဘလူးတုသ် အသံ ကိုးဒက်ခ် ဖွင့်ခြင်း\nရွေးချယ်မှု- နမူနာတစ်ခုစီအတွက် Bits"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"ဘလူးတုသ်အသံချန်နယ်မုဒ်"</string>

@@ -1431,7 +1431,6 @@ package android.content {
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.content.Intent registerReceiverForAllUsers(@Nullable android.content.BroadcastReceiver, @NonNull android.content.IntentFilter, @Nullable String, @Nullable android.os.Handler);
     method public abstract void sendBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
-    method public void sendBroadcastMultiplePermissions(@NonNull android.content.Intent, @NonNull String[]);
     method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
@@ -4854,6 +4853,10 @@ package android.net.wifi {
     field @Deprecated public static final int WPA2_PSK = 4; // 0x4
   }
 
+  public class WifiFrameworkInitializer {
+    method public static void registerServiceWrappers();
+  }
+
   public class WifiInfo implements android.os.Parcelable {
     method @Nullable public String getAppPackageName();
     method public double getRxSuccessRate();
@@ -5025,6 +5028,7 @@ package android.net.wifi {
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<java.lang.Integer> getAvailableChannels(int);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean getScanResults();
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public java.util.List<android.net.wifi.ScanResult> getSingleScanResults();
+    method @RequiresPermission(android.Manifest.permission.NETWORK_STACK) public void setScanningEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener, android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void startScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
@@ -5490,6 +5494,17 @@ package android.os {
     method @NonNull public static java.io.File getVendorDirectory();
   }
 
+  public class HidlMemory implements java.io.Closeable {
+    ctor public HidlMemory(@NonNull String, @IntRange(from=0) long, @Nullable android.os.NativeHandle);
+    method public void close() throws java.io.IOException;
+    method @NonNull public android.os.HidlMemory dup() throws java.io.IOException;
+    method protected void finalize();
+    method @Nullable public android.os.NativeHandle getHandle();
+    method @NonNull public String getName();
+    method public long getSize();
+    method @NonNull public android.os.NativeHandle releaseHandle();
+  }
+
   public class HidlSupport {
     method public static boolean deepEquals(Object, Object);
     method public static int deepHashCode(Object);
@@ -5520,6 +5535,7 @@ package android.os {
     method public final void copyToInt8Array(long, byte[], int);
     method public final boolean getBool(long);
     method public final double getDouble(long);
+    method public final long getFieldHandle(long);
     method public final float getFloat(long);
     method public final short getInt16(long);
     method public final int getInt32(long);
@@ -5534,6 +5550,7 @@ package android.os {
     method public final void putDoubleArray(long, double[]);
     method public final void putFloat(long, float);
     method public final void putFloatArray(long, float[]);
+    method public final void putHidlMemory(long, @NonNull android.os.HidlMemory);
     method public final void putInt16(long, short);
     method public final void putInt16Array(long, short[]);
     method public final void putInt32(long, int);
@@ -5562,9 +5579,11 @@ package android.os {
     method public final double readDouble();
     method public final java.util.ArrayList<java.lang.Double> readDoubleVector();
     method public final android.os.HwBlob readEmbeddedBuffer(long, long, long, boolean);
+    method @NonNull @Nullable public final android.os.HidlMemory readEmbeddedHidlMemory(long, long, long);
     method @Nullable public final android.os.NativeHandle readEmbeddedNativeHandle(long, long);
     method public final float readFloat();
     method public final java.util.ArrayList<java.lang.Float> readFloatVector();
+    method @NonNull public final android.os.HidlMemory readHidlMemory();
     method public final short readInt16();
     method public final java.util.ArrayList<java.lang.Short> readInt16Vector();
     method public final int readInt32();
@@ -5589,6 +5608,7 @@ package android.os {
     method public final void writeDoubleVector(java.util.ArrayList<java.lang.Double>);
     method public final void writeFloat(float);
     method public final void writeFloatVector(java.util.ArrayList<java.lang.Float>);
+    method public final void writeHidlMemory(@NonNull android.os.HidlMemory);
     method public final void writeInt16(short);
     method public final void writeInt16Vector(java.util.ArrayList<java.lang.Short>);
     method public final void writeInt32(int);
@@ -5711,6 +5731,9 @@ package android.os {
     field public static final int USER_ACTIVITY_EVENT_TOUCH = 2; // 0x2
     field public static final int USER_ACTIVITY_FLAG_INDIRECT = 2; // 0x2
     field public static final int USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS = 1; // 0x1
+  }
+
+  public class PowerWhitelistManager {
   }
 
   public class RecoverySystem {
@@ -5900,7 +5923,15 @@ package android.os {
   }
 
   public class WorkSource implements android.os.Parcelable {
+    ctor public WorkSource(int);
+    ctor public WorkSource(int, @NonNull String);
     method public android.os.WorkSource.WorkChain createWorkChain();
+    method @Nullable public String getPackageName(int);
+    method public int getUid(int);
+    method @Nullable public java.util.List<android.os.WorkSource.WorkChain> getWorkChains();
+    method public boolean isEmpty();
+    method public int size();
+    method @NonNull public android.os.WorkSource withoutNames();
   }
 
   public static final class WorkSource.WorkChain implements android.os.Parcelable {
@@ -6207,6 +6238,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(@NonNull String, @NonNull String, @Nullable String);
     method public static void removeOnPropertiesChangedListener(@NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperties(@NonNull android.provider.DeviceConfig.Properties);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
     field public static final String NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT = "activity_manager_native_boot";
@@ -6517,6 +6549,7 @@ package android.provider {
     field public static final String SERIAL_NUMBER = "serial_number";
     field public static final String SERVICE_CATEGORY = "service_category";
     field public static final String SLOT_INDEX = "slot_index";
+    field public static final String SUB_ID = "sub_id";
   }
 
   public static final class Telephony.Sms.Intents {
@@ -8576,7 +8609,7 @@ package android.telephony {
   }
 
   public final class SmsCbMessage implements android.os.Parcelable {
-    ctor public SmsCbMessage(int, int, int, @NonNull android.telephony.SmsCbLocation, int, @Nullable String, @Nullable String, int, @Nullable android.telephony.SmsCbEtwsInfo, @Nullable android.telephony.SmsCbCmasInfo, int, @Nullable java.util.List<android.telephony.CbGeoUtils.Geometry>, long, int);
+    ctor public SmsCbMessage(int, int, int, @NonNull android.telephony.SmsCbLocation, int, @Nullable String, @Nullable String, int, @Nullable android.telephony.SmsCbEtwsInfo, @Nullable android.telephony.SmsCbCmasInfo, int, @Nullable java.util.List<android.telephony.CbGeoUtils.Geometry>, long, int, int);
     method @NonNull public static android.telephony.SmsCbMessage createFromCursor(@NonNull android.database.Cursor);
     method public int describeContents();
     method @Nullable public android.telephony.SmsCbCmasInfo getCmasWarningInfo();
@@ -8593,6 +8626,7 @@ package android.telephony {
     method public int getSerialNumber();
     method public int getServiceCategory();
     method public int getSlotIndex();
+    method public int getSubscriptionId();
     method public boolean isCmasMessage();
     method public boolean isEmergencyMessage();
     method public boolean isEtwsMessage();
@@ -8656,6 +8690,10 @@ package android.telephony {
     method @Deprecated public static android.telephony.SubscriptionPlan.Builder createRecurringWeekly(java.time.ZonedDateTime);
   }
 
+  public class TelephonyFrameworkInitializer {
+    method public static void registerServiceWrappers();
+  }
+
   public final class TelephonyHistogram implements android.os.Parcelable {
     ctor public TelephonyHistogram(int, int, int);
     ctor public TelephonyHistogram(android.telephony.TelephonyHistogram);
@@ -8708,6 +8746,7 @@ package android.telephony {
     method @NonNull public static String getDefaultSimCountryIso();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
+    method public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Map<java.lang.Integer,java.lang.Integer> getLogicalToPhysicalSlotMapping();
@@ -8747,6 +8786,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isVideoCallingEnabled();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyOtaEmergencyNumberDbInstalled();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean rebootRadio();
     method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.MODIFY_PHONE_STATE}) public void requestCellInfoUpdate(@NonNull android.os.WorkSource, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CellInfoCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void requestNumberVerification(@NonNull android.telephony.PhoneNumberRange, long, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.NumberVerificationCallback);
@@ -8775,8 +8815,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
     method public void updateServiceLocation();
+    method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String);
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
-    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_OTA_EMERGENCY_NUMBER_DB_INSTALLED = "android.telephony.action.OTA_EMERGENCY_NUMBER_DB_INSTALLED";
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
@@ -8789,6 +8829,7 @@ package android.telephony {
     field public static final String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
+    field public static final int INVALID_EMERGENCY_NUMBER_DB_VERSION = -1; // 0xffffffff
     field public static final int KEY_TYPE_EPDG = 1; // 0x1
     field public static final int KEY_TYPE_WLAN = 2; // 0x2
     field public static final long NETWORK_TYPE_BITMASK_1xRTT = 64L; // 0x40L

@@ -789,12 +789,11 @@ public class WifiScanner {
 
     /**
      * Enable/Disable wifi scanning.
-     * Note: WifiService calls this after any client interface mode changes (i.e. a new interface
-     * set up or an existing interface torn down)
-     * If there are >= 1 active client interface, invoke setScanningEnabled(true)
-     * If there are 0 active client interface, invoke setScanningEnabled(false)
+     *
+     * @param enable set to true to enable scanning, set to false to disable all types of scanning.
      * {@hide}
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.NETWORK_STACK)
     public void setScanningEnabled(boolean enable) {
         validateChannel();
@@ -1291,12 +1290,15 @@ public class WifiScanner {
      * Applications will almost always want to use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
      * the standard {@link android.content.Context#WIFI_SERVICE Context.WIFI_SERVICE}.
+     *
      * @param context the application context
-     * @param service the Binder interface
+     * @param service the Binder interface for {@link Context#WIFI_SCANNING_SERVICE}
      * @param looper the Looper used to deliver callbacks
+     *
      * @hide
      */
-    public WifiScanner(Context context, IWifiScanner service, Looper looper) {
+    public WifiScanner(@NonNull Context context, @NonNull IWifiScanner service,
+            @NonNull Looper looper) {
         mContext = context;
         mService = service;
 

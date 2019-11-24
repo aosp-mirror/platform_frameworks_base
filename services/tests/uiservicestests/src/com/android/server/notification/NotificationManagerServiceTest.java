@@ -57,6 +57,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
@@ -655,6 +656,43 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(3, notifsAfter.length);
 
         return nrSummary;
+    }
+
+    @Test
+    public void testDefaultAssistant_overrideDefault() {
+        final int userId = 0;
+        final String testComponent = "package/class";
+        final List<UserInfo> userInfos = new ArrayList<>();
+        userInfos.add(new UserInfo(0, "", 0));
+        final ArraySet<ComponentName> validAssistants = new ArraySet<>();
+        validAssistants.add(ComponentName.unflattenFromString(testComponent));
+        final String originalComponent = DeviceConfig.getProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE
+        );
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE,
+                testComponent,
+                false
+        );
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        when(mAssistants.queryPackageForServices(isNull(), anyInt(), anyInt()))
+                .thenReturn(validAssistants);
+        when(mAssistants.getDefaultComponents()).thenReturn(new ArraySet<>());
+        when(mUm.getEnabledProfiles(anyInt())).thenReturn(userInfos);
+
+        mService.setDefaultAssistantForUser(userId);
+
+        verify(mAssistants).setPackageOrComponentEnabled(
+                eq(testComponent), eq(userId), eq(true), eq(true));
+
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE,
+                originalComponent,
+                false
+        );
     }
 
     @Test

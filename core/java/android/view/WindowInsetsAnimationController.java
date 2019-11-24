@@ -18,7 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.graphics.Insets;
-import android.view.WindowInsets.Type.InsetType;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimationListener.InsetsAnimation;
 
 /**
@@ -60,9 +60,9 @@ public interface WindowInsetsAnimationController {
     @NonNull Insets getCurrentInsets();
 
     /**
-     * @return The {@link InsetType}s this object is currently controlling.
+     * @return The {@link InsetsType}s this object is currently controlling.
      */
-    @InsetType int getTypes();
+    @InsetsType int getTypes();
 
     /**
      * Modifies the insets by indirectly moving the windows around in the system that are causing
@@ -94,5 +94,5 @@ public interface WindowInsetsAnimationController {
      * @param shownTypes The list of windows causing insets that should remain shown after finishing
      *                   the animation.
      */
-    void finish(@InsetType int shownTypes);
+    void finish(@InsetsType int shownTypes);
 }

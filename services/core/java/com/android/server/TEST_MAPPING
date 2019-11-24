@@ -23,6 +23,19 @@
         },
         {
             "name": "CtsLocationNoneTestCases"
+        },
+        {
+            "name": "CtsToastTestCases",
+            "file_patterns": ["NotificationManagerService\\.java"]
+        },
+        {
+            "name": "CtsWindowManagerDeviceTestCases",
+            "options": [
+                {
+                    "include-filter": "android.server.wm.ToastTest"
+                }
+            ],
+            "file_patterns": ["NotificationManagerService\\.java"]
         }
     ]
 }

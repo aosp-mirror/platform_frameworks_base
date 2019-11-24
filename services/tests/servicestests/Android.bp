@@ -8,6 +8,7 @@ android_test {
     // Include all test java files.
     srcs: [
         "src/**/*.java",
+        "src/**/*.kt",
 
         "aidl/com/android/servicestests/aidl/INetworkStateObserver.aidl",
         "aidl/com/android/servicestests/aidl/ICmdReceiverService.aidl",

@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.TYPE_IME;
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
@@ -81,9 +81,9 @@ class InsetsSourceProvider {
                 new Point());
 
         final int type = source.getType();
-        if (type == TYPE_TOP_BAR || type == TYPE_NAVIGATION_BAR) {
+        if (type == ITYPE_STATUS_BAR || type == ITYPE_NAVIGATION_BAR) {
             mControllable = sNewInsetsMode == NEW_INSETS_MODE_FULL;
-        } else if (type == TYPE_IME) {
+        } else if (type == ITYPE_IME) {
             mControllable = sNewInsetsMode >= NEW_INSETS_MODE_IME;
         } else {
             mControllable = false;
@@ -256,7 +256,7 @@ class InsetsSourceProvider {
                 OnAnimationFinishedCallback finishCallback) {
             // TODO(b/118118435): We can remove the type check when implementing the transient bar
             //                    animation.
-            if (mSource.getType() == TYPE_IME) {
+            if (mSource.getType() == ITYPE_IME) {
                 // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
                 t.setAlpha(animationLeash, 1 /* alpha */);
                 t.hide(animationLeash);

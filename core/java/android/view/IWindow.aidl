@@ -69,14 +69,14 @@ oneway interface IWindow {
     void insetsChanged(in InsetsState insetsState);
 
     /**
-     * Called when this window retrieved control over a specified set of inset sources.
+     * Called when this window retrieved control over a specified set of insets sources.
      */
     void insetsControlChanged(in InsetsState insetsState, in InsetsSourceControl[] activeControls);
 
     /**
      * Called when a set of insets source window should be shown by policy.
      *
-     * @param types internal inset types (WindowInsets.Type.InsetType) to show
+     * @param types internal insets types (WindowInsets.Type.InsetsType) to show
      * @param fromIme true if this request originated from IME (InputMethodService).
      */
     void showInsets(int types, boolean fromIme);
@@ -84,7 +84,7 @@ oneway interface IWindow {
     /**
      * Called when a set of insets source window should be hidden by policy.
      *
-     * @param types internal inset types (WindowInsets.Type.InsetType) to hide
+     * @param types internal insets types (WindowInsets.Type.InsetsType) to hide
      * @param fromIme true if this request originated from IME (InputMethodService).
      */
     void hideInsets(int types, boolean fromIme);

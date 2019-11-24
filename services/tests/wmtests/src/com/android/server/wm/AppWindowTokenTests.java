@@ -252,7 +252,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     @Presubmit
     public void testGetOrientation() {
-        mActivity.setHidden(false);
+        mActivity.setVisible(true);
 
         mActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -261,7 +261,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mActivity.getOrientation());
 
         mActivity.setOccludesParent(true);
-        mActivity.setHidden(true);
+        mActivity.setVisible(false);
         // Can not specify orientation if app isn't visible even though it occludes parent.
         assertEquals(SCREEN_ORIENTATION_UNSET, mActivity.getOrientation());
         // Can specify orientation if the current orientation candidate is orientation behind.
@@ -313,7 +313,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testSetOrientation() {
-        mActivity.setHidden(false);
+        mActivity.setVisible(true);
 
         // Assert orientation is unspecified to start.
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, mActivity.getOrientation());
