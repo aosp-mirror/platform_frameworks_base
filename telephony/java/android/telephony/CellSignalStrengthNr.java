@@ -16,11 +16,15 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -36,13 +40,67 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
 
     private static final String TAG = "CellSignalStrengthNr";
 
+    // Lifted from Default carrier configs and max range of SSRSRP
+    // Boundaries: [-140 dB, -44 dB]
+    private int[] mSsRsrpThresholds = new int[] {
+            -125, /* SIGNAL_STRENGTH_POOR */
+            -115, /* SIGNAL_STRENGTH_MODERATE */
+            -105, /* SIGNAL_STRENGTH_GOOD */
+            -95,  /* SIGNAL_STRENGTH_GREAT */
+    };
+
+    // Lifted from Default carrier configs and max range of SSRSRQ
+    // Boundaries: [-20 dB, -3 dB]
+    private int[] mSsRsrqThresholds = new int[] {
+            -14, /* SIGNAL_STRENGTH_POOR */
+            -12, /* SIGNAL_STRENGTH_MODERATE */
+            -10, /* SIGNAL_STRENGTH_GOOD */
+            -8  /* SIGNAL_STRENGTH_GREAT */
+    };
+
+    // Lifted from Default carrier configs and max range of SSSINR
+    // Boundaries: [-23 dB, 40 dB]
+    private int[] mSsSinrThresholds = new int[] {
+            -8, /* SIGNAL_STRENGTH_POOR */
+            0, /* SIGNAL_STRENGTH_MODERATE */
+            8, /* SIGNAL_STRENGTH_GOOD */
+            16  /* SIGNAL_STRENGTH_GREAT */
+    };
+
     /**
-     * These threshold values are copied from LTE.
-     * TODO: make it configurable via CarrierConfig.
+     * Indicates SSRSRP is considered for {@link #getLevel()} and reporting from modem.
+     *
+     * @hide
      */
-    private static final int SIGNAL_GREAT_THRESHOLD = -95;
-    private static final int SIGNAL_GOOD_THRESHOLD = -105;
-    private static final int SIGNAL_MODERATE_THRESHOLD = -115;
+    public static final int USE_SSRSRP = 1 << 0;
+    /**
+     * Indicates SSRSRQ is considered for {@link #getLevel()} and reporting from modem.
+     *
+     * @hide
+     */
+    public static final int USE_SSRSRQ = 1 << 1;
+    /**
+     * Indicates SSSINR is considered for {@link #getLevel()} and reporting from modem.
+     *
+     * @hide
+     */
+    public static final int USE_SSSINR = 1 << 2;
+
+    /**
+     * Bit-field integer to determine whether to use SS reference signal received power (SSRSRP),
+     * SS reference signal received quality (SSRSRQ), or/and SS signal-to-noise and interference
+     * ratio (SSSINR) for the number of 5G NR signal bars. If multiple measures are set bit, the
+     * parameter whose value is smallest is used to indicate the signal bar.
+     *
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "USE_" }, value = {
+        USE_SSRSRP,
+        USE_SSRSRQ,
+        USE_SSSINR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SignalLevelAndReportCriteriaSource {}
 
     private int mCsiRsrp;
     private int mCsiRsrq;
@@ -51,6 +109,21 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
     private int mSsRsrq;
     private int mSsSinr;
     private int mLevel;
+
+    /**
+     * Bit-field integer to determine whether to use SS reference signal received power (SSRSRP),
+     * SS reference signal received quality (SSRSRQ), or/and SS signal-to-noise and interference
+     * ratio (SSSINR) for the number of 5G NR signal bars. If multiple measures are set bit, the
+     * parameter whose value is smallest is used to indicate the signal bar.
+     *
+     *  SSRSRP = 1 << 0,
+     *  SSRSRQ = 1 << 1,
+     *  SSSINR = 1 << 2,
+     *
+     * For example, if both SSRSRP and SSSINR are used, the value of key is 5 (1 << 0 | 1 << 2).
+     * If the key is invalid or not configured, a default value (SSRSRP = 1 << 0) will apply.
+     */
+    private int mParametersUseForLevel;
 
     /** @hide */
     public CellSignalStrengthNr() {
@@ -182,6 +255,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mSsRsrq = CellInfo.UNAVAILABLE;
         mSsSinr = CellInfo.UNAVAILABLE;
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        mParametersUseForLevel = USE_SSRSRP;
     }
 
     /** {@inheritDoc} */
@@ -191,20 +265,83 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         return mLevel;
     }
 
+    /**
+     * Checks if the given parameter type is considered to use for {@link #getLevel()}.
+     *
+     * Note: if multiple parameter types are considered, the smaller level for one of the
+     * parameters would be returned by {@link #getLevel()}
+     *
+     * @param parameterType bitwise OR of {@link #USE_SSRSRP}, {@link #USE_SSRSRQ},
+     *         {@link #USE_SSSINR}
+     * @return {@code true} if the level is calculated based on the given parameter type;
+     *      {@code false} otherwise.
+     *
+     */
+    private boolean isLevelForParameter(@SignalLevelAndReportCriteriaSource int parameterType) {
+        return (parameterType & mParametersUseForLevel) == parameterType;
+    }
+
     /** @hide */
     @Override
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
-        if (mSsRsrp == CellInfo.UNAVAILABLE) {
-            mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        } else if (mSsRsrp >= SIGNAL_GREAT_THRESHOLD) {
-            mLevel = SIGNAL_STRENGTH_GREAT;
-        } else if (mSsRsrp >= SIGNAL_GOOD_THRESHOLD) {
-            mLevel = SIGNAL_STRENGTH_GOOD;
-        } else if (mSsRsrp >= SIGNAL_MODERATE_THRESHOLD) {
-            mLevel = SIGNAL_STRENGTH_MODERATE;
+        if (cc == null) {
+            mParametersUseForLevel = USE_SSRSRP;
         } else {
-            mLevel = SIGNAL_STRENGTH_POOR;
+            mParametersUseForLevel = cc.getInt(
+                    CarrierConfigManager.KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT, USE_SSRSRP);
+            Rlog.i(TAG, "Using SSRSRP for Level.");
+            mSsRsrpThresholds = cc.getIntArray(
+                    CarrierConfigManager.KEY_5G_NR_SSRSRP_THRESHOLDS_INT_ARRAY);
+            Rlog.i(TAG, "Applying 5G NR SSRSRP Thresholds: " + Arrays.toString(mSsRsrpThresholds));
+            mSsRsrqThresholds = cc.getIntArray(
+                    CarrierConfigManager.KEY_5G_NR_SSRSRQ_THRESHOLDS_INT_ARRAY);
+            Rlog.i(TAG, "Applying 5G NR SSRSRQ Thresholds: " + Arrays.toString(mSsRsrqThresholds));
+            mSsSinrThresholds = cc.getIntArray(
+                    CarrierConfigManager.KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY);
+            Rlog.i(TAG, "Applying 5G NR SSSINR Thresholds: " + Arrays.toString(mSsSinrThresholds));
         }
+        int ssRsrpLevel = SignalStrength.INVALID;
+        int ssRsrqLevel = SignalStrength.INVALID;
+        int ssSinrLevel = SignalStrength.INVALID;
+        if (isLevelForParameter(USE_SSRSRP)) {
+            ssRsrpLevel = updateLevelWithMeasure(mSsRsrp, mSsRsrpThresholds);
+            Rlog.i(TAG, "Updated 5G NR SSRSRP Level: " + ssRsrpLevel);
+        }
+        if (isLevelForParameter(USE_SSRSRQ)) {
+            ssRsrqLevel = updateLevelWithMeasure(mSsRsrq, mSsRsrqThresholds);
+            Rlog.i(TAG, "Updated 5G NR SSRSRQ Level: " + ssRsrqLevel);
+        }
+        if (isLevelForParameter(USE_SSSINR)) {
+            ssSinrLevel = updateLevelWithMeasure(mSsSinr, mSsSinrThresholds);
+            Rlog.i(TAG, "Updated 5G NR SSSINR Level: " + ssSinrLevel);
+        }
+        // Apply the smaller value among three levels of three measures.
+        mLevel = Math.min(Math.min(ssRsrpLevel, ssRsrqLevel), ssSinrLevel);
+    }
+
+    /**
+     * Update level with corresponding measure and thresholds.
+     *
+     * @param measure corresponding signal measure
+     * @param thresholds corresponding signal thresholds
+     * @return level of the signal strength
+     */
+    private int updateLevelWithMeasure(int measure, int[] thresholds) {
+        int level;
+        if (measure == CellInfo.UNAVAILABLE) {
+            level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        } else if (measure > thresholds[3]) {
+            level = SIGNAL_STRENGTH_GREAT;
+        } else if (measure > thresholds[2]) {
+            level = SIGNAL_STRENGTH_GOOD;
+        } else if (measure > thresholds[1]) {
+            level = SIGNAL_STRENGTH_MODERATE;
+        }  else if (measure > thresholds[0]) {
+            level = SIGNAL_STRENGTH_POOR;
+        } else {
+            level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        }
+        return level;
     }
 
     /**
@@ -247,6 +384,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         mSsRsrq = s.mSsRsrq;
         mSsSinr = s.mSsSinr;
         mLevel = s.mLevel;
+        mParametersUseForLevel = s.mParametersUseForLevel;
     }
 
     /** @hide */
@@ -290,6 +428,7 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
                 .append(" ssRsrq = " + mSsRsrq)
                 .append(" ssSinr = " + mSsSinr)
                 .append(" level = " + mLevel)
+                .append(" parametersUseForLevel = " + mParametersUseForLevel)
                 .append(" }")
                 .toString();
     }
