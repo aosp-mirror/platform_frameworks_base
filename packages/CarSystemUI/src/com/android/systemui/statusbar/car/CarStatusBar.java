@@ -23,15 +23,19 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.car.Car;
+import android.car.CarNotConnectedException;
 import android.car.drivingstate.CarDrivingStateEvent;
 import android.car.drivingstate.CarUxRestrictionsManager;
 import android.car.hardware.power.CarPowerManager.CarPowerStateListener;
+import android.car.media.CarAudioManager;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -99,6 +103,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.volume.VolumeUI;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -155,6 +160,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private NotificationDataManager mNotificationDataManager;
     private NotificationClickHandlerFactory mNotificationClickHandlerFactory;
     private ScreenLifecycle mScreenLifecycle;
+    private CarAudioManager mCarAudioManager;
+    private VolumeUI mVolumeUI;
 
     // The container for the notifications.
     private CarNotificationView mNotificationView;
@@ -213,6 +220,28 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     if (mNotificationDataManager != null) {
                         mNotificationDataManager.clearAll();
                     }
+                }
+            };
+
+    private final CarAudioManager.CarVolumeCallback mVolumeChangeCallback =
+            new CarAudioManager.CarVolumeCallback() {
+                @Override
+                public void onGroupVolumeChanged(int zoneId, int groupId, int flags) {
+                    if (mVolumeUI == null) {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            // Initialize Volume UI
+                            mVolumeUI = new VolumeUI();
+                            mVolumeUI.mComponents = mComponents;
+                            mVolumeUI.mContext = mContext;
+                            mVolumeUI.start();
+                        });
+                        mCarAudioManager.unregisterCarVolumeCallback(mVolumeChangeCallback);
+                    }
+                }
+
+                @Override
+                public void onMasterMuteChanged(int zoneId, int flags) {
+                    // ignored
                 }
             };
 
@@ -301,6 +330,22 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         mPowerManagerHelper = new PowerManagerHelper(mContext, mCarPowerStateListener);
         mPowerManagerHelper.connectToCarService();
+
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+                .addListener((car, ready) -> {
+                    if (!ready || mCarAudioManager != null) {
+                        return;
+                    }
+                    try {
+                        mCarAudioManager = (CarAudioManager) car.getCarManager(Car.AUDIO_SERVICE);
+                        Log.d(TAG, "Registering mVolumeChangeCallback.");
+                        // This volume call back is never unregistered because CarStatusBar is
+                        // never destroyed.
+                        mCarAudioManager.registerCarVolumeCallback(mVolumeChangeCallback);
+                    } catch (CarNotConnectedException e) {
+                        Log.wtf(TAG, " mVolumeChangeCallback failed to connect to car ", e);
+                    }
+                });
     }
 
     private void restartNavBarsIfNecessary() {
