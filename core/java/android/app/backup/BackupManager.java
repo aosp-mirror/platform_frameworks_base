@@ -960,7 +960,9 @@ public class BackupManager {
      *
      * @hide
      */
-    public void excludeKeysFromRestore(String packageName, List<String> keys) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public void excludeKeysFromRestore(@NonNull String packageName, @NonNull List<String> keys) {
         checkServiceBinder();
         if (sService != null) {
             try {

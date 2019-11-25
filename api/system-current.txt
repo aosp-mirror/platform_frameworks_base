@@ -828,6 +828,7 @@ package android.app.backup {
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void backupNow();
     method @RequiresPermission(android.Manifest.permission.BACKUP) public android.app.backup.RestoreSession beginRestoreSession();
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void cancelBackups();
+    method @RequiresPermission(android.Manifest.permission.BACKUP) public void excludeKeysFromRestore(@NonNull String, @NonNull java.util.List<java.lang.String>);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public long getAvailableRestoreToken(String);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public android.content.Intent getConfigurationIntent(String);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public String getCurrentTransport();
