@@ -7593,20 +7593,20 @@ public class TelephonyManager {
      * {@link CarrierConfigManager#KEY_EMERGENCY_SMS_MODE_TIMER_MS_INT}. If
      * the carrier does not support this mode, this function will always return false.
      *
-     * @return true if this device is in emergency SMS mode, false otherwise.
+     * @return {@code true} if this device is in emergency SMS mode, {@code false} otherwise.
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isInEmergencySmsMode() {
-
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.isInEmergencySmsMode();
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getNetworkSelectionMode RemoteException", ex);
+            Rlog.e(TAG, "isInEmergencySmsMode RemoteException", ex);
         }
         return false;
     }
