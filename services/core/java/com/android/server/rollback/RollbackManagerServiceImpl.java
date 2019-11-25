@@ -177,16 +177,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_TOKEN, -1);
                     int installFlags = intent.getIntExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALL_FLAGS, 0);
-                    int[] installedUsers = intent.getIntArrayExtra(
-                            PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS);
                     int user = intent.getIntExtra(
                             PackageManagerInternal.EXTRA_ENABLE_ROLLBACK_USER, 0);
 
                     File newPackageCodePath = new File(intent.getData().getPath());
 
                     getHandler().post(() -> {
-                        boolean success = enableRollback(installFlags, newPackageCodePath,
-                                installedUsers, user, token);
+                        boolean success =
+                                enableRollback(installFlags, newPackageCodePath, user, token);
                         int ret = PackageManagerInternal.ENABLE_ROLLBACK_SUCCEEDED;
                         if (!success) {
                             ret = PackageManagerInternal.ENABLE_ROLLBACK_FAILED;
@@ -821,13 +819,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      *
      * @param installFlags information about what is being installed.
      * @param newPackageCodePath path to the package about to be installed.
-     * @param installedUsers the set of users for which a given package is installed.
      * @param user the user that owns the install session to enable rollback on.
      * @param token the distinct rollback token sent by package manager.
      * @return true if enabling the rollback succeeds, false otherwise.
      */
-    private boolean enableRollback(int installFlags, File newPackageCodePath,
-            int[] installedUsers, @UserIdInt int user, int token) {
+    private boolean enableRollback(
+            int installFlags, File newPackageCodePath, @UserIdInt int user, int token) {
 
         // Find the session id associated with this install.
         // TODO: It would be nice if package manager or package installer told
@@ -872,38 +869,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
         // Check to see if this is the apk session for a staged session with
         // rollback enabled.
-        // TODO: This check could be made more efficient.
-        RollbackData rd = null;
         synchronized (mLock) {
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
                 if (data.apkSessionId == parentSession.getSessionId()) {
-                    rd = data;
-                    break;
-                }
-            }
-        }
-
-        if (rd != null) {
-            // This is the apk session for a staged session. We do not need to create a new rollback
-            // for this session.
-            PackageParser.PackageLite newPackage = null;
-            try {
-                newPackage = PackageParser.parsePackageLite(
-                        new File(packageSession.resolvedBaseCodePath), 0);
-            } catch (PackageParser.PackageParserException e) {
-                Slog.e(TAG, "Unable to parse new package", e);
-                return false;
-            }
-            String packageName = newPackage.packageName;
-            for (PackageRollbackInfo info : rd.info.getPackages()) {
-                if (info.getPackageName().equals(packageName)) {
-                    info.getInstalledUsers().addAll(IntArray.wrap(installedUsers));
+                    // This is the apk session for a staged session with rollback enabled. We do not
+                    // need to create a new rollback for this session.
                     return true;
                 }
             }
-            Slog.e(TAG, "Unable to find package in apk session");
-            return false;
         }
 
         NewRollback newRollback;
@@ -919,7 +893,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
         newRollback.addToken(token);
 
-        return enableRollbackForPackageSession(newRollback.data, packageSession, installedUsers);
+        return enableRollbackForPackageSession(newRollback.data, packageSession);
     }
 
     /**
@@ -930,7 +904,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * @return true on success, false on failure.
      */
     private boolean enableRollbackForPackageSession(RollbackData data,
-            PackageInstaller.SessionInfo session, @NonNull int[] installedUsers) {
+            PackageInstaller.SessionInfo session) {
         // TODO: Don't attempt to enable rollback for split installs.
         final int installFlags = session.installFlags;
         if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
@@ -988,8 +962,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageRollbackInfo packageRollbackInfo = new PackageRollbackInfo(
                 newVersion, installedVersion,
                 new IntArray() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
-                isApex, IntArray.wrap(installedUsers),
-                new SparseLongArray() /* ceSnapshotInodes */);
+                isApex, new IntArray(), new SparseLongArray() /* ceSnapshotInodes */);
 
         try {
             ApplicationInfo appInfo = pkgInfo.applicationInfo;
@@ -1019,7 +992,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         getHandler().post(() -> {
-            snapshotUserDataInternal(packageName);
+            snapshotUserDataInternal(packageName, userIds);
             restoreUserDataInternal(packageName, userIds, appId, ceDataInode, seInfo, token);
             final PackageManagerInternal pmi = LocalServices.getService(
                     PackageManagerInternal.class);
@@ -1027,7 +1000,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         });
     }
 
-    private void snapshotUserDataInternal(String packageName) {
+    private void snapshotUserDataInternal(String packageName, int[] userIds) {
         synchronized (mLock) {
             // staged installs
             for (int i = 0; i < mRollbacks.size(); i++) {
@@ -1038,7 +1011,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
                 for (PackageRollbackInfo info : data.info.getPackages()) {
                     if (info.getPackageName().equals(packageName)) {
-                        mAppDataRollbackHelper.snapshotAppData(data.info.getRollbackId(), info);
+                        mAppDataRollbackHelper.snapshotAppData(
+                                data.info.getRollbackId(), info, userIds);
                         saveRollbackData(data);
                         break;
                     }
@@ -1049,8 +1023,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             for (NewRollback rollback : mNewRollbacks) {
                 info = getPackageRollbackInfo(rollback.data, packageName);
                 if (info != null) {
-                    mAppDataRollbackHelper.snapshotAppData(rollback.data.info.getRollbackId(),
-                            info);
+                    mAppDataRollbackHelper.snapshotAppData(
+                            rollback.data.info.getRollbackId(), info, userIds);
                     saveRollbackData(rollback.data);
                 }
             }
@@ -1114,8 +1088,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
 
             if (!session.isMultiPackage()) {
-                if (!enableRollbackForPackageSession(newRollback.data, session,
-                            new int[0])) {
+                if (!enableRollbackForPackageSession(newRollback.data, session)) {
                     Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
                     result.offer(false);
                     return;
@@ -1129,8 +1102,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         result.offer(false);
                         return;
                     }
-                    if (!enableRollbackForPackageSession(newRollback.data, childSession,
-                                new int[0])) {
+                    if (!enableRollbackForPackageSession(newRollback.data, childSession)) {
                         Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
                         result.offer(false);
                         return;
@@ -1407,9 +1379,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     private void deleteRollback(RollbackData rollbackData) {
         for (PackageRollbackInfo info : rollbackData.info.getPackages()) {
-            IntArray installedUsers = info.getInstalledUsers();
-            for (int i = 0; i < installedUsers.size(); i++) {
-                int userId = installedUsers.get(i);
+            IntArray snapshottedUsers = info.getSnapshottedUsers();
+            for (int i = 0; i < snapshottedUsers.size(); i++) {
+                int userId = snapshottedUsers.get(i);
                 mAppDataRollbackHelper.destroyAppDataSnapshot(rollbackData.info.getRollbackId(),
                         info, userId);
             }
