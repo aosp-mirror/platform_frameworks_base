@@ -1086,6 +1086,7 @@ stubs_defaults {
         ":core-current-stubs-source",
         ":core_public_api_files",
         ":updatable-media-srcs",
+        ":ike-api-srcs",
     ],
     libs: ["framework-internal-utils"],
     installable: false,
