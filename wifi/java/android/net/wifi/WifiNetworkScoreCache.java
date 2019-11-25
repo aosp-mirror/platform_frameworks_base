@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.net.INetworkScoreCache;
 import android.net.NetworkKey;
+import android.net.NetworkScoreManager;
 import android.net.ScoredNetwork;
 import android.os.Handler;
 import android.os.Process;
@@ -40,7 +41,8 @@ import java.util.List;
  *
  * @hide
  */
-public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
+public class WifiNetworkScoreCache extends INetworkScoreCache.Stub
+        implements NetworkScoreManager.NetworkScoreCallback {
     private static final String TAG = "WifiNetworkScoreCache";
     private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -246,6 +248,17 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
     }
 
     @Override protected final void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        dumpWithLatestScanResults(fd, writer, args, wifiManager.getScanResults());
+    }
+
+    /**
+     * This is directly invoked from within Wifi-Service (on it's instance of this class), hence
+     * avoid making the WifiManager.getScanResults() call to avoid a deadlock.
+     */
+    public final void dumpWithLatestScanResults(
+            FileDescriptor fd, PrintWriter writer, String[] args,
+            List<ScanResult> latestScanResults) {
         mContext.enforceCallingOrSelfPermission(permission.DUMP, TAG);
         String header = String.format("WifiNetworkScoreCache (%s/%d)",
                 mContext.getPackageName(), Process.myUid());
@@ -256,8 +269,7 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
                 writer.println("    " + score);
             }
             writer.println("  Network scores for latest ScanResults:");
-            WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-            for (ScanResult scanResult : wifiManager.getScanResults()) {
+            for (ScanResult scanResult : latestScanResults) {
                 writer.println(
                         "    " + buildNetworkKey(scanResult) + ": " + getNetworkScore(scanResult));
             }
