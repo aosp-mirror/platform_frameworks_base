@@ -16,6 +16,10 @@
 
 package com.android.server;
 
+import static android.telephony.TelephonyManager.ACTION_MULTI_SIM_CONFIG_CHANGED;
+
+import static java.util.Arrays.copyOf;
+
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
@@ -286,7 +290,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             switch (msg.what) {
                 case MSG_USER_SWITCHED: {
                     if (VDBG) log("MSG_USER_SWITCHED userId=" + msg.arg1);
-                    int numPhones = TelephonyManager.getDefault().getPhoneCount();
+                    int numPhones = getTelephonyManager().getPhoneCount();
                     for (int sub = 0; sub < numPhones; sub++) {
                         TelephonyRegistry.this.notifyCellLocationForSubscriber(sub,
                                 mCellLocation[sub]);
@@ -367,9 +371,110 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_UPDATE_DEFAULT_SUB,
                             newDefaultPhoneId, newDefaultSubId));
                 }
+            } else if (action.equals(ACTION_MULTI_SIM_CONFIG_CHANGED)) {
+                onMultiSimConfigChanged();
             }
         }
     };
+
+    private TelephonyManager getTelephonyManager() {
+        return (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+    }
+
+    private void onMultiSimConfigChanged() {
+        int oldNumPhones = mNumPhones;
+        mNumPhones = getTelephonyManager().getActiveModemCount();
+        if (oldNumPhones == mNumPhones) return;
+
+        if (DBG) {
+            log("TelephonyRegistry: activeModemCount changed from " + oldNumPhones
+                    + " to " + mNumPhones);
+        }
+        mCallState = copyOf(mCallState, mNumPhones);
+        mDataActivity = copyOf(mCallState, mNumPhones);
+        mDataConnectionState = copyOf(mCallState, mNumPhones);
+        mDataConnectionNetworkType = copyOf(mCallState, mNumPhones);
+        mCallIncomingNumber = copyOf(mCallIncomingNumber, mNumPhones);
+        mServiceState = copyOf(mServiceState, mNumPhones);
+        mVoiceActivationState = copyOf(mVoiceActivationState, mNumPhones);
+        mDataActivationState = copyOf(mDataActivationState, mNumPhones);
+        mUserMobileDataState = copyOf(mUserMobileDataState, mNumPhones);
+        mSignalStrength = copyOf(mSignalStrength, mNumPhones);
+        mMessageWaiting = copyOf(mMessageWaiting, mNumPhones);
+        mCallForwarding = copyOf(mCallForwarding, mNumPhones);
+        mCellLocation = copyOf(mCellLocation, mNumPhones);
+        mSrvccState = copyOf(mSrvccState, mNumPhones);
+        mOtaspMode = copyOf(mOtaspMode, mNumPhones);
+        mPreciseCallState = copyOf(mPreciseCallState, mNumPhones);
+        mForegroundCallState = copyOf(mForegroundCallState, mNumPhones);
+        mBackgroundCallState = copyOf(mBackgroundCallState, mNumPhones);
+        mRingingCallState = copyOf(mRingingCallState, mNumPhones);
+        mCallDisconnectCause = copyOf(mCallDisconnectCause, mNumPhones);
+        mCallPreciseDisconnectCause = copyOf(mCallPreciseDisconnectCause, mNumPhones);
+        mCallQuality = copyOf(mCallQuality, mNumPhones);
+        mCallNetworkType = copyOf(mCallNetworkType, mNumPhones);
+        mCallAttributes = copyOf(mCallAttributes, mNumPhones);
+        mPreciseDataConnectionState = copyOf(mPreciseDataConnectionState, mNumPhones);
+        mOutgoingCallEmergencyNumber = copyOf(mOutgoingCallEmergencyNumber, mNumPhones);
+        mOutgoingSmsEmergencyNumber = copyOf(mOutgoingSmsEmergencyNumber, mNumPhones);
+
+        // ds -> ss switch.
+        if (mNumPhones < oldNumPhones) {
+            cutListToSize(mCellInfo, mNumPhones);
+            cutListToSize(mImsReasonInfo, mNumPhones);
+            cutListToSize(mPhysicalChannelConfigs, mNumPhones);
+            return;
+        }
+
+        // mNumPhones > oldNumPhones: ss -> ds switch
+        for (int i = oldNumPhones; i < mNumPhones; i++) {
+            mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
+            mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
+            mDataConnectionState[i] = TelephonyManager.DATA_UNKNOWN;
+            mVoiceActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
+            mDataActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
+            mCallIncomingNumber[i] =  "";
+            mServiceState[i] =  new ServiceState();
+            mSignalStrength[i] =  new SignalStrength();
+            mUserMobileDataState[i] = false;
+            mMessageWaiting[i] =  false;
+            mCallForwarding[i] =  false;
+            mCellLocation[i] = new Bundle();
+            mCellInfo.add(i, null);
+            mImsReasonInfo.add(i, null);
+            mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
+            mPhysicalChannelConfigs.add(i, new ArrayList<>());
+            mOtaspMode[i] = TelephonyManager.OTASP_UNKNOWN;
+            mCallDisconnectCause[i] = DisconnectCause.NOT_VALID;
+            mCallPreciseDisconnectCause[i] = PreciseDisconnectCause.NOT_VALID;
+            mCallQuality[i] = new CallQuality();
+            mCallAttributes[i] = new CallAttributes(new PreciseCallState(),
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN, new CallQuality());
+            mCallNetworkType[i] = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+            mPreciseCallState[i] = new PreciseCallState();
+            mRingingCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+            mForegroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+            mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
+            mPreciseDataConnectionState[i] = new PreciseDataConnectionState();
+        }
+
+        // Note that location can be null for non-phone builds like
+        // like the generic one.
+        CellLocation  location = CellLocation.getEmpty();
+        if (location != null) {
+            for (int i = oldNumPhones; i < mNumPhones; i++) {
+                location.fillInNotifierBundle(mCellLocation[i]);
+            }
+        }
+    }
+
+    private void cutListToSize(List list, int size) {
+        if (list == null) return;
+
+        while (list.size() > size) {
+            list.remove(list.size() - 1);
+        }
+    }
 
     // we keep a copy of all of the state so we can send it out when folks
     // register for it
@@ -385,7 +490,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
 
-        int numPhones = TelephonyManager.getDefault().getSupportedModemCount();
+        int numPhones = getTelephonyManager().getActiveModemCount();
         if (DBG) log("TelephonyRegistry: ctor numPhones=" + numPhones);
         mNumPhones = numPhones;
         mCallState = new int[numPhones];
@@ -467,6 +572,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(SubscriptionManager.ACTION_DEFAULT_SUBSCRIPTION_CHANGED);
+        filter.addAction(ACTION_MULTI_SIM_CONFIG_CHANGED);
         log("systemRunning register for intents");
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -2014,7 +2120,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             final int recordCount = mRecords.size();
             pw.println("last known state:");
             pw.increaseIndent();
-            for (int i = 0; i < TelephonyManager.getDefault().getPhoneCount(); i++) {
+            for (int i = 0; i < getTelephonyManager().getPhoneCount(); i++) {
                 pw.println("Phone Id=" + i);
                 pw.increaseIndent();
                 pw.println("mCallState=" + mCallState[i]);
