@@ -65,7 +65,7 @@ import java.util.Set;
  * {@link android.media.soundtrigger_middleware.Status} constants. Any other exception
  * thrown should be regarded as a bug in the implementation or one of its dependencies
  * (assuming correct usage).
- * <li>The implementation is designed for testibility by featuring dependency injection (the
+ * <li>The implementation is designed for testability by featuring dependency injection (the
  * underlying HAL driver instances are passed to the ctor) and by minimizing dependencies
  * on Android runtime.
  * <li>The implementation is thread-safe. This is achieved by a simplistic model, where all entry-

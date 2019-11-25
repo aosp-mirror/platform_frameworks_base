@@ -22,18 +22,29 @@ import static android.system.OsConstants.ENOSYS;
 import static android.system.OsConstants.EPERM;
 import static android.system.OsConstants.EPIPE;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.content.Context;
 import android.media.AudioFormat;
+import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
+import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -44,6 +55,7 @@ import java.util.UUID;
  */
 @SystemApi
 public class SoundTrigger {
+    private static final String TAG = "SoundTrigger";
 
     private SoundTrigger() {
     }
@@ -119,15 +131,15 @@ public class SoundTrigger {
          * recognition callback event */
         public final boolean returnsTriggerInEvent;
 
-        ModuleProperties(int id, String implementor, String description,
-                String uuid, int version, int maxSoundModels, int maxKeyphrases,
+        ModuleProperties(int id, @NonNull String implementor, @NonNull String description,
+                @NonNull String uuid, int version, int maxSoundModels, int maxKeyphrases,
                 int maxUsers, int recognitionModes, boolean supportsCaptureTransition,
                 int maxBufferMs, boolean supportsConcurrentCapture,
                 int powerConsumptionMw, boolean returnsTriggerInEvent) {
             this.id = id;
-            this.implementor = implementor;
-            this.description = description;
-            this.uuid = UUID.fromString(uuid);
+            this.implementor = requireNonNull(implementor);
+            this.description = requireNonNull(description);
+            this.uuid = UUID.fromString(requireNonNull(uuid));
             this.version = version;
             this.maxSoundModels = maxSoundModels;
             this.maxKeyphrases = maxKeyphrases;
@@ -231,6 +243,7 @@ public class SoundTrigger {
 
         /** Unique sound model identifier */
         @UnsupportedAppUsage
+        @NonNull
         public final UUID uuid;
 
         /** Sound model type (e.g. TYPE_KEYPHRASE); */
@@ -238,17 +251,20 @@ public class SoundTrigger {
 
         /** Unique sound model vendor identifier */
         @UnsupportedAppUsage
+        @NonNull
         public final UUID vendorUuid;
 
         /** Opaque data. For use by vendor implementation and enrollment application */
         @UnsupportedAppUsage
+        @NonNull
         public final byte[] data;
 
-        public SoundModel(UUID uuid, UUID vendorUuid, int type, byte[] data) {
-            this.uuid = uuid;
-            this.vendorUuid = vendorUuid;
+        public SoundModel(@NonNull UUID uuid, @Nullable UUID vendorUuid, int type,
+                @Nullable byte[] data) {
+            this.uuid = requireNonNull(uuid);
+            this.vendorUuid = vendorUuid != null ? vendorUuid : new UUID(0, 0);
             this.type = type;
-            this.data = data;
+            this.data = data != null ? data : new byte[0];
         }
 
         @Override
@@ -271,8 +287,6 @@ public class SoundTrigger {
             if (!(obj instanceof SoundModel))
                 return false;
             SoundModel other = (SoundModel) obj;
-            if (!Arrays.equals(data, other.data))
-                return false;
             if (type != other.type)
                 return false;
             if (uuid == null) {
@@ -284,6 +298,8 @@ public class SoundTrigger {
                 if (other.vendorUuid != null)
                     return false;
             } else if (!vendorUuid.equals(other.vendorUuid))
+                return false;
+            if (!Arrays.equals(data, other.data))
                 return false;
             return true;
         }
@@ -306,24 +322,28 @@ public class SoundTrigger {
 
         /** Locale of the keyphrase. JAVA Locale string e.g en_US */
         @UnsupportedAppUsage
+        @NonNull
         public final String locale;
 
         /** Key phrase text */
         @UnsupportedAppUsage
+        @NonNull
         public final String text;
 
         /** Users this key phrase has been trained for. countains sound trigger specific user IDs
          * derived from system user IDs {@link android.os.UserHandle#getIdentifier()}. */
         @UnsupportedAppUsage
+        @NonNull
         public final int[] users;
 
         @UnsupportedAppUsage
-        public Keyphrase(int id, int recognitionModes, String locale, String text, int[] users) {
+        public Keyphrase(int id, int recognitionModes, @NonNull String locale, @NonNull String text,
+                @Nullable int[] users) {
             this.id = id;
             this.recognitionModes = recognitionModes;
-            this.locale = locale;
-            this.text = text;
-            this.users = users;
+            this.locale = requireNonNull(locale);
+            this.text = requireNonNull(text);
+            this.users = users != null ? users : new int[0];
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<Keyphrase> CREATOR
@@ -427,13 +447,15 @@ public class SoundTrigger {
     public static class KeyphraseSoundModel extends SoundModel implements Parcelable {
         /** Key phrases in this sound model */
         @UnsupportedAppUsage
+        @NonNull
         public final Keyphrase[] keyphrases; // keyword phrases in model
 
         @UnsupportedAppUsage
         public KeyphraseSoundModel(
-                UUID uuid, UUID vendorUuid, byte[] data, Keyphrase[] keyphrases) {
+                @NonNull UUID uuid, @NonNull UUID vendorUuid, @Nullable byte[] data,
+                @Nullable Keyphrase[] keyphrases) {
             super(uuid, vendorUuid, TYPE_KEYPHRASE, data);
-            this.keyphrases = keyphrases;
+            this.keyphrases = keyphrases != null ? keyphrases : new Keyphrase[0];
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseSoundModel> CREATOR
@@ -528,7 +550,8 @@ public class SoundTrigger {
         };
 
         @UnsupportedAppUsage
-        public GenericSoundModel(UUID uuid, UUID vendorUuid, byte[] data) {
+        public GenericSoundModel(@NonNull UUID uuid, @NonNull UUID vendorUuid,
+                @Nullable byte[] data) {
             super(uuid, vendorUuid, TYPE_GENERIC_SOUND, data);
         }
 
@@ -648,6 +671,12 @@ public class SoundTrigger {
      * @hide
      */
     public static final int RECOGNITION_MODE_USER_AUTHENTICATION = 0x4;
+    /**
+     * Generic (non-speech) recognition.
+     *
+     * @hide
+     */
+    public static final int RECOGNITION_MODE_GENERIC = 0x8;
 
     /**
      *  Status codes for {@link RecognitionEvent}
@@ -739,6 +768,7 @@ public class SoundTrigger {
          *
          * @hide
          */
+        @NonNull
         public final AudioFormat captureFormat;
         /**
          * Opaque data for use by system applications who know about voice engine internals,
@@ -747,13 +777,14 @@ public class SoundTrigger {
          * @hide
          */
         @UnsupportedAppUsage
+        @NonNull
         public final byte[] data;
 
         /** @hide */
         @UnsupportedAppUsage
         public RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                 int captureSession, int captureDelayMs, int capturePreambleMs,
-                boolean triggerInData, AudioFormat captureFormat, byte[] data) {
+                boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
             this.status = status;
             this.soundModelHandle = soundModelHandle;
             this.captureAvailable = captureAvailable;
@@ -761,8 +792,8 @@ public class SoundTrigger {
             this.captureDelayMs = captureDelayMs;
             this.capturePreambleMs = capturePreambleMs;
             this.triggerInData = triggerInData;
-            this.captureFormat = captureFormat;
-            this.data = data;
+            this.captureFormat = requireNonNull(captureFormat);
+            this.data = data != null ? data : new byte[0];
         }
 
         /**
@@ -965,19 +996,21 @@ public class SoundTrigger {
         /** List of all keyphrases in the sound model for which recognition should be performed with
          * options for each keyphrase. */
         @UnsupportedAppUsage
+        @NonNull
         public final KeyphraseRecognitionExtra keyphrases[];
         /** Opaque data for use by system applications who know about voice engine internals,
          * typically during enrollment. */
         @UnsupportedAppUsage
+        @NonNull
         public final byte[] data;
 
         @UnsupportedAppUsage
         public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
-                KeyphraseRecognitionExtra[] keyphrases, byte[] data) {
+                @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data) {
             this.captureRequested = captureRequested;
             this.allowMultipleTriggers = allowMultipleTriggers;
-            this.keyphrases = keyphrases;
-            this.data = data;
+            this.keyphrases = keyphrases != null ? keyphrases : new KeyphraseRecognitionExtra[0];
+            this.data = data != null ? data : new byte[0];
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<RecognitionConfig> CREATOR
@@ -1126,15 +1159,17 @@ public class SoundTrigger {
         /** Confidence levels for all users recognized (KeyphraseRecognitionEvent) or to
          * be recognized (RecognitionConfig) */
         @UnsupportedAppUsage
+        @NonNull
         public final ConfidenceLevel[] confidenceLevels;
 
         @UnsupportedAppUsage
         public KeyphraseRecognitionExtra(int id, int recognitionModes, int coarseConfidenceLevel,
-                ConfidenceLevel[] confidenceLevels) {
+                @Nullable ConfidenceLevel[] confidenceLevels) {
             this.id = id;
             this.recognitionModes = recognitionModes;
             this.coarseConfidenceLevel = coarseConfidenceLevel;
-            this.confidenceLevels = confidenceLevels;
+            this.confidenceLevels =
+                    confidenceLevels != null ? confidenceLevels : new ConfidenceLevel[0];
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseRecognitionExtra> CREATOR
@@ -1217,16 +1252,18 @@ public class SoundTrigger {
     public static class KeyphraseRecognitionEvent extends RecognitionEvent implements Parcelable {
         /** Indicates if the key phrase is present in the buffered audio available for capture */
         @UnsupportedAppUsage
+        @NonNull
         public final KeyphraseRecognitionExtra[] keyphraseExtras;
 
         @UnsupportedAppUsage
         public KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                int captureSession, int captureDelayMs, int capturePreambleMs,
-               boolean triggerInData, AudioFormat captureFormat, byte[] data,
-               KeyphraseRecognitionExtra[] keyphraseExtras) {
+               boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+               @Nullable KeyphraseRecognitionExtra[] keyphraseExtras) {
             super(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
                   capturePreambleMs, triggerInData, captureFormat, data);
-            this.keyphraseExtras = keyphraseExtras;
+            this.keyphraseExtras =
+                    keyphraseExtras != null ? keyphraseExtras : new KeyphraseRecognitionExtra[0];
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
@@ -1343,8 +1380,8 @@ public class SoundTrigger {
         @UnsupportedAppUsage
         public GenericRecognitionEvent(int status, int soundModelHandle,
                 boolean captureAvailable, int captureSession, int captureDelayMs,
-                int capturePreambleMs, boolean triggerInData, AudioFormat captureFormat,
-                byte[] data) {
+                int capturePreambleMs, boolean triggerInData, @NonNull AudioFormat captureFormat,
+                @Nullable byte[] data) {
             super(status, soundModelHandle, captureAvailable, captureSession,
                     captureDelayMs, capturePreambleMs, triggerInData, captureFormat,
                     data);
@@ -1408,13 +1445,14 @@ public class SoundTrigger {
         /** The updated sound model handle */
         public final int soundModelHandle;
         /** New sound model data */
+        @NonNull
         public final byte[] data;
 
         @UnsupportedAppUsage
-        SoundModelEvent(int status, int soundModelHandle, byte[] data) {
+        SoundModelEvent(int status, int soundModelHandle, @Nullable byte[] data) {
             this.status = status;
             this.soundModelHandle = soundModelHandle;
-            this.data = data;
+            this.data = data != null ? data : new byte[0];
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<SoundModelEvent> CREATOR
@@ -1498,8 +1536,9 @@ public class SoundTrigger {
      * @hide
      */
     public static final int SERVICE_STATE_DISABLED = 1;
-
-    /**
+    private static Object mServiceLock = new Object();
+    private static ISoundTriggerMiddlewareService mService;
+   /**
      * @return returns current package name.
      */
     static String getCurrentOpPackageName() {
@@ -1523,23 +1562,20 @@ public class SoundTrigger {
      * @hide
      */
     @UnsupportedAppUsage
-    public static int listModules(ArrayList<ModuleProperties> modules) {
-        return listModules(getCurrentOpPackageName(), modules);
+    public static int listModules(@NonNull ArrayList<ModuleProperties> modules) {
+        try {
+            SoundTriggerModuleDescriptor[] descs = getService().listModules();
+            modules.clear();
+            modules.ensureCapacity(descs.length);
+            for (SoundTriggerModuleDescriptor desc : descs) {
+                modules.add(ConversionUtil.aidl2apiModuleDescriptor(desc));
+            }
+            return STATUS_OK;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception caught", e);
+            return STATUS_DEAD_OBJECT;
+        }
     }
-
-    /**
-     * Returns a list of descriptors for all hardware modules loaded.
-     * @param opPackageName
-     * @param modules A ModuleProperties array where the list will be returned.
-     * @return - {@link #STATUS_OK} in case of success
-     *         - {@link #STATUS_ERROR} in case of unspecified error
-     *         - {@link #STATUS_PERMISSION_DENIED} if the caller does not have system permission
-     *         - {@link #STATUS_NO_INIT} if the native service cannot be reached
-     *         - {@link #STATUS_BAD_VALUE} if modules is null
-     *         - {@link #STATUS_DEAD_OBJECT} if the binder transaction to the native service fails
-     */
-    private static native int listModules(String opPackageName,
-                                          ArrayList<ModuleProperties> modules);
 
     /**
      * Get an interface on a hardware module to control sound models and recognition on
@@ -1553,14 +1589,40 @@ public class SoundTrigger {
      * @hide
      */
     @UnsupportedAppUsage
-    public static SoundTriggerModule attachModule(int moduleId,
-                                                  StatusListener listener,
-                                                  Handler handler) {
-        if (listener == null) {
+    public static @NonNull SoundTriggerModule attachModule(int moduleId,
+            @NonNull StatusListener listener,
+            @Nullable Handler handler) {
+        Looper looper = handler != null ? handler.getLooper() : Looper.getMainLooper();
+        try {
+            return new SoundTriggerModule(getService(), moduleId, listener, looper);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
             return null;
         }
-        SoundTriggerModule module = new SoundTriggerModule(moduleId, listener, handler);
-        return module;
+    }
+
+    private static ISoundTriggerMiddlewareService getService() {
+        synchronized (mServiceLock) {
+            while (true) {
+                IBinder binder = null;
+                try {
+                    binder =
+                            ServiceManager.getServiceOrThrow(
+                                    Context.SOUND_TRIGGER_MIDDLEWARE_SERVICE);
+                    binder.linkToDeath(() -> {
+                        synchronized (mServiceLock) {
+                            mService = null;
+                        }
+                    }, 0);
+                    mService = ISoundTriggerMiddlewareService.Stub.asInterface(binder);
+                    break;
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to bind to soundtrigger service", e);
+                }
+            }
+            return  mService;
+        }
+
     }
 
     /**
