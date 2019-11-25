@@ -890,12 +890,6 @@ public abstract class PackageManagerInternal {
             "android.content.pm.extra.ENABLE_ROLLBACK_INSTALL_FLAGS";
 
     /**
-     * Extra field name for the set of installed users for a given rollback package.
-     */
-    public static final String EXTRA_ENABLE_ROLLBACK_INSTALLED_USERS =
-            "android.content.pm.extra.ENABLE_ROLLBACK_INSTALLED_USERS";
-
-    /**
      * Extra field name for the user id an install is associated with when
      * enabling rollback.
      */

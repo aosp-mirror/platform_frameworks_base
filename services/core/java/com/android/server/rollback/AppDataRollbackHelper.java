@@ -52,12 +52,13 @@ public class AppDataRollbackHelper {
     }
 
     /**
-     * Creates an app data snapshot for a specified {@code packageRollbackInfo}. Updates said {@code
-     * packageRollbackInfo} with the inodes of the CE user data snapshot folders.
+     * Creates an app data snapshot for a specified {@code packageRollbackInfo} and the specified
+     * {@code userIds}. Updates said {@code packageRollbackInfo} with the inodes of the CE user data
+     * snapshot folders.
      */
-    public void snapshotAppData(int snapshotId, PackageRollbackInfo packageRollbackInfo) {
-        final int[] installedUsers = packageRollbackInfo.getInstalledUsers().toArray();
-        for (int user : installedUsers) {
+    public void snapshotAppData(
+            int snapshotId, PackageRollbackInfo packageRollbackInfo, int[] userIds) {
+        for (int user : userIds) {
             final int storageFlags;
             if (isUserCredentialLocked(user)) {
                 // We've encountered a user that hasn't unlocked on a FBE device, so we can't copy
@@ -80,6 +81,7 @@ public class AppDataRollbackHelper {
                         + packageRollbackInfo.getPackageName() + ", userId: " + user, ie);
             }
         }
+        packageRollbackInfo.getSnapshottedUsers().addAll(IntArray.wrap(userIds));
     }
 
     /**
