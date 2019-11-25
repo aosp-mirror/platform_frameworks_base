@@ -171,7 +171,7 @@
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_dim_color">#80000000</color>              <!-- 50% black -->
     <color name="biometric_dialog_gray">#ff757575</color>
-    <color name="biometric_dialog_accent">#ff008577</color>                 <!-- dark teal -->
+    <color name="biometric_dialog_accent">@*android:color/accent_device_default_light</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
 
     <!-- Logout button -->
