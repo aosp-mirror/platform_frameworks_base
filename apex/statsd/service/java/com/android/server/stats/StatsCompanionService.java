@@ -2076,6 +2076,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullDangerousPermissionState(long elapsedNanos, final long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
+        Set<Integer> reportedUids = new HashSet<>();
         try {
             PackageManager pm = mContext.getPackageManager();
 
@@ -2095,6 +2096,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     if (pkg.requestedPermissions == null) {
                         continue;
                     }
+
+                    if (reportedUids.contains(pkg.applicationInfo.uid)) {
+                        // do not report same uid twice
+                        continue;
+                    }
+                    reportedUids.add(pkg.applicationInfo.uid);
 
                     int numPerms = pkg.requestedPermissions.length;
                     for (int permNum  = 0; permNum < numPerms; permNum++) {
@@ -2120,7 +2127,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
                         e.writeString(permName);
                         e.writeInt(pkg.applicationInfo.uid);
-                        e.writeString(pkg.packageName);
+                        e.writeString(null);
                         e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
                                 & REQUESTED_PERMISSION_GRANTED) != 0);
                         e.writeInt(permissionFlags);
