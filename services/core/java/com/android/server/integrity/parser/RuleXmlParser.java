@@ -32,6 +32,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A helper class to parse rules into the {@link Rule} model from Xml representation.
@@ -106,7 +107,7 @@ public final class RuleXmlParser implements RuleParser {
 
     private static Rule parseRule(XmlPullParser parser) throws IOException, XmlPullParserException {
         Formula formula = null;
-        @Rule.Effect int effect = Integer.parseInt(extractAttributeValue(parser, EFFECT_ATTRIBUTE));
+        int effect = Integer.parseInt(extractAttributeValue(parser, EFFECT_ATTRIBUTE).orElse("-1"));
 
         int eventType;
         while ((eventType = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -139,8 +140,8 @@ public final class RuleXmlParser implements RuleParser {
 
     private static Formula parseOpenFormula(XmlPullParser parser)
             throws IOException, XmlPullParserException {
-        @OpenFormula.Connector int connector = Integer.parseInt(
-                extractAttributeValue(parser, CONNECTOR_ATTRIBUTE));
+        int connector = Integer.parseInt(
+                extractAttributeValue(parser, CONNECTOR_ATTRIBUTE).orElse("-1"));
         List<Formula> formulas = new ArrayList<>();
 
         int eventType;
@@ -174,10 +175,10 @@ public final class RuleXmlParser implements RuleParser {
 
     private static Formula parseAtomicFormula(XmlPullParser parser)
             throws IOException, XmlPullParserException {
-        @AtomicFormula.Key int key = Integer.parseInt(extractAttributeValue(parser, KEY_ATTRIBUTE));
-        @AtomicFormula.Operator int operator = Integer.parseInt(
-                extractAttributeValue(parser, OPERATOR_ATTRIBUTE));
-        String value = extractAttributeValue(parser, VALUE_ATTRIBUTE);
+        int key = Integer.parseInt(extractAttributeValue(parser, KEY_ATTRIBUTE).orElse("-1"));
+        int operator = Integer.parseInt(
+                extractAttributeValue(parser, OPERATOR_ATTRIBUTE).orElse("-1"));
+        String value = extractAttributeValue(parser, VALUE_ATTRIBUTE).orElse(null);
 
         int eventType;
         while ((eventType = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -205,11 +206,7 @@ public final class RuleXmlParser implements RuleParser {
         }
     }
 
-    private static String extractAttributeValue(XmlPullParser parser, String attribute) {
-        String attributeValue = parser.getAttributeValue(NAMESPACE, attribute);
-        if (attributeValue == null) {
-            throw new RuntimeException(String.format("Attribute not found: %s", attribute));
-        }
-        return attributeValue;
+    private static Optional<String> extractAttributeValue(XmlPullParser parser, String attribute) {
+        return Optional.ofNullable(parser.getAttributeValue(NAMESPACE, attribute));
     }
 }
