@@ -6191,8 +6191,12 @@ public final class Settings {
                 "accessibility_shortcut_dialog_shown";
 
         /**
-         * Setting specifying the accessibility service to be toggled via the accessibility
-         * shortcut. Must be its flattened {@link ComponentName}.
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via the accessibility shortcut.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
          * @hide
          */
         @UnsupportedAppUsage
@@ -6201,9 +6205,11 @@ public final class Settings {
                 "accessibility_shortcut_target_service";
 
         /**
-         * Setting specifying the accessibility service or feature to be toggled via the
-         * accessibility button in the navigation bar. This is either a flattened
-         * {@link ComponentName} or the class name of a system class implementing a supported
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via the accessibility button in the navigation bar.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
          * accessibility feature.
          * @hide
          */
@@ -6364,6 +6370,9 @@ public final class Settings {
          * zoom in the display content and is targeted to low vision users. The current
          * magnification scale is controlled by {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE}.
          *
+         * @deprecated Use {@link #ACCESSIBILITY_BUTTON_TARGET_COMPONENT} instead.
+         * {@link #ACCESSIBILITY_BUTTON_TARGET_COMPONENT} holds the magnification system class name
+         * when navigation bar magnification is enabled.
          * @hide
          */
         @SystemApi

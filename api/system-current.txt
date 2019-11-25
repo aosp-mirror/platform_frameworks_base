@@ -6453,7 +6453,7 @@ package android.provider {
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, @Nullable String, boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
-    field public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED = "accessibility_display_magnification_navbar_enabled";
+    field @Deprecated public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED = "accessibility_display_magnification_navbar_enabled";
     field public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
     field public static final String AUTOFILL_FEATURE_FIELD_CLASSIFICATION = "autofill_field_classification";
     field public static final String AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT = "autofill_user_data_max_category_count";
