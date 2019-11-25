@@ -956,9 +956,9 @@ public final class Zygote {
 
     // This function is called from native code in com_android_internal_os_Zygote.cpp
     @SuppressWarnings("unused")
-    private static void callPostForkSystemServerHooks() {
+    private static void callPostForkSystemServerHooks(int runtimeFlags) {
         // SystemServer specific post fork hooks run before child post fork hooks.
-        ZygoteHooks.postForkSystemServer();
+        ZygoteHooks.postForkSystemServer(runtimeFlags);
     }
 
     // This function is called from native code in com_android_internal_os_Zygote.cpp
