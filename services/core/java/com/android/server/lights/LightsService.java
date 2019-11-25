@@ -84,8 +84,12 @@ public class LightsService extends SystemService {
                     if (DEBUG) {
                         Slog.d(TAG, "Using new setBrightness path!");
                     }
-                    SurfaceControl.setDisplayBrightness(mDisplayToken,
-                            (float) brightness / mSurfaceControlMaximumBrightness);
+                    if (brightness == 0) {
+                        SurfaceControl.setDisplayBrightness(mDisplayToken, -1.0f);
+                    } else {
+                        SurfaceControl.setDisplayBrightness(mDisplayToken,
+                                (float) (brightness - 1) / (mSurfaceControlMaximumBrightness - 1));
+                    }
                 } else {
                     int color = brightness & 0x000000ff;
                     color = 0xff000000 | (color << 16) | (color << 8) | color;
