@@ -84,6 +84,7 @@ public class UsbPermissionActivity extends AlertActivity
 
         final AlertController.AlertParams ap = mAlertParams;
         ap.mTitle = appName;
+        boolean useRecordWarning = false;
         if (mDevice == null) {
             // Accessory Case
 
@@ -97,13 +98,14 @@ public class UsbPermissionActivity extends AlertActivity
                             mPackageName)
                             == android.content.pm.PackageManager.PERMISSION_GRANTED;
             boolean isAudioCaptureDevice = mDevice.getHasAudioCapture();
-            boolean useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
+            useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
 
             int strID = useRecordWarning
                     ? R.string.usb_device_permission_prompt_warn
                     : R.string.usb_device_permission_prompt;
             ap.mMessage = getString(strID, appName, mDevice.getProductName());
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
+
         }
 
         ap.mPositiveButtonText = getString(android.R.string.ok);
@@ -111,7 +113,8 @@ public class UsbPermissionActivity extends AlertActivity
         ap.mPositiveButtonListener = this;
         ap.mNegativeButtonListener = this;
 
-        if (canBeDefault && (mDevice != null || mAccessory != null)) {
+        // Don't show the "always use" checkbox if the USB/Record warning is in effect
+        if (!useRecordWarning && canBeDefault && (mDevice != null || mAccessory != null)) {
             // add "open when" checkbox
             LayoutInflater inflater = (LayoutInflater) getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
