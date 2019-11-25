@@ -664,6 +664,17 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    @Nullable
+    @SystemApi
+    public Intent registerReceiverForAllUsers(@Nullable BroadcastReceiver receiver,
+            @NonNull IntentFilter filter, @Nullable String broadcastPermission,
+            @Nullable Handler scheduler) {
+        return mBase.registerReceiverForAllUsers(receiver, filter, broadcastPermission,
+                scheduler);
+    }
+
+    /** @hide */
+    @Override
     @UnsupportedAppUsage
     public Intent registerReceiverAsUser(
         BroadcastReceiver receiver, UserHandle user, IntentFilter filter,
