@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -74,7 +73,6 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
     @Mock private StatusBar mStatusBar;
     @Mock private DozeLog mDozeLog;
     @Mock private DozeParameters mDozeParameters;
-    @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     @Mock private DockManager mDockManager;
 
     @Before
@@ -85,7 +83,6 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
         when(mStatusBar.isDozing()).thenReturn(false);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
-        when(mSuperStatusBarViewFactory.getStatusBarWindowView()).thenReturn(mView);
         when(mDockManager.isDocked()).thenReturn(false);
 
         mController = new StatusBarWindowViewController(
@@ -105,9 +102,9 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
                 mDozeLog,
                 mDozeParameters,
                 new CommandQueue(mContext),
-                mSuperStatusBarViewFactory,
                 () -> mShadeController,
-                mDockManager);
+                mDockManager,
+                mView);
         mController.setupExpandedStatusBar();
         mController.setService(mStatusBar);
         mController.setDragDownHelper(mDragDownHelper);

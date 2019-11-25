@@ -145,6 +145,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import javax.inject.Provider;
+
 import dagger.Lazy;
 
 @SmallTest
@@ -227,6 +229,9 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private VolumeComponent mVolumeComponent;
     @Mock private CommandQueue mCommandQueue;
     @Mock private Recents mRecents;
+    @Mock private Provider<StatusBarComponent.Builder> mStatusBarComponentBuilderProvider;
+    @Mock private StatusBarComponent.Builder mStatusBarComponentBuilder;
+    @Mock private StatusBarComponent mStatusBarComponent;
     @Mock private PluginManager mPluginManager;
     @Mock private Divider mDivider;
     @Mock private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
@@ -300,6 +305,11 @@ public class StatusBarTest extends SysuiTestCase {
         when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
         when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
 
+        when(mStatusBarComponentBuilderProvider.get()).thenReturn(mStatusBarComponentBuilder);
+        when(mStatusBarComponentBuilder.build()).thenReturn(mStatusBarComponent);
+        when(mStatusBarComponent.getStatusBarWindowViewController()).thenReturn(
+                mStatusBarWindowViewController);
+
         mStatusBar = new StatusBar(
                 mContext,
                 mFeatureFlags,
@@ -354,7 +364,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationListener,
                 configurationController,
                 mStatusBarWindowController,
-                mStatusBarWindowViewController,
                 mLockscreenLockIconController,
                 mDozeParameters,
                 mScrimController,
@@ -367,6 +376,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mVolumeComponent,
                 mCommandQueue,
                 Optional.of(mRecents),
+                mStatusBarComponentBuilderProvider,
                 mPluginManager,
                 mRemoteInputUriController,
                 Optional.of(mDivider),
