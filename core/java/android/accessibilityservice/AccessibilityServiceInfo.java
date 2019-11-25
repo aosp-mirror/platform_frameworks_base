@@ -670,9 +670,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         }
         try {
             if (platformCompat != null) {
-                return platformCompat.isChangeEnabledByPackageName(
-                        REQUEST_ACCESSIBILITY_BUTTON_CHANGE, mResolveInfo.serviceInfo.packageName,
-                        mResolveInfo.serviceInfo.applicationInfo.uid);
+                return platformCompat.isChangeEnabled(REQUEST_ACCESSIBILITY_BUTTON_CHANGE,
+                        mResolveInfo.serviceInfo.applicationInfo);
             }
         } catch (RemoteException ignore) {
         }
