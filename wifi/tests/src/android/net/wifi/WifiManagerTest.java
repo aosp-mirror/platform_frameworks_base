@@ -60,7 +60,7 @@ import android.net.wifi.WifiManager.LocalOnlyHotspotSubscription;
 import android.net.wifi.WifiManager.NetworkRequestMatchCallback;
 import android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback;
 import android.net.wifi.WifiManager.OnWifiUsabilityStatsListener;
-import android.net.wifi.WifiManager.ScanResultsListener;
+import android.net.wifi.WifiManager.ScanResultsCallback;
 import android.net.wifi.WifiManager.SoftApCallback;
 import android.net.wifi.WifiManager.SuggestionConnectionStatusListener;
 import android.net.wifi.WifiManager.TrafficStateCallback;
@@ -112,15 +112,16 @@ public class WifiManagerTest {
     @Mock TrafficStateCallback mTrafficStateCallback;
     @Mock NetworkRequestMatchCallback mNetworkRequestMatchCallback;
     @Mock OnWifiUsabilityStatsListener mOnWifiUsabilityStatsListener;
-    @Mock ScanResultsListener mScanResultListener;
     @Mock SuggestionConnectionStatusListener mListener;
-    @Mock Executor mCallbackExecutor;
+    @Mock Runnable mRunnable;
     @Mock Executor mExecutor;
+    @Mock Executor mAnotherExecutor;
 
     private Handler mHandler;
     private TestLooper mLooper;
     private WifiManager mWifiManager;
     private WifiNetworkSuggestion mWifiNetworkSuggestion;
+    private ScanResultsCallback mScanResultsCallback;
 
     @Before
     public void setUp() throws Exception {
@@ -133,6 +134,12 @@ public class WifiManagerTest {
         mWifiManager = new WifiManager(mContext, mWifiService, mLooper.getLooper());
         verify(mWifiService).getVerboseLoggingLevel();
         mWifiNetworkSuggestion = new WifiNetworkSuggestion();
+        mScanResultsCallback = new ScanResultsCallback() {
+            @Override
+            public void onScanResultsAvailable() {
+                mRunnable.run();
+            }
+        };
     }
 
     /**
@@ -1778,65 +1785,81 @@ public class WifiManagerTest {
     }
 
     /**
-     * Verify an IllegalArgumentException is thrown if listener is not provided.
+     * Verify an IllegalArgumentException is thrown if callback is not provided.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testAddScanResultsListenerWithNullListener() throws Exception {
-        mWifiManager.addScanResultsListener(mCallbackExecutor, null);
+    public void testRegisterScanResultsCallbackWithNullCallback() throws Exception {
+        mWifiManager.registerScanResultsCallback(mExecutor, null);
     }
 
     /**
      * Verify an IllegalArgumentException is thrown if executor is not provided.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testAddScanResultsListenerWithNullExecutor() throws Exception {
-        mWifiManager.addScanResultsListener(null, mScanResultListener);
+    public void testRegisterCallbackWithNullExecutor() throws Exception {
+        mWifiManager.registerScanResultsCallback(null, mScanResultsCallback);
     }
 
     /**
-     * Verify client provided listener is being called to the right listener.
+     * Verify client provided callback is being called to the right callback.
      */
     @Test
-    public void testAddScanResultsListenerAndReceiveEvent() throws Exception {
-        ArgumentCaptor<IScanResultsListener.Stub> callbackCaptor =
-                ArgumentCaptor.forClass(IScanResultsListener.Stub.class);
-        Executor executor = new SynchronousExecutor();
-        mWifiManager.addScanResultsListener(executor, mScanResultListener);
-        verify(mWifiService).registerScanResultsListener(any(IBinder.class),
-                callbackCaptor.capture(), anyInt());
+    public void testAddScanResultsCallbackAndReceiveEvent() throws Exception {
+        ArgumentCaptor<IScanResultsCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(IScanResultsCallback.Stub.class);
+        mWifiManager.registerScanResultsCallback(new SynchronousExecutor(), mScanResultsCallback);
+        verify(mWifiService).registerScanResultsCallback(callbackCaptor.capture());
         callbackCaptor.getValue().onScanResultsAvailable();
-        verify(mScanResultListener).onScanResultsAvailable();
+        verify(mRunnable).run();
     }
 
     /**
-     * Verify client provided listener is being called on the right executor.
+     * Verify client provided callback is being called to the right executor.
      */
     @Test
-    public void testAddScanResultsListenerWithTheTargetExecutor() throws Exception {
-        ArgumentCaptor<IScanResultsListener.Stub> callbackCaptor =
-                ArgumentCaptor.forClass(IScanResultsListener.Stub.class);
-        mWifiManager.addScanResultsListener(mExecutor, mScanResultListener);
-        verify(mWifiService).registerScanResultsListener(any(IBinder.class),
-                callbackCaptor.capture(), anyInt());
+    public void testRegisterScanResultsCallbackWithTheTargetExecutor() throws Exception {
+        ArgumentCaptor<IScanResultsCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(IScanResultsCallback.Stub.class);
+        mWifiManager.registerScanResultsCallback(mExecutor, mScanResultsCallback);
+        verify(mWifiService).registerScanResultsCallback(callbackCaptor.capture());
+        mWifiManager.registerScanResultsCallback(mAnotherExecutor, mScanResultsCallback);
         callbackCaptor.getValue().onScanResultsAvailable();
-        verify(mExecutor).execute(any(Runnable.class));
+        verify(mExecutor, never()).execute(any(Runnable.class));
+        verify(mAnotherExecutor).execute(any(Runnable.class));
     }
 
     /**
-     * Verify client removeScanResultsListener.
+     * Verify client register unregister then register again, to ensure callback still works.
      */
     @Test
-    public void testRemoveScanResultsListener() throws Exception {
-        mWifiManager.removeScanResultsListener(mScanResultListener);
-        verify(mWifiService).unregisterScanResultsListener(anyInt());
+    public void testRegisterUnregisterThenRegisterAgainWithScanResultCallback() throws Exception {
+        ArgumentCaptor<IScanResultsCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(IScanResultsCallback.Stub.class);
+        mWifiManager.registerScanResultsCallback(new SynchronousExecutor(), mScanResultsCallback);
+        verify(mWifiService).registerScanResultsCallback(callbackCaptor.capture());
+        mWifiManager.unregisterScanResultsCallback(mScanResultsCallback);
+        callbackCaptor.getValue().onScanResultsAvailable();
+        verify(mRunnable, never()).run();
+        mWifiManager.registerScanResultsCallback(new SynchronousExecutor(), mScanResultsCallback);
+        callbackCaptor.getValue().onScanResultsAvailable();
+        verify(mRunnable).run();
     }
 
     /**
-     * Verify client removeScanResultsListener with null listener will cause an exception.
+     * Verify client unregisterScanResultsCallback.
+     */
+    @Test
+    public void testUnregisterScanResultsCallback() throws Exception {
+        mWifiManager.unregisterScanResultsCallback(mScanResultsCallback);
+        verify(mWifiService).unregisterScanResultsCallback(any());
+    }
+
+    /**
+     * Verify client unregisterScanResultsCallback with null callback will cause an exception.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testRemoveScanResultsListenerWithNullListener() throws Exception {
-        mWifiManager.removeScanResultsListener(null);
+    public void testUnregisterScanResultsCallbackWithNullCallback() throws Exception {
+        mWifiManager.unregisterScanResultsCallback(null);
     }
 
     /**

@@ -16,9 +16,12 @@
 
 package android.net.wifi;
 
-/** @hide */
-
-oneway interface IScanResultsListener
+/**
+ * Interface for Wi-Fi scan result available callback.
+ *
+ * @hide
+ */
+oneway interface IScanResultsCallback
 {
     void onScanResultsAvailable();
 }

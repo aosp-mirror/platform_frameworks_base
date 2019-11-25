@@ -5453,40 +5453,76 @@ public class WifiManager {
     }
 
     /**
-     * Interface for scan results listener. Should be implemented by applications and set when
-     * calling {@link WifiManager#addScanResultsListener(Executor, ScanResultsListener)}.
+     * Abstract class for scan results callback. Should be extended by applications and set when
+     * calling {@link WifiManager#registerScanResultsCallback(Executor, ScanResultsCallback)}.
      */
-    public interface ScanResultsListener {
+    public abstract static class ScanResultsCallback {
+        private final ScanResultsCallbackProxy mScanResultsCallbackProxy;
+
+        public ScanResultsCallback() {
+            mScanResultsCallbackProxy = new ScanResultsCallbackProxy();
+        }
 
         /**
-         * Called when new scan results available.
-         * Caller should use {@link WifiManager#getScanResults()} to get the scan results.
+         * Called when new scan results are available.
+         * Clients should use {@link WifiManager#getScanResults()} to get the scan results.
          */
-        void onScanResultsAvailable();
-    }
+        public abstract void onScanResultsAvailable();
 
-    private class ScanResultsListenerProxy extends IScanResultsListener.Stub {
-        private final Executor mExecutor;
-        private final ScanResultsListener mListener;
-
-        ScanResultsListenerProxy(Executor executor, ScanResultsListener listener) {
-            mExecutor = executor;
-            mListener = listener;
+        /*package*/ @NonNull ScanResultsCallbackProxy getProxy() {
+            return mScanResultsCallbackProxy;
         }
 
-        @Override
-        public void onScanResultsAvailable() {
-            mExecutor.execute(mListener::onScanResultsAvailable);
+        private static class ScanResultsCallbackProxy extends IScanResultsCallback.Stub {
+            private final Object mLock = new Object();
+            @Nullable @GuardedBy("mLock") private Executor mExecutor;
+            @Nullable @GuardedBy("mLock") private ScanResultsCallback mCallback;
+
+            ScanResultsCallbackProxy() {
+                mCallback = null;
+                mExecutor = null;
+            }
+
+            /*package*/ void initProxy(@NonNull Executor executor,
+                    @NonNull ScanResultsCallback callback) {
+                synchronized (mLock) {
+                    mExecutor = executor;
+                    mCallback = callback;
+                }
+            }
+
+            /*package*/ void cleanUpProxy() {
+                synchronized (mLock) {
+                    mExecutor = null;
+                    mCallback = null;
+                }
+            }
+
+            @Override
+            public void onScanResultsAvailable() {
+                ScanResultsCallback callback;
+                Executor executor;
+                synchronized (mLock) {
+                    executor = mExecutor;
+                    callback = mCallback;
+                }
+                if (callback == null || executor == null) {
+                    return;
+                }
+                Binder.clearCallingIdentity();
+                executor.execute(callback::onScanResultsAvailable);
+            }
         }
+
     }
 
     /**
-     * Add a listener for Scan Results. See {@link ScanResultsListener}.
+     * Register a callback for Scan Results. See {@link ScanResultsCallback}.
      * Caller will receive the event when scan results are available.
      * Caller should use {@link WifiManager#getScanResults()} requires
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} to get the scan results.
-     * Caller can remove a previously registered listener using
-     * {@link WifiManager#removeScanResultsListener(ScanResultsListener)}
+     * Caller can remove a previously registered callback using
+     * {@link WifiManager#unregisterScanResultsCallback(ScanResultsCallback)}
      * Same caller can add multiple listeners.
      * <p>
      * Applications should have the
@@ -5494,49 +5530,52 @@ public class WifiManager {
      * without the permission will trigger a {@link java.lang.SecurityException}.
      * <p>
      *
-     * @param executor The executor to execute the listener of the {@code listener} object.
-     * @param listener listener for Scan Results events
+     * @param executor The executor to execute the callback of the {@code callback} object.
+     * @param callback callback for Scan Results events
      */
 
     @RequiresPermission(ACCESS_WIFI_STATE)
-    public void addScanResultsListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull ScanResultsListener listener) {
-        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+    public void registerScanResultsCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull ScanResultsCallback callback) {
         if (executor == null) throw new IllegalArgumentException("executor cannot be null");
-        Log.v(TAG, "addScanResultsListener: listener=" + listener + ", executor=" + executor);
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+
+        Log.v(TAG, "registerScanResultsCallback: callback=" + callback
+                + ", executor=" + executor);
+        ScanResultsCallback.ScanResultsCallbackProxy proxy = callback.getProxy();
+        proxy.initProxy(executor, callback);
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) {
                 throw new RemoteException("Wifi service is not running");
             }
-            iWifiManager.registerScanResultsListener(
-                    new Binder(),
-                    new ScanResultsListenerProxy(executor, listener),
-                    listener.hashCode());
+            iWifiManager.registerScanResultsCallback(proxy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Allow callers to remove a previously added listener. After calling this method,
+     * Allow callers to unregister a previously registered callback. After calling this method,
      * applications will no longer receive Scan Results events.
      *
-     * @param listener listener to remove for Scan Results events
+     * @param callback callback to unregister for Scan Results events
      */
     @RequiresPermission(ACCESS_WIFI_STATE)
-    public void removeScanResultsListener(@NonNull ScanResultsListener listener) {
-        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
-        Log.v(TAG, "removeScanResultsListener: listener=" + listener);
-
+    public void unregisterScanResultsCallback(@NonNull ScanResultsCallback callback) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "unregisterScanResultsCallback: Callback=" + callback);
+        ScanResultsCallback.ScanResultsCallbackProxy proxy = callback.getProxy();
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) {
                 throw new RemoteException("Wifi service is not running");
             }
-            iWifiManager.unregisterScanResultsListener(listener.hashCode());
+            iWifiManager.unregisterScanResultsCallback(proxy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            proxy.cleanUpProxy();
         }
     }
 
