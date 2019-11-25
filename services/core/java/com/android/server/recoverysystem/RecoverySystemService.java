@@ -400,13 +400,9 @@ public class RecoverySystemService extends IRecoverySystem.Stub {
          * Sends a command to the uncrypt service.
          *
          * @param command command to send to the uncrypt service
-         * @throws IOException if the socket is closed or there was an error writing to the socket
+         * @throws IOException if there was an error writing to the socket
          */
         public void sendCommand(String command) throws IOException {
-            if (mLocalSocket.isClosed()) {
-                throw new IOException("socket is closed");
-            }
-
             byte[] cmdUtf8 = command.getBytes(StandardCharsets.UTF_8);
             mOutputStream.writeInt(cmdUtf8.length);
             mOutputStream.write(cmdUtf8, 0, cmdUtf8.length);
@@ -415,25 +411,17 @@ public class RecoverySystemService extends IRecoverySystem.Stub {
         /**
          * Reads the status from the uncrypt service which is usually represented as a percentage.
          * @return an integer representing the percentage completed
-         * @throws IOException if the socket was closed or there was an error reading the socket
+         * @throws IOException if there was an error reading the socket
          */
         public int getPercentageUncrypted() throws IOException {
-            if (mLocalSocket.isClosed()) {
-                throw new IOException("socket is closed");
-            }
-
             return mInputStream.readInt();
         }
 
         /**
          * Sends a confirmation to the uncrypt service.
-         * @throws IOException if the socket was closed or there was an error writing to the socket
+         * @throws IOException if there was an error writing to the socket
          */
         public void sendAck() throws IOException {
-            if (mLocalSocket.isClosed()) {
-                throw new IOException("socket is closed");
-            }
-
             mOutputStream.writeInt(0);
         }
 
