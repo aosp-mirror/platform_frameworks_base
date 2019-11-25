@@ -35,6 +35,7 @@ import android.content.Context;
 import android.content.pm.ProviderInfo;
 import android.os.Bundle;
 
+import com.android.settingslib.drawer.MasterSwitchControllerTest.TestMasterSwitchController;
 import com.android.settingslib.drawer.SwitchController.MetaData;
 
 import org.junit.Before;
@@ -84,8 +85,8 @@ public class SwitchesProviderTest {
     }
 
     @Test
-    public void attachInfo_NoMetaDataInController_shouldThrowIllegalArgumentException() {
-        thrown.expect(IllegalArgumentException.class);
+    public void attachInfo_NoMetaDataInController_shouldThrowNullPointerException() {
+        thrown.expect(NullPointerException.class);
         final TestSwitchController controller = new TestSwitchController();
         controller.setKey("123");
         mSwitchesProvider.addSwitchController(controller);
@@ -120,6 +121,19 @@ public class SwitchesProviderTest {
         mSwitchesProvider.addSwitchController(controller2);
 
         mSwitchesProvider.attachInfo(mContext, mProviderInfo);
+    }
+
+    @Test
+    public void getSwitchData_shouldNotReturnMasterSwitchData() {
+        final SwitchController controller = new TestMasterSwitchController("123");
+        mSwitchesProvider.addSwitchController(controller);
+        mSwitchesProvider.attachInfo(mContext, mProviderInfo);
+
+        final Bundle switchData = mSwitchesProvider.call(METHOD_GET_SWITCH_DATA, "uri" ,
+                null /* extras*/);
+
+        final ArrayList<Bundle> dataList = switchData.getParcelableArrayList(EXTRA_SWITCH_DATA);
+        assertThat(dataList).isEmpty();
     }
 
     @Test

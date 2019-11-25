@@ -113,7 +113,7 @@ public class TileUtilsTest {
         when(mPackageManager.queryIntentContentProvidersAsUser(any(Intent.class), anyInt(),
                 anyInt())).thenReturn(info);
 
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles).hasSize(2);
@@ -135,7 +135,7 @@ public class TileUtilsTest {
         when(mPackageManager.queryIntentContentProvidersAsUser(any(Intent.class), anyInt(),
                 anyInt())).thenReturn(info);
 
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* requiresSettings */);
 
         assertThat(outTiles).hasSize(2);
@@ -156,7 +156,7 @@ public class TileUtilsTest {
         when(mPackageManager.queryIntentContentProvidersAsUser(any(Intent.class), anyInt(),
                 anyInt())).thenReturn(info);
 
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION,
                 addedCache, null /* defaultCategory */, outTiles, false /* requiresSettings */);
 
         assertThat(outTiles).isEmpty();
@@ -197,7 +197,7 @@ public class TileUtilsTest {
         when(mPackageManager.queryIntentContentProvidersAsUser(any(Intent.class), anyInt(),
                 anyInt())).thenReturn(info);
 
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles).hasSize(2);
@@ -222,7 +222,7 @@ public class TileUtilsTest {
         when(mResources.getString(eq(123)))
                 .thenReturn("my localized title");
 
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
         assertThat(outTiles).hasSize(2);
         assertThat(outTiles.get(0).getTitle(mContext)).isEqualTo("my localized title");
@@ -245,7 +245,7 @@ public class TileUtilsTest {
         when(mPackageManager.queryIntentContentProvidersAsUser(any(Intent.class), anyInt(),
                 anyInt())).thenReturn(info);
 
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.get(0).isIconTintable(mContext)).isFalse();
@@ -266,7 +266,7 @@ public class TileUtilsTest {
         when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
                 .thenReturn(info);
 
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles).hasSize(1);
@@ -276,7 +276,7 @@ public class TileUtilsTest {
         resolveInfo.activityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON,
                 com.android.internal.R.drawable.ic_phone);
         outTiles.clear();
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles).hasSize(1);
@@ -300,7 +300,7 @@ public class TileUtilsTest {
         when(mPackageManager.queryIntentContentProvidersAsUser(any(Intent.class), anyInt(),
                 anyInt())).thenReturn(info);
 
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles.get(0).isIconTintable(mContext)).isTrue();
@@ -321,7 +321,7 @@ public class TileUtilsTest {
         when(mPackageManager.queryIntentContentProvidersAsUser(any(Intent.class), anyInt(),
                 anyInt())).thenReturn(info);
 
-        TileUtils.getTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION, addedCache,
                 null /* defaultCategory */, outTiles, false /* usePriority */);
 
         assertThat(outTiles).hasSize(2);
