@@ -86,7 +86,7 @@
 
     <!-- Biometric dialog colors -->
     <color name="biometric_dialog_gray">#ff888888</color>
-    <color name="biometric_dialog_accent">#ff80cbc4</color> <!-- light teal -->
+    <color name="biometric_dialog_accent">@*android:color/accent_device_default_dark</color>
     <color name="biometric_dialog_error">#fff28b82</color> <!-- red 300 -->
 
     <color name="GM2_green_500">#FF41Af6A</color>
