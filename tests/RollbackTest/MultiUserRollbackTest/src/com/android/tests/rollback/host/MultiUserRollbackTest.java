@@ -28,13 +28,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Runs rollback tests from a secondary user.
+ * Runs rollback tests for multiple users.
  */
 @RunWith(DeviceJUnit4ClassRunner.class)
-public class SecondaryUserRollbackTest extends BaseHostJUnit4Test {
-    private static final int SYSTEM_USER_ID = 0;
+public class MultiUserRollbackTest extends BaseHostJUnit4Test {
     // The user that was running originally when the test starts.
-    private int mOriginalUser = SYSTEM_USER_ID;
+    private int mOriginalUserId;
     private int mSecondaryUserId = -1;
     private static final long SWITCH_USER_COMPLETED_NUMBER_OF_POLLS = 60;
     private static final long SWITCH_USER_COMPLETED_POLL_INTERVAL_IN_MILLIS = 1000;
@@ -42,23 +41,45 @@ public class SecondaryUserRollbackTest extends BaseHostJUnit4Test {
 
     @After
     public void tearDown() throws Exception {
-        getDevice().switchUser(mOriginalUser);
+        getDevice().switchUser(mOriginalUserId);
         getDevice().executeShellCommand("pm uninstall com.android.cts.install.lib.testapp.A");
-        getDevice().executeShellCommand("pm uninstall com.android.cts.install.lib.testapp.B");
         removeSecondaryUserIfNecessary();
     }
 
     @Before
     public void setup() throws Exception {
+        mOriginalUserId = getDevice().getCurrentUser();
+        installPackageAsUser("RollbackTest.apk", true, mOriginalUserId);
         createAndSwitchToSecondaryUserIfNecessary();
-        installPackageAsUser("RollbackTest.apk", true, mSecondaryUserId, "--user current");
+        installPackageAsUser("RollbackTest.apk", true, mSecondaryUserId);
     }
 
     @Test
-    public void testBasic() throws Exception {
-        assertTrue(runDeviceTests("com.android.tests.rollback",
-                "com.android.tests.rollback.RollbackTest",
-                "testBasic"));
+    public void testBasicForSecondaryUser() throws Exception {
+        runPhaseForUsers("testBasic", mSecondaryUserId);
+    }
+
+    @Test
+    public void testMultipleUsers() throws Exception {
+        runPhaseForUsers("testMultipleUsersInstallV1", mOriginalUserId, mSecondaryUserId);
+        runPhaseForUsers("testMultipleUsersUpgradeToV2", mOriginalUserId);
+        runPhaseForUsers("testMultipleUsersUpdateUserData", mOriginalUserId, mSecondaryUserId);
+        switchToUser(mOriginalUserId);
+        getDevice().executeShellCommand("pm rollback-app com.android.cts.install.lib.testapp.A");
+        runPhaseForUsers("testMultipleUsersVerifyUserdataRollback", mOriginalUserId,
+                mSecondaryUserId);
+    }
+
+    /**
+     * Run the phase for the given user ids, in the order they are given.
+     */
+    private void runPhaseForUsers(String phase, int... userIds) throws Exception {
+        for (int userId: userIds) {
+            switchToUser(userId);
+            assertTrue(runDeviceTests("com.android.tests.rollback",
+                    "com.android.tests.rollback.MultiUserRollbackTest",
+                    phase));
+        }
     }
 
     private void removeSecondaryUserIfNecessary() throws Exception {
@@ -70,19 +91,23 @@ public class SecondaryUserRollbackTest extends BaseHostJUnit4Test {
 
     private void createAndSwitchToSecondaryUserIfNecessary() throws Exception {
         if (mSecondaryUserId == -1) {
-            mOriginalUser = getDevice().getCurrentUser();
-            mSecondaryUserId = getDevice().createUser("SecondaryUserRollbackTest_User");
-            assertTrue(getDevice().switchUser(mSecondaryUserId));
-            // give time for user to be switched
-            waitForSwitchUserCompleted(mSecondaryUserId);
+            mOriginalUserId = getDevice().getCurrentUser();
+            mSecondaryUserId = getDevice().createUser("MultiUserRollbackTest_User"
+                    + System.currentTimeMillis());
+            switchToUser(mSecondaryUserId);
         }
     }
 
-    private void waitForSwitchUserCompleted(int userId) throws Exception {
+    private void switchToUser(int userId) throws Exception {
+        if (getDevice().getCurrentUser() == userId) {
+            return;
+        }
+
+        assertTrue(getDevice().switchUser(userId));
         for (int i = 0; i < SWITCH_USER_COMPLETED_NUMBER_OF_POLLS; ++i) {
-            String logs = getDevice().executeAdbCommand("logcat", "-v", "brief", "-d",
-                    "ActivityManager:D");
-            if (logs.contains("Posting BOOT_COMPLETED user #" + userId)) {
+            String userState = getDevice().executeShellCommand("am get-started-user-state "
+                    + userId);
+            if (userState.contains("RUNNING_UNLOCKED")) {
                 return;
             }
             Thread.sleep(SWITCH_USER_COMPLETED_POLL_INTERVAL_IN_MILLIS);

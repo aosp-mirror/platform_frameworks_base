@@ -7,7 +7,7 @@
       "name": "StagedRollbackTest"
     },
     {
-      "name": "SecondaryUserRollbackTest"
+      "name": "MultiUserRollbackTest"
     }
   ]
 }
