@@ -2972,6 +2972,7 @@ public class SubscriptionManager {
      * permission or had carrier privilege permission on the subscription.
      * {@link TelephonyManager#hasCarrierPrivileges()}
      *
+     * @throws IllegalStateException if Telephony service is in bad state.
      * @throws SecurityException if the caller doesn't meet the requirements
      *             outlined above.
      *
