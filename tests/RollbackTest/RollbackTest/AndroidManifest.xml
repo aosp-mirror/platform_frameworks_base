@@ -18,7 +18,7 @@
     package="com.android.tests.rollback" >
 
     <application>
-        <receiver android:name="com.android.tests.rollback.LocalIntentSender"
+        <receiver android:name="com.android.cts.install.lib.LocalIntentSender"
                   android:exported="true" />
         <uses-library android:name="android.test.runner" />
     </application>
