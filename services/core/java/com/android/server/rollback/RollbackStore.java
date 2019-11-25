@@ -25,7 +25,7 @@ import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
 import android.util.IntArray;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseLongArray;
 
 import libcore.io.IoUtils;
@@ -83,7 +83,7 @@ class RollbackStore {
                 try {
                     rollbacks.add(loadRollbackData(rollbackDir));
                 } catch (IOException e) {
-                    Log.e(TAG, "Unable to read rollback data at " + rollbackDir, e);
+                    Slog.e(TAG, "Unable to read rollback data at " + rollbackDir, e);
                     removeFile(rollbackDir);
                 }
             }
