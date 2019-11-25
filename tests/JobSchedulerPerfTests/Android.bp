@@ -19,7 +19,7 @@ android_test {
         "androidx.test.rules",
         "apct-perftests-utils",
         "services",
-        "jobscheduler-service",
+        "service-jobscheduler",
     ],
     platform_apis: true,
     certificate: "platform",
