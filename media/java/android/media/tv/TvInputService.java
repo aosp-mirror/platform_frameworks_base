@@ -173,6 +173,12 @@ public abstract class TvInputService extends Service {
                 mServiceHandler.obtainMessage(ServiceHandler.DO_REMOVE_HDMI_INPUT,
                         deviceInfo).sendToTarget();
             }
+
+            @Override
+            public void notifyHdmiDeviceUpdated(HdmiDeviceInfo deviceInfo) {
+                mServiceHandler.obtainMessage(ServiceHandler.DO_UPDATE_HDMI_INPUT,
+                        deviceInfo).sendToTarget();
+            }
         };
     }
 
@@ -255,6 +261,24 @@ public abstract class TvInputService extends Service {
     @SystemApi
     public String onHdmiDeviceRemoved(HdmiDeviceInfo deviceInfo) {
         return null;
+    }
+
+    /**
+     * Called when {@code deviceInfo} is updated.
+     *
+     * <p>The changes are usually cuased by the corresponding HDMI-CEC logical device.
+     *
+     * <p>The default behavior ignores all changes.
+     *
+     * <p>The TV input service responsible for {@code deviceInfo} can update the {@link TvInputInfo}
+     * object based on the updated {@code deviceInfo} (e.g. update the label based on the preferred
+     * device OSD name).
+     *
+     * @param deviceInfo the updated {@link HdmiDeviceInfo} object.
+     * @hide
+     */
+    @SystemApi
+    public void onHdmiDeviceUpdated(@NonNull HdmiDeviceInfo deviceInfo) {
     }
 
     private boolean isPassthroughInput(String inputId) {
@@ -1962,6 +1986,7 @@ public abstract class TvInputService extends Service {
         private static final int DO_REMOVE_HARDWARE_INPUT = 5;
         private static final int DO_ADD_HDMI_INPUT = 6;
         private static final int DO_REMOVE_HDMI_INPUT = 7;
+        private static final int DO_UPDATE_HDMI_INPUT = 8;
 
         private void broadcastAddHardwareInput(int deviceId, TvInputInfo inputInfo) {
             int n = mCallbacks.beginBroadcast();
@@ -2129,6 +2154,11 @@ public abstract class TvInputService extends Service {
                     if (inputId != null) {
                         broadcastRemoveHardwareInput(inputId);
                     }
+                    return;
+                }
+                case DO_UPDATE_HDMI_INPUT: {
+                    HdmiDeviceInfo deviceInfo = (HdmiDeviceInfo) msg.obj;
+                    onHdmiDeviceUpdated(deviceInfo);
                     return;
                 }
                 default: {
