@@ -263,6 +263,22 @@ public class AtomicFormulaTest {
         assertEquals(formula, newFormula);
     }
 
+    @Test
+    public void testInvalidAtomicFormula_invalidKey() {
+        assertExpectException(
+                IllegalArgumentException.class,
+                /* expectedExceptionMessageRegex */ "Unknown key: -1",
+                () -> new IntAtomicFormula(/* key= */ -1, AtomicFormula.EQ, 0));
+    }
+
+    @Test
+    public void testInvalidAtomicFormula_invalidOperator() {
+        assertExpectException(
+                IllegalArgumentException.class,
+                /* expectedExceptionMessageRegex */ "Unknown operator: -1",
+                () -> new IntAtomicFormula(AtomicFormula.VERSION_CODE, /* operator= */ -1, 0));
+    }
+
     /** Returns a builder with all fields filled with some dummy data. */
     private AppInstallMetadata.Builder getAppInstallMetadataBuilder() {
         return new AppInstallMetadata.Builder()

@@ -106,4 +106,12 @@ public class RuleTest {
 
         assertEquals(newRule, rule);
     }
+
+    @Test
+    public void testInvalidRule_invalidEffect() {
+        assertExpectException(
+                IllegalArgumentException.class,
+                /* expectedExceptionMessageRegex */ "Unknown effect: -1",
+                () -> new Rule(PACKAGE_NAME_ATOMIC_FORMULA, /* effect= */ -1));
+    }
 }

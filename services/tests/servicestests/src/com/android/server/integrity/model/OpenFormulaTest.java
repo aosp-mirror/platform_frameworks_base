@@ -53,7 +53,7 @@ public class OpenFormulaTest {
         assertExpectException(
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex */
-                String.format("Connector AND must have at least 2 formulas"),
+                "Connector AND must have at least 2 formulas",
                 () ->
                         new OpenFormula(
                                 OpenFormula.AND, Collections.singletonList(ATOMIC_FORMULA_1)));
@@ -64,7 +64,7 @@ public class OpenFormulaTest {
         assertExpectException(
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex */
-                String.format("Connector NOT must have 1 formula only"),
+                "Connector NOT must have 1 formula only",
                 () ->
                         new OpenFormula(
                                 OpenFormula.NOT,
@@ -73,7 +73,8 @@ public class OpenFormulaTest {
 
     @Test
     public void testIsSatisfiable_notFalse_true() {
-        OpenFormula openFormula = new OpenFormula(OpenFormula.NOT, Arrays.asList(ATOMIC_FORMULA_1));
+        OpenFormula openFormula = new OpenFormula(OpenFormula.NOT,
+                Collections.singletonList(ATOMIC_FORMULA_1));
         AppInstallMetadata appInstallMetadata =
                 getAppInstallMetadataBuilder().setPackageName("test2").build();
         // validate assumptions about the metadata
@@ -84,7 +85,8 @@ public class OpenFormulaTest {
 
     @Test
     public void testIsSatisfiable_notTrue_false() {
-        OpenFormula openFormula = new OpenFormula(OpenFormula.NOT, Arrays.asList(ATOMIC_FORMULA_1));
+        OpenFormula openFormula = new OpenFormula(OpenFormula.NOT,
+                Collections.singletonList(ATOMIC_FORMULA_1));
         AppInstallMetadata appInstallMetadata =
                 getAppInstallMetadataBuilder().setPackageName("test1").build();
         // validate assumptions about the metadata
@@ -207,6 +209,15 @@ public class OpenFormulaTest {
         OpenFormula newFormula = OpenFormula.CREATOR.createFromParcel(p);
 
         assertEquals(formula, newFormula);
+    }
+
+    @Test
+    public void testInvalidOpenFormula_invalidConnector() {
+        assertExpectException(
+                IllegalArgumentException.class,
+                /* expectedExceptionMessageRegex */ "Unknown connector: -1",
+                () -> new OpenFormula(/* connector= */ -1,
+                        Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2)));
     }
 
     /** Returns a builder with all fields filled with some dummy data. */

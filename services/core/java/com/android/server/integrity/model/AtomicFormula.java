@@ -112,6 +112,7 @@ public abstract class AtomicFormula implements Formula {
     private final @Key int mKey;
 
     public AtomicFormula(@Key int key) {
+        checkArgument(isValidKey(key), String.format("Unknown key: %d", key));
         mKey = key;
     }
 
@@ -134,6 +135,8 @@ public abstract class AtomicFormula implements Formula {
             checkArgument(
                     key == VERSION_CODE,
                     String.format("Key %s cannot be used with IntAtomicFormula", keyToString(key)));
+            checkArgument(isValidOperator(operator),
+                    String.format("Unknown operator: %d", operator));
             mOperator = operator;
             mValue = value;
         }
@@ -236,6 +239,14 @@ public abstract class AtomicFormula implements Formula {
                     throw new IllegalStateException(
                             "Unexpected key in IntAtomicFormula" + getKey());
             }
+        }
+
+        private static boolean isValidOperator(int operator) {
+            return operator == EQ
+                    || operator == LT
+                    || operator == LE
+                    || operator == GT
+                    || operator == GE;
         }
     }
 
@@ -485,5 +496,14 @@ public abstract class AtomicFormula implements Formula {
             default:
                 throw new IllegalArgumentException("Unknown operator " + op);
         }
+    }
+
+    private static boolean isValidKey(int key) {
+        return key == PACKAGE_NAME
+                || key == APP_CERTIFICATE
+                || key == VERSION_CODE
+                || key == INSTALLER_NAME
+                || key == INSTALLER_CERTIFICATE
+                || key == PRE_INSTALLED;
     }
 }
