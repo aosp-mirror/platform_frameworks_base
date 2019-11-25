@@ -56,8 +56,14 @@ void write_namespace(FILE* out, const string& cppNamespaces);
 void write_closing_namespace(FILE* out, const string& cppNamespaces);
 
 void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl,
-        const string& moduleName
-);
+        const string& moduleName);
+
+void write_native_method_signature(FILE* out, const string& methodName,
+        const vector<java_type_t>& signature, const AtomDecl& attributionDecl,
+        const string& closer);
+
+void write_native_method_call(FILE* out, const string& methodName,
+        const vector<java_type_t>& signature, const AtomDecl& attributionDecl, int argIndex = 1);
 
 // Common Java helpers.
 void write_java_atom_codes(FILE* out, const Atoms& atoms, const string& moduleName);
@@ -69,14 +75,12 @@ void write_java_usage(FILE* out, const string& method_name, const string& atom_c
 
 int write_java_non_chained_methods(FILE* out, const map<vector<java_type_t>,
         set<string>>& signatures_to_modules,
-        const string& moduleName
-);
+        const string& moduleName);
 
 int write_java_work_source_methods(
         FILE* out,
         const map<vector<java_type_t>, set<string>>& signatures_to_modules,
-        const string& moduleName
-);
+        const string& moduleName);
 
 }  // namespace stats_log_api_gen
 }  // namespace android

@@ -25,6 +25,8 @@ cc_binary_host {
         "java_writer.cpp",
         "java_writer_q.cpp",
         "main.cpp",
+        "native_writer.cpp",
+        "native_writer_q.cpp",
         "utils.cpp",
     ],
     cflags: [

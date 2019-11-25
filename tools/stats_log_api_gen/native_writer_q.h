@@ -26,10 +26,22 @@ namespace stats_log_api_gen {
 
 using namespace std;
 
-int write_atoms_info_cpp(FILE* out, const Atoms& atoms, const string& namespaceStr,
-        const string& importHeader, const string& statslogHeader);
+void write_native_cpp_includes_q(FILE* out);
 
-int write_atoms_info_header(FILE* out, const Atoms& atoms, const string& namespaceStr);
+void write_native_stats_log_cpp_globals_q(FILE* out);
+
+void write_native_try_stats_write_methods_q(FILE* out, const Atoms& atoms,
+        const AtomDecl& attributionDecl, const string& moduleName);
+
+void write_native_stats_write_methods_q(FILE* out, const string& methodName, const Atoms& atoms,
+        const AtomDecl& attributionDecl, const string& moduleName, const string& tryMethodName);
+
+void write_native_try_stats_write_non_chained_methods_q(FILE* out, const Atoms& atoms,
+        const AtomDecl& attributionDecl, const string& moduleName);
+
+void write_native_stats_write_non_chained_methods_q(FILE* out, const string& methodName,
+        const Atoms& atoms, const AtomDecl& attributionDecl, const string& moduleName,
+        const string& tryMethodName);
 
 }  // namespace stats_log_api_gen
 }  // namespace android

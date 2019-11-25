@@ -83,7 +83,9 @@ static int write_java_methods(
         // Print method body.
         string indent("");
         if (DEFAULT_MODULE_NAME != moduleName) {
-            fprintf(out, "        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {\n");
+            // TODO(b/146235828): Use just SDK_INT check once it is incremented from Q.
+            fprintf(out, "        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q ||\n");
+            fprintf(out, "                Build.VERSION.CODENAME.equals(\"R\")) {\n");
             indent = "    ";
         }
 
