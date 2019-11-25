@@ -41,7 +41,6 @@
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.READ_SEARCH_INDEXABLES"/>
         <permission name="android.permission.REBOOT"/>
-        <permission name="android.permission.REQUEST_NETWORK_SCORES"/>
         <permission name="android.permission.SET_TIME"/>
         <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.TETHER_PRIVILEGED"/>
