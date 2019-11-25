@@ -22,7 +22,6 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
-import android.provider.DeviceConfig;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -31,9 +30,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -55,23 +52,12 @@ import java.util.concurrent.TimeUnit;
  * 3. Under low storage conditions and package is recently used, check
  * that dexopt upgrades test app to $(getprop pm.dexopt.bg-dexopt).
  *
- * When downgrade feature is on (downgrade_unused_apps_enabled flag is set to true):
- * 4  On low storage, check that the inactive packages are downgraded.
- * 5. On low storage, check that used packages are upgraded.
- * 6. On storage completely full, dexopt fails.
- * 7. Not on low storage, unused packages are upgraded.
- * 8. Low storage, unused app is downgraded. When app is used again, app is upgraded.
- *
  * Each test case runs "cmd package bg-dexopt-job com.android.frameworks.bgdexopttest".
  *
  * The setup for these tests make sure this package has been configured to have been recently used
  * plus installed far enough in the past. If a test case requires that this package has not been
  * recently used, it sets the time forward more than
  * `getprop pm.dexopt.downgrade_after_inactive_days` days.
- *
- * For some of the tests, the DeviceConfig flags inactive_app_threshold_days and
- * downgrade_unused_apps_enabled are set. These turn on/off the downgrade unused apps feature for
- * all devices and set the time threshold for unused apps.
  *
  * For tests that require low storage, the phone is filled up.
  *
@@ -94,13 +80,9 @@ public final class BackgroundDexOptServiceIntegrationTests {
             "pm.dexopt.downgrade_after_inactive_days", 0);
     // Needs to be between 1.0 and 2.0.
     private static final double LOW_STORAGE_MULTIPLIER = 1.5;
-    private static final int DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS = 15;
 
     // The file used to fill up storage.
     private File mBigFile;
-
-    @Rule
-    public ExpectedException mExpectedException = ExpectedException.none();
 
     // Remember start time.
     @BeforeClass
@@ -214,25 +196,9 @@ public final class BackgroundDexOptServiceIntegrationTests {
         logSpaceRemaining();
     }
 
-    private void fillUpStorageCompletely() throws IOException {
-        fillUpStorage((getStorageLowBytes()));
-    }
-
     // Fill up storage so that device is in low storage condition.
     private void fillUpToLowStorage() throws IOException {
         fillUpStorage((long) (getStorageLowBytes() * LOW_STORAGE_MULTIPLIER));
-    }
-
-    private void setInactivePackageThreshold(int threshold) {
-        DeviceConfig.setProperty(
-                DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                "inactive_app_threshold_days", Integer.toString(threshold), false);
-    }
-
-    private void enableDowngradeFeature(boolean enabled) {
-        DeviceConfig.setProperty(
-                DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                "downgrade_unused_apps_enabled", Boolean.toString(enabled), false);
     }
 
     // TODO(aeubanks): figure out how to get scheduled bg-dexopt to run
@@ -278,7 +244,7 @@ public final class BackgroundDexOptServiceIntegrationTests {
 
     // Test that background dexopt under normal conditions succeeds.
     @Test
-    public void testBackgroundDexOpt_normalConditions_dexOptSucceeds() throws IOException {
+    public void testBackgroundDexOpt() throws IOException {
         // Set filter to quicken.
         compilePackageWithFilter(PACKAGE_NAME, "verify");
         Assert.assertEquals("verify", getCompilerFilter(PACKAGE_NAME));
@@ -291,16 +257,17 @@ public final class BackgroundDexOptServiceIntegrationTests {
 
     // Test that background dexopt under low storage conditions upgrades used packages.
     @Test
-    public void testBackgroundDexOpt_lowStorage_usedPkgsUpgraded() throws IOException {
+    public void testBackgroundDexOptDowngradeSkipRecentlyUsedPackage() throws IOException {
         // Should be less than DOWNGRADE_AFTER_DAYS.
         long deltaDays = DOWNGRADE_AFTER_DAYS - 1;
         try {
-            enableDowngradeFeature(false);
             // Set time to future.
             setTimeFutureDays(deltaDays);
+
             // Set filter to quicken.
             compilePackageWithFilter(PACKAGE_NAME, "quicken");
             Assert.assertEquals("quicken", getCompilerFilter(PACKAGE_NAME));
+
             // Fill up storage to trigger low storage threshold.
             fillUpToLowStorage();
 
@@ -315,20 +282,18 @@ public final class BackgroundDexOptServiceIntegrationTests {
     }
 
     // Test that background dexopt under low storage conditions downgrades unused packages.
-    // This happens if the system property pm.dexopt.downgrade_after_inactive_days is set
-    // (e.g. on Android Go devices).
     @Test
-    public void testBackgroundDexOpt_lowStorage_unusedPkgsDowngraded()
-            throws IOException {
+    public void testBackgroundDexOptDowngradeSuccessful() throws IOException {
         // Should be more than DOWNGRADE_AFTER_DAYS.
         long deltaDays = DOWNGRADE_AFTER_DAYS + 1;
         try {
-            enableDowngradeFeature(false);
             // Set time to future.
             setTimeFutureDays(deltaDays);
+
             // Set filter to quicken.
             compilePackageWithFilter(PACKAGE_NAME, "quicken");
             Assert.assertEquals("quicken", getCompilerFilter(PACKAGE_NAME));
+
             // Fill up storage to trigger low storage threshold.
             fillUpToLowStorage();
 
@@ -342,134 +307,4 @@ public final class BackgroundDexOptServiceIntegrationTests {
         }
     }
 
-    // Test that the background dexopt downgrades inactive packages when the downgrade feature is
-    // enabled.
-    @Test
-    public void testBackgroundDexOpt_downgradeFeatureEnabled_lowStorage_inactivePkgsDowngraded()
-            throws IOException {
-        // Should be more than DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS.
-        long deltaDays = DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS + 1;
-        try {
-            enableDowngradeFeature(true);
-            setInactivePackageThreshold(DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS);
-            // Set time to future.
-            setTimeFutureDays(deltaDays);
-            // Set filter to quicken.
-            compilePackageWithFilter(PACKAGE_NAME, "quicken");
-            Assert.assertEquals("quicken", getCompilerFilter(PACKAGE_NAME));
-            // Fill up storage to trigger low storage threshold.
-            fillUpToLowStorage();
-
-            runBackgroundDexOpt();
-
-            // Verify that downgrade is successful.
-            Assert.assertEquals(DOWNGRADE_COMPILER_FILTER, getCompilerFilter(PACKAGE_NAME));
-        } finally {
-            // Reset time.
-            setTimeFutureDays(-deltaDays);
-        }
-    }
-
-    // Test that the background dexopt upgrades used packages when the downgrade feature is enabled.
-    // This test doesn't fill the device storage completely, but to a multiplier of the low storage
-    // threshold and this is why apps can still be optimized.
-    @Test
-    public void testBackgroundDexOpt_downgradeFeatureEnabled_lowStorage_usedPkgsUpgraded()
-            throws IOException {
-        enableDowngradeFeature(true);
-        // Set filter to quicken.
-        compilePackageWithFilter(PACKAGE_NAME, "quicken");
-        Assert.assertEquals("quicken", getCompilerFilter(PACKAGE_NAME));
-        // Fill up storage to trigger low storage threshold.
-        fillUpToLowStorage();
-
-        runBackgroundDexOpt();
-
-        /// Verify that bg-dexopt is successful in upgrading the used packages.
-        Assert.assertEquals(BG_DEXOPT_COMPILER_FILTER, getCompilerFilter(PACKAGE_NAME));
-    }
-
-    // Test that the background dexopt fails and doesn't change the compilation filter of used
-    // packages when the downgrade feature is enabled and the storage is filled up completely.
-    // The bg-dexopt shouldn't optimise nor downgrade these packages.
-    @Test
-    public void testBackgroundDexOpt_downgradeFeatureEnabled_fillUpStorageCompletely_dexOptFails()
-            throws IOException {
-        enableDowngradeFeature(true);
-        String previousCompilerFilter = getCompilerFilter(PACKAGE_NAME);
-
-        // Fill up storage completely, without using a multiplier for the low storage threshold.
-        fillUpStorageCompletely();
-
-        // When the bg dexopt runs with the storage filled up completely, it will fail.
-        mExpectedException.expect(IllegalStateException.class);
-        runBackgroundDexOpt();
-
-        /// Verify that bg-dexopt doesn't change the compilation filter of used apps.
-        Assert.assertEquals(previousCompilerFilter, getCompilerFilter(PACKAGE_NAME));
-    }
-
-    // Test that the background dexopt upgrades the unused packages when the downgrade feature is
-    // on if the device is not low on storage.
-    @Test
-    public void testBackgroundDexOpt_downgradeFeatureEnabled_notLowStorage_unusedPkgsUpgraded()
-            throws IOException {
-        // Should be more than DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS.
-        long deltaDays = DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS + 1;
-        try {
-            enableDowngradeFeature(true);
-            setInactivePackageThreshold(DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS);
-            // Set time to future.
-            setTimeFutureDays(deltaDays);
-            // Set filter to quicken.
-            compilePackageWithFilter(PACKAGE_NAME, "quicken");
-            Assert.assertEquals("quicken", getCompilerFilter(PACKAGE_NAME));
-
-            runBackgroundDexOpt();
-
-            // Verify that bg-dexopt is successful in upgrading the unused packages when the device
-            // is not low on storage.
-            Assert.assertEquals(BG_DEXOPT_COMPILER_FILTER, getCompilerFilter(PACKAGE_NAME));
-        } finally {
-            // Reset time.
-            setTimeFutureDays(-deltaDays);
-        }
-    }
-
-    // Test that when an unused package (which was downgraded) is used again, it's re-optimized when
-    // bg-dexopt runs again.
-    @Test
-    public void testBackgroundDexOpt_downgradeFeatureEnabled_downgradedPkgsUpgradedAfterUse()
-            throws IOException {
-        // Should be more than DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS.
-        long deltaDays = DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS + 1;
-        try {
-            enableDowngradeFeature(true);
-            setInactivePackageThreshold(DOWNGRADE_FEATURE_PKG_INACTIVE_AFTER_DAYS);
-            // Set time to future.
-            setTimeFutureDays(deltaDays);
-            // Fill up storage to trigger low storage threshold.
-            fillUpToLowStorage();
-            // Set filter to quicken.
-            compilePackageWithFilter(PACKAGE_NAME, "quicken");
-            Assert.assertEquals("quicken", getCompilerFilter(PACKAGE_NAME));
-
-            runBackgroundDexOpt();
-
-            // Verify that downgrade is successful.
-            Assert.assertEquals(DOWNGRADE_COMPILER_FILTER, getCompilerFilter(PACKAGE_NAME));
-
-            // Reset time.
-            setTimeFutureDays(-deltaDays);
-            deltaDays = 0;
-            runBackgroundDexOpt();
-
-            // Verify that bg-dexopt is successful in upgrading the unused packages that were used
-            // again.
-            Assert.assertEquals(BG_DEXOPT_COMPILER_FILTER, getCompilerFilter(PACKAGE_NAME));
-        } finally {
-            // Reset time.
-            setTimeFutureDays(-deltaDays);
-        }
-    }
 }

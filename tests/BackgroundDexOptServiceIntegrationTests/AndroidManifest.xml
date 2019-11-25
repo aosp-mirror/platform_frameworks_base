@@ -28,8 +28,6 @@
     <uses-permission android:name="android.permission.SET_TIME" />
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
-    <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
 
     <application>
         <uses-library android:name="android.test.runner" />
