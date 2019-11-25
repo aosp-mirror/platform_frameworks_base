@@ -20,9 +20,9 @@ package android.bluetooth;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
-import android.os.Build;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +43,7 @@ public interface BluetoothProfile {
      * This extra represents the current connection state of the profile of the
      * Bluetooth device.
      */
+    @SuppressLint("ActionValue")
     String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
 
     /**
@@ -51,6 +52,7 @@ public interface BluetoothProfile {
      * This extra represents the previous connection state of the profile of the
      * Bluetooth device.
      */
+    @SuppressLint("ActionValue")
     String EXTRA_PREVIOUS_STATE =
             "android.bluetooth.profile.extra.PREVIOUS_STATE";
 
@@ -106,7 +108,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @SystemApi
     int PAN = 5;
 
     /**
