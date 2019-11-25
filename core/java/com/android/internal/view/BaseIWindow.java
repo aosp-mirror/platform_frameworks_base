@@ -36,6 +36,8 @@ import com.android.internal.os.IResultReceiver;
 
 import dalvik.annotation.compat.UnsupportedAppUsage;
 
+import java.io.IOException;
+
 public class BaseIWindow extends IWindow.Stub {
 
     @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.P)
@@ -101,6 +103,13 @@ public class BaseIWindow extends IWindow.Stub {
 
     @Override
     public void executeCommand(String command, String parameters, ParcelFileDescriptor out) {
+        if (out != null) {
+            try {
+                out.closeWithError("Unsupported command " + command);
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
     }
 
     @Override
