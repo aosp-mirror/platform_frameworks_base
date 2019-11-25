@@ -35,7 +35,8 @@ import java.util.Collections;
 public class OpenFormulaTest {
 
     private static final AtomicFormula ATOMIC_FORMULA_1 =
-            new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "test1");
+            new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "test1",
+                    /* isHashedValue= */ false);
     private static final AtomicFormula ATOMIC_FORMULA_2 =
             new AtomicFormula.IntAtomicFormula(AtomicFormula.VERSION_CODE, AtomicFormula.EQ, 1);
 

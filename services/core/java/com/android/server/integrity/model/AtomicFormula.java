@@ -253,6 +253,8 @@ public abstract class AtomicFormula implements Formula {
     /** An {@link AtomicFormula} with a key and string value. */
     public static final class StringAtomicFormula extends AtomicFormula implements Parcelable {
         private final String mValue;
+        // Indicates whether the value is the actual value or the hashed value.
+        private final boolean mIsHashedValue;
 
         /**
          * Constructs a new {@link StringAtomicFormula}.
@@ -262,8 +264,9 @@ public abstract class AtomicFormula implements Formula {
          *
          * @throws IllegalArgumentException if {@code key} cannot be used with string value
          */
-        public StringAtomicFormula(@Key int key, @NonNull String value) {
+        public StringAtomicFormula(@Key int key, @NonNull String value, boolean isHashedValue) {
             super(key);
+            mIsHashedValue = isHashedValue;
             checkArgument(
                     key == PACKAGE_NAME
                             || key == APP_CERTIFICATE
@@ -277,6 +280,7 @@ public abstract class AtomicFormula implements Formula {
         StringAtomicFormula(Parcel in) {
             super(in.readInt());
             mValue = in.readStringNoHelper();
+            mIsHashedValue = in.readByte() != 0;
         }
 
         @NonNull
@@ -335,11 +339,16 @@ public abstract class AtomicFormula implements Formula {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(getKey());
             dest.writeStringNoHelper(mValue);
+            dest.writeByte((byte) (mIsHashedValue ? 1 : 0));
         }
 
         @NonNull
         public String getValue() {
             return mValue;
+        }
+
+        public boolean getIsHashedValue() {
+            return mIsHashedValue;
         }
 
         private String getMetadataValueByKey(AppInstallMetadata appInstallMetadata) {

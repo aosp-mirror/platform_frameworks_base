@@ -58,7 +58,8 @@ public class RuleXmlParserTest {
         RuleParser xmlParser = new RuleXmlParser();
         InputStream inputStream = new ByteArrayInputStream(ruleXmlOpenFormula.getBytes());
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.NOT, Collections.singletonList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(inputStream);
@@ -84,7 +85,8 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.NOT, Collections.singletonList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
@@ -114,8 +116,10 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.AND, Arrays.asList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
@@ -145,8 +149,10 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.OR, Arrays.asList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
@@ -172,7 +178,8 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.NOT, Collections.singletonList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
@@ -297,7 +304,8 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);
@@ -364,7 +372,8 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);

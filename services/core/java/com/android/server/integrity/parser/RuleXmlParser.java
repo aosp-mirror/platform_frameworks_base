@@ -51,6 +51,7 @@ public final class RuleXmlParser implements RuleParser {
     private static final String OPERATOR_ATTRIBUTE = "O";
     private static final String VALUE_ATTRIBUTE = "V";
     private static final String CONNECTOR_ATTRIBUTE = "C";
+    private static final String IS_HASHED_VALUE_ATTRIBUTE = "H";
 
     @Override
     public List<Rule> parse(String ruleText) throws RuleParseException {
@@ -179,6 +180,8 @@ public final class RuleXmlParser implements RuleParser {
         int operator = Integer.parseInt(
                 extractAttributeValue(parser, OPERATOR_ATTRIBUTE).orElse("-1"));
         String value = extractAttributeValue(parser, VALUE_ATTRIBUTE).orElse(null);
+        String isHashedValue = extractAttributeValue(parser, IS_HASHED_VALUE_ATTRIBUTE).orElse(
+                null);
 
         int eventType;
         while ((eventType = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -186,17 +189,18 @@ public final class RuleXmlParser implements RuleParser {
                 break;
             }
         }
-        return constructAtomicFormulaBasedOnKey(key, operator, value);
+        return constructAtomicFormulaBasedOnKey(key, operator, value, isHashedValue);
     }
 
     private static Formula constructAtomicFormulaBasedOnKey(@AtomicFormula.Key int key,
-            @AtomicFormula.Operator int operator, String value) {
+            @AtomicFormula.Operator int operator, String value, String isHashedValue) {
         switch (key) {
             case AtomicFormula.PACKAGE_NAME:
             case AtomicFormula.INSTALLER_NAME:
             case AtomicFormula.APP_CERTIFICATE:
             case AtomicFormula.INSTALLER_CERTIFICATE:
-                return new AtomicFormula.StringAtomicFormula(key, value);
+                return new AtomicFormula.StringAtomicFormula(key, value,
+                        Boolean.parseBoolean(isHashedValue));
             case AtomicFormula.PRE_INSTALLED:
                 return new AtomicFormula.BooleanAtomicFormula(key, Boolean.parseBoolean(value));
             case AtomicFormula.VERSION_CODE:
