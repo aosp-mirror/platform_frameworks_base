@@ -77,10 +77,10 @@ class ResetTargetTaskHelper {
     }
 
     private void processTask(Task task) {
+        reset(task);
         mRoot = task.getRootActivity(true);
         if (mRoot == null) return;
 
-        reset(task);
         final boolean isTargetTask = task == mTargetTask;
         if (isTargetTask) mTargetTaskFound = true;
 
