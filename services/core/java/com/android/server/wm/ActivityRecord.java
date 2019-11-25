@@ -6239,9 +6239,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // relatively fixed.
         overrideConfig.colorMode = fullConfig.colorMode;
         overrideConfig.densityDpi = fullConfig.densityDpi;
-        overrideConfig.screenLayout = fullConfig.screenLayout
-                & (Configuration.SCREENLAYOUT_LONG_MASK
-                        | Configuration.SCREENLAYOUT_SIZE_MASK);
         // The smallest screen width is the short side of screen bounds. Because the bounds
         // and density won't be changed, smallestScreenWidthDp is also fixed.
         overrideConfig.smallestScreenWidthDp = fullConfig.smallestScreenWidthDp;
@@ -6376,6 +6373,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Use resolvedBounds to compute other override configurations such as appBounds
         task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
                 mCompatDisplayInsets);
+        // Use current screen layout as source because the size of app is independent to parent.
+        resolvedConfig.screenLayout = Task.computeScreenLayoutOverride(
+                getConfiguration().screenLayout, resolvedConfig.screenWidthDp,
+                resolvedConfig.screenHeightDp);
 
         // Use parent orientation if it cannot be decided by bounds, so the activity can fit inside
         // the parent bounds appropriately.
