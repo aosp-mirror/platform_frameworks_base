@@ -25,7 +25,6 @@ import static org.junit.Assert.fail;
 
 import android.Manifest;
 import android.annotation.Nullable;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -77,7 +76,7 @@ public class StagedRollbackTest {
                 Manifest.permission.INSTALL_PACKAGES,
                 Manifest.permission.DELETE_PACKAGES,
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
-                Manifest.permission.KILL_BACKGROUND_PROCESSES);
+                Manifest.permission.FORCE_STOP_PACKAGES);
     }
 
     /**
@@ -135,17 +134,8 @@ public class StagedRollbackTest {
      */
     @Test
     public void testBadApkOnlyTriggerRollback() throws Exception {
-        BroadcastReceiver crashCountReceiver = null;
-        Context context = InstrumentationRegistry.getContext();
-
-        try {
-            // Crash TestApp.A PackageWatchdog#TRIGGER_FAILURE_COUNT times to trigger rollback
-            crashCountReceiver = RollbackUtils.sendCrashBroadcast(context, TestApp.A, 5);
-        } finally {
-            if (crashCountReceiver != null) {
-                context.unregisterReceiver(crashCountReceiver);
-            }
-        }
+        // Crash TestApp.A PackageWatchdog#TRIGGER_FAILURE_COUNT times to trigger rollback
+        RollbackUtils.sendCrashBroadcast(TestApp.A, 5);
 
         // We expect the device to be rebooted automatically. Wait for that to
         // happen. At that point, the host test driver will wait for the
