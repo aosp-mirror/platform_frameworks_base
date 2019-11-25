@@ -141,6 +141,8 @@ aidl_interface {
         "java/android/media/soundtrigger_middleware/ISoundTriggerCallback.aidl",
         "java/android/media/soundtrigger_middleware/ISoundTriggerMiddlewareService.aidl",
         "java/android/media/soundtrigger_middleware/ISoundTriggerModule.aidl",
+        "java/android/media/soundtrigger_middleware/ModelParameter.aidl",
+        "java/android/media/soundtrigger_middleware/ModelParameterRange.aidl",
         "java/android/media/soundtrigger_middleware/Phrase.aidl",
         "java/android/media/soundtrigger_middleware/PhraseRecognitionEvent.aidl",
         "java/android/media/soundtrigger_middleware/PhraseRecognitionExtra.aidl",

@@ -15,6 +15,8 @@
  */
 package android.media.soundtrigger_middleware;
 
+import android.media.soundtrigger_middleware.ModelParameter;
+import android.media.soundtrigger_middleware.ModelParameterRange;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.PhraseSoundModel;
 import android.media.soundtrigger_middleware.RecognitionConfig;
@@ -95,6 +97,47 @@ interface ISoundTriggerModule {
      * ServiceSpecificException with an OPERATION_NOT_SUPPORTED status.
      */
     void forceRecognitionEvent(int modelHandle);
+
+    /**
+     * Set a model specific parameter with the given value. This parameter
+     * will keep its value for the duration the model is loaded regardless of starting and stopping
+     * recognition. Once the model is unloaded, the value will be lost.
+     * It is expected to check if the handle supports the parameter via the
+     * queryModelParameterSupport API prior to calling this method.
+     *
+     * @param modelHandle The sound model handle indicating which model to modify parameters
+     * @param modelParam Parameter to set which will be validated against the
+     *                   ModelParameter type.
+     * @param value The value to set for the given model parameter
+     */
+    void setModelParameter(int modelHandle, ModelParameter modelParam, int value);
+
+    /**
+     * Get a model specific parameter. This parameter will keep its value
+     * for the duration the model is loaded regardless of starting and stopping recognition.
+     * Once the model is unloaded, the value will be lost. If the value is not set, a default
+     * value is returned. See ModelParameter for parameter default values.
+     * It is expected to check if the handle supports the parameter via the
+     * queryModelParameterSupport API prior to calling this method.
+     *
+     * @param modelHandle The sound model associated with given modelParam
+     * @param modelParam Parameter to set which will be validated against the
+     *                   ModelParameter type.
+     * @return Value set to the requested parameter.
+     */
+    int getModelParameter(int modelHandle, ModelParameter modelParam);
+
+    /**
+     * Determine if parameter control is supported for the given model handle, and its valid value
+     * range if it is.
+     *
+     * @param modelHandle The sound model handle indicating which model to query
+     * @param modelParam Parameter to set which will be validated against the
+     *                   ModelParameter type.
+     * @return If parameter is supported, the return value is its valid range, otherwise null.
+     */
+    @nullable ModelParameterRange queryModelParameterSupport(int modelHandle,
+                                                             ModelParameter modelParam);
 
     /**
      * Detach from the module, releasing any active resources.

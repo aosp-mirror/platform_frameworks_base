@@ -116,6 +116,7 @@ java_library_static {
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
+        "android.hardware.soundtrigger-V2.3-java",
         "android.hidl.manager-V1.2-java",
         "dnsresolver_aidl_interface-V2-java",
         "netd_event_listener_interface-java",
