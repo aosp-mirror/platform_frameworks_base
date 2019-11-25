@@ -45,6 +45,8 @@ public:
     void renderLayers(const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
                       bool opaque, const LightInfo& lightInfo) override;
 
+    // If the given node didn't have a layer surface, or had one of the wrong size, this method
+    // creates a new one and returns true. Otherwise does nothing and returns false.
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                              ErrorHandler* errorHandler) override;
 
@@ -92,7 +94,7 @@ private:
 
     // Called every frame. Normally returns early with screen canvas.
     // But when capture is enabled, returns an nwaycanvas where commands are also recorded.
-    SkCanvas* tryCapture(SkSurface* surface);
+    SkCanvas* tryCapture(SkSurface* surface, RenderNode* root, const LayerUpdateQueue& dirtyLayers);
     // Called at the end of every frame, closes the recording if necessary.
     void endCapture(SkSurface* surface);
     // Determine if a new file-based capture should be started.
