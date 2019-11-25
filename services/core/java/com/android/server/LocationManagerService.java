@@ -146,8 +146,13 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @Override
         public void onBootPhase(int phase) {
-            if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
-                mService.systemRunning();
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                // the location service must be functioning after this boot phase
+                mService.onSystemReady();
+            } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+                // some providers rely on third party code, so we wait to initialize
+                // providers until third party code is allowed to run
+                mService.onSystemThirdPartyAppsCanStart();
             }
         }
     }
@@ -264,156 +269,159 @@ public class LocationManagerService extends ILocationManager.Stub {
                 userId -> mContext.getResources().getStringArray(
                         com.android.internal.R.array.config_locationExtraPackageNames));
 
-        // most startup is deferred until systemRunning()
+        // most startup is deferred until systemReady()
     }
 
-    private void systemRunning() {
+    private void onSystemReady() {
         synchronized (mLock) {
-            initializeLocked();
+            mPackageManager = mContext.getPackageManager();
+            mAppOps = mContext.getSystemService(AppOpsManager.class);
+            mPowerManager = mContext.getSystemService(PowerManager.class);
+            mActivityManager = mContext.getSystemService(ActivityManager.class);
+            mUserManager = mContext.getSystemService(UserManager.class);
+
+            mSettingsStore = new LocationSettingsStore(mContext, mHandler);
+            mLocationFudger = new LocationFudger(mContext, mHandler);
+            mGeofenceManager = new GeofenceManager(mContext, mSettingsStore);
+
+            PowerManagerInternal localPowerManager =
+                    LocalServices.getService(PowerManagerInternal.class);
+
+            // add listeners
+            mAppOps.startWatchingMode(
+                    AppOpsManager.OP_COARSE_LOCATION,
+                    null,
+                    AppOpsManager.WATCH_FOREGROUND_CHANGES,
+                    new AppOpsManager.OnOpChangedInternalListener() {
+                        public void onOpChanged(int op, String packageName) {
+                            // onOpChanged invoked on ui thread, move to our thread to reduce
+                            // risk of
+                            // blocking ui thread
+                            mHandler.post(() -> {
+                                synchronized (mLock) {
+                                    onAppOpChangedLocked();
+                                }
+                            });
+                        }
+                    });
+            mPackageManager.addOnPermissionsChangeListener(
+                    uid -> {
+                        // listener invoked on ui thread, move to our thread to reduce risk of
+                        // blocking
+                        // ui thread
+                        mHandler.post(() -> {
+                            synchronized (mLock) {
+                                onPermissionsChangedLocked();
+                            }
+                        });
+                    });
+            mActivityManager.addOnUidImportanceListener(
+                    (uid, importance) -> {
+                        // listener invoked on ui thread, move to our thread to reduce risk of
+                        // blocking
+                        // ui thread
+                        mHandler.post(() -> {
+                            synchronized (mLock) {
+                                onUidImportanceChangedLocked(uid, importance);
+                            }
+                        });
+                    },
+                    FOREGROUND_IMPORTANCE_CUTOFF);
+
+            localPowerManager.registerLowPowerModeObserver(ServiceType.LOCATION,
+                    state -> {
+                        // listener invoked on ui thread, move to our thread to reduce risk of
+                        // blocking
+                        // ui thread
+                        mHandler.post(() -> {
+                            synchronized (mLock) {
+                                onBatterySaverModeChangedLocked(state.locationMode);
+                            }
+                        });
+                    });
+            mBatterySaverMode = mPowerManager.getLocationPowerSaveMode();
+
+            mSettingsStore.addOnLocationEnabledChangedListener(() -> {
+                synchronized (mLock) {
+                    onLocationModeChangedLocked(true);
+                }
+            });
+            mSettingsStore.addOnLocationProvidersAllowedChangedListener(() -> {
+                synchronized (mLock) {
+                    onProviderAllowedChangedLocked();
+                }
+            });
+            mSettingsStore.addOnBackgroundThrottleIntervalChangedListener(() -> {
+                synchronized (mLock) {
+                    onBackgroundThrottleIntervalChangedLocked();
+                }
+            });
+            mSettingsStore.addOnBackgroundThrottlePackageWhitelistChangedListener(() -> {
+                synchronized (mLock) {
+                    onBackgroundThrottleWhitelistChangedLocked();
+                }
+            });
+            mSettingsStore.addOnIgnoreSettingsPackageWhitelistChangedListener(() -> {
+                synchronized (mLock) {
+                    onIgnoreSettingsWhitelistChangedLocked();
+                }
+            });
+
+            new PackageMonitor() {
+                @Override
+                public void onPackageDisappeared(String packageName, int reason) {
+                    synchronized (mLock) {
+                        LocationManagerService.this.onPackageDisappearedLocked(packageName);
+                    }
+                }
+            }.register(mContext, mHandler.getLooper(), true);
+
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+            intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
+            intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+            intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+            intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+
+            mContext.registerReceiverAsUser(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    final String action = intent.getAction();
+                    if (action == null) {
+                        return;
+                    }
+                    synchronized (mLock) {
+                        switch (action) {
+                            case Intent.ACTION_USER_SWITCHED:
+                                onUserChangedLocked(
+                                        intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                                break;
+                            case Intent.ACTION_MANAGED_PROFILE_ADDED:
+                            case Intent.ACTION_MANAGED_PROFILE_REMOVED:
+                                onUserProfilesChangedLocked();
+                                break;
+                            case Intent.ACTION_SCREEN_ON:
+                            case Intent.ACTION_SCREEN_OFF:
+                                onScreenStateChangedLocked();
+                                break;
+                        }
+                    }
+                }
+            }, UserHandle.ALL, intentFilter, null, mHandler);
+
+            // switching the user from null to system here performs the bulk of the initialization
+            // work. the user being changed will cause a reload of all user specific settings, which
+            // causes initialization, and propagates changes until a steady state is reached
+            mCurrentUserId = UserHandle.USER_NULL;
+            onUserChangedLocked(ActivityManager.getCurrentUser());
         }
     }
 
-    @GuardedBy("mLock")
-    private void initializeLocked() {
-        mPackageManager = mContext.getPackageManager();
-        mAppOps = mContext.getSystemService(AppOpsManager.class);
-        mPowerManager = mContext.getSystemService(PowerManager.class);
-        mActivityManager = mContext.getSystemService(ActivityManager.class);
-        mUserManager = mContext.getSystemService(UserManager.class);
-
-        mSettingsStore = new LocationSettingsStore(mContext, mHandler);
-
-        mLocationFudger = new LocationFudger(mContext, mHandler);
-        mGeofenceManager = new GeofenceManager(mContext, mSettingsStore);
-
-        PowerManagerInternal localPowerManager =
-                LocalServices.getService(PowerManagerInternal.class);
-
-        // prepare providers
-        initializeProvidersLocked();
-
-        // add listeners
-        mAppOps.startWatchingMode(
-                AppOpsManager.OP_COARSE_LOCATION,
-                null,
-                AppOpsManager.WATCH_FOREGROUND_CHANGES,
-                new AppOpsManager.OnOpChangedInternalListener() {
-                    public void onOpChanged(int op, String packageName) {
-                        // onOpChanged invoked on ui thread, move to our thread to reduce risk of
-                        // blocking ui thread
-                        mHandler.post(() -> {
-                            synchronized (mLock) {
-                                onAppOpChangedLocked();
-                            }
-                        });
-                    }
-                });
-        mPackageManager.addOnPermissionsChangeListener(
-                uid -> {
-                    // listener invoked on ui thread, move to our thread to reduce risk of blocking
-                    // ui thread
-                    mHandler.post(() -> {
-                        synchronized (mLock) {
-                            onPermissionsChangedLocked();
-                        }
-                    });
-                });
-        mActivityManager.addOnUidImportanceListener(
-                (uid, importance) -> {
-                    // listener invoked on ui thread, move to our thread to reduce risk of blocking
-                    // ui thread
-                    mHandler.post(() -> {
-                        synchronized (mLock) {
-                            onUidImportanceChangedLocked(uid, importance);
-                        }
-                    });
-                },
-                FOREGROUND_IMPORTANCE_CUTOFF);
-
-        localPowerManager.registerLowPowerModeObserver(ServiceType.LOCATION,
-                state -> {
-                    // listener invoked on ui thread, move to our thread to reduce risk of blocking
-                    // ui thread
-                    mHandler.post(() -> {
-                        synchronized (mLock) {
-                            onBatterySaverModeChangedLocked(state.locationMode);
-                        }
-                    });
-                });
-        mBatterySaverMode = mPowerManager.getLocationPowerSaveMode();
-
-        mSettingsStore.addOnLocationEnabledChangedListener(() -> {
-            synchronized (mLock) {
-                onLocationModeChangedLocked(true);
-            }
-        });
-        mSettingsStore.addOnLocationProvidersAllowedChangedListener(() -> {
-            synchronized (mLock) {
-                onProviderAllowedChangedLocked();
-            }
-        });
-        mSettingsStore.addOnBackgroundThrottleIntervalChangedListener(() -> {
-            synchronized (mLock) {
-                onBackgroundThrottleIntervalChangedLocked();
-            }
-        });
-        mSettingsStore.addOnBackgroundThrottlePackageWhitelistChangedListener(() -> {
-            synchronized (mLock) {
-                onBackgroundThrottleWhitelistChangedLocked();
-            }
-        });
-        mSettingsStore.addOnIgnoreSettingsPackageWhitelistChangedListener(() -> {
-            synchronized (mLock) {
-                onIgnoreSettingsWhitelistChangedLocked();
-            }
-        });
-
-        new PackageMonitor() {
-            @Override
-            public void onPackageDisappeared(String packageName, int reason) {
-                synchronized (mLock) {
-                    LocationManagerService.this.onPackageDisappearedLocked(packageName);
-                }
-            }
-        }.register(mContext, mHandler.getLooper(), true);
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
-        intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
-        intentFilter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final String action = intent.getAction();
-                if (action == null) {
-                    return;
-                }
-                synchronized (mLock) {
-                    switch (action) {
-                        case Intent.ACTION_USER_SWITCHED:
-                            onUserChangedLocked(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
-                            break;
-                        case Intent.ACTION_MANAGED_PROFILE_ADDED:
-                        case Intent.ACTION_MANAGED_PROFILE_REMOVED:
-                            onUserProfilesChangedLocked();
-                            break;
-                        case Intent.ACTION_SCREEN_ON:
-                        case Intent.ACTION_SCREEN_OFF:
-                            onScreenStateChangedLocked();
-                            break;
-                    }
-                }
-            }
-        }, UserHandle.ALL, intentFilter, null, mHandler);
-
-        // switching the user from null to system here performs the bulk of the initialization work.
-        // the user being changed will cause a reload of all user specific settings, which causes
-        // provider initialization, and propagates changes until a steady state is reached
-        mCurrentUserId = UserHandle.USER_NULL;
-        onUserChangedLocked(ActivityManager.getCurrentUser());
+    private void onSystemThirdPartyAppsCanStart() {
+        synchronized (mLock) {
+            // prepare providers
+            initializeProvidersLocked();
+        }
     }
 
     @GuardedBy("mLock")
