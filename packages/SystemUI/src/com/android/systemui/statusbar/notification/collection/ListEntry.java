@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.collection;
 
 import android.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Abstract superclass for top-level entries, i.e. things that can appear in the final notification
  * list shown to users. In practice, this means either GroupEntries or NotificationEntries.
@@ -49,7 +51,8 @@ public abstract class ListEntry {
         return mParent;
     }
 
-    void setParent(@Nullable GroupEntry parent) {
+    @VisibleForTesting
+    public void setParent(@Nullable GroupEntry parent) {
         mParent = parent;
     }
 
