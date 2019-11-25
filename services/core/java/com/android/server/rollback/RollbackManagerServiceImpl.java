@@ -45,14 +45,13 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.UserHandle;   // duped to avoid merge conflict
-import android.os.UserManager;  // out of order to avoid merge conflict
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.IntArray;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
 
@@ -76,6 +75,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -115,9 +115,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private final Set<NewRollback> mNewRollbacks = new ArraySet<>();
 
     // The list of all rollbacks, including available and committed rollbacks.
-    // This list is null until the rollback data has been loaded.
     @GuardedBy("mLock")
-    private List<RollbackData> mRollbacks;
+    private final List<RollbackData> mRollbacks;
 
     private final RollbackStore mRollbackStore;
 
@@ -139,29 +138,25 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // SystemService#onStart.
         mInstaller = new Installer(mContext);
         mInstaller.onStart();
-        mHandlerThread = new HandlerThread("RollbackManagerServiceHandler");
-        mHandlerThread.start();
-
-        // Monitor the handler thread
-        Watchdog.getInstance().addThread(getHandler(), HANDLER_THREAD_TIMEOUT_DURATION_MILLIS);
 
         mRollbackStore = new RollbackStore(new File(Environment.getDataDirectory(), "rollback"));
 
         mPackageHealthObserver = new RollbackPackageHealthObserver(mContext);
         mAppDataRollbackHelper = new AppDataRollbackHelper(mInstaller);
 
-        // Kick off loading of the rollback data from strorage in a background
-        // thread.
-        // TODO: Consider loading the rollback data directly here instead, to
-        // avoid the need to call ensureRollbackDataLoaded every time before
-        // accessing the rollback data?
-        // TODO: Test that this kicks off initial scheduling of rollback
-        // expiration.
-        getHandler().post(() -> ensureRollbackDataLoaded());
+        // Load rollback data from device storage.
+        synchronized (mLock) {
+            mRollbacks = mRollbackStore.loadAllRollbackData();
+            for (RollbackData data : mRollbacks) {
+                mAllocatedRollbackIds.put(data.info.getRollbackId(), true);
+            }
+        }
 
-        // TODO: Make sure to register these call backs when a new user is
-        // added too.
-        SessionCallback sessionCallback = new SessionCallback();
+        // Kick off and start monitoring the handler thread.
+        mHandlerThread = new HandlerThread("RollbackManagerServiceHandler");
+        mHandlerThread.start();
+        Watchdog.getInstance().addThread(getHandler(), HANDLER_THREAD_TIMEOUT_DURATION_MILLIS);
+
         for (UserInfo userInfo : UserManager.get(mContext).getUsers(true)) {
             registerUserCallbacks(userInfo.getUserHandle());
         }
@@ -171,7 +166,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         try {
             enableRollbackFilter.addDataType("application/vnd.android.package-archive");
         } catch (IntentFilter.MalformedMimeTypeException e) {
-            Log.e(TAG, "addDataType", e);
+            Slog.e(TAG, "addDataType", e);
         }
 
         mContext.registerReceiver(new BroadcastReceiver() {
@@ -251,12 +246,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private void registerUserCallbacks(UserHandle user) {
         Context context = getContextAsUser(user);
         if (context == null) {
-            Log.e(TAG, "Unable to register user callbacks for user " + user);
+            Slog.e(TAG, "Unable to register user callbacks for user " + user);
             return;
         }
-
-        // TODO: Reuse the same SessionCallback and broadcast receiver
-        // instances, rather than creating new instances for each user.
 
         context.getPackageManager().getPackageInstaller()
                 .registerSessionCallback(new SessionCallback(), getHandler());
@@ -290,7 +282,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     public ParceledListSlice getAvailableRollbacks() {
         enforceManageRollbacks("getAvailableRollbacks");
         if (Thread.currentThread().equals(mHandlerThread)) {
-            Log.wtf(TAG, "Calling getAvailableRollbacks from mHandlerThread "
+            Slog.wtf(TAG, "Calling getAvailableRollbacks from mHandlerThread "
                     + "causes a deadlock");
             throw new IllegalStateException("Cannot call RollbackManager#getAvailableRollbacks "
                     + "from the handler thread!");
@@ -300,20 +292,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // to get the most up-to-date results. This is intended to reduce test
         // flakiness when checking available rollbacks immediately after
         // installing a package with rollback enabled.
-        final LinkedBlockingQueue<Boolean> result = new LinkedBlockingQueue<>();
-        getHandler().post(() -> result.offer(true));
-
+        CountDownLatch latch = new CountDownLatch(1);
+        getHandler().post(() -> latch.countDown());
         try {
-            result.take();
+            latch.await();
         } catch (InterruptedException ie) {
-            // We may not get the most up-to-date information, but whatever we
-            // can get now is better than nothing, so log but otherwise ignore
-            // the exception.
-            Log.w(TAG, "Interrupted while waiting for handler thread in getAvailableRollbacks");
+            throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
         }
 
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
@@ -326,11 +313,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     @Override
-    public ParceledListSlice<RollbackInfo> getRecentlyExecutedRollbacks() {
+    public ParceledListSlice<RollbackInfo> getRecentlyCommittedRollbacks() {
         enforceManageRollbacks("getRecentlyCommittedRollbacks");
 
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             List<RollbackInfo> rollbacks = new ArrayList<>();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
@@ -345,7 +331,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @Override
     public void commitRollback(int rollbackId, ParceledListSlice causePackages,
             String callerPackageName, IntentSender statusReceiver) {
-        enforceManageRollbacks("executeRollback");
+        enforceManageRollbacks("commitRollback");
 
         final int callingUid = Binder.getCallingUid();
         AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
@@ -365,8 +351,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 final long timeDifference = mRelativeBootTime - oldRelativeBootTime;
 
                 synchronized (mLock) {
-                    ensureRollbackDataLoadedLocked();
-
                     Iterator<RollbackData> iter = mRollbacks.iterator();
                     while (iter.hasNext()) {
                         RollbackData data = iter.next();
@@ -393,7 +377,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private void commitRollbackInternal(int rollbackId, List<VersionedPackage> causePackages,
             String callerPackageName, IntentSender statusReceiver) {
-        Log.i(TAG, "Initiating rollback");
+        Slog.i(TAG, "Initiating rollback");
 
         RollbackData data = getRollbackForId(rollbackId);
         if (data == null || data.state != RollbackData.ROLLBACK_STATE_AVAILABLE) {
@@ -532,7 +516,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
             parentSession.commit(receiver.getIntentSender());
         } catch (IOException e) {
-            Log.e(TAG, "Rollback failed", e);
+            Slog.e(TAG, "Rollback failed", e);
             sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
                     "IOException: " + e.toString());
             return;
@@ -545,13 +529,21 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "reloadPersistedData");
 
-        synchronized (mLock) {
-            mRollbacks = null;
-        }
+        CountDownLatch latch = new CountDownLatch(1);
         getHandler().post(() -> {
             updateRollbackLifetimeDurationInMillis();
-            ensureRollbackDataLoaded();
+            synchronized (mLock) {
+                mRollbacks.clear();
+                mRollbacks.addAll(mRollbackStore.loadAllRollbackData());
+            }
+            latch.countDown();
         });
+
+        try {
+            latch.await();
+        } catch (InterruptedException ie) {
+            throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
+        }
     }
 
     @Override
@@ -560,7 +552,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "expireRollbackForPackage");
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             Iterator<RollbackData> iter = mRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
@@ -573,6 +564,20 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
         }
+    }
+
+    @Override
+    public void blockRollbackManager(long millis) {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                "blockRollbackManager");
+        getHandler().post(() -> {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException e) {
+                throw new IllegalStateException("RollbackManagerHandlerThread interrupted");
+            }
+        });
     }
 
     void onUnlockUser(int userId) {
@@ -613,7 +618,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             List<RollbackData> restoreInProgress = new ArrayList<>();
             Set<String> apexPackageNames = new HashSet<>();
             synchronized (mLock) {
-                ensureRollbackDataLoadedLocked();
                 for (RollbackData data : mRollbacks) {
                     if (data.isStaged()) {
                         if (data.state == RollbackData.ROLLBACK_STATE_ENABLING) {
@@ -635,17 +639,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
                 PackageInstaller.SessionInfo session = installer.getSessionInfo(
                         data.stagedSessionId);
-                // TODO: What if session is null?
-                if (session != null) {
-                    if (session.isStagedSessionApplied()) {
-                        makeRollbackAvailable(data);
-                    } else if (session.isStagedSessionFailed()) {
-                        // TODO: Do we need to remove this from
-                        // mRollbacks, or is it okay to leave as
-                        // unavailable until the next reboot when it will go
-                        // away on its own?
-                        deleteRollback(data);
-                    }
+                if (session == null || session.isStagedSessionFailed()) {
+                    // TODO: Do we need to remove this from
+                    // mRollbacks, or is it okay to leave as
+                    // unavailable until the next reboot when it will go
+                    // away on its own?
+                    deleteRollback(data);
+                } else if (session.isStagedSessionApplied()) {
+                    makeRollbackAvailable(data);
                 }
             }
 
@@ -676,42 +677,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     /**
-     * Load rollback data from storage if it has not already been loaded.
-     * After calling this funciton, mAvailableRollbacks and
-     * mRecentlyExecutedRollbacks will be non-null.
-     */
-    private void ensureRollbackDataLoaded() {
-        synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
-        }
-    }
-
-    /**
-     * Load rollback data from storage if it has not already been loaded.
-     * After calling this function, mRollbacks will be non-null.
-     */
-    @GuardedBy("mLock")
-    private void ensureRollbackDataLoadedLocked() {
-        if (mRollbacks == null) {
-            loadAllRollbackDataLocked();
-        }
-    }
-
-    /**
-     * Load all rollback data from storage.
-     * Note: We do potentially heavy IO here while holding mLock, because we
-     * have to have the rollback data loaded before we can do anything else
-     * meaningful.
-     */
-    @GuardedBy("mLock")
-    private void loadAllRollbackDataLocked() {
-        mRollbacks = mRollbackStore.loadAllRollbackData();
-        for (RollbackData data : mRollbacks) {
-            mAllocatedRollbackIds.put(data.info.getRollbackId(), true);
-        }
-    }
-
-    /**
      * Called when a package has been replaced with a different version.
      * Removes all backups for the package not matching the currently
      * installed package version.
@@ -722,7 +687,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         VersionedPackage installedVersion = getInstalledPackageVersion(packageName);
 
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             Iterator<RollbackData> iter = mRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
@@ -761,7 +725,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private void sendFailure(IntentSender statusReceiver, @RollbackManager.Status int status,
             String message) {
-        Log.e(TAG, message);
+        Slog.e(TAG, message);
         try {
             final Intent fillIn = new Intent();
             fillIn.putExtra(RollbackManager.EXTRA_STATUS, status);
@@ -791,8 +755,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         Instant now = Instant.now();
         Instant oldest = null;
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
-
             Iterator<RollbackData> iter = mRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
@@ -876,7 +838,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // session.
         final Context context = getContextAsUser(UserHandle.of(user));
         if (context == null) {
-            Log.e(TAG, "Unable to create context for install session user.");
+            Slog.e(TAG, "Unable to create context for install session user.");
             return false;
         }
 
@@ -903,7 +865,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         if (parentSession == null || packageSession == null) {
-            Log.e(TAG, "Unable to find session for enabled rollback.");
+            Slog.e(TAG, "Unable to find session for enabled rollback.");
             return false;
         }
 
@@ -912,7 +874,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // TODO: This check could be made more efficient.
         RollbackData rd = null;
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
                 if (data.apkSessionId == parentSession.getSessionId()) {
@@ -930,7 +891,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 newPackage = PackageParser.parsePackageLite(
                         new File(packageSession.resolvedBaseCodePath), 0);
             } catch (PackageParser.PackageParserException e) {
-                Log.e(TAG, "Unable to parse new package", e);
+                Slog.e(TAG, "Unable to parse new package", e);
                 return false;
             }
             String packageName = newPackage.packageName;
@@ -940,7 +901,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     return true;
                 }
             }
-            Log.e(TAG, "Unable to find package in apk session");
+            Slog.e(TAG, "Unable to find package in apk session");
             return false;
         }
 
@@ -972,16 +933,16 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // TODO: Don't attempt to enable rollback for split installs.
         final int installFlags = session.installFlags;
         if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
-            Log.e(TAG, "Rollback is not enabled.");
+            Slog.e(TAG, "Rollback is not enabled.");
             return false;
         }
         if ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-            Log.e(TAG, "Rollbacks not supported for instant app install");
+            Slog.e(TAG, "Rollbacks not supported for instant app install");
             return false;
         }
 
         if (session.resolvedBaseCodePath == null) {
-            Log.e(TAG, "Session code path has not been resolved.");
+            Slog.e(TAG, "Session code path has not been resolved.");
             return false;
         }
 
@@ -990,17 +951,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         try {
             newPackage = PackageParser.parsePackageLite(new File(session.resolvedBaseCodePath), 0);
         } catch (PackageParser.PackageParserException e) {
-            Log.e(TAG, "Unable to parse new package", e);
+            Slog.e(TAG, "Unable to parse new package", e);
             return false;
         }
 
         String packageName = newPackage.packageName;
-        Log.i(TAG, "Enabling rollback for install of " + packageName
+        Slog.i(TAG, "Enabling rollback for install of " + packageName
                 + ", session:" + session.sessionId);
 
         String installerPackageName = session.getInstallerPackageName();
         if (!enableRollbackAllowed(installerPackageName, packageName)) {
-            Log.e(TAG, "Installer " + installerPackageName
+            Slog.e(TAG, "Installer " + installerPackageName
                     + " is not allowed to enable rollback on " + packageName);
             return false;
         }
@@ -1016,7 +977,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         } catch (PackageManager.NameNotFoundException e) {
             // TODO: Support rolling back fresh package installs rather than
             // fail here. Test this case.
-            Log.e(TAG, packageName + " is not installed");
+            Slog.e(TAG, packageName + " is not installed");
             return false;
         }
 
@@ -1038,7 +999,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
         } catch (IOException e) {
-            Log.e(TAG, "Unable to copy package for rollback for " + packageName, e);
+            Slog.e(TAG, "Unable to copy package for rollback for " + packageName, e);
             return false;
         }
 
@@ -1068,7 +1029,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private void snapshotUserDataInternal(String packageName) {
         synchronized (mLock) {
             // staged installs
-            ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mRollbacks.size(); i++) {
                 RollbackData data = mRollbacks.get(i);
                 if (data.state != RollbackData.ROLLBACK_STATE_ENABLING) {
@@ -1101,7 +1061,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         PackageRollbackInfo info = null;
         RollbackData rollbackData = null;
         synchronized (mLock) {
-            ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
                 if (data.restoreUserDataInProgress) {
@@ -1143,7 +1102,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
             final PackageInstaller.SessionInfo session = installer.getSessionInfo(sessionId);
             if (session == null) {
-                Log.e(TAG, "No matching install session for: " + sessionId);
+                Slog.e(TAG, "No matching install session for: " + sessionId);
                 result.offer(false);
                 return;
             }
@@ -1156,7 +1115,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             if (!session.isMultiPackage()) {
                 if (!enableRollbackForPackageSession(newRollback.data, session,
                             new int[0])) {
-                    Log.e(TAG, "Unable to enable rollback for session: " + sessionId);
+                    Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
                     result.offer(false);
                     return;
                 }
@@ -1165,13 +1124,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     final PackageInstaller.SessionInfo childSession =
                             installer.getSessionInfo(childSessionId);
                     if (childSession == null) {
-                        Log.e(TAG, "No matching child install session for: " + childSessionId);
+                        Slog.e(TAG, "No matching child install session for: " + childSessionId);
                         result.offer(false);
                         return;
                     }
                     if (!enableRollbackForPackageSession(newRollback.data, childSession,
                                 new int[0])) {
-                        Log.e(TAG, "Unable to enable rollback for session: " + sessionId);
+                        Slog.e(TAG, "Unable to enable rollback for session: " + sessionId);
                         result.offer(false);
                         return;
                     }
@@ -1184,7 +1143,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         try {
             return result.take();
         } catch (InterruptedException ie) {
-            Log.e(TAG, "Interrupted while waiting for notifyStagedSession response");
+            Slog.e(TAG, "Interrupted while waiting for notifyStagedSession response");
             return false;
         }
     }
@@ -1197,7 +1156,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         getHandler().post(() -> {
             RollbackData rd = null;
             synchronized (mLock) {
-                ensureRollbackDataLoadedLocked();
                 for (int i = 0; i < mRollbacks.size(); ++i) {
                     RollbackData data = mRollbacks.get(i);
                     if (data.stagedSessionId == originalSessionId) {
@@ -1343,7 +1301,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return null;
         }
         if (newRollback.isCancelled) {
-            Log.e(TAG, "Rollback has been cancelled by PackageManager");
+            Slog.e(TAG, "Rollback has been cancelled by PackageManager");
             deleteRollback(data);
             return null;
         }
@@ -1352,7 +1310,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         // this is running on the handler thread and all changes to the
         // data.info occur on the handler thread.
         if (data.info.getPackages().size() != newRollback.packageSessionIds.length) {
-            Log.e(TAG, "Failed to enable rollback for all packages in session.");
+            Slog.e(TAG, "Failed to enable rollback for all packages in session.");
             deleteRollback(data);
             return null;
         }
@@ -1369,7 +1327,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             // device reboots between when the session is
             // committed and this point. Revisit this after
             // adding support for rollback of staged installs.
-            ensureRollbackDataLoadedLocked();
             mRollbacks.add(data);
         }
 
@@ -1406,9 +1363,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      */
     private RollbackData getRollbackForId(int rollbackId) {
         synchronized (mLock) {
-            // TODO: Have ensureRollbackDataLoadedLocked return the list of
-            // available rollbacks, to hopefully avoid forgetting to call it?
-            ensureRollbackDataLoadedLocked();
             for (int i = 0; i < mRollbacks.size(); ++i) {
                 RollbackData data = mRollbacks.get(i);
                 if (data.info.getRollbackId() == rollbackId) {
@@ -1472,7 +1426,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         try {
             mRollbackStore.saveRollbackData(rollbackData);
         } catch (IOException ioe) {
-            Log.e(TAG, "Unable to save rollback info for: "
+            Slog.e(TAG, "Unable to save rollback info for: "
                     + rollbackData.info.getRollbackId(), ioe);
         }
     }
