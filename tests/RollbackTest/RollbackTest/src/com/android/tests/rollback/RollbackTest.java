@@ -1021,6 +1021,7 @@ public class RollbackTest {
 
             Uninstall.packages(TestApp.A);
             Install.single(TestApp.A1).commit();
+            waitForUnavailableRollback(TestApp.A);
 
             // Block the RollbackManager to make extra sure it will not be
             // able to enable the rollback in time.
@@ -1029,6 +1030,10 @@ public class RollbackTest {
 
             assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
 
+            // Give plenty of time for RollbackManager to unblock and attempt
+            // to make the rollback available before asserting that the
+            // rollback was not made available.
+            Thread.sleep(TimeUnit.SECONDS.toMillis(2));
             assertThat(
                 getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TestApp.A)).isNull();
         } finally {
