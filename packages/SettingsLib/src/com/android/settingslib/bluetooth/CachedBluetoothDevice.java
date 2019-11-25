@@ -163,9 +163,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void disconnect() {
         synchronized (mProfileLock) {
-            for (LocalBluetoothProfile profile : mProfiles) {
-                disconnect(profile);
-            }
+            mLocalAdapter.disconnectAllEnabledProfiles(mDevice);
         }
         // Disconnect  PBAP server in case its connected
         // This is to ensure all the profiles are disconnected as some CK/Hs do not
