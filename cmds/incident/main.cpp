@@ -375,7 +375,7 @@ main(int argc, char** argv)
     if (destination == DEST_STDOUT) {
         // Call into the service
         sp<StatusListener> listener(new StatusListener());
-        status = service->reportIncidentToStream(args, listener, writeEnd);
+        status = service->reportIncidentToStream(args, listener, std::move(writeEnd));
 
         if (!status.isOk()) {
             fprintf(stderr, "reportIncident returned \"%s\"\n", status.toString8().string());
@@ -388,7 +388,7 @@ main(int argc, char** argv)
     } else if (destination == DEST_DUMPSTATE) {
         // Call into the service
         sp<StatusListener> listener(new StatusListener());
-        status = service->reportIncidentToDumpstate(writeEnd, listener);
+        status = service->reportIncidentToDumpstate(std::move(writeEnd), listener);
         if (!status.isOk()) {
             fprintf(stderr, "reportIncident returned \"%s\"\n", status.toString8().string());
             return 1;

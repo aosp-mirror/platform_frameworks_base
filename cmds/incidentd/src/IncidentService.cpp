@@ -279,7 +279,7 @@ Status IncidentService::reportIncident(const IncidentReportArgs& args) {
 
 Status IncidentService::reportIncidentToStream(const IncidentReportArgs& args,
                                                const sp<IIncidentReportStatusListener>& listener,
-                                               const unique_fd& stream) {
+                                               unique_fd stream) {
     IncidentReportArgs argsCopy(args);
 
     // Streaming reports can not also be broadcast.
@@ -306,7 +306,7 @@ Status IncidentService::reportIncidentToStream(const IncidentReportArgs& args,
     return Status::ok();
 }
 
-Status IncidentService::reportIncidentToDumpstate(const unique_fd& stream,
+Status IncidentService::reportIncidentToDumpstate(unique_fd stream,
         const sp<IIncidentReportStatusListener>& listener) {
     uid_t caller = IPCThreadState::self()->getCallingUid();
     if (caller != AID_ROOT && caller != AID_SHELL) {

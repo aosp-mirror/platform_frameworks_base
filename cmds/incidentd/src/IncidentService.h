@@ -121,9 +121,9 @@ public:
 
     virtual Status reportIncidentToStream(const IncidentReportArgs& args,
                                           const sp<IIncidentReportStatusListener>& listener,
-                                          const unique_fd& stream);
+                                          unique_fd stream);
 
-    virtual Status reportIncidentToDumpstate(const unique_fd& stream,
+    virtual Status reportIncidentToDumpstate(unique_fd stream,
             const sp<IIncidentReportStatusListener>& listener);
 
     virtual Status systemRunning();
