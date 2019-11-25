@@ -84,28 +84,30 @@ class UserSystemPackageInstaller {
      * System Property whether to only install system packages on a user if they're whitelisted for
      * that user type. These are flags and can be freely combined.
      * <ul>
-     * <li> 0 (0b000) - disable whitelist (install all system packages; no logging)</li>
-     * <li> 1 (0b001) - enforce (only install system packages if they are whitelisted)</li>
-     * <li> 2 (0b010) - log (log when a non-whitelisted package is run)</li>
-     * <li> 4 (0b100) - implicitly whitelist any package not mentioned in the whitelist</li>
-     * <li>-1         - use device default (as defined in res/res/values/config.xml)</li>
+     * <li> 0 (0b0000) - disable whitelist (install all system packages; no logging)</li>
+     * <li> 1 (0b0001) - enforce (only install system packages if they are whitelisted)</li>
+     * <li> 2 (0b0010) - log (log when a non-whitelisted package is run)</li>
+     * <li> 4 (0b0100) - implicitly whitelist any package not mentioned in the whitelist</li>
+     * <li> 8 (0b1000) - ignore OTAs (don't install system packages during OTAs)</li>
+     * <li>-1          - use device default (as defined in res/res/values/config.xml)</li>
      * </ul>
      * Note: This list must be kept current with config_userTypePackageWhitelistMode in
      * frameworks/base/core/res/res/values/config.xml
      */
     static final String PACKAGE_WHITELIST_MODE_PROP = "persist.debug.user.package_whitelist_mode";
     static final int USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE = 0;
-    static final int USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE = 0b001;
-    static final int USER_TYPE_PACKAGE_WHITELIST_MODE_LOG = 0b010;
-    static final int USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST = 0b100;
+    static final int USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE = 0b0001;
+    static final int USER_TYPE_PACKAGE_WHITELIST_MODE_LOG = 0b0010;
+    static final int USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST = 0b0100;
+    static final int USER_TYPE_PACKAGE_WHITELIST_MODE_IGNORE_OTA = 0b1000;
     static final int USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT = -1;
 
     @IntDef(flag = true, prefix = "USER_TYPE_PACKAGE_WHITELIST_MODE_", value = {
             USER_TYPE_PACKAGE_WHITELIST_MODE_DISABLE,
             USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE,
-            USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE,
             USER_TYPE_PACKAGE_WHITELIST_MODE_LOG,
             USER_TYPE_PACKAGE_WHITELIST_MODE_IMPLICIT_WHITELIST,
+            USER_TYPE_PACKAGE_WHITELIST_MODE_IGNORE_OTA,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PackageWhitelistMode {}
@@ -144,11 +146,17 @@ class UserSystemPackageInstaller {
     boolean installWhitelistedSystemPackages(boolean isFirstBoot, boolean isUpgrade) {
         final int mode = getWhitelistMode();
         checkWhitelistedSystemPackages(mode);
-        if (!isUpgrade && !isFirstBoot) {
+        final boolean isConsideredUpgrade = isUpgrade && !isIgnoreOtaMode(mode);
+        if (!isConsideredUpgrade && !isFirstBoot) {
+            return false;
+        }
+        if (isFirstBoot && !isEnforceMode(mode)) {
+            // Note that if !isEnforceMode, we nonetheless still install packages if isUpgrade
+            // in order to undo any previous non-installing. isFirstBoot lacks this requirement.
             return false;
         }
         Slog.i(TAG, "Reviewing whitelisted packages due to "
-                + (isFirstBoot ? "[firstBoot]" : "") + (isUpgrade ? "[upgrade]" : ""));
+                + (isFirstBoot ? "[firstBoot]" : "") + (isConsideredUpgrade ? "[upgrade]" : ""));
         final PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
         // Install/uninstall system packages per user.
         for (int userId : mUm.getUserIds()) {
@@ -160,7 +168,7 @@ class UserSystemPackageInstaller {
                 final boolean install =
                         (userWhitelist == null || userWhitelist.contains(pkg.packageName))
                         && !pkg.applicationInfo.hiddenUntilInstalled;
-                if (isUpgrade && !isFirstBoot && !install) {
+                if (isConsideredUpgrade && !isFirstBoot && !install) {
                     return; // To be careful, we don’t uninstall apps during OTAs
                 }
                 final boolean changed = pmInt.setInstalled(pkg, userId, install);
@@ -220,6 +228,19 @@ class UserSystemPackageInstaller {
     }
 
     /**
+     * Whether to ignore OTAs, and therefore not install missing system packages during OTAs.
+     * <p>Note:
+     * If in this mode, old system packages will not be installed on pre-existing users during OTAs.
+     * Any system packages that had not been installed at the time of the user's creation,
+     * due to {@link UserSystemPackageInstaller}'s previous actions, will therefore continue to
+     * remain uninstalled, even if the whitelist (or enforcement mode) now declares that they should
+     * be.
+     */
+    boolean isIgnoreOtaMode() {
+        return isIgnoreOtaMode(getWhitelistMode());
+    }
+
+    /**
      * Whether to log a warning concerning potential problems with the user-type package whitelist.
      */
     boolean isLogMode() {
@@ -237,6 +258,11 @@ class UserSystemPackageInstaller {
     /** See {@link #isEnforceMode()}. */
     private static boolean isEnforceMode(int whitelistMode) {
         return (whitelistMode & USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE) != 0;
+    }
+
+    /** See {@link #isIgnoreOtaMode()}. */
+    private static boolean isIgnoreOtaMode(int whitelistMode) {
+        return (whitelistMode & USER_TYPE_PACKAGE_WHITELIST_MODE_IGNORE_OTA) != 0;
     }
 
     /** See {@link #isLogMode()}. */
@@ -465,6 +491,7 @@ class UserSystemPackageInstaller {
         pw.print(isEnforceMode(mode) ? " (enforced)" : "");
         pw.print(isLogMode(mode) ? " (logged)" : "");
         pw.print(isImplicitWhitelistMode(mode) ? " (implicit)" : "");
+        pw.print(isIgnoreOtaMode(mode) ? " (ignore OTAs)" : "");
         pw.println();
 
         final int size = mWhitelistedPackagesForUserTypes.size();
