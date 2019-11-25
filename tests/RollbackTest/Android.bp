@@ -31,9 +31,9 @@ java_test_host {
 }
 
 java_test_host {
-    name: "SecondaryUserRollbackTest",
-    srcs: ["SecondaryUserRollbackTest/src/**/*.java"],
+    name: "MultiUserRollbackTest",
+    srcs: ["MultiUserRollbackTest/src/**/*.java"],
     libs: ["tradefed"],
     test_suites: ["general-tests"],
-    test_config: "SecondaryUserRollbackTest.xml",
+    test_config: "MultiUserRollbackTest.xml",
 }
