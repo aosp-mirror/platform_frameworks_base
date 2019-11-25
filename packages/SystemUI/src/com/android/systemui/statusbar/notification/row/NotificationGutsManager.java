@@ -174,7 +174,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             if (ops.contains(OP_CAMERA) || ops.contains(OP_RECORD_AUDIO)) {
                 startAppDetailsSettingsActivity(pkg, uid, null, row);
             } else {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_OVERLAY_PERMISSION);
                 intent.setData(Uri.fromParts("package", pkg, null));
                 mNotificationActivityStarter.startNotificationGutsIntent(intent, uid, row);
             }

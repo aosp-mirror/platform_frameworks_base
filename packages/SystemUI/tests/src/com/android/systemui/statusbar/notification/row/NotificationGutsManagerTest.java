@@ -274,7 +274,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
         verify(mNotificationActivityStarter, times(1))
                 .startNotificationGutsIntent(captor.capture(), anyInt(), any());
-        assertEquals(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, captor.getValue().getAction());
+        assertEquals(Settings.ACTION_MANAGE_APP_OVERLAY_PERMISSION, captor.getValue().getAction());
     }
 
     @Test
