@@ -2248,12 +2248,6 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Notification.IN_CALL_NOTIFICATION_ENABLED);
         p.end(notificationToken);
 
-        final long packageVerifierToken = p.start(SecureSettingsProto.PACKAGE_VERIFIER);
-        dumpSetting(s, p,
-                Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
-                SecureSettingsProto.PackageVerifier.USER_CONSENT);
-        p.end(packageVerifierToken);
-
         final long parentalControlToken = p.start(SecureSettingsProto.PARENTAL_CONTROL);
         dumpSetting(s, p,
                 Settings.Secure.PARENTAL_CONTROL_ENABLED,
