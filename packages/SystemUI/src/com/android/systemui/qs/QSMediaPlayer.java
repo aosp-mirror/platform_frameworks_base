@@ -18,8 +18,11 @@ package com.android.systemui.qs;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -35,6 +38,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +58,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 
+import java.util.List;
+
 /**
  * Single media player for carousel in QSPanel
  */
@@ -70,6 +76,83 @@ public class QSMediaPlayer {
     private int mHeight;
     private int mForegroundColor;
     private int mBackgroundColor;
+    private ComponentName mRecvComponent;
+    private QSPanel mParent;
+
+    private MediaController.Callback mSessionCallback = new MediaController.Callback() {
+        @Override
+        public void onSessionDestroyed() {
+            Log.d(TAG, "session destroyed");
+            mController.unregisterCallback(mSessionCallback);
+
+            // Hide all the old buttons
+            final int[] actionIds = {
+                    R.id.action0,
+                    R.id.action1,
+                    R.id.action2,
+                    R.id.action3,
+                    R.id.action4
+            };
+            for (int i = 0; i < actionIds.length; i++) {
+                ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
+                if (thisBtn != null) {
+                    thisBtn.setVisibility(View.GONE);
+                }
+            }
+
+            // Add a restart button
+            ImageButton btn = mMediaNotifView.findViewById(actionIds[0]);
+            btn.setOnClickListener(v -> {
+                Log.d(TAG, "Attempting to restart session");
+                // Send a media button event to previously found receiver
+                if (mRecvComponent != null) {
+                    Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                    intent.setComponent(mRecvComponent);
+                    int keyCode = KeyEvent.KEYCODE_MEDIA_PLAY;
+                    intent.putExtra(
+                            Intent.EXTRA_KEY_EVENT,
+                            new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
+                    mContext.sendBroadcast(intent);
+                } else {
+                    Log.d(TAG, "No receiver to restart");
+                    // If we don't have a receiver, try relaunching the activity instead
+                    try {
+                        mController.getSessionActivity().send();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.e(TAG, "Pending intent was canceled");
+                        e.printStackTrace();
+                    }
+                }
+            });
+            btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_replay));
+            btn.setImageTintList(ColorStateList.valueOf(mForegroundColor));
+            btn.setVisibility(View.VISIBLE);
+
+            // Add long-click option to remove the player
+            ViewGroup mMediaCarousel = (ViewGroup) mMediaNotifView.getParent();
+            mMediaNotifView.setOnLongClickListener(v -> {
+                // Replace player view with delete/cancel view
+                v.setVisibility(View.GONE);
+
+                View options = LayoutInflater.from(mContext).inflate(
+                        R.layout.qs_media_panel_options, null, false);
+                ImageButton btnDelete = options.findViewById(R.id.remove);
+                btnDelete.setOnClickListener(b -> {
+                    mMediaCarousel.removeView(options);
+                    mParent.removeMediaPlayer(QSMediaPlayer.this);
+                });
+                ImageButton btnCancel = options.findViewById(R.id.cancel);
+                btnCancel.setOnClickListener(b -> {
+                    mMediaCarousel.removeView(options);
+                    v.setVisibility(View.VISIBLE);
+                });
+
+                int pos = mMediaCarousel.indexOfChild(v);
+                mMediaCarousel.addView(options, pos, v.getLayoutParams());
+                return true; // consumed click
+            });
+        }
+    };
 
     /**
      *
@@ -92,7 +175,8 @@ public class QSMediaPlayer {
     }
 
     /**
-     *
+     * Create or update the player view for the given media session
+     * @param parent the parent QSPanel
      * @param token token for this media session
      * @param icon app notification icon
      * @param iconColor foreground color (for text, icons)
@@ -101,13 +185,30 @@ public class QSMediaPlayer {
      * @param notif reference to original notification
      * @param device current playback device
      */
-    public void setMediaSession(MediaSession.Token token, Icon icon, int iconColor, int bgColor,
-            View actionsContainer, Notification notif, MediaDevice device) {
-        Log.d(TAG, "got media session: " + token);
+    public void setMediaSession(QSPanel parent, MediaSession.Token token, Icon icon, int iconColor,
+            int bgColor, View actionsContainer, Notification notif, MediaDevice device) {
+        mParent = parent;
         mToken = token;
         mForegroundColor = iconColor;
         mBackgroundColor = bgColor;
         mController = new MediaController(mContext, token);
+
+        // Try to find a receiver for the media button that matches this app
+        PackageManager pm = mContext.getPackageManager();
+        Intent it = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        List<ResolveInfo> info = pm.queryBroadcastReceiversAsUser(it, 0, mContext.getUser());
+        if (info != null) {
+            for (ResolveInfo inf : info) {
+                if (inf.activityInfo.packageName.equals(notif.contentIntent.getCreatorPackage())) {
+                    Log.d(TAG, "Found receiver for package: " + inf);
+                    mRecvComponent = inf.getComponentInfo().getComponentName();
+                }
+            }
+        }
+
+        // reset in case we had previously restarted the stream
+        mMediaNotifView.setOnLongClickListener(null);
+        mController.registerCallback(mSessionCallback);
         MediaMetadata mMediaMetadata = mController.getMetadata();
         if (mMediaMetadata == null) {
             Log.e(TAG, "Media metadata was null");
@@ -235,7 +336,6 @@ public class QSMediaPlayer {
         for (; i < actionIds.length; i++) {
             ImageButton thisBtn = mMediaNotifView.findViewById(actionIds[i]);
             thisBtn.setVisibility(View.GONE);
-            Log.d(TAG, "hid a button");
         }
     }
 
@@ -266,8 +366,9 @@ public class QSMediaPlayer {
 
     private void addAlbumArtBackground(MediaMetadata metadata, int bgColor, int width, int height) {
         Bitmap albumArt = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+        float radius = mContext.getResources().getDimension(R.dimen.qs_media_corner_radius);
         if (albumArt != null) {
-
+            Log.d(TAG, "updating album art");
             Bitmap original = albumArt.copy(Bitmap.Config.ARGB_8888, true);
             Bitmap scaled = scaleBitmap(original, width, height);
             Canvas canvas = new Canvas(scaled);
@@ -281,12 +382,15 @@ public class QSMediaPlayer {
 
             RoundedBitmapDrawable roundedDrawable = RoundedBitmapDrawableFactory.create(
                     mContext.getResources(), scaled);
-            roundedDrawable.setCornerRadius(20);
+            roundedDrawable.setCornerRadius(radius);
 
             mMediaNotifView.setBackground(roundedDrawable);
         } else {
             Log.e(TAG, "No album art available");
-            mMediaNotifView.setBackground(null);
+            GradientDrawable rect = new GradientDrawable();
+            rect.setCornerRadius(radius);
+            rect.setColor(bgColor);
+            mMediaNotifView.setBackground(rect);
         }
     }
 

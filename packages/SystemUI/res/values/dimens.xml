@@ -1179,4 +1179,5 @@
     <dimen name="qs_media_height">150dp</dimen>
     <dimen name="qs_media_width">350dp</dimen>
     <dimen name="qs_media_padding">8dp</dimen>
+    <dimen name="qs_media_corner_radius">10dp</dimen>
 </resources>
