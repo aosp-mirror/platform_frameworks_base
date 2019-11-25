@@ -37,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.android.internal.R;
 
 
@@ -65,7 +66,9 @@ final class CarUserSwitchingDialog extends UserSwitchingDialog {
         setCancelable(false);
         Resources res = getContext().getResources();
         // Custom view due to alignment and font size requirements
-        getContext().setTheme(R.style.Theme_DeviceDefault_Light_Dialog_Alert_UserSwitchingDialog);
+        // TODO (b/145021634): disabled because it's delaying user switch by 3 seconds
+        // getContext()
+        // .setTheme(R.style.Theme_DeviceDefault_Light_Dialog_Alert_UserSwitchingDialog);
         View view = LayoutInflater.from(getContext()).inflate(
                 R.layout.car_user_switching_dialog,
                 null);
