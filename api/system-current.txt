@@ -4476,6 +4476,23 @@ package android.net.ipsec.ike {
     method @NonNull public android.net.ipsec.ike.ChildSaProposal build();
   }
 
+  public interface ChildSessionCallback {
+    method public void onClosed();
+    method public void onClosedExceptionally(@NonNull android.net.ipsec.ike.exceptions.IkeException);
+    method public void onIpSecTransformCreated(@NonNull android.net.IpSecTransform, int);
+    method public void onIpSecTransformDeleted(@NonNull android.net.IpSecTransform, int);
+    method public void onOpened(@NonNull android.net.ipsec.ike.ChildSessionConfiguration);
+  }
+
+  public final class ChildSessionConfiguration {
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getInboundTrafficSelectors();
+    method @NonNull public java.util.List<android.net.LinkAddress> getInternalAddresses();
+    method @NonNull public java.util.List<java.net.InetAddress> getInternalDhcpServers();
+    method @NonNull public java.util.List<java.net.InetAddress> getInternalDnsServers();
+    method @NonNull public java.util.List<android.net.LinkAddress> getInternalSubnets();
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getOutboundTrafficSelectors();
+  }
+
   public class IkeFqdnIdentification extends android.net.ipsec.ike.IkeIdentification {
     ctor public IkeFqdnIdentification(@NonNull String);
     field @NonNull public final String fqdn;
@@ -4517,6 +4534,21 @@ package android.net.ipsec.ike {
     method @NonNull public android.net.ipsec.ike.IkeSaProposal build();
   }
 
+  public interface IkeSessionCallback {
+    method public void onClosed();
+    method public void onClosedExceptionally(@NonNull android.net.ipsec.ike.exceptions.IkeException);
+    method public void onError(@NonNull android.net.ipsec.ike.exceptions.IkeProtocolException);
+    method public void onOpened(@NonNull android.net.ipsec.ike.IkeSessionConfiguration);
+  }
+
+  public final class IkeSessionConfiguration {
+    ctor public IkeSessionConfiguration();
+    method @NonNull public String getRemoteApplicationVersion();
+    method public boolean isIkeExtensionEnabled(int);
+    field public static final int EXTENSION_TYPE_FRAGMENTATION = 1; // 0x1
+    field public static final int EXTENSION_TYPE_MOBIKE = 2; // 0x2
+  }
+
   public final class IkeTrafficSelector {
     ctor public IkeTrafficSelector(int, int, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress);
     field public final int endPort;
@@ -4549,6 +4581,37 @@ package android.net.ipsec.ike {
     field public static final int KEY_LEN_UNUSED = 0; // 0x0
     field public static final int PSEUDORANDOM_FUNCTION_AES128_XCBC = 4; // 0x4
     field public static final int PSEUDORANDOM_FUNCTION_HMAC_SHA1 = 2; // 0x2
+  }
+
+}
+
+package android.net.ipsec.ike.exceptions {
+
+  public abstract class IkeException extends java.lang.Exception {
+  }
+
+  public final class IkeInternalException extends android.net.ipsec.ike.exceptions.IkeException {
+  }
+
+  public abstract class IkeProtocolException extends android.net.ipsec.ike.exceptions.IkeException {
+    method @Nullable public byte[] getErrorData();
+    method public int getErrorType();
+    field public static final int ERROR_TYPE_AUTHENTICATION_FAILED = 24; // 0x18
+    field public static final int ERROR_TYPE_CHILD_SA_NOT_FOUND = 44; // 0x2c
+    field public static final int ERROR_TYPE_FAILED_CP_REQUIRED = 37; // 0x25
+    field public static final int ERROR_TYPE_INTERNAL_ADDRESS_FAILURE = 36; // 0x24
+    field public static final int ERROR_TYPE_INVALID_IKE_SPI = 4; // 0x4
+    field public static final int ERROR_TYPE_INVALID_KE_PAYLOAD = 17; // 0x11
+    field public static final int ERROR_TYPE_INVALID_MAJOR_VERSION = 5; // 0x5
+    field public static final int ERROR_TYPE_INVALID_MESSAGE_ID = 9; // 0x9
+    field public static final int ERROR_TYPE_INVALID_SELECTORS = 39; // 0x27
+    field public static final int ERROR_TYPE_INVALID_SYNTAX = 7; // 0x7
+    field public static final int ERROR_TYPE_NO_ADDITIONAL_SAS = 35; // 0x23
+    field public static final int ERROR_TYPE_NO_PROPOSAL_CHOSEN = 14; // 0xe
+    field public static final int ERROR_TYPE_SINGLE_PAIR_REQUIRED = 34; // 0x22
+    field public static final int ERROR_TYPE_TEMPORARY_FAILURE = 43; // 0x2b
+    field public static final int ERROR_TYPE_TS_UNACCEPTABLE = 38; // 0x26
+    field public static final int ERROR_TYPE_UNSUPPORTED_CRITICAL_PAYLOAD = 1; // 0x1
   }
 
 }
