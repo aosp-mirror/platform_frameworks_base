@@ -7674,19 +7674,17 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void grantInputChannel(int callingUid, int callingPid, int displayId, SurfaceControl surface,
             IWindow window, IBinder hostInputToken, InputChannel outInputChannel) {
-        final InputApplicationHandle applicationHandle;
+        InputApplicationHandle applicationHandle = null;
         final String name;
         final InputChannel[] inputChannels;
         final InputChannel clientChannel;
         final InputChannel serverChannel;
         synchronized (mGlobalLock) {
             final WindowState hostWindow = mInputToWindowMap.get(hostInputToken);
-            if (hostWindow == null) {
-                Slog.e(TAG, "Failed to grant input channel");
-                return;
-            }
+            final String hostWindowName = (hostWindow != null)
+                    ? hostWindow.getWindowTag().toString() : "Internal";
             name = "EmbeddedWindow{ u" + UserHandle.getUserId(callingUid)
-                    + " " + hostWindow.getWindowTag() + "}";
+                    + " " + hostWindowName + "}";
 
             inputChannels = InputChannel.openInputChannelPair(name);
             serverChannel = inputChannels[0];
@@ -7694,8 +7692,10 @@ public class WindowManagerService extends IWindowManager.Stub
             mInputManager.registerInputChannel(serverChannel);
             mEmbeddedWindowController.add(serverChannel.getToken(), window, hostWindow, callingUid,
                     callingPid);
-            applicationHandle = new InputApplicationHandle(
-                hostWindow.mInputWindowHandle.inputApplicationHandle);
+            if (hostWindow != null) {
+                applicationHandle = new InputApplicationHandle(
+                        hostWindow.mInputWindowHandle.inputApplicationHandle);
+            }
         }
 
         clientChannel.transferTo(outInputChannel);

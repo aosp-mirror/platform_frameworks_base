@@ -103,8 +103,7 @@ class WindowlessWindowManager implements IWindowSession {
         }
 
         if (((attrs.inputFeatures &
-                WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0) &&
-                (mHostInputToken != null)) {
+                WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0)) {
             try {
                 mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, outInputChannel);
             } catch (RemoteException e) {
