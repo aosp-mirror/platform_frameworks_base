@@ -82,7 +82,8 @@ public class ChangeAppRotationTest extends FlickerTestBase {
     @Before
     public void runTransition() {
         super.runTransition(
-                changeAppRotation(mTestApp, mUiDevice, mBeginRotation, mEndRotation).build());
+                changeAppRotation(mTestApp, mUiDevice, mBeginRotation, mEndRotation)
+                        .includeJankyRuns().build());
     }
 
     @FlakyTest(bugId = 140855415)
