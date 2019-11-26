@@ -16,6 +16,7 @@
 
 package com.android.server.integrity.model;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -26,6 +27,9 @@ import com.android.server.integrity.model.AtomicFormula.BooleanAtomicFormula;
 import com.android.server.integrity.model.AtomicFormula.IntAtomicFormula;
 import com.android.server.integrity.model.AtomicFormula.StringAtomicFormula;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Represents a rule logic/content.
  *
@@ -34,6 +38,15 @@ import com.android.server.integrity.model.AtomicFormula.StringAtomicFormula;
 @SystemApi
 @VisibleForTesting
 public interface Formula {
+    @IntDef(
+            value = {
+                    OPEN_FORMULA_TAG,
+                    STRING_ATOMIC_FORMULA_TAG,
+                    INT_ATOMIC_FORMULA_TAG,
+                    BOOLEAN_ATOMIC_FORMULA_TAG
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Tag {}
 
     int OPEN_FORMULA_TAG = 0;
     int STRING_ATOMIC_FORMULA_TAG = 1;
@@ -46,6 +59,9 @@ public interface Formula {
      */
     boolean isSatisfied(@NonNull AppInstallMetadata appInstallMetadata);
 
+    /** Returns the tag that identifies the current class. */
+    @Tag int getTag();
+
     /**
      * Write a {@link Formula} to {@link android.os.Parcel}.
      *
@@ -55,21 +71,8 @@ public interface Formula {
      * @throws IllegalArgumentException if {@link Formula} is not a recognized subclass
      */
     static void writeToParcel(@NonNull Formula formula, @NonNull Parcel dest, int flags) {
-        if (formula instanceof OpenFormula) {
-            dest.writeInt(OPEN_FORMULA_TAG);
-            ((OpenFormula) formula).writeToParcel(dest, flags);
-        } else if (formula instanceof StringAtomicFormula) {
-            dest.writeInt(STRING_ATOMIC_FORMULA_TAG);
-            ((StringAtomicFormula) formula).writeToParcel(dest, flags);
-        } else if (formula instanceof IntAtomicFormula) {
-            dest.writeInt(INT_ATOMIC_FORMULA_TAG);
-            ((IntAtomicFormula) formula).writeToParcel(dest, flags);
-        } else if (formula instanceof BooleanAtomicFormula) {
-            dest.writeInt(BOOLEAN_ATOMIC_FORMULA_TAG);
-            ((BooleanAtomicFormula) formula).writeToParcel(dest, flags);
-        } else {
-            throw new IllegalArgumentException("Unrecognized class " + formula.getClass());
-        }
+        dest.writeInt(formula.getTag());
+        ((Parcelable) formula).writeToParcel(dest, flags);
     }
 
     /**

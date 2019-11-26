@@ -298,6 +298,11 @@ public class RuleXmlSerializerTest {
             }
 
             @Override
+            public int getTag() {
+                return 0;
+            }
+
+            @Override
             public int hashCode() {
                 return super.hashCode();
             }

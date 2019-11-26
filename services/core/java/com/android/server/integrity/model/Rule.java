@@ -58,7 +58,7 @@ public final class Rule implements Parcelable {
      */
     public static final int FORCE_ALLOW = 1;
 
-    private final Formula mFormula;
+    private final @NonNull Formula mFormula;
     private final @Effect int mEffect;
 
     public Rule(@NonNull Formula formula, @Effect int effect) {
@@ -119,7 +119,7 @@ public final class Rule implements Parcelable {
             return false;
         }
         Rule that = (Rule) o;
-        return Objects.equals(mFormula, that.mFormula) && mEffect == that.mEffect;
+        return mEffect == that.mEffect && Objects.equals(mFormula, that.mFormula);
     }
 
     @Override
@@ -127,7 +127,7 @@ public final class Rule implements Parcelable {
         return Objects.hash(mFormula, mEffect);
     }
 
-    private String effectToString(int effect) {
+    private static String effectToString(int effect) {
         switch (effect) {
             case DENY:
                 return "DENY";

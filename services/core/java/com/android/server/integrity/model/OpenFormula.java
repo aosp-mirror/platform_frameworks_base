@@ -63,7 +63,7 @@ public final class OpenFormula implements Formula, Parcelable {
     public static final int NOT = 2;
 
     private final @Connector int mConnector;
-    private final List<Formula> mFormulas;
+    private final @NonNull List<Formula> mFormulas;
 
     @NonNull
     public static final Creator<OpenFormula> CREATOR =
@@ -99,6 +99,7 @@ public final class OpenFormula implements Formula, Parcelable {
         for (int i = 0; i < length; i++) {
             mFormulas.add(Formula.readFromParcel(in));
         }
+        validateFormulas(mConnector, mFormulas);
     }
 
     public @Connector int getConnector() {
@@ -125,6 +126,11 @@ public final class OpenFormula implements Formula, Parcelable {
                 Slog.i(TAG, "Unknown connector " + mConnector);
                 return false;
         }
+    }
+
+    @Override
+    public int getTag() {
+        return Formula.OPEN_FORMULA_TAG;
     }
 
     @Override
@@ -175,7 +181,7 @@ public final class OpenFormula implements Formula, Parcelable {
         }
     }
 
-    private void validateFormulas(@Connector int connector, List<Formula> formulas) {
+    private static void validateFormulas(@Connector int connector, List<Formula> formulas) {
         switch (connector) {
             case AND:
             case OR:
@@ -195,7 +201,7 @@ public final class OpenFormula implements Formula, Parcelable {
         }
     }
 
-    private String connectorToString(int connector) {
+    private static String connectorToString(int connector) {
         switch (connector) {
             case AND:
                 return "AND";
