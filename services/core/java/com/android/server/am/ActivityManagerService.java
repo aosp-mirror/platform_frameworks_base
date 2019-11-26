@@ -18611,6 +18611,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void monitor() {
+            ActivityManagerService.this.monitor();
+        }
+
+        @Override
         public long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason) {
             synchronized (ActivityManagerService.this) {
                 return ActivityManagerService.this.inputDispatchingTimedOut(
