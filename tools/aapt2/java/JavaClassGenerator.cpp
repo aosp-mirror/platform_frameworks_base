@@ -428,7 +428,7 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
     out_rewrite_method->AppendStatement(
         StringPrintf("  if ((styleable.%s[i] & 0xff000000) == 0) {", array_field_name.data()));
     out_rewrite_method->AppendStatement(
-        StringPrintf("    styleable.%s[i] = (styleable.%s[i] & 0x00ffffff) | (p << 24);",
+        StringPrintf("    styleable.%s[i] = (styleable.%s[i] & 0x00ffffff) | packageIdBits;",
                      array_field_name.data(), array_field_name.data()));
     out_rewrite_method->AppendStatement("  }");
     out_rewrite_method->AppendStatement("}");
@@ -487,9 +487,9 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
 
   if (out_rewrite_method != nullptr) {
     const StringPiece& type_str = to_string(name.type);
-    out_rewrite_method->AppendStatement(StringPrintf("%s.%s = (%s.%s & 0x00ffffff) | (p << 24);",
-                                                     type_str.data(), field_name.data(),
-                                                     type_str.data(), field_name.data()));
+    out_rewrite_method->AppendStatement(
+        StringPrintf("%s.%s = (%s.%s & 0x00ffffff) | packageIdBits;", type_str.data(),
+                     field_name.data(), type_str.data(), field_name.data()));
   }
 }
 
@@ -599,6 +599,7 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
       rewrite_method->AppendStatement(
           StringPrintf("%s.R.onResourcesLoaded(p);", package_to_callback.data()));
     }
+    rewrite_method->AppendStatement("final int packageIdBits = p << 24;");
   }
 
   for (const auto& package : table_->packages) {
