@@ -2555,7 +2555,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             Process.setThreadGroupAndCpuset(BackgroundThread.get().getThreadId(),
                     Process.THREAD_GROUP_SYSTEM);
             Process.setThreadGroupAndCpuset(
-                    mOomAdjuster.mAppCompact.mCompactionThread.getThreadId(),
+                    mOomAdjuster.mCachedAppOptimizer.mCachedAppOptimizerThread.getThreadId(),
                     Process.THREAD_GROUP_SYSTEM);
         } catch (Exception e) {
             Slog.w(TAG, "Setting background thread cpuset failed");
@@ -5304,7 +5304,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 String data, Bundle extras, boolean ordered,
                                 boolean sticky, int sendingUser) {
                             synchronized (ActivityManagerService.this) {
-                                mOomAdjuster.mAppCompact.compactAllSystem();
+                                mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
                                 requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
                             }
                         }
@@ -9000,7 +9000,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long timeSinceLastIdle = now - mLastIdleTime;
 
             // Compact all non-zygote processes to freshen up the page cache.
-            mOomAdjuster.mAppCompact.compactAllSystem();
+            mOomAdjuster.mCachedAppOptimizer.compactAllSystem();
 
             final long lowRamSinceLastIdle = getLowRamTimeSinceIdle(now);
             mLastIdleTime = now;
@@ -10020,7 +10020,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             mConstants.dump(pw);
-            mOomAdjuster.dumpAppCompactorSettings(pw);
+            mOomAdjuster.dumpCachedAppOptimizerSettings(pw);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
@@ -10425,7 +10425,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("settings".equals(cmd)) {
                 synchronized (this) {
                     mConstants.dump(pw);
-                    mOomAdjuster.dumpAppCompactorSettings(pw);
+                    mOomAdjuster.dumpCachedAppOptimizerSettings(pw);
                 }
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 if (dumpClient) {

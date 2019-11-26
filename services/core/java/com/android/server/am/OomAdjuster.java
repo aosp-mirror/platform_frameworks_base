@@ -122,9 +122,9 @@ public final class OomAdjuster {
     PowerManagerInternal mLocalPowerManager;
 
     /**
-     * Service for compacting background apps.
+     * Service for optimizing resource usage from background apps.
      */
-    AppCompactor mAppCompact;
+    CachedAppOptimizer mCachedAppOptimizer;
 
     ActivityManagerConstants mConstants;
 
@@ -197,7 +197,7 @@ public final class OomAdjuster {
 
         mLocalPowerManager = LocalServices.getService(PowerManagerInternal.class);
         mConstants = mService.mConstants;
-        mAppCompact = new AppCompactor(mService);
+        mCachedAppOptimizer = new CachedAppOptimizer(mService);
 
         mProcessGroupHandler = new Handler(adjusterThread.getLooper(), msg -> {
             final int pid = msg.arg1;
@@ -224,7 +224,7 @@ public final class OomAdjuster {
     }
 
     void initSettings() {
-        mAppCompact.init();
+        mCachedAppOptimizer.init();
     }
 
     /**
@@ -1978,7 +1978,7 @@ public final class OomAdjuster {
         int changes = 0;
 
         // don't compact during bootup
-        if (mAppCompact.useCompaction() && mService.mBooted) {
+        if (mCachedAppOptimizer.useCompaction() && mService.mBooted) {
             // Cached and prev/home compaction
             if (app.curAdj != app.setAdj) {
                 // Perform a minor compaction when a perceptible app becomes the prev/home app
@@ -1987,26 +1987,26 @@ public final class OomAdjuster {
                 if (app.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ &&
                         (app.curAdj == ProcessList.PREVIOUS_APP_ADJ ||
                                 app.curAdj == ProcessList.HOME_APP_ADJ)) {
-                    mAppCompact.compactAppSome(app);
+                    mCachedAppOptimizer.compactAppSome(app);
                 } else if ((app.setAdj < ProcessList.CACHED_APP_MIN_ADJ
                                 || app.setAdj > ProcessList.CACHED_APP_MAX_ADJ)
                         && app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ
                         && app.curAdj <= ProcessList.CACHED_APP_MAX_ADJ) {
-                    mAppCompact.compactAppFull(app);
+                    mCachedAppOptimizer.compactAppFull(app);
                 }
             } else if (mService.mWakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE
                     && app.setAdj < ProcessList.FOREGROUND_APP_ADJ
                     // Because these can fire independent of oom_adj/procstate changes, we need
                     // to throttle the actual dispatch of these requests in addition to the
                     // processing of the requests. As a result, there is throttling both here
-                    // and in AppCompactor.
-                    && mAppCompact.shouldCompactPersistent(app, now)) {
-                mAppCompact.compactAppPersistent(app);
+                    // and in CachedAppOptimizer.
+                    && mCachedAppOptimizer.shouldCompactPersistent(app, now)) {
+                mCachedAppOptimizer.compactAppPersistent(app);
             } else if (mService.mWakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE
                     && app.getCurProcState()
                         == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-                    && mAppCompact.shouldCompactBFGS(app, now)) {
-                mAppCompact.compactAppBfgs(app);
+                    && mCachedAppOptimizer.shouldCompactBFGS(app, now)) {
+                mCachedAppOptimizer.compactAppBfgs(app);
             }
         }
 
@@ -2439,7 +2439,7 @@ public final class OomAdjuster {
     }
 
     @GuardedBy("mService")
-    void dumpAppCompactorSettings(PrintWriter pw) {
-        mAppCompact.dump(pw);
+    void dumpCachedAppOptimizerSettings(PrintWriter pw) {
+        mCachedAppOptimizer.dump(pw);
     }
 }
