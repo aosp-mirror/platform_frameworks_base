@@ -16,12 +16,11 @@
 
 package com.android.server.integrity.serializer;
 
+import android.content.integrity.AtomicFormula;
+import android.content.integrity.CompoundFormula;
+import android.content.integrity.Formula;
+import android.content.integrity.Rule;
 import android.util.Xml;
-
-import com.android.server.integrity.model.AtomicFormula;
-import com.android.server.integrity.model.Formula;
-import com.android.server.integrity.model.OpenFormula;
-import com.android.server.integrity.model.Rule;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -31,9 +30,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * A helper class to serialize rules from the {@link Rule} model to Xml representation.
- */
+/** A helper class to serialize rules from the {@link Rule} model to Xml representation. */
 public class RuleXmlSerializer implements RuleSerializer {
 
     public static final String TAG = "RuleXmlSerializer";
@@ -97,23 +94,23 @@ public class RuleXmlSerializer implements RuleSerializer {
     private void serializeFormula(Formula formula, XmlSerializer xmlSerializer) throws IOException {
         if (formula instanceof AtomicFormula) {
             serializeAtomicFormula((AtomicFormula) formula, xmlSerializer);
-        } else if (formula instanceof OpenFormula) {
-            serializeOpenFormula((OpenFormula) formula, xmlSerializer);
+        } else if (formula instanceof CompoundFormula) {
+            serializeOpenFormula((CompoundFormula) formula, xmlSerializer);
         } else {
             throw new IllegalArgumentException(
                     String.format("Invalid formula type: %s", formula.getClass()));
         }
     }
 
-    private void serializeOpenFormula(OpenFormula openFormula, XmlSerializer xmlSerializer)
+    private void serializeOpenFormula(CompoundFormula compoundFormula, XmlSerializer xmlSerializer)
             throws IOException {
-        if (openFormula == null) {
+        if (compoundFormula == null) {
             return;
         }
         xmlSerializer.startTag(NAMESPACE, OPEN_FORMULA_TAG);
-        serializeAttributeValue(CONNECTOR_ATTRIBUTE, String.valueOf(openFormula.getConnector()),
+        serializeAttributeValue(CONNECTOR_ATTRIBUTE, String.valueOf(compoundFormula.getConnector()),
                 xmlSerializer);
-        for (Formula formula : openFormula.getFormulas()) {
+        for (Formula formula : compoundFormula.getFormulas()) {
             serializeFormula(formula, xmlSerializer);
         }
         xmlSerializer.endTag(NAMESPACE, OPEN_FORMULA_TAG);

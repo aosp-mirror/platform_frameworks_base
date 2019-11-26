@@ -4909,6 +4909,14 @@ public abstract class Context {
     public static final String APP_SEARCH_SERVICE = "app_search";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.content.integrity.AppIntegrityManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String APP_INTEGRITY_SERVICE = "app_integrity";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

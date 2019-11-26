@@ -48,6 +48,7 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_RESTARTED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FIRST_LAUNCH" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_NEEDS_VERIFICATION" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_VERIFIED" />
     <protected-broadcast android:name="android.intent.action.PACKAGES_SUSPENDED" />

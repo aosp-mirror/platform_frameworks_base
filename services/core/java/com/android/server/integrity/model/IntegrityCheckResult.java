@@ -17,6 +17,7 @@
 package com.android.server.integrity.model;
 
 import android.annotation.Nullable;
+import android.content.integrity.Rule;
 
 /**
  * A class encapsulating the result from the evaluation engine after evaluating rules against app
