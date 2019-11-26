@@ -112,7 +112,7 @@ public class NotificationHistoryManager {
         }
     }
 
-    void onUserRemoved(@UserIdInt int userId) {
+    public void onUserRemoved(@UserIdInt int userId) {
         synchronized (mLock) {
             // Actual data deletion is handled by other parts of the system (the entire directory is
             // removed) - we just need clean up our internal state for GC
@@ -122,7 +122,7 @@ public class NotificationHistoryManager {
         }
     }
 
-    void onPackageRemoved(int userId, String packageName) {
+    public void onPackageRemoved(int userId, String packageName) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.get(userId, false)) {
                 if (mHistoryEnabled.get(userId, false)) {
@@ -142,7 +142,8 @@ public class NotificationHistoryManager {
         }
     }
 
-    void triggerWriteToDisk() {
+    // TODO: wire this up to AMS when power button is long pressed
+    public void triggerWriteToDisk() {
         synchronized (mLock) {
             final int userCount = mUserState.size();
             for (int i = 0; i < userCount; i++) {
@@ -204,7 +205,7 @@ public class NotificationHistoryManager {
         }
     }
 
-    public boolean isHistoryEnabled(@UserIdInt int userId) {
+    boolean isHistoryEnabled(@UserIdInt int userId) {
         synchronized (mLock) {
             return mHistoryEnabled.get(userId);
         }
