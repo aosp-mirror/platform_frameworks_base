@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
-import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -37,6 +36,8 @@ import com.android.server.SystemConfig;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -111,31 +112,55 @@ class UserSystemPackageInstaller {
     public @interface PackageWhitelistMode {}
 
     /**
-     * Maps system package manifest names to the user flags on which they should be initially
-     * installed.
-     * <p>Packages that are whitelisted, but then blacklisted so that they aren't to be installed on
+     * Maps system package manifest names to a bitset representing (via {@link #getUserTypeMask})
+     * the user types on which they should be initially installed.
+     * <p>
+     * E.g. if package "pkg1" should be installed on "usertype_d", which is the user type for which
+     * {@link #getUserTypeMask}("usertype_d") returns (1 << 3)
+     * then mWhitelistedPackagesForUserTypes.get("pkg1") will be a Long whose
+     * bit in position 3 will equal 1.
+     * <p>
+     * Packages that are whitelisted, but then blacklisted so that they aren't to be installed on
      * any user, are purposefully still present in this list.
      */
-    private final ArrayMap<String, Integer> mWhitelistedPackagesForUserTypes;
+    private final ArrayMap<String, Long> mWhitelistedPackagesForUserTypes;
 
     private final UserManagerService mUm;
 
-    UserSystemPackageInstaller(UserManagerService ums) {
-        mUm = ums;
+    /**
+     * Alphabetically sorted list of user types.
+     * Throughout this class, a long (functioning as a bitset) has its ith bit representing
+     * the user type stored in mUserTypes[i].
+     * mUserTypes cannot exceed Long.SIZE (since we are using long for our bitset).
+     */
+    private final String[] mUserTypes;
+
+    UserSystemPackageInstaller(UserManagerService um, ArrayMap<String, UserTypeDetails> userTypes) {
+        mUm = um;
+        mUserTypes = getAndSortKeysFromMap(userTypes);
+        if (mUserTypes.length > Long.SIZE) {
+            throw new IllegalArgumentException("Device contains " + userTypes.size()
+                    + " user types. However, UserSystemPackageInstaller does not work if there are"
+                    + " more than " + Long.SIZE + " user types.");
+            // UserSystemPackageInstaller could use a BitSet instead of Long in this case.
+            // But, currently, 64 user types is far beyond expectations, so we have not done so.
+        }
         mWhitelistedPackagesForUserTypes =
                 determineWhitelistedPackagesForUserTypes(SystemConfig.getInstance());
     }
 
     /** Constructor for testing purposes. */
     @VisibleForTesting
-    UserSystemPackageInstaller(UserManagerService ums, ArrayMap<String, Integer> whitelist) {
+    UserSystemPackageInstaller(UserManagerService ums, ArrayMap<String, Long> whitelist,
+            String[] sortedUserTypes) {
         mUm = ums;
+        mUserTypes = sortedUserTypes;
         mWhitelistedPackagesForUserTypes = whitelist;
     }
 
     /**
      * During OTAs and first boot, install/uninstall all system packages for all users based on the
-     * user's UserInfo flags and the SystemConfig whitelist.
+     * user's user type and the SystemConfig whitelist.
      * We do NOT uninstall packages during an OTA though.
      *
      * This is responsible for enforcing the whitelist for pre-existing users (i.e. USER_SYSTEM);
@@ -262,27 +287,27 @@ class UserSystemPackageInstaller {
 
     /**
      * Gets the system packages names that should be installed on the given user.
-     * See {@link #getInstallablePackagesForUserType(int)}.
+     * See {@link #getInstallablePackagesForUserType(String)}.
      */
     private @Nullable Set<String> getInstallablePackagesForUserId(@UserIdInt int userId) {
-        return getInstallablePackagesForUserType(mUm.getUserInfo(userId).flags);
+        return getInstallablePackagesForUserType(mUm.getUserInfo(userId).userType);
     }
 
     /**
-     * Gets the system package names that should be installed on a user with the given flags, as
+     * Gets the system package names that should be installed on users of the given user type, as
      * determined by SystemConfig, the whitelist mode, and the apps actually on the device.
      * Names are the {@link PackageParser.Package#packageName}, not necessarily the manifest names.
      *
-     * Returns null if all system packages should be installed (due enforce-mode being off).
+     * Returns null if all system packages should be installed (due to enforce-mode being off).
      */
-    @Nullable Set<String> getInstallablePackagesForUserType(int flags) {
+    @Nullable Set<String> getInstallablePackagesForUserType(String userType) {
         final int mode = getWhitelistMode();
         if (!isEnforceMode(mode)) {
             return null;
         }
-        final boolean isSystemUser = (flags & UserInfo.FLAG_SYSTEM) != 0;
+        final boolean isSystemUser = mUm.isUserTypeSubtypeOfSystem(userType);
         final boolean isImplicitWhitelistMode = isImplicitWhitelistMode(mode);
-        final Set<String> whitelistedPackages = getWhitelistedPackagesForUserType(flags);
+        final Set<String> whitelistedPackages = getWhitelistedPackagesForUserType(userType);
 
         final Set<String> installPackages = new ArraySet<>();
         final PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
@@ -304,8 +329,9 @@ class UserSystemPackageInstaller {
      * the given whitelist of system packages.
      *
      * @param sysPkg the system package. Must be a system package; no verification for this is done.
-     * @param userTypeWhitelist map of package manifest names to user flags on which they should be
-     *                          installed
+     * @param userTypeWhitelist map of package manifest names to user types on which they should be
+     *                          installed. This is only used for overriding the userWhitelist in
+     *                          certain situations (based on its keyset).
      * @param userWhitelist set of package manifest names that should be installed on this
      *                      particular user. This must be consistent with userTypeWhitelist, but is
      *                      passed in separately to avoid repeatedly calculating it from
@@ -315,7 +341,7 @@ class UserSystemPackageInstaller {
      */
     @VisibleForTesting
     static boolean shouldInstallPackage(PackageParser.Package sysPkg,
-            @NonNull ArrayMap<String, Integer> userTypeWhitelist,
+            @NonNull ArrayMap<String, Long> userTypeWhitelist,
             @NonNull Set<String> userWhitelist, boolean isImplicitWhitelistMode,
             boolean isSystemUser) {
 
@@ -335,16 +361,17 @@ class UserSystemPackageInstaller {
     }
 
     /**
-     * Gets the package manifest names that are whitelisted for a user with the given flags,
+     * Gets the package manifest names that are whitelisted for users of the given user type,
      * as determined by SystemConfig.
      */
     @VisibleForTesting
-    @NonNull Set<String> getWhitelistedPackagesForUserType(int flags) {
-        Set<String> installablePkgs = new ArraySet<>(mWhitelistedPackagesForUserTypes.size());
+    @NonNull Set<String> getWhitelistedPackagesForUserType(String userType) {
+        final long userTypeMask = getUserTypeMask(userType);
+        final Set<String> installablePkgs = new ArraySet<>(mWhitelistedPackagesForUserTypes.size());
         for (int i = 0; i < mWhitelistedPackagesForUserTypes.size(); i++) {
-            String pkgName = mWhitelistedPackagesForUserTypes.keyAt(i);
-            int whitelistedUserTypes = mWhitelistedPackagesForUserTypes.valueAt(i);
-            if ((flags & whitelistedUserTypes) != 0) {
+            final String pkgName = mWhitelistedPackagesForUserTypes.keyAt(i);
+            final long whitelistedUserTypes = mWhitelistedPackagesForUserTypes.valueAt(i);
+            if ((userTypeMask & whitelistedUserTypes) != 0) {
                 installablePkgs.add(pkgName);
             }
         }
@@ -364,7 +391,8 @@ class UserSystemPackageInstaller {
     }
 
     /**
-     * Returns a map of package manifest names to the user flags on which it is to be installed.
+     * Returns a map of package manifest names to the bit set representing (via
+     * {@link #getUserTypeMask}) the user types on which they are to be installed.
      * Also, clears this data from SystemConfig where it was stored inefficiently (and therefore
      * should be called exactly once, even if the data isn't useful).
      *
@@ -375,89 +403,132 @@ class UserSystemPackageInstaller {
      *  <li>Packages that never whitelisted at all (even if they are explicitly blacklisted) are
      *          ignored.</li>
      *  <li>Packages that are blacklisted whenever they are whitelisted will be stored with the
-     *          flag 0 (since this is a valid scenario, e.g. if an OEM completely blacklists an AOSP
-     *          app).</li>
+     *          value 0 (since this is a valid scenario, e.g. if an OEM completely blacklists an
+     *          AOSP app).</li>
      * </ul>
+     *
+     * @see #mWhitelistedPackagesForUserTypes
      */
     @VisibleForTesting
-    static ArrayMap<String, Integer> determineWhitelistedPackagesForUserTypes(
-            SystemConfig sysConfig) {
+    ArrayMap<String, Long> determineWhitelistedPackagesForUserTypes(SystemConfig sysConfig) {
+        // We first get the list of user types that correspond to FULL, SYSTEM, and PROFILE.
+        final Map<String, Long> baseTypeBitSets = getBaseTypeBitSets();
 
         final ArrayMap<String, Set<String>> whitelist =
                 sysConfig.getAndClearPackageToUserTypeWhitelist();
         // result maps packageName -> userTypes on which the package should be installed.
-        final ArrayMap<String, Integer> result = new ArrayMap<>(whitelist.size() + 1);
+        final ArrayMap<String, Long> result = new ArrayMap<>(whitelist.size() + 1);
         // First, do the whitelisted user types.
         for (int i = 0; i < whitelist.size(); i++) {
             final String pkgName = whitelist.keyAt(i).intern();
-            final int flags = getFlagsFromUserTypes(whitelist.valueAt(i));
-            if (flags != 0) {
-                result.put(pkgName, flags);
+            final long typesBitSet = getTypesBitSet(whitelist.valueAt(i), baseTypeBitSets);
+            if (typesBitSet != 0) {
+                result.put(pkgName, typesBitSet);
             }
         }
         // Then, un-whitelist any blacklisted user types.
-        // TODO(b/141370854): Right now, the blacklist is actually just an 'unwhitelist'. Which
-        //                    direction we go depends on how we design user subtypes, which is still
-        //                    being designed. For now, unwhitelisting works for current use-cases.
         final ArrayMap<String, Set<String>> blacklist =
                 sysConfig.getAndClearPackageToUserTypeBlacklist();
         for (int i = 0; i < blacklist.size(); i++) {
             final String pkgName = blacklist.keyAt(i).intern();
-            final int nonFlags = getFlagsFromUserTypes(blacklist.valueAt(i));
-            final Integer flags = result.get(pkgName);
-            if (flags != null) {
-                result.put(pkgName, flags & ~nonFlags);
+            final long nonTypesBitSet = getTypesBitSet(blacklist.valueAt(i), baseTypeBitSets);
+            final Long typesBitSet = result.get(pkgName);
+            if (typesBitSet != null) {
+                result.put(pkgName, typesBitSet & ~nonTypesBitSet);
+            } else if (nonTypesBitSet != 0) {
+                // Package was never whitelisted but is validly blacklisted.
+                result.put(pkgName, 0L);
             }
         }
         // Regardless of the whitelists/blacklists, ensure mandatory packages.
-        result.put("android",
-                UserInfo.FLAG_SYSTEM | UserInfo.FLAG_FULL | UserInfo.FLAG_PROFILE);
+        result.put("android", ~0L);
         return result;
     }
 
-    /** Converts a user types, as used in SystemConfig, to a UserInfo flag. */
-    private static int getFlagsFromUserTypes(Iterable<String> userTypes) {
-        // TODO(b/142482943): Update all this for the new UserTypes.
-        int flags = 0;
-        for (String type : userTypes) {
-            switch (type) {
-                case "GUEST":
-                    flags |= UserInfo.FLAG_GUEST;
-                    break;
-                case "RESTRICTED":
-                    flags |= UserInfo.FLAG_RESTRICTED;
-                    break;
-                case "MANAGED_PROFILE":
-                    flags |= UserInfo.FLAG_MANAGED_PROFILE;
-                    break;
-                case "EPHEMERAL":
-                    flags |= UserInfo.FLAG_EPHEMERAL;
-                    break;
-                case "DEMO":
-                    flags |= UserInfo.FLAG_DEMO;
-                    break;
-                case "FULL":
-                    flags |= UserInfo.FLAG_FULL;
-                    break;
-                case "SYSTEM":
-                    flags |= UserInfo.FLAG_SYSTEM;
-                    break;
-                case "PROFILE":
-                    flags |= UserInfo.FLAG_PROFILE;
-                    break;
-                default:
-                    Slog.w(TAG, "SystemConfig contained an invalid user type: " + type);
-                    break;
-                // Other UserInfo flags are forbidden.
-                // In particular, FLAG_INITIALIZED, FLAG_DISABLED, FLAG_QUIET_MODE are inapplicable.
-                // The following are invalid now, but are reconsiderable: FLAG_PRIMARY, FLAG_ADMIN.
+    /**
+     * Returns the bitmask (with exactly one 1) corresponding to the given userType.
+     * Returns 0 if no such userType exists.
+     */
+    @VisibleForTesting
+    long getUserTypeMask(String userType) {
+        final int userTypeIndex = Arrays.binarySearch(mUserTypes, userType);
+        final long userTypeMask = userTypeIndex >= 0 ? (1 << userTypeIndex) : 0;
+        return userTypeMask;
+    }
+
+    /**
+     * Returns the mapping from the name of each base type to the bitset (as defined by
+     * {@link #getUserTypeMask}) of user types to which it corresponds (i.e. the base's subtypes).
+     * <p>
+     * E.g. if "android.type.ex" is a FULL user type for which getUserTypeMask() returns (1 << 3),
+     * then getBaseTypeBitSets().get("FULL") will contain true (1) in position 3.
+     */
+    private Map<String, Long> getBaseTypeBitSets() {
+        long typesBitSetFull = 0;
+        long typesBitSetSystem = 0;
+        long typesBitSetProfile = 0;
+        for (int idx = 0; idx < mUserTypes.length; idx++) {
+            if (mUm.isUserTypeSubtypeOfFull(mUserTypes[idx])) {
+                typesBitSetFull |= (1 << idx);
+            }
+            if (mUm.isUserTypeSubtypeOfSystem(mUserTypes[idx])) {
+                typesBitSetSystem |= (1 << idx);
+            }
+            if (mUm.isUserTypeSubtypeOfProfile(mUserTypes[idx])) {
+                typesBitSetProfile |= (1 << idx);
             }
         }
-        return flags;
+
+        Map<String, Long> result = new ArrayMap<>(3);
+        result.put("FULL", typesBitSetFull);
+        result.put("SYSTEM", typesBitSetSystem);
+        result.put("PROFILE", typesBitSetProfile);
+        return result;
+    }
+
+    /**
+     * Converts a list of user types and base types, as used in SystemConfig, to a bit set
+     * representing (via {@link #getUserTypeMask}) user types.
+     *
+     * Returns 0 if userTypes does not contain any valid user or base types.
+     *
+     * @param baseTypeBitSets a map from the base types (FULL/SYSTEM/PROFILE) to their subtypes
+     *                        (represented as a bitset, as defined by {@link #getUserTypeMask}).
+     *                        (This can be created by {@link #getBaseTypeBitSets}.)
+     */
+    private long getTypesBitSet(Iterable<String> userTypes, Map<String, Long> baseTypeBitSets) {
+        long resultBitSet = 0;
+        for (String type : userTypes) {
+            // See if userType is a base type, like FULL.
+            final Long baseTypeBitSet = baseTypeBitSets.get(type);
+            if (baseTypeBitSet != null) {
+                resultBitSet |= baseTypeBitSet;
+                continue;
+            }
+            // userType wasn't a base type, so it should be the name of a specific user type.
+            final long userTypeBitSet = getUserTypeMask(type);
+            if (userTypeBitSet != 0) {
+                resultBitSet |= userTypeBitSet;
+                continue;
+            }
+            Slog.w(TAG, "SystemConfig contained an invalid user type: " + type);
+        }
+        return resultBitSet;
+    }
+
+    /** Returns a sorted array consisting of the keyset of the provided map. */
+    private static String[] getAndSortKeysFromMap(ArrayMap<String, ?> map) {
+        final String[] userTypeList = new String[map.size()];
+        for (int i = 0; i < map.size(); i++) {
+            userTypeList[i] = map.keyAt(i);
+        }
+        Arrays.sort(userTypeList);
+        return userTypeList;
     }
 
     void dump(PrintWriter pw) {
         final String prefix = "    ";
+        final String prefix2 = prefix + prefix;
         final int mode = getWhitelistMode();
         pw.println("Whitelisted packages per user type");
         pw.print(prefix); pw.print("Mode: ");
@@ -467,18 +538,27 @@ class UserSystemPackageInstaller {
         pw.print(isImplicitWhitelistMode(mode) ? " (implicit)" : "");
         pw.println();
 
+        pw.print(prefix); pw.println("Legend");
+        for (int idx = 0; idx < mUserTypes.length; idx++) {
+            pw.print(prefix2); pw.println(idx + " -> " + mUserTypes[idx]);
+        }
+
         final int size = mWhitelistedPackagesForUserTypes.size();
         if (size == 0) {
             pw.print(prefix); pw.println("No packages");
             return;
         }
-        final String prefix2 = prefix + prefix;
         pw.print(prefix); pw.print(size); pw.println(" packages:");
-        for (int i = 0; i < size; i++) {
-            final String pkgName = mWhitelistedPackagesForUserTypes.keyAt(i);
-            final String whitelistedUserTypes =
-                    UserInfo.flagsToString(mWhitelistedPackagesForUserTypes.valueAt(i));
-            pw.print(prefix2); pw.print(pkgName); pw.print(": "); pw.println(whitelistedUserTypes);
+        for (int pkgIdx = 0; pkgIdx < size; pkgIdx++) {
+            final String pkgName = mWhitelistedPackagesForUserTypes.keyAt(pkgIdx);
+            pw.print(prefix2); pw.print(pkgName); pw.print(": ");
+            final long userTypesBitSet = mWhitelistedPackagesForUserTypes.valueAt(pkgIdx);
+            for (int idx = 0; idx < mUserTypes.length; idx++) {
+                if ((userTypesBitSet & (1 << idx)) != 0) {
+                    pw.print(idx); pw.print(" ");
+                }
+            }
+            pw.println();
         }
     }
 }

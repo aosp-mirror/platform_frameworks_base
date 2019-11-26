@@ -223,6 +223,14 @@ public final class UserTypeDetails {
         return (mBaseType & UserInfo.FLAG_PROFILE) != 0;
     }
 
+    public boolean isFull() {
+        return (mBaseType & UserInfo.FLAG_FULL) != 0;
+    }
+
+    public boolean isSystem() {
+        return (mBaseType & UserInfo.FLAG_SYSTEM) != 0;
+    }
+
     // TODO(b/142482943): Hook this up and don't return the original.
     public List<String> getDefaultRestrictions() {
         return mDefaultRestrictions;
