@@ -71,6 +71,7 @@ public class UsbConfirmActivity extends AlertActivity
 
         final AlertController.AlertParams ap = mAlertParams;
         ap.mTitle = appName;
+        boolean useRecordWarning = false;
         if (mDevice == null) {
             ap.mMessage = getString(R.string.usb_accessory_confirm_prompt, appName,
                     mAccessory.getDescription());
@@ -83,7 +84,7 @@ public class UsbConfirmActivity extends AlertActivity
                             packageName)
                             == android.content.pm.PackageManager.PERMISSION_GRANTED;
             boolean isAudioCaptureDevice = mDevice.getHasAudioCapture();
-            boolean useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
+            useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
 
             int strID = useRecordWarning
                     ? R.string.usb_device_confirm_prompt_warn
@@ -98,22 +99,23 @@ public class UsbConfirmActivity extends AlertActivity
         ap.mNegativeButtonListener = this;
 
         // add "always use" checkbox
-        LayoutInflater inflater = (LayoutInflater)getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
-        ap.mView = inflater.inflate(com.android.internal.R.layout.always_use_checkbox, null);
-        mAlwaysUse = (CheckBox)ap.mView.findViewById(com.android.internal.R.id.alwaysUse);
-        if (mDevice == null) {
-            mAlwaysUse.setText(getString(R.string.always_use_accessory, appName,
-                    mAccessory.getDescription()));
-        } else {
-            mAlwaysUse.setText(getString(R.string.always_use_device, appName,
-                    mDevice.getProductName()));
+        if (!useRecordWarning) {
+            LayoutInflater inflater = (LayoutInflater) getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+            ap.mView = inflater.inflate(com.android.internal.R.layout.always_use_checkbox, null);
+            mAlwaysUse = (CheckBox) ap.mView.findViewById(com.android.internal.R.id.alwaysUse);
+            if (mDevice == null) {
+                mAlwaysUse.setText(getString(R.string.always_use_accessory, appName,
+                        mAccessory.getDescription()));
+            } else {
+                mAlwaysUse.setText(getString(R.string.always_use_device, appName,
+                        mDevice.getProductName()));
+            }
+            mAlwaysUse.setOnCheckedChangeListener(this);
+            mClearDefaultHint = (TextView) ap.mView.findViewById(
+                    com.android.internal.R.id.clearDefaultHint);
+            mClearDefaultHint.setVisibility(View.GONE);
         }
-        mAlwaysUse.setOnCheckedChangeListener(this);
-        mClearDefaultHint = (TextView)ap.mView.findViewById(
-                                                    com.android.internal.R.id.clearDefaultHint);
-        mClearDefaultHint.setVisibility(View.GONE);
-
         setupAlert();
 
     }
@@ -133,7 +135,7 @@ public class UsbConfirmActivity extends AlertActivity
                 IUsbManager service = IUsbManager.Stub.asInterface(b);
                 final int uid = mResolveInfo.activityInfo.applicationInfo.uid;
                 final int userId = UserHandle.myUserId();
-                boolean alwaysUse = mAlwaysUse.isChecked();
+                boolean alwaysUse = mAlwaysUse != null ? mAlwaysUse.isChecked() : false;
                 Intent intent = null;
 
                 if (mDevice != null) {
