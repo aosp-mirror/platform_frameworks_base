@@ -87,6 +87,41 @@ public class BluetoothDeviceLayerDrawable extends LayerDrawable {
         return drawable;
     }
 
+    /**
+     * Create the {@link LayerDrawable} that contains bluetooth device icon and battery icon.
+     * This is a horizontal layout drawable while bluetooth icon at start and battery icon at end.
+     *
+     * @param context      used to get the spec for icon
+     * @param resId        represents the bluetooth device drawable
+     * @param batteryLevel the battery level for bluetooth device
+     * @param iconScale    the ratio of height between battery icon and bluetooth icon
+     * @param gap          the gap between battery icon and bluetooth icon
+     * @param paddingSide  the side padding of the battery icon
+     * @param paddingTop   the top and bottom badding of the battery icon
+     */
+    public static BluetoothDeviceLayerDrawable createLayerDrawable(Context context, int resId,
+            int batteryLevel, float iconScale, int gap, int paddingTop, int paddingSide) {
+        final Drawable deviceDrawable = context.getDrawable(resId);
+
+        final BatteryMeterDrawable batteryDrawable = new BatteryMeterDrawable(context,
+                context.getColor(R.color.meter_background_color), batteryLevel);
+        batteryDrawable.setPadding(paddingSide, paddingTop, paddingSide, paddingTop);
+
+        final BluetoothDeviceLayerDrawable drawable = new BluetoothDeviceLayerDrawable(
+                new Drawable[]{deviceDrawable, batteryDrawable});
+        // Set the bluetooth icon at the left
+        drawable.setLayerGravity(0 /* index of deviceDrawable */, Gravity.START);
+        // Set battery icon to the right of the bluetooth icon
+        drawable.setLayerInsetStart(1 /* index of batteryDrawable */,
+                deviceDrawable.getIntrinsicWidth() + gap);
+        drawable.setLayerInsetTop(1 /* index of batteryDrawable */,
+                (int) (deviceDrawable.getIntrinsicHeight() * (1 - iconScale)));
+
+        drawable.setConstantState(context, resId, batteryLevel, iconScale);
+
+        return drawable;
+    }
+
     public void setConstantState(Context context, int resId, int batteryLevel, float iconScale) {
         mState = new BluetoothDeviceLayerDrawableState(context, resId, batteryLevel, iconScale);
     }
