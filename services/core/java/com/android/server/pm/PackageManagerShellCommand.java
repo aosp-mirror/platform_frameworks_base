@@ -728,8 +728,11 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final String filter = getNextArg();
 
+        if (userId == UserHandle.USER_ALL) {
+            getFlags |= PackageManager.MATCH_KNOWN_PACKAGES;
+        }
         final int translatedUserId =
-                translateUserId(userId, UserHandle.USER_NULL, "runListPackages");
+                translateUserId(userId, UserHandle.USER_SYSTEM, "runListPackages");
         @SuppressWarnings("unchecked")
         final ParceledListSlice<PackageInfo> slice =
                 mInterface.getInstalledPackages(getFlags, translatedUserId);
@@ -896,29 +899,29 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runListStagedSessions() {
-        final IndentingPrintWriter pw = new IndentingPrintWriter(
-                getOutPrintWriter(), /* singleIndent */ "  ", /* wrapLength */ 120);
+        try (IndentingPrintWriter pw = new IndentingPrintWriter(
+                getOutPrintWriter(), /* singleIndent */ "  ", /* wrapLength */ 120)) {
+            final SessionDump sessionDump = new SessionDump();
+            String opt;
+            while ((opt = getNextOption()) != null) {
+                if (!setSessionFlag(opt, sessionDump)) {
+                    pw.println("Error: Unknown option: " + opt);
+                    return -1;
+                }
+            }
 
-        SessionDump sessionDump = new SessionDump();
-        String opt;
-        while ((opt = getNextOption()) != null) {
-            if (!setSessionFlag(opt, sessionDump)) {
-                pw.println("Error: Unknown option: " + opt);
+            try {
+                final List<SessionInfo> stagedSessions =
+                        mInterface.getPackageInstaller().getStagedSessions().getList();
+                printSessionList(pw, stagedSessions, sessionDump);
+            } catch (RemoteException e) {
+                pw.println("Failure ["
+                        + e.getClass().getName() + " - "
+                        + e.getMessage() + "]");
                 return -1;
             }
+            return 1;
         }
-
-        try {
-            List<SessionInfo> stagedSessions =
-                    mInterface.getPackageInstaller().getStagedSessions().getList();
-            printSessionList(pw, stagedSessions, sessionDump);
-        } catch (RemoteException e) {
-            pw.println("Failure ["
-                    + e.getClass().getName() + " - "
-                    + e.getMessage() + "]");
-            return -1;
-        }
-        return 1;
     }
 
     private void printSessionList(IndentingPrintWriter pw, List<SessionInfo> stagedSessions,
@@ -1943,8 +1946,10 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        ClearDataObserver obs = new ClearDataObserver();
-        ActivityManager.getService().clearApplicationUserData(pkg, false, obs, userId);
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runClear");
+        final ClearDataObserver obs = new ClearDataObserver();
+        ActivityManager.getService().clearApplicationUserData(pkg, false, obs, translatedUserId);
         synchronized (obs) {
             while (!obs.finished) {
                 try {
@@ -2551,9 +2556,11 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: valid value not specified");
             return 1;
         }
-        IUserManager um = IUserManager.Stub.asInterface(
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runSetUserRestriction");
+        final IUserManager um = IUserManager.Stub.asInterface(
                 ServiceManager.getService(Context.USER_SERVICE));
-        um.setUserRestriction(restriction, value, userId);
+        um.setUserRestriction(restriction, value, translatedUserId);
         return 0;
     }
 
