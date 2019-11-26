@@ -5715,6 +5715,18 @@ public final class Settings {
                 "managed_provisioning_dpc_downloaded";
 
         /**
+         * Indicates whether the device is under restricted secure FRP mode.
+         * Secure FRP mode is enabled when the device is under FRP. On solving of FRP challenge,
+         * device is removed from this mode.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String SECURE_FRP_MODE = "secure_frp_mode";
+
+        /**
          * Indicates whether the current user has completed setup via the setup wizard.
          * <p>
          * Type: int (0 for false, 1 for true)

@@ -684,6 +684,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE,
                  Settings.Secure.SEARCH_SOURCE_TIMEOUT_MILLIS,
                  Settings.Secure.SEARCH_THREAD_KEEPALIVE_SECONDS,
+                 Settings.Secure.SECURE_FRP_MODE,
                  Settings.Secure.SEARCH_WEB_RESULTS_OVERRIDE_LIMIT,
                  Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
                  Settings.Secure.SELECTED_SPELL_CHECKER,  // Intentionally removed in Q
