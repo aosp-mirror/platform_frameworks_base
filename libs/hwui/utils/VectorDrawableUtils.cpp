@@ -300,7 +300,7 @@ void PathResolver::addCommand(SkPath* outPath, char previousCmd, char cmd,
                 // (rx ry x-axis-rotation large-arc-flag sweep-flag x y)
                 outPath->arcTo(points->at(k + 0), points->at(k + 1), points->at(k + 2),
                                (SkPath::ArcSize) (points->at(k + 3) != 0),
-                               (SkPath::Direction) (points->at(k + 4) == 0), 
+                               (SkPathDirection) (points->at(k + 4) == 0),
                                points->at(k + 5) + currentX, points->at(k + 6) + currentY);
                 currentX += points->at(k + 5);
                 currentY += points->at(k + 6);
@@ -310,7 +310,7 @@ void PathResolver::addCommand(SkPath* outPath, char previousCmd, char cmd,
             case 'A':  // Draws an elliptical arc
                 outPath->arcTo(points->at(k + 0), points->at(k + 1), points->at(k + 2),
                                (SkPath::ArcSize) (points->at(k + 3) != 0),
-                               (SkPath::Direction) (points->at(k + 4) == 0), 
+                               (SkPathDirection) (points->at(k + 4) == 0),
                                points->at(k + 5), points->at(k + 6));
                 currentX = points->at(k + 5);
                 currentY = points->at(k + 6);
