@@ -467,6 +467,10 @@ public class InsetsController implements WindowInsetsController {
         }
     }
 
+    boolean isAnimating() {
+        return mAnimationDirection != DIRECTION_NONE;
+    }
+
     private InsetsSourceConsumer createConsumerOfType(int type) {
         if (type == ITYPE_IME) {
             return new ImeInsetsSourceConsumer(mState, Transaction::new, this);
@@ -514,6 +518,7 @@ public class InsetsController implements WindowInsetsController {
                 } else {
                     hideDirectly(types);
                 }
+                mAnimationDirection = show ? DIRECTION_SHOW : DIRECTION_HIDE;
                 mAnimator = ObjectAnimator.ofObject(
                         controller,
                         new InsetsProperty(),
