@@ -620,32 +620,6 @@ public class StagingManager {
                             PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
                             "Cannot stage multiple sessions without checkpoint support", null);
                 }
-
-                // TODO:b/141843321 Add support for staging multiple sessions in apexd
-                // Since apexd doesn't support multiple staged sessions yet, we have to careful how
-                // we handle apex sessions. We want to allow a set of apex sessions under the same
-                // parent to be staged when there is no previously staged apex sessions.
-                if (isApexSession(session) && isApexSession(stagedSession)) {
-                    // session is apex and it can co-exist with stagedSession only if they are from
-                    // same parent
-                    final boolean coExist;
-                    if (!session.hasParentSessionId() && !stagedSession.hasParentSessionId()) {
-                        // Both single package apex sessions. Cannot co-exist.
-                        coExist = false;
-                    } else {
-                        // At least one of the session has parent. Both must be from same parent.
-                        coExist =
-                                session.getParentSessionId() == stagedSession.getParentSessionId();
-                    }
-                    if (!coExist) {
-                        throw new PackageManagerException(
-                                PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
-                                "Package: " + session.getPackageName() + " in session: "
-                                        + session.sessionId + " cannot be staged as there is "
-                                        + "already another apex staged session: "
-                                        + stagedSession.sessionId, null);
-                    }
-                }
             }
         }
     }
