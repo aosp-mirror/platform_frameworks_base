@@ -8009,7 +8009,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean canProfileOwnerAccessDeviceIds(int userId) {
         synchronized (getLockObject()) {
-            return mOwners.canProfileOwnerAccessDeviceIds(userId);
+            return mOwners.isProfileOwnerOfOrganizationOwnedDevice(userId);
         }
     }
 
@@ -12661,14 +12661,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return false;
     }
 
-    private boolean hasGrantProfileOwnerDevcieIdAccessPermission() {
+    private boolean hasMarkProfileOwnerOnOrganizationOwnedDevicePermission() {
         return mContext.checkCallingPermission(
-                android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS)
+                permission.MARK_DEVICE_ORGANIZATION_OWNED)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
-    public void grantDeviceIdsAccessToProfileOwner(ComponentName who, int userId) {
+    public void markProfileOwnerOnOrganizationOwnedDevice(ComponentName who, int userId) {
         // As the caller is the system, it must specify the component name of the profile owner
         // as a sanity / safety check.
         Preconditions.checkNotNull(who);
@@ -12677,16 +12677,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
 
-        // Only privileged system apps can grant the Profile Owner access to Device IDs.
-        if (!(isCallerWithSystemUid() || isAdb()
-                || hasGrantProfileOwnerDevcieIdAccessPermission())) {
+        // Only adb or system apps with the right permission can mark a profile owner on
+        // organization-owned device.
+        if (!(isAdb() || hasMarkProfileOwnerOnOrganizationOwnedDevicePermission())) {
             throw new SecurityException(
-                    "Only the system can grant Device IDs access for a profile owner.");
+                    "Only the system can mark a profile owner of organization-owned device.");
         }
 
-        if (isAdb() && hasIncompatibleAccountsOrNonAdbNoLock(userId, who)) {
-            throw new SecurityException(
-                    "Can only be called from ADB if the device has no accounts.");
+        if (isAdb()) {
+            if (hasIncompatibleAccountsOrNonAdbNoLock(userId, who)) {
+                throw new SecurityException(
+                        "Can only be called from ADB if the device has no accounts.");
+            }
+        } else {
+            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
+                throw new IllegalStateException(
+                        "Cannot mark profile owner as managing an organization-owned device after"
+                                + " set-up");
+            }
         }
 
         // Grant access under lock.
@@ -12699,8 +12707,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         who.flattenToString(), userId));
             }
 
-            Slog.i(LOG_TAG, String.format("Granting Device ID access to %s, for user %d",
-                        who.flattenToString(), userId));
+            Slog.i(LOG_TAG, String.format(
+                    "Marking %s as profile owner on organization-owned device for user %d",
+                    who.flattenToString(), userId));
 
             // First, set restriction on removing the profile.
             final long ident = mInjector.binderClearCallingIdentity();
@@ -12720,9 +12729,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
 
-            // setProfileOwnerCanAccessDeviceIds will trigger writing of the profile owner
+            // markProfileOwnerOfOrganizationOwnedDevice will trigger writing of the profile owner
             // data, no need to do it manually.
-            mOwners.setProfileOwnerCanAccessDeviceIds(userId);
+            mOwners.markProfileOwnerOfOrganizationOwnedDevice(userId);
         }
     }
 

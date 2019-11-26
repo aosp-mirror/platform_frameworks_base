@@ -10832,28 +10832,38 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Grants the profile owner of the given user access to device identifiers (such as
-     * serial number, IMEI and MEID).
+     * Deprecated. Use {@code markProfileOwnerOnOrganizationOwnedDevice} instead.
+     * Throws UnsupportedOperationException when called.
      *
-     * <p>This lets the profile owner request inclusion of device identifiers when calling
-     * {@link generateKeyPair}.
-     *
-     * <p>This grant is necessary to guarantee that profile owners can access device identifiers.
-     *
-     * <p>Privileged system API - meant to be called by the system, particularly the managed
-     * provisioning app, when a work profile is set up.
+     * @deprecated Use {@link #markProfileOwnerOnOrganizationOwnedDevice} instead.
      *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(value = android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS,
             conditional = true)
     public void setProfileOwnerCanAccessDeviceIds(@NonNull ComponentName who) {
+        throw new UnsupportedOperationException(
+                "This method is deprecated. use markProfileOwnerOnOrganizationOwnedDevice instead"
+                        + ".");
+    }
+
+    /**
+     * Marks the profile owner of the given user as managing an organization-owned device.
+     * That will give it access to device identifiers (such as serial number, IMEI and MEID)
+     * as well as other privileges.
+     *
+     * @hide
+     */
+    @RequiresPermission(value = android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED,
+            conditional = true)
+    public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull ComponentName who) {
         if (mService == null) {
             return;
         }
         try {
-            mService.grantDeviceIdsAccessToProfileOwner(who, myUserId());
+            mService.markProfileOwnerOnOrganizationOwnedDevice(who, myUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
