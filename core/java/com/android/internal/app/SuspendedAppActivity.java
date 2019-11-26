@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.res.Resources.ID_NULL;
 
 import android.Manifest;
@@ -64,7 +66,8 @@ public class SuspendedAppActivity extends AlertActivity
         final Intent moreDetailsIntent = new Intent(Intent.ACTION_SHOW_SUSPENDED_APP_DETAILS)
                 .setPackage(suspendingPackage);
         final String requiredPermission = Manifest.permission.SEND_SHOW_SUSPENDED_APP_DETAILS;
-        final ResolveInfo resolvedInfo = mPm.resolveActivityAsUser(moreDetailsIntent, 0, userId);
+        final ResolveInfo resolvedInfo = mPm.resolveActivityAsUser(moreDetailsIntent,
+                MATCH_DIRECT_BOOT_UNAWARE | MATCH_DIRECT_BOOT_AWARE, userId);
         if (resolvedInfo != null && resolvedInfo.activityInfo != null
                 && requiredPermission.equals(resolvedInfo.activityInfo.permission)) {
             moreDetailsIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, suspendedPackage)
