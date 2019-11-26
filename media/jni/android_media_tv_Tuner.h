@@ -18,13 +18,18 @@
 #define _ANDROID_MEDIA_TV_TUNER_H_
 
 #include <android/hardware/tv/tuner/1.0/ITuner.h>
+#include <fmq/MessageQueue.h>
 #include <unordered_map>
 #include <utils/RefBase.h>
 
 #include "jni.h"
 
+using ::android::hardware::EventFlag;
+using ::android::hardware::MQDescriptorSync;
+using ::android::hardware::MessageQueue;
 using ::android::hardware::Return;
 using ::android::hardware::hidl_vec;
+using ::android::hardware::kSynchronizedReadWrite;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterEvent;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterStatus;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
@@ -50,6 +55,8 @@ using ::android::hardware::tv::tuner::V1_0::LnbEventType;
 using ::android::hardware::tv::tuner::V1_0::LnbId;
 using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
 using ::android::hardware::tv::tuner::V1_0::RecordStatus;
+
+using FilterMQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
 
 namespace android {
 
@@ -93,8 +100,12 @@ struct FrontendCallback : public IFrontendCallback {
 
 struct Filter : public RefBase {
     Filter(sp<IFilter> sp, jweak obj);
+    ~Filter();
+    int close();
     sp<IFilter> getIFilter();
     sp<IFilter> mFilterSp;
+    std::unique_ptr<FilterMQ> mFilterMQ;
+    EventFlag* mFilterMQEventFlag;
     jweak mFilterObj;
 };
 

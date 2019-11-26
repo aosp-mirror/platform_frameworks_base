@@ -247,6 +247,7 @@ public final class Tuner implements AutoCloseable  {
         private native boolean nativeStartFilter();
         private native boolean nativeStopFilter();
         private native boolean nativeFlushFilter();
+        private native int nativeRead(byte[] buffer, int offset, int size);
 
         private Filter(int id) {
             mId = id;
@@ -277,6 +278,11 @@ public final class Tuner implements AutoCloseable  {
 
         public boolean flush() {
             return nativeFlushFilter();
+        }
+
+        public int read(@NonNull byte[] buffer, int offset, int size) {
+            size = Math.min(size, buffer.length - offset);
+            return nativeRead(buffer, offset, size);
         }
     }
 

@@ -31,6 +31,7 @@ using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterPesDataSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxMmtpPid;
+using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
 using ::android::hardware::tv::tuner::V1_0::DemuxTpid;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
@@ -118,6 +119,18 @@ void FilterCallback::setFilter(const jobject filter) {
 /////////////// Filter ///////////////////////
 
 Filter::Filter(sp<IFilter> sp, jweak obj) : mFilterSp(sp), mFilterObj(obj) {}
+
+Filter::~Filter() {
+    EventFlag::deleteEventFlag(&mFilterMQEventFlag);
+}
+
+int Filter::close() {
+    Result r = mFilterSp->close();
+    if (r == Result::SUCCESS) {
+        EventFlag::deleteEventFlag(&mFilterMQEventFlag);
+    }
+    return (int)r;
+}
 
 sp<IFilter> Filter::getIFilter() {
     return mFilterSp;
@@ -222,6 +235,7 @@ jobject JTuner::openFrontendById(int id) {
     fe->setCallback(feCb);
 
     jint jId = (jint) id;
+
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     // TODO: add more fields to frontend
     return env->NewObject(
@@ -444,7 +458,7 @@ static DemuxPid getDemuxPid(int pidType, int pid) {
 static FrontendSettings getFrontendSettings(JNIEnv *env, int type, jobject settings) {
     FrontendSettings frontendSettings;
     jclass clazz = env->FindClass("android/media/tv/tuner/FrontendSettings");
-    jfieldID freqField = env->GetFieldID(clazz, "frequency", "I");
+    jfieldID freqField = env->GetFieldID(clazz, "mFrequency", "I");
     uint32_t freq = static_cast<uint32_t>(env->GetIntField(clazz, freqField));
 
     // TODO: handle the other 8 types of settings
@@ -591,16 +605,58 @@ static DemuxFilterSettings getFilterSettings(
     return filterSettings;
 }
 
+static int copyData(JNIEnv *env, sp<Filter> filter, jbyteArray buffer, jint offset, int size) {
+    ALOGD("copyData, size=%d, offset=%d", size, offset);
+
+    int available = filter->mFilterMQ->availableToRead();
+    ALOGD("copyData, available=%d", available);
+    size = std::min(size, available);
+
+    jboolean isCopy;
+    jbyte *dst = env->GetByteArrayElements(buffer, &isCopy);
+    ALOGD("copyData, isCopy=%d", isCopy);
+    if (dst == nullptr) {
+        ALOGD("Failed to GetByteArrayElements");
+        return 0;
+    }
+
+    if (filter->mFilterMQ->read(reinterpret_cast<unsigned char*>(dst) + offset, size)) {
+        env->ReleaseByteArrayElements(buffer, dst, 0);
+        filter->mFilterMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
+    } else {
+        ALOGD("Failed to read FMQ");
+        env->ReleaseByteArrayElements(buffer, dst, 0);
+        return 0;
+    }
+    return size;
+}
+
 static int android_media_tv_Tuner_configure_filter(
         JNIEnv *env, jobject filter, int type, int subtype, jobject settings) {
     ALOGD("configure filter type=%d, subtype=%d", type, subtype);
-    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
-    if (filterSp == NULL) {
+    sp<Filter> filterSp = getFilter(env, filter);
+    sp<IFilter> iFilterSp = filterSp->getIFilter();
+    if (iFilterSp == NULL) {
         ALOGD("Failed to configure filter: filter not found");
         return (int)Result::INVALID_STATE;
     }
     DemuxFilterSettings filterSettings = getFilterSettings(env, type, subtype, settings);
-    Result res = filterSp->configure(filterSettings);
+    Result res = iFilterSp->configure(filterSettings);
+    MQDescriptorSync<uint8_t> filterMQDesc;
+    if (res == Result::SUCCESS && filterSp->mFilterMQ == NULL) {
+        Result getQueueDescResult = Result::UNKNOWN_ERROR;
+        iFilterSp->getQueueDesc(
+                [&](Result r, const MQDescriptorSync<uint8_t>& desc) {
+                    filterMQDesc = desc;
+                    getQueueDescResult = r;
+                    ALOGD("getFilterQueueDesc");
+                });
+        if (getQueueDescResult == Result::SUCCESS) {
+            filterSp->mFilterMQ = std::make_unique<FilterMQ>(filterMQDesc, true);
+            EventFlag::createEventFlag(
+                    filterSp->mFilterMQ->getEventFlagWord(), &(filterSp->mFilterMQEventFlag));
+        }
+    }
     return (int)res;
 }
 
@@ -629,6 +685,16 @@ static bool android_media_tv_Tuner_flush_filter(JNIEnv *env, jobject filter) {
         return false;
     }
     return filterSp->flush() == Result::SUCCESS;
+}
+
+static int android_media_tv_Tuner_read_filter_fmq(
+        JNIEnv *env, jobject filter, jbyteArray buffer, jint offset, jint size) {
+    sp<Filter> filterSp = getFilter(env, filter);
+    if (filterSp == NULL) {
+        ALOGD("Failed to read filter FMQ: filter not found");
+        return 0;
+    }
+    return copyData(env, filterSp, buffer, offset, size);
 }
 
 static jobject android_media_tv_Tuner_open_descrambler(JNIEnv *env, jobject thiz) {
@@ -737,6 +803,7 @@ static const JNINativeMethod gFilterMethods[] = {
     { "nativeStartFilter", "()Z", (void *)android_media_tv_Tuner_start_filter },
     { "nativeStopFilter", "()Z", (void *)android_media_tv_Tuner_stop_filter },
     { "nativeFlushFilter", "()Z", (void *)android_media_tv_Tuner_flush_filter },
+    { "nativeRead", "([BII)I", (void *)android_media_tv_Tuner_read_filter_fmq },
 };
 
 static const JNINativeMethod gDescramblerMethods[] = {

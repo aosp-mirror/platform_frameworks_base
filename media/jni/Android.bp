@@ -133,6 +133,8 @@ cc_library_shared {
     shared_libs: [
         "android.hardware.tv.tuner@1.0",
         "libandroid_runtime",
+        "libcutils",
+        "libfmq",
         "libhidlbase",
         "liblog",
         "libutils",
