@@ -16,7 +16,13 @@
 
 package com.android.server.locksettings;
 
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,17 +40,23 @@ import android.os.SystemClock;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.platform.test.annotations.Presubmit;
-import android.test.AndroidTestCase;
 import android.util.Log;
 import android.util.Log.TerribleFailure;
 import android.util.Log.TerribleFailureHandler;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -53,11 +65,12 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * runtest frameworks-services -c com.android.server.locksettings.LockSettingsStorageTests
+ * atest FrameworksServicesTests:LockSettingsStorageTests
  */
 @SmallTest
 @Presubmit
-public class LockSettingsStorageTests extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class LockSettingsStorageTests {
     private static final int SOME_USER_ID = 1034;
     private final byte[] PASSWORD_0 = "thepassword0".getBytes();
     private final byte[] PASSWORD_1 = "password1".getBytes();
@@ -71,11 +84,10 @@ public class LockSettingsStorageTests extends AndroidTestCase {
 
     private File mDb;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        mStorageDir = new File(getContext().getFilesDir(), "locksettings");
-        mDb = getContext().getDatabasePath("locksettings.db");
+    @Before
+    public void setUp() throws Exception {
+        mStorageDir = new File(InstrumentationRegistry.getContext().getFilesDir(), "locksettings");
+        mDb = InstrumentationRegistry.getContext().getDatabasePath("locksettings.db");
 
         assertTrue(mStorageDir.exists() || mStorageDir.mkdirs());
         assertTrue(FileUtils.deleteContents(mStorageDir));
@@ -87,13 +99,14 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         // User 3 is a profile of user 0.
         when(mockUserManager.getProfileParent(eq(3))).thenReturn(new UserInfo(0, "name", 0));
 
-        MockLockSettingsContext context = new MockLockSettingsContext(getContext(), mockUserManager,
+        MockLockSettingsContext context = new MockLockSettingsContext(
+                InstrumentationRegistry.getContext(), mockUserManager,
                 mock(NotificationManager.class), mock(DevicePolicyManager.class),
                 mock(StorageManager.class), mock(TrustManager.class), mock(KeyguardManager.class),
                 mock(FingerprintManager.class), mock(FaceManager.class),
                 mock(PackageManager.class));
         mStorage = new LockSettingsStorageTestable(context,
-                new File(getContext().getFilesDir(), "locksettings"));
+                new File(InstrumentationRegistry.getContext().getFilesDir(), "locksettings"));
         mStorage.setDatabaseOnCreateCallback(new LockSettingsStorage.Callback() {
                     @Override
                     public void initialize(SQLiteDatabase db) {
@@ -102,18 +115,19 @@ public class LockSettingsStorageTests extends AndroidTestCase {
                 });
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
         mStorage.closeDatabase();
     }
 
+    @Test
     public void testKeyValue_InitializeWorked() {
         assertEquals("initialValue", mStorage.readKeyValue("initializedKey", "default", 0));
         mStorage.clearCache();
         assertEquals("initialValue", mStorage.readKeyValue("initializedKey", "default", 0));
     }
 
+    @Test
     public void testKeyValue_WriteThenRead() {
         mStorage.writeKeyValue("key", "value", 0);
         assertEquals("value", mStorage.readKeyValue("key", "default", 0));
@@ -121,11 +135,13 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertEquals("value", mStorage.readKeyValue("key", "default", 0));
     }
 
+    @Test
     public void testKeyValue_DefaultValue() {
         assertEquals("default", mStorage.readKeyValue("unititialized key", "default", 0));
         assertEquals("default2", mStorage.readKeyValue("unititialized key", "default2", 0));
     }
 
+    @Test
     public void testKeyValue_Concurrency() {
         final CountDownLatch latch = new CountDownLatch(1);
         List<Thread> threads = new ArrayList<>();
@@ -161,6 +177,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertEquals('5', mStorage.readKeyValue("key", "default", 0).charAt(0));
     }
 
+    @Test
     public void testKeyValue_CacheStarvedWriter() {
         final CountDownLatch latch = new CountDownLatch(1);
         List<Thread> threads = new ArrayList<>();
@@ -196,6 +213,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertEquals("Cached value didn't match stored value", storage, cached);
     }
 
+    @Test
     public void testRemoveUser() {
         mStorage.writeKeyValue("key", "value", 0);
         writePasswordBytes(PASSWORD_0, 0);
@@ -213,10 +231,12 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertPatternBytes(PATTERN_1, 1);
     }
 
+    @Test
     public void testCredential_Default() {
         assertEquals(mStorage.readCredentialHash(0).type, LockPatternUtils.CREDENTIAL_TYPE_NONE);
     }
 
+    @Test
     public void testPassword_Write() {
         writePasswordBytes(PASSWORD_0, 0);
 
@@ -225,6 +245,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertPasswordBytes(PASSWORD_0, 0);
     }
 
+    @Test
     public void testPassword_WriteProfileWritesParent() {
         writePasswordBytes(PASSWORD_0, 1);
         writePasswordBytes(PASSWORD_1, 2);
@@ -236,6 +257,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertPasswordBytes(PASSWORD_1, 2);
     }
 
+    @Test
     public void testLockType_WriteProfileWritesParent() {
         writePasswordBytes(PASSWORD_0, 10);
         writePatternBytes(PATTERN_0, 20);
@@ -251,6 +273,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
                 mStorage.readCredentialHash(20).type);
     }
 
+    @Test
     public void testPassword_WriteParentWritesProfile() {
         writePasswordBytes(PASSWORD_0, 2);
         writePasswordBytes(PASSWORD_1, 1);
@@ -262,6 +285,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertPasswordBytes(PASSWORD_0, 2);
     }
 
+    @Test
     public void testProfileLock_ReadWriteChildProfileLock() {
         assertFalse(mStorage.hasChildProfileLock(20));
         mStorage.writeChildProfileLock(20, PASSWORD_0);
@@ -272,6 +296,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertTrue(mStorage.hasChildProfileLock(20));
     }
 
+    @Test
     public void testPattern_Write() {
         writePatternBytes(PATTERN_0, 0);
 
@@ -280,6 +305,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertPatternBytes(PATTERN_0, 0);
     }
 
+    @Test
     public void testPattern_WriteProfileWritesParent() {
         writePatternBytes(PATTERN_0, 1);
         writePatternBytes(PATTERN_1, 2);
@@ -291,6 +317,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertPatternBytes(PATTERN_1, 2);
     }
 
+    @Test
     public void testPattern_WriteParentWritesProfile() {
         writePatternBytes(PATTERN_1, 2);
         writePatternBytes(PATTERN_0, 1);
@@ -302,6 +329,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertPatternBytes(PATTERN_1, 2);
     }
 
+    @Test
     public void testPrefetch() {
         mStorage.writeKeyValue("key", "toBeFetched", 0);
         writePatternBytes(PATTERN_0, 0);
@@ -313,34 +341,39 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertPatternBytes(PATTERN_0, 0);
     }
 
+    @Test
     public void testFileLocation_Owner() {
-        LockSettingsStorage storage = new LockSettingsStorage(getContext());
+        LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
         assertEquals("/data/system/gatekeeper.pattern.key", storage.getLockPatternFilename(0));
         assertEquals("/data/system/gatekeeper.password.key", storage.getLockPasswordFilename(0));
     }
 
+    @Test
     public void testFileLocation_SecondaryUser() {
-        LockSettingsStorage storage = new LockSettingsStorage(getContext());
+        LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
         assertEquals("/data/system/users/1/gatekeeper.pattern.key", storage.getLockPatternFilename(1));
         assertEquals("/data/system/users/1/gatekeeper.password.key", storage.getLockPasswordFilename(1));
     }
 
+    @Test
     public void testFileLocation_ProfileToSecondary() {
-        LockSettingsStorage storage = new LockSettingsStorage(getContext());
+        LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
         assertEquals("/data/system/users/2/gatekeeper.pattern.key", storage.getLockPatternFilename(2));
         assertEquals("/data/system/users/2/gatekeeper.password.key", storage.getLockPasswordFilename(2));
     }
 
+    @Test
     public void testFileLocation_ProfileToOwner() {
-        LockSettingsStorage storage = new LockSettingsStorage(getContext());
+        LockSettingsStorage storage = new LockSettingsStorage(InstrumentationRegistry.getContext());
 
         assertEquals("/data/system/users/3/gatekeeper.pattern.key", storage.getLockPatternFilename(3));
         assertEquals("/data/system/users/3/gatekeeper.password.key", storage.getLockPasswordFilename(3));
     }
 
+    @Test
     public void testSyntheticPasswordState() {
         final byte[] data = {1,2,3,4};
         mStorage.writeSyntheticPasswordState(10, 1234L, "state", data);
@@ -351,18 +384,21 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertEquals(null, mStorage.readSyntheticPasswordState(10, 1234L, "state"));
     }
 
+    @Test
     public void testPersistentDataBlock_unavailable() {
         mStorage.mPersistentDataBlockManager = null;
 
         assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
     }
 
+    @Test
     public void testPersistentDataBlock_empty() {
         mStorage.mPersistentDataBlockManager = mock(PersistentDataBlockManagerInternal.class);
 
         assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
     }
 
+    @Test
     public void testPersistentDataBlock_withData() {
         mStorage.mPersistentDataBlockManager = mock(PersistentDataBlockManagerInternal.class);
         when(mStorage.mPersistentDataBlockManager.getFrpCredentialHandle())
@@ -377,6 +413,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertArrayEquals(PAYLOAD, data.payload);
     }
 
+    @Test
     public void testPersistentDataBlock_exception() {
         mStorage.mPersistentDataBlockManager = mock(PersistentDataBlockManagerInternal.class);
         when(mStorage.mPersistentDataBlockManager.getFrpCredentialHandle())
@@ -384,6 +421,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
     }
 
+    @Test
     public void testPersistentData_serializeUnserialize() {
         byte[] serialized = PersistentData.toBytes(PersistentData.TYPE_SP, SOME_USER_ID,
                 DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, PAYLOAD);
@@ -394,16 +432,19 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertArrayEquals(PAYLOAD, deserialized.payload);
     }
 
+    @Test
     public void testPersistentData_unserializeNull() {
         PersistentData deserialized = PersistentData.fromBytes(null);
         assertSame(PersistentData.NONE, deserialized);
     }
 
+    @Test
     public void testPersistentData_unserializeEmptyArray() {
         PersistentData deserialized = PersistentData.fromBytes(new byte[0]);
         assertSame(PersistentData.NONE, deserialized);
     }
 
+    @Test
     public void testPersistentData_unserializeInvalid() {
         assertNotNull(suppressAndReturnWtf(() -> {
             PersistentData deserialized = PersistentData.fromBytes(new byte[]{5});
@@ -411,6 +452,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         }));
     }
 
+    @Test
     public void testPersistentData_unserialize_version1() {
         // This test ensures that we can read serialized VERSION_1 PersistentData even if we change
         // the wire format in the future.
