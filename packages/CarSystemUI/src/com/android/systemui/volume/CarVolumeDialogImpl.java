@@ -290,7 +290,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
         mShowing = true;
         clearAllAndSetupDefaultCarVolumeLineItem(mCurrentlyDisplayingGroupId);
         mDialog.show();
-        Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
+        Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
     }
 
     private void clearAllAndSetupDefaultCarVolumeLineItem(int groupId) {
@@ -349,7 +349,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                 }, DISMISS_DELAY_IN_MILLIS))
                 .start();
 
-        Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
+        Events.writeEvent(Events.EVENT_DISMISS_DIALOG, reason);
     }
 
     private void loadAudioUsageItems() {

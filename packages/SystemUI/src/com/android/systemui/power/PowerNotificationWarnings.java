@@ -476,7 +476,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 });
         d.setOnDismissListener(dialogInterface -> {
             mUsbHighTempDialog = null;
-            Events.writeEvent(mContext, Events.EVENT_DISMISS_USB_OVERHEAT_ALARM,
+            Events.writeEvent(Events.EVENT_DISMISS_USB_OVERHEAT_ALARM,
                     Events.DISMISS_REASON_USB_OVERHEAD_ALARM_CHANGED,
                     mKeyguard.isKeyguardLocked());
         });
@@ -485,7 +485,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         d.show();
         mUsbHighTempDialog = d;
 
-        Events.writeEvent(mContext, Events.EVENT_SHOW_USB_OVERHEAT_ALARM,
+        Events.writeEvent(Events.EVENT_SHOW_USB_OVERHEAT_ALARM,
                 Events.SHOW_REASON_USB_OVERHEAD_ALARM_CHANGED,
                 mKeyguard.isKeyguardLocked());
     }
