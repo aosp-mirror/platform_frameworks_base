@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.IdRes;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -26,6 +27,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStructure;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 
@@ -93,6 +95,7 @@ public class RadioGroup extends LinearLayout {
         if (getImportantForAutofill() == IMPORTANT_FOR_AUTOFILL_AUTO) {
             setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_YES);
         }
+        setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
 
         // retrieve selected radio button as requested by the user in the
         // XML layout file
@@ -474,5 +477,51 @@ public class RadioGroup extends LinearLayout {
             }
         }
         return null;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        if (this.getOrientation() == HORIZONTAL) {
+            info.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain(1,
+                    getVisibleChildCount(), false,
+                    AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE));
+        } else {
+            info.setCollectionInfo(
+                    AccessibilityNodeInfo.CollectionInfo.obtain(getVisibleChildCount(),
+                    1, false,
+                    AccessibilityNodeInfo.CollectionInfo.SELECTION_MODE_SINGLE));
+        }
+    }
+
+    private int getVisibleChildCount() {
+        int count = 0;
+        for (int i = 0; i < getChildCount(); i++) {
+            if (this.getChildAt(i) instanceof RadioButton) {
+                if (((RadioButton) this.getChildAt(i)).getVisibility() == VISIBLE) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    int getIndexWithinVisibleButtons(@Nullable View child) {
+        if (!(child instanceof RadioButton)) {
+            return -1;
+        }
+        int index = 0;
+        for (int i = 0; i < getChildCount(); i++) {
+            if (this.getChildAt(i) instanceof RadioButton) {
+                RadioButton radioButton = (RadioButton) this.getChildAt(i);
+                if (radioButton == child) {
+                    return index;
+                }
+                if (radioButton.getVisibility() == VISIBLE) {
+                    index++;
+                }
+            }
+        }
+        return -1;
     }
 }
