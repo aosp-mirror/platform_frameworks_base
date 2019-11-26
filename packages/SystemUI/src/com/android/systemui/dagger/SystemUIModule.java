@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.BootCompleteCache;
+import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.DumpController;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.model.SysUiState;
@@ -52,6 +54,10 @@ import dagger.Provides;
 @Module(includes = {AssistModule.class,
                     PeopleHubModule.class})
 public abstract class SystemUIModule {
+
+    @Binds
+    abstract BootCompleteCache bindBootCompleteCache(BootCompleteCacheImpl bootCompleteCache);
+
     /** */
     @Binds
     public abstract ContextComponentHelper bindComponentHelper(
@@ -100,4 +106,5 @@ public abstract class SystemUIModule {
     @Singleton
     @Binds
     abstract NotifListBuilder bindNotifListBuilder(NotifListBuilderImpl impl);
+
 }

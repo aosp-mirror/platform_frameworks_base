@@ -20,6 +20,7 @@ import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME
 
 import android.content.ContentProvider;
 
+import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.Dependency;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.SystemUIFactory;
@@ -46,6 +47,12 @@ import dagger.Component;
         SystemUIModule.class,
         SystemUIDefaultModule.class})
 public interface SystemUIRootComponent {
+
+    /**
+     * Provides a BootCompleteCache.
+     */
+    @Singleton
+    BootCompleteCacheImpl provideBootCacheImpl();
 
     /**
      * Creates a ContextComponentHelper.
