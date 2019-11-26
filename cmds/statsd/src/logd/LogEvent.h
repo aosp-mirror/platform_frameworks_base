@@ -24,7 +24,7 @@
 #include <log/log_read.h>
 #include <private/android_logger.h>
 #include <stats_event_list.h>
-#include "stats_event.h"
+#include <stats_event.h>
 #include <utils/Errors.h>
 
 #include <string>
