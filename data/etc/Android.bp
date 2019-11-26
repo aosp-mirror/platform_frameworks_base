@@ -43,7 +43,7 @@ prebuilt_etc {
 
 prebuilt_etc {
     name: "privapp_whitelist_com.android.carrierconfig",
-    product_specific: true,
+    system_ext_specific: true,
     sub_dir: "permissions",
     src: "com.android.carrierconfig.xml",
     filename_from_src: true,
