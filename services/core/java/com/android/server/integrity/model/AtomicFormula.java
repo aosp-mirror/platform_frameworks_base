@@ -46,12 +46,12 @@ public abstract class AtomicFormula implements Formula {
 
     @IntDef(
             value = {
-                    PACKAGE_NAME,
-                    APP_CERTIFICATE,
-                    INSTALLER_NAME,
-                    INSTALLER_CERTIFICATE,
-                    VERSION_CODE,
-                    PRE_INSTALLED,
+                PACKAGE_NAME,
+                APP_CERTIFICATE,
+                INSTALLER_NAME,
+                INSTALLER_CERTIFICATE,
+                VERSION_CODE,
+                PRE_INSTALLED,
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Key {}
@@ -60,11 +60,47 @@ public abstract class AtomicFormula implements Formula {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Operator {}
 
+    /**
+     * Package name of the app.
+     *
+     * <p>Can only be used in {@link StringAtomicFormula}.
+     */
     public static final int PACKAGE_NAME = 0;
+
+    /**
+     * SHA-256 of the app certificate of the app.
+     *
+     * <p>Can only be used in {@link StringAtomicFormula}.
+     */
     public static final int APP_CERTIFICATE = 1;
+
+    /**
+     * Package name of the installer. Will be empty string if installed by the system (e.g., adb).
+     *
+     * <p>Can only be used in {@link StringAtomicFormula}.
+     */
     public static final int INSTALLER_NAME = 2;
+
+    /**
+     * SHA-256 of the cert of the installer. Will be empty string if installed by the system (e.g.,
+     * adb).
+     *
+     * <p>Can only be used in {@link StringAtomicFormula}.
+     */
     public static final int INSTALLER_CERTIFICATE = 3;
+
+    /**
+     * Version code of the app.
+     *
+     * <p>Can only be used in {@link IntAtomicFormula}.
+     */
     public static final int VERSION_CODE = 4;
+
+    /**
+     * If the app is pre-installed on the device.
+     *
+     * <p>Can only be used in {@link BooleanAtomicFormula}.
+     */
     public static final int PRE_INSTALLED = 5;
 
     public static final int EQ = 0;
@@ -91,7 +127,7 @@ public abstract class AtomicFormula implements Formula {
          * specified by {@code key} is of the correct relationship to {@code value} as specified by
          * {@code operator}.
          *
-         * @throws IllegalArgumentException if {@code key} is not {@link #VERSION_CODE}
+         * @throws IllegalArgumentException if {@code key} cannot be used with integer value
          */
         public IntAtomicFormula(@Key int key, @Operator int operator, int value) {
             super(key);
@@ -143,6 +179,11 @@ public abstract class AtomicFormula implements Formula {
         }
 
         @Override
+        public int getTag() {
+            return Formula.INT_ATOMIC_FORMULA_TAG;
+        }
+
+        @Override
         public String toString() {
             return String.format(
                     "(%s %s %s)", keyToString(getKey()), operatorToString(mOperator), mValue);
@@ -157,7 +198,9 @@ public abstract class AtomicFormula implements Formula {
                 return false;
             }
             IntAtomicFormula that = (IntAtomicFormula) o;
-            return getKey() == that.getKey() && mValue == that.mValue;
+            return getKey() == that.getKey()
+                    && mValue == that.mValue
+                    && mOperator == that.mOperator;
         }
 
         @Override
@@ -206,8 +249,7 @@ public abstract class AtomicFormula implements Formula {
          * <p>This formula will hold if and only if the corresponding information of an install
          * specified by {@code key} equals {@code value}.
          *
-         * @throws IllegalArgumentException if {@code key} is not one of {@link #PACKAGE_NAME},
-         *     {@link #APP_CERTIFICATE}, {@link #INSTALLER_NAME} and {@link #INSTALLER_CERTIFICATE}
+         * @throws IllegalArgumentException if {@code key} cannot be used with string value
          */
         public StringAtomicFormula(@Key int key, @NonNull String value) {
             super(key);
@@ -247,6 +289,11 @@ public abstract class AtomicFormula implements Formula {
         }
 
         @Override
+        public int getTag() {
+            return Formula.STRING_ATOMIC_FORMULA_TAG;
+        }
+
+        @Override
         public String toString() {
             return String.format("(%s %s %s)", keyToString(getKey()), operatorToString(EQ), mValue);
         }
@@ -279,6 +326,7 @@ public abstract class AtomicFormula implements Formula {
             dest.writeStringNoHelper(mValue);
         }
 
+        @NonNull
         public String getValue() {
             return mValue;
         }
@@ -310,7 +358,7 @@ public abstract class AtomicFormula implements Formula {
          * <p>This formula will hold if and only if the corresponding information of an install
          * specified by {@code key} equals {@code value}.
          *
-         * @throws IllegalArgumentException if {@code key} is not {@link #PRE_INSTALLED}
+         * @throws IllegalArgumentException if {@code key} cannot be used with boolean value
          */
         public BooleanAtomicFormula(@Key int key, boolean value) {
             super(key);
@@ -344,6 +392,11 @@ public abstract class AtomicFormula implements Formula {
         public boolean isSatisfied(@NonNull AppInstallMetadata appInstallMetadata) {
             boolean metadataValue = getMetadataValueByKey(appInstallMetadata);
             return metadataValue == mValue;
+        }
+
+        @Override
+        public int getTag() {
+            return Formula.BOOLEAN_ATOMIC_FORMULA_TAG;
         }
 
         @Override
@@ -398,7 +451,7 @@ public abstract class AtomicFormula implements Formula {
         return mKey;
     }
 
-    String keyToString(int key) {
+    static String keyToString(int key) {
         switch (key) {
             case PACKAGE_NAME:
                 return "PACKAGE_NAME";
@@ -417,7 +470,7 @@ public abstract class AtomicFormula implements Formula {
         }
     }
 
-    String operatorToString(int op) {
+    static String operatorToString(int op) {
         switch (op) {
             case EQ:
                 return "EQ";
