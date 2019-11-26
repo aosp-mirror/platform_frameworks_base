@@ -2708,6 +2708,21 @@ public class UserManager {
     }
 
     /**
+     * Returns information for all users on this device. Requires
+     * {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @param excludeDying specify if the list should exclude users being
+     *            removed.
+     * @return the list of users that were created.
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
+        return getUsers(/*excludePartial= */ true, excludeDying,
+                /* excludePreCreated= */ true);
+    }
+
+    /**
      * Returns information for all users on this device, based on the filtering parameters.
      *
      * @hide
@@ -2720,6 +2735,24 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns the user handles for all users on this device, based on the filtering parameters.
+     *
+     * @param excludeDying specify if the list should exclude users being removed.
+     * @return the list of user handles.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public @NonNull List<UserHandle> getUserHandles(boolean excludeDying) {
+        List<UserInfo> users = getUsers(excludeDying);
+        List<UserHandle> result = new ArrayList<>(users.size());
+        for (UserInfo user : users) {
+            result.add(user.getUserHandle());
+        }
+        return result;
     }
 
     /**
@@ -3259,21 +3292,6 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Returns information for all users on this device. Requires
-     * {@link android.Manifest.permission#MANAGE_USERS} permission.
-     *
-     * @param excludeDying specify if the list should exclude users being
-     *            removed.
-     * @return the list of users that were created.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
-        return getUsers(/*excludePartial= */ true, excludeDying,
-                /* excludePreCreated= */ true);
     }
 
     /**
