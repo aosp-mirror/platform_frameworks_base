@@ -125,6 +125,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @TestApi
     public static final String FUSED_PROVIDER = "fused";
 
     /**
