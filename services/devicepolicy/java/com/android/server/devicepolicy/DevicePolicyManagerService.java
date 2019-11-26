@@ -10899,31 +10899,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setLocationEnabled(ComponentName who, boolean locationEnabled) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        int userId = mInjector.userHandleGetCallingUserId();
+        enforceDeviceOwner(who);
 
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        UserHandle userHandle = mInjector.binderGetCallingUserHandle();
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled,
+                        userHandle));
 
-            if (!isDeviceOwner(who, userId) && !isCurrentUserDemo()) {
-                throw new SecurityException(
-                        "Permission denial: Profile owners cannot update location settings");
-            }
-        }
-
-        long ident = mInjector.binderClearCallingIdentity();
-        try {
-            mInjector.getLocationManager().setLocationEnabledForUser(
-                    locationEnabled, UserHandle.of(userId));
-            DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.SET_SECURE_SETTING)
-                    .setAdmin(who)
-                    .setStrings(Settings.Secure.LOCATION_MODE, Integer.toString(
-                            locationEnabled ? Settings.Secure.LOCATION_MODE_ON
-                                    : Settings.Secure.LOCATION_MODE_OFF))
-                    .write();
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_SECURE_SETTING)
+                .setAdmin(who)
+                .setStrings(Settings.Secure.LOCATION_MODE, Integer.toString(
+                        locationEnabled ? Settings.Secure.LOCATION_MODE_ON
+                                : Settings.Secure.LOCATION_MODE_OFF))
+                .write();
     }
 
     @Override
