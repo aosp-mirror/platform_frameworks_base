@@ -144,7 +144,7 @@ public class KeyguardIndicationController implements StateListener,
                 Dependency.get(AccessibilityController.class),
                 UnlockMethodCache.getInstance(context),
                 Dependency.get(StatusBarStateController.class),
-                Dependency.get(KeyguardUpdateMonitor.class),
+                KeyguardUpdateMonitor.getInstance(context),
                 Dependency.get(DockManager.class));
     }
 
