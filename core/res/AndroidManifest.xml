@@ -108,8 +108,8 @@
 
     <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE" />
-    <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE_PRIVILEGED" />
-    <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE_PRIVILEGED" />
+    <protected-broadcast android:name="android.app.action.ENTER_CAR_MODE_PRIORITIZED" />
+    <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE_PRIORITIZED" />
     <protected-broadcast android:name="android.app.action.ENTER_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.NEXT_ALARM_CLOCK_CHANGED" />
