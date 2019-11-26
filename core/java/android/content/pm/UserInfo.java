@@ -26,6 +26,8 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.DebugUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -385,6 +387,13 @@ public class UserInfo implements Parcelable {
         }
     }
 
+    // TODO(b/142482943): Get rid of this (after removing it from all tests) if feasible.
+    /**
+     * @deprecated This is dangerous since it doesn't set the mandatory fields. Use a different
+     * constructor instead.
+     */
+    @Deprecated
+    @VisibleForTesting
     public UserInfo() {
     }
 
