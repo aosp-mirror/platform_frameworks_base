@@ -115,6 +115,14 @@ void FilterCallback::setFilter(const jobject filter) {
     mFilter = env->NewWeakGlobalRef(filter);
 }
 
+/////////////// Filter ///////////////////////
+
+Filter::Filter(sp<IFilter> sp, jweak obj) : mFilterSp(sp), mFilterObj(obj) {}
+
+sp<IFilter> Filter::getIFilter() {
+    return mFilterSp;
+}
+
 /////////////// FrontendCallback ///////////////////////
 
 FrontendCallback::FrontendCallback(jweak tunerObj, FrontendId id) : mObject(tunerObj), mId(id) {}
@@ -330,18 +338,18 @@ jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
         }
     }
 
-    sp<IFilter> filterSp;
+    sp<IFilter> iFilterSp;
     sp<FilterCallback> callback = new FilterCallback();
     mDemux->openFilter(type, bufferSize, callback,
             [&](Result, const sp<IFilter>& filter) {
-                filterSp = filter;
+                iFilterSp = filter;
             });
-    if (filterSp == NULL) {
+    if (iFilterSp == NULL) {
         ALOGD("Failed to open filter, type = %d", type.mainType);
         return NULL;
     }
     int fId;
-    filterSp->getId([&](Result, uint32_t filterId) {
+    iFilterSp->getId([&](Result, uint32_t filterId) {
         fId = filterId;
     });
 
@@ -353,6 +361,7 @@ jobject JTuner::openFilter(DemuxFilterType type, int bufferSize) {
                     mObject,
                     (jint) fId);
 
+    sp<Filter> filterSp = new Filter(iFilterSp, filterObj);
     filterSp->incStrong(filterObj);
     env->SetLongField(filterObj, gFields.filterContext, (jlong)filterSp.get());
 
@@ -458,8 +467,8 @@ static FrontendSettings getFrontendSettings(JNIEnv *env, int type, jobject setti
     return frontendSettings;
 }
 
-static sp<IFilter> getFilter(JNIEnv *env, jobject filter) {
-    return (IFilter *)env->GetLongField(filter, gFields.filterContext);
+static sp<Filter> getFilter(JNIEnv *env, jobject filter) {
+    return (Filter *)env->GetLongField(filter, gFields.filterContext);
 }
 
 static sp<IDvr> getDvr(JNIEnv *env, jobject dvr) {
@@ -585,7 +594,7 @@ static DemuxFilterSettings getFilterSettings(
 static int android_media_tv_Tuner_configure_filter(
         JNIEnv *env, jobject filter, int type, int subtype, jobject settings) {
     ALOGD("configure filter type=%d, subtype=%d", type, subtype);
-    sp<IFilter> filterSp = getFilter(env, filter);
+    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (filterSp == NULL) {
         ALOGD("Failed to configure filter: filter not found");
         return (int)Result::INVALID_STATE;
@@ -596,7 +605,7 @@ static int android_media_tv_Tuner_configure_filter(
 }
 
 static bool android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
-    sp<IFilter> filterSp = getFilter(env, filter);
+    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (filterSp == NULL) {
         ALOGD("Failed to start filter: filter not found");
         return false;
@@ -605,7 +614,7 @@ static bool android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
 }
 
 static bool android_media_tv_Tuner_stop_filter(JNIEnv *env, jobject filter) {
-    sp<IFilter> filterSp = getFilter(env, filter);
+    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (filterSp == NULL) {
         ALOGD("Failed to stop filter: filter not found");
         return false;
@@ -614,7 +623,7 @@ static bool android_media_tv_Tuner_stop_filter(JNIEnv *env, jobject filter) {
 }
 
 static bool android_media_tv_Tuner_flush_filter(JNIEnv *env, jobject filter) {
-    sp<IFilter> filterSp = getFilter(env, filter);
+    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (filterSp == NULL) {
         ALOGD("Failed to flush filter: filter not found");
         return false;
@@ -633,7 +642,7 @@ static bool android_media_tv_Tuner_add_pid(
     if (descramblerSp == NULL) {
         return false;
     }
-    sp<IFilter> filterSp = getFilter(env, filter);
+    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     Result result = descramblerSp->addPid(getDemuxPid((int)pidType, (int)pid), filterSp);
     return result == Result::SUCCESS;
 }
@@ -644,7 +653,7 @@ static bool android_media_tv_Tuner_remove_pid(
     if (descramblerSp == NULL) {
         return false;
     }
-    sp<IFilter> filterSp = getFilter(env, filter);
+    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     Result result = descramblerSp->removePid(getDemuxPid((int)pidType, (int)pid), filterSp);
     return result == Result::SUCCESS;
 }
@@ -656,7 +665,7 @@ static jobject android_media_tv_Tuner_open_dvr(JNIEnv *env, jobject thiz, jint t
 
 static bool android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<IDvr> dvrSp = getDvr(env, dvr);
-    sp<IFilter> filterSp = getFilter(env, filter);
+    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (dvrSp == NULL || filterSp == NULL) {
         return false;
     }
@@ -666,7 +675,7 @@ static bool android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobje
 
 static bool android_media_tv_Tuner_detach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<IDvr> dvrSp = getDvr(env, dvr);
-    sp<IFilter> filterSp = getFilter(env, filter);
+    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
     if (dvrSp == NULL || filterSp == NULL) {
         return false;
     }

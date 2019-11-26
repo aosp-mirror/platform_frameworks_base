@@ -91,6 +91,13 @@ struct FrontendCallback : public IFrontendCallback {
     FrontendId mId;
 };
 
+struct Filter : public RefBase {
+    Filter(sp<IFilter> sp, jweak obj);
+    sp<IFilter> getIFilter();
+    sp<IFilter> mFilterSp;
+    jweak mFilterObj;
+};
+
 struct JTuner : public RefBase {
     JTuner(JNIEnv *env, jobject thiz);
     sp<ITuner> getTunerService();
