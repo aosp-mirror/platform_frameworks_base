@@ -959,9 +959,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertPreparedAndNotDestroyedLocked("commit");
             assertNoWriteFileTransfersOpenLocked();
 
-            if (forTransfer) {
+            final boolean enforceInstallPackages = forTransfer
+                    || (android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
+                                android.provider.Settings.Secure.SECURE_FRP_MODE, 0) == 1);
+            if (enforceInstallPackages) {
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, null);
-
+            }
+            if (forTransfer) {
                 if (mInstallerUid == mOriginalInstallerUid) {
                     throw new IllegalArgumentException("Session has not been transferred");
                 }
