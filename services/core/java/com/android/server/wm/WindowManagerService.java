@@ -7692,7 +7692,9 @@ public class WindowManagerService extends IWindowManager.Stub
             mInputManager.registerInputChannel(serverChannel);
             mEmbeddedWindowController.add(serverChannel.getToken(), window, hostWindow, callingUid,
                     callingPid);
-            if (hostWindow != null) {
+
+            if (hostWindow != null
+                    && hostWindow.mInputWindowHandle.inputApplicationHandle != null) {
                 applicationHandle = new InputApplicationHandle(
                         hostWindow.mInputWindowHandle.inputApplicationHandle);
             }
