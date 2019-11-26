@@ -27,6 +27,7 @@ import android.content.pm.ResolveInfo;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.BootCompleteCache;
 import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -62,7 +63,6 @@ public final class PhoneStateMonitor {
 
     private static final String[] DEFAULT_HOME_CHANGE_ACTIONS = new String[] {
             PackageManagerWrapper.ACTION_PREFERRED_ACTIVITY_CHANGED,
-            Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_PACKAGE_ADDED,
             Intent.ACTION_PACKAGE_CHANGED,
             Intent.ACTION_PACKAGE_REMOVED
@@ -77,13 +77,14 @@ public final class PhoneStateMonitor {
 
     @Inject
     PhoneStateMonitor(Context context, BroadcastDispatcher broadcastDispatcher,
-            Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy, BootCompleteCache bootCompleteCache) {
         mContext = context;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
 
         ActivityManagerWrapper activityManagerWrapper = ActivityManagerWrapper.getInstance();
         mDefaultHome = getCurrentDefaultHome();
+        bootCompleteCache.addListener(() -> mDefaultHome = getCurrentDefaultHome());
         IntentFilter intentFilter = new IntentFilter();
         for (String action : DEFAULT_HOME_CHANGE_ACTIONS) {
             intentFilter.addAction(action);
