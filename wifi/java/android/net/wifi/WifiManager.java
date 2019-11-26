@@ -1200,6 +1200,7 @@ public class WifiManager {
      * <li>allowedAuthAlgorithms</li>
      * <li>allowedPairwiseCiphers</li>
      * <li>allowedGroupCiphers</li>
+     * <li>status</li>
      * </ul>
      * @return a list of network configurations in the form of a list
      * of {@link WifiConfiguration} objects.
