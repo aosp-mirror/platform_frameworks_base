@@ -504,11 +504,9 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no package specified");
             return 1;
         }
-        userId = translateUserId(userId, true /*allowAll*/, "runPath");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
-        return displayPackageFilePath(pkg, userId);
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runPath");
+        return displayPackageFilePath(pkg, translatedUserId);
     }
 
     private int runList() throws RemoteException {
@@ -730,13 +728,11 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final String filter = getNextArg();
 
-        userId = translateUserId(userId, true /*allowAll*/, "runListPackages");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runListPackages");
         @SuppressWarnings("unchecked")
         final ParceledListSlice<PackageInfo> slice =
-                mInterface.getInstalledPackages(getFlags, userId);
+                mInterface.getInstalledPackages(getFlags, translatedUserId);
         final List<PackageInfo> packages = slice.getList();
 
         final int count = packages.size();
@@ -1357,19 +1353,17 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("Error: package name not specified");
             return 1;
         }
-        userId = translateUserId(userId, true /*allowAll*/, "runInstallExisting");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runInstallExisting");
 
         int installReason = PackageManager.INSTALL_REASON_UNKNOWN;
         try {
             if (waitTillComplete) {
                 final LocalIntentReceiver receiver = new LocalIntentReceiver();
                 final IPackageInstaller installer = mInterface.getPackageInstaller();
-                pw.println("Installing package " + packageName + " for user: " + userId);
+                pw.println("Installing package " + packageName + " for user: " + translatedUserId);
                 installer.installExistingPackage(packageName, installFlags, installReason,
-                        receiver.getIntentSender(), userId, null);
+                        receiver.getIntentSender(), translatedUserId, null);
                 final Intent result = receiver.getResult();
                 final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                         PackageInstaller.STATUS_FAILURE);
@@ -1377,12 +1371,12 @@ class PackageManagerShellCommand extends ShellCommand {
                 return status == PackageInstaller.STATUS_SUCCESS ? 0 : 1;
             }
 
-            final int res = mInterface.installExistingPackageAsUser(packageName, userId,
+            final int res = mInterface.installExistingPackageAsUser(packageName, translatedUserId,
                     installFlags, installReason, null);
             if (res == PackageManager.INSTALL_FAILED_INVALID_URI) {
                 throw new NameNotFoundException("Package " + packageName + " doesn't exist");
             }
-            pw.println("Package " + packageName + " installed for user: " + userId);
+            pw.println("Package " + packageName + " installed for user: " + translatedUserId);
             return 0;
         } catch (RemoteException | NameNotFoundException e) {
             pw.println(e.toString());
@@ -1845,36 +1839,37 @@ class PackageManagerShellCommand extends ShellCommand {
             return runRemoveSplits(packageName, splitNames);
         }
 
-        userId = translateUserId(userId, true /*allowAll*/, "runUninstall");
+        if (userId == UserHandle.USER_ALL) {
+            flags |= PackageManager.DELETE_ALL_USERS;
+        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_SYSTEM, "runUninstall");
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
-        PackageManagerInternal internal = LocalServices.getService(PackageManagerInternal.class);
+        final PackageManagerInternal internal =
+                LocalServices.getService(PackageManagerInternal.class);
 
         if (internal.isApexPackage(packageName)) {
-            internal.uninstallApex(packageName, versionCode, userId, receiver.getIntentSender());
-        } else {
-            if (userId == UserHandle.USER_ALL) {
-                userId = UserHandle.USER_SYSTEM;
-                flags |= PackageManager.DELETE_ALL_USERS;
-            } else {
-                final PackageInfo info = mInterface.getPackageInfo(packageName,
-                        PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
-                if (info == null) {
-                    pw.println("Failure [not installed for " + userId + "]");
-                    return 1;
-                }
-                final boolean isSystem =
-                        (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-                // If we are being asked to delete a system app for just one
-                // user set flag so it disables rather than reverting to system
-                // version of the app.
-                if (isSystem) {
-                    flags |= PackageManager.DELETE_SYSTEM_APP;
-                }
+            internal.uninstallApex(
+                    packageName, versionCode, translatedUserId, receiver.getIntentSender());
+        } else if ((flags & PackageManager.DELETE_ALL_USERS) != 0) {
+            final PackageInfo info = mInterface.getPackageInfo(packageName,
+                    PackageManager.MATCH_STATIC_SHARED_LIBRARIES, translatedUserId);
+            if (info == null) {
+                pw.println("Failure [not installed for " + translatedUserId + "]");
+                return 1;
+            }
+            final boolean isSystem =
+                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+            // If we are being asked to delete a system app for just one
+            // user set flag so it disables rather than reverting to system
+            // version of the app.
+            if (isSystem) {
+                flags |= PackageManager.DELETE_SYSTEM_APP;
             }
 
             mInterface.getPackageInstaller().uninstall(new VersionedPackage(packageName,
                             versionCode), null /*callerPackageName*/, flags,
-                    receiver.getIntentSender(), userId);
+                    receiver.getIntentSender(), translatedUserId);
         }
 
         final Intent result = receiver.getResult();
@@ -1991,28 +1986,26 @@ class PackageManagerShellCommand extends ShellCommand {
             userId = UserHandle.parseUserArg(getNextArgRequired());
         }
 
-        String pkg = getNextArg();
+        final String pkg = getNextArg();
         if (pkg == null) {
             getErrPrintWriter().println("Error: no package or component specified");
             return 1;
         }
-        userId = translateUserId(userId, true /*allowAll*/, "runSetEnabledSetting");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
-        ComponentName cn = ComponentName.unflattenFromString(pkg);
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runSetEnabledSetting");
+        final ComponentName cn = ComponentName.unflattenFromString(pkg);
         if (cn == null) {
-            mInterface.setApplicationEnabledSetting(pkg, state, 0, userId,
+            mInterface.setApplicationEnabledSetting(pkg, state, 0, translatedUserId,
                     "shell:" + android.os.Process.myUid());
             getOutPrintWriter().println("Package " + pkg + " new state: "
                     + enabledSettingToString(
-                    mInterface.getApplicationEnabledSetting(pkg, userId)));
+                    mInterface.getApplicationEnabledSetting(pkg, translatedUserId)));
             return 0;
         } else {
-            mInterface.setComponentEnabledSetting(cn, state, 0, userId);
+            mInterface.setComponentEnabledSetting(cn, state, 0, translatedUserId);
             getOutPrintWriter().println("Component " + cn.toShortString() + " new state: "
                     + enabledSettingToString(
-                    mInterface.getComponentEnabledSetting(cn, userId)));
+                    mInterface.getComponentEnabledSetting(cn, translatedUserId)));
             return 0;
         }
     }
@@ -2029,13 +2022,11 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no package or component specified");
             return 1;
         }
-        userId = translateUserId(userId, true /*allowAll*/, "runSetHiddenSetting");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
-        mInterface.setApplicationHiddenSettingAsUser(pkg, state, userId);
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runSetHiddenSetting");
+        mInterface.setApplicationHiddenSettingAsUser(pkg, state, translatedUserId);
         getOutPrintWriter().println("Package " + pkg + " new hidden state: "
-                + mInterface.getApplicationHiddenSettingAsUser(pkg, userId));
+                + mInterface.getApplicationHiddenSettingAsUser(pkg, translatedUserId));
         return 0;
     }
 
@@ -2102,16 +2093,14 @@ class PackageManagerShellCommand extends ShellCommand {
             info = null;
         }
         try {
-            userId = translateUserId(userId, true /*allowAll*/, "runSuspend");
-            if (userId == UserHandle.USER_ALL) {
-                userId = UserHandle.USER_SYSTEM;
-            }
+            final int translatedUserId =
+                    translateUserId(userId, UserHandle.USER_NULL, "runSuspend");
             mInterface.setPackagesSuspendedAsUser(new String[]{packageName}, suspendedState,
                     ((appExtras.size() > 0) ? appExtras : null),
                     ((launcherExtras.size() > 0) ? launcherExtras : null),
-                    info, callingPackage, userId);
+                    info, callingPackage, translatedUserId);
             pw.println("Package " + packageName + " new suspended state: "
-                    + mInterface.isPackageSuspendedForUser(packageName, userId));
+                    + mInterface.isPackageSuspendedForUser(packageName, translatedUserId));
             return 0;
         } catch (RemoteException | IllegalArgumentException e) {
             pw.println(e.toString());
@@ -2139,11 +2128,12 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no permission specified");
             return 1;
         }
-        userId = translateUserId(userId, true /*allowAll*/, "runGrantRevokePermission");
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runGrantRevokePermission");
         if (grant) {
-            mPermissionManager.grantRuntimePermission(pkg, perm, userId);
+            mPermissionManager.grantRuntimePermission(pkg, perm, translatedUserId);
         } else {
-            mPermissionManager.revokeRuntimePermission(pkg, perm, userId);
+            mPermissionManager.revokeRuntimePermission(pkg, perm, translatedUserId);
         }
         return 0;
     }
@@ -2327,11 +2317,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 return 1;
         }
 
-        userId = translateUserId(userId, true /*allowAll*/, "runSetAppLink");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
-        final PackageInfo info = mInterface.getPackageInfo(pkg, 0, userId);
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runSetAppLink");
+        final PackageInfo info = mInterface.getPackageInfo(pkg, 0, translatedUserId);
         if (info == null) {
             getErrPrintWriter().println("Error: package " + pkg + " not found.");
             return 1;
@@ -2342,7 +2330,7 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        if (!mInterface.updateIntentVerificationStatus(pkg, newMode, userId)) {
+        if (!mInterface.updateIntentVerificationStatus(pkg, newMode, translatedUserId)) {
             getErrPrintWriter().println("Error: unable to update app link status for " + pkg);
             return 1;
         }
@@ -2371,11 +2359,9 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        userId = translateUserId(userId, true /*allowAll*/, "runGetAppLink");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
-        final PackageInfo info = mInterface.getPackageInfo(pkg, 0, userId);
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runGetAppLink");
+        final PackageInfo info = mInterface.getPackageInfo(pkg, 0, translatedUserId);
         if (info == null) {
             getErrPrintWriter().println("Error: package " + pkg + " not found.");
             return 1;
@@ -2388,7 +2374,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         getOutPrintWriter().println(linkStateToString(
-                mInterface.getIntentVerificationStatus(pkg, userId)));
+                mInterface.getIntentVerificationStatus(pkg, translatedUserId)));
 
         return 0;
     }
@@ -2763,14 +2749,15 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             pkgName = componentName.getPackageName();
         }
-        userId = translateUserId(userId, true /*allowAll*/, "runInstallCreate");
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runSetHomeActivity");
         final CompletableFuture<Boolean> future = new CompletableFuture<>();
         final RemoteCallback callback = new RemoteCallback(res -> future.complete(res != null));
         try {
             IRoleManager roleManager = android.app.role.IRoleManager.Stub.asInterface(
                     ServiceManager.getServiceOrThrow(Context.ROLE_SERVICE));
             roleManager.addRoleHolderAsUser(RoleManager.ROLE_HOME, pkgName,
-                    0, userId, callback);
+                    0, translatedUserId, callback);
             boolean success = future.get();
             if (success) {
                 pw.println("Success");
@@ -2859,14 +2846,12 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
 
-        userId = translateUserId(userId, true /*allowAll*/, "runSetHarmfulAppWarning");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runSetHarmfulAppWarning");
         final String packageName = getNextArgRequired();
         final String warning = getNextArg();
 
-        mInterface.setHarmfulAppWarning(packageName, warning, userId);
+        mInterface.setHarmfulAppWarning(packageName, warning, translatedUserId);
 
         return 0;
     }
@@ -2884,12 +2869,10 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
 
-        userId = translateUserId(userId, true /*allowAll*/, "runGetHarmfulAppWarning");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-        }
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_NULL, "runGetHarmfulAppWarning");
         final String packageName = getNextArgRequired();
-        final CharSequence warning = mInterface.getHarmfulAppWarning(packageName, userId);
+        final CharSequence warning = mInterface.getHarmfulAppWarning(packageName, translatedUserId);
         if (!TextUtils.isEmpty(warning)) {
             getOutPrintWriter().println(warning);
             return 0;
@@ -2917,21 +2900,22 @@ class PackageManagerShellCommand extends ShellCommand {
         throw new IllegalArgumentException("ABI " + abi + " not supported on this device");
     }
 
-    private int translateUserId(int userId, boolean allowAll, String logContext) {
-        return ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, allowAll, true, logContext, "pm command");
+    private int translateUserId(int userId, int allUserId, String logContext) {
+        final boolean allowAll = (allUserId != UserHandle.USER_NULL);
+        final int translatedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, allowAll, true, logContext, "pm command");
+        return translatedUserId == UserHandle.USER_ALL ? allUserId : translatedUserId;
     }
 
     private int doCreateSession(SessionParams params, String installerPackageName, int userId)
             throws RemoteException {
-        userId = translateUserId(userId, true /*allowAll*/, "doCreateSession");
         if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
             params.installFlags |= PackageManager.INSTALL_ALL_USERS;
         }
-
+        final int translatedUserId =
+                translateUserId(userId, UserHandle.USER_SYSTEM, "doCreateSession");
         final int sessionId = mInterface.getPackageInstaller()
-                .createSession(params, installerPackageName, userId);
+                .createSession(params, installerPackageName, translatedUserId);
         return sessionId;
     }
 
