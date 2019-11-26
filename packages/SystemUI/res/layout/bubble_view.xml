@@ -14,16 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.systemui.bubbles.BubbleView
+<com.android.systemui.bubbles.BadgedImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:id="@+id/bubble_view">
-
-    <com.android.systemui.bubbles.BadgedImageView
-        android:id="@+id/bubble_image"
-        android:layout_width="@dimen/individual_bubble_size"
-        android:layout_height="@dimen/individual_bubble_size"
-        android:clipToPadding="false"/>
-
-</com.android.systemui.bubbles.BubbleView>
+    android:id="@+id/bubble_view"
+    android:layout_width="@dimen/individual_bubble_size"
+    android:layout_height="@dimen/individual_bubble_size"/>

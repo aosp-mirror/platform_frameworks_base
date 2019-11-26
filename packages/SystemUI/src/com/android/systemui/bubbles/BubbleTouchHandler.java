@@ -95,7 +95,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
             return false;
         }
 
-        if (!(mTouchedView instanceof BubbleView)
+        if (!(mTouchedView instanceof BadgedImageView)
                 && !(mTouchedView instanceof BubbleStackView)
                 && !(mTouchedView instanceof BubbleFlyoutView)) {
             // Not touching anything touchable, but we shouldn't collapse (e.g. touching edge
@@ -187,7 +187,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     mStack.onFlyoutDragFinished(rawX - mTouchDown.x /* deltaX */, velX);
                 } else if (shouldDismiss) {
                     final String individualBubbleKey =
-                            isStack ? null : ((BubbleView) mTouchedView).getKey();
+                            isStack ? null : ((BadgedImageView) mTouchedView).getKey();
                     mStack.magnetToStackIfNeededThenAnimateDismissal(mTouchedView, velX, velY,
                             () -> {
                                 if (isStack) {
@@ -214,7 +214,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     // Toggle expansion
                     mBubbleData.setExpanded(!mBubbleData.isExpanded());
                 } else {
-                    final String key = ((BubbleView) mTouchedView).getKey();
+                    final String key = ((BadgedImageView) mTouchedView).getKey();
                     mBubbleData.setSelectedBubble(mBubbleData.getBubbleWithKey(key));
                 }
 

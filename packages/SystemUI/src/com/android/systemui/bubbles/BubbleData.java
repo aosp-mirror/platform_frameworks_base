@@ -210,8 +210,8 @@ public class BubbleData {
             setSelectedBubbleInternal(bubble);
         }
         boolean isBubbleExpandedAndSelected = mExpanded && mSelectedBubble == bubble;
-        bubble.setShowInShadeWhenBubble(!isBubbleExpandedAndSelected && showInShade);
-        bubble.setShowBubbleDot(!isBubbleExpandedAndSelected);
+        bubble.setShowInShade(!isBubbleExpandedAndSelected && showInShade);
+        bubble.setShowDot(!isBubbleExpandedAndSelected /* show */, true /* animate */);
         dispatchPendingChanges();
     }
 
@@ -303,9 +303,8 @@ public class BubbleData {
         if (notif.getRanking().visuallyInterruptive()) {
             return true;
         }
-        final boolean suppressedFromShade = hasBubbleWithKey(notif.getKey())
-                && !getBubbleWithKey(notif.getKey()).showInShadeWhenBubble();
-        return suppressedFromShade;
+        return hasBubbleWithKey(notif.getKey())
+                && !getBubbleWithKey(notif.getKey()).showInShade();
     }
 
     private void doAdd(Bubble bubble) {

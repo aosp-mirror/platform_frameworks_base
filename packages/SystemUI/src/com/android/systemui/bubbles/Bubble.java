@@ -64,8 +64,9 @@ class Bubble {
     private ShortcutInfo mShortcutInfo;
 
     private boolean mInflated;
-    private BubbleView mIconView;
+    private BadgedImageView mIconView;
     private BubbleExpandedView mExpandedView;
+    private BubbleIconFactory mBubbleIconFactory;
 
     private long mLastUpdated;
     private long mLastAccessed;
@@ -146,7 +147,7 @@ class Bubble {
         return mAppName;
     }
 
-    public Drawable getUserBadgedAppIcon() {
+    Drawable getUserBadgedAppIcon() {
         return mUserBadgedAppIcon;
     }
 
@@ -165,17 +166,15 @@ class Bubble {
         return BubbleExperimentConfig.isShortcutIntent(getBubbleIntent());
     }
 
+    void setBubbleIconFactory(BubbleIconFactory factory) {
+        mBubbleIconFactory = factory;
+    }
+
     boolean isInflated() {
         return mInflated;
     }
 
-    void updateDotVisibility() {
-        if (mIconView != null) {
-            mIconView.updateDotVisibility(true /* animate */);
-        }
-    }
-
-    BubbleView getIconView() {
+    BadgedImageView getIconView() {
         return mIconView;
     }
 
@@ -193,8 +192,9 @@ class Bubble {
         if (mInflated) {
             return;
         }
-        mIconView = (BubbleView) inflater.inflate(
+        mIconView = (BadgedImageView) inflater.inflate(
                 R.layout.bubble_view, stackView, false /* attachToRoot */);
+        mIconView.setBubbleIconFactory(mBubbleIconFactory);
         mIconView.setBubble(this);
 
         mExpandedView = (BubbleExpandedView) inflater.inflate(
@@ -260,15 +260,15 @@ class Bubble {
      */
     void markAsAccessedAt(long lastAccessedMillis) {
         mLastAccessed = lastAccessedMillis;
-        setShowInShadeWhenBubble(false);
-        setShowBubbleDot(false);
+        setShowInShade(false);
+        setShowDot(false /* show */, true /* animate */);
     }
 
     /**
      * Whether this notification should be shown in the shade when it is also displayed as a
      * bubble.
      */
-    boolean showInShadeWhenBubble() {
+    boolean showInShade() {
         return !mEntry.isRowDismissed() && !shouldSuppressNotification()
                 && (!mEntry.isClearable() || mShowInShadeWhenBubble);
     }
@@ -277,28 +277,33 @@ class Bubble {
      * Sets whether this notification should be shown in the shade when it is also displayed as a
      * bubble.
      */
-    void setShowInShadeWhenBubble(boolean showInShade) {
+    void setShowInShade(boolean showInShade) {
         mShowInShadeWhenBubble = showInShade;
     }
 
     /**
      * Sets whether the bubble for this notification should show a dot indicating updated content.
      */
-    void setShowBubbleDot(boolean showDot) {
+    void setShowDot(boolean showDot, boolean animate) {
         mShowBubbleUpdateDot = showDot;
+        if (animate && mIconView != null) {
+            mIconView.animateDot();
+        } else if (mIconView != null) {
+            mIconView.invalidate();
+        }
     }
 
     /**
      * Whether the bubble for this notification should show a dot indicating updated content.
      */
-    boolean showBubbleDot() {
+    boolean showDot() {
         return mShowBubbleUpdateDot && !mEntry.shouldSuppressNotificationDot();
     }
 
     /**
      * Whether the flyout for the bubble should be shown.
      */
-    boolean showFlyoutForBubble() {
+    boolean showFlyout() {
         return !mSuppressFlyout && !mEntry.shouldSuppressPeek()
                 && !mEntry.shouldSuppressNotificationList();
     }
@@ -470,9 +475,9 @@ class Bubble {
     public void dump(
             @NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("key: "); pw.println(mKey);
-        pw.print("  showInShade:   "); pw.println(showInShadeWhenBubble());
-        pw.print("  showDot:       "); pw.println(showBubbleDot());
-        pw.print("  showFlyout:    "); pw.println(showFlyoutForBubble());
+        pw.print("  showInShade:   "); pw.println(showInShade());
+        pw.print("  showDot:       "); pw.println(showDot());
+        pw.print("  showFlyout:    "); pw.println(showFlyout());
         pw.print("  desiredHeight: "); pw.println(getDesiredHeightString());
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
