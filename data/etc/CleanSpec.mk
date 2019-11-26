@@ -47,6 +47,8 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/etc/permissions/com.
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/product/etc/permissions/com.android.carrierconfig.xml)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/etc/permissions/com.android.emergency.xml)
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/product/etc/permissions/com.android.emergency.xml)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/product/etc/permissions/com.android.provision.xml)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/product/etc/permissions/com.android.provision.xml)
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
 # ******************************************************************
