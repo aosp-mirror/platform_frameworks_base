@@ -168,6 +168,7 @@ cc_binary {
         "-Os",
         // "-g",
         // "-O0",
+        // "-DNEW_ENCODING_SCHEME",
     ],
 
     product_variables: {
@@ -325,7 +326,8 @@ cc_benchmark {
         "-Wno-unused-function",
 
         // Bug: http://b/29823425 Disable -Wvarargs for Clang update to r271374
-        "-Wno-varargs"
+        "-Wno-varargs",
+        // "-DNEW_ENCODING_SCHEME",
     ],
 
     static_libs: [
@@ -334,8 +336,9 @@ cc_benchmark {
 
     shared_libs: [
         "libgtest_prod",
-        "libstatslog",
         "libprotobuf-cpp-lite",
+        "libstatslog",
+        "libstatssocket",
     ],
 }
 
