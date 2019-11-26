@@ -18,6 +18,7 @@ package com.android.server.stats;
 import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
@@ -115,7 +116,6 @@ import android.util.proto.ProtoStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.IProcessStats;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
@@ -535,7 +535,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     // Assumes that sStatsdLock is held.
     @GuardedBy("sStatsdLock")
-    private final void informAllUidsLocked(Context context) throws RemoteException {
+    private void informAllUidsLocked(Context context) throws RemoteException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
         PackageManager pm = context.getPackageManager();
         final List<UserInfo> users = um.getUsers(true);
@@ -557,7 +557,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             Slog.e(TAG, "Failed to close the read side of the pipe.", e);
         }
         final ParcelFileDescriptor writeFd = fds[1];
-        BackgroundThread.getHandler().post(() -> {
+        HandlerThread backgroundThread = new HandlerThread(
+                "statsCompanionService.bg", THREAD_PRIORITY_BACKGROUND);
+        backgroundThread.start();
+        Handler handler = new Handler(backgroundThread.getLooper());
+        handler.post(() -> {
             FileOutputStream fout = new ParcelFileDescriptor.AutoCloseOutputStream(writeFd);
             try {
                 ProtoOutputStream output = new ProtoOutputStream(fout);
@@ -606,6 +610,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
             } finally {
                 IoUtils.closeQuietly(fout);
+                backgroundThread.quit();
+                backgroundThread.interrupt();
             }
         });
     }
