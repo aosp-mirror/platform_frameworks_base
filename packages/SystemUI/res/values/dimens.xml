@@ -1079,6 +1079,10 @@
     <dimen name="logout_button_margin_bottom">12dp</dimen>
     <dimen name="logout_button_corner_radius">2dp</dimen>
 
+    <!--  Blur radius on status bar window and power menu  -->
+    <dimen name="min_window_blur_radius">1px</dimen>
+    <dimen name="max_window_blur_radius">100px</dimen>
+
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
     <!-- How much each bubble is elevated. -->
