@@ -30,6 +30,8 @@ import java.util.Map;
 
 public class WifiUtils {
 
+    private static final int INVALID_RSSI = -127;
+
     public static String buildLoggingSummary(AccessPoint accessPoint, WifiConfiguration config) {
         final StringBuilder summary = new StringBuilder();
         final WifiInfo info = accessPoint.getInfo();
@@ -106,8 +108,8 @@ public class WifiUtils {
             visibility.append(String.format("rx=%.1f", info.getRxSuccessRate()));
         }
 
-        int maxRssi5 = WifiConfiguration.INVALID_RSSI;
-        int maxRssi24 = WifiConfiguration.INVALID_RSSI;
+        int maxRssi5 = INVALID_RSSI;
+        int maxRssi24 = INVALID_RSSI;
         final int maxDisplayedScans = 4;
         int num5 = 0; // number of scanned BSSID on 5GHz band
         int num24 = 0; // number of scanned BSSID on 2.4Ghz band

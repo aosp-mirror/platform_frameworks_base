@@ -518,8 +518,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             int networkId, final List<WifiConfiguration> configs) {
         if (configs != null) {
             for (WifiConfiguration config : configs) {
-                if (mLastInfo != null && networkId == config.networkId &&
-                        !(config.selfAdded && config.numAssociation == 0)) {
+                if (mLastInfo != null && networkId == config.networkId) {
                     return config;
                 }
             }

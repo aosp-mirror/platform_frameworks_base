@@ -152,10 +152,35 @@ MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(
     
 
 
+
+MutableBareField: android.net.IpConfiguration#httpProxy:
+    Bare field httpProxy must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.IpConfiguration#ipAssignment:
+    Bare field ipAssignment must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.IpConfiguration#proxySettings:
+    Bare field proxySettings must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.IpConfiguration#staticIpConfiguration:
+    Bare field staticIpConfiguration must be marked final, or moved behind accessors if mutable
 MutableBareField: android.net.wifi.WifiConfiguration#allowAutojoin:
     
+MutableBareField: android.net.wifi.WifiConfiguration#apBand:
+    Bare field apBand must be marked final, or moved behind accessors if mutable
 MutableBareField: android.net.wifi.WifiConfiguration#carrierId:
     
+MutableBareField: android.net.wifi.WifiConfiguration#fromWifiNetworkSpecifier:
+    Bare field fromWifiNetworkSpecifier must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.WifiConfiguration#fromWifiNetworkSuggestion:
+    Bare field fromWifiNetworkSuggestion must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.WifiConfiguration#macRandomizationSetting:
+    Bare field macRandomizationSetting must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.WifiConfiguration#meteredOverride:
+    Bare field meteredOverride must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.WifiConfiguration#requirePMF:
+    Bare field requirePMF must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.WifiConfiguration#saePasswordId:
+    Bare field saePasswordId must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.WifiConfiguration#shared:
+    Bare field shared must be marked final, or moved behind accessors if mutable
 
 
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
