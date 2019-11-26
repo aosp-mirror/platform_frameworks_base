@@ -17,8 +17,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.util.LongSparseLongArray;
-import android.util.Pair;
+import android.util.LongSparseArray;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -159,14 +158,11 @@ public class RecentLocationAccessesTest {
 
     private OpEntry createOpEntryWithTime(int op, long time) {
         // Slot for background access timestamp.
-        final LongSparseLongArray accessTimes = new LongSparseLongArray();
-        accessTimes.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_BACKGROUND,
-            AppOpsManager.OP_FLAG_SELF), time);
+        final LongSparseArray<AppOpsManager.NoteOpEvent> accessEvents = new LongSparseArray<>();
+        accessEvents.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_BACKGROUND,
+            AppOpsManager.OP_FLAG_SELF), new AppOpsManager.NoteOpEvent(time, -1, null));
 
-        OpFeatureEntry.Builder featureEntry = new OpFeatureEntry.Builder(false, accessTimes,
-                null /*rejectTimes*/, null /*durations*/, null /* proxyUids */,
-                null /* proxyPackages */, null /* proxyFeatureIds */);
-        return new OpEntry(op, AppOpsManager.MODE_ALLOWED,
-                new Pair[]{new Pair(null, featureEntry)});
+        return new OpEntry(op, AppOpsManager.MODE_ALLOWED, Collections.singletonMap(null,
+                new OpFeatureEntry(op, false, accessEvents, null)));
     }
 }

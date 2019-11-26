@@ -20,6 +20,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
+import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_READ_SMS;
 import static android.app.AppOpsManager.OP_WIFI_SCAN;
 import static android.app.AppOpsManager.OP_WRITE_SMS;
@@ -465,11 +466,11 @@ public class AppOpsServiceTest {
                 assertWithMessage("Unexpected mode").that(mode).isEqualTo(opEntry.getMode());
                 if (minMillis > 0) {
                     assertWithMessage("Unexpected timestamp")
-                            .that(opEntry.getTime()).isAtLeast(minMillis);
+                            .that(opEntry.getLastAccessTime(OP_FLAGS_ALL)).isAtLeast(minMillis);
                 }
                 if (minRejectMillis > 0) {
-                    assertWithMessage("Unexpected rejection timestamp")
-                            .that(opEntry.getRejectTime()).isAtLeast(minRejectMillis);
+                    assertWithMessage("Unexpected rejection timestamp").that(
+                            opEntry.getLastRejectTime(OP_FLAGS_ALL)).isAtLeast(minRejectMillis);
                 }
             }
         }
