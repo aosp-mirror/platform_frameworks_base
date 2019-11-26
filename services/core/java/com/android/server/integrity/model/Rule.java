@@ -16,6 +16,7 @@
 
 package com.android.server.integrity.model;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
@@ -62,6 +63,7 @@ public final class Rule implements Parcelable {
     private final @Effect int mEffect;
 
     public Rule(@NonNull Formula formula, @Effect int effect) {
+        checkArgument(isValidEffect(effect), String.format("Unknown effect: %d", effect));
         this.mFormula = checkNotNull(formula);
         this.mEffect = effect;
     }
@@ -136,5 +138,10 @@ public final class Rule implements Parcelable {
             default:
                 throw new IllegalArgumentException("Unknown effect " + effect);
         }
+    }
+
+    private static boolean isValidEffect(int effect) {
+        return effect == DENY
+                || effect == FORCE_ALLOW;
     }
 }

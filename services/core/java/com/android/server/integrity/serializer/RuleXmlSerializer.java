@@ -48,6 +48,7 @@ public class RuleXmlSerializer implements RuleSerializer {
     private static final String OPERATOR_ATTRIBUTE = "O";
     private static final String VALUE_ATTRIBUTE = "V";
     private static final String CONNECTOR_ATTRIBUTE = "C";
+    private static final String IS_HASHED_VALUE_ATTRIBUTE = "H";
 
     @Override
     public void serialize(List<Rule> rules, OutputStream outputStream)
@@ -129,6 +130,10 @@ public class RuleXmlSerializer implements RuleSerializer {
         if (atomicFormula instanceof AtomicFormula.StringAtomicFormula) {
             serializeAttributeValue(VALUE_ATTRIBUTE,
                     ((AtomicFormula.StringAtomicFormula) atomicFormula).getValue(), xmlSerializer);
+            serializeAttributeValue(IS_HASHED_VALUE_ATTRIBUTE,
+                    String.valueOf(
+                            ((AtomicFormula.StringAtomicFormula) atomicFormula).getIsHashedValue()),
+                    xmlSerializer);
         } else if (atomicFormula instanceof AtomicFormula.IntAtomicFormula) {
             serializeAttributeValue(OPERATOR_ATTRIBUTE,
                     String.valueOf(((AtomicFormula.IntAtomicFormula) atomicFormula).getOperator()),

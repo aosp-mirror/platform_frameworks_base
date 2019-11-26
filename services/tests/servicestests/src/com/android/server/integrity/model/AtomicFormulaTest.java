@@ -38,7 +38,8 @@ public class AtomicFormulaTest {
     @Test
     public void testValidAtomicFormula_stringValue() {
         StringAtomicFormula stringAtomicFormula =
-                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.test.app");
+                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME,
+                        "com.test.app", /* isHashedValue= */ false);
 
         assertEquals(AtomicFormula.PACKAGE_NAME, stringAtomicFormula.getKey());
     }
@@ -66,7 +67,8 @@ public class AtomicFormulaTest {
                 /* expectedExceptionMessageRegex */
                 String.format(
                         "Key VERSION_CODE cannot be used with StringAtomicFormula"),
-                () -> new StringAtomicFormula(AtomicFormula.VERSION_CODE, "test-value"));
+                () -> new StringAtomicFormula(AtomicFormula.VERSION_CODE, "test-value",
+                        /* isHashedValue= */ false));
     }
 
     @Test
@@ -92,7 +94,8 @@ public class AtomicFormulaTest {
     @Test
     public void testIsSatisfiable_string_true() {
         StringAtomicFormula stringAtomicFormula =
-                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.test.app");
+                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME,
+                        "com.test.app", /* isHashedValue= */ false);
         AppInstallMetadata appInstallMetadata =
                 getAppInstallMetadataBuilder().setPackageName("com.test.app").build();
 
@@ -102,7 +105,8 @@ public class AtomicFormulaTest {
     @Test
     public void testIsSatisfiable_string_false() {
         StringAtomicFormula stringAtomicFormula =
-                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.test.app");
+                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME,
+                        "com.test.app", /* isHashedValue= */ false);
         AppInstallMetadata appInstallMetadata =
                 getAppInstallMetadataBuilder().setPackageName("com.foo.bar").build();
 
@@ -231,7 +235,8 @@ public class AtomicFormulaTest {
 
     @Test
     public void testParcelUnparcel_string() {
-        StringAtomicFormula formula = new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "abc");
+        StringAtomicFormula formula = new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "abc",
+                /* isHashedValue= */ false);
         Parcel p = Parcel.obtain();
         formula.writeToParcel(p, 0);
         p.setDataPosition(0);
@@ -261,6 +266,22 @@ public class AtomicFormulaTest {
         BooleanAtomicFormula newFormula = BooleanAtomicFormula.CREATOR.createFromParcel(p);
 
         assertEquals(formula, newFormula);
+    }
+
+    @Test
+    public void testInvalidAtomicFormula_invalidKey() {
+        assertExpectException(
+                IllegalArgumentException.class,
+                /* expectedExceptionMessageRegex */ "Unknown key: -1",
+                () -> new IntAtomicFormula(/* key= */ -1, AtomicFormula.EQ, 0));
+    }
+
+    @Test
+    public void testInvalidAtomicFormula_invalidOperator() {
+        assertExpectException(
+                IllegalArgumentException.class,
+                /* expectedExceptionMessageRegex */ "Unknown operator: -1",
+                () -> new IntAtomicFormula(AtomicFormula.VERSION_CODE, /* operator= */ -1, 0));
     }
 
     /** Returns a builder with all fields filled with some dummy data. */

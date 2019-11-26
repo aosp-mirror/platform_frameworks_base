@@ -112,6 +112,7 @@ public abstract class AtomicFormula implements Formula {
     private final @Key int mKey;
 
     public AtomicFormula(@Key int key) {
+        checkArgument(isValidKey(key), String.format("Unknown key: %d", key));
         mKey = key;
     }
 
@@ -134,6 +135,8 @@ public abstract class AtomicFormula implements Formula {
             checkArgument(
                     key == VERSION_CODE,
                     String.format("Key %s cannot be used with IntAtomicFormula", keyToString(key)));
+            checkArgument(isValidOperator(operator),
+                    String.format("Unknown operator: %d", operator));
             mOperator = operator;
             mValue = value;
         }
@@ -237,11 +240,21 @@ public abstract class AtomicFormula implements Formula {
                             "Unexpected key in IntAtomicFormula" + getKey());
             }
         }
+
+        private static boolean isValidOperator(int operator) {
+            return operator == EQ
+                    || operator == LT
+                    || operator == LE
+                    || operator == GT
+                    || operator == GE;
+        }
     }
 
     /** An {@link AtomicFormula} with a key and string value. */
     public static final class StringAtomicFormula extends AtomicFormula implements Parcelable {
         private final String mValue;
+        // Indicates whether the value is the actual value or the hashed value.
+        private final boolean mIsHashedValue;
 
         /**
          * Constructs a new {@link StringAtomicFormula}.
@@ -251,8 +264,9 @@ public abstract class AtomicFormula implements Formula {
          *
          * @throws IllegalArgumentException if {@code key} cannot be used with string value
          */
-        public StringAtomicFormula(@Key int key, @NonNull String value) {
+        public StringAtomicFormula(@Key int key, @NonNull String value, boolean isHashedValue) {
             super(key);
+            mIsHashedValue = isHashedValue;
             checkArgument(
                     key == PACKAGE_NAME
                             || key == APP_CERTIFICATE
@@ -266,6 +280,7 @@ public abstract class AtomicFormula implements Formula {
         StringAtomicFormula(Parcel in) {
             super(in.readInt());
             mValue = in.readStringNoHelper();
+            mIsHashedValue = in.readByte() != 0;
         }
 
         @NonNull
@@ -324,11 +339,16 @@ public abstract class AtomicFormula implements Formula {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(getKey());
             dest.writeStringNoHelper(mValue);
+            dest.writeByte((byte) (mIsHashedValue ? 1 : 0));
         }
 
         @NonNull
         public String getValue() {
             return mValue;
+        }
+
+        public boolean getIsHashedValue() {
+            return mIsHashedValue;
         }
 
         private String getMetadataValueByKey(AppInstallMetadata appInstallMetadata) {
@@ -485,5 +505,14 @@ public abstract class AtomicFormula implements Formula {
             default:
                 throw new IllegalArgumentException("Unknown operator " + op);
         }
+    }
+
+    private static boolean isValidKey(int key) {
+        return key == PACKAGE_NAME
+                || key == APP_CERTIFICATE
+                || key == VERSION_CODE
+                || key == INSTALLER_NAME
+                || key == INSTALLER_CERTIFICATE
+                || key == PRE_INSTALLED;
     }
 }

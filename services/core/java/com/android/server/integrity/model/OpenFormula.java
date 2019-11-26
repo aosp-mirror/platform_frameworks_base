@@ -86,6 +86,8 @@ public final class OpenFormula implements Formula, Parcelable {
      *     for that operator (at least 2 for {@link #AND} and {@link #OR}, 1 for {@link #NOT}).
      */
     public OpenFormula(@Connector int connector, @NonNull List<Formula> formulas) {
+        checkArgument(isValidConnector(connector),
+                String.format("Unknown connector: %d", connector));
         validateFormulas(connector, formulas);
         this.mConnector = connector;
         this.mFormulas = Collections.unmodifiableList(formulas);
@@ -212,5 +214,11 @@ public final class OpenFormula implements Formula, Parcelable {
             default:
                 throw new IllegalArgumentException("Unknown connector " + connector);
         }
+    }
+
+    private static boolean isValidConnector(int connector) {
+        return connector == AND
+                || connector == OR
+                || connector == NOT;
     }
 }

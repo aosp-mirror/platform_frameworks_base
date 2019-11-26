@@ -43,7 +43,6 @@ public class RuleXmlParserTest {
     public void testXmlStream_validOpenFormula() throws Exception {
         Map<String, String> atomicFormulaAttrs = new HashMap<>();
         atomicFormulaAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        atomicFormulaAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         atomicFormulaAttrs.put("V", "com.app.test");
         String ruleXmlOpenFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
@@ -59,7 +58,8 @@ public class RuleXmlParserTest {
         RuleParser xmlParser = new RuleXmlParser();
         InputStream inputStream = new ByteArrayInputStream(ruleXmlOpenFormula.getBytes());
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.NOT, Collections.singletonList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(inputStream);
@@ -71,7 +71,6 @@ public class RuleXmlParserTest {
     public void testXmlString_validOpenFormula_notConnector() throws Exception {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         packageNameAttrs.put("V", "com.app.test");
         String ruleXmlOpenFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
@@ -86,7 +85,8 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.NOT, Collections.singletonList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
@@ -98,11 +98,9 @@ public class RuleXmlParserTest {
     public void testXmlString_validOpenFormula_andConnector() throws Exception {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         packageNameAttrs.put("V", "com.app.test");
         Map<String, String> appCertificateAttrs = new HashMap<>();
         appCertificateAttrs.put("K", String.valueOf(AtomicFormula.APP_CERTIFICATE));
-        appCertificateAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         appCertificateAttrs.put("V", "test_cert");
         String ruleXmlOpenFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
@@ -118,8 +116,10 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.AND, Arrays.asList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
@@ -131,11 +131,9 @@ public class RuleXmlParserTest {
     public void testXmlString_validOpenFormula_orConnector() throws Exception {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         packageNameAttrs.put("V", "com.app.test");
         Map<String, String> appCertificateAttrs = new HashMap<>();
         appCertificateAttrs.put("K", String.valueOf(AtomicFormula.APP_CERTIFICATE));
-        appCertificateAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         appCertificateAttrs.put("V", "test_cert");
         String ruleXmlOpenFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
@@ -151,8 +149,10 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.OR, Arrays.asList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, "test_cert",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
@@ -165,7 +165,6 @@ public class RuleXmlParserTest {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
         packageNameAttrs.put("V", "com.app.test");
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         String ruleXmlOpenFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
                     Collections.singletonMap("E", String.valueOf(Rule.DENY)),
@@ -179,7 +178,8 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(new OpenFormula(OpenFormula.NOT, Collections.singletonList(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"))),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false))),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlOpenFormula);
@@ -191,7 +191,6 @@ public class RuleXmlParserTest {
     public void testXmlString_invalidOpenFormula_invalidNumberOfFormulas() throws Exception {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         packageNameAttrs.put("V", "com.app.test");
         Map<String, String> versionCodeAttrs = new HashMap<>();
         versionCodeAttrs.put("K", String.valueOf(AtomicFormula.VERSION_CODE));
@@ -246,7 +245,6 @@ public class RuleXmlParserTest {
     public void testXmlString_invalidOpenFormula_invalidEffect() throws Exception {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         packageNameAttrs.put("V", "com.app.test");
         String ruleXmlOpenFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
@@ -271,7 +269,6 @@ public class RuleXmlParserTest {
     public void testXmlString_invalidOpenFormula_invalidTags() throws Exception {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         packageNameAttrs.put("V", "com.app.test");
         String ruleXmlOpenFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
@@ -297,7 +294,6 @@ public class RuleXmlParserTest {
     public void testXmlString_validAtomicFormula_stringValue() throws Exception {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         packageNameAttrs.put("V", "com.app.test");
         String ruleXmlAtomicFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
@@ -308,7 +304,8 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);
@@ -343,7 +340,6 @@ public class RuleXmlParserTest {
     public void testXmlString_validAtomicFormula_booleanValue() throws Exception {
         Map<String, String> preInstalledAttrs = new HashMap<>();
         preInstalledAttrs.put("K", String.valueOf(AtomicFormula.PRE_INSTALLED));
-        preInstalledAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         preInstalledAttrs.put("V", "true");
         String ruleXmlAtomicFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
@@ -367,7 +363,6 @@ public class RuleXmlParserTest {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
         packageNameAttrs.put("V", "com.app.test");
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         String ruleXmlAtomicFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
                     Collections.singletonMap("E", String.valueOf(Rule.DENY)),
@@ -377,7 +372,8 @@ public class RuleXmlParserTest {
                 + "</RL>";
         RuleParser xmlParser = new RuleXmlParser();
         Rule expectedRule = new Rule(
-                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test"),
+                new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, "com.app.test",
+                        /* isHashedValue= */ false),
                 Rule.DENY);
 
         List<Rule> rules = xmlParser.parse(ruleXmlAtomicFormula);
@@ -389,7 +385,6 @@ public class RuleXmlParserTest {
     public void testXmlString_invalidAtomicFormula_invalidAttribute() throws Exception {
         Map<String, String> packageNameAttrs = new HashMap<>();
         packageNameAttrs.put("BadKey", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        packageNameAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         packageNameAttrs.put("V", "com.app.test");
         String ruleXmlAtomicFormula = "<RL>"
                 + generateTagWithAttribute(/* tag= */ "R",
@@ -402,8 +397,50 @@ public class RuleXmlParserTest {
 
         assertExpectException(
                 RuleParseException.class,
-                /* expectedExceptionMessageRegex */ "Attribute not found: K",
+                /* expectedExceptionMessageRegex */ "Found unexpected key: -1",
                 () -> xmlParser.parse(ruleXmlAtomicFormula));
+    }
+
+    @Test
+    public void testXmlString_invalidRule_invalidAttribute() throws Exception {
+        Map<String, String> packageNameAttrs = new HashMap<>();
+        packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
+        packageNameAttrs.put("V", "com.app.test");
+        String ruleXmlAtomicFormula = "<RL>"
+                + generateTagWithAttribute(/* tag= */ "R",
+                    Collections.singletonMap("BadEffect", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
+                + generateTagWithAttribute(/* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                + "</R>"
+                + "</RL>";
+        RuleParser xmlParser = new RuleXmlParser();
+        assertExpectException(
+                RuleParseException.class,
+                /* expectedExceptionMessageRegex */ "Unknown effect: -1",
+                () -> xmlParser.parse(ruleXmlAtomicFormula));
+    }
+
+    @Test
+    public void testXmlString_invalidOpenFormula_invalidAttribute() throws Exception {
+        Map<String, String> packageNameAttrs = new HashMap<>();
+        packageNameAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
+        packageNameAttrs.put("V", "com.app.test");
+        String ruleXmlOpenFormula = "<RL>"
+                + generateTagWithAttribute(/* tag= */ "R",
+                    Collections.singletonMap("E", String.valueOf(Rule.DENY)),
+                        /* closed= */ false)
+                + generateTagWithAttribute(/* tag= */ "OF",
+                    Collections.singletonMap("BadConnector", String.valueOf(OpenFormula.NOT)),
+                        /* closed= */ false)
+                + generateTagWithAttribute(/* tag= */ "AF", packageNameAttrs, /* closed= */ true)
+                + "</OF>"
+                + "</R>"
+                + "</RL>";
+        RuleParser xmlParser = new RuleXmlParser();
+        assertExpectException(
+                RuleParseException.class,
+                /* expectedExceptionMessageRegex */ "Unknown connector: -1",
+                () -> xmlParser.parse(ruleXmlOpenFormula));
     }
 
     @Test
@@ -431,7 +468,6 @@ public class RuleXmlParserTest {
     public void testXmlString_withNoRuleList() {
         Map<String, String> atomicFormulaAttrs = new HashMap<>();
         atomicFormulaAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        atomicFormulaAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         atomicFormulaAttrs.put("V", "com.app.test");
         String ruleXmlWithNoRuleList = generateTagWithAttribute(/* tag= */ "R",
                     Collections.singletonMap("E", String.valueOf(Rule.DENY)),
@@ -454,7 +490,6 @@ public class RuleXmlParserTest {
     public void testXmlStream_withNoRuleList() {
         Map<String, String> atomicFormulaAttrs = new HashMap<>();
         atomicFormulaAttrs.put("K", String.valueOf(AtomicFormula.PACKAGE_NAME));
-        atomicFormulaAttrs.put("O", String.valueOf(AtomicFormula.EQ));
         atomicFormulaAttrs.put("V", "com.app.test");
         String ruleXmlWithNoRuleList = generateTagWithAttribute(/* tag= */ "R",
                     Collections.singletonMap("E", String.valueOf(Rule.DENY)),

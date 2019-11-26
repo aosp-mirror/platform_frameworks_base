@@ -36,9 +36,11 @@ public class RuleTest {
     private static final String PACKAGE_NAME = "com.test.app";
     private static final String APP_CERTIFICATE = "test_cert";
     private static final Formula PACKAGE_NAME_ATOMIC_FORMULA =
-            new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME);
+            new AtomicFormula.StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME,
+                    /* isHashedValue= */ false);
     private static final Formula APP_CERTIFICATE_ATOMIC_FORMULA =
-            new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE);
+            new AtomicFormula.StringAtomicFormula(AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE,
+                    /* isHashedValue= */ false);
 
     @Test
     public void testValidRule() {
@@ -105,5 +107,13 @@ public class RuleTest {
         Rule newRule = Rule.CREATOR.createFromParcel(p);
 
         assertEquals(newRule, rule);
+    }
+
+    @Test
+    public void testInvalidRule_invalidEffect() {
+        assertExpectException(
+                IllegalArgumentException.class,
+                /* expectedExceptionMessageRegex */ "Unknown effect: -1",
+                () -> new Rule(PACKAGE_NAME_ATOMIC_FORMULA, /* effect= */ -1));
     }
 }
