@@ -4535,8 +4535,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @param activeActivity the activity that is active or just completed pause action. We won't
      *                       resume if this activity is active.
      */
-    private boolean shouldPauseActivity(ActivityRecord activeActivity) {
-        return shouldMakeActive(activeActivity) && !isFocusable() && !isState(PAUSING, PAUSED);
+    @VisibleForTesting
+    boolean shouldPauseActivity(ActivityRecord activeActivity) {
+        return shouldMakeActive(activeActivity) && !isFocusable() && !isState(PAUSING, PAUSED)
+                // We will only allow pausing if results is null, otherwise it will cause this
+                // activity to resume before getting result
+                && (results == null);
     }
 
     /**
@@ -4606,9 +4610,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // Check if activity above is finishing now and this one becomes the topmost in task.
         final ActivityRecord activityAbove = task.getChildAt(positionInTask + 1);
-        if (activityAbove.finishing && results == null) {
-            // We will only allow making active if activity above wasn't launched for result.
-            // Otherwise it will cause this activity to resume before getting result.
+        if (activityAbove.finishing) {
             return true;
         }
         return false;
