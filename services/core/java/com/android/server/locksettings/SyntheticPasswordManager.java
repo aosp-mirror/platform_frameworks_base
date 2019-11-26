@@ -38,6 +38,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
@@ -139,17 +140,38 @@ public class SyntheticPasswordManager {
         public VerifyCredentialResponse gkResponse;
     }
 
+    /**
+     * This class represents the master cryptographic secret for a given user (a.k.a synthietic
+     * password). This secret is derived from the user's lockscreen credential or password escrow
+     * token. All other cryptograhic keys related to the user, including disk encryption key,
+     * keystore encryption key, gatekeeper auth key, vendor auth secret and others are directly
+     * derived from this token.
+     * <p>
+     * The master secret associated with an authentication token is retrievable from
+     * {@link AuthenticationToken#getSyntheticPassword()} and the authentication token can be
+     * reconsturcted from the master secret later with
+     * {@link AuthenticationToken#recreateDirectly(byte[])}. The first time an authentication token
+     * is needed, it should be created with {@link AuthenticationToken#create()} so that the
+     * necessary escrow data ({@link #mEncryptedEscrowSplit0} and {@link #mEscrowSplit1}) is
+     * properly initialized. The caller can either persist the (non-secret) esscrow data if escrow
+     * is required, or discard it to cryptograhically disable escrow. To support escrow, the caller
+     * needs to securely store the secret returned from
+     * {@link AuthenticationToken#getEscrowSecret()}, and at the time of use, load the escrow data
+     * back with {@link AuthenticationToken#setEscrowData(byte[], byte[])} and then re-create the
+     * master secret from the escrow secret via
+     * {@link AuthenticationToken#recreateFromEscrow(byte[])}.
+     */
     static class AuthenticationToken {
         private final byte mVersion;
-        /*
-         * Here is the relationship between all three fields:
-         * P0 and P1 are two randomly-generated blocks. P1 is stored on disk but P0 is not.
-         * syntheticPassword = hash(P0 || P1)
-         * E0 = P0 encrypted under syntheticPassword, stored on disk.
+        /**
+         * Here is the relationship between these fields:
+         * Generate two random block P0 and P1. P1 is recorded in mEscrowSplit1 but P0 is not.
+         * mSyntheticPassword = hash(P0 || P1)
+         * E0 = P0 encrypted under syntheticPassword, recoreded in mEncryptedEscrowSplit0.
          */
-        private @Nullable byte[] E0;
-        private @Nullable byte[] P1;
-        private @NonNull String syntheticPassword;
+        private @NonNull byte[] mSyntheticPassword;
+        private @Nullable byte[] mEncryptedEscrowSplit0;
+        private @Nullable byte[] mEscrowSplit1;
 
         AuthenticationToken(byte version) {
             mVersion = version;
@@ -157,11 +179,11 @@ public class SyntheticPasswordManager {
 
         private byte[] derivePassword(byte[] personalization) {
             if (mVersion == SYNTHETIC_PASSWORD_VERSION_V3) {
-                return (new SP800Derive(syntheticPassword.getBytes()))
+                return (new SP800Derive(mSyntheticPassword))
                     .withContext(personalization, PERSONALISATION_CONTEXT);
             } else {
                 return SyntheticPasswordCrypto.personalisedHash(personalization,
-                        syntheticPassword.getBytes());
+                        mSyntheticPassword);
             }
         }
 
@@ -185,32 +207,77 @@ public class SyntheticPasswordManager {
             return derivePassword(PERSONALIZATION_PASSWORD_HASH);
         }
 
-        private void initialize(byte[] P0, byte[] P1) {
-            this.P1 = P1;
-            this.syntheticPassword = String.valueOf(HexEncoding.encode(
-                    SyntheticPasswordCrypto.personalisedHash(
-                            PERSONALIZATION_SP_SPLIT, P0, P1)));
-            this.E0 = SyntheticPasswordCrypto.encrypt(this.syntheticPassword.getBytes(),
-                    PERSONALIZATION_E0, P0);
+        /**
+         * Assign escrow data to this auth token. This is a prerequisite to call
+         * {@link AuthenticationToken#recreateFromEscrow}.
+         */
+        public void setEscrowData(@Nullable byte[] encryptedEscrowSplit0,
+                @Nullable byte[] escrowSplit1) {
+            mEncryptedEscrowSplit0 = encryptedEscrowSplit0;
+            mEscrowSplit1 = escrowSplit1;
         }
 
-        public void recreate(byte[] secret) {
-            initialize(secret, this.P1);
+        /**
+         * Re-creates authentication token from escrow secret (escrowSplit0, returned from
+         * {@link AuthenticationToken#getEscrowSecret}). Escrow data needs to be loaded
+         * by {@link #setEscrowData} before calling this.
+         */
+        public void recreateFromEscrow(byte[] escrowSplit0) {
+            Preconditions.checkNotNull(mEscrowSplit1);
+            Preconditions.checkNotNull(mEncryptedEscrowSplit0);
+            recreate(escrowSplit0, mEscrowSplit1);
         }
 
-        protected static AuthenticationToken create() {
+        /**
+         * Re-creates authentication token from synthetic password directly.
+         */
+        public void recreateDirectly(byte[] syntheticPassword) {
+            this.mSyntheticPassword = Arrays.copyOf(syntheticPassword, syntheticPassword.length);
+        }
+
+        /**
+         * Generates a new random synthetic password with escrow data.
+         */
+        static AuthenticationToken create() {
             AuthenticationToken result = new AuthenticationToken(SYNTHETIC_PASSWORD_VERSION_V3);
-            result.initialize(secureRandom(SYNTHETIC_PASSWORD_LENGTH),
-                    secureRandom(SYNTHETIC_PASSWORD_LENGTH));
+            byte[] escrowSplit0 = secureRandom(SYNTHETIC_PASSWORD_LENGTH);
+            byte[] escrowSplit1 = secureRandom(SYNTHETIC_PASSWORD_LENGTH);
+            result.recreate(escrowSplit0, escrowSplit1);
+            byte[] encrypteEscrowSplit0 = SyntheticPasswordCrypto.encrypt(result.mSyntheticPassword,
+                    PERSONALIZATION_E0, escrowSplit0);
+            result.setEscrowData(encrypteEscrowSplit0,  escrowSplit1);
             return result;
         }
 
-        public byte[] computeP0() {
-            if (E0 == null) {
+        /**
+         * Re-creates synthetic password from both escrow splits. See javadoc for
+         * AuthenticationToken.mSyntheticPassword for details on what each block means.
+         */
+        private void recreate(byte[] escrowSplit0, byte[] escrowSplit1) {
+            mSyntheticPassword = String.valueOf(HexEncoding.encode(
+                    SyntheticPasswordCrypto.personalisedHash(
+                            PERSONALIZATION_SP_SPLIT, escrowSplit0, escrowSplit1))).getBytes();
+        }
+
+        /**
+         * Returns the escrow secret that can be used later to reconstruct this authentication
+         * token from {@link #recreateFromEscrow(byte[])}. Only possible if escrow is not disabled
+         * (encryptedEscrowSplit0 known).
+         */
+        public byte[] getEscrowSecret() {
+            if (mEncryptedEscrowSplit0 == null) {
                 return null;
             }
-            return SyntheticPasswordCrypto.decrypt(syntheticPassword.getBytes(), PERSONALIZATION_E0,
-                    E0);
+            return SyntheticPasswordCrypto.decrypt(mSyntheticPassword, PERSONALIZATION_E0,
+                    mEncryptedEscrowSplit0);
+        }
+
+        /**
+         * Returns the raw synthetic password that can be used later to reconstruct this
+         * authentication token from {@link #recreateDirectly(byte[])}
+         */
+        public byte[] getSyntheticPassword() {
+            return mSyntheticPassword;
         }
     }
 
@@ -537,14 +604,15 @@ public class SyntheticPasswordManager {
     }
 
     private boolean loadEscrowData(AuthenticationToken authToken, int userId) {
-        authToken.E0 = loadState(SP_E0_NAME, DEFAULT_HANDLE, userId);
-        authToken.P1 = loadState(SP_P1_NAME, DEFAULT_HANDLE, userId);
-        return authToken.E0 != null && authToken.P1 != null;
+        byte[] e0 = loadState(SP_E0_NAME, DEFAULT_HANDLE, userId);
+        byte[] p1 = loadState(SP_P1_NAME, DEFAULT_HANDLE, userId);
+        authToken.setEscrowData(e0,  p1);
+        return e0 != null && p1 != null;
     }
 
     private void saveEscrowData(AuthenticationToken authToken, int userId) {
-        saveState(SP_E0_NAME, authToken.E0, DEFAULT_HANDLE, userId);
-        saveState(SP_P1_NAME, authToken.P1, DEFAULT_HANDLE, userId);
+        saveState(SP_E0_NAME, authToken.mEncryptedEscrowSplit0, DEFAULT_HANDLE, userId);
+        saveState(SP_P1_NAME, authToken.mEscrowSplit1, DEFAULT_HANDLE, userId);
     }
 
     public boolean hasEscrowData(int userId) {
@@ -862,9 +930,9 @@ public class SyntheticPasswordManager {
             byte[] applicationId, long sid, int userId) {
         final byte[] secret;
         if (type == SYNTHETIC_PASSWORD_TOKEN_BASED) {
-            secret = authToken.computeP0();
+            secret = authToken.getEscrowSecret();
         } else {
-            secret = authToken.syntheticPassword.getBytes();
+            secret = authToken.getSyntheticPassword();
         }
         byte[] content = createSPBlob(getHandleName(handle), secret, applicationId, sid);
         byte[] blob = new byte[content.length + 1 + 1];
@@ -1058,9 +1126,9 @@ public class SyntheticPasswordManager {
                 Slog.e(TAG, "User is not escrowable: " + userId);
                 return null;
             }
-            result.recreate(secret);
+            result.recreateFromEscrow(secret);
         } else {
-            result.syntheticPassword = new String(secret);
+            result.recreateDirectly(secret);
         }
         if (version == SYNTHETIC_PASSWORD_VERSION_V1) {
             Slog.i(TAG, "Upgrade v1 SP blob for user " + userId + ", type = " + type);
