@@ -176,7 +176,7 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
                 KeyStore keyStore, IBinder operationToken) {
             KeyStoreCryptoOperationStreamer streamer = new KeyStoreCryptoOperationChunkedStreamer(
                     new KeyStoreCryptoOperationChunkedStreamer.MainDataStream(
-                            keyStore, operationToken));
+                            keyStore, operationToken), 0);
             if (isEncrypting()) {
                 return streamer;
             } else {
@@ -191,7 +191,7 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
         protected final KeyStoreCryptoOperationStreamer createAdditionalAuthenticationDataStreamer(
                 KeyStore keyStore, IBinder operationToken) {
             return new KeyStoreCryptoOperationChunkedStreamer(
-                    new AdditionalAuthenticationDataStream(keyStore, operationToken));
+                    new AdditionalAuthenticationDataStream(keyStore, operationToken), 0);
         }
 
         @Override
