@@ -207,6 +207,7 @@ cc_library_shared {
 
             static_libs: [
                 "libasync_safe",
+                "libdmabufinfo",
                 "libgif",
                 "libseccomp_policy",
                 "libgrallocusage",
