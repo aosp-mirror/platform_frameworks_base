@@ -88,7 +88,6 @@ import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
 import android.util.Log;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
@@ -4198,6 +4197,12 @@ public class DevicePolicyManager {
      * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to
      * be able to call this method; if it has not, a security exception will be thrown.
      *
+     * If the caller is a profile owner of an organization-owned managed profile, it may
+     * additionally call this method on the parent instance.
+     * Calling this method on the parent {@link DevicePolicyManager} instance would wipe the
+     * entire device, while calling it on the current profile instance would relinquish the device
+     * for personal use, removing the work profile and all policies set by the profile owner.
+     *
      * @param flags Bit mask of additional options: currently supported flags are
      *            {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA},
      *            {@link #WIPE_EUICC} and {@link #WIPE_SILENTLY}.
@@ -4205,10 +4210,7 @@ public class DevicePolicyManager {
      *            that uses {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA}
      */
     public void wipeData(int flags) {
-        throwIfParentInstance("wipeData");
-        final String wipeReasonForUser = mContext.getString(
-                R.string.work_profile_deleted_description_dpm_wipe);
-        wipeDataInternal(flags, wipeReasonForUser);
+        wipeDataInternal(flags, "");
     }
 
     /**
@@ -4221,6 +4223,12 @@ public class DevicePolicyManager {
      * The calling device admin must have requested {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to
      * be able to call this method; if it has not, a security exception will be thrown.
      *
+     * If the caller is a profile owner of an organization-owned managed profile, it may
+     * additionally call this method on the parent instance.
+     * Calling this method on the parent {@link DevicePolicyManager} instance would wipe the
+     * entire device, while calling it on the current profile instance would relinquish the device
+     * for personal use, removing the work profile and all policies set by the profile owner.
+     *
      * @param flags Bit mask of additional options: currently supported flags are
      *            {@link #WIPE_EXTERNAL_STORAGE}, {@link #WIPE_RESET_PROTECTION_DATA} and
      *            {@link #WIPE_EUICC}.
@@ -4232,7 +4240,6 @@ public class DevicePolicyManager {
      *            {@link #WIPE_SILENTLY} is set.
      */
     public void wipeData(int flags, @NonNull CharSequence reason) {
-        throwIfParentInstance("wipeData");
         Preconditions.checkNotNull(reason, "reason string is null");
         Preconditions.checkStringNotEmpty(reason, "reason string is empty");
         Preconditions.checkArgument((flags & WIPE_SILENTLY) == 0, "WIPE_SILENTLY cannot be set");
@@ -4250,7 +4257,7 @@ public class DevicePolicyManager {
     private void wipeDataInternal(int flags, @NonNull String wipeReasonForUser) {
         if (mService != null) {
             try {
-                mService.wipeDataWithReason(flags, wipeReasonForUser);
+                mService.wipeDataWithReason(flags, wipeReasonForUser, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9285,6 +9292,12 @@ public class DevicePolicyManager {
      * <li>{@link #setTrustAgentConfiguration}</li>
      * <li>{@link #getRequiredStrongAuthTimeout}</li>
      * <li>{@link #setRequiredStrongAuthTimeout}</li>
+     * </ul>
+     *
+     * <p>The following methods can be called by the profile owner of a managed profile
+     * on an organization-owned device:
+     * <ul>
+     * <li>{@link #wipeData}</li>
      * </ul>
      *
      * @return a new instance of {@link DevicePolicyManager} that acts on the parent profile.

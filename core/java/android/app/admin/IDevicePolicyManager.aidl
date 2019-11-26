@@ -102,7 +102,7 @@ interface IDevicePolicyManager {
 
     void lockNow(int flags, boolean parent);
 
-    void wipeDataWithReason(int flags, String wipeReasonForUser);
+    void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent);
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin(int userHandle);
