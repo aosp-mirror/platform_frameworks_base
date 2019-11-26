@@ -1626,7 +1626,6 @@ filegroup {
         "core/java/android/os/RegistrantList.java",
         "core/java/android/os/Registrant.java",
         "core/java/android/util/LocalLog.java",
-        "core/java/android/util/Slog.java",
         "core/java/android/util/TimeUtils.java",
         "core/java/com/android/internal/os/SomeArgs.java",
         "core/java/com/android/internal/util/DumpUtils.java",
