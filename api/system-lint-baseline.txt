@@ -65,7 +65,7 @@ MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent
 MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #1:
     
 MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #2:
-    
+
 MissingNullability: android.net.wifi.rtt.RangingRequest.Builder#addResponder(android.net.wifi.rtt.ResponderConfig):
     
 MissingNullability: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context) parameter #0:
@@ -181,6 +181,8 @@ MutableBareField: android.net.wifi.WifiConfiguration#saePasswordId:
     Bare field saePasswordId must be marked final, or moved behind accessors if mutable
 MutableBareField: android.net.wifi.WifiConfiguration#shared:
     Bare field shared must be marked final, or moved behind accessors if mutable
+MutableBareField: android.net.wifi.WifiScanner.ScanSettings#type:
+    Bare field type must be marked final, or moved behind accessors if mutable
 
 
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
