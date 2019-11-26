@@ -48,9 +48,9 @@ public final class WifiBatteryStats implements Parcelable {
     private long[] mTimeInStateMillis =
         new long[BatteryStats.NUM_WIFI_STATES];
     private long[] mTimeInSupplicantStateMillis =
-        new long[BatteryStats.NUM_WIFI_SIGNAL_STRENGTH_BINS];
-    private long[] mTimeInRxSignalStrengthLevelMillis =
         new long[BatteryStats.NUM_WIFI_SUPPL_STATES];
+    private long[] mTimeInRxSignalStrengthLevelMillis =
+        new long[BatteryStats.NUM_WIFI_SIGNAL_STRENGTH_BINS];
     private long mMonitoredRailChargeConsumedMaMillis = 0;
 
     public static final @NonNull Parcelable.Creator<WifiBatteryStats> CREATOR =
