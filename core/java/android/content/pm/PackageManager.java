@@ -5989,9 +5989,28 @@ public abstract class PackageManager {
      *
      * @param packageName The name of the package to query
      * @throws IllegalArgumentException if the given package name is not installed
+     *
+     * @deprecated use {@link #getInstallSourceInfo(String)} instead
      */
+    @Deprecated
     @Nullable
     public abstract String getInstallerPackageName(@NonNull String packageName);
+
+    /**
+     * Retrieves information about how a package was installed or updated.
+     * <p>
+     * If the calling application does not hold the INSTALL_PACKAGES permission then
+     * the result will always return {@code null} from
+     * {@link InstallSourceInfo#getOriginatingPackageName()}.
+     *
+     * @param packageName The name of the package to query
+     * @throws NameNotFoundException if the given package name is not installed
+     */
+    @NonNull
+    public InstallSourceInfo getInstallSourceInfo(@NonNull String packageName)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException("getInstallSourceInfo not implemented");
+    }
 
     /**
      * Attempts to clear the user data directory of an application.
