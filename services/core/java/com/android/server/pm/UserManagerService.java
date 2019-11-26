@@ -351,6 +351,7 @@ public class UserManagerService extends IUserManager.Stub {
      * User restrictions set by {@link com.android.server.devicepolicy.DevicePolicyManagerService}
      * that should be applied to all users, including guests. Only non-empty restriction bundles are
      * stored.
+     * The key is the user id of the user whom the restriction originated from.
      */
     @GuardedBy("mRestrictionsLock")
     private final SparseArray<Bundle> mDevicePolicyGlobalUserRestrictions = new SparseArray<>();
@@ -364,6 +365,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * User restrictions set by {@link com.android.server.devicepolicy.DevicePolicyManagerService}
      * for each user. Only non-empty restriction bundles are stored.
+     * The key is the user id of the user whom the restriction originated from.
      */
     @GuardedBy("mRestrictionsLock")
     private final SparseArray<Bundle> mDevicePolicyLocalUserRestrictions = new SparseArray<>();
@@ -1633,7 +1635,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * See {@link UserManagerInternal#setDevicePolicyUserRestrictions}
      */
-    private void setDevicePolicyUserRestrictionsInner(@UserIdInt int userId,
+    private void setDevicePolicyUserRestrictionsInner(@UserIdInt int originatingUserId,
             @Nullable Bundle restrictions,
             @UserManagerInternal.OwnerType int restrictionOwnerType) {
         final Bundle global = new Bundle();
@@ -1647,16 +1649,16 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mRestrictionsLock) {
             // Update global and local restrictions if they were changed.
             globalChanged = updateRestrictionsIfNeededLR(
-                    userId, global, mDevicePolicyGlobalUserRestrictions);
+                    originatingUserId, global, mDevicePolicyGlobalUserRestrictions);
             localChanged = updateRestrictionsIfNeededLR(
-                    userId, local, mDevicePolicyLocalUserRestrictions);
+                    originatingUserId, local, mDevicePolicyLocalUserRestrictions);
 
             if (restrictionOwnerType == UserManagerInternal.OWNER_TYPE_DEVICE_OWNER) {
                 // Remember the global restriction owner userId to be able to make a distinction
                 // in getUserRestrictionSource on who set local policies.
-                mDeviceOwnerUserId = userId;
+                mDeviceOwnerUserId = originatingUserId;
             } else {
-                if (mDeviceOwnerUserId == userId) {
+                if (mDeviceOwnerUserId == originatingUserId) {
                     // When profile owner sets restrictions it passes null global bundle and we
                     // reset global restriction owner userId.
                     // This means this user used to have DO, but now the DO is gone and the user
@@ -1666,15 +1668,16 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (DBG) {
-            Log.d(LOG_TAG, "setDevicePolicyUserRestrictions: userId=" + userId
-                            + " global=" + global + (globalChanged ? " (changed)" : "")
-                            + " local=" + local + (localChanged ? " (changed)" : "")
+            Log.d(LOG_TAG, "setDevicePolicyUserRestrictions: "
+                    + " originatingUserId=" + originatingUserId
+                    + " global=" + global + (globalChanged ? " (changed)" : "")
+                    + " local=" + local + (localChanged ? " (changed)" : "")
             );
         }
         // Don't call them within the mRestrictionsLock.
         synchronized (mPackagesLock) {
             if (localChanged || globalChanged) {
-                writeUserLP(getUserDataNoChecks(userId));
+                writeUserLP(getUserDataNoChecks(originatingUserId));
             }
         }
 
@@ -1682,7 +1685,7 @@ public class UserManagerService extends IUserManager.Stub {
             if (globalChanged) {
                 applyUserRestrictionsForAllUsersLR();
             } else if (localChanged) {
-                applyUserRestrictionsLR(userId);
+                applyUserRestrictionsLR(originatingUserId);
             }
         }
     }
@@ -4510,9 +4513,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     private class LocalService extends UserManagerInternal {
         @Override
-        public void setDevicePolicyUserRestrictions(@UserIdInt int userId,
-                @Nullable Bundle restrictions, @OwnerType int restrictionOwnerType) {
-            UserManagerService.this.setDevicePolicyUserRestrictionsInner(userId,
+        public void setDevicePolicyUserRestrictions(@UserIdInt int originatingUserId,
+                @Nullable Bundle restrictions,
+                @OwnerType int restrictionOwnerType) {
+            UserManagerService.this.setDevicePolicyUserRestrictionsInner(originatingUserId,
                     restrictions, restrictionOwnerType);
         }
 

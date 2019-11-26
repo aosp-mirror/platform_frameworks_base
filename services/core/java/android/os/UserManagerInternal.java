@@ -57,7 +57,7 @@ public abstract class UserManagerInternal {
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to set
      * restrictions enforced by the user.
      *
-     * @param userId target user id for the local restrictions.
+     * @param originatingUserId user id of the user where the restriction originated.
      * @param restrictions a bundle of user restrictions.
      * @param restrictionOwnerType determines which admin {@code userId} corresponds to.
      *             The admin can be either
@@ -70,8 +70,8 @@ public abstract class UserManagerInternal {
      *             otherwise it will be applied just on the current user.
      * @see OwnerType
      */
-    public abstract void setDevicePolicyUserRestrictions(int userId, @Nullable Bundle restrictions,
-            @OwnerType int restrictionOwnerType);
+    public abstract void setDevicePolicyUserRestrictions(int originatingUserId,
+            @Nullable Bundle restrictions, @OwnerType int restrictionOwnerType);
 
     /**
      * Returns the "base" user restrictions.

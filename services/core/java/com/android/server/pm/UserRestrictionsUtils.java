@@ -411,6 +411,13 @@ public class UserRestrictionsUtils {
     }
 
     /**
+     * @return true if a restriction is settable by profile owner of an organization owned device.
+     */
+    public static boolean canProfileOwnerOfOrganizationOwnedDeviceChange(String restriction) {
+        return PROFILE_OWNER_ORGANIZATION_OWNED_GLOBAL_RESTRICTIONS.contains(restriction);
+    }
+
+    /**
      * Returns the user restrictions that default to {@code true} for device owners.
      * These user restrictions are local, though. ie only for the device owner's user id.
      */
