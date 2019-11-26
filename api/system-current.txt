@@ -1283,7 +1283,7 @@ package android.app.usage {
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void unregisterAppUsageLimitObserver(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void unregisterAppUsageObserver(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void unregisterUsageSessionObserver(int);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(String, long, android.os.UserHandle);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(String, long, android.os.UserHandle);
     field public static final String EXTRA_OBSERVER_ID = "android.app.usage.extra.OBSERVER_ID";
     field public static final String EXTRA_TIME_LIMIT = "android.app.usage.extra.TIME_LIMIT";
     field public static final String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
@@ -6256,6 +6256,11 @@ package android.os {
   }
 
   public class PowerWhitelistManager {
+    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(@NonNull String, long);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long whitelistAppTemporarilyForEvent(@NonNull String, int, @NonNull String);
+    field public static final int EVENT_MMS = 2; // 0x2
+    field public static final int EVENT_SMS = 1; // 0x1
+    field public static final int EVENT_UNSPECIFIED = 0; // 0x0
   }
 
   public class RecoverySystem {
@@ -6384,6 +6389,7 @@ package android.os {
   }
 
   public final class UserHandle implements android.os.Parcelable {
+    method @NonNull public static String formatUid(int);
     method public static int getAppId(int);
     method public int getIdentifier();
     method @Deprecated public boolean isOwner();

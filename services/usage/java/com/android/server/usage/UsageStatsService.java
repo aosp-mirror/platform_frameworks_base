@@ -62,12 +62,10 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -150,7 +148,6 @@ public class UsageStatsService extends SystemService implements
     UserManager mUserManager;
     PackageManager mPackageManager;
     PackageManagerInternal mPackageManagerInternal;
-    IDeviceIdleController mDeviceIdleController;
     // Do not use directly. Call getDpmInternal() instead
     DevicePolicyManagerInternal mDpmInternal;
 
@@ -264,9 +261,6 @@ public class UsageStatsService extends SystemService implements
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             // initialize mDpmInternal
             getDpmInternal();
-
-            mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
-                    ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
 
             if (ENABLE_KERNEL_UPDATES && KERNEL_COUNTER_FILE.exists()) {
                 try {
@@ -1623,16 +1617,6 @@ public class UsageStatsService extends SystemService implements
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-        }
-
-        @Override
-        public void whitelistAppTemporarily(String packageName, long duration, int userId)
-                throws RemoteException {
-            StringBuilder reason = new StringBuilder(32);
-            reason.append("from:");
-            UserHandle.formatUid(reason, Binder.getCallingUid());
-            mDeviceIdleController.addPowerSaveTempWhitelistApp(packageName, duration, userId,
-                    reason.toString());
         }
 
         @Override

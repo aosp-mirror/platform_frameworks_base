@@ -1662,7 +1662,17 @@ public class DeviceIdleController extends SystemService
             return isPowerSaveWhitelistAppInternal(name);
         }
 
-        @Override public void addPowerSaveTempWhitelistApp(String packageName, long duration,
+        @Override
+        public long whitelistAppTemporarily(String packageName, int userId, String reason)
+                throws RemoteException {
+            // At least 10 seconds.
+            long duration = Math.max(10_000L, mConstants.MAX_TEMP_APP_WHITELIST_DURATION / 2);
+            addPowerSaveTempWhitelistAppChecked(packageName, duration, userId, reason);
+            return duration;
+        }
+
+        @Override
+        public void addPowerSaveTempWhitelistApp(String packageName, long duration,
                 int userId, String reason) throws RemoteException {
             addPowerSaveTempWhitelistAppChecked(packageName, duration, userId, reason);
         }
