@@ -1361,7 +1361,11 @@ public final class Settings {
             if (tagName.equals(TAG_ITEM)) {
                 PreferredActivity pa = new PreferredActivity(parser);
                 if (pa.mPref.getParseError() == null) {
-                    editPreferredActivitiesLPw(userId).addFilter(pa);
+                    final PreferredIntentResolver resolver = editPreferredActivitiesLPw(userId);
+                    ArrayList<PreferredActivity> pal = resolver.findFilters(pa);
+                    if (pal == null || pal.size() == 0) {
+                        resolver.addFilter(pa);
+                    }
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Error in package manager settings: <preferred-activity> "
