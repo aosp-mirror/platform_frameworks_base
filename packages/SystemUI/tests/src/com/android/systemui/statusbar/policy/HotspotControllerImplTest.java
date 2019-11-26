@@ -77,7 +77,6 @@ public class HotspotControllerImplTest extends SysuiTestCase {
                 any(WifiManager.SoftApCallback.class));
 
         mController = new HotspotControllerImpl(mContext, new Handler(mLooper.getLooper()));
-        mController.handleSetListening(true);
     }
 
     @Test
