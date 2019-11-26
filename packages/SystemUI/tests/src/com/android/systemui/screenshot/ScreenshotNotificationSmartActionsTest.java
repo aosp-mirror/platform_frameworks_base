@@ -175,7 +175,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.image = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         data.iconSize = 10;
         data.finisher = null;
-        data.onEditReady = null;
+        data.mActionsReadyListener = null;
         data.previewWidth = 10;
         data.previewheight = 10;
         SaveImageInBackgroundTask task = new SaveImageInBackgroundTask(mContext, data,

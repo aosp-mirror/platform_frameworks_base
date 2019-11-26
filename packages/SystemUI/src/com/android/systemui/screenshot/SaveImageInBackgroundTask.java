@@ -434,8 +434,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 R.drawable.ic_screenshot_edit,
                 r.getString(com.android.internal.R.string.screenshot_edit), editAction);
         notificationBuilder.addAction(editActionBuilder.build());
-        if (editAction != null && mParams.onEditReady != null) {
-            mParams.onEditReady.apply(editAction);
+        if (mParams.mActionsReadyListener != null) {
+            mParams.mActionsReadyListener.onActionsReady(shareAction, editAction);
         }
 
         // Create a delete action for the notification
@@ -472,7 +472,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             GlobalScreenshot.notifyScreenshotError(mParams.context, mNotificationManager,
                     mParams.errorMsgResId);
         } else {
-            if (mParams.onEditReady != null) {
+            if (mParams.mActionsReadyListener != null) {
                 // Cancel the "saving screenshot" notification
                 mNotificationManager.cancel(
                         SystemMessageProto.SystemMessage.NOTE_GLOBAL_SCREENSHOT);

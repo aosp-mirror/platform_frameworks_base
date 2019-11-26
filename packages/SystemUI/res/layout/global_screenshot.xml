@@ -39,4 +39,13 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         android:pointerIcon="crosshair"/>
+    <LinearLayout
+        android:id="@+id/global_screenshot_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:gravity="center"
+        android:paddingVertical="@dimen/screenshot_action_container_padding"
+        android:visibility="gone"
+        android:background="@drawable/action_chip_container_background"/>
 </FrameLayout>
