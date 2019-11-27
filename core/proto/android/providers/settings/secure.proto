@@ -219,6 +219,12 @@ message SecureSettingsProto {
     }
     optional Gesture gesture = 74;
 
+    message GestureNavigation {
+        optional SettingProto back_gesture_inset_scale_left = 1 [(android.privacy).dest = DEST_AUTOMATIC];
+        optional SettingProto back_gesture_inset_scale_right = 2 [(android.privacy).dest = DEST_AUTOMATIC];
+    }
+    optional GestureNavigation gesture_navigation = 77;
+
     optional SettingProto immersive_mode_confirmations = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Incall {
@@ -316,6 +322,7 @@ message SecureSettingsProto {
     optional SettingProto multi_press_timeout = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     optional SettingProto navigation_mode = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     message NfcPayment {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -564,5 +571,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 77;
+    // Next tag = 78;
 }
