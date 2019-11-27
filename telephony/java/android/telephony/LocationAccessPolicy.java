@@ -206,8 +206,8 @@ public final class LocationAccessPolicy {
         if (hasManifestPermission) {
             // Only check the app op if the app has the permission.
             int appOpMode = context.getSystemService(AppOpsManager.class)
-                    .noteOpNoThrow(permissionToCheck, query.callingUid, query.callingPackage,
-                            query.callingFeatureId, null);
+                    .noteOpNoThrow(AppOpsManager.permissionToOpCode(permissionToCheck),
+                            query.callingUid, query.callingPackage, query.callingFeatureId, null);
             if (appOpMode == AppOpsManager.MODE_ALLOWED) {
                 // If the app did everything right, return without logging.
                 return LocationPermissionResult.ALLOWED;
@@ -265,7 +265,7 @@ public final class LocationAccessPolicy {
         // Do the check for fine, then for coarse.
         if (query.minSdkVersionForFine < Integer.MAX_VALUE) {
             LocationPermissionResult resultForFine = checkAppLocationPermissionHelper(
-                    context, query, AppOpsManager.OPSTR_FINE_LOCATION);
+                    context, query, Manifest.permission.ACCESS_FINE_LOCATION);
             if (resultForFine != null) {
                 return resultForFine;
             }
@@ -273,7 +273,7 @@ public final class LocationAccessPolicy {
 
         if (query.minSdkVersionForCoarse < Integer.MAX_VALUE) {
             LocationPermissionResult resultForCoarse = checkAppLocationPermissionHelper(
-                    context, query, AppOpsManager.OPSTR_COARSE_LOCATION);
+                    context, query, Manifest.permission.ACCESS_COARSE_LOCATION);
             if (resultForCoarse != null) {
                 return resultForCoarse;
             }
