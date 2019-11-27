@@ -227,6 +227,26 @@ public class SnoozeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testUpdateAfterCancel() throws Exception {
+        // snooze a notification
+        NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.snooze(r , 1000);
+
+        // cancel the notification
+        mSnoozeHelper.cancel(UserHandle.USER_SYSTEM, false);
+
+        // update the notification
+        r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
+        mSnoozeHelper.update(UserHandle.USER_SYSTEM, r);
+
+        // verify callback is called when repost (snooze is expired)
+        verify(mCallback, never()).repost(anyInt(), any(NotificationRecord.class));
+        mSnoozeHelper.repost(r.getKey(), UserHandle.USER_SYSTEM);
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r);
+        assertFalse(r.isCanceled);
+    }
+
+    @Test
     public void testGetSnoozedByUser() throws Exception {
         NotificationRecord r = getNotificationRecord("pkg", 1, "one", UserHandle.SYSTEM);
         NotificationRecord r2 = getNotificationRecord("pkg", 2, "two", UserHandle.SYSTEM);
