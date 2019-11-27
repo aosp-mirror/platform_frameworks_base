@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Falta l\'aplicació d\'administració del perfil professional o està malmesa. Com a conseqüència, s\'han suprimit el teu perfil professional i les dades relacionades. Contacta amb l\'administrador per obtenir ajuda."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"El teu perfil professional ja no està disponible en aquest dispositiu"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Has intentat introduir la contrasenya massa vegades"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"El dispositiu està gestionat"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"La teva organització gestiona aquest dispositiu i és possible que supervisi el trànsit de xarxa. Toca per obtenir més informació."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"El contingut del dispositiu s\'esborrarà"</string>
@@ -1116,10 +1118,8 @@
     <string name="loading" msgid="3138021523725055037">"S\'està carregant…"</string>
     <string name="capital_on" msgid="2770685323900821829">"SÍ"</string>
     <string name="capital_off" msgid="7443704171014626777">"NO"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"seleccionat"</string>
+    <string name="not_checked" msgid="7972320087569023342">"no seleccionat"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completa l\'acció mitjançant"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Completa l\'acció amb %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Completa l\'acció"</string>
@@ -2004,6 +2004,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Commuta Pantalla dividida"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Pantalla de bloqueig"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Captura de pantalla"</string>
-    <!-- no translation found for accessibility_freeform_caption (7873194416838321119) -->
-    <skip />
+    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"Aplicació <xliff:g id="APP_NAME">%1$s</xliff:g> a la finestra emergent."</string>
 </resources>

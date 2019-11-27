@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Laneko profila administratzeko aplikazioa falta da edo hondatuta dago. Ondorioz, ezabatu egin dira laneko profila bera eta harekin erlazionatutako datuak. Laguntza lortzeko, jarri administratzailearekin harremanetan."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Laneko profila ez dago erabilgarri gailu honetan"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Gehiegitan saiatu zara pasahitza idazten"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"Jabeak kudeatzen du gailua"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Erakundeak kudeatzen du gailua eta baliteke sareko trafikoa gainbegiratzea. Sakatu hau xehetasunak ikusteko."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Gailuko datuak ezabatu egingo dira"</string>
@@ -1116,10 +1118,8 @@
     <string name="loading" msgid="3138021523725055037">"Kargatzen…"</string>
     <string name="capital_on" msgid="2770685323900821829">"AKTIBATUTA"</string>
     <string name="capital_off" msgid="7443704171014626777">"DESAKTIBATUTA"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"markatuta"</string>
+    <string name="not_checked" msgid="7972320087569023342">"markatu gabe"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Gauzatu ekintza hau erabilita:"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Osatu ekintza %1$s erabiliz"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Osatu ekintza"</string>

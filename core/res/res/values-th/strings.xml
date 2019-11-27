@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"แอปผู้ดูแลระบบโปรไฟล์งานไม่มีอยู่หรือเสียหาย ระบบจึงทำการลบโปรไฟล์งานและข้อมูลที่เกี่ยวข้องของคุณออก โปรดติดต่อผู้ดูแลระบบเพื่อรับความช่วยเหลือ"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"โปรไฟล์งานของคุณไม่สามารถใช้ในอุปกรณ์นี้อีกต่อไป"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ลองป้อนรหัสผ่านหลายครั้งเกินไป"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"อุปกรณ์มีการจัดการ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"องค์กรของคุณจัดการอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย แตะเพื่อดูรายละเอียด"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ระบบจะลบข้อมูลในอุปกรณ์ของคุณ"</string>
@@ -1116,10 +1118,8 @@
     <string name="loading" msgid="3138021523725055037">"กำลังโหลด..."</string>
     <string name="capital_on" msgid="2770685323900821829">"เปิด"</string>
     <string name="capital_off" msgid="7443704171014626777">"ปิด"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"เลือกไว้"</string>
+    <string name="not_checked" msgid="7972320087569023342">"ยังไม่เลือก"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ทำงานให้เสร็จโดยใช้"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"ดำเนินการให้เสร็จสมบูรณ์โดยใช้ %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ทำงานให้เสร็จสิ้น"</string>
@@ -2004,6 +2004,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"เปิด/ปิดการแบ่งหน้าจอ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"หน้าจอล็อก"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ภาพหน้าจอ"</string>
-    <!-- no translation found for accessibility_freeform_caption (7873194416838321119) -->
-    <skip />
+    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"แอป <xliff:g id="APP_NAME">%1$s</xliff:g> ในหน้าต่างป๊อปอัป"</string>
 </resources>

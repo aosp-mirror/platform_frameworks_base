@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Die Admin-App für das Arbeitsprofil fehlt oder ist beschädigt. Daher wurden dein Arbeitsprofil und alle zugehörigen Daten gelöscht. Bitte wende dich für weitere Hilfe an deinen Administrator."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Dein Arbeitsprofil ist auf diesem Gerät nicht mehr verfügbar"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Zu viele falsche Passworteingaben"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dies ist ein verwaltetes Gerät"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Deine Organisation verwaltet dieses Gerät und überprüft unter Umständen den Netzwerkverkehr. Tippe hier, um weitere Informationen zu erhalten."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Die Daten auf deinem Gerät werden gelöscht."</string>
@@ -1116,10 +1118,8 @@
     <string name="loading" msgid="3138021523725055037">"Wird geladen…"</string>
     <string name="capital_on" msgid="2770685323900821829">"AN"</string>
     <string name="capital_off" msgid="7443704171014626777">"AUS"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"aktiviert"</string>
+    <string name="not_checked" msgid="7972320087569023342">"deaktiviert"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Aktion durchführen mit"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Aktion mit %1$s abschließen"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Abschließen"</string>
@@ -1539,7 +1539,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Browser starten?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Anruf annehmen?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Immer"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Auf \"Immer öffnen\" festlegen"</string>
+    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Immer damit öffnen"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Nur diesmal"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Einstellungen"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"Das Arbeitsprofil wird von %1$s nicht unterstützt."</string>
