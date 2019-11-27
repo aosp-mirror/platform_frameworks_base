@@ -206,7 +206,14 @@ abstract class ApexManager {
      *
      * @return {@code true} upon success, {@code false} if any remote exception occurs
      */
-    abstract boolean abortActiveSession();
+    abstract boolean revertActiveSessions();
+
+    /**
+     * Abandons the staged session with the given sessionId.
+     *
+     * @return {@code true} upon success, {@code false} if any remote exception occurs
+     */
+    abstract boolean abortStagedSession(int sessionId) throws PackageManagerException;
 
     /**
      * Uninstalls given {@code apexPackage}.
@@ -485,13 +492,28 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean abortActiveSession() {
+        boolean revertActiveSessions() {
             try {
-                mApexService.abortActiveSession();
+                mApexService.revertActiveSessions();
                 return true;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
                 return false;
+            }
+        }
+
+        @Override
+        boolean abortStagedSession(int sessionId) throws PackageManagerException {
+            try {
+                mApexService.abortStagedSession(sessionId);
+                return true;
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Unable to contact apexservice", re);
+                return false;
+            } catch (Exception e) {
+                throw new PackageManagerException(
+                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        "Failed to abort staged session : " + e.getMessage());
             }
         }
 
@@ -678,7 +700,12 @@ abstract class ApexManager {
         }
 
         @Override
-        boolean abortActiveSession() {
+        boolean revertActiveSessions() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        boolean abortStagedSession(int sessionId) throws PackageManagerException {
             throw new UnsupportedOperationException();
         }
 

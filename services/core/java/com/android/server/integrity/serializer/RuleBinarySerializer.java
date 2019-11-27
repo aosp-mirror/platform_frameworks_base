@@ -16,7 +16,7 @@
 
 package com.android.server.integrity.serializer;
 
-import com.android.server.integrity.model.Rule;
+import android.content.integrity.Rule;
 
 import java.io.OutputStream;
 import java.util.List;

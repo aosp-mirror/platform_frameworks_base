@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.android.server.input.InputManagerService;
+import com.android.server.wm.EmbeddedWindowController.EmbeddedWindow;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicReference;
@@ -90,20 +91,39 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         int windowPid = INVALID_PID;
         //TODO(b/141764879) Limit scope of wm lock when input calls notifyANR
         synchronized (mService.mGlobalLock) {
+
+            // Check if we can blame a window
             if (token != null) {
                 windowState = mService.mInputToWindowMap.get(token);
                 if (windowState != null) {
                     activity = windowState.mActivityRecord;
                     windowPid = windowState.mSession.mPid;
-                } else {
-                    // Check if this is an embedded window and if so get the embedded app pid
-                    windowPid = mService.mEmbeddedWindowController.getOwnerPid(token);
-                    WindowState hostWindowState =
-                            mService.mEmbeddedWindowController.getHostWindow(token);
-                    aboveSystem = isWindowAboveSystem(hostWindowState);
+                    // Figure out whether this window is layered above system windows.
+                    // We need to do this here to help the activity manager know how to
+                    // layer its ANR dialog.
+                    aboveSystem = isWindowAboveSystem(windowState);
                 }
             }
 
+            // Check if we can blame an embedded window
+            if (token != null && windowState == null) {
+                EmbeddedWindow embeddedWindow = mService.mEmbeddedWindowController.get(token);
+                if (embeddedWindow != null) {
+                    windowPid = embeddedWindow.mOwnerPid;
+                    WindowState hostWindowState = embeddedWindow.mHostWindowState;
+                    if (hostWindowState == null) {
+                        // The embedded window has no host window and we cannot easily determine
+                        // its z order. Try to place the anr dialog as high as possible.
+                        aboveSystem = true;
+                    } else {
+                        aboveSystem = isWindowAboveSystem(hostWindowState);
+                    }
+                }
+            }
+
+            // Check if we can blame an activity. If we don't have an activity to blame, pull out
+            // the token passed in via input application handle. This can happen if there are no
+            // focused windows but input dispatcher knows the focused app.
             if (activity == null && inputApplicationHandle != null) {
                 activity = ActivityRecord.forTokenLocked(inputApplicationHandle.token);
             }
@@ -112,10 +132,6 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                 Slog.i(TAG_WM, "Input event dispatching timed out "
                         + "sending to " + windowState.mAttrs.getTitle()
                         + ".  Reason: " + reason);
-                // Figure out whether this window is layered above system windows.
-                // We need to do this here to help the activity manager know how to
-                // layer its ANR dialog.
-                aboveSystem = isWindowAboveSystem(windowState);
             } else if (activity != null) {
                 Slog.i(TAG_WM, "Input event dispatching timed out "
                         + "sending to application " + activity.stringName

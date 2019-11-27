@@ -19,6 +19,7 @@ package android.net.wifi;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
@@ -87,37 +88,6 @@ public class WifiConfigurationTest {
         parcelWW.recycle();
 
         assertArrayEquals(bytes, rebytes);
-    }
-
-    @Test
-    public void testNetworkSelectionStatusCopy() {
-        NetworkSelectionStatus networkSelectionStatus = new NetworkSelectionStatus();
-        networkSelectionStatus.setNotRecommended(true);
-
-        NetworkSelectionStatus copy = new NetworkSelectionStatus();
-        copy.copy(networkSelectionStatus);
-
-        assertEquals(networkSelectionStatus.isNotRecommended(), copy.isNotRecommended());
-    }
-
-    @Test
-    public void testNetworkSelectionStatusParcel() {
-        NetworkSelectionStatus networkSelectionStatus = new NetworkSelectionStatus();
-        networkSelectionStatus.setNotRecommended(true);
-
-        Parcel parcelW = Parcel.obtain();
-        networkSelectionStatus.writeToParcel(parcelW);
-        byte[] bytes = parcelW.marshall();
-        parcelW.recycle();
-
-        Parcel parcelR = Parcel.obtain();
-        parcelR.unmarshall(bytes, 0, bytes.length);
-        parcelR.setDataPosition(0);
-
-        NetworkSelectionStatus copy = new NetworkSelectionStatus();
-        copy.readFromParcel(parcelR);
-
-        assertEquals(networkSelectionStatus.isNotRecommended(), copy.isNotRecommended());
     }
 
     @Test
@@ -347,5 +317,19 @@ public class WifiConfigurationTest {
         config.allowedKeyManagement.clear();
         config.allowedKeyManagement.set(KeyMgmt.NONE);
         assertEquals(mSsid + KeyMgmt.strings[KeyMgmt.NONE], config.getSsidAndSecurityTypeString());
+    }
+
+    /**
+     * Ensure that the {@link NetworkSelectionStatus.DisableReasonInfo}s are populated in
+     * {@link NetworkSelectionStatus#DISABLE_REASON_INFOS} for reason codes from 0 to
+     * {@link NetworkSelectionStatus#NETWORK_SELECTION_DISABLED_MAX} - 1.
+     */
+    @Test
+    public void testNetworkSelectionDisableReasonInfosPopulated() {
+        assertEquals(NetworkSelectionStatus.NETWORK_SELECTION_DISABLED_MAX,
+                NetworkSelectionStatus.DISABLE_REASON_INFOS.size());
+        for (int i = 0; i < NetworkSelectionStatus.NETWORK_SELECTION_DISABLED_MAX; i++) {
+            assertNotNull(NetworkSelectionStatus.DISABLE_REASON_INFOS.get(i));
+        }
     }
 }

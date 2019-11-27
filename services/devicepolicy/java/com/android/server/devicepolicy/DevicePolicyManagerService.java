@@ -5568,6 +5568,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void enforceProfileOwnerOfCorpOwnedDevice(ActiveAdmin admin) {
+        if (!isProfileOwnerOfOrganizationOwnedDevicte(admin)) {
+            throw new SecurityException(String.format("Provided admin %s is either not a profile "
+                    + "owner or not on a corporate-owned device.", admin));
+        }
+    }
+
     @Override
     public boolean approveCaCert(String alias, int userId, boolean approval) {
         enforceManageUsers();
@@ -6613,27 +6620,83 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void wipeDataWithReason(int flags, String wipeReasonForUser) {
+    public void wipeDataWithReason(int flags, String wipeReasonForUser,
+            boolean calledOnParentInstance) {
         if (!mHasFeature) {
             return;
         }
-        Preconditions.checkStringNotEmpty(wipeReasonForUser, "wipeReasonForUser is null or empty");
+
         enforceFullCrossUsersPermission(mInjector.userHandleGetCallingUserId());
 
         final ActiveAdmin admin;
         synchronized (getLockObject()) {
             admin = getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_WIPE_DATA);
         }
+
+        if (admin == null) {
+            throw new SecurityException(String.format("No active admin for user %d",
+                    mInjector.userHandleGetCallingUserId()));
+        }
+
+        boolean calledByProfileOwnerOnOrgOwnedDevice =
+                isProfileOwnerOfOrganizationOwnedDevicte(admin);
+
+        if (calledOnParentInstance && !calledByProfileOwnerOnOrgOwnedDevice) {
+            throw new SecurityException("Wiping the entire device can only be done by a profile"
+                    + "owner on organization-owned device.");
+        }
+
+        if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
+            if (!isDeviceOwner(admin) && !calledByProfileOwnerOnOrgOwnedDevice) {
+                throw new SecurityException(
+                        "Only device owners or proflie owners of organization-owned device"
+                        + " can set WIPE_RESET_PROTECTION_DATA");
+            }
+        }
+
+        if (TextUtils.isEmpty(wipeReasonForUser)) {
+            if (calledByProfileOwnerOnOrgOwnedDevice && !calledOnParentInstance) {
+                wipeReasonForUser = mContext.getString(R.string.device_ownership_relinquished);
+            } else {
+                wipeReasonForUser = mContext.getString(
+                        R.string.work_profile_deleted_description_dpm_wipe);
+            }
+        }
+
+        int userId = admin.getUserHandle().getIdentifier();
+        if (calledByProfileOwnerOnOrgOwnedDevice) {
+            // When wipeData is called on the parent instance, it implies wiping the entire device.
+            if (calledOnParentInstance) {
+                userId = UserHandle.USER_SYSTEM;
+            } else {
+                // when wipeData is _not_ called on the parent instance, it implies relinquishing
+                // control over the device, wiping only the work profile. So the user restriction
+                // on profile removal needs to be removed first.
+
+                final long ident = mInjector.binderClearCallingIdentity();
+                try {
+                    // Clear restriction as user.
+                    mUserManager.setUserRestriction(
+                            UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, false,
+                            UserHandle.SYSTEM);
+                } finally {
+                    mInjector.binderRestoreCallingIdentity(ident);
+                }
+            }
+        }
+
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.WIPE_DATA_WITH_REASON)
                 .setAdmin(admin.info.getComponent())
                 .setInt(flags)
                 .write();
-        String internalReason = "DevicePolicyManager.wipeDataWithReason() from "
-                + admin.info.getComponent().flattenToShortString();
+        String internalReason = String.format(
+                "DevicePolicyManager.wipeDataWithReason() from %s, organization-owned? %s",
+                admin.info.getComponent().flattenToShortString(),
+                calledByProfileOwnerOnOrgOwnedDevice);
+
         wipeDataNoLock(
-                admin.info.getComponent(), flags, internalReason, wipeReasonForUser,
-                admin.getUserHandle().getIdentifier());
+                admin.info.getComponent(), flags, internalReason, wipeReasonForUser, userId);
     }
 
     private void wipeDataNoLock(ComponentName admin, int flags, String internalReason,
@@ -6657,10 +6720,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             if ((flags & WIPE_RESET_PROTECTION_DATA) != 0) {
-                if (!isDeviceOwner(admin, userId)) {
-                    throw new SecurityException(
-                            "Only device owner admins can set WIPE_RESET_PROTECTION_DATA");
-                }
                 PersistentDataBlockManager manager = (PersistentDataBlockManager)
                         mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
                 if (manager != null) {
@@ -7950,8 +8009,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean canProfileOwnerAccessDeviceIds(int userId) {
         synchronized (getLockObject()) {
-            return mOwners.canProfileOwnerAccessDeviceIds(userId);
+            return mOwners.isProfileOwnerOfOrganizationOwnedDevice(userId);
         }
+    }
+
+    /**
+     * Returns true if the provided {@code admin} is a profile owner and the profile is marked
+     * as organization-owned.
+     * The {@code admin} parameter must be obtained by the service by calling
+     * {@code getActiveAdminForCallerLocked} or one of the similar variants, not caller-supplied
+     * input.
+     */
+    private boolean isProfileOwnerOfOrganizationOwnedDevicte(@Nullable ActiveAdmin admin) {
+        if (admin == null) {
+            return false;
+        }
+
+        final int adminUserId = admin.getUserHandle().getIdentifier();
+
+        if (!isProfileOwner(admin.info.getComponent(), adminUserId)) {
+            Slog.w(LOG_TAG, String.format("%s is not profile owner of user %d",
+                    admin.info.getComponent(), adminUserId));
+            return false;
+        }
+
+        if (!canProfileOwnerAccessDeviceIds(adminUserId)) {
+            Slog.w(LOG_TAG, String.format("Profile owner of user %d does not own the device.",
+                    adminUserId));
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -12573,14 +12661,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return false;
     }
 
-    private boolean hasGrantProfileOwnerDevcieIdAccessPermission() {
+    private boolean hasMarkProfileOwnerOnOrganizationOwnedDevicePermission() {
         return mContext.checkCallingPermission(
-                android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS)
+                permission.MARK_DEVICE_ORGANIZATION_OWNED)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
-    public void grantDeviceIdsAccessToProfileOwner(ComponentName who, int userId) {
+    public void markProfileOwnerOnOrganizationOwnedDevice(ComponentName who, int userId) {
         // As the caller is the system, it must specify the component name of the profile owner
         // as a sanity / safety check.
         Preconditions.checkNotNull(who);
@@ -12589,16 +12677,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
 
-        // Only privileged system apps can grant the Profile Owner access to Device IDs.
-        if (!(isCallerWithSystemUid() || isAdb()
-                || hasGrantProfileOwnerDevcieIdAccessPermission())) {
+        // Only adb or system apps with the right permission can mark a profile owner on
+        // organization-owned device.
+        if (!(isAdb() || hasMarkProfileOwnerOnOrganizationOwnedDevicePermission())) {
             throw new SecurityException(
-                    "Only the system can grant Device IDs access for a profile owner.");
+                    "Only the system can mark a profile owner of organization-owned device.");
         }
 
-        if (isAdb() && hasIncompatibleAccountsOrNonAdbNoLock(userId, who)) {
-            throw new SecurityException(
-                    "Can only be called from ADB if the device has no accounts.");
+        if (isAdb()) {
+            if (hasIncompatibleAccountsOrNonAdbNoLock(userId, who)) {
+                throw new SecurityException(
+                        "Can only be called from ADB if the device has no accounts.");
+            }
+        } else {
+            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
+                throw new IllegalStateException(
+                        "Cannot mark profile owner as managing an organization-owned device after"
+                                + " set-up");
+            }
         }
 
         // Grant access under lock.
@@ -12611,12 +12707,31 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         who.flattenToString(), userId));
             }
 
-            Slog.i(LOG_TAG, String.format("Granting Device ID access to %s, for user %d",
-                        who.flattenToString(), userId));
+            Slog.i(LOG_TAG, String.format(
+                    "Marking %s as profile owner on organization-owned device for user %d",
+                    who.flattenToString(), userId));
 
-            // setProfileOwnerCanAccessDeviceIds will trigger writing of the profile owner
+            // First, set restriction on removing the profile.
+            final long ident = mInjector.binderClearCallingIdentity();
+            try {
+                // Clear restriction as user.
+                UserHandle parentUser = mUserManager.getProfileParent(UserHandle.of(userId));
+                if (!parentUser.isSystem()) {
+                    throw new IllegalStateException(
+                            String.format("Only the profile owner of a managed profile on the"
+                                + " primary user can be granted access to device identifiers, not"
+                                + " on user %d", parentUser.getIdentifier()));
+                }
+
+                mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, true,
+                        parentUser);
+            } finally {
+                mInjector.binderRestoreCallingIdentity(ident);
+            }
+
+            // markProfileOwnerOfOrganizationOwnedDevice will trigger writing of the profile owner
             // data, no need to do it manually.
-            mOwners.setProfileOwnerCanAccessDeviceIds(userId);
+            mOwners.markProfileOwnerOfOrganizationOwnedDevice(userId);
         }
     }
 

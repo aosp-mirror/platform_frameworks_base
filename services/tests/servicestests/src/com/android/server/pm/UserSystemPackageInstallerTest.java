@@ -16,10 +16,9 @@
 
 package com.android.server.pm;
 
-import static android.content.pm.UserInfo.FLAG_FULL;
-import static android.content.pm.UserInfo.FLAG_GUEST;
-import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
-import static android.content.pm.UserInfo.FLAG_SYSTEM;
+import static android.os.UserManager.USER_TYPE_FULL_GUEST;
+import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
+import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 
 import static com.android.server.pm.UserSystemPackageInstaller.PACKAGE_WHITELIST_MODE_PROP;
 import static com.android.server.pm.UserSystemPackageInstaller.USER_TYPE_PACKAGE_WHITELIST_MODE_DEVICE_DEFAULT;
@@ -98,7 +97,8 @@ public class UserSystemPackageInstallerTest {
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         UserManagerService ums = new UserManagerService(InstrumentationRegistry.getContext());
 
-        mUserSystemPackageInstaller = new UserSystemPackageInstaller(ums);
+        ArrayMap<String, UserTypeDetails> userTypes = UserTypeFactory.getUserTypes();
+        mUserSystemPackageInstaller = new UserSystemPackageInstaller(ums, userTypes);
         mContext = InstrumentationRegistry.getTargetContext();
     }
 
@@ -130,9 +130,10 @@ public class UserSystemPackageInstallerTest {
             public ArrayMap<String, Set<String>> getAndClearPackageToUserTypeWhitelist() {
                 ArrayMap<String, Set<String>> r = new ArrayMap<>();
                 r.put("com.android.package1", new ArraySet<>(Arrays.asList(
-                        "PROFILE", "SYSTEM", "GUEST", "FULL", "invalid-garbage1")));
+                        "PROFILE", "SYSTEM", USER_TYPE_FULL_GUEST, "invalid-garbage1")));
                 r.put("com.android.package2", new ArraySet<>(Arrays.asList(
-                        "MANAGED_PROFILE")));
+                        USER_TYPE_PROFILE_MANAGED)));
+                r.put("com.android.package3", new ArraySet<>(Arrays.asList("FULL")));
                 return r;
             }
 
@@ -140,18 +141,46 @@ public class UserSystemPackageInstallerTest {
             public ArrayMap<String, Set<String>> getAndClearPackageToUserTypeBlacklist() {
                 ArrayMap<String, Set<String>> r = new ArrayMap<>();
                 r.put("com.android.package1", new ArraySet<>(Arrays.asList(
-                        "FULL", "RESTRICTED", "invalid-garbage2")));
+                        USER_TYPE_PROFILE_MANAGED, "invalid-garbage2")));
+                // com.android.package2 has nothing blacklisted
+                r.put("com.android.package3", new ArraySet<>(Arrays.asList("SYSTEM")));
                 return r;
             }
         };
 
-        final ArrayMap<String, Integer> expectedOutput = getNewPackageToWhitelistedFlagsMap();
-        expectedOutput.put("com.android.package1",
-                UserInfo.FLAG_PROFILE | FLAG_SYSTEM | FLAG_GUEST);
-        expectedOutput.put("com.android.package2",
-                UserInfo.FLAG_MANAGED_PROFILE);
+        final ArrayMap<String, UserTypeDetails> userTypes = UserTypeFactory.getUserTypes();
+        // Determine the expected userTypeBitSets based on getUserTypeMask.
+        long expectedUserTypeBitSet1 = 0;
+        expectedUserTypeBitSet1
+                |= mUserSystemPackageInstaller.getUserTypeMask(USER_TYPE_FULL_GUEST);
+        for (int i = 0; i < userTypes.size(); i++) {
+            final String userType = userTypes.keyAt(i);
+            final UserTypeDetails details = userTypes.valueAt(i);
+            if (details.isSystem() || details.isProfile()) {
+                expectedUserTypeBitSet1 |= mUserSystemPackageInstaller.getUserTypeMask(userType);
+            }
+        }
+        expectedUserTypeBitSet1
+                &= ~mUserSystemPackageInstaller.getUserTypeMask(USER_TYPE_PROFILE_MANAGED);
 
-        final ArrayMap<String, Integer> actualOutput =
+        final long expectedUserTypeBitSet2 =
+                mUserSystemPackageInstaller.getUserTypeMask(USER_TYPE_PROFILE_MANAGED);
+
+        long expectedUserTypeBitSet3 = 0;
+        for (int i = 0; i < userTypes.size(); i++) {
+            final String userType = userTypes.keyAt(i);
+            final UserTypeDetails details = userTypes.valueAt(i);
+            if (details.isFull() && !details.isSystem()) {
+                expectedUserTypeBitSet3 |= mUserSystemPackageInstaller.getUserTypeMask(userType);
+            }
+        }
+
+        final ArrayMap<String, Long> expectedOutput = getNewPackageToWhitelistedBitSetMap();
+        expectedOutput.put("com.android.package1", expectedUserTypeBitSet1);
+        expectedOutput.put("com.android.package2", expectedUserTypeBitSet2);
+        expectedOutput.put("com.android.package3", expectedUserTypeBitSet3);
+
+        final ArrayMap<String, Long> actualOutput =
                 mUserSystemPackageInstaller.determineWhitelistedPackagesForUserTypes(sysConfig);
 
         assertEquals("Incorrect package-to-user mapping.", expectedOutput, actualOutput);
@@ -189,11 +218,12 @@ public class UserSystemPackageInstallerTest {
             }
         };
 
-        final ArrayMap<String, Integer> expectedOutput = getNewPackageToWhitelistedFlagsMap();
-        expectedOutput.put("com.android.package3", 0);
-        expectedOutput.put("com.android.package4", 0);
+        final ArrayMap<String, Long> expectedOutput = getNewPackageToWhitelistedBitSetMap();
+        expectedOutput.put("com.android.package2", 0L);
+        expectedOutput.put("com.android.package3", 0L);
+        expectedOutput.put("com.android.package4", 0L);
 
-        final ArrayMap<String, Integer> actualOutput =
+        final ArrayMap<String, Long> actualOutput =
                 mUserSystemPackageInstaller.determineWhitelistedPackagesForUserTypes(sysConfig);
 
         assertEquals("Incorrect package-to-user mapping.", expectedOutput, actualOutput);
@@ -209,16 +239,15 @@ public class UserSystemPackageInstallerTest {
         final String packageName3 = "pkg3"; // whitelisted for a different user type
         final String packageName4 = "pkg4"; // not whitelisted nor blacklisted at all
 
-        final ArrayMap<String, Integer> pkgFlgMap = new ArrayMap<>(); // Whitelist: pkgs per flags
-        pkgFlgMap.put(packageName1, FLAG_FULL);
-        pkgFlgMap.put(packageName2, 0);
-        pkgFlgMap.put(packageName3, FLAG_MANAGED_PROFILE);
+        // Whitelist: user type bitset for each pkg (for the test, all that matters is 0 vs non-0).
+        final ArrayMap<String, Long> pkgBitSetMap = new ArrayMap<>();
+        pkgBitSetMap.put(packageName1, 0b01L);
+        pkgBitSetMap.put(packageName2, 0L);
+        pkgBitSetMap.put(packageName3, 0b10L);
 
-        // Whitelist of pkgs for this specific user, i.e. subset of pkgFlagMap for this user.
+        // Whitelist of pkgs for this specific user, i.e. subset of pkgBitSetMap for this user.
         final Set<String> userWhitelist = new ArraySet<>();
         userWhitelist.add(packageName1);
-
-        final UserSystemPackageInstaller uspi = new UserSystemPackageInstaller(null, pkgFlgMap);
 
         final PackageParser.Package pkg1 = new PackageParser.Package(packageName1);
         final PackageParser.Package pkg2 = new PackageParser.Package(packageName2);
@@ -228,26 +257,38 @@ public class UserSystemPackageInstallerTest {
         // No implicit whitelist, so only install pkg1.
         boolean implicit = false;
         boolean isSysUser = false;
-        assertTrue(uspi.shouldInstallPackage(pkg1, pkgFlgMap, userWhitelist, implicit, isSysUser));
-        assertFalse(uspi.shouldInstallPackage(pkg2, pkgFlgMap, userWhitelist, implicit, isSysUser));
-        assertFalse(uspi.shouldInstallPackage(pkg3, pkgFlgMap, userWhitelist, implicit, isSysUser));
-        assertFalse(uspi.shouldInstallPackage(pkg4, pkgFlgMap, userWhitelist, implicit, isSysUser));
+        assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg1, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+        assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg2, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+        assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg3, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+        assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg4, pkgBitSetMap, userWhitelist, implicit, isSysUser));
 
         // Use implicit whitelist, so install pkg1 and pkg4
         implicit = true;
         isSysUser = false;
-        assertTrue(uspi.shouldInstallPackage(pkg1, pkgFlgMap, userWhitelist, implicit, isSysUser));
-        assertFalse(uspi.shouldInstallPackage(pkg2, pkgFlgMap, userWhitelist, implicit, isSysUser));
-        assertFalse(uspi.shouldInstallPackage(pkg3, pkgFlgMap, userWhitelist, implicit, isSysUser));
-        assertTrue(uspi.shouldInstallPackage(pkg4, pkgFlgMap, userWhitelist, implicit, isSysUser));
+        assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg1, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+        assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg2, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+        assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg3, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+        assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg4, pkgBitSetMap, userWhitelist, implicit, isSysUser));
 
         // For user 0 specifically, we always implicitly whitelist.
         implicit = false;
         isSysUser = true;
-        assertTrue(uspi.shouldInstallPackage(pkg1, pkgFlgMap, userWhitelist, implicit, isSysUser));
-        assertFalse(uspi.shouldInstallPackage(pkg2, pkgFlgMap, userWhitelist, implicit, isSysUser));
-        assertFalse(uspi.shouldInstallPackage(pkg3, pkgFlgMap, userWhitelist, implicit, isSysUser));
-        assertTrue(uspi.shouldInstallPackage(pkg4, pkgFlgMap, userWhitelist, implicit, isSysUser));
+        assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg1, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+        assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg2, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+        assertFalse(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg3, pkgBitSetMap, userWhitelist, implicit, isSysUser));
+        assertTrue(UserSystemPackageInstaller.shouldInstallPackage(
+                pkg4, pkgBitSetMap, userWhitelist, implicit, isSysUser));
     }
 
     /**
@@ -256,31 +297,38 @@ public class UserSystemPackageInstallerTest {
      */
     @Test
     public void testGetWhitelistedPackagesForUserType() {
-        final String packageName1 = "pkg1"; // whitelisted for FULL
+        final String[] sortedUserTypes = new String[]{"type_a", "type_b", "type_c", "type_d"};
+        final String nameOfTypeA = sortedUserTypes[0];
+        final String nameOfTypeB = sortedUserTypes[1];
+        final String nameOfTypeC = sortedUserTypes[2];
+        final long maskOfTypeA = 0b0001L;
+        final long maskOfTypeC = 0b0100L;
+
+        final String packageName1 = "pkg1"; // whitelisted for user type A
         final String packageName2 = "pkg2"; // blacklisted whenever whitelisted
-        final String packageName3 = "pkg3"; // whitelisted for SYSTEM
-        final String packageName4 = "pkg4"; // whitelisted for FULL
+        final String packageName3 = "pkg3"; // whitelisted for user type C
+        final String packageName4 = "pkg4"; // whitelisted for user type A
 
-        final ArrayMap<String, Integer> pkgFlagMap = new ArrayMap<>(); // Whitelist: pkgs per flags
-        pkgFlagMap.put(packageName1, FLAG_FULL);
-        pkgFlagMap.put(packageName2, 0);
-        pkgFlagMap.put(packageName3, FLAG_SYSTEM);
-        pkgFlagMap.put(packageName4, FLAG_FULL);
+        final ArrayMap<String, Long> pkgBitSetMap = new ArrayMap<>(); // Whitelist: bitset per pkg
+        pkgBitSetMap.put(packageName1, maskOfTypeA);
+        pkgBitSetMap.put(packageName2, 0L);
+        pkgBitSetMap.put(packageName3, maskOfTypeC);
+        pkgBitSetMap.put(packageName4, maskOfTypeA);
 
-        // Whitelist of pkgs for this specific user, i.e. subset of pkgFlagMap for this user.
-        final Set<String> expectedUserWhitelist = new ArraySet<>();
-        expectedUserWhitelist.add(packageName1);
+        UserSystemPackageInstaller uspi =
+                new UserSystemPackageInstaller(null, pkgBitSetMap, sortedUserTypes);
 
-        UserSystemPackageInstaller uspi = new UserSystemPackageInstaller(null, pkgFlagMap);
-
-        Set<String> output = uspi.getWhitelistedPackagesForUserType(FLAG_FULL);
+        Set<String> output = uspi.getWhitelistedPackagesForUserType(nameOfTypeA);
         assertEquals("Whitelist for FULL is the wrong size", 2, output.size());
-        assertTrue("Whitelist for FULL doesn't contain pkg1", output.contains(packageName1));
-        assertTrue("Whitelist for FULL doesn't contain pkg4", output.contains(packageName4));
+        assertTrue("Whitelist for A doesn't contain pkg1", output.contains(packageName1));
+        assertTrue("Whitelist for A doesn't contain pkg4", output.contains(packageName4));
 
-        output = uspi.getWhitelistedPackagesForUserType(FLAG_SYSTEM);
-        assertEquals("Whitelist for SYSTEM is the wrong size", 1, output.size());
-        assertTrue("Whitelist for SYSTEM doesn't contain pkg1", output.contains(packageName3));
+        output = uspi.getWhitelistedPackagesForUserType(nameOfTypeB);
+        assertEquals("Whitelist for B is the wrong size", 0, output.size());
+
+        output = uspi.getWhitelistedPackagesForUserType(nameOfTypeC);
+        assertEquals("Whitelist for C is the wrong size", 1, output.size());
+        assertTrue("Whitelist for C doesn't contain pkg1", output.contains(packageName3));
     }
 
     /**
@@ -291,22 +339,23 @@ public class UserSystemPackageInstallerTest {
      */
     @Test
     public void testPackagesForCreateUser_full() {
-        final int userFlags = UserInfo.FLAG_FULL;
+        final String userTypeToCreate = USER_TYPE_FULL_SECONDARY;
+        final long userTypeMask = mUserSystemPackageInstaller.getUserTypeMask(userTypeToCreate);
         setUserTypePackageWhitelistMode(USER_TYPE_PACKAGE_WHITELIST_MODE_ENFORCE);
         PackageManager pm = mContext.getPackageManager();
 
         final SystemConfig sysConfig = new SystemConfigTestClass(true);
-        final ArrayMap<String, Integer> packageMap =
+        final ArrayMap<String, Long> packageMap =
                 mUserSystemPackageInstaller.determineWhitelistedPackagesForUserTypes(sysConfig);
         final Set<String> expectedPackages = new ArraySet<>(packageMap.size());
         for (int i = 0; i < packageMap.size(); i++) {
-            if ((userFlags & packageMap.valueAt(i)) != 0) {
+            if ((userTypeMask & packageMap.valueAt(i)) != 0) {
                 expectedPackages.add(packageMap.keyAt(i));
             }
         }
 
         final UserManager um = UserManager.get(mContext);
-        final UserInfo user = um.createUser("Test User", userFlags);
+        final UserInfo user = um.createUser("Test User", userTypeToCreate, 0);
         assertNotNull(user);
         mRemoveUsers.add(user.id);
 
@@ -387,10 +436,11 @@ public class UserSystemPackageInstallerTest {
         }
     }
 
-    private ArrayMap<String, Integer> getNewPackageToWhitelistedFlagsMap() {
-        final ArrayMap<String, Integer> pkgFlagMap = new ArrayMap<>();
-        // "android" is always treated as whitelisted, regardless of the xml file.
-        pkgFlagMap.put("android", FLAG_SYSTEM | UserInfo.FLAG_FULL | UserInfo.FLAG_PROFILE);
-        return pkgFlagMap;
+    /** @see UserSystemPackageInstaller#mWhitelistedPackagesForUserTypes */
+    private ArrayMap<String, Long> getNewPackageToWhitelistedBitSetMap() {
+        final ArrayMap<String, Long> pkgBitSetMap = new ArrayMap<>();
+        // "android" is always treated as whitelisted for all types, regardless of the xml file.
+        pkgBitSetMap.put("android", ~0L);
+        return pkgBitSetMap;
     }
 }

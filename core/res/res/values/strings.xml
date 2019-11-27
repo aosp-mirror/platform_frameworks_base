@@ -404,6 +404,8 @@
     <!-- Content text for a notification. The Title of the notification is "Work profile deleted",
         This indicates that a work profile has been deleted because the maximum failed password attempts as been reached. [CHAR LIMIT=NONE]-->
     <string name="work_profile_deleted_reason_maximum_password_failure">Too many password attempts</string>
+    <!-- Shows up as the reason for the work profile deletion when the admin of an organization-owend device relinquishes it. [CHAR LIMIT=NONE] -->
+    <string name="device_ownership_relinquished">Admin relinquished device for personal use</string>
 
     <!-- Content title for a notification. This notification indicates that the device is managed
          and network logging was activated by a device owner. [CHAR LIMIT=NONE]-->

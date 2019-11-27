@@ -662,7 +662,6 @@ public class SettingsBackupTest {
                  Settings.Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
                  Settings.Secure.NUM_ROTATION_SUGGESTIONS_ACCEPTED,
                  Settings.Secure.ODI_CAPTIONS_ENABLED,
-                 Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
                  Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
                  Settings.Secure.PAYMENT_SERVICE_SEARCH_URI,
                  Settings.Secure.PRINT_SERVICE_SEARCH_URI,
@@ -685,6 +684,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE,
                  Settings.Secure.SEARCH_SOURCE_TIMEOUT_MILLIS,
                  Settings.Secure.SEARCH_THREAD_KEEPALIVE_SECONDS,
+                 Settings.Secure.SECURE_FRP_MODE,
                  Settings.Secure.SEARCH_WEB_RESULTS_OVERRIDE_LIMIT,
                  Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
                  Settings.Secure.SELECTED_SPELL_CHECKER,  // Intentionally removed in Q

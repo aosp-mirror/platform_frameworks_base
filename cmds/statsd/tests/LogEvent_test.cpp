@@ -17,6 +17,8 @@
 #include <log/log_event_list.h>
 #include "frameworks/base/cmds/statsd/src/atoms.pb.h"
 #include "frameworks/base/core/proto/android/stats/launcher/launcher.pb.h"
+#include <stats_event.h>
+
 
 #ifdef __ANDROID__
 
@@ -25,8 +27,276 @@ namespace os {
 namespace statsd {
 
 using std::string;
+using std::vector;
 using util::ProtoOutputStream;
 using util::ProtoReader;
+
+
+#ifdef NEW_ENCODING_SCHEME
+
+Field getField(int32_t tag, const vector<int32_t>& pos, int32_t depth, const vector<bool>& last) {
+    Field f(tag, (int32_t*)pos.data(), depth);
+
+    // For loop starts at 1 because the last field at depth 0 is not decorated.
+    for (int i = 1; i < depth; i++) {
+        if (last[i]) f.decorateLastPos(i);
+    }
+
+    return f;
+}
+
+TEST(LogEventTest, TestPrimitiveParsing) {
+    struct stats_event* event = stats_event_obtain();
+    stats_event_set_atom_id(event, 100);
+    stats_event_write_int32(event, 10);
+    stats_event_write_int64(event, 0x123456789);
+    stats_event_write_float(event, 2.0);
+    stats_event_write_bool(event, true);
+    stats_event_build(event);
+
+    size_t size;
+    uint8_t* buf = stats_event_get_buffer(event, &size);
+
+    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    EXPECT_TRUE(logEvent.isValid());
+    EXPECT_EQ(100, logEvent.GetTagId());
+
+    const vector<FieldValue>& values = logEvent.getValues();
+    EXPECT_EQ(4, values.size());
+
+    const FieldValue& int32Item = values[0];
+    Field expectedField = getField(100, {1, 1, 1}, 0, {false, false, false});
+    EXPECT_EQ(expectedField, int32Item.mField);
+    EXPECT_EQ(Type::INT, int32Item.mValue.getType());
+    EXPECT_EQ(10, int32Item.mValue.int_value);
+
+    const FieldValue& int64Item = values[1];
+    expectedField = getField(100, {2, 1, 1}, 0, {false, false, false});
+    EXPECT_EQ(expectedField, int64Item.mField);
+    EXPECT_EQ(Type::LONG, int64Item.mValue.getType());
+    EXPECT_EQ(0x123456789, int64Item.mValue.long_value);
+
+    const FieldValue& floatItem = values[2];
+    expectedField = getField(100, {3, 1, 1}, 0, {false, false, false});
+    EXPECT_EQ(expectedField, floatItem.mField);
+    EXPECT_EQ(Type::FLOAT, floatItem.mValue.getType());
+    EXPECT_EQ(2.0, floatItem.mValue.float_value);
+
+    const FieldValue& boolItem = values[3];
+    expectedField = getField(100, {4, 1, 1}, 0, {true, false, false});
+    EXPECT_EQ(expectedField, boolItem.mField);
+    EXPECT_EQ(Type::INT, boolItem.mValue.getType()); // FieldValue does not support boolean type
+    EXPECT_EQ(1, boolItem.mValue.int_value);
+
+    stats_event_release(event);
+}
+
+
+TEST(LogEventTest, TestStringAndByteArrayParsing) {
+    struct stats_event* event = stats_event_obtain();
+    stats_event_set_atom_id(event, 100);
+    string str = "test";
+    stats_event_write_string8(event, str.c_str());
+    stats_event_write_byte_array(event, (uint8_t*)str.c_str(), str.length());
+    stats_event_build(event);
+
+    size_t size;
+    uint8_t* buf = stats_event_get_buffer(event, &size);
+
+    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    EXPECT_TRUE(logEvent.isValid());
+    EXPECT_EQ(100, logEvent.GetTagId());
+
+    const vector<FieldValue>& values = logEvent.getValues();
+    EXPECT_EQ(2, values.size());
+
+    const FieldValue& stringItem = values[0];
+    Field expectedField = getField(100, {1, 1, 1}, 0, {false, false, false});
+    EXPECT_EQ(expectedField, stringItem.mField);
+    EXPECT_EQ(Type::STRING, stringItem.mValue.getType());
+    EXPECT_EQ(str, stringItem.mValue.str_value);
+
+    const FieldValue& storageItem = values[1];
+    expectedField = getField(100, {2, 1, 1}, 0, {true, false, false});
+    EXPECT_EQ(expectedField, storageItem.mField);
+    EXPECT_EQ(Type::STORAGE, storageItem.mValue.getType());
+    vector<uint8_t> expectedValue = {'t', 'e', 's', 't'};
+    EXPECT_EQ(expectedValue, storageItem.mValue.storage_value);
+
+    stats_event_release(event);
+}
+
+TEST(LogEventTest, TestEmptyString) {
+    struct stats_event* event = stats_event_obtain();
+    stats_event_set_atom_id(event, 100);
+    string empty = "";
+    stats_event_write_string8(event, empty.c_str());
+    stats_event_build(event);
+
+    size_t size;
+    uint8_t* buf = stats_event_get_buffer(event, &size);
+
+    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    EXPECT_TRUE(logEvent.isValid());
+    EXPECT_EQ(100, logEvent.GetTagId());
+
+    const vector<FieldValue>& values = logEvent.getValues();
+    EXPECT_EQ(1, values.size());
+
+    const FieldValue& item = values[0];
+    Field expectedField = getField(100, {1, 1, 1}, 0, {true, false, false});
+    EXPECT_EQ(expectedField, item.mField);
+    EXPECT_EQ(Type::STRING, item.mValue.getType());
+    EXPECT_EQ(empty, item.mValue.str_value);
+
+    stats_event_release(event);
+}
+
+TEST(LogEventTest, TestByteArrayWithNullCharacter) {
+    struct stats_event* event = stats_event_obtain();
+    stats_event_set_atom_id(event, 100);
+    uint8_t message[] = {'\t', 'e', '\0', 's', 't'};
+    stats_event_write_byte_array(event, message, 5);
+    stats_event_build(event);
+
+    size_t size;
+    uint8_t* buf = stats_event_get_buffer(event, &size);
+
+    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    EXPECT_TRUE(logEvent.isValid());
+    EXPECT_EQ(100, logEvent.GetTagId());
+
+    const vector<FieldValue>& values = logEvent.getValues();
+    EXPECT_EQ(1, values.size());
+
+    const FieldValue& item = values[0];
+    Field expectedField = getField(100, {1, 1, 1}, 0, {true, false, false});
+    EXPECT_EQ(expectedField, item.mField);
+    EXPECT_EQ(Type::STORAGE, item.mValue.getType());
+    vector<uint8_t> expectedValue(message, message + 5);
+    EXPECT_EQ(expectedValue, item.mValue.storage_value);
+
+    stats_event_release(event);
+}
+
+TEST(LogEventTest, TestKeyValuePairs) {
+    struct stats_event* event = stats_event_obtain();
+    stats_event_set_atom_id(event, 100);
+
+    struct key_value_pair pairs[4];
+    pairs[0] = {.key = 0, .valueType = INT32_TYPE, .int32Value = 1};
+    pairs[1] = {.key = 1, .valueType = INT64_TYPE, .int64Value = 0x123456789};
+    pairs[2] = {.key = 2, .valueType = FLOAT_TYPE, .floatValue = 2.0};
+    string str = "test";
+    pairs[3] = {.key = 3, .valueType = STRING_TYPE, .stringValue = str.c_str()};
+
+    stats_event_write_key_value_pairs(event, pairs, 4);
+    stats_event_build(event);
+
+    size_t size;
+    uint8_t* buf = stats_event_get_buffer(event, &size);
+
+    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    EXPECT_TRUE(logEvent.isValid());
+    EXPECT_EQ(100, logEvent.GetTagId());
+
+    const vector<FieldValue>& values = logEvent.getValues();
+    EXPECT_EQ(8, values.size()); // 2 FieldValues per key-value pair
+
+    // Check the keys first
+    for (int i = 0; i < values.size() / 2; i++) {
+        const FieldValue& item = values[2 * i];
+        int32_t depth1Pos = i + 1;
+        bool depth1Last = i == (values.size() / 2 - 1);
+        Field expectedField = getField(100, {1, depth1Pos, 1}, 2, {true, depth1Last, false});
+
+        EXPECT_EQ(expectedField, item.mField);
+        EXPECT_EQ(Type::INT, item.mValue.getType());
+        EXPECT_EQ(i, item.mValue.int_value);
+    }
+
+    // Check the values now
+    // Note: pos[2] = index of type in KeyValuePair in atoms.proto
+    const FieldValue& int32Item = values[1];
+    Field expectedField = getField(100, {1, 1, 2}, 2, {true, false, true});
+    EXPECT_EQ(expectedField, int32Item.mField);
+    EXPECT_EQ(Type::INT, int32Item.mValue.getType());
+    EXPECT_EQ(1, int32Item.mValue.int_value);
+
+    const FieldValue& int64Item = values[3];
+    expectedField = getField(100, {1, 2, 3}, 2, {true, false, true});
+    EXPECT_EQ(expectedField, int64Item.mField);
+    EXPECT_EQ(Type::LONG, int64Item.mValue.getType());
+    EXPECT_EQ(0x123456789, int64Item.mValue.long_value);
+
+    const FieldValue& floatItem = values[5];
+    expectedField = getField(100, {1, 3, 5}, 2, {true, false, true});
+    EXPECT_EQ(expectedField, floatItem.mField);
+    EXPECT_EQ(Type::FLOAT, floatItem.mValue.getType());
+    EXPECT_EQ(2.0, floatItem.mValue.float_value);
+
+    const FieldValue& stringItem = values[7];
+    expectedField = getField(100, {1, 4, 4}, 2, {true, true, true});
+    EXPECT_EQ(expectedField, stringItem.mField);
+    EXPECT_EQ(Type::STRING, stringItem.mValue.getType());
+    EXPECT_EQ(str, stringItem.mValue.str_value);
+
+    stats_event_release(event);
+}
+
+TEST(LogEventTest, TestAttributionChain) {
+    struct stats_event* event = stats_event_obtain();
+    stats_event_set_atom_id(event, 100);
+
+    string tag1 = "tag1";
+    string tag2 = "tag2";
+
+    uint32_t uids[] = {1001, 1002};
+    const char* tags[] = {tag1.c_str(), tag2.c_str()};
+
+    stats_event_write_attribution_chain(event, uids, tags, 2);
+    stats_event_build(event);
+
+    size_t size;
+    uint8_t* buf = stats_event_get_buffer(event, &size);
+
+    LogEvent logEvent(buf, size, /*uid=*/ 1000);
+    EXPECT_TRUE(logEvent.isValid());
+    EXPECT_EQ(100, logEvent.GetTagId());
+
+    const vector<FieldValue>& values = logEvent.getValues();
+    EXPECT_EQ(4, values.size()); // 2 per attribution node
+
+    // Check first attribution node
+    const FieldValue& uid1Item = values[0];
+    Field expectedField = getField(100, {1, 1, 1}, 2, {true, false, false});
+    EXPECT_EQ(expectedField, uid1Item.mField);
+    EXPECT_EQ(Type::INT, uid1Item.mValue.getType());
+    EXPECT_EQ(1001, uid1Item.mValue.int_value);
+
+    const FieldValue& tag1Item = values[1];
+    expectedField = getField(100, {1, 1, 2}, 2, {true, false, true});
+    EXPECT_EQ(expectedField, tag1Item.mField);
+    EXPECT_EQ(Type::STRING, tag1Item.mValue.getType());
+    EXPECT_EQ(tag1, tag1Item.mValue.str_value);
+
+    // Check second attribution nodes
+    const FieldValue& uid2Item = values[2];
+    expectedField = getField(100, {1, 2, 1}, 2, {true, true, false});
+    EXPECT_EQ(expectedField, uid2Item.mField);
+    EXPECT_EQ(Type::INT, uid2Item.mValue.getType());
+    EXPECT_EQ(1002, uid2Item.mValue.int_value);
+
+    const FieldValue& tag2Item = values[3];
+    expectedField = getField(100, {1, 2, 2}, 2, {true, true, true});
+    EXPECT_EQ(expectedField, tag2Item.mField);
+    EXPECT_EQ(Type::STRING, tag2Item.mValue.getType());
+    EXPECT_EQ(tag2, tag2Item.mValue.str_value);
+
+    stats_event_release(event);
+}
+
+#else // NEW_ENCODING_SCHEME
 
 TEST(LogEventTest, TestLogParsing) {
     LogEvent event1(1, 2000);
@@ -659,6 +929,7 @@ TEST(LogEventTest, TestWriteExperimentIdsToProto) {
     EXPECT_EQ(proto[1], 0xae);
     EXPECT_EQ(proto[2], 0x27);
 }
+#endif // NEW_ENCODING_SCHEME
 
 
 }  // namespace statsd

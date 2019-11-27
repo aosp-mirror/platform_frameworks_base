@@ -1098,16 +1098,12 @@ public class AccessPoint implements Comparable<AccessPoint> {
                         summary.append(mContext.getString(R.string.wifi_check_password_try_again));
                         break;
                     case WifiConfiguration.NetworkSelectionStatus.DISABLED_DHCP_FAILURE:
-                    case WifiConfiguration.NetworkSelectionStatus.DISABLED_DNS_FAILURE:
                         summary.append(mContext.getString(R.string.wifi_disabled_network_failure));
                         break;
                     case WifiConfiguration.NetworkSelectionStatus.DISABLED_ASSOCIATION_REJECTION:
                         summary.append(mContext.getString(R.string.wifi_disabled_generic));
                         break;
                 }
-            } else if (mConfig != null && mConfig.getNetworkSelectionStatus().isNotRecommended()) {
-                summary.append(mContext.getString(
-                        R.string.wifi_disabled_by_recommendation_provider));
             } else if (mIsCarrierAp) {
                 summary.append(String.format(mContext.getString(
                         R.string.available_via_carrier), mCarrierName));

@@ -291,7 +291,7 @@ static jlong vibratorSupportsAmplitudeControl(JNIEnv*, jclass) {
 
 static void vibratorSetAmplitude(JNIEnv*, jclass, jint amplitude) {
     if (auto hal = getHal<aidl::IVibrator>()) {
-        auto status = hal->call(&aidl::IVibrator::IVibrator::setAmplitude, amplitude);
+        auto status = hal->call(&aidl::IVibrator::IVibrator::setAmplitude, static_cast<float>(amplitude) / UINT8_MAX);
         if (!status.isOk()) {
             ALOGE("Failed to set vibrator amplitude: %s", status.toString8().string());
         }

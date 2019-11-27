@@ -1,0 +1,23 @@
+{
+  // Looking for unit test presubmit configuration?
+  // This currently lives in ATP config apct/system_ui/unit_test
+  "staged-platinum-postsubmit": [
+    {
+      "name": "PlatformScenarioTests",
+      "options": [
+        {
+            "include-filter": "android.platform.test.scenario.sysui"
+        },
+        {
+            "include-filter": "android.platform.test.scenario.quicksettings"
+        },
+        {
+            "include-filter": "android.platform.test.scenario.notification"
+        },
+        {
+            "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ]
+}

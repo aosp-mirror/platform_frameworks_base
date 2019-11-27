@@ -1,0 +1,77 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package com.android.server.wm
+
+# Do not change these names without updating the checkin_events setting in
+# google3/googledata/wireless/android/provisioning/gservices.config !!
+#
+# An activity is being finished:
+30001 wm_finish_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
+# A task is being brought to the front of the screen:
+30002 wm_task_to_front (User|1|5),(Task|1|5)
+# An existing activity is being given a new intent:
+30003 wm_new_intent (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
+# A new task is being created:
+30004 wm_create_task (User|1|5),(Task ID|1|5)
+# A new activity is being created in an existing task:
+30005 wm_create_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Action|3),(MIME Type|3),(URI|3),(Flags|1|5)
+# An activity has been resumed into the foreground but was not already running:
+30006 wm_restart_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
+# An activity has been resumed and is now in the foreground:
+30007 wm_resume_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
+
+# Activity launch time
+30009 wm_activity_launch_time (User|1|5),(Token|1|5),(Component Name|3),(time|2|3)
+
+# The Activity Manager failed to pause the given activity.
+30012 wm_failed_to_pause (User|1|5),(Token|1|5),(Wanting to pause|3),(Currently pausing|3)
+# Attempting to pause the current activity
+30013 wm_pause_activity (User|1|5),(Token|1|5),(Component Name|3),(User Leaving|3)
+# Application process has been started
+
+# An activity is being destroyed:
+30018 wm_destroy_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3),(Reason|3)
+# An activity has been relaunched, resumed, and is now in the foreground:
+30019 wm_relaunch_resume_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
+# An activity has been relaunched:
+30020 wm_relaunch_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
+# The activity's onPause has been called.
+30021 wm_on_paused_called (Token|1|5),(Component Name|3),(Reason|3)
+# The activity's onResume has been called.
+30022 wm_on_resume_called (Token|1|5),(Component Name|3),(Reason|3)
+
+# Activity set to resumed
+30043 wm_set_resumed_activity (User|1|5),(Component Name|3),(Reason|3)
+
+# Stack focus
+30044 wm_focused_stack (User|1|5),(Display Id|1|5),(Focused Stack Id|1|5),(Last Focused Stack Id|1|5),(Reason|3)
+
+# Attempting to stop an activity
+30048 wm_stop_activity (User|1|5),(Token|1|5),(Component Name|3)
+
+# The task is being removed from its parent stack
+30061 wm_remove_task (Task ID|1|5), (Stack ID|1|5)
+
+# An activity been add into stopping list
+30066 wm_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)
+
+# Keyguard status changed
+30067 wm_set_keyguard_shown (keyguardShowing|1),(aodShowing|1),(keyguardGoingAway|1),(Reason|3)
+
+# Out of memory for surfaces.
+31000 wm_no_surface_memory (Window|3),(PID|1|5),(Operation|3)
+# Task created.
+31001 wm_task_created (TaskId|1|5),(StackId|1|5)
+# Task moved to top (1) or bottom (0).
+31002 wm_task_moved (TaskId|1|5),(ToTop|1),(Index|1)
+# Task removed with source explanation.
+31003 wm_task_removed (TaskId|1|5),(Reason|3)
+# Stack created.
+31004 wm_stack_created (StackId|1|5)
+# Home stack moved to top (1) or bottom (0).
+31005 wm_home_stack_moved (ToTop|1)
+# Stack removed.
+31006 wm_stack_removed (StackId|1|5)
+# bootanim finished:
+31007 wm_boot_animation_done (time|2|3)
+

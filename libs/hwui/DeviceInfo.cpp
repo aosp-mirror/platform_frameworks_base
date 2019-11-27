@@ -15,9 +15,8 @@
  */
 
 #include <DeviceInfo.h>
-#include <gui/SurfaceComposerClient.h>
 #include <log/log.h>
-#include <ui/GraphicTypes.h>
+#include <utils/Errors.h>
 
 #include <mutex>
 #include <thread>
@@ -32,44 +31,6 @@ DeviceInfo* DeviceInfo::get() {
     return &sDeviceInfo;
 }
 
-static void queryWideColorGamutPreference(sk_sp<SkColorSpace>* colorSpace, SkColorType* colorType) {
-    if (Properties::isolatedProcess) {
-        *colorSpace = SkColorSpace::MakeSRGB();
-        *colorType = SkColorType::kN32_SkColorType;
-        return;
-    }
-    ui::Dataspace defaultDataspace, wcgDataspace;
-    ui::PixelFormat defaultPixelFormat, wcgPixelFormat;
-    status_t status =
-        SurfaceComposerClient::getCompositionPreference(&defaultDataspace, &defaultPixelFormat,
-                                                        &wcgDataspace, &wcgPixelFormat);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to get composition preference, error %d", status);
-    switch (wcgDataspace) {
-        case ui::Dataspace::DISPLAY_P3:
-            *colorSpace = SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
-            break;
-        case ui::Dataspace::V0_SCRGB:
-            *colorSpace = SkColorSpace::MakeSRGB();
-            break;
-        case ui::Dataspace::V0_SRGB:
-            // when sRGB is returned, it means wide color gamut is not supported.
-            *colorSpace = SkColorSpace::MakeSRGB();
-            break;
-        default:
-            LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
-    }
-    switch (wcgPixelFormat) {
-        case ui::PixelFormat::RGBA_8888:
-            *colorType = SkColorType::kN32_SkColorType;
-            break;
-        case ui::PixelFormat::RGBA_FP16:
-            *colorType = SkColorType::kRGBA_F16_SkColorType;
-            break;
-        default:
-            LOG_ALWAYS_FATAL("Unreachable: unsupported pixel format.");
-    }
-}
-
 DeviceInfo::DeviceInfo() {
 #if HWUI_NULL_GPU
         mMaxTextureSize = NULL_GPU_MAX_TEXTURE_SIZE;
@@ -77,7 +38,6 @@ DeviceInfo::DeviceInfo() {
         mMaxTextureSize = -1;
 #endif
         updateDisplayInfo();
-        queryWideColorGamutPreference(&mWideColorSpace, &mWideColorType);
 }
 DeviceInfo::~DeviceInfo() {
     ADisplay_release(mDisplays);
@@ -113,9 +73,45 @@ void DeviceInfo::updateDisplayInfo() {
             }
         }
         LOG_ALWAYS_FATAL_IF(mPhysicalDisplayIndex < 0, "Failed to find a connected physical display!");
-        mMaxRefreshRate = ADisplay_getMaxSupportedFps(mDisplays[mPhysicalDisplayIndex]);
+
+
+        // Since we now just got the primary display for the first time, then
+        // store the primary display metadata here.
+        ADisplay* primaryDisplay = mDisplays[mPhysicalDisplayIndex];
+        mMaxRefreshRate = ADisplay_getMaxSupportedFps(primaryDisplay);
+        ADataSpace dataspace;
+        AHardwareBuffer_Format format;
+        ADisplay_getPreferredWideColorFormat(primaryDisplay, &dataspace, &format);
+        switch (dataspace) {
+            case ADATASPACE_DISPLAY_P3:
+                mWideColorSpace =
+                        SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
+                break;
+            case ADATASPACE_SCRGB:
+                mWideColorSpace = SkColorSpace::MakeSRGB();
+                break;
+            case ADATASPACE_SRGB:
+                // when sRGB is returned, it means wide color gamut is not supported.
+                mWideColorSpace = SkColorSpace::MakeSRGB();
+                break;
+            default:
+                LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
+        }
+        switch (format) {
+            case AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM:
+                mWideColorType = SkColorType::kN32_SkColorType;
+                break;
+            case AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT:
+                mWideColorType = SkColorType::kRGBA_F16_SkColorType;
+                break;
+            default:
+                LOG_ALWAYS_FATAL("Unreachable: unsupported pixel format.");
+        }
     }
-    status_t status = ADisplay_getCurrentConfig(mDisplays[mPhysicalDisplayIndex], &mCurrentConfig);
+    // This method may have been called when the display config changed, so
+    // sync with the current configuration.
+    ADisplay* primaryDisplay = mDisplays[mPhysicalDisplayIndex];
+    status_t status = ADisplay_getCurrentConfig(primaryDisplay, &mCurrentConfig);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display config, error %d", status);
     mWidth = ADisplayConfig_getWidth(mCurrentConfig);
     mHeight = ADisplayConfig_getHeight(mCurrentConfig);

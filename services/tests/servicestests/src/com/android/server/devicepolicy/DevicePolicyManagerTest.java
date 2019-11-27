@@ -5143,7 +5143,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureContextForAccess(mContext, false);
 
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.setProfileOwnerCanAccessDeviceIds(admin2));
+                () -> dpm.markProfileOwnerOnOrganizationOwnedDevice(admin2));
     }
 
     public void testGrantDeviceIdsAccess_notByAuthorizedCaller() throws Exception {
@@ -5151,22 +5151,25 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureContextForAccess(mContext, false);
 
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.setProfileOwnerCanAccessDeviceIds(admin1));
+                () -> dpm.markProfileOwnerOnOrganizationOwnedDevice(admin1));
     }
 
     public void testGrantDeviceIdsAccess_byAuthorizedSystemCaller() throws Exception {
         setupProfileOwner();
 
         // This method will throw if the system context could not call
-        // setProfileOwnerCanAccessDeviceIds successfully.
-        configureProfileOwnerForDeviceIdAccess(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        // markProfileOwnerOfOrganizationOwnedDevice successfully.
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
     }
 
-    private static void configureContextForAccess(DpmMockContext context, boolean granted) {
+    private void configureContextForAccess(DpmMockContext context, boolean granted) {
         when(context.spiedContext.checkCallingPermission(
-                android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS))
+                permission.MARK_DEVICE_ORGANIZATION_OWNED))
                 .thenReturn(granted ? PackageManager.PERMISSION_GRANTED
                         : PackageManager.PERMISSION_DENIED);
+
+        when(getServices().userManager.getProfileParent(any()))
+                .thenReturn(UserHandle.SYSTEM);
     }
 
     public void testGrantDeviceIdsAccess_byAuthorizedManagedProvisioning() throws Exception {
@@ -5180,7 +5183,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         DpmMockContext.CALLER_MANAGED_PROVISIONING_UID);
         try {
             runAsCaller(mServiceContext, dpms, dpm -> {
-                dpm.setProfileOwnerCanAccessDeviceIds(admin1);
+                dpm.markProfileOwnerOnOrganizationOwnedDevice(admin1);
             });
         } finally {
             mServiceContext.binder.restoreCallingIdentity(ident);
@@ -5218,7 +5221,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         admin1.getPackageName(), DpmMockContext.CALLER_SYSTEM_USER_UID));
 
         setupProfileOwner();
-        configureProfileOwnerForDeviceIdAccess(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
 
         // The profile owner is allowed to request Device ID attestation.
         mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
@@ -5255,7 +5258,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm -> dpm.setDelegatedScopes(admin1, DpmMockContext.DELEGATE_PACKAGE_NAME,
                         Arrays.asList(DELEGATION_CERT_INSTALL)));
 
-        configureProfileOwnerForDeviceIdAccess(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
 
         // Make sure that the profile owner can still request Device ID attestation.
         mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
@@ -5432,12 +5435,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.isPackageAllowedToAccessCalendar(testPackage));
     }
 
-    private void configureProfileOwnerForDeviceIdAccess(ComponentName who, int userId) {
+    private void configureProfileOwnerOfOrgOwnedDevice(ComponentName who, int userId) {
+        when(getServices().userManager.getProfileParent(eq(UserHandle.of(userId))))
+                .thenReturn(UserHandle.SYSTEM);
         final long ident = mServiceContext.binder.clearCallingIdentity();
         mServiceContext.binder.callingUid =
                 UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
+
+        configureContextForAccess(mServiceContext, true);
         runAsCaller(mServiceContext, dpms, dpm -> {
-            dpm.setProfileOwnerCanAccessDeviceIds(who);
+            dpm.markProfileOwnerOnOrganizationOwnedDevice(who);
         });
         mServiceContext.binder.restoreCallingIdentity(ident);
     }

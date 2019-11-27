@@ -5715,6 +5715,18 @@ public final class Settings {
                 "managed_provisioning_dpc_downloaded";
 
         /**
+         * Indicates whether the device is under restricted secure FRP mode.
+         * Secure FRP mode is enabled when the device is under FRP. On solving of FRP challenge,
+         * device is removed from this mode.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String SECURE_FRP_MODE = "secure_frp_mode";
+
+        /**
          * Indicates whether the current user has completed setup via the setup wizard.
          * <p>
          * Type: int (0 for false, 1 for true)
@@ -6191,8 +6203,12 @@ public final class Settings {
                 "accessibility_shortcut_dialog_shown";
 
         /**
-         * Setting specifying the accessibility service to be toggled via the accessibility
-         * shortcut. Must be its flattened {@link ComponentName}.
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via the accessibility shortcut.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
          * @hide
          */
         @UnsupportedAppUsage
@@ -6201,9 +6217,11 @@ public final class Settings {
                 "accessibility_shortcut_target_service";
 
         /**
-         * Setting specifying the accessibility service or feature to be toggled via the
-         * accessibility button in the navigation bar. This is either a flattened
-         * {@link ComponentName} or the class name of a system class implementing a supported
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via the accessibility button in the navigation bar.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
          * accessibility feature.
          * @hide
          */
@@ -6364,6 +6382,9 @@ public final class Settings {
          * zoom in the display content and is targeted to low vision users. The current
          * magnification scale is controlled by {@link #ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE}.
          *
+         * @deprecated Use {@link #ACCESSIBILITY_BUTTON_TARGET_COMPONENT} instead.
+         * {@link #ACCESSIBILITY_BUTTON_TARGET_COMPONENT} holds the magnification system class name
+         * when navigation bar magnification is enabled.
          * @hide
          */
         @SystemApi
@@ -7168,16 +7189,6 @@ public final class Settings {
          */
         @UnsupportedAppUsage
         public static final String VOICE_RECOGNITION_SERVICE = "voice_recognition_service";
-
-        /**
-         * Stores whether an user has consented to have apps verified through PAM.
-         * The value is boolean (1 or 0).
-         *
-         * @hide
-         */
-        @UnsupportedAppUsage
-        public static final String PACKAGE_VERIFIER_USER_CONSENT =
-            "package_verifier_user_consent";
 
         /**
          * The {@link ComponentName} string of the selected spell checker service which is

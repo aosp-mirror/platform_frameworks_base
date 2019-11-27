@@ -42,10 +42,10 @@ public class ProviderTile extends Tile {
     private String mAuthority;
     private String mKey;
 
-    public ProviderTile(ComponentInfo info, String category, Bundle metaData) {
+    public ProviderTile(ProviderInfo info, String category, Bundle metaData) {
         super(info, category);
         setMetaData(metaData);
-        mAuthority = ((ProviderInfo) info).authority;
+        mAuthority = info.authority;
         mKey = metaData.getString(META_DATA_PREFERENCE_KEYHINT);
     }
 

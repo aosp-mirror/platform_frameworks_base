@@ -26,10 +26,6 @@ public class FakeHotspotController extends BaseLeakChecker<Callback> implements 
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public boolean isHotspotEnabled() {
         return false;
     }

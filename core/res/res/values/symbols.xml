@@ -456,6 +456,7 @@
   <java-symbol type="string" name="config_deviceSpecificDevicePolicyManagerService" />
   <java-symbol type="string" name="config_deviceSpecificAudioService" />
   <java-symbol type="integer" name="config_num_physical_slots" />
+  <java-symbol type="array" name="config_integrityRuleProviderPackages" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -1193,6 +1194,7 @@
   <java-symbol type="string" name="work_profile_deleted_details" />
   <java-symbol type="string" name="work_profile_deleted_description_dpm_wipe" />
   <java-symbol type="string" name="work_profile_deleted_reason_maximum_password_failure" />
+  <java-symbol type="string" name="device_ownership_relinquished" />
   <java-symbol type="string" name="network_logging_notification_title" />
   <java-symbol type="string" name="network_logging_notification_text" />
   <java-symbol type="string" name="factory_reset_warning" />
@@ -3359,7 +3361,6 @@
   <java-symbol type="array" name="config_defaultTextClassifierPackages" />
   <java-symbol type="string" name="config_defaultWellbeingPackage" />
   <java-symbol type="string" name="config_telephonyPackages" />
-  <java-symbol type="string" name="config_wifiPackage" />
   <java-symbol type="string" name="config_defaultContentCaptureService" />
   <java-symbol type="string" name="config_defaultAugmentedAutofillService" />
   <java-symbol type="string" name="config_defaultAppPredictionService" />

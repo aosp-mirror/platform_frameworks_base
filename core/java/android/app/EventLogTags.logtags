@@ -1,0 +1,36 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package android.app
+
+# Do not change these names without updating the checkin_events setting in
+# google3/googledata/wireless/android/provisioning/gservices.config !!
+#
+# The activity's onPause has been called.
+30021 wm_on_paused_called (Token|1|5),(Component Name|3),(Reason|3)
+# The activity's onResume has been called.
+30022 wm_on_resume_called (Token|1|5),(Component Name|3),(Reason|3)
+
+# Attempting to stop an activity
+30048 wm_stop_activity (User|1|5),(Token|1|5),(Component Name|3)
+# The activity's onStop has been called.
+30049 wm_on_stop_called (Token|1|5),(Component Name|3),(Reason|3)
+
+# The activity's onCreate has been called.
+30057 wm_on_create_called (Token|1|5),(Component Name|3),(Reason|3)
+# The activity's onRestart has been called.
+30058 wm_on_restart_called (Token|1|5),(Component Name|3),(Reason|3)
+# The activity's onStart has been called.
+30059 wm_on_start_called (Token|1|5),(Component Name|3),(Reason|3)
+# The activity's onDestroy has been called.
+30060 wm_on_destroy_called (Token|1|5),(Component Name|3),(Reason|3)
+# The activity's onActivityResult has been called.
+30062 wm_on_activity_result_called (Token|1|5),(Component Name|3),(Reason|3)
+
+# The activity's onTopResumedActivityChanged(true) has been called.
+30064 wm_on_top_resumed_gained_called (Token|1|5),(Component Name|3),(Reason|3)
+# The activity's onTopResumedActivityChanged(false) has been called.
+30065 wm_on_top_resumed_lost_called (Token|1|5),(Component Name|3),(Reason|3)
+
+# An activity been add into stopping list
+30066 wm_add_to_stopping (User|1|5),(Token|1|5),(Component Name|3),(Reason|3)
+

@@ -2130,7 +2130,7 @@ class UserController implements Handler.Callback {
         }
     }
 
-    void dump(PrintWriter pw, boolean dumpAll) {
+    void dump(PrintWriter pw) {
         synchronized (mLock) {
             pw.println("  mStartedUsers:");
             for (int i = 0; i < mStartedUsers.size(); i++) {
@@ -2164,7 +2164,11 @@ class UserController implements Handler.Callback {
                 }
             }
             pw.println("  mCurrentUserId:" + mCurrentUserId);
+            pw.println("  mTargetUserId:" + mTargetUserId);
             pw.println("  mLastActiveUsers:" + mLastActiveUsers);
+            pw.println("  mDelayUserDataLocking:" + mDelayUserDataLocking);
+            pw.println("  mMaxRunningUsers:" + mMaxRunningUsers);
+            pw.println("  mUserSwitchUiEnabled:" + mUserSwitchUiEnabled);
         }
     }
 

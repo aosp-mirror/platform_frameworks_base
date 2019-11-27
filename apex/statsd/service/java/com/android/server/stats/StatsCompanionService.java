@@ -565,7 +565,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 // Add in all the apps for every user/profile.
                 for (UserInfo profile : users) {
                     List<PackageInfo> pi =
-                            pm.getInstalledPackagesAsUser(PackageManager.MATCH_KNOWN_PACKAGES,
+                            pm.getInstalledPackagesAsUser(PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                            | PackageManager.MATCH_ANY_USER,
                                     profile.id);
                     for (int j = 0; j < pi.size(); j++) {
                         if (pi.get(j).applicationInfo != null) {
@@ -2076,6 +2077,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullDangerousPermissionState(long elapsedNanos, final long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
+        Set<Integer> reportedUids = new HashSet<>();
         try {
             PackageManager pm = mContext.getPackageManager();
 
@@ -2095,6 +2097,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     if (pkg.requestedPermissions == null) {
                         continue;
                     }
+
+                    if (reportedUids.contains(pkg.applicationInfo.uid)) {
+                        // do not report same uid twice
+                        continue;
+                    }
+                    reportedUids.add(pkg.applicationInfo.uid);
 
                     int numPerms = pkg.requestedPermissions.length;
                     for (int permNum  = 0; permNum < numPerms; permNum++) {
@@ -2120,7 +2128,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
                         e.writeString(permName);
                         e.writeInt(pkg.applicationInfo.uid);
-                        e.writeString(pkg.packageName);
+                        e.writeString(null);
                         e.writeBoolean((pkg.requestedPermissionsFlags[permNum]
                                 & REQUESTED_PERMISSION_GRANTED) != 0);
                         e.writeInt(permissionFlags);
@@ -2729,23 +2737,20 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 filter.addAction(Intent.ACTION_PACKAGE_ADDED);
                 filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
                 filter.addDataScheme("package");
-                mContext.registerReceiverAsUser(mAppUpdateReceiver, UserHandle.ALL, filter,
-                        null,
-                        null);
+                mContext.registerReceiverForAllUsers(mAppUpdateReceiver, filter, null, null);
 
                 // Setup receiver for user initialize (which happens once for a new user)
                 // and
                 // if a user is removed.
                 filter = new IntentFilter(Intent.ACTION_USER_INITIALIZE);
                 filter.addAction(Intent.ACTION_USER_REMOVED);
-                mContext.registerReceiverAsUser(mUserUpdateReceiver, UserHandle.ALL,
-                        filter, null, null);
+                mContext.registerReceiverForAllUsers(mUserUpdateReceiver, filter, null, null);
 
                 // Setup receiver for device reboots or shutdowns.
                 filter = new IntentFilter(Intent.ACTION_REBOOT);
                 filter.addAction(Intent.ACTION_SHUTDOWN);
-                mContext.registerReceiverAsUser(
-                        mShutdownEventReceiver, UserHandle.ALL, filter, null, null);
+                mContext.registerReceiverForAllUsers(
+                        mShutdownEventReceiver, filter, null, null);
                 final long token = Binder.clearCallingIdentity();
                 try {
                     // Pull the latest state of UID->app name, version mapping when

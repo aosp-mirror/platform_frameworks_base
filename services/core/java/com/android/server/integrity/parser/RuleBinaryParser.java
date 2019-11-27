@@ -16,7 +16,7 @@
 
 package com.android.server.integrity.parser;
 
-import com.android.server.integrity.model.Rule;
+import android.content.integrity.Rule;
 
 import java.io.InputStream;
 import java.util.List;

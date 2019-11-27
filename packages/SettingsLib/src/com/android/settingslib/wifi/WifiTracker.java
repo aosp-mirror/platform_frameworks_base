@@ -224,9 +224,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         mConnectivityManager = connectivityManager;
 
         // check if verbose logging developer option has been turned on or off
-        sVerboseLogging = Settings.Global.getInt(
-                mContext.getContentResolver(),
-                Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED, 0) > 0;
+        sVerboseLogging = mWifiManager != null && (mWifiManager.getVerboseLoggingLevel() > 0);
 
         mFilter = filter;
 
@@ -518,8 +516,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             int networkId, final List<WifiConfiguration> configs) {
         if (configs != null) {
             for (WifiConfiguration config : configs) {
-                if (mLastInfo != null && networkId == config.networkId &&
-                        !(config.selfAdded && config.numAssociation == 0)) {
+                if (mLastInfo != null && networkId == config.networkId) {
                     return config;
                 }
             }

@@ -32,6 +32,7 @@ import android.util.Log;
 import android.util.TimingsTraceLog;
 
 import com.android.systemui.dagger.ContextComponentHelper;
+import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.util.NotificationChannels;
 
 import java.lang.reflect.Constructor;
@@ -47,13 +48,13 @@ public class SystemUIApplication extends Application implements
     private static final boolean DEBUG = false;
 
     private ContextComponentHelper mComponentHelper;
+    private BootCompleteCacheImpl mBootCompleteCache;
 
     /**
      * Hold a reference on the stuff we start.
      */
     private SystemUI[] mServices;
     private boolean mServicesStarted;
-    private boolean mBootCompleted;
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
 
     public SystemUIApplication() {
@@ -71,8 +72,9 @@ public class SystemUIApplication extends Application implements
                 Trace.TRACE_TAG_APP);
         log.traceBegin("DependencyInjection");
         mContextAvailableCallback.onContextAvailable(this);
-        mComponentHelper = SystemUIFactory
-                .getInstance().getRootComponent().getContextComponentHelper();
+        SystemUIRootComponent root = SystemUIFactory.getInstance().getRootComponent();
+        mComponentHelper = root.getContextComponentHelper();
+        mBootCompleteCache = root.provideBootCacheImpl();
         log.traceEnd();
 
         // Set the application theme that is inherited by all services. Note that setting the
@@ -86,19 +88,17 @@ public class SystemUIApplication extends Application implements
             registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if (mBootCompleted) return;
+                    if (mBootCompleteCache.isBootComplete()) return;
 
                     if (DEBUG) Log.v(TAG, "BOOT_COMPLETED received");
                     unregisterReceiver(this);
-                    mBootCompleted = true;
+                    mBootCompleteCache.setBootComplete();
                     if (mServicesStarted) {
                         final int N = mServices.length;
                         for (int i = 0; i < N; i++) {
                             mServices[i].onBootCompleted();
                         }
                     }
-
-
                 }
             }, bootCompletedFilter);
 
@@ -107,7 +107,7 @@ public class SystemUIApplication extends Application implements
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
-                        if (!mBootCompleted) return;
+                        if (!mBootCompleteCache.isBootComplete()) return;
                         // Update names of SystemUi notification channels
                         NotificationChannels.createAll(context);
                     }
@@ -159,11 +159,11 @@ public class SystemUIApplication extends Application implements
         }
         mServices = new SystemUI[services.length];
 
-        if (!mBootCompleted) {
+        if (!mBootCompleteCache.isBootComplete()) {
             // check to see if maybe it was already completed long before we began
             // see ActivityManagerService.finishBooting()
             if ("1".equals(SystemProperties.get("sys.boot_completed"))) {
-                mBootCompleted = true;
+                mBootCompleteCache.setBootComplete();
                 if (DEBUG) {
                     Log.v(TAG, "BOOT_COMPLETED was already sent");
                 }
@@ -205,7 +205,7 @@ public class SystemUIApplication extends Application implements
             if (ti > 1000) {
                 Log.w(TAG, "Initialization of " + clsName + " took " + ti + " ms");
             }
-            if (mBootCompleted) {
+            if (mBootCompleteCache.isBootComplete()) {
                 mServices[i].onBootCompleted();
             }
         }

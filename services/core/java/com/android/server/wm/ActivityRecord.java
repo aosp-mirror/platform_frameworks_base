@@ -122,8 +122,6 @@ import static com.android.server.am.ActivityRecordProto.STATE;
 import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
 import static com.android.server.am.ActivityRecordProto.VISIBLE;
 import static com.android.server.am.ActivityRecordProto.VISIBLE_REQUESTED;
-import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
-import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
@@ -306,7 +304,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.am.AppTimeTracker;
-import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
@@ -2379,8 +2376,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Make a local reference to its task since this.task could be set to null once this
             // activity is destroyed and detached from task.
             final Task task = getTask();
-            EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
-                    mUserId, System.identityHashCode(this),
+            EventLogTags.writeWmFinishActivity(mUserId, System.identityHashCode(this),
                     task.mTaskId, shortComponentName, reason);
             final ArrayList<ActivityRecord> activities = task.mChildren;
             final int index = activities.indexOf(this);
@@ -2655,8 +2651,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY, mUserId,
-                System.identityHashCode(this), task.mTaskId, shortComponentName, reason);
+        EventLogTags.writeWmDestroyActivity(mUserId, System.identityHashCode(this),
+                task.mTaskId, shortComponentName, reason);
 
         final ActivityStack stack = getActivityStack();
         if (hasProcess() && !stack.inLruList(this)) {
@@ -4535,8 +4531,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @param activeActivity the activity that is active or just completed pause action. We won't
      *                       resume if this activity is active.
      */
-    private boolean shouldPauseActivity(ActivityRecord activeActivity) {
-        return shouldMakeActive(activeActivity) && !isFocusable() && !isState(PAUSING, PAUSED);
+    @VisibleForTesting
+    boolean shouldPauseActivity(ActivityRecord activeActivity) {
+        return shouldMakeActive(activeActivity) && !isFocusable() && !isState(PAUSING, PAUSED)
+                // We will only allow pausing if results is null, otherwise it will cause this
+                // activity to resume before getting result
+                && (results == null);
     }
 
     /**
@@ -4606,9 +4606,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // Check if activity above is finishing now and this one becomes the topmost in task.
         final ActivityRecord activityAbove = task.getChildAt(positionInTask + 1);
-        if (activityAbove.finishing && results == null) {
-            // We will only allow making active if activity above wasn't launched for result.
-            // Otherwise it will cause this activity to resume before getting result.
+        if (activityAbove.finishing) {
             return true;
         }
         return false;
@@ -4739,7 +4737,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!mVisibleRequested) {
                 setVisibility(false);
             }
-            EventLogTags.writeAmStopActivity(
+            EventLogTags.writeWmStopActivity(
                     mUserId, System.identityHashCode(this), shortComponentName);
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     StopActivityItem.obtain(mVisibleRequested, configChangeFlags));
@@ -4808,8 +4806,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void addToStopping(boolean scheduleIdle, boolean idleDelayed, String reason) {
         if (!mStackSupervisor.mStoppingActivities.contains(this)) {
-            EventLog.writeEvent(EventLogTags.AM_ADD_TO_STOPPING, mUserId,
-                    System.identityHashCode(this), shortComponentName, reason);
+            EventLogTags.writeWmAddToStopping(mUserId, System.identityHashCode(this),
+                    shortComponentName, reason);
             mStackSupervisor.mStoppingActivities.add(this);
         }
 
@@ -6239,9 +6237,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // relatively fixed.
         overrideConfig.colorMode = fullConfig.colorMode;
         overrideConfig.densityDpi = fullConfig.densityDpi;
-        overrideConfig.screenLayout = fullConfig.screenLayout
-                & (Configuration.SCREENLAYOUT_LONG_MASK
-                        | Configuration.SCREENLAYOUT_SIZE_MASK);
         // The smallest screen width is the short side of screen bounds. Because the bounds
         // and density won't be changed, smallestScreenWidthDp is also fixed.
         overrideConfig.smallestScreenWidthDp = fullConfig.smallestScreenWidthDp;
@@ -6376,6 +6371,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Use resolvedBounds to compute other override configurations such as appBounds
         task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
                 mCompatDisplayInsets);
+        // Use current screen layout as source because the size of app is independent to parent.
+        resolvedConfig.screenLayout = Task.computeScreenLayoutOverride(
+                getConfiguration().screenLayout, resolvedConfig.screenWidthDp,
+                resolvedConfig.screenHeightDp);
 
         // Use parent orientation if it cannot be decided by bounds, so the activity can fit inside
         // the parent bounds appropriately.
@@ -6939,9 +6938,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 "Relaunching: " + this + " with results=" + pendingResults
                         + " newIntents=" + pendingNewIntents + " andResume=" + andResume
                         + " preserveWindow=" + preserveWindow);
-        EventLog.writeEvent(andResume ? AM_RELAUNCH_RESUME_ACTIVITY
-                        : AM_RELAUNCH_ACTIVITY, mUserId, System.identityHashCode(this),
-                task.mTaskId, shortComponentName);
+        if (andResume) {
+            EventLogTags.writeWmRelaunchResumeActivity(mUserId, System.identityHashCode(this),
+                    task.mTaskId, shortComponentName);
+        } else {
+            EventLogTags.writeWmRelaunchActivity(mUserId, System.identityHashCode(this),
+                    task.mTaskId, shortComponentName);
+        }
 
         startFreezingScreenLocked(0);
 

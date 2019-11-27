@@ -72,7 +72,10 @@ public class WifiFrameworkInitializer {
         SystemServiceRegistry.registerContextAwareService(
                 Context.WIFI_SERVICE,
                 WifiManager.class,
-                context -> new WifiManager(context, getInstanceLooper())
+                (context, serviceBinder) -> {
+                    IWifiManager service = IWifiManager.Stub.asInterface(serviceBinder);
+                    return new WifiManager(context, service, getInstanceLooper());
+                }
         );
         SystemServiceRegistry.registerStaticService(
                 Context.WIFI_P2P_SERVICE,

@@ -1492,7 +1492,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mAppPredictionServicePackage;
     final @Nullable String mIncidentReportApproverPackage;
     final @Nullable String[] mTelephonyPackages;
-    final @Nullable String mWifiPackage;
     final @NonNull String mServicesSystemSharedLibraryPackageName;
     final @NonNull String mSharedSystemSharedLibraryPackageName;
 
@@ -2974,7 +2973,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mTelephonyPackages = getTelephonyPackageNames();
-            mWifiPackage = mContext.getString(R.string.config_wifiPackage);
 
             // Now that we know all of the shared libraries, update all clients to have
             // the correct library paths.
@@ -22938,8 +22936,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     return filterOnlySystemPackages(mAppPredictionServicePackage);
                 case PackageManagerInternal.PACKAGE_TELEPHONY:
                     return filterOnlySystemPackages(mTelephonyPackages);
-                case PackageManagerInternal.PACKAGE_WIFI:
-                    return filterOnlySystemPackages(mWifiPackage);
                 default:
                     return ArrayUtils.emptyArray(String.class);
             }

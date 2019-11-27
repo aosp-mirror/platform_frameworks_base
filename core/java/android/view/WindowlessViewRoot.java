@@ -32,6 +32,14 @@ import android.os.IBinder;
 public class WindowlessViewRoot {
     private ViewRootImpl mViewRoot;
     private WindowlessWindowManager mWm;
+
+    /** @hide */
+    public WindowlessViewRoot(@NonNull Context c, @NonNull Display d,
+            @NonNull WindowlessWindowManager wwm) {
+        mWm = wwm;
+        mViewRoot = new ViewRootImpl(c, d, mWm);
+    }
+
     public WindowlessViewRoot(@NonNull Context c, @NonNull Display d,
             @NonNull SurfaceControl rootSurface,
             @Nullable IBinder hostInputToken) {
@@ -54,5 +62,13 @@ public class WindowlessViewRoot {
 
     public void dispose() {
         mViewRoot.dispatchDetachedFromWindow();
+    }
+
+    /**
+     * Tell this viewroot to clean itself up.
+     * @hide
+     */
+    public void die() {
+        mViewRoot.die(false /* immediate */);
     }
 }

@@ -3334,27 +3334,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
         Bundle args = null;
-        if (deviceId > Integer.MIN_VALUE) {
+        if (deviceId > Integer.MIN_VALUE || hint != null) {
             args = new Bundle();
-            args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, deviceId);
-        }
-        if ((mContext.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_TELEVISION) {
-            // On TV, use legacy handling until assistants are implemented in the proper way.
-            ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                    .launchLegacyAssist(hint, mCurrentUserId, args);
-        } else {
+            if (deviceId > Integer.MIN_VALUE) {
+                args.putInt(Intent.EXTRA_ASSIST_INPUT_DEVICE_ID, deviceId);
+            }
             if (hint != null) {
-                if (args == null) {
-                    args = new Bundle();
-                }
                 args.putBoolean(hint, true);
             }
-            StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
-            if (statusbar != null) {
-                statusbar.startAssist(args);
-            }
         }
+        ((SearchManager) mContext.createContextAsUser(UserHandle.of(mCurrentUserId), 0)
+                .getSystemService(Context.SEARCH_SERVICE)).launchAssist(args);
     }
 
     /** Launches ACTION_VOICE_ASSIST. Does nothing on keyguard. */

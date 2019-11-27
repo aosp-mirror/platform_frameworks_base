@@ -75,7 +75,7 @@ package android {
     field public static final String GET_PROCESS_STATE_AND_OOM_SCORE = "android.permission.GET_PROCESS_STATE_AND_OOM_SCORE";
     field public static final String GET_RUNTIME_PERMISSIONS = "android.permission.GET_RUNTIME_PERMISSIONS";
     field public static final String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
-    field public static final String GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS = "android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS";
+    field @Deprecated public static final String GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS = "android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS";
     field public static final String GRANT_RUNTIME_PERMISSIONS = "android.permission.GRANT_RUNTIME_PERMISSIONS";
     field public static final String GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS = "android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS";
     field public static final String HANDLE_CAR_MODE_CHANGES = "android.permission.HANDLE_CAR_MODE_CHANGES";
@@ -604,6 +604,10 @@ package android.app {
     method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
   }
 
+  public class SearchManager implements android.content.DialogInterface.OnCancelListener android.content.DialogInterface.OnDismissListener {
+    method public void launchAssist(@Nullable android.os.Bundle);
+  }
+
   public final class StatsManager {
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void addConfig(long, byte[]) throws android.app.StatsManager.StatsUnavailableException;
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean addConfiguration(long, byte[]);
@@ -646,6 +650,29 @@ package android.app {
     method public boolean isRecentsDisabled();
     method public boolean isSearchDisabled();
     method public boolean isStatusBarExpansionDisabled();
+  }
+
+  public final class SystemServiceRegistry {
+    method public static <TServiceClass> void registerContextAwareService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.ContextAwareServiceProducerWithBinder<TServiceClass>);
+    method public static <TServiceClass> void registerContextAwareService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.ContextAwareServiceProducerWithoutBinder<TServiceClass>);
+    method public static <TServiceClass> void registerStaticService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.StaticServiceProducerWithBinder<TServiceClass>);
+    method public static <TServiceClass> void registerStaticService(@NonNull String, @NonNull Class<TServiceClass>, @NonNull android.app.SystemServiceRegistry.StaticServiceProducerWithoutBinder<TServiceClass>);
+  }
+
+  public static interface SystemServiceRegistry.ContextAwareServiceProducerWithBinder<TServiceClass> {
+    method @NonNull public TServiceClass createService(@NonNull android.content.Context, @NonNull android.os.IBinder);
+  }
+
+  public static interface SystemServiceRegistry.ContextAwareServiceProducerWithoutBinder<TServiceClass> {
+    method @NonNull public TServiceClass createService(@NonNull android.content.Context);
+  }
+
+  public static interface SystemServiceRegistry.StaticServiceProducerWithBinder<TServiceClass> {
+    method @NonNull public TServiceClass createService(@NonNull android.os.IBinder);
+  }
+
+  public static interface SystemServiceRegistry.StaticServiceProducerWithoutBinder<TServiceClass> {
+    method @NonNull public TServiceClass createService();
   }
 
   public class UiModeManager {
@@ -741,7 +768,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public boolean packageHasActiveAdmins(String);
     method @Deprecated @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public boolean setActiveProfileOwner(@NonNull android.content.ComponentName, String) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setDeviceProvisioningConfigApplied();
-    method @RequiresPermission(value=android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS, conditional=true) public void setProfileOwnerCanAccessDeviceIds(@NonNull android.content.ComponentName);
+    method @Deprecated @RequiresPermission(value=android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS, conditional=true) public void setProfileOwnerCanAccessDeviceIds(@NonNull android.content.ComponentName);
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
     field public static final String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
     field public static final String ACTION_PROVISION_FINALIZATION = "android.app.action.PROVISION_FINALIZATION";
@@ -1087,6 +1114,10 @@ package android.app.job {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public abstract int scheduleAsPackage(@NonNull android.app.job.JobInfo, @NonNull String, int, String);
   }
 
+  public class JobSchedulerFrameworkInitializer {
+    method public static void registerServiceWrappers();
+  }
+
 }
 
 package android.app.prediction {
@@ -1279,7 +1310,7 @@ package android.app.usage {
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void unregisterAppUsageLimitObserver(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void unregisterAppUsageObserver(int);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void unregisterUsageSessionObserver(int);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(String, long, android.os.UserHandle);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(String, long, android.os.UserHandle);
     field public static final String EXTRA_OBSERVER_ID = "android.app.usage.extra.OBSERVER_ID";
     field public static final String EXTRA_TIME_LIMIT = "android.app.usage.extra.TIME_LIMIT";
     field public static final String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
@@ -1356,7 +1387,23 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPriority(android.bluetooth.BluetoothDevice, int);
   }
 
+  public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
+    method protected void finalize();
+    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    method public boolean isTetheringOn();
+    method public void setBluetoothTethering(boolean);
+    field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
+    field public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
+    field public static final int LOCAL_NAP_ROLE = 1; // 0x1
+    field public static final int LOCAL_PANU_ROLE = 2; // 0x2
+    field public static final int PAN_ROLE_NONE = 0; // 0x0
+    field public static final int REMOTE_NAP_ROLE = 1; // 0x1
+    field public static final int REMOTE_PANU_ROLE = 2; // 0x2
+  }
+
   public interface BluetoothProfile {
+    field public static final int PAN = 5; // 0x5
     field public static final int PRIORITY_OFF = 0; // 0x0
     field public static final int PRIORITY_ON = 100; // 0x64
   }
@@ -1433,6 +1480,7 @@ package android.content {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
     method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
+    field public static final String APP_INTEGRITY_SERVICE = "app_integrity";
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
     field public static final String BACKUP_SERVICE = "backup";
     field public static final String BATTERY_STATS_SERVICE = "batterystats";
@@ -1485,6 +1533,7 @@ package android.content {
     field public static final String ACTION_MANAGE_PERMISSION_APPS = "android.intent.action.MANAGE_PERMISSION_APPS";
     field @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public static final String ACTION_MANAGE_SPECIAL_APP_ACCESSES = "android.intent.action.MANAGE_SPECIAL_APP_ACCESSES";
     field public static final String ACTION_MASTER_CLEAR_NOTIFICATION = "android.intent.action.MASTER_CLEAR_NOTIFICATION";
+    field public static final String ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION = "android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION";
     field public static final String ACTION_PENDING_INCIDENT_REPORTS_CHANGED = "android.intent.action.PENDING_INCIDENT_REPORTS_CHANGED";
     field public static final String ACTION_PRE_BOOT_COMPLETED = "android.intent.action.PRE_BOOT_COMPLETED";
     field public static final String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
@@ -1528,6 +1577,150 @@ package android.content {
   public class IntentFilter implements android.os.Parcelable {
     method public final int getOrder();
     method public final void setOrder(int);
+  }
+
+}
+
+package android.content.integrity {
+
+  public final class AppInstallMetadata {
+    method @NonNull public String getAppCertificate();
+    method @Nullable public String getInstallerCertificate();
+    method @Nullable public String getInstallerName();
+    method @NonNull public String getPackageName();
+    method public int getVersionCode();
+    method public boolean isPreInstalled();
+  }
+
+  public static final class AppInstallMetadata.Builder {
+    ctor public AppInstallMetadata.Builder();
+    method @NonNull public android.content.integrity.AppInstallMetadata build();
+    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setAppCertificate(@NonNull String);
+    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setInstallerCertificate(@NonNull String);
+    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setInstallerName(@NonNull String);
+    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setIsPreInstalled(boolean);
+    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setPackageName(@NonNull String);
+    method @NonNull public android.content.integrity.AppInstallMetadata.Builder setVersionCode(int);
+  }
+
+  public class AppIntegrityManager {
+    method @NonNull public String getCurrentRuleSetProvider();
+    method @NonNull public String getCurrentRuleSetVersion();
+    method public void updateRuleSet(@NonNull android.content.integrity.RuleSet, @NonNull android.content.IntentSender);
+    field public static final String EXTRA_STATUS = "android.content.integrity.extra.STATUS";
+    field public static final int STATUS_FAILURE = 1; // 0x1
+    field public static final int STATUS_SUCCESS = 0; // 0x0
+  }
+
+  public abstract class AtomicFormula implements android.content.integrity.Formula {
+    ctor public AtomicFormula(@android.content.integrity.AtomicFormula.Key int);
+    method public int getKey();
+    field public static final int APP_CERTIFICATE = 1; // 0x1
+    field public static final int EQ = 0; // 0x0
+    field public static final int GE = 4; // 0x4
+    field public static final int GT = 3; // 0x3
+    field public static final int INSTALLER_CERTIFICATE = 3; // 0x3
+    field public static final int INSTALLER_NAME = 2; // 0x2
+    field public static final int LE = 2; // 0x2
+    field public static final int LT = 1; // 0x1
+    field public static final int PACKAGE_NAME = 0; // 0x0
+    field public static final int PRE_INSTALLED = 5; // 0x5
+    field public static final int VERSION_CODE = 4; // 0x4
+  }
+
+  public static final class AtomicFormula.BooleanAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
+    ctor public AtomicFormula.BooleanAtomicFormula(@android.content.integrity.AtomicFormula.Key int, boolean);
+    method public int describeContents();
+    method public int getTag();
+    method public boolean getValue();
+    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.AtomicFormula.BooleanAtomicFormula> CREATOR;
+  }
+
+  public static final class AtomicFormula.IntAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
+    ctor public AtomicFormula.IntAtomicFormula(@android.content.integrity.AtomicFormula.Key int, @android.content.integrity.AtomicFormula.Operator int, int);
+    method public int describeContents();
+    method public int getOperator();
+    method public int getTag();
+    method public int getValue();
+    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.AtomicFormula.IntAtomicFormula> CREATOR;
+  }
+
+  @IntDef({android.content.integrity.AtomicFormula.PACKAGE_NAME, android.content.integrity.AtomicFormula.APP_CERTIFICATE, android.content.integrity.AtomicFormula.INSTALLER_NAME, android.content.integrity.AtomicFormula.INSTALLER_CERTIFICATE, android.content.integrity.AtomicFormula.VERSION_CODE, android.content.integrity.AtomicFormula.PRE_INSTALLED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface AtomicFormula.Key {
+  }
+
+  @IntDef({android.content.integrity.AtomicFormula.EQ, android.content.integrity.AtomicFormula.LT, android.content.integrity.AtomicFormula.LE, android.content.integrity.AtomicFormula.GT, android.content.integrity.AtomicFormula.GE}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface AtomicFormula.Operator {
+  }
+
+  public static final class AtomicFormula.StringAtomicFormula extends android.content.integrity.AtomicFormula implements android.os.Parcelable {
+    ctor public AtomicFormula.StringAtomicFormula(@android.content.integrity.AtomicFormula.Key int, @NonNull String, boolean);
+    method public int describeContents();
+    method public boolean getIsHashedValue();
+    method public int getTag();
+    method @NonNull public String getValue();
+    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.AtomicFormula.StringAtomicFormula> CREATOR;
+  }
+
+  public final class CompoundFormula implements android.content.integrity.Formula android.os.Parcelable {
+    ctor public CompoundFormula(@android.content.integrity.CompoundFormula.Connector int, @NonNull java.util.List<android.content.integrity.Formula>);
+    method public int describeContents();
+    method @android.content.integrity.CompoundFormula.Connector public int getConnector();
+    method @NonNull public java.util.List<android.content.integrity.Formula> getFormulas();
+    method public int getTag();
+    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int AND = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.CompoundFormula> CREATOR;
+    field public static final int NOT = 2; // 0x2
+    field public static final int OR = 1; // 0x1
+  }
+
+  @IntDef({android.content.integrity.CompoundFormula.AND, android.content.integrity.CompoundFormula.OR, android.content.integrity.CompoundFormula.NOT}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface CompoundFormula.Connector {
+  }
+
+  public interface Formula {
+    method @android.content.integrity.Formula.Tag public int getTag();
+    method public boolean isSatisfied(@NonNull android.content.integrity.AppInstallMetadata);
+    method @NonNull public static android.content.integrity.Formula readFromParcel(@NonNull android.os.Parcel);
+    method public static void writeToParcel(@NonNull android.content.integrity.Formula, @NonNull android.os.Parcel, int);
+    field public static final int BOOLEAN_ATOMIC_FORMULA_TAG = 3; // 0x3
+    field public static final int COMPOUND_FORMULA_TAG = 0; // 0x0
+    field public static final int INT_ATOMIC_FORMULA_TAG = 2; // 0x2
+    field public static final int STRING_ATOMIC_FORMULA_TAG = 1; // 0x1
+  }
+
+  @IntDef({android.content.integrity.Formula.COMPOUND_FORMULA_TAG, android.content.integrity.Formula.STRING_ATOMIC_FORMULA_TAG, android.content.integrity.Formula.INT_ATOMIC_FORMULA_TAG, android.content.integrity.Formula.BOOLEAN_ATOMIC_FORMULA_TAG}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface Formula.Tag {
+  }
+
+  public final class Rule implements android.os.Parcelable {
+    ctor public Rule(@NonNull android.content.integrity.Formula, @android.content.integrity.Rule.Effect int);
+    method public int describeContents();
+    method @android.content.integrity.Rule.Effect public int getEffect();
+    method @NonNull public android.content.integrity.Formula getFormula();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.integrity.Rule> CREATOR;
+    field public static final int DENY = 0; // 0x0
+    field public static final int FORCE_ALLOW = 1; // 0x1
+  }
+
+  @IntDef({android.content.integrity.Rule.DENY, android.content.integrity.Rule.FORCE_ALLOW}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface Rule.Effect {
+  }
+
+  public class RuleSet {
+    method @NonNull public java.util.List<android.content.integrity.Rule> getRules();
+    method @NonNull public String getVersion();
+  }
+
+  public static class RuleSet.Builder {
+    ctor public RuleSet.Builder();
+    method @NonNull public android.content.integrity.RuleSet.Builder addRules(@NonNull java.util.List<android.content.integrity.Rule>);
+    method @NonNull public android.content.integrity.RuleSet build();
+    method @NonNull public android.content.integrity.RuleSet.Builder setVersion(@NonNull String);
   }
 
 }
@@ -1823,7 +2016,6 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_TELEPHONY = 4194304; // 0x400000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
-    field public static final int PROTECTION_FLAG_WIFI = 8388608; // 0x800000
     field @Nullable public final String backgroundPermission;
     field @StringRes public int requestRes;
   }
@@ -4183,6 +4375,33 @@ package android.net {
     method public void onUpstreamChanged(@Nullable android.net.Network);
   }
 
+  public final class IpConfiguration implements android.os.Parcelable {
+    ctor public IpConfiguration();
+    ctor public IpConfiguration(@NonNull android.net.IpConfiguration);
+    method @Nullable public android.net.ProxyInfo getHttpProxy();
+    method @NonNull public android.net.IpConfiguration.IpAssignment getIpAssignment();
+    method @NonNull public android.net.IpConfiguration.ProxySettings getProxySettings();
+    method @Nullable public android.net.StaticIpConfiguration getStaticIpConfiguration();
+    method public void setHttpProxy(@Nullable android.net.ProxyInfo);
+    method public void setIpAssignment(@NonNull android.net.IpConfiguration.IpAssignment);
+    method public void setProxySettings(@NonNull android.net.IpConfiguration.ProxySettings);
+    method public void setStaticIpConfiguration(@Nullable android.net.StaticIpConfiguration);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.IpConfiguration> CREATOR;
+  }
+
+  public enum IpConfiguration.IpAssignment {
+    enum_constant public static final android.net.IpConfiguration.IpAssignment DHCP;
+    enum_constant public static final android.net.IpConfiguration.IpAssignment STATIC;
+    enum_constant public static final android.net.IpConfiguration.IpAssignment UNASSIGNED;
+  }
+
+  public enum IpConfiguration.ProxySettings {
+    enum_constant public static final android.net.IpConfiguration.ProxySettings NONE;
+    enum_constant public static final android.net.IpConfiguration.ProxySettings PAC;
+    enum_constant public static final android.net.IpConfiguration.ProxySettings STATIC;
+    enum_constant public static final android.net.IpConfiguration.ProxySettings UNASSIGNED;
+  }
+
   public final class IpPrefix implements android.os.Parcelable {
     ctor public IpPrefix(@NonNull java.net.InetAddress, @IntRange(from=0, to=128) int);
     ctor public IpPrefix(@NonNull String);
@@ -4255,6 +4474,7 @@ package android.net {
 
   public class NetworkKey implements android.os.Parcelable {
     ctor public NetworkKey(android.net.WifiKey);
+    method @Nullable public static android.net.NetworkKey createFromScanResult(@Nullable android.net.wifi.ScanResult);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkKey> CREATOR;
@@ -4277,16 +4497,23 @@ package android.net {
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, "android.permission.REQUEST_NETWORK_SCORES"}) public boolean clearScores() throws java.lang.SecurityException;
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, "android.permission.REQUEST_NETWORK_SCORES"}) public void disableScoring() throws java.lang.SecurityException;
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, "android.permission.REQUEST_NETWORK_SCORES"}) public String getActiveScorerPackage();
+    method @RequiresPermission("android.permission.REQUEST_NETWORK_SCORES") public void registerNetworkScoreCallback(int, int, @NonNull java.util.concurrent.Executor, @NonNull android.net.NetworkScoreManager.NetworkScoreCallback) throws java.lang.SecurityException;
+    method @RequiresPermission("android.permission.REQUEST_NETWORK_SCORES") public boolean requestScores(@NonNull android.net.NetworkKey[]) throws java.lang.SecurityException;
     method @RequiresPermission(anyOf={android.Manifest.permission.SCORE_NETWORKS, "android.permission.REQUEST_NETWORK_SCORES"}) public boolean setActiveScorer(String) throws java.lang.SecurityException;
-    method @RequiresPermission(android.Manifest.permission.SCORE_NETWORKS) public boolean updateScores(android.net.ScoredNetwork[]) throws java.lang.SecurityException;
-    field public static final String ACTION_CHANGE_ACTIVE = "android.net.scoring.CHANGE_ACTIVE";
+    method @RequiresPermission(android.Manifest.permission.SCORE_NETWORKS) public boolean updateScores(@NonNull android.net.ScoredNetwork[]) throws java.lang.SecurityException;
+    field @Deprecated public static final String ACTION_CHANGE_ACTIVE = "android.net.scoring.CHANGE_ACTIVE";
     field public static final String ACTION_CUSTOM_ENABLE = "android.net.scoring.CUSTOM_ENABLE";
     field public static final String ACTION_RECOMMEND_NETWORKS = "android.net.action.RECOMMEND_NETWORKS";
     field public static final String ACTION_SCORER_CHANGED = "android.net.scoring.SCORER_CHANGED";
-    field public static final String ACTION_SCORE_NETWORKS = "android.net.scoring.SCORE_NETWORKS";
-    field public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
+    field @Deprecated public static final String ACTION_SCORE_NETWORKS = "android.net.scoring.SCORE_NETWORKS";
+    field @Deprecated public static final String EXTRA_NETWORKS_TO_SCORE = "networksToScore";
     field public static final String EXTRA_NEW_SCORER = "newScorer";
-    field public static final String EXTRA_PACKAGE_NAME = "packageName";
+    field @Deprecated public static final String EXTRA_PACKAGE_NAME = "packageName";
+  }
+
+  public static interface NetworkScoreManager.NetworkScoreCallback {
+    method public void clearScores();
+    method public void updateScores(@NonNull java.util.List<android.net.ScoredNetwork>);
   }
 
   public class NetworkStack {
@@ -4404,6 +4631,258 @@ package android.net.apf {
     field public final int apfPacketFormat;
     field public final int apfVersionSupported;
     field public final int maximumApfProgramSize;
+  }
+
+}
+
+package android.net.eap {
+
+  public final class EapSessionConfig {
+  }
+
+  public static final class EapSessionConfig.Builder {
+    ctor public EapSessionConfig.Builder();
+    method @NonNull public android.net.eap.EapSessionConfig build();
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapAkaConfig(int, int);
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapAkaPrimeConfig(int, int, @NonNull String, boolean);
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapIdentity(@NonNull byte[]);
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapMsChapV2Config(@NonNull String, @NonNull String);
+    method @NonNull public android.net.eap.EapSessionConfig.Builder setEapSimConfig(int, int);
+  }
+
+  public static class EapSessionConfig.EapAkaConfig extends android.net.eap.EapSessionConfig.EapUiccConfig {
+  }
+
+  public static class EapSessionConfig.EapAkaPrimeConfig extends android.net.eap.EapSessionConfig.EapAkaConfig {
+    method public boolean allowsMismatchedNetworkNames();
+    method @NonNull public String getNetworkName();
+  }
+
+  public abstract static class EapSessionConfig.EapMethodConfig {
+    method public int getMethodType();
+  }
+
+  public static class EapSessionConfig.EapMsChapV2Config extends android.net.eap.EapSessionConfig.EapMethodConfig {
+    method @NonNull public String getPassword();
+    method @NonNull public String getUsername();
+  }
+
+  public static class EapSessionConfig.EapSimConfig extends android.net.eap.EapSessionConfig.EapUiccConfig {
+  }
+
+  public abstract static class EapSessionConfig.EapUiccConfig extends android.net.eap.EapSessionConfig.EapMethodConfig {
+    method public int getAppType();
+    method public int getSubId();
+  }
+
+}
+
+package android.net.ipsec.ike {
+
+  public final class ChildSaProposal extends android.net.ipsec.ike.SaProposal {
+  }
+
+  public static final class ChildSaProposal.Builder {
+    ctor public ChildSaProposal.Builder();
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addDhGroup(int);
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addEncryptionAlgorithm(int, int);
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal.Builder addIntegrityAlgorithm(int);
+    method @NonNull public android.net.ipsec.ike.ChildSaProposal build();
+  }
+
+  public interface ChildSessionCallback {
+    method public void onClosed();
+    method public void onClosedExceptionally(@NonNull android.net.ipsec.ike.exceptions.IkeException);
+    method public void onIpSecTransformCreated(@NonNull android.net.IpSecTransform, int);
+    method public void onIpSecTransformDeleted(@NonNull android.net.IpSecTransform, int);
+    method public void onOpened(@NonNull android.net.ipsec.ike.ChildSessionConfiguration);
+  }
+
+  public final class ChildSessionConfiguration {
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getInboundTrafficSelectors();
+    method @NonNull public java.util.List<android.net.LinkAddress> getInternalAddresses();
+    method @NonNull public java.util.List<java.net.InetAddress> getInternalDhcpServers();
+    method @NonNull public java.util.List<java.net.InetAddress> getInternalDnsServers();
+    method @NonNull public java.util.List<android.net.LinkAddress> getInternalSubnets();
+    method @NonNull public java.util.List<android.net.ipsec.ike.IkeTrafficSelector> getOutboundTrafficSelectors();
+  }
+
+  public abstract class ChildSessionOptions {
+  }
+
+  public class IkeFqdnIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeFqdnIdentification(@NonNull String);
+    field @NonNull public final String fqdn;
+  }
+
+  public abstract class IkeIdentification {
+  }
+
+  public final class IkeIpv4AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeIpv4AddrIdentification(@NonNull java.net.Inet4Address);
+    field @NonNull public final java.net.Inet4Address ipv4Address;
+  }
+
+  public class IkeIpv6AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeIpv6AddrIdentification(@NonNull java.net.Inet6Address);
+    field @NonNull public final java.net.Inet6Address ipv6Address;
+  }
+
+  public final class IkeKeyIdIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeKeyIdIdentification(@NonNull byte[]);
+    field @NonNull public final byte[] keyId;
+  }
+
+  public final class IkeRfc822AddrIdentification extends android.net.ipsec.ike.IkeIdentification {
+    ctor public IkeRfc822AddrIdentification(@NonNull String);
+    field @NonNull public final String rfc822Name;
+  }
+
+  public final class IkeSaProposal extends android.net.ipsec.ike.SaProposal {
+    method @NonNull public java.util.List<java.lang.Integer> getPseudorandomFunctions();
+  }
+
+  public static final class IkeSaProposal.Builder {
+    ctor public IkeSaProposal.Builder();
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addDhGroup(int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addEncryptionAlgorithm(int, int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addIntegrityAlgorithm(int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal.Builder addPseudorandomFunction(int);
+    method @NonNull public android.net.ipsec.ike.IkeSaProposal build();
+  }
+
+  public final class IkeSession implements java.lang.AutoCloseable {
+    ctor public IkeSession(@NonNull android.content.Context, @NonNull android.net.ipsec.ike.IkeSessionOptions, @NonNull android.net.ipsec.ike.ChildSessionOptions, @NonNull java.util.concurrent.Executor, @NonNull android.net.ipsec.ike.IkeSessionCallback, @NonNull android.net.ipsec.ike.ChildSessionCallback);
+    method public void close();
+    method public void closeChildSession(@NonNull android.net.ipsec.ike.ChildSessionCallback);
+    method public void kill();
+    method public void openChildSession(@NonNull android.net.ipsec.ike.ChildSessionOptions, @NonNull android.net.ipsec.ike.ChildSessionCallback);
+  }
+
+  public interface IkeSessionCallback {
+    method public void onClosed();
+    method public void onClosedExceptionally(@NonNull android.net.ipsec.ike.exceptions.IkeException);
+    method public void onError(@NonNull android.net.ipsec.ike.exceptions.IkeProtocolException);
+    method public void onOpened(@NonNull android.net.ipsec.ike.IkeSessionConfiguration);
+  }
+
+  public final class IkeSessionConfiguration {
+    ctor public IkeSessionConfiguration();
+    method @NonNull public String getRemoteApplicationVersion();
+    method public boolean isIkeExtensionEnabled(int);
+    field public static final int EXTENSION_TYPE_FRAGMENTATION = 1; // 0x1
+    field public static final int EXTENSION_TYPE_MOBIKE = 2; // 0x2
+  }
+
+  public final class IkeSessionOptions {
+  }
+
+  public static final class IkeSessionOptions.Builder {
+    ctor public IkeSessionOptions.Builder();
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder addSaProposal(@NonNull android.net.ipsec.ike.IkeSaProposal);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions build();
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.security.PrivateKey);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.cert.X509Certificate, @NonNull java.util.List<java.security.cert.X509Certificate>, @NonNull java.security.PrivateKey);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthEap(@NonNull java.security.cert.X509Certificate, @NonNull android.net.eap.EapSessionConfig);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setAuthPsk(@NonNull byte[]);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setLocalIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setRemoteIdentification(@NonNull android.net.ipsec.ike.IkeIdentification);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setServerAddress(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.ipsec.ike.IkeSessionOptions.Builder setUdpEncapsulationSocket(@NonNull android.net.IpSecManager.UdpEncapsulationSocket);
+  }
+
+  public final class IkeTrafficSelector {
+    ctor public IkeTrafficSelector(int, int, @NonNull java.net.InetAddress, @NonNull java.net.InetAddress);
+    field public final int endPort;
+    field @NonNull public final java.net.InetAddress endingAddress;
+    field public final int startPort;
+    field @NonNull public final java.net.InetAddress startingAddress;
+  }
+
+  public abstract class SaProposal {
+    method @NonNull public java.util.List<java.lang.Integer> getDhGroups();
+    method @NonNull public java.util.List<android.util.Pair<java.lang.Integer,java.lang.Integer>> getEncryptionAlgorithms();
+    method @NonNull public java.util.List<java.lang.Integer> getIntegrityAlgorithms();
+    field public static final int DH_GROUP_1024_BIT_MODP = 2; // 0x2
+    field public static final int DH_GROUP_2048_BIT_MODP = 14; // 0xe
+    field public static final int DH_GROUP_NONE = 0; // 0x0
+    field public static final int ENCRYPTION_ALGORITHM_3DES = 3; // 0x3
+    field public static final int ENCRYPTION_ALGORITHM_AES_CBC = 12; // 0xc
+    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_12 = 19; // 0x13
+    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_16 = 20; // 0x14
+    field public static final int ENCRYPTION_ALGORITHM_AES_GCM_8 = 18; // 0x12
+    field public static final int INTEGRITY_ALGORITHM_AES_XCBC_96 = 5; // 0x5
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA1_96 = 2; // 0x2
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_256_128 = 12; // 0xc
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_384_192 = 13; // 0xd
+    field public static final int INTEGRITY_ALGORITHM_HMAC_SHA2_512_256 = 14; // 0xe
+    field public static final int INTEGRITY_ALGORITHM_NONE = 0; // 0x0
+    field public static final int KEY_LEN_AES_128 = 128; // 0x80
+    field public static final int KEY_LEN_AES_192 = 192; // 0xc0
+    field public static final int KEY_LEN_AES_256 = 256; // 0x100
+    field public static final int KEY_LEN_UNUSED = 0; // 0x0
+    field public static final int PSEUDORANDOM_FUNCTION_AES128_XCBC = 4; // 0x4
+    field public static final int PSEUDORANDOM_FUNCTION_HMAC_SHA1 = 2; // 0x2
+  }
+
+  public final class TransportModeChildSessionOptions extends android.net.ipsec.ike.ChildSessionOptions {
+  }
+
+  public static final class TransportModeChildSessionOptions.Builder {
+    ctor public TransportModeChildSessionOptions.Builder();
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
+    method @NonNull public android.net.ipsec.ike.TransportModeChildSessionOptions build();
+  }
+
+  public final class TunnelModeChildSessionOptions extends android.net.ipsec.ike.ChildSessionOptions {
+  }
+
+  public static final class TunnelModeChildSessionOptions.Builder {
+    ctor public TunnelModeChildSessionOptions.Builder();
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalAddressRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalAddressRequest(@NonNull java.net.InetAddress, int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDhcpServerRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDhcpServerRequest(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDnsServerRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalDnsServerRequest(@NonNull java.net.InetAddress);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addInternalSubnetRequest(int);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addOutboundTrafficSelectors(@NonNull android.net.ipsec.ike.IkeTrafficSelector);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions.Builder addSaProposal(@NonNull android.net.ipsec.ike.ChildSaProposal);
+    method @NonNull public android.net.ipsec.ike.TunnelModeChildSessionOptions build();
+  }
+
+}
+
+package android.net.ipsec.ike.exceptions {
+
+  public abstract class IkeException extends java.lang.Exception {
+  }
+
+  public final class IkeInternalException extends android.net.ipsec.ike.exceptions.IkeException {
+  }
+
+  public abstract class IkeProtocolException extends android.net.ipsec.ike.exceptions.IkeException {
+    method @Nullable public byte[] getErrorData();
+    method public int getErrorType();
+    field public static final int ERROR_TYPE_AUTHENTICATION_FAILED = 24; // 0x18
+    field public static final int ERROR_TYPE_CHILD_SA_NOT_FOUND = 44; // 0x2c
+    field public static final int ERROR_TYPE_FAILED_CP_REQUIRED = 37; // 0x25
+    field public static final int ERROR_TYPE_INTERNAL_ADDRESS_FAILURE = 36; // 0x24
+    field public static final int ERROR_TYPE_INVALID_IKE_SPI = 4; // 0x4
+    field public static final int ERROR_TYPE_INVALID_KE_PAYLOAD = 17; // 0x11
+    field public static final int ERROR_TYPE_INVALID_MAJOR_VERSION = 5; // 0x5
+    field public static final int ERROR_TYPE_INVALID_MESSAGE_ID = 9; // 0x9
+    field public static final int ERROR_TYPE_INVALID_SELECTORS = 39; // 0x27
+    field public static final int ERROR_TYPE_INVALID_SYNTAX = 7; // 0x7
+    field public static final int ERROR_TYPE_NO_ADDITIONAL_SAS = 35; // 0x23
+    field public static final int ERROR_TYPE_NO_PROPOSAL_CHOSEN = 14; // 0xe
+    field public static final int ERROR_TYPE_SINGLE_PAIR_REQUIRED = 34; // 0x22
+    field public static final int ERROR_TYPE_TEMPORARY_FAILURE = 43; // 0x2b
+    field public static final int ERROR_TYPE_TS_UNACCEPTABLE = 38; // 0x26
+    field public static final int ERROR_TYPE_UNSUPPORTED_CRITICAL_PAYLOAD = 1; // 0x1
   }
 
 }
@@ -4833,24 +5312,94 @@ package android.net.wifi {
   }
 
   @Deprecated public class WifiConfiguration implements android.os.Parcelable {
+    method @Deprecated public int getAuthType();
+    method @Deprecated @NonNull public android.net.IpConfiguration.IpAssignment getIpAssignment();
+    method @Deprecated @NonNull public android.net.wifi.WifiConfiguration.NetworkSelectionStatus getNetworkSelectionStatus();
+    method @Deprecated @NonNull public String getPrintableSsid();
+    method @Deprecated @NonNull public android.net.IpConfiguration.ProxySettings getProxySettings();
+    method @Deprecated @Nullable public android.net.StaticIpConfiguration getStaticIpConfiguration();
     method @Deprecated public boolean hasNoInternetAccess();
     method @Deprecated public boolean isEphemeral();
+    method @Deprecated public static boolean isMetered(@Nullable android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiInfo);
     method @Deprecated public boolean isNoInternetAccessExpected();
+    method @Deprecated public void setIpConfiguration(@Nullable android.net.IpConfiguration);
+    method @Deprecated public void setProxy(@NonNull android.net.IpConfiguration.ProxySettings, @NonNull android.net.ProxyInfo);
+    field @Deprecated public static final int AP_BAND_2GHZ = 0; // 0x0
+    field @Deprecated public static final int AP_BAND_5GHZ = 1; // 0x1
+    field @Deprecated public static final int AP_BAND_ANY = -1; // 0xffffffff
+    field @Deprecated public static final int INVALID_NETWORK_ID = -1; // 0xffffffff
+    field @Deprecated public static final int METERED_OVERRIDE_METERED = 1; // 0x1
+    field @Deprecated public static final int METERED_OVERRIDE_NONE = 0; // 0x0
+    field @Deprecated public static final int METERED_OVERRIDE_NOT_METERED = 2; // 0x2
+    field @Deprecated public static final int RANDOMIZATION_NONE = 0; // 0x0
+    field @Deprecated public static final int RANDOMIZATION_PERSISTENT = 1; // 0x1
     field @Deprecated public boolean allowAutojoin;
+    field @Deprecated public int apBand;
     field @Deprecated public int carrierId;
     field @Deprecated public String creatorName;
     field @Deprecated public int creatorUid;
+    field @Deprecated public boolean fromWifiNetworkSpecifier;
+    field @Deprecated public boolean fromWifiNetworkSuggestion;
     field @Deprecated public String lastUpdateName;
     field @Deprecated public int lastUpdateUid;
+    field @Deprecated public int macRandomizationSetting;
     field @Deprecated public boolean meteredHint;
+    field @Deprecated public int meteredOverride;
     field @Deprecated public int numAssociation;
     field @Deprecated public int numScorerOverride;
     field @Deprecated public int numScorerOverrideAndSwitchedNetwork;
+    field @Deprecated @NonNull public final android.net.wifi.WifiConfiguration.RecentFailure recentFailure;
+    field @Deprecated public boolean requirePMF;
+    field @Deprecated @Nullable public String saePasswordId;
+    field @Deprecated public boolean shared;
     field @Deprecated public boolean useExternalScores;
   }
 
   @Deprecated public static class WifiConfiguration.KeyMgmt {
     field @Deprecated public static final int WPA2_PSK = 4; // 0x4
+  }
+
+  @Deprecated public static class WifiConfiguration.NetworkSelectionStatus {
+    method @Deprecated public int getDisableReasonCounter(int);
+    method @Deprecated public long getDisableTime();
+    method @Deprecated public boolean getHasEverConnected();
+    method @Deprecated @Nullable public static String getNetworkDisableReasonString(int);
+    method @Deprecated public int getNetworkSelectionDisableReason();
+    method @Deprecated @NonNull public String getNetworkStatusString();
+    method @Deprecated public boolean isNetworkEnabled();
+    method @Deprecated public boolean isNetworkPermanentlyDisabled();
+    field @Deprecated public static final int DISABLED_ASSOCIATION_REJECTION = 1; // 0x1
+    field @Deprecated public static final int DISABLED_AUTHENTICATION_FAILURE = 2; // 0x2
+    field @Deprecated public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 5; // 0x5
+    field @Deprecated public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 9; // 0x9
+    field @Deprecated public static final int DISABLED_BY_WIFI_MANAGER = 7; // 0x7
+    field @Deprecated public static final int DISABLED_BY_WRONG_PASSWORD = 8; // 0x8
+    field @Deprecated public static final int DISABLED_DHCP_FAILURE = 3; // 0x3
+    field @Deprecated public static final int DISABLED_NO_INTERNET_PERMANENT = 6; // 0x6
+    field @Deprecated public static final int DISABLED_NO_INTERNET_TEMPORARY = 4; // 0x4
+    field @Deprecated public static final int NETWORK_SELECTION_DISABLED_MAX = 10; // 0xa
+    field @Deprecated public static final int NETWORK_SELECTION_ENABLE = 0; // 0x0
+  }
+
+  @Deprecated public static class WifiConfiguration.RecentFailure {
+    method @Deprecated public int getAssociationStatus();
+    field @Deprecated public static final int NONE = 0; // 0x0
+    field @Deprecated public static final int STATUS_AP_UNABLE_TO_HANDLE_NEW_STA = 17; // 0x11
+  }
+
+  public class WifiEnterpriseConfig implements android.os.Parcelable {
+    method @Nullable public String[] getCaCertificateAliases();
+    method @NonNull public String getCaPath();
+    method @NonNull public String getClientCertificateAlias();
+    method public int getOcsp();
+    method public void setCaCertificateAliases(@Nullable String[]);
+    method public void setCaPath(@Nullable String);
+    method public void setClientCertificateAlias(@Nullable String);
+    method public void setOcsp(int);
+    field public static final int OCSP_NONE = 0; // 0x0
+    field public static final int OCSP_REQUEST_CERT_STATUS = 1; // 0x1
+    field public static final int OCSP_REQUIRE_ALL_NON_TRUSTED_CERTS_STATUS = 3; // 0x3
+    field public static final int OCSP_REQUIRE_CERT_STATUS = 2; // 0x2
   }
 
   public class WifiFrameworkInitializer {
@@ -5734,6 +6283,11 @@ package android.os {
   }
 
   public class PowerWhitelistManager {
+    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void whitelistAppTemporarily(@NonNull String, long);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public long whitelistAppTemporarilyForEvent(@NonNull String, int, @NonNull String);
+    field public static final int EVENT_MMS = 2; // 0x2
+    field public static final int EVENT_SMS = 1; // 0x1
+    field public static final int EVENT_UNSPECIFIED = 0; // 0x0
   }
 
   public class RecoverySystem {
@@ -5862,6 +6416,7 @@ package android.os {
   }
 
   public final class UserHandle implements android.os.Parcelable {
+    method @NonNull public static String formatUid(int);
     method public static int getAppId(int);
     method public int getIdentifier();
     method @Deprecated public boolean isOwner();
@@ -6445,7 +7000,7 @@ package android.provider {
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, @Nullable String, boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
-    field public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED = "accessibility_display_magnification_navbar_enabled";
+    field @Deprecated public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED = "accessibility_display_magnification_navbar_enabled";
     field public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
     field public static final String AUTOFILL_FEATURE_FIELD_CLASSIFICATION = "autofill_field_classification";
     field public static final String AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT = "autofill_user_data_max_category_count";
@@ -6465,6 +7020,7 @@ package android.provider {
     field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
     field public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
     field public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
+    field public static final String SECURE_FRP_MODE = "secure_frp_mode";
     field public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES = "theme_customization_overlay_packages";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
@@ -8249,7 +8805,7 @@ package android.telephony {
   }
 
   public final class ModemActivityInfo implements android.os.Parcelable {
-    ctor public ModemActivityInfo(long, int, int, @NonNull int[], int);
+    ctor public ModemActivityInfo(long, int, int, @Nullable int[], int);
     method public int describeContents();
     method public int getIdleTimeMillis();
     method public int getReceiveTimeMillis();
@@ -8660,6 +9216,7 @@ package android.telephony {
   }
 
   public class SubscriptionManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean canDisablePhysicalSubscription();
     method public java.util.List<android.telephony.SubscriptionInfo> getAvailableSubscriptionInfoList();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEnabledSubscriptionId(int);
     method @NonNull public static android.content.res.Resources getResourcesForSubId(@NonNull android.content.Context, int);
@@ -8776,6 +9333,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isInEmergencySmsMode();
     method public boolean isModemEnabledForSlot(int);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isOpportunisticNetworkEnabled();

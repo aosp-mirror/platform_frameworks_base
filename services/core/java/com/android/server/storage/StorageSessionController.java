@@ -69,15 +69,21 @@ public final class StorageSessionController {
     }
 
     /**
-     * Creates a storage session associated with {@code deviceFd} for {@code vol}. Sessions can be
-     * started with {@link #onVolumeReady} and removed with {@link #onVolumeUnmount} or
-     * {@link #onVolumeRemove}.
+     * Creates and starts a storage session associated with {@code deviceFd} for {@code vol}.
+     * Sessions can be started with {@link #onVolumeReady} and removed with {@link #onVolumeUnmount}
+     * or {@link #onVolumeRemove}.
+     *
+     * Throws an {@link IllegalStateException} if a session for {@code vol} has already been created
      *
      * Does nothing if {@link #shouldHandle} is {@code false}
      *
+     * Blocks until the session is started or fails
+     *
+     * @throws ExternalStorageServiceException if the session fails to start
      * @throws IllegalStateException if a session has already been created for {@code vol}
      */
-    public void onVolumeMount(FileDescriptor deviceFd, VolumeInfo vol) {
+    public void onVolumeMount(FileDescriptor deviceFd, VolumeInfo vol)
+            throws ExternalStorageServiceException {
         if (!shouldHandle(vol)) {
             return;
         }
@@ -87,71 +93,22 @@ public final class StorageSessionController {
         String sessionId = vol.getId();
         int userId = vol.getMountUserId();
 
-        if (deviceFd == null) {
-            Slog.w(TAG, "Null fd. Session not started for vol: " + vol);
-            return;
-        }
-
-        // Get realpath for the fd, paths that are not /dev/null need additional
-        // setup by the ExternalStorageService before they can be ready
-        String realPath;
-        try {
-            realPath = ParcelFileDescriptor.getFile(deviceFd).getPath();
-        } catch (IOException e) {
-            Slog.wtf(TAG, "Could not get real path from fd: " + deviceFd, e);
-            return;
-        }
-
-        if ("/dev/null".equals(realPath)) {
-            Slog.i(TAG, "Volume ready for use with id: " + sessionId);
-            return;
-        }
-
+        StorageUserConnection connection = null;
         synchronized (mLock) {
-            StorageUserConnection connection = mConnections.get(userId);
+            connection = mConnections.get(userId);
             if (connection == null) {
+                Slog.i(TAG, "Creating connection for user: " + userId);
                 connection = new StorageUserConnection(mContext, userId, this);
                 mConnections.put(userId, connection);
             }
             Slog.i(TAG, "Creating session with id: " + sessionId);
-            connection.createSession(sessionId, new ParcelFileDescriptor(deviceFd));
-        }
-    }
-
-    /**
-     * Starts a storage session associated with {@code vol} after {@link #onVolumeMount}.
-     *
-     * Subsequent calls will attempt to start the storage session, but does nothing if already
-     * started. If the user associated with {@code vol} is not yet ready, all pending sesssions
-     * can be restarted with {@link onUnlockUser}.
-     *
-     * Does nothing if {@link #shouldHandle} is {@code false}
-     *
-     * Blocks until the session is started or fails
-     *
-     * @throws ExternalStorageServiceException if the session fails to start
-     */
-    public void onVolumeReady(VolumeInfo vol) throws ExternalStorageServiceException {
-        if (!shouldHandle(vol)) {
-            return;
+            connection.createSession(sessionId, new ParcelFileDescriptor(deviceFd),
+                    vol.getPath().getPath(), vol.getInternalPath().getPath());
         }
 
-        Slog.i(TAG, "On volume ready " + vol);
-        String sessionId = vol.getId();
-
-        StorageUserConnection connection = null;
-        synchronized (mLock) {
-            connection = mConnections.get(vol.getMountUserId());
-            if (connection == null) {
-                Slog.i(TAG, "Volume ready but no associated connection");
-                return;
-            }
-        }
-
-        connection.initSession(sessionId, vol.getPath().getPath(),
-                vol.getInternalPath().getPath());
-
-        if (isReady()) {
+        // At boot, a volume can be mounted before user is unlocked, in that case, we create it
+        // above and save it so that we can restart all sessions when the user is unlocked
+        if (mExternalStorageServiceComponent != null) {
             connection.startSession(sessionId);
         } else {
             Slog.i(TAG, "Controller not initialised, session not started " + sessionId);
@@ -205,14 +162,10 @@ public final class StorageSessionController {
         if (connection != null) {
             String sessionId = vol.getId();
 
-            if (isReady()) {
-                try {
-                    connection.removeSessionAndWait(sessionId);
-                } catch (ExternalStorageServiceException e) {
-                    Slog.e(TAG, "Failed to end session for vol with id: " + sessionId, e);
-                }
-            } else {
-                Slog.i(TAG, "Controller not initialised, session not ended " + sessionId);
+            try {
+                connection.removeSessionAndWait(sessionId);
+            } catch (ExternalStorageServiceException e) {
+                Slog.e(TAG, "Failed to end session for vol with id: " + sessionId, e);
             }
         }
     }
@@ -232,7 +185,7 @@ public final class StorageSessionController {
 
         Slog.i(TAG, "On user unlock " + userId);
         if (userId == 0) {
-            init();
+            initExternalStorageServiceComponent();
         }
 
         StorageUserConnection connection = null;
@@ -256,13 +209,6 @@ public final class StorageSessionController {
      **/
     public void onReset(IVold vold, Handler handler) {
         if (!shouldHandle(null)) {
-            return;
-        }
-
-        if (!isReady()) {
-            synchronized (mLock) {
-                mConnections.clear();
-            }
             return;
         }
 
@@ -311,7 +257,7 @@ public final class StorageSessionController {
         }
     }
 
-    private void init() throws ExternalStorageServiceException {
+    private void initExternalStorageServiceComponent() throws ExternalStorageServiceException {
         Slog.i(TAG, "Initialialising...");
         ProviderInfo provider = mContext.getPackageManager().resolveContentProvider(
                 MediaStore.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
@@ -414,9 +360,5 @@ public final class StorageSessionController {
 
     private boolean shouldHandle(@Nullable VolumeInfo vol) {
         return mIsFuseEnabled && !mIsResetting && (vol == null || isEmulatedOrPublic(vol));
-    }
-
-    private boolean isReady() {
-        return mExternalStorageServiceComponent != null;
     }
 }

@@ -29,6 +29,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Build;
+import android.os.PowerWhitelistManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -1044,15 +1045,16 @@ public final class UsageStatsManager {
      * @param user The user for whom the package should be whitelisted. Passing in a user that is
      * not the same as the caller's process will require the INTERACT_ACROSS_USERS permission.
      * @see #isAppInactive(String)
+     *
+     * @deprecated Use
+     * {@link android.os.PowerWhitelistManager#whitelistAppTemporarily(String, long)} instead.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
+    @Deprecated
     public void whitelistAppTemporarily(String packageName, long duration, UserHandle user) {
-        try {
-            mService.whitelistAppTemporarily(packageName, duration, user.getIdentifier());
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        mContext.getSystemService(PowerWhitelistManager.class)
+                .whitelistAppTemporarily(packageName, duration);
     }
 
     /**

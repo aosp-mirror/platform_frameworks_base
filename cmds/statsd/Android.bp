@@ -117,6 +117,10 @@ cc_defaults {
         "src/uid_data.proto",
     ],
 
+    cflags: [
+        // "-DNEW_ENCODING_SCHEME",
+    ],
+
     local_include_dirs: [
         "src",
     ],
@@ -282,7 +286,10 @@ cc_test {
         include_dirs: ["external/protobuf/src"],
     },
 
-    shared_libs: ["libprotobuf-cpp-lite"],
+    shared_libs: [
+        "libprotobuf-cpp-lite",
+        "libstatssocket"
+    ],
 
 }
 
@@ -325,7 +332,7 @@ cc_benchmark {
         "-Wno-unused-function",
 
         // Bug: http://b/29823425 Disable -Wvarargs for Clang update to r271374
-        "-Wno-varargs"
+        "-Wno-varargs",
     ],
 
     static_libs: [
@@ -334,8 +341,9 @@ cc_benchmark {
 
     shared_libs: [
         "libgtest_prod",
-        "libstatslog",
         "libprotobuf-cpp-lite",
+        "libstatslog",
+        "libstatssocket",
     ],
 }
 

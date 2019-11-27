@@ -367,22 +367,4 @@ applications that come with the platform
         <permission name="android.permission.REBOOT"/>
         <permission name="android.permission.MANAGE_DYNAMIC_SYSTEM"/>
     </privapp-permissions>
-
-    <privapp-permissions package="com.android.wifi">
-        <permission name="android.permission.CHANGE_CONFIGURATION"/>
-        <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
-        <permission name="android.permission.DUMP"/>
-        <permission name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
-        <permission name="android.permission.INTERNAL_SYSTEM_WINDOW"/>
-        <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
-        <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
-        <permission name="android.permission.READ_DEVICE_CONFIG"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
-        <permission name="android.permission.REQUEST_NETWORK_SCORES"/>
-        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
-        <permission name="android.permission.UPDATE_DEVICE_STATS"/>
-        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
-        <permission name="android.permission.LOCATION_HARDWARE"/>
-    </privapp-permissions>
 </permissions>

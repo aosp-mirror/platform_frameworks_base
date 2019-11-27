@@ -193,7 +193,6 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -265,7 +264,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.WindowManagerPolicyThread;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
-import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
@@ -3327,7 +3325,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 ProtoLog.e(WM_ERROR, "Boot completed: SurfaceFlinger is dead!");
             }
 
-            EventLog.writeEvent(EventLogTags.WM_BOOT_ANIMATION_DONE, SystemClock.uptimeMillis());
+            EventLogTags.writeWmBootAnimationDone(SystemClock.uptimeMillis());
             Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, "Stop bootanim", 0);
             mDisplayEnabled = true;
             ProtoLog.i(WM_DEBUG_SCREEN_ON, "******************** ENABLING SCREEN!");
@@ -7674,19 +7672,17 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void grantInputChannel(int callingUid, int callingPid, int displayId, SurfaceControl surface,
             IWindow window, IBinder hostInputToken, InputChannel outInputChannel) {
-        final InputApplicationHandle applicationHandle;
+        InputApplicationHandle applicationHandle = null;
         final String name;
         final InputChannel[] inputChannels;
         final InputChannel clientChannel;
         final InputChannel serverChannel;
         synchronized (mGlobalLock) {
             final WindowState hostWindow = mInputToWindowMap.get(hostInputToken);
-            if (hostWindow == null) {
-                Slog.e(TAG, "Failed to grant input channel");
-                return;
-            }
+            final String hostWindowName = (hostWindow != null)
+                    ? hostWindow.getWindowTag().toString() : "Internal";
             name = "EmbeddedWindow{ u" + UserHandle.getUserId(callingUid)
-                    + " " + hostWindow.getWindowTag() + "}";
+                    + " " + hostWindowName + "}";
 
             inputChannels = InputChannel.openInputChannelPair(name);
             serverChannel = inputChannels[0];
@@ -7694,8 +7690,12 @@ public class WindowManagerService extends IWindowManager.Stub
             mInputManager.registerInputChannel(serverChannel);
             mEmbeddedWindowController.add(serverChannel.getToken(), window, hostWindow, callingUid,
                     callingPid);
-            applicationHandle = new InputApplicationHandle(
-                hostWindow.mInputWindowHandle.inputApplicationHandle);
+
+            if (hostWindow != null
+                    && hostWindow.mInputWindowHandle.inputApplicationHandle != null) {
+                applicationHandle = new InputApplicationHandle(
+                        hostWindow.mInputWindowHandle.inputApplicationHandle);
+            }
         }
 
         clientChannel.transferTo(outInputChannel);

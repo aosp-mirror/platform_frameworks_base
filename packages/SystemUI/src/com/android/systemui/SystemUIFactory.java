@@ -57,7 +57,7 @@ public class SystemUIFactory {
     private static final String TAG = "SystemUIFactory";
 
     static SystemUIFactory mFactory;
-    protected SystemUIRootComponent mRootComponent;
+    private SystemUIRootComponent mRootComponent;
 
     public static <T extends SystemUIFactory> T getInstance() {
         return (T) mFactory;

@@ -102,7 +102,7 @@ interface IDevicePolicyManager {
 
     void lockNow(int flags, boolean parent);
 
-    void wipeDataWithReason(int flags, String wipeReasonForUser);
+    void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent);
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin(int userHandle);
@@ -426,7 +426,7 @@ interface IDevicePolicyManager {
     int getGlobalPrivateDnsMode(in ComponentName admin);
     String getGlobalPrivateDnsHost(in ComponentName admin);
 
-    void grantDeviceIdsAccessToProfileOwner(in ComponentName who, int userId);
+    void markProfileOwnerOnOrganizationOwnedDevice(in ComponentName who, int userId);
 
     void installUpdateFromFile(in ComponentName admin, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
 

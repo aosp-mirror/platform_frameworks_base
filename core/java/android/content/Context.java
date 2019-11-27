@@ -3864,14 +3864,6 @@ public abstract class Context {
     public static final String NETWORK_STACK_SERVICE = "network_stack";
 
     /**
-     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
-     * {@link android.net.WifiStackClient} IBinder for communicating with the network stack
-     * @hide
-     * @see android.net.WifiStackClient
-     */
-    public static final String WIFI_STACK_SERVICE = "wifi_stack";
-
-    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.net.IpSecManager} for encrypting Sockets or Networks with
      * IPSec.
@@ -4915,6 +4907,14 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String APP_SEARCH_SERVICE = "app_search";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.content.integrity.AppIntegrityManager}.
+     * @hide
+     */
+    @SystemApi
+    public static final String APP_INTEGRITY_SERVICE = "app_integrity";
 
     /**
      * Determine whether the given permission is allowed for a particular

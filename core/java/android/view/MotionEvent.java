@@ -1440,7 +1440,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int TOOL_TYPE_STYLUS = 2;
 
     /**
-     * Tool type constant: The tool is a mouse or trackpad.
+     * Tool type constant: The tool is a mouse.
      *
      * @see #getToolType
      */

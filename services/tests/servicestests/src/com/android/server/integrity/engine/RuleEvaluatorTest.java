@@ -21,12 +21,13 @@ import static com.android.server.integrity.model.IntegrityCheckResult.Effect.DEN
 
 import static org.junit.Assert.assertEquals;
 
-import com.android.server.integrity.model.AppInstallMetadata;
-import com.android.server.integrity.model.AtomicFormula;
-import com.android.server.integrity.model.AtomicFormula.StringAtomicFormula;
+import android.content.integrity.AppInstallMetadata;
+import android.content.integrity.AtomicFormula;
+import android.content.integrity.AtomicFormula.StringAtomicFormula;
+import android.content.integrity.CompoundFormula;
+import android.content.integrity.Rule;
+
 import com.android.server.integrity.model.IntegrityCheckResult;
-import com.android.server.integrity.model.OpenFormula;
-import com.android.server.integrity.model.Rule;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,7 +64,10 @@ public class RuleEvaluatorTest {
     public void testEvaluateRules_noMatchedRules_allow() {
         Rule rule1 =
                 new Rule(
-                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_2),
+                        new StringAtomicFormula(
+                                AtomicFormula.PACKAGE_NAME,
+                                PACKAGE_NAME_2,
+                                /* isHashedValue= */ false),
                         Rule.DENY);
 
         IntegrityCheckResult result =
@@ -76,11 +80,17 @@ public class RuleEvaluatorTest {
     public void testEvaluateRules_oneMatch_deny() {
         Rule rule1 =
                 new Rule(
-                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                        new StringAtomicFormula(
+                                AtomicFormula.PACKAGE_NAME,
+                                PACKAGE_NAME_1,
+                                /* isHashedValue= */ false),
                         Rule.DENY);
         Rule rule2 =
                 new Rule(
-                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_2),
+                        new StringAtomicFormula(
+                                AtomicFormula.PACKAGE_NAME,
+                                PACKAGE_NAME_2,
+                                /* isHashedValue= */ false),
                         Rule.DENY);
 
         IntegrityCheckResult result =
@@ -94,16 +104,24 @@ public class RuleEvaluatorTest {
     public void testEvaluateRules_multipleMatches_deny() {
         Rule rule1 =
                 new Rule(
-                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                        new StringAtomicFormula(
+                                AtomicFormula.PACKAGE_NAME,
+                                PACKAGE_NAME_1,
+                                /* isHashedValue= */ false),
                         Rule.DENY);
-        OpenFormula openFormula2 =
-                new OpenFormula(
-                        OpenFormula.AND,
+        CompoundFormula compoundFormula2 =
+                new CompoundFormula(
+                        CompoundFormula.AND,
                         Arrays.asList(
-                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
                                 new StringAtomicFormula(
-                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
-        Rule rule2 = new Rule(openFormula2, Rule.DENY);
+                                        AtomicFormula.PACKAGE_NAME,
+                                        PACKAGE_NAME_1,
+                                        /* isHashedValue= */ false),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE,
+                                        APP_CERTIFICATE,
+                                        /* isHashedValue= */ false)));
+        Rule rule2 = new Rule(compoundFormula2, Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);
@@ -114,13 +132,15 @@ public class RuleEvaluatorTest {
 
     @Test
     public void testEvaluateRules_ruleWithNot_deny() {
-        OpenFormula openFormula =
-                new OpenFormula(
-                        OpenFormula.NOT,
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.NOT,
                         Collections.singletonList(
                                 new StringAtomicFormula(
-                                        AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_2)));
-        Rule rule = new Rule(openFormula, Rule.DENY);
+                                        AtomicFormula.PACKAGE_NAME,
+                                        PACKAGE_NAME_2,
+                                        /* isHashedValue= */ false)));
+        Rule rule = new Rule(compoundFormula, Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
@@ -146,14 +166,19 @@ public class RuleEvaluatorTest {
 
     @Test
     public void testEvaluateRules_validForm_deny() {
-        OpenFormula openFormula =
-                new OpenFormula(
-                        OpenFormula.AND,
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND,
                         Arrays.asList(
-                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
                                 new StringAtomicFormula(
-                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
-        Rule rule = new Rule(openFormula, Rule.DENY);
+                                        AtomicFormula.PACKAGE_NAME,
+                                        PACKAGE_NAME_1,
+                                        /* isHashedValue= */ false),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE,
+                                        APP_CERTIFICATE,
+                                        /* isHashedValue= */ false)));
+        Rule rule = new Rule(compoundFormula, Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
@@ -164,14 +189,19 @@ public class RuleEvaluatorTest {
 
     @Test
     public void testEvaluateRules_ruleNotInDNF_ignoreAndAllow() {
-        OpenFormula openFormula =
-                new OpenFormula(
-                        OpenFormula.OR,
+        CompoundFormula compoundFormula =
+                new CompoundFormula(
+                        CompoundFormula.OR,
                         Arrays.asList(
-                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
                                 new StringAtomicFormula(
-                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
-        Rule rule = new Rule(openFormula, Rule.DENY);
+                                        AtomicFormula.PACKAGE_NAME,
+                                        PACKAGE_NAME_1,
+                                        /* isHashedValue= */ false),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE,
+                                        APP_CERTIFICATE,
+                                        /* isHashedValue= */ false)));
+        Rule rule = new Rule(compoundFormula, Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
@@ -180,17 +210,22 @@ public class RuleEvaluatorTest {
     }
 
     @Test
-    public void testEvaluateRules_openFormulaWithNot_allow() {
-        OpenFormula openSubFormula =
-                new OpenFormula(
-                        OpenFormula.AND,
+    public void testEvaluateRules_compoundFormulaWithNot_allow() {
+        CompoundFormula openSubFormula =
+                new CompoundFormula(
+                        CompoundFormula.AND,
                         Arrays.asList(
-                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_2),
                                 new StringAtomicFormula(
-                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
-        OpenFormula openFormula =
-                new OpenFormula(OpenFormula.NOT, Collections.singletonList(openSubFormula));
-        Rule rule = new Rule(openFormula, Rule.DENY);
+                                        AtomicFormula.PACKAGE_NAME,
+                                        PACKAGE_NAME_2,
+                                        /* isHashedValue= */ false),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE,
+                                        APP_CERTIFICATE,
+                                        /* isHashedValue= */ false)));
+        CompoundFormula compoundFormula =
+                new CompoundFormula(CompoundFormula.NOT, Collections.singletonList(openSubFormula));
+        Rule rule = new Rule(compoundFormula, Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Collections.singletonList(rule), APP_INSTALL_METADATA);
@@ -202,16 +237,24 @@ public class RuleEvaluatorTest {
     public void testEvaluateRules_forceAllow() {
         Rule rule1 =
                 new Rule(
-                        new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
+                        new StringAtomicFormula(
+                                AtomicFormula.PACKAGE_NAME,
+                                PACKAGE_NAME_1,
+                                /* isHashedValue= */ false),
                         Rule.FORCE_ALLOW);
-        OpenFormula openFormula2 =
-                new OpenFormula(
-                        OpenFormula.AND,
+        CompoundFormula compoundFormula2 =
+                new CompoundFormula(
+                        CompoundFormula.AND,
                         Arrays.asList(
-                                new StringAtomicFormula(AtomicFormula.PACKAGE_NAME, PACKAGE_NAME_1),
                                 new StringAtomicFormula(
-                                        AtomicFormula.APP_CERTIFICATE, APP_CERTIFICATE)));
-        Rule rule2 = new Rule(openFormula2, Rule.DENY);
+                                        AtomicFormula.PACKAGE_NAME,
+                                        PACKAGE_NAME_1,
+                                        /* isHashedValue= */ false),
+                                new StringAtomicFormula(
+                                        AtomicFormula.APP_CERTIFICATE,
+                                        APP_CERTIFICATE,
+                                        /* isHashedValue= */ false)));
+        Rule rule2 = new Rule(compoundFormula2, Rule.DENY);
 
         IntegrityCheckResult result =
                 RuleEvaluator.evaluateRules(Arrays.asList(rule1, rule2), APP_INSTALL_METADATA);

@@ -393,8 +393,13 @@ public final class UserHandle implements Parcelable {
     /**
      * Generate a text representation of the uid, breaking out its individual
      * components -- user, app, isolated, etc.
+     *
+     * @param uid The uid to format
+     * @return A string representing the UID with its individual components broken out
      * @hide
      */
+    @SystemApi
+    @NonNull
     public static String formatUid(int uid) {
         StringBuilder sb = new StringBuilder();
         formatUid(sb, uid);
@@ -520,7 +525,7 @@ public final class UserHandle implements Parcelable {
     public int hashCode() {
         return mHandle;
     }
-    
+
     public int describeContents() {
         return 0;
     }
@@ -532,10 +537,10 @@ public final class UserHandle implements Parcelable {
     /**
      * Write a UserHandle to a Parcel, handling null pointers.  Must be
      * read with {@link #readFromParcel(Parcel)}.
-     * 
+     *
      * @param h The UserHandle to be written.
      * @param out The Parcel in which the UserHandle will be placed.
-     * 
+     *
      * @see #readFromParcel(Parcel)
      */
     public static void writeToParcel(UserHandle h, Parcel out) {
@@ -545,23 +550,23 @@ public final class UserHandle implements Parcelable {
             out.writeInt(USER_NULL);
         }
     }
-    
+
     /**
      * Read a UserHandle from a Parcel that was previously written
      * with {@link #writeToParcel(UserHandle, Parcel)}, returning either
      * a null or new object as appropriate.
-     * 
+     *
      * @param in The Parcel from which to read the UserHandle
      * @return Returns a new UserHandle matching the previously written
      * object, or null if a null had been written.
-     * 
+     *
      * @see #writeToParcel(UserHandle, Parcel)
      */
     public static UserHandle readFromParcel(Parcel in) {
         int h = in.readInt();
         return h != USER_NULL ? new UserHandle(h) : null;
     }
-    
+
     public static final @android.annotation.NonNull Parcelable.Creator<UserHandle> CREATOR
             = new Parcelable.Creator<UserHandle>() {
         public UserHandle createFromParcel(Parcel in) {
@@ -581,7 +586,7 @@ public final class UserHandle implements Parcelable {
      * must not use this with data written by
      * {@link #writeToParcel(UserHandle, Parcel)} since it is not possible
      * to handle a null UserHandle here.
-     * 
+     *
      * @param in The Parcel containing the previously written UserHandle,
      * positioned at the location in the buffer where it was written.
      */

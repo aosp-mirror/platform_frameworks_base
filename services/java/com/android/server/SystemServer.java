@@ -43,7 +43,6 @@ import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
-import android.net.wifi.WifiStackClient;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -387,15 +386,6 @@ public final class SystemServer {
 
             EventLog.writeEvent(EventLogTags.SYSTEM_SERVER_START,
                     mStartCount, mRuntimeStartUptime, mRuntimeStartElapsedTime);
-
-            // If a device's clock is before 1970 (before 0), a lot of
-            // APIs crash dealing with negative numbers, notably
-            // java.io.File#setLastModified, so instead we fake it and
-            // hope that time from cell towers or NTP fixes it shortly.
-            if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
-                Slog.w(TAG, "System clock is before 1970; setting to 1970.");
-                SystemClock.setCurrentTimeMillis(EARLIEST_SUPPORTED_TIME);
-            }
 
             //
             // Default the timezone property to GMT if not set.
@@ -1369,6 +1359,40 @@ public final class SystemServer {
             t.traceEnd();
 
             if (context.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_WIFI)) {
+                // Wifi Service must be started first for wifi-related services.
+                t.traceBegin("StartWifi");
+                mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
+                t.traceEnd();
+                t.traceBegin("StartWifiScanning");
+                mSystemServiceManager.startService(
+                        "com.android.server.wifi.scanner.WifiScanningService");
+                t.traceEnd();
+            }
+
+            if (context.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_WIFI_RTT)) {
+                t.traceBegin("StartRttService");
+                mSystemServiceManager.startService(
+                        "com.android.server.wifi.rtt.RttService");
+                t.traceEnd();
+            }
+
+            if (context.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_WIFI_AWARE)) {
+                t.traceBegin("StartWifiAware");
+                mSystemServiceManager.startService(WIFI_AWARE_SERVICE_CLASS);
+                t.traceEnd();
+            }
+
+            if (context.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_WIFI_DIRECT)) {
+                t.traceBegin("StartWifiP2P");
+                mSystemServiceManager.startService(WIFI_P2P_SERVICE_CLASS);
+                t.traceEnd();
+            }
+
+            if (context.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_LOWPAN)) {
                 t.traceBegin("StartLowpan");
                 mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
@@ -2177,14 +2201,6 @@ public final class SystemServer {
                 NetworkStackClient.getInstance().start();
             } catch (Throwable e) {
                 reportWtf("starting Network Stack", e);
-            }
-            t.traceEnd();
-
-            t.traceBegin("StartWifiStack");
-            try {
-                WifiStackClient.getInstance().start();
-            } catch (Throwable e) {
-                reportWtf("starting Wifi Stack", e);
             }
             t.traceEnd();
 

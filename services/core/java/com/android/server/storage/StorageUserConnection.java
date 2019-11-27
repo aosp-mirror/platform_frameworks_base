@@ -75,46 +75,20 @@ public final class StorageUserConnection {
     /**
      * Creates and stores a storage {@link Session}.
      *
-     * Created sessions must be initialised with {@link #initSession} before starting with
-     * {@link #startSession}.
-     *
      * They must also be cleaned up with {@link #removeSession}.
      *
      * @throws IllegalArgumentException if a {@code Session} with {@code sessionId} already exists
      */
-    public void createSession(String sessionId, ParcelFileDescriptor pfd) {
+    public void createSession(String sessionId, ParcelFileDescriptor pfd, String upperPath,
+            String lowerPath) {
         Preconditions.checkNotNull(sessionId);
         Preconditions.checkNotNull(pfd);
+        Preconditions.checkNotNull(upperPath);
+        Preconditions.checkNotNull(lowerPath);
 
         synchronized (mLock) {
             Preconditions.checkArgument(!mSessions.containsKey(sessionId));
-            mSessions.put(sessionId, new Session(sessionId, pfd));
-        }
-    }
-
-    /**
-     * Initialise a storage {@link Session}.
-     *
-     * Initialised sessions can be started with {@link #startSession}.
-     *
-     * They must also be cleaned up with {@link #removeSession}.
-     *
-     * @throws IllegalArgumentException if {@code sessionId} does not exist or is initialised
-     */
-    public void initSession(String sessionId, String upperPath, String lowerPath) {
-        synchronized (mLock) {
-            Session session = mSessions.get(sessionId);
-            if (session == null) {
-                throw new IllegalStateException("Failed to initialise non existent session. Id: "
-                        + sessionId + ". Upper path: " + upperPath + ". Lower path: " + lowerPath);
-            } else if (session.isInitialisedLocked()) {
-                throw new IllegalStateException("Already initialised session. Id: "
-                        + sessionId + ". Upper path: " + upperPath + ". Lower path: " + lowerPath);
-            } else {
-                session.upperPath = upperPath;
-                session.lowerPath = lowerPath;
-                Slog.i(TAG, "Initialised session: " + session);
-            }
+            mSessions.put(sessionId, new Session(sessionId, pfd, upperPath, lowerPath));
         }
     }
 
@@ -440,14 +414,14 @@ public final class StorageUserConnection {
     private static final class Session implements AutoCloseable {
         public final String sessionId;
         public final ParcelFileDescriptor pfd;
-        @GuardedBy("mLock")
-        public String lowerPath;
-        @GuardedBy("mLock")
-        public String upperPath;
+        public final String lowerPath;
+        public final String upperPath;
 
-        Session(String sessionId, ParcelFileDescriptor pfd) {
+        Session(String sessionId, ParcelFileDescriptor pfd, String upperPath, String lowerPath) {
             this.sessionId = sessionId;
             this.pfd = pfd;
+            this.upperPath = upperPath;
+            this.lowerPath = lowerPath;
         }
 
         @Override

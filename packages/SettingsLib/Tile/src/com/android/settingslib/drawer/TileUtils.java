@@ -244,15 +244,15 @@ public class TileUtils {
             // TODO: Needs much optimization, too many PM queries going on here.
             if (user.getIdentifier() == ActivityManager.getCurrentUser()) {
                 // Only add Settings for this user.
-                getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true);
-                getTilesForAction(context, user, OPERATOR_SETTINGS, cache,
+                loadTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true);
+                loadTilesForAction(context, user, OPERATOR_SETTINGS, cache,
                         OPERATOR_DEFAULT_CATEGORY, tiles, false);
-                getTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
+                loadTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
                         MANUFACTURER_DEFAULT_CATEGORY, tiles, false);
             }
             if (setup) {
-                getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
-                getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false);
+                loadTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
+                loadTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false);
             }
         }
 
@@ -284,18 +284,18 @@ public class TileUtils {
     }
 
     @VisibleForTesting
-    static void getTilesForAction(Context context,
+    static void loadTilesForAction(Context context,
             UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, List<Tile> outTiles, boolean requireSettings) {
         final Intent intent = new Intent(action);
         if (requireSettings) {
             intent.setPackage(SETTING_PKG);
         }
-        getActivityTiles(context, user, addedCache, defaultCategory, outTiles, intent);
-        getProviderTiles(context, user, addedCache, defaultCategory, outTiles, intent);
+        loadActivityTiles(context, user, addedCache, defaultCategory, outTiles, intent);
+        loadProviderTiles(context, user, addedCache, defaultCategory, outTiles, intent);
     }
 
-    private static void getActivityTiles(Context context,
+    private static void loadActivityTiles(Context context,
             UserHandle user, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, List<Tile> outTiles, Intent intent) {
         final PackageManager pm = context.getPackageManager();
@@ -308,11 +308,11 @@ public class TileUtils {
             }
             final ActivityInfo activityInfo = resolved.activityInfo;
             final Bundle metaData = activityInfo.metaData;
-            getTile(user, addedCache, defaultCategory, outTiles, intent, metaData, activityInfo);
+            loadTile(user, addedCache, defaultCategory, outTiles, intent, metaData, activityInfo);
         }
     }
 
-    private static void getProviderTiles(Context context,
+    private static void loadProviderTiles(Context context,
             UserHandle user, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, List<Tile> outTiles, Intent intent) {
         final PackageManager pm = context.getPackageManager();
@@ -330,13 +330,13 @@ public class TileUtils {
                 continue;
             }
             for (Bundle metaData : switchData) {
-                getTile(user, addedCache, defaultCategory, outTiles, intent, metaData,
+                loadTile(user, addedCache, defaultCategory, outTiles, intent, metaData,
                         providerInfo);
             }
         }
     }
 
-    private static void getTile(UserHandle user, Map<Pair<String, String>, Tile> addedCache,
+    private static void loadTile(UserHandle user, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, List<Tile> outTiles, Intent intent, Bundle metaData,
             ComponentInfo componentInfo) {
         String categoryKey = defaultCategory;
@@ -359,8 +359,8 @@ public class TileUtils {
         Tile tile = addedCache.get(key);
         if (tile == null) {
             tile = isProvider
-                    ? new ProviderTile(componentInfo, categoryKey, metaData)
-                    : new ActivityTile(componentInfo, categoryKey);
+                    ? new ProviderTile((ProviderInfo) componentInfo, categoryKey, metaData)
+                    : new ActivityTile((ActivityInfo) componentInfo, categoryKey);
             addedCache.put(key, tile);
         } else {
             tile.setMetaData(metaData);
@@ -516,7 +516,7 @@ public class TileUtils {
      * @param value       Boolean associated with the key
      * @return Bundle associated with the action, if returned by the content provider
      */
-    public static Bundle putBooleanToUri(Context context, Uri uri,
+    public static Bundle putBooleanToUriAndGetResult(Context context, Uri uri,
             Map<String, IContentProvider> providerMap, String key, boolean value) {
         final Bundle bundle = new Bundle();
         bundle.putBoolean(key, value);

@@ -126,7 +126,6 @@ import android.os.WorkSource;
 import android.provider.MediaStore;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.EventLog;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -141,7 +140,6 @@ import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.am.EventLogTags;
 import com.android.server.am.UserState;
 
 import java.io.FileDescriptor;
@@ -823,8 +821,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         "Launching: " + r + " savedState=" + r.getSavedState()
                                 + " with results=" + results + " newIntents=" + newIntents
                                 + " andResume=" + andResume);
-                EventLog.writeEvent(EventLogTags.AM_RESTART_ACTIVITY, r.mUserId,
-                        System.identityHashCode(r), task.mTaskId, r.shortComponentName);
+                EventLogTags.writeWmRestartActivity(r.mUserId, System.identityHashCode(r),
+                        task.mTaskId, r.shortComponentName);
                 if (r.isActivityTypeHome()) {
                     // Home process is the root process of the task.
                     updateHomeProcess(task.getChildAt(0).app);

@@ -180,6 +180,11 @@
     <!-- Color for the Assistant invocation lights -->
     <color name="default_invocation_lights_color">#ffffffff</color>         <!-- white -->
 
+    <!-- Global screenshot actions -->
+    <color name="global_screenshot_button_background">#F5F5F5</color>
+    <color name="global_screenshot_button_ripple">#1f000000</color>
+    <color name="global_screenshot_button_text">@color/GM2_blue_500</color>
+
     <!-- GM2 colors -->
     <color name="GM2_grey_50">#F8F9FA</color>
     <color name="GM2_grey_100">#F1F3F4</color>

@@ -189,10 +189,10 @@ public final class AppCompactor {
     @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile long mFullAnonRssThrottleKb =
             DEFAULT_COMPACT_FULL_RSS_THROTTLE_KB;
-    @GuardedBy("mPhenoypeFlagLock")
+    @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting volatile long mFullDeltaRssThrottleKb =
             DEFAULT_COMPACT_FULL_DELTA_RSS_THROTTLE_KB;
-    @GuardedBy("mPhenoypeFlagLock")
+    @GuardedBy("mPhenotypeFlagLock")
     @VisibleForTesting final Set<Integer> mProcStateThrottle;
 
     // Handler on which compaction runs.

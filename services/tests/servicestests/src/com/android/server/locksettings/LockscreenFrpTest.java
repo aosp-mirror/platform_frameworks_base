@@ -22,22 +22,31 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTE
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
 
+import static org.junit.Assert.assertEquals;
+
 import android.app.admin.DevicePolicyManager;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 
 /** Test setting a lockscreen credential and then verify it under USER_FRP */
+@RunWith(AndroidJUnit4.class)
 public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setDeviceNotProvisioned() throws Exception {
         // FRP credential can only be verified prior to provisioning
         mSettings.setDeviceProvisioned(false);
     }
 
+    @Test
     public void testFrpCredential_setPin() {
         mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID, false);
 
@@ -46,6 +55,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
                 mService.verifyCredential(newPin("1234"), 0, USER_FRP).getResponseCode());
     }
 
+    @Test
     public void testFrpCredential_setPattern() {
         mService.setLockCredential(newPattern("4321"), nonePassword(), PRIMARY_USER_ID, false);
 
@@ -54,6 +64,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
                 mService.verifyCredential(newPattern("4321"), 0, USER_FRP).getResponseCode());
     }
 
+    @Test
     public void testFrpCredential_setPassword() {
         mService.setLockCredential(newPassword("4321"), nonePassword(), PRIMARY_USER_ID, false);
 
@@ -62,6 +73,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
                 mService.verifyCredential(newPassword("4321"), 0, USER_FRP).getResponseCode());
     }
 
+    @Test
     public void testFrpCredential_changeCredential() {
         mService.setLockCredential(newPassword("1234"), nonePassword(), PRIMARY_USER_ID, false);
         mService.setLockCredential(newPattern("5678"), newPassword("1234"), PRIMARY_USER_ID, false);
@@ -71,6 +83,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
                 mService.verifyCredential(newPattern("5678"), 0, USER_FRP).getResponseCode());
     }
 
+    @Test
     public void testFrpCredential_removeCredential() {
         mService.setLockCredential(newPassword("1234"), nonePassword(), PRIMARY_USER_ID, false);
         assertEquals(CREDENTIAL_TYPE_PASSWORD, mService.getCredentialType(USER_FRP));
@@ -79,6 +92,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
         assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(USER_FRP));
     }
 
+    @Test
     public void testFrpCredential_cannotVerifyAfterProvsioning() {
         mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID, false);
 
@@ -87,6 +101,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
                 mService.verifyCredential(newPin("1234"), 0, USER_FRP).getResponseCode());
     }
 
+    @Test
     public void testFrpCredential_legacyPinTypePersistentData() {
         mService.setLockCredential(newPin("1234"), nonePassword(), PRIMARY_USER_ID, false);
         PersistentData data = mStorage.readPersistentDataBlock();
@@ -102,6 +117,7 @@ public class LockscreenFrpTest extends BaseLockSettingsServiceTests {
 
     }
 
+    @Test
     public void testFrpCredential_legacyPasswordTypePersistentData() {
         mService.setLockCredential(newPassword("1234"), nonePassword(), PRIMARY_USER_ID, false);
         PersistentData data = mStorage.readPersistentDataBlock();

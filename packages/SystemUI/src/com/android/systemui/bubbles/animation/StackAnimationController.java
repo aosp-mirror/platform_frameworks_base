@@ -686,6 +686,10 @@ public class StackAnimationController extends
         } else {
             // If there's no other bubbles, and we were in the dismiss target, reset the flag.
             mWithinDismissTarget = false;
+            // When all children are removed ensure stack position is sane
+            setStackPosition(mRestingStackPosition == null
+                    ? getDefaultStartPosition()
+                    : mRestingStackPosition);
         }
     }
 

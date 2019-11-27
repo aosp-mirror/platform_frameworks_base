@@ -55,7 +55,7 @@ public abstract class SwitchesProvider extends ContentProvider {
 
     private String mAuthority;
     private final Map<String, SwitchController> mControllerMap = new LinkedHashMap<>();
-    private final List<Bundle> mSwitchList = new ArrayList<>();
+    private final List<Bundle> mSwitchDataList = new ArrayList<>();
 
     /**
      * Get a list of {@link SwitchController} for this provider.
@@ -88,7 +88,9 @@ public abstract class SwitchesProvider extends ContentProvider {
 
             controller.setAuthority(mAuthority);
             mControllerMap.put(key, controller);
-            mSwitchList.add(controller.getBundle());
+            if (!(controller instanceof MasterSwitchController)) {
+                mSwitchDataList.add(controller.getBundle());
+            }
         });
         return true;
     }
@@ -101,7 +103,7 @@ public abstract class SwitchesProvider extends ContentProvider {
                 : null;
         if (TextUtils.isEmpty(key)) {
             if (METHOD_GET_SWITCH_DATA.equals(method)) {
-                bundle.putParcelableList(EXTRA_SWITCH_DATA, mSwitchList);
+                bundle.putParcelableList(EXTRA_SWITCH_DATA, mSwitchDataList);
                 return bundle;
             }
             return null;
@@ -114,7 +116,10 @@ public abstract class SwitchesProvider extends ContentProvider {
 
         switch (method) {
             case METHOD_GET_SWITCH_DATA:
-                return controller.getBundle();
+                if (!(controller instanceof MasterSwitchController)) {
+                    return controller.getBundle();
+                }
+                break;
             case METHOD_GET_PROVIDER_ICON:
                 if (controller instanceof ProviderIcon) {
                     return ((ProviderIcon) controller).getProviderIcon();

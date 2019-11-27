@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ActivityRecord.INVALID_PID;
 
+import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -39,8 +39,21 @@ class EmbeddedWindowController {
         mWmLock = wmLock;
     }
 
-    void add(IBinder inputToken, IWindow window, WindowState hostWindowState, int ownerUid,
-            int ownerPid) {
+    /**
+     * Adds a new embedded window.
+     *
+     * @param inputToken input channel token passed in by the embedding process when it requests
+     *                   the server to add an input channel to the embedded surface.
+     * @param window     client token used to clean up the map if the embedding process dies
+     * @param hostWindowState input channel token belonging to the host window. This is needed to
+     *                        handle input callbacks to wm. It's used when raising ANR and when
+     *                        the user taps out side of the focused region on screen. This can be
+     *                        null if there is no host window.
+     * @param ownerUid  calling uid
+     * @param ownerPid  calling pid used for anr blaming
+     */
+    void add(IBinder inputToken, IWindow window, @Nullable WindowState hostWindowState,
+            int ownerUid, int ownerPid) {
         EmbeddedWindow embeddedWindow = new EmbeddedWindow(window, hostWindowState, ownerUid,
                 ownerPid);
         try {
@@ -61,31 +74,30 @@ class EmbeddedWindowController {
         return embeddedWindow != null ? embeddedWindow.mHostWindowState : null;
     }
 
-    int getOwnerPid(IBinder inputToken) {
-        EmbeddedWindow embeddedWindow = mWindows.get(inputToken);
-        return embeddedWindow != null ? embeddedWindow.mOwnerPid : INVALID_PID;
-    }
-
     void remove(IWindow client) {
-        for (ArrayMap.Entry<IBinder, EmbeddedWindow> entry: mWindows.entrySet()) {
-            if (entry.getValue().mClient.asBinder() == client.asBinder()) {
-                mWindows.remove(entry.getKey());
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
+            if (mWindows.valueAt(i).mClient.asBinder() == client.asBinder()) {
+                mWindows.removeAt(i);
                 return;
             }
         }
     }
 
     void removeWindowsWithHost(WindowState host) {
-        for (ArrayMap.Entry<IBinder, EmbeddedWindow> entry: mWindows.entrySet()) {
-            if (entry.getValue().mHostWindowState == host) {
-                mWindows.remove(entry.getKey());
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
+            if (mWindows.valueAt(i).mHostWindowState == host) {
+                mWindows.removeAt(i);
             }
         }
     }
 
-    private static class EmbeddedWindow {
+    EmbeddedWindow get(IBinder inputToken) {
+        return mWindows.get(inputToken);
+    }
+
+    static class EmbeddedWindow {
         final IWindow mClient;
-        final WindowState mHostWindowState;
+        @Nullable final WindowState mHostWindowState;
         final int mOwnerUid;
         final int mOwnerPid;
 
