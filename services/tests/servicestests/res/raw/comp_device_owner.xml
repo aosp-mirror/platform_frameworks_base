@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<root>
+    <device-owner package="com.android.frameworks.servicestests"
+        name=""
+        component="com.android.frameworks.servicestests/com.android.server.devicepolicy.DummyDeviceAdmins$Admin1"
+        userRestrictionsMigrated="true" />
+    <device-owner-context userId="0" />
+</root>
