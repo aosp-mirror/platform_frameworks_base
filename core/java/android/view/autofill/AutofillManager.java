@@ -47,6 +47,7 @@ import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.UserData;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -61,6 +62,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityWindowInfo;
+import android.widget.EditText;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
@@ -1073,6 +1075,8 @@ public final class AutofillManager {
                 } else if (sVerbose) {
                     Log.v(TAG, "Ignoring visibility change on " + id + ": no tracked views");
                 }
+            } else if (!virtual && isVisible) {
+                startAutofillIfNeededLocked(view);
             }
         }
     }
@@ -1238,9 +1242,11 @@ public final class AutofillManager {
                 return;
             }
             if (!mEnabled || !isActiveLocked()) {
-                if (sVerbose) {
-                    Log.v(TAG, "notifyValueChanged(" + view.getAutofillId()
-                            + "): ignoring on state " + getStateAsStringLocked());
+                if (!startAutofillIfNeededLocked(view)) {
+                    if (sVerbose) {
+                        Log.v(TAG, "notifyValueChanged(" + view.getAutofillId()
+                                + "): ignoring on state " + getStateAsStringLocked());
+                    }
                 }
                 return;
             }
@@ -1877,6 +1883,37 @@ public final class AutofillManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    private boolean startAutofillIfNeededLocked(View view) {
+        if (mState == STATE_UNKNOWN
+                && mSessionId == NO_SESSION
+                && view instanceof EditText
+                && !TextUtils.isEmpty(((EditText) view).getText())
+                && !view.isFocused()
+                && view.isImportantForAutofill()
+                && view.isLaidOut()
+                && view.isVisibleToUser()) {
+
+            ensureServiceClientAddedIfNeededLocked();
+
+            if (sVerbose) {
+                Log.v(TAG, "startAutofillIfNeededLocked(): enabled=" + mEnabled);
+            }
+            if (mEnabled && !isClientDisablingEnterExitEvent()) {
+                final AutofillId id = view.getAutofillId();
+                final AutofillValue value = view.getAutofillValue();
+                // Starts new session.
+                startSessionLocked(id, /* bounds= */ null, /* value= */ null, /* flags= */ 0);
+                // Updates value.
+                updateSessionLocked(id, /* bounds= */ null, value, ACTION_VALUE_CHANGED,
+                        /* flags= */ 0);
+                addEnteredIdLocked(id);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
