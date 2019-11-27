@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
+import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
 import android.content.Context;
 import android.graphics.drawable.Icon;
@@ -196,6 +197,16 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         for (AtomicFile file : mDataBase.mHistoryFiles) {
             verify(file, times(1)).openRead();
         }
+    }
+
+    @Test
+    public void testReadNotificationHistory_readsBuffer() throws Exception {
+        HistoricalNotification hn = getHistoricalNotification(1);
+        mDataBase.addNotification(hn);
+
+        NotificationHistory nh = mDataBase.readNotificationHistory();
+
+        assertThat(nh.getNotificationsToWrite()).contains(hn);
     }
 
     @Test

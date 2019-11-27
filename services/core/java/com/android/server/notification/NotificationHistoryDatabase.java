@@ -183,6 +183,7 @@ public class NotificationHistoryDatabase {
     public NotificationHistory readNotificationHistory() {
         synchronized (mLock) {
             NotificationHistory notifications = new NotificationHistory();
+            notifications.addNotificationsToWrite(mBuffer);
 
             for (AtomicFile file : mHistoryFiles) {
                 try {
