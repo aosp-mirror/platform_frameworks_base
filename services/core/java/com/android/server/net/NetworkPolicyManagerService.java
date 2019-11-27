@@ -1509,6 +1509,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         latch.await(5, TimeUnit.SECONDS);
     }
 
+    @VisibleForTesting
+    Handler getHandlerForTesting() {
+        return mHandler;
+    }
+
     /**
      * Update mobile policies with data cycle information from {@link CarrierConfigManager}
      * if necessary.
