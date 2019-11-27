@@ -24,7 +24,7 @@ namespace statsd {
 
 class PullResultReceiver : public BnPullAtomResultReceiver {
 public:
-    PullResultReceiver(function<void(int32_t, bool, const vector<android::util::StatsEvent>&)>
+    PullResultReceiver(function<void(int32_t, bool, const vector<android::util::StatsEventParcel>&)>
                                pullFinishCallback);
     ~PullResultReceiver();
 
@@ -32,10 +32,11 @@ public:
      * Binder call for finishing a pull.
      */
     binder::Status pullFinished(int32_t atomTag, bool success,
-                                        const vector<android::util::StatsEvent>& output) override;
+                                const vector<android::util::StatsEventParcel>& output) override;
 
 private:
-    function<void(int32_t, bool, const vector<android::util::StatsEvent>&)> pullFinishCallback;
+    function<void(int32_t, bool, const vector<android::util::StatsEventParcel>&)>
+            pullFinishCallback;
 };
 
 }  // namespace statsd

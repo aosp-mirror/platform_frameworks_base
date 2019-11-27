@@ -25,12 +25,13 @@ namespace os {
 namespace statsd {
 
 PullResultReceiver::PullResultReceiver(
-        std::function<void(int32_t, bool, const vector<android::util::StatsEvent>&)> pullFinishCb)
+        std::function<void(int32_t, bool, const vector<android::util::StatsEventParcel>&)>
+             pullFinishCb)
     : pullFinishCallback(std::move(pullFinishCb)) {
 }
 
 Status PullResultReceiver::pullFinished(int32_t atomTag, bool success,
-                                        const vector<StatsEvent>& output) {
+                                        const vector<StatsEventParcel>& output) {
     pullFinishCallback(atomTag, success, output);
     return Status::ok();
 }

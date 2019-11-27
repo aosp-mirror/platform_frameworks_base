@@ -34,6 +34,7 @@ import android.os.ServiceManager;
 import android.util.AndroidException;
 import android.util.Slog;
 import android.util.StatsEvent;
+import android.util.StatsEventParcel;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -540,10 +541,12 @@ public final class StatsManager {
             mExecutor.execute(() -> {
                 List<StatsEvent> data = new ArrayList<>();
                 boolean success = mCallback.onPullAtom(atomTag, data);
-                StatsEvent[] arr = new StatsEvent[data.size()];
-                arr = data.toArray(arr);
+                StatsEventParcel[] parcels = new StatsEventParcel[data.size()];
+                for (int i = 0; i < data.size(); i++) {
+                    parcels[i].buffer = data.get(i).getBytes();
+                }
                 try {
-                    resultReceiver.pullFinished(atomTag, success, arr);
+                    resultReceiver.pullFinished(atomTag, success, parcels);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId);
                 }
