@@ -71,6 +71,18 @@ public class SimpleTimeZoneDetectorStrategyTest {
     }
 
     @Test
+    public void testSuggestPhoneTime_emptySuggestionIgnored() {
+        Scenario scenario = SCENARIO_1;
+        mScript.pokeFakeClocks(scenario)
+                .pokeTimeDetectionEnabled(true);
+
+        PhoneTimeSuggestion timeSuggestion = createPhoneTimeSuggestion(ARBITRARY_PHONE_ID, null);
+
+        mScript.simulatePhoneTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
     public void testSuggestPhoneTime_systemClockThreshold() {
         Scenario scenario = SCENARIO_1;
         final int systemClockUpdateThresholdMillis = 1000;
@@ -99,7 +111,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
         TimestampedValue<Long> utcTime2 = new TimestampedValue<>(
                 mScript.peekElapsedRealtimeMillis(),
                 mScript.peekSystemClockMillis() + underThresholdMillis);
-        PhoneTimeSuggestion timeSuggestion2 = new PhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime2);
+        PhoneTimeSuggestion timeSuggestion2 =
+                createPhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime2);
         mScript.simulateTimePassing(clockIncrement)
                 .simulatePhoneTimeSuggestion(timeSuggestion2)
                 .verifySystemClockWasNotSetAndResetCallTracking();
@@ -109,7 +122,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
                 mScript.peekElapsedRealtimeMillis(),
                 mScript.peekSystemClockMillis() + systemClockUpdateThresholdMillis);
 
-        PhoneTimeSuggestion timeSuggestion3 = new PhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime3);
+        PhoneTimeSuggestion timeSuggestion3 =
+                createPhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime3);
         mScript.simulateTimePassing(clockIncrement);
 
         long expectSystemClockMillis3 =
@@ -158,7 +172,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
         long referenceTimeBeforeLastSignalMillis = utcTime1.getReferenceTimeMillis() - 1;
         TimestampedValue<Long> utcTime2 = new TimestampedValue<>(
                 referenceTimeBeforeLastSignalMillis, validUtcTimeMillis);
-        PhoneTimeSuggestion timeSuggestion2 = new PhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime2);
+        PhoneTimeSuggestion timeSuggestion2 =
+                createPhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime2);
         mScript.simulatePhoneTimeSuggestion(timeSuggestion2)
                 .verifySystemClockWasNotSetAndResetCallTracking();
 
@@ -168,7 +183,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
                 utcTime1.getReferenceTimeMillis() + Integer.MAX_VALUE + 1;
         TimestampedValue<Long> utcTime3 = new TimestampedValue<>(
                 referenceTimeInFutureMillis, validUtcTimeMillis);
-        PhoneTimeSuggestion timeSuggestion3 = new PhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime3);
+        PhoneTimeSuggestion timeSuggestion3 =
+                createPhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime3);
         mScript.simulatePhoneTimeSuggestion(timeSuggestion3)
                 .verifySystemClockWasNotSetAndResetCallTracking();
 
@@ -178,7 +194,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
                 validReferenceTimeMillis, validUtcTimeMillis);
         long expectedSystemClockMillis4 =
                 TimeDetectorStrategy.getTimeAt(utcTime4, mScript.peekElapsedRealtimeMillis());
-        PhoneTimeSuggestion timeSuggestion4 = new PhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime4);
+        PhoneTimeSuggestion timeSuggestion4 =
+                createPhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime4);
         mScript.simulatePhoneTimeSuggestion(timeSuggestion4)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis4);
     }
@@ -223,7 +240,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
         TimestampedValue<Long> utcTime2 = new TimestampedValue<>(
                 mScript.peekElapsedRealtimeMillis(),
                 mScript.peekSystemClockMillis() + systemClockUpdateThreshold);
-        PhoneTimeSuggestion timeSuggestion2 = new PhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime2);
+        PhoneTimeSuggestion timeSuggestion2 =
+                createPhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime2);
 
         // Simulate more time passing.
         mScript.simulateTimePassing(clockIncrementMillis);
@@ -465,7 +483,7 @@ public class SimpleTimeZoneDetectorStrategyTest {
         PhoneTimeSuggestion createPhoneTimeSuggestionForActual(int phoneId) {
             TimestampedValue<Long> time = new TimestampedValue<>(
                     mInitialDeviceRealtimeMillis, mActualTimeMillis);
-            return new PhoneTimeSuggestion(phoneId, time);
+            return createPhoneTimeSuggestion(phoneId, time);
         }
 
         static class Builder {
@@ -498,6 +516,13 @@ public class SimpleTimeZoneDetectorStrategyTest {
                         mActualTimeMillis);
             }
         }
+    }
+
+    private static PhoneTimeSuggestion createPhoneTimeSuggestion(int phoneId,
+            TimestampedValue<Long> utcTime) {
+        PhoneTimeSuggestion timeSuggestion = new PhoneTimeSuggestion(phoneId);
+        timeSuggestion.setUtcTime(utcTime);
+        return timeSuggestion;
     }
 
     private static long createUtcTime(int year, int monthInYear, int day, int hourOfDay, int minute,
