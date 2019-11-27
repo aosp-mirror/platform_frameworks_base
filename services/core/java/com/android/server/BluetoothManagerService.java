@@ -1751,14 +1751,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                         //Do enable request
                         try {
-                            if (!mQuietEnable) {
-                                if (!mBluetooth.enable()) {
-                                    Slog.e(TAG, "IBluetooth.enable() returned false");
-                                }
-                            } else {
-                                if (!mBluetooth.enableNoAutoConnect()) {
-                                    Slog.e(TAG, "IBluetooth.enableNoAutoConnect() returned false");
-                                }
+                            if (!mBluetooth.enable(mQuietEnable)) {
+                                Slog.e(TAG, "IBluetooth.enable() returned false");
                             }
                         } catch (RemoteException e) {
                             Slog.e(TAG, "Unable to call enable()", e);
@@ -2027,14 +2021,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             } else if (mBluetooth != null) {
                 //Enable bluetooth
                 try {
-                    if (!mQuietEnable) {
-                        if (!mBluetooth.enable()) {
-                            Slog.e(TAG, "IBluetooth.enable() returned false");
-                        }
-                    } else {
-                        if (!mBluetooth.enableNoAutoConnect()) {
-                            Slog.e(TAG, "IBluetooth.enableNoAutoConnect() returned false");
-                        }
+                    if (!mBluetooth.enable(mQuietEnable)) {
+                        Slog.e(TAG, "IBluetooth.enable() returned false");
                     }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to call enable()", e);
