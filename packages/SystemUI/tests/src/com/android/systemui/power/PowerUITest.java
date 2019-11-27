@@ -48,6 +48,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.power.PowerUI.WarningsUI;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import org.junit.Before;
@@ -87,6 +88,7 @@ public class PowerUITest extends SysuiTestCase {
     private IThermalEventListener mUsbThermalEventListener;
     private IThermalEventListener mSkinThermalEventListener;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock private CommandQueue mCommandQueue;
     @Mock private Lazy<StatusBar> mStatusBarLazy;
     @Mock private StatusBar mStatusBar;
 
@@ -686,7 +688,7 @@ public class PowerUITest extends SysuiTestCase {
     }
 
     private void createPowerUi() {
-        mPowerUI = new PowerUI(mContext, mBroadcastDispatcher, mStatusBarLazy);
+        mPowerUI = new PowerUI(mContext, mBroadcastDispatcher, mCommandQueue, mStatusBarLazy);
         mPowerUI.mThermalService = mThermalServiceMock;
     }
 

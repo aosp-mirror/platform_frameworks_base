@@ -46,6 +46,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
@@ -60,7 +61,7 @@ import javax.inject.Singleton;
 import dagger.Lazy;
 
 @Singleton
-public class PowerUI extends SystemUI {
+public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
 
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -80,6 +81,7 @@ public class PowerUI extends SystemUI {
 
     private PowerManager mPowerManager;
     private WarningsUI mWarnings;
+    private InattentiveSleepWarningView mOverlayView;
     private final Configuration mLastConfiguration = new Configuration();
     private int mPlugType = 0;
     private int mInvalidCharger = 0;
@@ -105,13 +107,15 @@ public class PowerUI extends SystemUI {
     private IThermalEventListener mSkinThermalEventListener;
     private IThermalEventListener mUsbThermalEventListener;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final CommandQueue mCommandQueue;
     private final Lazy<StatusBar> mStatusBarLazy;
 
     @Inject
     public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher,
-            Lazy<StatusBar> statusBarLazy) {
+            CommandQueue commandQueue, Lazy<StatusBar> statusBarLazy) {
         super(context);
         mBroadcastDispatcher = broadcastDispatcher;
+        mCommandQueue = commandQueue;
         mStatusBarLazy = statusBarLazy;
     }
 
@@ -162,6 +166,7 @@ public class PowerUI extends SystemUI {
                     }
                 });
         initThermalEventListeners();
+        mCommandQueue.addCallback(this);
     }
 
     @Override
@@ -578,6 +583,22 @@ public class PowerUI extends SystemUI {
                     == PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN) {
                 mWarnings.showThermalShutdownWarning();
             }
+        }
+    }
+
+    @Override
+    public void showInattentiveSleepWarning() {
+        if (mOverlayView == null) {
+            mOverlayView = new InattentiveSleepWarningView(mContext);
+        }
+
+        mOverlayView.show();
+    }
+
+    @Override
+    public void dismissInattentiveSleepWarning(boolean animated) {
+        if (mOverlayView != null) {
+            mOverlayView.dismiss(animated);
         }
     }
 
