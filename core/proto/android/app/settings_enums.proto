@@ -693,6 +693,12 @@ enum Action {
     // CATEGORY: SETTINGS
     // OS: R
     ACTION_CONTROLLER_UPDATE_STATE = 1728;
+
+    // Custom tag to evaluate the consuming time from onAttach to
+    // DashboardFragment.updatePreferenceStates.
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_DASHBOARD_VISIBLE_TIME = 1729;
 }
 
 /**
