@@ -248,18 +248,6 @@ public class ZygoteInit {
 
         InputStream is;
         try {
-            // If we are profiling the boot image, avoid preloading classes.
-            // Can't use device_config since we are the zygote.
-            String prop = SystemProperties.get(
-                    "persist.device_config.runtime_native_boot.profilebootclasspath", "");
-            // Might be empty if the property is unset since the default is "".
-            if (prop.length() == 0) {
-                prop = SystemProperties.get("dalvik.vm.profilebootclasspath", "");
-            }
-            if ("true".equals(prop)) {
-                return;
-            }
-
             is = new FileInputStream(PRELOADED_CLASSES);
         } catch (FileNotFoundException e) {
             Log.e(TAG, "Couldn't find " + PRELOADED_CLASSES + ".");
@@ -338,6 +326,22 @@ public class ZygoteInit {
             Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "PreloadDexCaches");
             runtime.preloadDexCaches();
             Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+
+            // If we are profiling the boot image, reset the Jit counters after preloading the
+            // classes. We want to preload for performance, and we can use method counters to
+            // infer what clases are used after calling resetJitCounters, for profile purposes.
+            // Can't use device_config since we are the zygote.
+            String prop = SystemProperties.get(
+                    "persist.device_config.runtime_native_boot.profilebootclasspath", "");
+            // Might be empty if the property is unset since the default is "".
+            if (prop.length() == 0) {
+                prop = SystemProperties.get("dalvik.vm.profilebootclasspath", "");
+            }
+            if ("true".equals(prop)) {
+                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "ResetJitCounters");
+                runtime.resetJitCounters();
+                Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
+            }
 
             // Bring back root. We'll need it later if we're in the zygote.
             if (droppedPriviliges) {
