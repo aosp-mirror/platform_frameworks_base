@@ -204,4 +204,7 @@ public class SettingsValidators {
             new InclusiveIntegerRangeValidator(0, 100);
 
     static final Validator VIBRATION_INTENSITY_VALIDATOR = new InclusiveIntegerRangeValidator(0, 3);
+
+    static final Validator ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR =
+            new AccessibilityShortcutTargetListValidator();
 }

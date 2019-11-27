@@ -35,7 +35,7 @@ abstract class ListValidator implements Validator {
         if (!isEntryValid(value)) {
             return false;
         }
-        String[] items = value.split(",");
+        String[] items = value.split(mListSplitRegex);
         for (String item : items) {
             if (!isItemValid(item)) {
                 return false;
