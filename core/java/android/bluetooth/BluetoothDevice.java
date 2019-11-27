@@ -1131,20 +1131,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean createBond() {
-        final IBluetooth service = sService;
-        if (service == null) {
-            Log.e(TAG, "BT not enabled. Cannot create bond to Remote Device");
-            return false;
-        }
-        try {
-            Log.i(TAG, "createBond() for device " + getAddress()
-                    + " called by pid: " + Process.myPid()
-                    + " tid: " + Process.myTid());
-            return service.createBond(this, TRANSPORT_AUTO);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        }
-        return false;
+        return createBond(TRANSPORT_AUTO);
     }
 
     /**
@@ -1165,23 +1152,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     @UnsupportedAppUsage
     public boolean createBond(int transport) {
-        final IBluetooth service = sService;
-        if (service == null) {
-            Log.e(TAG, "BT not enabled. Cannot create bond to Remote Device");
-            return false;
-        }
-        if (TRANSPORT_AUTO > transport || transport > TRANSPORT_LE) {
-            throw new IllegalArgumentException(transport + " is not a valid Bluetooth transport");
-        }
-        try {
-            Log.i(TAG, "createBond() for device " + getAddress()
-                    + " called by pid: " + Process.myPid()
-                    + " tid: " + Process.myTid());
-            return service.createBond(this, transport);
-        } catch (RemoteException e) {
-            Log.e(TAG, "", e);
-        }
-        return false;
+        return createBondOutOfBand(transport, null);
     }
 
     /**
@@ -1209,7 +1180,7 @@ public final class BluetoothDevice implements Parcelable {
             return false;
         }
         try {
-            return service.createBondOutOfBand(this, transport, oobData);
+            return service.createBond(this, transport, oobData);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
         }
