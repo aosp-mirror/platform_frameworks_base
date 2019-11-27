@@ -193,6 +193,17 @@ public final class LocationAccessPolicy {
         }
     }
 
+    private static String getAppOpsString(String manifestPermission) {
+        switch (manifestPermission) {
+            case Manifest.permission.ACCESS_FINE_LOCATION:
+                return AppOpsManager.OPSTR_FINE_LOCATION;
+            case Manifest.permission.ACCESS_COARSE_LOCATION:
+                return AppOpsManager.OPSTR_COARSE_LOCATION;
+            default:
+                return null;
+        }
+    }
+
     private static LocationPermissionResult checkAppLocationPermissionHelper(Context context,
             LocationPermissionQuery query, String permissionToCheck) {
         String locationTypeForLog =
@@ -206,8 +217,8 @@ public final class LocationAccessPolicy {
         if (hasManifestPermission) {
             // Only check the app op if the app has the permission.
             int appOpMode = context.getSystemService(AppOpsManager.class)
-                    .noteOpNoThrow(AppOpsManager.permissionToOpCode(permissionToCheck),
-                            query.callingUid, query.callingPackage, query.callingFeatureId, null);
+                    .noteOpNoThrow(getAppOpsString(permissionToCheck), query.callingUid,
+                            query.callingPackage, query.callingFeatureId, null);
             if (appOpMode == AppOpsManager.MODE_ALLOWED) {
                 // If the app did everything right, return without logging.
                 return LocationPermissionResult.ALLOWED;
