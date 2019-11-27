@@ -117,8 +117,10 @@ public class TimeDetectorServiceTest {
 
     private static PhoneTimeSuggestion createPhoneTimeSuggestion() {
         int phoneId = 1234;
+        PhoneTimeSuggestion suggestion = new PhoneTimeSuggestion(phoneId);
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
-        return new PhoneTimeSuggestion(phoneId, timeValue);
+        suggestion.setUtcTime(timeValue);
+        return suggestion;
     }
 
     private static class StubbedTimeDetectorStrategy implements TimeDetectorStrategy {
