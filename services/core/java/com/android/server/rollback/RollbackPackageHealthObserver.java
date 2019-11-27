@@ -16,6 +16,13 @@
 
 package com.android.server.rollback;
 
+import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_CRASH;
+import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING;
+import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_EXPLICIT_HEALTH_CHECK;
+import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH;
+import static android.util.StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -111,6 +118,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
         VersionedPackage moduleMetadataPackage = getModuleMetadataPackage();
         RollbackInfo rollback = getAvailableRollback(rollbackManager, failedPackage);
+        int reasonToLog = mapFailureReasonToMetric(rollbackReason);
 
         if (rollback == null) {
             Slog.w(TAG, "Expected rollback but no valid rollback found for package: [ "
@@ -120,7 +128,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
 
         logEvent(moduleMetadataPackage,
-                StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE);
+                StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE,
+                reasonToLog, failedPackage.getPackageName());
         LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver((Intent result) -> {
             int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
                     RollbackManager.STATUS_FAILURE);
@@ -137,11 +146,13 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                             moduleMetadataPackage);
                 } else {
                     logEvent(moduleMetadataPackage,
-                            StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS);
+                            StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                            reasonToLog, failedPackage.getPackageName());
                 }
             } else {
                 logEvent(moduleMetadataPackage,
-                        StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE);
+                        StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                        reasonToLog, failedPackage.getPackageName());
             }
         });
 
@@ -220,12 +231,14 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
         if (sessionInfo.isStagedSessionApplied()) {
             logEvent(oldModuleMetadataPackage,
-                    StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS);
+                    StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
         } else if (sessionInfo.isStagedSessionReady()) {
             // TODO: What do for staged session ready but not applied
         } else {
             logEvent(oldModuleMetadataPackage,
-                    StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE);
+                    StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                    WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN, "");
         }
     }
 
@@ -304,12 +317,16 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                     saveLastStagedRollbackId(rollbackId);
                     logEvent(moduleMetadataPackage,
                             StatsLog
-                            .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED);
+                            .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,
+                            WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN,
+                            "");
                     mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
                 } else if (sessionInfo.isStagedSessionFailed()
                         && markStagedSessionHandled(rollbackId)) {
                     logEvent(moduleMetadataPackage,
-                            StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE);
+                            StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                            WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN,
+                            "");
                     mContext.unregisterReceiver(listener);
                 }
             }
@@ -356,11 +373,12 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         return rollbackId;
     }
 
-    private static void logEvent(@Nullable VersionedPackage moduleMetadataPackage, int type) {
+    private static void logEvent(@Nullable VersionedPackage moduleMetadataPackage, int type,
+            int rollbackReason, @NonNull String failingPackageName) {
         Slog.i(TAG, "Watchdog event occurred of type: " + type);
         if (moduleMetadataPackage != null) {
             StatsLog.logWatchdogRollbackOccurred(type, moduleMetadataPackage.getPackageName(),
-                    moduleMetadataPackage.getVersionCode());
+                    moduleMetadataPackage.getVersionCode(), rollbackReason, failingPackageName);
         }
     }
 
@@ -393,4 +411,20 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                 + "and mitigate native crashes");
         mHandler.post(()->checkAndMitigateNativeCrashes());
     }
+
+    private int mapFailureReasonToMetric(@FailureReasons int failureReason) {
+        switch (failureReason) {
+            case PackageWatchdog.FAILURE_REASON_NATIVE_CRASH:
+                return WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_NATIVE_CRASH;
+            case PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK:
+                return WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_EXPLICIT_HEALTH_CHECK;
+            case PackageWatchdog.FAILURE_REASON_APP_CRASH:
+                return WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_CRASH;
+            case PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING:
+                return WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_APP_NOT_RESPONDING;
+            default:
+                return WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_REASON__REASON_UNKNOWN;
+        }
+    }
+
 }
