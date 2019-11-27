@@ -161,9 +161,13 @@ public class ImsMmTelManager implements RegistrationManager {
             public void onCapabilitiesStatusChanged(int config) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> mLocalCallback.onCapabilitiesStatusChanged(
-                                new MmTelFeature.MmTelCapabilities(config))));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onCapabilitiesStatusChanged(
+                            new MmTelFeature.MmTelCapabilities(config)));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             @Override
