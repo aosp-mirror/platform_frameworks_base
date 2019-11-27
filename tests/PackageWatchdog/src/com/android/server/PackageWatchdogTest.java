@@ -118,7 +118,8 @@ public class PackageWatchdogTest {
 
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // The failed packages should be the same as the registered ones to ensure registration is
         // done successfully
@@ -135,7 +136,8 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer2, Arrays.asList(APP_A, APP_B), SHORT_DURATION);
         raiseFatalFailureAndDispatch(watchdog,
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
-                        new VersionedPackage(APP_B, VERSION_CODE)));
+                        new VersionedPackage(APP_B, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // The failed packages should be the same as the registered ones to ensure registration is
         // done successfully
@@ -151,7 +153,8 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.unregisterHealthObserver(observer);
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // We should have no failed packages to ensure unregistration is done successfully
         assertThat(observer.mHealthCheckFailedPackages).isEmpty();
@@ -167,7 +170,8 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
         watchdog.unregisterHealthObserver(observer2);
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // observer1 should receive failed packages as intended.
         assertThat(observer1.mHealthCheckFailedPackages).containsExactly(APP_A);
@@ -183,7 +187,8 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
         moveTimeForwardAndDispatch(SHORT_DURATION);
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // We should have no failed packages for the fatal failure is raised after expiration
         assertThat(observer.mHealthCheckFailedPackages).isEmpty();
@@ -199,7 +204,8 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), LONG_DURATION);
         moveTimeForwardAndDispatch(SHORT_DURATION);
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // We should have no failed packages for the fatal failure is raised after expiration
         assertThat(observer1.mHealthCheckFailedPackages).isEmpty();
@@ -226,7 +232,8 @@ public class PackageWatchdogTest {
         moveTimeForwardAndDispatch((SHORT_DURATION / 2) + 1);
 
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Verify that we receive failed packages as expected for APP_A not expired
         assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
@@ -252,7 +259,8 @@ public class PackageWatchdogTest {
         watchdog2.registerHealthObserver(observer2);
         raiseFatalFailureAndDispatch(watchdog2,
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
-                        new VersionedPackage(APP_B, VERSION_CODE)));
+                        new VersionedPackage(APP_B, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // We should receive failed packages as expected to ensure observers are persisted and
         // resumed correctly
@@ -274,7 +282,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A below the threshold
         for (int i = 0; i < watchdog.getTriggerFailureCount() - 1; i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
 
         // Run handler so package failures are dispatched to observers
@@ -301,7 +310,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_C (not observed) above the threshold
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_C, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_C, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Verify that observers are not notified
         assertThat(observer1.mHealthCheckFailedPackages).isEmpty();
@@ -331,7 +341,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A (different version) above the threshold
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, differentVersionCode)));
+                Arrays.asList(new VersionedPackage(APP_A, differentVersionCode)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Verify that observers are not notified
         assertThat(observer.mHealthCheckFailedPackages).isEmpty();
@@ -368,7 +379,8 @@ public class PackageWatchdogTest {
                 Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE),
                         new VersionedPackage(APP_B, VERSION_CODE),
                         new VersionedPackage(APP_C, VERSION_CODE),
-                        new VersionedPackage(APP_D, VERSION_CODE)));
+                        new VersionedPackage(APP_D, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Verify least impact observers are notifed of package failures
         List<String> observerNonePackages = observerNone.mMitigatedPackages;
@@ -411,7 +423,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A above the threshold
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Verify only observerFirst is notifed
         assertThat(observerFirst.mMitigatedPackages).containsExactly(APP_A);
@@ -424,7 +437,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A again above the threshold
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Verify only observerSecond is notifed cos it has least impact
         assertThat(observerSecond.mMitigatedPackages).containsExactly(APP_A);
@@ -437,7 +451,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A again above the threshold
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Verify only observerFirst is notifed cos it has the only action
         assertThat(observerFirst.mMitigatedPackages).containsExactly(APP_A);
@@ -450,7 +465,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A again above the threshold
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Verify no observer is notified cos no actions left
         assertThat(observerFirst.mMitigatedPackages).isEmpty();
@@ -474,7 +490,8 @@ public class PackageWatchdogTest {
 
         // Then fail APP_A above the threshold
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // Verify only one observer is notifed
         assertThat(observer1.mMitigatedPackages).containsExactly(APP_A);
@@ -746,13 +763,15 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION);
         // Fail APP_A below the threshold which should not trigger package failures
         for (int i = 0; i < PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT - 1; i++) {
-            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+            watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                    PackageWatchdog.FAILURE_REASON_UNKNOWN);
         }
         mTestLooper.dispatchAll();
         assertThat(observer.mHealthCheckFailedPackages).isEmpty();
 
         // One more to trigger the package failure
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
         assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
     }
@@ -773,20 +792,24 @@ public class PackageWatchdogTest {
         TestObserver observer = new TestObserver(OBSERVER_NAME_1);
 
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A, APP_B), Long.MAX_VALUE);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS + 1);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
 
         // We shouldn't receive APP_A since the interval of 2 failures is greater than
         // DEFAULT_TRIGGER_FAILURE_DURATION_MS.
         assertThat(observer.mHealthCheckFailedPackages).isEmpty();
 
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)));
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS - 1);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)));
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
 
         // We should receive APP_B since the interval of 2 failures is less than
@@ -809,7 +832,8 @@ public class PackageWatchdogTest {
         // small timeouts.
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS - 100);
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // We should receive APP_A since the observer hasn't expired
         assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
@@ -827,7 +851,8 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), -1);
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_OBSERVING_DURATION_MS + 1);
         raiseFatalFailureAndDispatch(watchdog,
-                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+                Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
 
         // We should receive nothing since the observer has expired
         assertThat(observer.mHealthCheckFailedPackages).isEmpty();
@@ -850,20 +875,57 @@ public class PackageWatchdogTest {
 
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A), Long.MAX_VALUE);
         // Raise 2 failures at t=0 and t=900 respectively
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(900);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
 
         // Raise 2 failures at t=1100
         moveTimeForwardAndDispatch(200);
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
-        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)));
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
+        watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
+                PackageWatchdog.FAILURE_REASON_UNKNOWN);
         mTestLooper.dispatchAll();
 
         // We should receive APP_A since there are 3 failures within 1000ms window
         assertThat(observer.mHealthCheckFailedPackages).containsExactly(APP_A);
+    }
+
+    /** Test that observers execute correctly for different failure reasons */
+    @Test
+    public void testFailureReasons() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
+        TestObserver observer2 = new TestObserver(OBSERVER_NAME_2);
+        TestObserver observer3 = new TestObserver(OBSERVER_NAME_3);
+        TestObserver observer4 = new TestObserver(OBSERVER_NAME_4);
+
+        watchdog.startObservingHealth(observer1, Arrays.asList(APP_A), SHORT_DURATION);
+        watchdog.startObservingHealth(observer2, Arrays.asList(APP_B), SHORT_DURATION);
+        watchdog.startObservingHealth(observer3, Arrays.asList(APP_C), SHORT_DURATION);
+        watchdog.startObservingHealth(observer4, Arrays.asList(APP_D), SHORT_DURATION);
+
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_A,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_B,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_C,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_APP_CRASH);
+        raiseFatalFailureAndDispatch(watchdog, Arrays.asList(new VersionedPackage(APP_D,
+                VERSION_CODE)), PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+
+        assertThat(observer1.getLastFailureReason()).isEqualTo(
+                PackageWatchdog.FAILURE_REASON_NATIVE_CRASH);
+        assertThat(observer2.getLastFailureReason()).isEqualTo(
+                PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+        assertThat(observer3.getLastFailureReason()).isEqualTo(
+                PackageWatchdog.FAILURE_REASON_APP_CRASH);
+        assertThat(observer4.getLastFailureReason()).isEqualTo(
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
     }
 
     private void adoptShellPermissions(String... permissions) {
@@ -900,9 +962,9 @@ public class PackageWatchdogTest {
 
     /** Trigger package failures above the threshold. */
     private void raiseFatalFailureAndDispatch(PackageWatchdog watchdog,
-            List<VersionedPackage> packages) {
+            List<VersionedPackage> packages, int failureReason) {
         for (int i = 0; i < watchdog.getTriggerFailureCount(); i++) {
-            watchdog.onPackageFailure(packages);
+            watchdog.onPackageFailure(packages, failureReason);
         }
         mTestLooper.dispatchAll();
     }
@@ -936,6 +998,7 @@ public class PackageWatchdogTest {
     private static class TestObserver implements PackageHealthObserver {
         private final String mName;
         private int mImpact;
+        private int mLastFailureReason;
         final List<String> mHealthCheckFailedPackages = new ArrayList<>();
         final List<String> mMitigatedPackages = new ArrayList<>();
 
@@ -954,13 +1017,18 @@ public class PackageWatchdogTest {
             return mImpact;
         }
 
-        public boolean execute(VersionedPackage versionedPackage) {
+        public boolean execute(VersionedPackage versionedPackage, int failureReason) {
             mMitigatedPackages.add(versionedPackage.getPackageName());
+            mLastFailureReason = failureReason;
             return true;
         }
 
         public String getName() {
             return mName;
+        }
+
+        public int getLastFailureReason() {
+            return mLastFailureReason;
         }
     }
 
