@@ -15,11 +15,12 @@
  */
 package com.android.server.notification;
 
-import static android.os.UserHandle.USER_ALL;
+import static android.os.UserHandle.MIN_SECONDARY_USER_ID;
 import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -28,9 +29,11 @@ import static org.mockito.Mockito.when;
 
 import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
-import android.content.Context;
+import android.content.pm.UserInfo;
 import android.graphics.drawable.Icon;
+import android.os.Handler;
 import android.os.UserManager;
+import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -44,22 +47,21 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.List;
+
 
 @RunWith(AndroidJUnit4.class)
 public class NotificationHistoryManagerTest extends UiServiceTestCase {
 
     @Mock
-    Context mContext;
-    @Mock
     UserManager mUserManager;
     @Mock
     NotificationHistoryDatabase mDb;
+    @Mock
+    Handler mHandler;
+    List<UserInfo> mUsers;
 
     NotificationHistoryManager mHistoryManager;
-
-    private HistoricalNotification getHistoricalNotification(int index) {
-        return getHistoricalNotification("package" + index, index);
-    }
 
     private HistoricalNotification getHistoricalNotification(String packageName, int index) {
         String expectedChannelName = "channelName" + index;
@@ -88,13 +90,28 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
-        when(mContext.getUser()).thenReturn(getContext().getUser());
-        when(mContext.getPackageName()).thenReturn(getContext().getPackageName());
+
+        getContext().addMockSystemService(UserManager.class, mUserManager);
+
+        mUsers = new ArrayList<>();
+        UserInfo userSystem = new UserInfo();
+        userSystem.id = USER_SYSTEM;
+        mUsers.add(userSystem);
+        UserInfo userAll = new UserInfo();
+        userAll.id = MIN_SECONDARY_USER_ID;
+        mUsers.add(userAll);
+        mUsers.add(userAll);
+        when(mUserManager.getUsers()).thenReturn(mUsers);
+
+        for (UserInfo info : mUsers) {
+            Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 1, info.id);
+        }
 
         NotificationHistoryDatabaseFactory.setTestingNotificationHistoryDatabase(mDb);
 
-        mHistoryManager = new NotificationHistoryManager(mContext);
+        mHistoryManager = new NotificationHistoryManager(getContext(), mHandler);
+        mHistoryManager.onBootPhaseAppsCanStart();
     }
 
     @Test
@@ -105,6 +122,20 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isTrue();
         assertThat(mHistoryManager.isUserUnlocked(USER_SYSTEM)).isTrue();
         verify(mDb, times(1)).init();
+    }
+
+    public void testOnUserUnlocked_historyDisabled() {
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isFalse();
+        assertThat(mHistoryManager.isUserUnlocked(USER_SYSTEM)).isFalse();
+
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+
+        assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isFalse();
+        assertThat(mHistoryManager.isUserUnlocked(USER_SYSTEM)).isFalse();
+        verify(mDb, times(1)).disableHistory();
     }
 
     @Test
@@ -144,6 +175,7 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
 
         assertThat(mHistoryManager.doesHistoryExistForUser(USER_SYSTEM)).isFalse();
         assertThat(mHistoryManager.isUserUnlocked(USER_SYSTEM)).isFalse();
+        assertThat(mHistoryManager.isHistoryEnabled(USER_SYSTEM)).isFalse();
     }
 
     @Test
@@ -187,6 +219,18 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testOnPackageRemoved_historyDisabled() {
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+        String pkg = "pkg";
+        mHistoryManager.onPackageRemoved(USER_SYSTEM, pkg);
+
+        assertThat(mHistoryManager.getPendingPackageRemovalsForUser(USER_SYSTEM))
+                .isNull();
+    }
+
+    @Test
     public void testOnPackageRemoved_multiUser() {
         String pkg = "pkg";
         NotificationHistoryDatabase userHistorySystem = mock(NotificationHistoryDatabase.class);
@@ -195,8 +239,8 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
         mHistoryManager.replaceNotificationHistoryDatabase(USER_SYSTEM, userHistorySystem);
 
-        mHistoryManager.onUserUnlocked(USER_ALL);
-        mHistoryManager.replaceNotificationHistoryDatabase(USER_ALL, userHistoryAll);
+        mHistoryManager.onUserUnlocked(MIN_SECONDARY_USER_ID);
+        mHistoryManager.replaceNotificationHistoryDatabase(MIN_SECONDARY_USER_ID, userHistoryAll);
 
         mHistoryManager.onPackageRemoved(USER_SYSTEM, pkg);
 
@@ -212,8 +256,8 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
         mHistoryManager.replaceNotificationHistoryDatabase(USER_SYSTEM, userHistorySystem);
 
-        mHistoryManager.onUserUnlocked(USER_ALL);
-        mHistoryManager.replaceNotificationHistoryDatabase(USER_ALL, userHistoryAll);
+        mHistoryManager.onUserUnlocked(MIN_SECONDARY_USER_ID);
+        mHistoryManager.replaceNotificationHistoryDatabase(MIN_SECONDARY_USER_ID, userHistoryAll);
 
         mHistoryManager.triggerWriteToDisk();
 
@@ -229,14 +273,29 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
         mHistoryManager.replaceNotificationHistoryDatabase(USER_SYSTEM, userHistorySystem);
 
-        mHistoryManager.onUserUnlocked(USER_ALL);
-        mHistoryManager.replaceNotificationHistoryDatabase(USER_ALL, userHistoryAll);
-        mHistoryManager.onUserStopped(USER_ALL);
+        mHistoryManager.onUserUnlocked(MIN_SECONDARY_USER_ID);
+        mHistoryManager.replaceNotificationHistoryDatabase(MIN_SECONDARY_USER_ID, userHistoryAll);
+        mHistoryManager.onUserStopped(MIN_SECONDARY_USER_ID);
 
         mHistoryManager.triggerWriteToDisk();
 
         verify(userHistorySystem, times(1)).forceWriteToDisk();
         verify(userHistoryAll, never()).forceWriteToDisk();
+    }
+
+    @Test
+    public void testTriggerWriteToDisk_historyDisabled() {
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+        NotificationHistoryDatabase userHistorySystem = mock(NotificationHistoryDatabase.class);
+
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        mHistoryManager.replaceNotificationHistoryDatabase(USER_SYSTEM, userHistorySystem);
+
+        mHistoryManager.triggerWriteToDisk();
+
+        verify(userHistorySystem, never()).forceWriteToDisk();
     }
 
     @Test
@@ -247,9 +306,23 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAddNotification_historyDisabled() {
+        HistoricalNotification hn = getHistoricalNotification("pkg", 1);
+
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, hn.getUserId());
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+
+        mHistoryManager.onUserUnlocked(hn.getUserId());
+        mHistoryManager.addNotification(hn);
+
+        verify(mDb, never()).addNotification(any());
+    }
+
+    @Test
     public void testAddNotification() {
         HistoricalNotification hnSystem = getHistoricalNotification("pkg", USER_SYSTEM);
-        HistoricalNotification hnAll = getHistoricalNotification("pkg", USER_ALL);
+        HistoricalNotification hnAll = getHistoricalNotification("pkg", MIN_SECONDARY_USER_ID);
 
         NotificationHistoryDatabase userHistorySystem = mock(NotificationHistoryDatabase.class);
         NotificationHistoryDatabase userHistoryAll = mock(NotificationHistoryDatabase.class);
@@ -257,8 +330,8 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         mHistoryManager.onUserUnlocked(USER_SYSTEM);
         mHistoryManager.replaceNotificationHistoryDatabase(USER_SYSTEM, userHistorySystem);
 
-        mHistoryManager.onUserUnlocked(USER_ALL);
-        mHistoryManager.replaceNotificationHistoryDatabase(USER_ALL, userHistoryAll);
+        mHistoryManager.onUserUnlocked(MIN_SECONDARY_USER_ID);
+        mHistoryManager.replaceNotificationHistoryDatabase(MIN_SECONDARY_USER_ID, userHistoryAll);
 
         mHistoryManager.addNotification(hnSystem);
         mHistoryManager.addNotification(hnAll);
@@ -270,7 +343,7 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
     @Test
     public void testReadNotificationHistory() {
         HistoricalNotification hnSystem = getHistoricalNotification("pkg", USER_SYSTEM);
-        HistoricalNotification hnAll = getHistoricalNotification("pkg", USER_ALL);
+        HistoricalNotification hnAll = getHistoricalNotification("pkg", MIN_SECONDARY_USER_ID);
 
         NotificationHistoryDatabase userHistorySystem = mock(NotificationHistoryDatabase.class);
         NotificationHistoryDatabase userHistoryAll = mock(NotificationHistoryDatabase.class);
@@ -283,8 +356,8 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
         when(nhSystem.getNotificationsToWrite()).thenReturn(nhSystemList);
         when(userHistorySystem.readNotificationHistory()).thenReturn(nhSystem);
 
-        mHistoryManager.onUserUnlocked(USER_ALL);
-        mHistoryManager.replaceNotificationHistoryDatabase(USER_ALL, userHistoryAll);
+        mHistoryManager.onUserUnlocked(MIN_SECONDARY_USER_ID);
+        mHistoryManager.replaceNotificationHistoryDatabase(MIN_SECONDARY_USER_ID, userHistoryAll);
         NotificationHistory nhAll = mock(NotificationHistory.class);
         ArrayList<HistoricalNotification> nhAllList = new ArrayList<>();
         nhAllList.add(hnAll);
@@ -293,13 +366,47 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
 
         // ensure read history returns both historical notifs
         NotificationHistory nh = mHistoryManager.readNotificationHistory(
-                new int[] {USER_SYSTEM, USER_ALL});
+                new int[] {USER_SYSTEM, MIN_SECONDARY_USER_ID});
         assertThat(nh.getNotificationsToWrite()).contains(hnSystem);
         assertThat(nh.getNotificationsToWrite()).contains(hnAll);
     }
 
     @Test
-    public void readFilteredNotificationHistory_userUnlocked() {
+    public void testReadNotificationHistory_historyDisabled() {
+        HistoricalNotification hnSystem = getHistoricalNotification("pkg", USER_SYSTEM);
+
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+        NotificationHistory nhSystem = mock(NotificationHistory.class);
+        ArrayList<HistoricalNotification> nhSystemList = new ArrayList<>();
+        nhSystemList.add(hnSystem);
+        when(nhSystem.getNotificationsToWrite()).thenReturn(nhSystemList);
+        when(mDb.readNotificationHistory()).thenReturn(nhSystem);
+
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
+
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0,  USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+
+        NotificationHistory nh =
+                mHistoryManager.readNotificationHistory(new int[] {USER_SYSTEM,});
+        assertThat(nh.getNotificationsToWrite()).isEmpty();
+    }
+
+    @Test
+    public void testReadFilteredNotificationHistory_userLocked() {
+        NotificationHistory nh =
+                mHistoryManager.readFilteredNotificationHistory(USER_SYSTEM, "", "", 1000);
+        assertThat(nh.getNotificationsToWrite()).isEmpty();
+    }
+
+    @Test
+    public void testReadFilteredNotificationHistory_historyDisabled() {
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0,  USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+
+        mHistoryManager.onUserUnlocked(USER_SYSTEM);
         NotificationHistory nh =
                 mHistoryManager.readFilteredNotificationHistory(USER_SYSTEM, "", "", 1000);
         assertThat(nh.getNotificationsToWrite()).isEmpty();
@@ -311,5 +418,16 @@ public class NotificationHistoryManagerTest extends UiServiceTestCase {
 
         mHistoryManager.readFilteredNotificationHistory(USER_SYSTEM, "pkg", "chn", 1000);
         verify(mDb, times(1)).readNotificationHistory("pkg", "chn", 1000);
+    }
+
+    @Test
+    public void testIsHistoryEnabled() {
+        assertThat(mHistoryManager.isHistoryEnabled(USER_SYSTEM)).isTrue();
+
+        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0,  USER_SYSTEM);
+        mHistoryManager.mSettingsObserver.update(null, USER_SYSTEM);
+
+        assertThat(mHistoryManager.isHistoryEnabled(USER_SYSTEM)).isFalse();
     }
 }
