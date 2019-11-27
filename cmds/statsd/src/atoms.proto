@@ -1742,6 +1742,19 @@ message WatchdogRollbackOccurred {
     optional string package_name = 2;
 
     optional int32 package_version_code = 3;
+
+    enum RollbackReasonType {
+        REASON_UNKNOWN = 0;
+        REASON_NATIVE_CRASH = 1;
+        REASON_EXPLICIT_HEALTH_CHECK = 2;
+        REASON_APP_CRASH = 3;
+        REASON_APP_NOT_RESPONDING = 4;
+    }
+    optional RollbackReasonType rollback_reason = 4;
+
+    // Set by RollbackPackageHealthObserver to be the package that is failing when a rollback
+    // is initiated. Empty if the package is unknown.
+    optional string failing_package_name = 5;
 }
 
 /**
