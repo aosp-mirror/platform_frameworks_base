@@ -37,9 +37,8 @@ public class EmergencyNumberDbInstallReceiver extends ConfigUpdateInstallReceive
         Slog.i(TAG, "Emergency number database is updated in file partition");
 
         // Notify EmergencyNumberTracker for emergency number installation complete.
-        Intent notifyInstallComplete = new Intent(
-                TelephonyManager.ACTION_OTA_EMERGENCY_NUMBER_DB_INSTALLED);
-        context.sendBroadcast(
-                notifyInstallComplete, android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE);
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(
+                Context.TELEPHONY_SERVICE);
+        telephonyManager.notifyOtaEmergencyNumberDbInstalled();
     }
 }
