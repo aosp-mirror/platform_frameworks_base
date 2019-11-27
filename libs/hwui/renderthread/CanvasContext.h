@@ -110,7 +110,7 @@ public:
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 
-    void setSurface(sp<Surface>&& surface);
+    void setSurface(sp<Surface>&& surface, bool enableTimeout = true);
     bool pauseSurface();
     void setStopped(bool stopped);
     bool hasSurface() const { return mNativeSurface.get(); }
