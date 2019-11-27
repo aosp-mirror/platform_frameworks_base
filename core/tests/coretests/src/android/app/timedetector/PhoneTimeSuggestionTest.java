@@ -30,17 +30,22 @@ public class PhoneTimeSuggestionTest {
 
     @Test
     public void testEquals() {
-        PhoneTimeSuggestion one =
-                new PhoneTimeSuggestion(PHONE_ID, new TimestampedValue<>(1111L, 2222L));
+        PhoneTimeSuggestion one = new PhoneTimeSuggestion(PHONE_ID);
         assertEquals(one, one);
 
-        PhoneTimeSuggestion two =
-                new PhoneTimeSuggestion(PHONE_ID, new TimestampedValue<>(1111L, 2222L));
+        PhoneTimeSuggestion two = new PhoneTimeSuggestion(PHONE_ID);
         assertEquals(one, two);
         assertEquals(two, one);
 
-        PhoneTimeSuggestion three =
-                new PhoneTimeSuggestion(PHONE_ID + 1, new TimestampedValue<>(1111L, 2222L));
+        one.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        assertEquals(one, one);
+
+        two.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        assertEquals(one, two);
+        assertEquals(two, one);
+
+        PhoneTimeSuggestion three = new PhoneTimeSuggestion(PHONE_ID + 1);
+        three.setUtcTime(new TimestampedValue<>(1111L, 2222L));
         assertNotEquals(one, three);
         assertNotEquals(three, one);
 
@@ -52,8 +57,10 @@ public class PhoneTimeSuggestionTest {
 
     @Test
     public void testParcelable() {
-        PhoneTimeSuggestion one =
-                new PhoneTimeSuggestion(PHONE_ID, new TimestampedValue<>(1111L, 2222L));
+        PhoneTimeSuggestion one = new PhoneTimeSuggestion(PHONE_ID);
+        assertEquals(one, roundTripParcelable(one));
+
+        one.setUtcTime(new TimestampedValue<>(1111L, 2222L));
         assertEquals(one, roundTripParcelable(one));
 
         // DebugInfo should also be stored (but is not checked by equals()
