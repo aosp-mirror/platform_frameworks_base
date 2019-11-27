@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Intent;
 import android.icu.util.Calendar;
@@ -36,6 +37,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.Duration;
+
 @RunWith(AndroidJUnit4.class)
 public class SimpleTimeZoneDetectorStrategyTest {
 
@@ -47,6 +50,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
 
     private static final int ARBITRARY_PHONE_ID = 123456;
 
+    private static final long ONE_DAY_MILLIS = Duration.ofDays(1).toMillis();
+
     private Script mScript;
 
     @Before
@@ -55,7 +60,7 @@ public class SimpleTimeZoneDetectorStrategyTest {
     }
 
     @Test
-    public void testSuggestPhoneTime_nitz_timeDetectionEnabled() {
+    public void testSuggestPhoneTime_autoTimeEnabled() {
         Scenario scenario = SCENARIO_1;
         mScript.pokeFakeClocks(scenario)
                 .pokeTimeDetectionEnabled(true);
@@ -67,7 +72,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
 
         mScript.simulateTimePassing(clockIncrement)
                 .simulatePhoneTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(expectSystemClockMillis);
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectSystemClockMillis, true /* expectNetworkBroadcast */);
     }
 
     @Test
@@ -103,7 +109,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
 
         // Send the first time signal. It should be used.
         mScript.simulatePhoneTimeSuggestion(timeSuggestion1)
-                .verifySystemClockWasSetAndResetCallTracking(expectSystemClockMillis1);
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectSystemClockMillis1, true /* expectNetworkBroadcast */);
 
         // Now send another time signal, but one that is too similar to the last one and should be
         // ignored.
@@ -130,11 +137,12 @@ public class SimpleTimeZoneDetectorStrategyTest {
                 TimeDetectorStrategy.getTimeAt(utcTime3, mScript.peekElapsedRealtimeMillis());
 
         mScript.simulatePhoneTimeSuggestion(timeSuggestion3)
-                .verifySystemClockWasSetAndResetCallTracking(expectSystemClockMillis3);
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectSystemClockMillis3, true /* expectNetworkBroadcast */);
     }
 
     @Test
-    public void testSuggestPhoneTime_nitz_timeDetectionDisabled() {
+    public void testSuggestPhoneTime_autoTimeDisabled() {
         Scenario scenario = SCENARIO_1;
         mScript.pokeFakeClocks(scenario)
                 .pokeTimeDetectionEnabled(false);
@@ -146,7 +154,7 @@ public class SimpleTimeZoneDetectorStrategyTest {
     }
 
     @Test
-    public void testSuggestPhoneTime_nitz_invalidNitzReferenceTimesIgnored() {
+    public void testSuggestPhoneTime_invalidNitzReferenceTimesIgnored() {
         Scenario scenario = SCENARIO_1;
         final int systemClockUpdateThreshold = 2000;
         mScript.pokeFakeClocks(scenario)
@@ -161,7 +169,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
         long expectedSystemClockMillis1 =
                 TimeDetectorStrategy.getTimeAt(utcTime1, mScript.peekElapsedRealtimeMillis());
         mScript.simulatePhoneTimeSuggestion(timeSuggestion1)
-                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1);
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectedSystemClockMillis1, true /* expectNetworkBroadcast */);
 
         // The UTC time increment should be larger than the system clock update threshold so we
         // know it shouldn't be ignored for other reasons.
@@ -197,7 +206,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
         PhoneTimeSuggestion timeSuggestion4 =
                 createPhoneTimeSuggestion(ARBITRARY_PHONE_ID, utcTime4);
         mScript.simulatePhoneTimeSuggestion(timeSuggestion4)
-                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis4);
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectedSystemClockMillis4, true /* expectNetworkBroadcast */);
     }
 
     @Test
@@ -229,7 +239,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
 
         // Turn on auto time detection.
         mScript.simulateAutoTimeDetectionToggle()
-                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1);
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectedSystemClockMillis1, true /* expectNetworkBroadcast */);
 
         // Turn off auto time detection.
         mScript.simulateAutoTimeDetectionToggle()
@@ -256,7 +267,99 @@ public class SimpleTimeZoneDetectorStrategyTest {
 
         // Turn on auto time detection.
         mScript.simulateAutoTimeDetectionToggle()
-                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis2);
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectedSystemClockMillis2, true /* expectNetworkBroadcast */);
+    }
+
+    @Test
+    public void testSuggestManualTime_autoTimeDisabled() {
+        Scenario scenario = SCENARIO_1;
+        mScript.pokeFakeClocks(scenario)
+                .pokeTimeDetectionEnabled(false);
+
+        ManualTimeSuggestion timeSuggestion = scenario.createManualTimeSuggestionForActual();
+        final int clockIncrement = 1000;
+        long expectSystemClockMillis = scenario.getActualTimeMillis() + clockIncrement;
+
+        mScript.simulateTimePassing(clockIncrement)
+                .simulateManualTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectSystemClockMillis, false /* expectNetworkBroadcast */);
+    }
+
+    @Test
+    public void testSuggestManualTime_retainsAutoSignal() {
+        Scenario scenario = SCENARIO_1;
+
+        // Configure the start state.
+        mScript.pokeFakeClocks(scenario)
+                .pokeTimeDetectionEnabled(true);
+
+        // Simulate a phone suggestion.
+        PhoneTimeSuggestion phoneTimeSuggestion =
+                scenario.createPhoneTimeSuggestionForActual(ARBITRARY_PHONE_ID);
+        long expectedAutoClockMillis = phoneTimeSuggestion.getUtcTime().getValue();
+        final int clockIncrement = 1000;
+
+        // Simulate the passage of time.
+        mScript.simulateTimePassing(clockIncrement);
+        expectedAutoClockMillis += clockIncrement;
+
+        mScript.simulatePhoneTimeSuggestion(phoneTimeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectedAutoClockMillis, true /* expectNetworkBroadcast */);
+
+        // Simulate the passage of time.
+        mScript.simulateTimePassing(clockIncrement);
+        expectedAutoClockMillis += clockIncrement;
+
+        // Switch to manual.
+        mScript.simulateAutoTimeDetectionToggle()
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Simulate the passage of time.
+        mScript.simulateTimePassing(clockIncrement);
+        expectedAutoClockMillis += clockIncrement;
+
+
+        // Simulate a manual suggestion 1 day different from the auto suggestion.
+        long manualTimeMillis = SCENARIO_1.getActualTimeMillis() + ONE_DAY_MILLIS;
+        long expectedManualClockMillis = manualTimeMillis;
+        ManualTimeSuggestion manualTimeSuggestion = createManualTimeSuggestion(manualTimeMillis);
+        mScript.simulateManualTimeSuggestion(manualTimeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(
+                        expectedManualClockMillis, false /* expectNetworkBroadcast */);
+
+        // Simulate the passage of time.
+        mScript.simulateTimePassing(clockIncrement);
+        expectedAutoClockMillis += clockIncrement;
+
+        // Switch back to auto.
+        mScript.simulateAutoTimeDetectionToggle();
+
+        mScript.verifySystemClockWasSetAndResetCallTracking(
+                        expectedAutoClockMillis, true /* expectNetworkBroadcast */);
+
+        // Switch back to manual - nothing should happen to the clock.
+        mScript.simulateAutoTimeDetectionToggle()
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    /**
+     * Manual suggestions should be ignored if auto time is enabled.
+     */
+    @Test
+    public void testSuggestManualTime_autoTimeEnabled() {
+        Scenario scenario = SCENARIO_1;
+        mScript.pokeFakeClocks(scenario)
+                .pokeTimeDetectionEnabled(true);
+
+        ManualTimeSuggestion timeSuggestion = scenario.createManualTimeSuggestionForActual();
+        final int clockIncrement = 1000;
+
+        mScript.simulateTimePassing(clockIncrement)
+                .simulateManualTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
     }
 
     /**
@@ -280,7 +383,7 @@ public class SimpleTimeZoneDetectorStrategyTest {
         }
 
         @Override
-        public boolean isTimeDetectionEnabled() {
+        public boolean isAutoTimeDetectionEnabled() {
             return mTimeDetectionEnabled;
         }
 
@@ -426,8 +529,13 @@ public class SimpleTimeZoneDetectorStrategyTest {
             return this;
         }
 
+        Script simulateManualTimeSuggestion(ManualTimeSuggestion timeSuggestion) {
+            mSimpleTimeDetectorStrategy.suggestManualTime(timeSuggestion);
+            return this;
+        }
+
         Script simulateAutoTimeDetectionToggle() {
-            boolean enabled = !mFakeCallback.isTimeDetectionEnabled();
+            boolean enabled = !mFakeCallback.isAutoTimeDetectionEnabled();
             mFakeCallback.pokeTimeDetectionEnabled(enabled);
             mSimpleTimeDetectorStrategy.handleAutoTimeDetectionToggle(enabled);
             return this;
@@ -445,9 +553,12 @@ public class SimpleTimeZoneDetectorStrategyTest {
             return this;
         }
 
-        Script verifySystemClockWasSetAndResetCallTracking(long expectSystemClockMillis) {
+        Script verifySystemClockWasSetAndResetCallTracking(
+                long expectSystemClockMillis, boolean expectNetworkBroadcast) {
             mFakeCallback.verifySystemClockWasSet(expectSystemClockMillis);
-            mFakeCallback.verifyIntentWasBroadcast();
+            if (expectNetworkBroadcast) {
+                mFakeCallback.verifyIntentWasBroadcast();
+            }
             mFakeCallback.resetCallTracking();
             return this;
         }
@@ -484,6 +595,12 @@ public class SimpleTimeZoneDetectorStrategyTest {
             TimestampedValue<Long> time = new TimestampedValue<>(
                     mInitialDeviceRealtimeMillis, mActualTimeMillis);
             return createPhoneTimeSuggestion(phoneId, time);
+        }
+
+        ManualTimeSuggestion createManualTimeSuggestionForActual() {
+            TimestampedValue<Long> time = new TimestampedValue<>(
+                    mInitialDeviceRealtimeMillis, mActualTimeMillis);
+            return new ManualTimeSuggestion(time);
         }
 
         static class Builder {
@@ -523,6 +640,12 @@ public class SimpleTimeZoneDetectorStrategyTest {
         PhoneTimeSuggestion timeSuggestion = new PhoneTimeSuggestion(phoneId);
         timeSuggestion.setUtcTime(utcTime);
         return timeSuggestion;
+    }
+
+    private ManualTimeSuggestion createManualTimeSuggestion(long timeMillis) {
+        TimestampedValue<Long> utcTime =
+                new TimestampedValue<>(mScript.peekElapsedRealtimeMillis(), timeMillis);
+        return new ManualTimeSuggestion(utcTime);
     }
 
     private static long createUtcTime(int year, int monthInYear, int day, int hourOfDay, int minute,
