@@ -613,22 +613,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public boolean isEnabled() {
-        if ((Binder.getCallingUid() != Process.SYSTEM_UID) && (!checkIfCallerIsForegroundUser())) {
-            Slog.w(TAG, "isEnabled(): not allowed for non-active and non system user");
-            return false;
-        }
-
-        try {
-            mBluetoothLock.readLock().lock();
-            if (mBluetooth != null) {
-                return mBluetooth.isEnabled();
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "isEnabled()", e);
-        } finally {
-            mBluetoothLock.readLock().unlock();
-        }
-        return false;
+        return getState() == BluetoothAdapter.STATE_ON;
     }
 
     public int getState() {
