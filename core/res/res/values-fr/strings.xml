@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"L\'application d\'administration du profil professionnel est manquante ou endommagée. Par conséquent, votre profil professionnel et toutes les données associées ont été supprimés. Pour obtenir de l\'aide, contactez l\'administrateur."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Votre profil professionnel n\'est plus disponible sur cet appareil"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Trop de tentatives de saisie du mot de passe"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"L\'appareil est géré"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Votre organisation gère cet appareil et peut surveiller le trafic réseau. Appuyez ici pour obtenir plus d\'informations."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Les données de votre appareil vont être effacées"</string>
@@ -1066,7 +1068,7 @@
     <string name="selectAll" msgid="1532369154488982046">"Tout sélectionner"</string>
     <string name="cut" msgid="2561199725874745819">"Couper"</string>
     <string name="copy" msgid="5472512047143665218">"Copier"</string>
-    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Échec de la copie dans le Presse-papiers"</string>
+    <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Échec de la copie dans le presse-papiers"</string>
     <string name="paste" msgid="461843306215520225">"Coller"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Coller au format texte brut"</string>
     <string name="replace" msgid="7842675434546657444">"Remplacer..."</string>
@@ -1116,10 +1118,8 @@
     <string name="loading" msgid="3138021523725055037">"Chargement…"</string>
     <string name="capital_on" msgid="2770685323900821829">"OUI"</string>
     <string name="capital_off" msgid="7443704171014626777">"NON"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"activé"</string>
+    <string name="not_checked" msgid="7972320087569023342">"désactivé"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Continuer avec"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Terminer l\'action avec %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Terminer l\'action"</string>

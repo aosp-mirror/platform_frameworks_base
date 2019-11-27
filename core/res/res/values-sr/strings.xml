@@ -190,6 +190,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Апликација за администраторе на профилу за Work недостаје или је оштећена. Због тога су профил за Work и повезани подаци избрисани. Обратите се администратору за помоћ."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Профил за Work више није доступан на овом уређају"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Превише покушаја уноса лозинке"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"Уређајем се управља"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Организација управља овим уређајем и може да надгледа мрежни саобраћај. Додирните за детаље."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Уређај ће бити обрисан"</string>
@@ -1136,10 +1138,8 @@
     <string name="loading" msgid="3138021523725055037">"Учитава се…"</string>
     <string name="capital_on" msgid="2770685323900821829">"ДА"</string>
     <string name="capital_off" msgid="7443704171014626777">"НЕ"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"означено је"</string>
+    <string name="not_checked" msgid="7972320087569023342">"није означено"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Довршавање радње помоћу"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Завршите радњу помоћу апликације %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Заврши радњу"</string>

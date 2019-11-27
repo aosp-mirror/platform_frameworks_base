@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"பணிக் கணக்கு நிர்வாகி ஆப்ஸ் இல்லை அல்லது அது சிதைந்துள்ளது. இதன் விளைவாக, உங்கள் பணிக் கணக்குமும் அதனுடன் தொடர்புடைய தரவும் நீக்கப்பட்டன. உதவிக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"இந்தச் சாதனத்தில் இனி பணிக் கணக்கு கிடைக்காது"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"கடவுச்சொல்லை அதிக முறை தவறாக முயற்சித்துவிட்டீர்கள்"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"சாதனம் நிர்வகிக்கப்படுகிறது"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம். விவரங்களுக்கு, தட்டவும்."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"சாதனத் தரவு அழிக்கப்படும்"</string>
@@ -1116,10 +1118,8 @@
     <string name="loading" msgid="3138021523725055037">"ஏற்றுகிறது..."</string>
     <string name="capital_on" msgid="2770685323900821829">"ஆன்"</string>
     <string name="capital_off" msgid="7443704171014626777">"ஆஃப்"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"இயக்கப்பட்டுள்ளது"</string>
+    <string name="not_checked" msgid="7972320087569023342">"முடக்கப்பட்டுள்ளது"</string>
     <string name="whichApplication" msgid="5432266899591255759">"இதைப் பயன்படுத்தி செயலை நிறைவுசெய்"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ஐப் பயன்படுத்தி செயலை முடிக்கவும்"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"செயலை முடி"</string>
@@ -2004,6 +2004,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"திரைப் பிரிப்பை நிலைமாற்று"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"பூட்டுத் திரை"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ஸ்கிரீன்ஷாட்"</string>
-    <!-- no translation found for accessibility_freeform_caption (7873194416838321119) -->
-    <skip />
+    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸில் உள்ள பாப் அப் சாளரம்."</string>
 </resources>

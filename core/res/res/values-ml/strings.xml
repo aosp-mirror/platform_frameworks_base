@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിൻ ആപ്പ് വിട്ടുപോയിരിക്കുന്നു അല്ലെങ്കിൽ കേടായിരിക്കുന്നു. ഫലമായി, നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും ബന്ധപ്പെട്ട വിവരങ്ങളും ഇല്ലാതാക്കിയിരിക്കുന്നു. സഹായത്തിന് അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ഈ ഉപകരണത്തിൽ തുടർന്നങ്ങോട്ട് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ലഭ്യമല്ല"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"വളരെയധികം പാസ്‌വേഡ് ശ്രമങ്ങൾ"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"ഉപകരണം മാനേജുചെയ്യുന്നുണ്ട്"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
@@ -1116,10 +1118,8 @@
     <string name="loading" msgid="3138021523725055037">"ലോഡുചെയ്യുന്നു..."</string>
     <string name="capital_on" msgid="2770685323900821829">"ഓൺ"</string>
     <string name="capital_off" msgid="7443704171014626777">"ഓഫ്"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"പരിശോധിച്ചത്"</string>
+    <string name="not_checked" msgid="7972320087569023342">"പരിശോധിക്കാത്തത്"</string>
     <string name="whichApplication" msgid="5432266899591255759">"പൂർണ്ണമായ പ്രവർത്തനം ഉപയോഗിക്കുന്നു"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ഉപയോഗിച്ച് പ്രവർത്തനം പൂർത്തിയാക്കുക"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"പ്രവർത്തനം പൂർത്തിയാക്കുക"</string>
@@ -2004,6 +2004,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"സ്‌ക്രീൻ വിഭജന മോഡ് മാറ്റുക"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"സ്ക്രീൻഷോട്ട്"</string>
-    <!-- no translation found for accessibility_freeform_caption (7873194416838321119) -->
-    <skip />
+    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"പോപ്പ്-അപ്പ് വിൻഡോയിലെ <xliff:g id="APP_NAME">%1$s</xliff:g> ആപ്പ്."</string>
 </resources>
