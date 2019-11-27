@@ -2713,9 +2713,14 @@ public class SubscriptionManager {
                     if (executor == null || callback == null) {
                         return;
                     }
-                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                        callback.accept(result);
-                    }));
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        executor.execute(() -> {
+                            callback.accept(result);
+                        });
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             };
             iSub.setPreferredDataSubscriptionId(subId, needValidation, callbackStub);
