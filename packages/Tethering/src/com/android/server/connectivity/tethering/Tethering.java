@@ -93,8 +93,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
-import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -111,7 +109,6 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
-import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -188,6 +185,7 @@ public class Tethering {
     private final PhoneStateListener mPhoneStateListener;
     private final INetd mNetd;
     private final NetdCallback mNetdCallback;
+    private final UserRestrictionActionListener mTetheringRestriction;
     private int mActiveDataSubId = INVALID_SUBSCRIPTION_ID;
     // All the usage of mTetherInternalCallback should run in the same thread.
     private ITetherInternalCallback mTetherInternalCallback = null;
@@ -280,6 +278,10 @@ public class Tethering {
             mLog.e("Unable to register netd UnsolicitedEventListener");
         }
 
+        final UserManager userManager = (UserManager) mContext.getSystemService(
+                    Context.USER_SERVICE);
+        mTetheringRestriction = new UserRestrictionActionListener(userManager, this);
+
         // Load tethering configuration.
         updateConfiguration();
 
@@ -298,6 +300,7 @@ public class Tethering {
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        filter.addAction(UserManager.ACTION_USER_RESTRICTIONS_CHANGED);
         mContext.registerReceiver(mStateReceiver, filter, null, handler);
 
         filter = new IntentFilter();
@@ -306,11 +309,6 @@ public class Tethering {
         filter.addDataScheme("file");
         mContext.registerReceiver(mStateReceiver, filter, null, handler);
 
-        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
-        // This check is useful only for some unit tests; example: ConnectivityServiceTest.
-        if (umi != null) {
-            umi.addUserRestrictionsListener(new TetheringUserRestrictionListener(this));
-        }
     }
 
     private WifiManager getWifiManager() {
@@ -717,8 +715,8 @@ public class Tethering {
         }
 
         if (mTetheredNotificationBuilder == null) {
-            mTetheredNotificationBuilder =
-                    new Notification.Builder(mContext, SystemNotificationChannels.NETWORK_STATUS);
+            mTetheredNotificationBuilder = new Notification.Builder(mContext,
+                    SystemNotificationChannels.NETWORK_STATUS);
             mTetheredNotificationBuilder.setWhen(0)
                     .setOngoing(true)
                     .setColor(mContext.getColor(
@@ -764,6 +762,9 @@ public class Tethering {
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 mLog.log("OBSERVED configuration changed");
                 updateConfiguration();
+            } else if (action.equals(UserManager.ACTION_USER_RESTRICTIONS_CHANGED)) {
+                mLog.log("OBSERVED user restrictions changed");
+                handleUserRestrictionAction();
             }
         }
 
@@ -870,25 +871,35 @@ public class Tethering {
                 }
             }
         }
+
+        private void handleUserRestrictionAction() {
+            mTetheringRestriction.onUserRestrictionsChanged();
+        }
     }
 
     @VisibleForTesting
-    protected static class TetheringUserRestrictionListener implements UserRestrictionsListener {
+    protected static class UserRestrictionActionListener {
+        private final UserManager mUserManager;
         private final Tethering mWrapper;
+        public boolean mDisallowTethering;
 
-        public TetheringUserRestrictionListener(Tethering wrapper) {
+        public UserRestrictionActionListener(UserManager um, Tethering wrapper) {
+            mUserManager = um;
             mWrapper = wrapper;
+            mDisallowTethering = false;
         }
 
-        public void onUserRestrictionsChanged(int userId,
-                                              Bundle newRestrictions,
-                                              Bundle prevRestrictions) {
+        public void onUserRestrictionsChanged() {
+            // getUserRestrictions gets restriction for this process' user, which is the primary
+            // user. This is fine because DISALLOW_CONFIG_TETHERING can only be set on the primary
+            // user. See UserManager.DISALLOW_CONFIG_TETHERING.
+            final Bundle restrictions = mUserManager.getUserRestrictions();
             final boolean newlyDisallowed =
-                    newRestrictions.getBoolean(UserManager.DISALLOW_CONFIG_TETHERING);
-            final boolean previouslyDisallowed =
-                    prevRestrictions.getBoolean(UserManager.DISALLOW_CONFIG_TETHERING);
-            final boolean tetheringDisallowedChanged = (newlyDisallowed != previouslyDisallowed);
+                    restrictions.getBoolean(UserManager.DISALLOW_CONFIG_TETHERING);
+            final boolean prevDisallowed = mDisallowTethering;
+            mDisallowTethering = newlyDisallowed;
 
+            final boolean tetheringDisallowedChanged = (newlyDisallowed != prevDisallowed);
             if (!tetheringDisallowedChanged) {
                 return;
             }
