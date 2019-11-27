@@ -6362,7 +6362,8 @@ message DeviceIdentifierAccessDenied {
     optional bool is_preinstalled = 3;
 
     // True if the package is privileged.
-    optional bool is_priv_app = 4;
+    // Starting from Android 11, this boolean is not set and will always be false.
+    optional bool is_priv_app = 4 [deprecated = true];
 }
 
 /**
