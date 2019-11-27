@@ -181,6 +181,33 @@ public class WifiManagerTest {
     }
 
     /**
+     * Check the call to startSoftAp calls WifiService to startSoftAp with the provided
+     * WifiConfiguration.  Verify that the return value is propagated to the caller.
+     */
+    @Test
+    public void testStartTetheredHotspotCallsServiceWithSoftApConfig() throws Exception {
+        SoftApConfiguration mSoftApConfig = new SoftApConfiguration.Builder().build();
+        when(mWifiService.startTetheredHotspot(eq(mSoftApConfig))).thenReturn(true);
+        assertTrue(mWifiManager.startTetheredHotspot(mSoftApConfig));
+
+        when(mWifiService.startTetheredHotspot(eq(mSoftApConfig))).thenReturn(false);
+        assertFalse(mWifiManager.startTetheredHotspot(mSoftApConfig));
+    }
+
+    /**
+     * Check the call to startSoftAp calls WifiService to startSoftAp with a null config.  Verify
+     * that the return value is propagated to the caller.
+     */
+    @Test
+    public void testStartTetheredHotspotCallsServiceWithNullConfig() throws Exception {
+        when(mWifiService.startTetheredHotspot(eq(null))).thenReturn(true);
+        assertTrue(mWifiManager.startTetheredHotspot(null));
+
+        when(mWifiService.startTetheredHotspot(eq(null))).thenReturn(false);
+        assertFalse(mWifiManager.startTetheredHotspot(null));
+    }
+
+    /**
      * Test creation of a LocalOnlyHotspotReservation and verify that close properly calls
      * WifiService.stopLocalOnlyHotspot.
      */
@@ -1143,6 +1170,43 @@ public class WifiManagerTest {
 
         try {
             mWifiManager.setWifiApConfiguration(new WifiConfiguration());
+            fail("setWifiApConfiguration should rethrow Exceptions from WifiService");
+        } catch (SecurityException e) { }
+    }
+
+    /**
+     * Verify that a successful call properly returns true.
+     */
+    @Test
+    public void testSetSoftApConfigurationSuccessReturnsTrue() throws Exception {
+        SoftApConfiguration apConfig = new SoftApConfiguration.Builder().build();
+
+        when(mWifiService.setSoftApConfiguration(eq(apConfig), eq(TEST_PACKAGE_NAME)))
+                .thenReturn(true);
+        assertTrue(mWifiManager.setSoftApConfiguration(apConfig));
+    }
+
+    /**
+     * Verify that a failed call properly returns false.
+     */
+    @Test
+    public void testSetSoftApConfigurationFailureReturnsFalse() throws Exception {
+        SoftApConfiguration apConfig = new SoftApConfiguration.Builder().build();
+
+        when(mWifiService.setSoftApConfiguration(eq(apConfig), eq(TEST_PACKAGE_NAME)))
+                .thenReturn(false);
+        assertFalse(mWifiManager.setSoftApConfiguration(apConfig));
+    }
+
+    /**
+     * Verify Exceptions are rethrown when underlying calls to WifiService throw exceptions.
+     */
+    @Test
+    public void testSetSoftApConfigurationRethrowsException() throws Exception {
+        doThrow(new SecurityException()).when(mWifiService).setSoftApConfiguration(any(), any());
+
+        try {
+            mWifiManager.setSoftApConfiguration(new SoftApConfiguration.Builder().build());
             fail("setWifiApConfiguration should rethrow Exceptions from WifiService");
         } catch (SecurityException e) { }
     }
