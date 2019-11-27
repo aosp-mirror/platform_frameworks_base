@@ -216,10 +216,21 @@ public final class SaveInfo implements Parcelable {
      */
     public static final int NEGATIVE_BUTTON_STYLE_REJECT = 1;
 
+    /**
+     * Style for the negative button of the save UI to never do the
+     * save operation. This means that the user does not need to save
+     * any data on this activity or application. Once the user tapping
+     * the negative button, the service should never trigger the save
+     * UI again. In addition to this, must consider providing restore
+     * options for the user.
+     */
+    public static final int NEGATIVE_BUTTON_STYLE_NEVER = 2;
+
     /** @hide */
     @IntDef(prefix = { "NEGATIVE_BUTTON_STYLE_" }, value = {
             NEGATIVE_BUTTON_STYLE_CANCEL,
-            NEGATIVE_BUTTON_STYLE_REJECT
+            NEGATIVE_BUTTON_STYLE_REJECT,
+            NEGATIVE_BUTTON_STYLE_NEVER
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface NegativeButtonStyle{}
@@ -571,6 +582,7 @@ public final class SaveInfo implements Parcelable {
          *
          * @see #NEGATIVE_BUTTON_STYLE_CANCEL
          * @see #NEGATIVE_BUTTON_STYLE_REJECT
+         * @see #NEGATIVE_BUTTON_STYLE_NEVER
          *
          * @throws IllegalArgumentException If the style is invalid
          */
@@ -578,11 +590,7 @@ public final class SaveInfo implements Parcelable {
                 @Nullable IntentSender listener) {
             throwIfDestroyed();
             Preconditions.checkArgumentInRange(style, NEGATIVE_BUTTON_STYLE_CANCEL,
-                    NEGATIVE_BUTTON_STYLE_REJECT, "style");
-            if (style != NEGATIVE_BUTTON_STYLE_CANCEL
-                    && style != NEGATIVE_BUTTON_STYLE_REJECT) {
-                throw new IllegalArgumentException("Invalid style: " + style);
-            }
+                    NEGATIVE_BUTTON_STYLE_NEVER, "style");
             mNegativeButtonStyle = style;
             mNegativeActionListener = listener;
             return this;

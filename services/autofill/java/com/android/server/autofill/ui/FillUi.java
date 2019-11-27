@@ -383,7 +383,7 @@ final class FillUi {
             }
             child.setOnClickListener((v) -> {
                 if (sVerbose) {
-                    Slog.v(TAG, "Applying " + id + " after " + v + " was clicked");
+                    Slog.v(TAG, " Cancelling session after " + v + " clicked");
                 }
                 mCallback.cancelSession();
             });
