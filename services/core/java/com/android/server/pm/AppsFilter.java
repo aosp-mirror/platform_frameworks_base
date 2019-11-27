@@ -347,6 +347,7 @@ public class AppsFilter {
                     mForceQueryable.contains(newPkgSetting.appId)
                             /* shared user that is already force queryable */
                             || newPkg.isForceQueryable()
+                            || newPkgSetting.forceQueryableOverride
                             || (newPkgSetting.isSystem() && (mSystemAppsQueryable
                             || ArrayUtils.contains(mForceQueryableByDevicePackageNames,
                             newPkg.getPackageName())));

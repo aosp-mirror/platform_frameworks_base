@@ -2730,6 +2730,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--staged":
                     sessionParams.setStaged();
                     break;
+                case "--force-queryable":
+                    sessionParams.setForceQueryable();
+                    break;
                 case "--enable-rollback":
                     if (params.installerPackageName == null) {
                         // com.android.shell has the TEST_MANAGE_ROLLBACKS

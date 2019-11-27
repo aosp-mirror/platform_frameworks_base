@@ -1467,6 +1467,8 @@ public class PackageInstaller {
         public DataLoaderParams dataLoaderParams;
         /** {@hide} */
         public int rollbackDataPolicy = PackageManager.RollbackDataPolicy.RESTORE;
+        /** {@hide} */
+        public boolean forceQueryableOverride;
 
         /**
          * Construct parameters for a new package install session.
@@ -1499,6 +1501,7 @@ public class PackageInstaller {
             installerPackageName = source.readString();
             isMultiPackage = source.readBoolean();
             isStaged = source.readBoolean();
+            forceQueryableOverride = source.readBoolean();
             requiredInstalledVersionCode = source.readLong();
             DataLoaderParamsParcel dataLoaderParamsParcel = source.readParcelable(
                     DataLoaderParamsParcel.class.getClassLoader());
@@ -1528,6 +1531,7 @@ public class PackageInstaller {
             ret.installerPackageName = installerPackageName;
             ret.isMultiPackage = isMultiPackage;
             ret.isStaged = isStaged;
+            ret.forceQueryableOverride = forceQueryableOverride;
             ret.requiredInstalledVersionCode = requiredInstalledVersionCode;
             ret.dataLoaderParams = dataLoaderParams;
             ret.rollbackDataPolicy = rollbackDataPolicy;
@@ -1904,6 +1908,14 @@ public class PackageInstaller {
             this.dataLoaderParams = dataLoaderParams;
         }
 
+        /**
+         *
+         * {@hide}
+         */
+        public void setForceQueryable() {
+            this.forceQueryableOverride = true;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -1923,6 +1935,7 @@ public class PackageInstaller {
             pw.printPair("installerPackageName", installerPackageName);
             pw.printPair("isMultiPackage", isMultiPackage);
             pw.printPair("isStaged", isStaged);
+            pw.printPair("forceQueryable", forceQueryableOverride);
             pw.printPair("requiredInstalledVersionCode", requiredInstalledVersionCode);
             pw.printPair("dataLoaderParams", dataLoaderParams);
             pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
@@ -1954,6 +1967,7 @@ public class PackageInstaller {
             dest.writeString(installerPackageName);
             dest.writeBoolean(isMultiPackage);
             dest.writeBoolean(isStaged);
+            dest.writeBoolean(forceQueryableOverride);
             dest.writeLong(requiredInstalledVersionCode);
             if (dataLoaderParams != null) {
                 dest.writeParcelable(dataLoaderParams.getData(), flags);
@@ -2078,6 +2092,8 @@ public class PackageInstaller {
         /** {@hide} */
         public boolean isStaged;
         /** {@hide} */
+        public boolean forceQueryable;
+        /** {@hide} */
         public int parentSessionId = INVALID_ID;
         /** {@hide} */
         public int[] childSessionIds = NO_SESSIONS;
@@ -2135,6 +2151,7 @@ public class PackageInstaller {
             installFlags = source.readInt();
             isMultiPackage = source.readBoolean();
             isStaged = source.readBoolean();
+            forceQueryable = source.readBoolean();
             parentSessionId = source.readInt();
             childSessionIds = source.createIntArray();
             if (childSessionIds == null) {
@@ -2476,6 +2493,14 @@ public class PackageInstaller {
         }
 
         /**
+         * Returns true if this session is marked as forceQueryable
+         * {@hide}
+         */
+        public boolean isForceQueryable() {
+            return forceQueryable;
+        }
+
+        /**
          * Returns {@code true} if this session is an active staged session.
          *
          * We consider a session active if it has been committed and it is either pending
@@ -2636,6 +2661,7 @@ public class PackageInstaller {
             dest.writeInt(installFlags);
             dest.writeBoolean(isMultiPackage);
             dest.writeBoolean(isStaged);
+            dest.writeBoolean(forceQueryable);
             dest.writeInt(parentSessionId);
             dest.writeIntArray(childSessionIds);
             dest.writeBoolean(isStagedSessionApplied);
