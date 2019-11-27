@@ -848,7 +848,7 @@ public class PackageWatchdog {
         public void updatePackagesLocked(List<MonitoredPackage> packages) {
             for (int pIndex = 0; pIndex < packages.size(); pIndex++) {
                 MonitoredPackage p = packages.get(pIndex);
-                this.packages.put(p.mName, p);
+                this.packages.put(p.getName(), p);
             }
         }
 
@@ -872,7 +872,7 @@ public class PackageWatchdog {
                 int newState = p.handleElapsedTimeLocked(elapsedMs);
                 if (oldState != HealthCheckState.FAILED
                         && newState == HealthCheckState.FAILED) {
-                    Slog.i(TAG, "Package " + p.mName + " failed health check");
+                    Slog.i(TAG, "Package " + p.getName() + " failed health check");
                     failedPackages.add(p);
                 }
                 if (p.isExpiredLocked()) {
@@ -971,8 +971,7 @@ public class PackageWatchdog {
      * instances of this class.
      */
     class MonitoredPackage {
-        //TODO(b/120598832): VersionedPackage?
-        private final String mName;
+        private final VersionedPackage mPackage;
         // Times when package failures happen sorted in ascending order
         @GuardedBy("mLock")
         private final LongArrayQueue mFailureHistory = new LongArrayQueue();
@@ -1002,7 +1001,7 @@ public class PackageWatchdog {
 
         MonitoredPackage(String name, long durationMs, long healthCheckDurationMs,
                 boolean hasPassedHealthCheck) {
-            mName = name;
+            mPackage = getVersionedPackage(name);
             mDurationMs = durationMs;
             mHealthCheckDurationMs = healthCheckDurationMs;
             mHasPassedHealthCheck = hasPassedHealthCheck;
@@ -1013,7 +1012,7 @@ public class PackageWatchdog {
         @GuardedBy("mLock")
         public void writeLocked(XmlSerializer out) throws IOException {
             out.startTag(null, TAG_PACKAGE);
-            out.attribute(null, ATTR_NAME, mName);
+            out.attribute(null, ATTR_NAME, getName());
             out.attribute(null, ATTR_DURATION, String.valueOf(mDurationMs));
             out.attribute(null, ATTR_EXPLICIT_HEALTH_CHECK_DURATION,
                     String.valueOf(mHealthCheckDurationMs));
@@ -1053,7 +1052,7 @@ public class PackageWatchdog {
         public int setHealthCheckActiveLocked(long initialHealthCheckDurationMs) {
             if (initialHealthCheckDurationMs <= 0) {
                 Slog.wtf(TAG, "Cannot set non-positive health check duration "
-                        + initialHealthCheckDurationMs + "ms for package " + mName
+                        + initialHealthCheckDurationMs + "ms for package " + getName()
                         + ". Using total duration " + mDurationMs + "ms instead");
                 initialHealthCheckDurationMs = mDurationMs;
             }
@@ -1072,7 +1071,7 @@ public class PackageWatchdog {
         @GuardedBy("mLock")
         public int handleElapsedTimeLocked(long elapsedMs) {
             if (elapsedMs <= 0) {
-                Slog.w(TAG, "Cannot handle non-positive elapsed time for package " + mName);
+                Slog.w(TAG, "Cannot handle non-positive elapsed time for package " + getName());
                 return mHealthCheckState;
             }
             // Transitions to FAILED if now <= 0 and health check not passed
@@ -1105,7 +1104,7 @@ public class PackageWatchdog {
 
         /** Returns the monitored package name. */
         private String getName() {
-            return mName;
+            return mPackage.getPackageName();
         }
 
         /**
@@ -1170,7 +1169,7 @@ public class PackageWatchdog {
             } else {
                 mHealthCheckState = HealthCheckState.ACTIVE;
             }
-            Slog.i(TAG, "Updated health check state for package " + mName + ": "
+            Slog.i(TAG, "Updated health check state for package " + getName() + ": "
                     + toString(oldState) + " -> " + toString(mHealthCheckState));
             return mHealthCheckState;
         }
