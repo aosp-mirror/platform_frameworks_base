@@ -2451,4 +2451,14 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     SETTINGS_PLATFORM_COMPAT_DASHBOARD = 1805;
+
+    // OPEN: Settings > Location -> Work profile tab
+    // CATEGORY: SETTINGS
+    // OS: R
+    LOCATION_WORK = 1806;
+
+    // OPEN: Settings > Account -> Work profile tab
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACCOUNT_WORK = 1807;
 }
