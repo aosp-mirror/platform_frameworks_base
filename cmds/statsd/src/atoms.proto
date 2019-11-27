@@ -337,7 +337,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10069
+    // Next: 10070
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -407,6 +407,7 @@ message Atom {
         NotificationRemoteViews notification_remote_views = 10066;
         DangerousPermissionStateSampled dangerous_permission_state_sampled = 10067;
         GraphicsStats graphics_stats = 10068;
+        RuntimeAppOpsAccess runtime_app_ops_access = 10069;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -6846,7 +6847,7 @@ message AppOps {
     // Uid of the package requesting the op
     optional int32 uid = 1 [(is_uid) = true];
 
-    // Nmae of the package performing the op
+    // Name of the package performing the op
     optional string package_name = 2;
 
     // operation id; maps to the OP_* constants in AppOpsManager.java
@@ -7632,3 +7633,35 @@ message GraphicsStats {
     // more apps are running / rendering.
     optional bool is_today = 16;
 }
+
+/**
+ * Message related to dangerous (runtime) app ops access
+ */
+message RuntimeAppOpsAccess {
+    // Uid of the package accessing app op
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Name of the package accessing app op
+    optional string package_name = 2;
+
+    // operation id; maps to the OP_* constants in AppOpsManager.java
+    optional int32 op_id = 3;
+
+    // feature id; provided by developer when accessing related API, limited at 50 chars by API.
+    // Features must be provided through manifest using <feature> tag available in R and above.
+    optional string feature_id = 4;
+
+    // message related to app op access, limited to 600 chars by API
+    optional string message = 5;
+
+    enum SamplingStrategy {
+        DEFAULT = 0;
+        UNIFORM = 1;
+        RARELY_USED = 2;
+    }
+
+    // sampling strategy used to collect this message
+    optional SamplingStrategy sampling_strategy = 6;
+}
+
+
