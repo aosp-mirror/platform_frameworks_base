@@ -17,7 +17,10 @@
 package com.android.externalstorage;
 
 import static com.android.externalstorage.ExternalStorageProvider.AUTHORITY;
+import static com.android.externalstorage.ExternalStorageProvider.getPathFromDocId;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -50,5 +53,19 @@ public class ExternalStorageProviderTest {
         });
 
         verify(spyProvider, atLeast(1)).updateVolumes();
+    }
+
+    @Test
+    public void testGetPathFromDocId() throws Exception {
+        final String root = "root";
+        final String path = "abc/def/ghi";
+        String docId = root + ":" + path;
+        assertEquals(getPathFromDocId(docId), path);
+
+        docId = root + ":" + path + "/";
+        assertEquals(getPathFromDocId(docId), path);
+
+        docId = root + ":";
+        assertTrue(getPathFromDocId(docId).isEmpty());
     }
 }

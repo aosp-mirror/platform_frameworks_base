@@ -50,6 +50,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.FileSystemProvider;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -308,37 +309,26 @@ public class ExternalStorageProvider extends FileSystemProvider {
     @Override
     protected boolean shouldBlockFromTree(@NonNull String docId) {
         try {
-            final File dir = getFileForDocId(docId, true /* visible */).getCanonicalFile();
-            if (!dir.isDirectory()) {
+            final File dir = getFileForDocId(docId, false /* visible */);
+
+            // the file is null or it is not a directory
+            if (dir == null || !dir.isDirectory()) {
                 return false;
             }
 
-            final String path = dir.getAbsolutePath();
+            final String path = getPathFromDocId(docId);
 
-            // Block Download folder from tree
-            if (MediaStore.Downloads.isDownloadDir(path)) {
+            // Block the root of the storage
+            if (path.isEmpty()) {
                 return true;
             }
 
-            final ArrayMap<String, RootInfo> roots = new ArrayMap<>();
-
-            synchronized (mRootsLock) {
-                roots.putAll(mRoots);
+            // Block Download folder from tree
+            if (TextUtils.equals(Environment.DIRECTORY_DOWNLOADS.toLowerCase(),
+                    path.toLowerCase())) {
+                return true;
             }
 
-            // block root of storage
-            for (int i = 0; i < roots.size(); i++) {
-                RootInfo rootInfo = roots.valueAt(i);
-                // skip home root
-                if (TextUtils.equals(rootInfo.rootId, ROOT_ID_HOME)) {
-                    continue;
-                }
-
-                // block the root of storage
-                if (TextUtils.equals(path, rootInfo.visiblePath.getAbsolutePath())) {
-                    return true;
-                }
-            }
             return false;
         } catch (IOException e) {
             throw new IllegalArgumentException(
@@ -428,6 +418,23 @@ public class ExternalStorageProvider extends FileSystemProvider {
             throws FileNotFoundException {
         RootInfo root = getRootFromDocId(docId);
         return Pair.create(root, buildFile(root, docId, visible, true));
+    }
+
+    @VisibleForTesting
+    static String getPathFromDocId(String docId) {
+        final int splitIndex = docId.indexOf(':', 1);
+        final String path = docId.substring(splitIndex + 1);
+
+        if (path.isEmpty()) {
+            return path;
+        }
+
+        // remove trailing "/"
+        if (path.charAt(path.length() - 1) == '/') {
+            return path.substring(0, path.length() - 1);
+        } else {
+            return path;
+        }
     }
 
     private RootInfo getRootFromDocId(String docId) throws FileNotFoundException {
