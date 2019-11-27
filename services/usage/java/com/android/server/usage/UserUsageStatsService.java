@@ -34,10 +34,7 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
-import android.os.Process;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -46,8 +43,8 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.LocalServices;
 import com.android.server.usage.UsageStatsDatabase.StatCombiner;
 
 import java.io.File;
@@ -55,7 +52,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -112,9 +109,12 @@ class UserUsageStatsService {
         mSystemTimeSnapshot = System.currentTimeMillis();
     }
 
-    void init(final long currentTimeMillis) {
-        readPackageMappingsLocked();
+    void init(final long currentTimeMillis, HashMap<String, Long> installedPackages) {
+        readPackageMappingsLocked(installedPackages);
         mDatabase.init(currentTimeMillis);
+        if (mDatabase.wasUpgradePerformed()) {
+            mDatabase.prunePackagesDataOnUpgrade(installedPackages);
+        }
 
         int nullCount = 0;
         for (int i = 0; i < mCurrentStats.length; i++) {
@@ -170,52 +170,53 @@ class UserUsageStatsService {
         persistActiveStats();
     }
 
-    void onPackageRemoved(String packageName, long timeRemoved) {
-        mDatabase.onPackageRemoved(packageName, timeRemoved);
+    int onPackageRemoved(String packageName, long timeRemoved) {
+        return mDatabase.onPackageRemoved(packageName, timeRemoved);
     }
 
-    private void readPackageMappingsLocked() {
+    private void readPackageMappingsLocked(HashMap<String, Long> installedPackages) {
         mDatabase.readMappingsLocked();
-        cleanUpPackageMappingsLocked();
+        updatePackageMappingsLocked(installedPackages);
     }
 
     /**
-     * Queries Package Manager for a list of installed packages and removes those packages from
-     * mPackagesTokenData which are not installed any more.
+     * Queries Job Scheduler for any pending data prune jobs and if any exist, it updates the
+     * package mappings in memory by removing those tokens.
      * This will only happen once per device boot, when the user is unlocked for the first time.
+     *
+     * @param installedPackages map of installed packages (package_name:package_install_time)
      */
-    private void cleanUpPackageMappingsLocked() {
-        final long timeNow = System.currentTimeMillis();
-        /*
-         Note (b/142501248): PackageManagerInternal#getInstalledApplications is not lightweight.
-         Once its implementation is updated, or it's replaced with a better alternative, update
-         the call here to use it. For now, using the heavy #getInstalledApplications is okay since
-         this clean-up is only performed once every boot.
-         */
-        final PackageManagerInternal packageManagerInternal =
-                LocalServices.getService(PackageManagerInternal.class);
-        if (packageManagerInternal == null) {
+    private void updatePackageMappingsLocked(HashMap<String, Long> installedPackages) {
+        if (ArrayUtils.isEmpty(installedPackages)) {
             return;
         }
-        final List<ApplicationInfo> installedPackages =
-                packageManagerInternal.getInstalledApplications(0, mUserId, Process.SYSTEM_UID);
-        // convert the package list to a set for easy look-ups
-        final HashSet<String> packagesSet = new HashSet<>(installedPackages.size());
-        for (int i = installedPackages.size() - 1; i >= 0; i--) {
-            packagesSet.add(installedPackages.get(i).packageName);
-        }
-        final List<String> removedPackages = new ArrayList<>();
+
+        final long timeNow = System.currentTimeMillis();
+        final ArrayList<String> removedPackages = new ArrayList<>();
         // populate list of packages that are found in the mappings but not in the installed list
         for (int i = mDatabase.mPackagesTokenData.packagesToTokensMap.size() - 1; i >= 0; i--) {
-            if (!packagesSet.contains(mDatabase.mPackagesTokenData.packagesToTokensMap.keyAt(i))) {
-                removedPackages.add(mDatabase.mPackagesTokenData.packagesToTokensMap.keyAt(i));
+            final String packageName = mDatabase.mPackagesTokenData.packagesToTokensMap.keyAt(i);
+            if (!installedPackages.containsKey(packageName)) {
+                removedPackages.add(packageName);
             }
         }
+        if (removedPackages.isEmpty()) {
+            return;
+        }
 
-        // remove packages in the mappings that are no longer installed
+        // remove packages in the mappings that are no longer installed and persist to disk
         for (int i = removedPackages.size() - 1; i >= 0; i--) {
             mDatabase.mPackagesTokenData.removePackage(removedPackages.get(i), timeNow);
         }
+        try {
+            mDatabase.writeMappingsLocked();
+        } catch (Exception e) {
+            Slog.w(TAG, "Unable to write updated package mappings file on service initialization.");
+        }
+    }
+
+    boolean pruneUninstalledPackagesData() {
+        return mDatabase.pruneUninstalledPackagesData();
     }
 
     private void onTimeChanged(long oldTime, long newTime) {

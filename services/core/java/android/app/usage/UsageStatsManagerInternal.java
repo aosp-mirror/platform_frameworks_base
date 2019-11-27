@@ -281,4 +281,13 @@ public abstract class UsageStatsManagerInternal {
             return mUsageRemaining;
         }
     }
+
+    /**
+     * Called by {@link com.android.server.usage.UsageStatsIdleService} when the device is idle to
+     * prune usage stats data for uninstalled packages.
+     *
+     * @param userId the user associated with the job
+     * @return {@code true} if the pruning was successful, {@code false} otherwise
+     */
+    public abstract boolean pruneUninstalledPackagesData(@UserIdInt int userId);
 }

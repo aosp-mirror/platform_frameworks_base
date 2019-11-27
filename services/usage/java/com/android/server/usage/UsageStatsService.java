@@ -52,6 +52,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -101,6 +102,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -324,6 +326,8 @@ public class UsageStatsService extends SystemService implements
     }
 
     private void onUserUnlocked(int userId) {
+        // fetch the installed packages outside the lock so it doesn't block package manager.
+        final HashMap<String, Long> installedPackages = getInstalledPackages(userId);
         synchronized (mLock) {
             // Create a user unlocked event to report
             final Event unlockEvent = new Event(USER_UNLOCKED, SystemClock.elapsedRealtime());
@@ -340,9 +344,10 @@ public class UsageStatsService extends SystemService implements
             }
             boolean needToFlush = !pendingEvents.isEmpty();
 
+            initializeUserUsageStatsServiceLocked(userId, System.currentTimeMillis(),
+                    installedPackages);
             mUserUnlockedStates.put(userId, true);
-            final UserUsageStatsService userService = getUserDataAndInitializeIfNeededLocked(
-                    userId, System.currentTimeMillis());
+            final UserUsageStatsService userService = getUserUsageStatsServiceLocked(userId);
             if (userService == null) {
                 Slog.i(TAG, "Attempted to unlock stopped or removed user " + userId);
                 return;
@@ -365,6 +370,29 @@ public class UsageStatsService extends SystemService implements
                 userService.persistActiveStats();
             }
         }
+    }
+
+    /**
+     * Fetches a map (package_name:install_time) of installed packages for the given user. This
+     * map contains all installed packages, including those packages which have been uninstalled
+     * with the DONT_DELETE_DATA flag.
+     * This is a helper method which should only be called when the given user's usage stats service
+     * is initialized; it performs a heavy query to package manager so do not call it otherwise.
+     * <br/>
+     * Note: DO NOT call this while holding the usage stats lock ({@code mLock}).
+     */
+    private HashMap<String, Long> getInstalledPackages(int userId) {
+        if (mPackageManager == null) {
+            return null;
+        }
+        final List<PackageInfo> installedPackages = mPackageManager.getInstalledPackagesAsUser(
+                PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+        final HashMap<String, Long> packagesMap = new HashMap<>();
+        for (int i = installedPackages.size() - 1; i >= 0; i--) {
+            final PackageInfo packageInfo = installedPackages.get(i);
+            packagesMap.put(packageInfo.packageName, packageInfo.firstInstallTime);
+        }
+        return packagesMap;
     }
 
     private DevicePolicyManagerInternal getDpmInternal() {
@@ -456,29 +484,40 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    private UserUsageStatsService getUserDataAndInitializeIfNeededLocked(int userId,
-            long currentTimeMillis) {
-        UserUsageStatsService service = mUserState.get(userId);
+    /**
+     * This should the be only way to fetch the usage stats service for a specific user.
+     */
+    private UserUsageStatsService getUserUsageStatsServiceLocked(int userId) {
+        final UserUsageStatsService service = mUserState.get(userId);
         if (service == null) {
-            final File usageStatsDir = new File(Environment.getDataSystemCeDirectory(userId),
-                    "usagestats");
-            service = new UserUsageStatsService(getContext(), userId, usageStatsDir, this);
-            if (mUserUnlockedStates.get(userId)) {
-                try {
-                    service.init(currentTimeMillis);
-                    mUserState.put(userId, service);
-                } catch (Exception e) {
-                    if (mUserManager.isUserUnlocked(userId)) {
-                        throw e; // rethrow exception - user is unlocked
-                    } else {
-                        Slog.w(TAG, "Attempted to initialize service for "
-                                + "stopped or removed user " + userId);
-                        return null;
-                    }
-                }
-            }
+            Slog.wtf(TAG, "Failed to fetch usage stats service for user " + userId + ". "
+                    + "The user might not have been initialized yet.");
         }
         return service;
+    }
+
+    /**
+     * Initializes the given user's usage stats service - this should ideally only be called once,
+     * when the user is initially unlocked.
+     */
+    private void initializeUserUsageStatsServiceLocked(int userId,
+            long currentTimeMillis, HashMap<String, Long> installedPackages) {
+        final File usageStatsDir = new File(Environment.getDataSystemCeDirectory(userId),
+                "usagestats");
+        final UserUsageStatsService service = new UserUsageStatsService(getContext(), userId,
+                usageStatsDir, this);
+        try {
+            service.init(currentTimeMillis, installedPackages);
+            mUserState.put(userId, service);
+        } catch (Exception e) {
+            if (mUserManager.isUserUnlocked(userId)) {
+                Slog.w(TAG, "Failed to initialized unlocked user " + userId);
+                throw e; // rethrow the exception - user is unlocked
+            } else {
+                Slog.w(TAG, "Attempted to initialize service for stopped or removed user "
+                        + userId);
+            }
+        }
     }
 
     private void migrateStatsToSystemCeIfNeededLocked(int userId) {
@@ -700,7 +739,6 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            final long timeNow = System.currentTimeMillis();
             final long elapsedRealtime = SystemClock.elapsedRealtime();
 
             if (event.mPackage != null
@@ -795,8 +833,7 @@ public class UsageStatsService extends SystemService implements
                     break;
             }
 
-            final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+            final UserUsageStatsService service = getUserUsageStatsServiceLocked(userId);
             if (service == null) {
                 return; // user was stopped or removed
             }
@@ -847,15 +884,18 @@ public class UsageStatsService extends SystemService implements
             mAppStandby.onUserRemoved(userId);
             mAppTimeLimit.onUserRemoved(userId);
         }
+        // Cancel any scheduled jobs for this user since the user is being removed.
+        UsageStatsIdleService.cancelJob(getContext(), userId);
     }
 
     /**
      * Called by the Handler for message MSG_PACKAGE_REMOVED.
      */
     private void onPackageRemoved(int userId, String packageName) {
+        final int tokenRemoved;
         synchronized (mLock) {
             final long timeRemoved = System.currentTimeMillis();
-            if (!mUserUnlockedStates.get(userId, false)) {
+            if (!mUserUnlockedStates.get(userId)) {
                 // If user is not unlocked and a package is removed for them, we will handle it
                 // when the user service is initialized and package manager is queried.
                 return;
@@ -865,7 +905,30 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            userService.onPackageRemoved(packageName, timeRemoved);
+            tokenRemoved = userService.onPackageRemoved(packageName, timeRemoved);
+        }
+
+        // Schedule a job to prune any data related to this package.
+        if (tokenRemoved != PackagesTokenData.UNASSIGNED_TOKEN) {
+            UsageStatsIdleService.scheduleJob(getContext(), userId);
+        }
+    }
+
+    /**
+     * Called by the Binder stub.
+     */
+    private boolean pruneUninstalledPackagesData(int userId) {
+        synchronized (mLock) {
+            if (!mUserUnlockedStates.get(userId)) {
+                return false; // user is no longer unlocked
+            }
+
+            final UserUsageStatsService userService = mUserState.get(userId);
+            if (userService == null) {
+                return false; // user was stopped or removed
+            }
+
+            return userService.pruneUninstalledPackagesData();
         }
     }
 
@@ -880,8 +943,7 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            final UserUsageStatsService service = getUserUsageStatsServiceLocked(userId);
             if (service == null) {
                 return null; // user was stopped or removed
             }
@@ -915,8 +977,7 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            final UserUsageStatsService service = getUserUsageStatsServiceLocked(userId);
             if (service == null) {
                 return null; // user was stopped or removed
             }
@@ -935,8 +996,7 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            final UserUsageStatsService service = getUserUsageStatsServiceLocked(userId);
             if (service == null) {
                 return null; // user was stopped or removed
             }
@@ -955,8 +1015,7 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            final UserUsageStatsService service = getUserUsageStatsServiceLocked(userId);
             if (service == null) {
                 return null; // user was stopped or removed
             }
@@ -975,8 +1034,7 @@ public class UsageStatsService extends SystemService implements
                 return null;
             }
 
-            final UserUsageStatsService service =
-                    getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            final UserUsageStatsService service = getUserUsageStatsServiceLocked(userId);
             if (service == null) {
                 return null; // user was stopped or removed
             }
@@ -2041,8 +2099,7 @@ public class UsageStatsService extends SystemService implements
 
                 // Check to ensure that only user 0's data is b/r for now
                 if (user == UserHandle.USER_SYSTEM) {
-                    final UserUsageStatsService userStats = getUserDataAndInitializeIfNeededLocked(
-                            user, System.currentTimeMillis());
+                    final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(user);
                     if (userStats == null) {
                         return null; // user was stopped or removed
                     }
@@ -2062,8 +2119,7 @@ public class UsageStatsService extends SystemService implements
                 }
 
                 if (user == UserHandle.USER_SYSTEM) {
-                    final UserUsageStatsService userStats = getUserDataAndInitializeIfNeededLocked(
-                            user, System.currentTimeMillis());
+                    final UserUsageStatsService userStats = getUserUsageStatsServiceLocked(user);
                     if (userStats == null) {
                         return; // user was stopped or removed
                     }
@@ -2123,6 +2179,11 @@ public class UsageStatsService extends SystemService implements
         @Override
         public AppUsageLimitData getAppUsageLimit(String packageName, UserHandle user) {
             return mAppTimeLimit.getAppUsageLimit(packageName, user);
+        }
+
+        @Override
+        public boolean pruneUninstalledPackagesData(int userId) {
+            return UsageStatsService.this.pruneUninstalledPackagesData(userId);
         }
     }
 
