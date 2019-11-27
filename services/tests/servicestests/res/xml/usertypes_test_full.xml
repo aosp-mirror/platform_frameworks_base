@@ -14,11 +14,12 @@
      limitations under the License.
 -->
 <user-types>
-    <profile-type
-        name='android.test'
-        max-allowed-per-parent='2' >
+    <full-type
+        name='android.test.1'
+        max-allowed-per-parent='12' >
+        <default-restrictions no_remove_user='true' no_bluetooth='true' />
         <badge-colors>
+            <item res='@*android:color/profile_badge_1' />
         </badge-colors>
-        <default-restrictions />
-    </profile-type>
+    </full-type>
 </user-types>

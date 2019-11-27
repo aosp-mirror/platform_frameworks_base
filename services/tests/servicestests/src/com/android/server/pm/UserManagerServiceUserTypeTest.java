@@ -25,15 +25,19 @@ import static android.content.pm.UserInfo.FLAG_PROFILE;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
 import static android.content.pm.UserInfo.FLAG_SYSTEM;
 
+import static com.android.server.pm.UserTypeDetails.UNLIMITED_NUMBER_OF_USERS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertThrows;
 
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.Bundle;
 import android.os.UserManager;
 import android.util.ArrayMap;
 
@@ -46,9 +50,6 @@ import com.android.frameworks.servicestests.R;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Tests for {@link UserTypeDetails} and {@link UserTypeFactory}.
@@ -68,7 +69,8 @@ public class UserManagerServiceUserTypeTest {
 
     @Test
     public void testUserTypeBuilder_createUserType() {
-        UserTypeDetails type = new UserTypeDetails.Builder()
+        final Bundle restrictions = makeRestrictionsBundle("r1", "r2");
+        final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
                 .setEnabled(true)
                 .setMaxAllowed(21)
@@ -81,7 +83,7 @@ public class UserManagerServiceUserTypeTest {
                 .setBadgeNoBackground(30)
                 .setLabel(31)
                 .setMaxAllowedPerParent(32)
-                .setDefaultRestrictions(new ArrayList<>(Arrays.asList("r1", "r2")))
+                .setDefaultRestrictions(restrictions)
                 .createUserTypeDetails();
 
         assertEquals("a.name", type.getName());
@@ -93,7 +95,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(30, type.getBadgeNoBackground());
         assertEquals(31, type.getLabel());
         assertEquals(32, type.getMaxAllowedPerParent());
-        assertEquals(new ArrayList<>(Arrays.asList("r1", "r2")), type.getDefaultRestrictions());
+        assertTrue(UserRestrictionsUtils.areEqual(restrictions, type.getDefaultRestrictions()));
+        assertNotSame(restrictions, type.getDefaultRestrictions());
 
 
         assertEquals(23, type.getBadgeLabel(0));
@@ -120,8 +123,8 @@ public class UserManagerServiceUserTypeTest {
                 .createUserTypeDetails();
 
         assertTrue(type.isEnabled());
-        assertEquals(UserTypeDetails.UNLIMITED_NUMBER_OF_USERS, type.getMaxAllowed());
-        assertEquals(UserTypeDetails.UNLIMITED_NUMBER_OF_USERS, type.getMaxAllowedPerParent());
+        assertEquals(UNLIMITED_NUMBER_OF_USERS, type.getMaxAllowed());
+        assertEquals(UNLIMITED_NUMBER_OF_USERS, type.getMaxAllowedPerParent());
         assertEquals(FLAG_FULL, type.getDefaultUserInfoFlags());
         assertEquals(Resources.ID_NULL, type.getIconBadge());
         assertEquals(Resources.ID_NULL, type.getBadgePlain());
@@ -201,23 +204,26 @@ public class UserManagerServiceUserTypeTest {
 
     /** Tests {@link UserTypeFactory#customizeBuilders} for a reasonable xml file. */
     @Test
-    public void testUserTypeFactoryCustomize_normal() throws Exception {
+    public void testUserTypeFactoryCustomize_profile() throws Exception {
         final String userTypeAosp1 = "android.test.1"; // Profile user that is not customized
         final String userTypeAosp2 = "android.test.2"; // Profile user that is customized
         final String userTypeOem1 = "custom.test.1"; // Custom-defined profile
 
         // Mock some "AOSP defaults".
+        final Bundle restrictions = makeRestrictionsBundle("no_config_vpn", "no_config_tethering");
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
                 .setName(userTypeAosp1)
                 .setBaseType(FLAG_PROFILE)
-                .setMaxAllowedPerParent(31));
+                .setMaxAllowedPerParent(31)
+                .setDefaultRestrictions(restrictions));
         builders.put(userTypeAosp2, new UserTypeDetails.Builder()
                 .setName(userTypeAosp1)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(32)
                 .setIconBadge(401)
-                .setBadgeColors(402, 403, 404));
+                .setBadgeColors(402, 403, 404)
+                .setDefaultRestrictions(restrictions));
 
         final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_profile);
         UserTypeFactory.customizeBuilders(builders, parser);
@@ -226,6 +232,7 @@ public class UserManagerServiceUserTypeTest {
         UserTypeDetails aospType = builders.get(userTypeAosp1).createUserTypeDetails();
         assertEquals(31, aospType.getMaxAllowedPerParent());
         assertEquals(Resources.ID_NULL, aospType.getIconBadge());
+        assertTrue(UserRestrictionsUtils.areEqual(restrictions, aospType.getDefaultRestrictions()));
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -251,6 +258,9 @@ public class UserManagerServiceUserTypeTest {
                 aospType.getBadgeColor(2));
         assertEquals(com.android.internal.R.color.profile_badge_2,
                 aospType.getBadgeColor(3));
+        assertTrue(UserRestrictionsUtils.areEqual(
+                makeRestrictionsBundle("no_remove_user", "no_bluetooth"),
+                aospType.getDefaultRestrictions()));
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);
@@ -258,9 +268,33 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(14, customType.createUserTypeDetails().getMaxAllowedPerParent());
     }
 
+    /** Tests {@link UserTypeFactory#customizeBuilders} for customizing a FULL user. */
+    @Test
+    public void testUserTypeFactoryCustomize_full() throws Exception {
+        final String userTypeFull = "android.test.1";
+
+        // Mock "AOSP default".
+        final Bundle restrictions = makeRestrictionsBundle("no_config_vpn", "no_config_tethering");
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+        builders.put(userTypeFull, new UserTypeDetails.Builder()
+                .setName(userTypeFull)
+                .setBaseType(FLAG_FULL)
+                .setDefaultRestrictions(restrictions));
+
+        final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_full);
+        UserTypeFactory.customizeBuilders(builders, parser);
+
+        UserTypeDetails details = builders.get(userTypeFull).createUserTypeDetails();
+        assertEquals(UNLIMITED_NUMBER_OF_USERS, details.getMaxAllowedPerParent());
+        assertTrue(UserRestrictionsUtils.areEqual(
+                makeRestrictionsBundle("no_remove_user", "no_bluetooth"),
+                details.getDefaultRestrictions()));
+        assertEquals(Resources.ID_NULL, details.getBadgeColor(0));
+    }
+
     /**
      * Tests {@link UserTypeFactory#customizeBuilders} when custom user type deletes the
-     * badge-colors.
+     * badge-colors and restrictions.
      */
     @Test
     public void testUserTypeFactoryCustomize_eraseArray() throws Exception {
@@ -271,7 +305,8 @@ public class UserManagerServiceUserTypeTest {
                 .setName(typeName)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(1)
-                .setBadgeColors(501, 502));
+                .setBadgeColors(501, 502)
+                .setDefaultRestrictions(makeRestrictionsBundle("r1")));
 
         final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_eraseArray);
         UserTypeFactory.customizeBuilders(builders, parser);
@@ -280,6 +315,7 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(2, typeDetails.getMaxAllowedPerParent());
         assertEquals(Resources.ID_NULL, typeDetails.getBadgeColor(0));
         assertEquals(Resources.ID_NULL, typeDetails.getBadgeColor(1));
+        assertTrue(typeDetails.getDefaultRestrictions().isEmpty());
     }
 
     /** Tests {@link UserTypeFactory#customizeBuilders} when custom user type has illegal name. */
@@ -301,7 +337,10 @@ public class UserManagerServiceUserTypeTest {
                 () -> UserTypeFactory.customizeBuilders(builders, parser));
     }
 
-    /** Tests {@link UserTypeFactory#customizeBuilders} when illegally customizing a non-profile. */
+    /**
+     * Tests {@link UserTypeFactory#customizeBuilders} when illegally customizing a non-profile as
+     * a profile.
+     */
     @Test
     public void testUserTypeFactoryCustomize_illegalUserBaseType() throws Exception {
         final String userTypeFull = "android.test";
@@ -314,7 +353,7 @@ public class UserManagerServiceUserTypeTest {
 
         XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_illegalUserBaseType);
 
-        // parser is illegal because customization of FULL is not supported.
+        // parser is illegal because userTypeFull is FULL but the tag is for profile-type.
         assertThrows(IllegalArgumentException.class,
                 () -> UserTypeFactory.customizeBuilders(builders, parser));
     }
@@ -322,5 +361,14 @@ public class UserManagerServiceUserTypeTest {
     /** Returns a minimal {@link UserTypeDetails.Builder} that can legitimately be created. */
     private UserTypeDetails.Builder getMinimalBuilder() {
         return new UserTypeDetails.Builder().setName("name").setBaseType(FLAG_FULL);
+    }
+
+    /** Creates a Bundle of the given String restrictions, each set to true. */
+    private Bundle makeRestrictionsBundle(String ... restrictions) {
+        final Bundle bundle = new Bundle();
+        for (String restriction : restrictions) {
+            bundle.putBoolean(restriction, true);
+        }
+        return bundle;
     }
 }

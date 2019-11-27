@@ -34,8 +34,10 @@ import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
 
 import static com.android.server.pm.UserTypeDetails.UNLIMITED_NUMBER_OF_USERS;
 
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.Bundle;
 import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -80,8 +82,8 @@ public final class UserTypeFactory {
         builders.put(USER_TYPE_FULL_RESTRICTED, getDefaultTypeFullRestricted());
         builders.put(USER_TYPE_SYSTEM_HEADLESS, getDefaultTypeSystemHeadless());
 
-        try (XmlResourceParser parser
-                     = Resources.getSystem().getXml(com.android.internal.R.xml.config_user_types)) {
+        try (XmlResourceParser parser =
+                     Resources.getSystem().getXml(com.android.internal.R.xml.config_user_types)) {
             customizeBuilders(builders, parser);
         }
 
@@ -113,7 +115,8 @@ public final class UserTypeFactory {
                 .setBadgeColors(
                         com.android.internal.R.color.profile_badge_1,
                         com.android.internal.R.color.profile_badge_2,
-                        com.android.internal.R.color.profile_badge_3);
+                        com.android.internal.R.color.profile_badge_3)
+                .setDefaultRestrictions(null);
     }
 
     /**
@@ -124,7 +127,8 @@ public final class UserTypeFactory {
         return new UserTypeDetails.Builder()
                 .setName(USER_TYPE_FULL_SECONDARY)
                 .setBaseType(FLAG_FULL)
-                .setMaxAllowed(UNLIMITED_NUMBER_OF_USERS);
+                .setMaxAllowed(UNLIMITED_NUMBER_OF_USERS)
+                .setDefaultRestrictions(getDefaultSecondaryUserRestrictions());
     }
 
     /**
@@ -135,13 +139,12 @@ public final class UserTypeFactory {
                 .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
         final int flags = FLAG_GUEST | (ephemeralGuests ? FLAG_EPHEMERAL : 0);
 
-        // TODO(b/142482943): Put UMS.initDefaultGuestRestrictions() here; then fetch them from here
-
         return new UserTypeDetails.Builder()
                 .setName(USER_TYPE_FULL_GUEST)
                 .setBaseType(FLAG_FULL)
                 .setDefaultUserInfoPropertyFlags(flags)
-                .setMaxAllowed(1);
+                .setMaxAllowed(1)
+                .setDefaultRestrictions(getDefaultGuestUserRestrictions());
     }
 
     /**
@@ -152,7 +155,8 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_FULL_DEMO)
                 .setBaseType(FLAG_FULL)
                 .setDefaultUserInfoPropertyFlags(FLAG_DEMO)
-                .setMaxAllowed(UNLIMITED_NUMBER_OF_USERS);
+                .setMaxAllowed(UNLIMITED_NUMBER_OF_USERS)
+                .setDefaultRestrictions(null);
     }
 
     /**
@@ -164,7 +168,9 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_FULL_RESTRICTED)
                 .setBaseType(FLAG_FULL)
                 .setDefaultUserInfoPropertyFlags(FLAG_RESTRICTED)
-                .setMaxAllowed(UNLIMITED_NUMBER_OF_USERS);
+                .setMaxAllowed(UNLIMITED_NUMBER_OF_USERS)
+                // NB: UserManagerService.createRestrictedProfile() applies hardcoded restrictions.
+                .setDefaultRestrictions(null);
     }
 
     /**
@@ -186,6 +192,21 @@ public final class UserTypeFactory {
                 .setBaseType(FLAG_SYSTEM);
     }
 
+    private static Bundle getDefaultSecondaryUserRestrictions() {
+        final Bundle restrictions = new Bundle();
+        restrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
+        restrictions.putBoolean(UserManager.DISALLOW_SMS, true);
+        return restrictions;
+    }
+
+    private static Bundle getDefaultGuestUserRestrictions() {
+        // Guest inherits the secondary user's restrictions, plus has some extra ones.
+        final Bundle restrictions = getDefaultSecondaryUserRestrictions();
+        restrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, true);
+        restrictions.putBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
+        return restrictions;
+    }
+
     /**
      * Reads the given xml parser to obtain device user-type customization, and updates the given
      * map of {@link UserTypeDetails.Builder}s accordingly.
@@ -200,8 +221,13 @@ public final class UserTypeFactory {
             for (XmlUtils.nextElement(parser);
                     parser.getEventType() != XmlResourceParser.END_DOCUMENT;
                     XmlUtils.nextElement(parser)) {
+                final boolean isProfile;
                 final String elementName = parser.getName();
-                if (!"profile-type".equals(elementName)) {
+                if ("profile-type".equals(elementName)) {
+                    isProfile = true;
+                } else if ("full-type".equals(elementName)) {
+                    isProfile = false;
+                } else {
                     Slog.w(LOG_TAG, "Skipping unknown element " + elementName + " in "
                                 + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
@@ -210,7 +236,7 @@ public final class UserTypeFactory {
 
                 String typeName = parser.getAttributeValue(null, "name");
                 if (typeName == null) {
-                    Slog.w(LOG_TAG, "Skipping profile-type with no name in "
+                    Slog.w(LOG_TAG, "Skipping user type with no name in "
                             + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
@@ -226,32 +252,45 @@ public final class UserTypeFactory {
                         throw new IllegalArgumentException("Illegal custom user type name "
                                 + typeName + ": Non-AOSP user types cannot start with 'android.'");
                     }
-                    if (!builder.isBaseTypeProfile()) {
-                        throw new IllegalArgumentException("Customization of non-profile user type "
-                                + "(" + typeName + ") is not currently supported.");
+                    final boolean isValid =
+                            (isProfile && builder.getBaseType() == UserInfo.FLAG_PROFILE)
+                            || (!isProfile && builder.getBaseType() == UserInfo.FLAG_FULL);
+                    if (!isValid) {
+                        throw new IllegalArgumentException("Wrong base type to customize user type "
+                                + "(" + typeName + "), which is type "
+                                + UserInfo.flagsToString(builder.getBaseType()));
                     }
-                } else {
-                    // typeName refers to a new OEM-defined type which we are defining.
+                } else if (isProfile) {
+                    // typeName refers to a new OEM-defined profile type which we are defining.
                     Slog.i(LOG_TAG, "Creating custom user type " + typeName);
                     builder = new UserTypeDetails.Builder();
                     builder.setName(typeName);
                     builder.setBaseType(FLAG_PROFILE);
                     builders.put(typeName, builder);
+                } else {
+                    throw new IllegalArgumentException("Creation of non-profile user type "
+                            + "(" + typeName + ") is not currently supported.");
                 }
 
                 // Process the attributes (other than name).
-                setIntAttribute(parser, "max-allowed-per-parent", builder::setMaxAllowedPerParent);
-                setResAttribute(parser, "icon-badge", builder::setIconBadge);
-                setResAttribute(parser, "badge-plain", builder::setBadgePlain);
-                setResAttribute(parser, "badge-no-background", builder::setBadgeNoBackground);
+                if (isProfile) {
+                    setIntAttribute(parser, "max-allowed-per-parent",
+                            builder::setMaxAllowedPerParent);
+                    setResAttribute(parser, "icon-badge", builder::setIconBadge);
+                    setResAttribute(parser, "badge-plain", builder::setBadgePlain);
+                    setResAttribute(parser, "badge-no-background", builder::setBadgeNoBackground);
+                }
 
                 // Process child elements.
                 final int depth = parser.getDepth();
                 while (XmlUtils.nextElementWithin(parser, depth)) {
                     final String childName = parser.getName();
-                    if ("badge-labels".equals(childName)) {
+                    if ("default-restrictions".equals(childName)) {
+                        final Bundle restrictions = UserRestrictionsUtils.readRestrictions(parser);
+                        builder.setDefaultRestrictions(restrictions);
+                    } else if (isProfile && "badge-labels".equals(childName)) {
                         setResAttributeArray(parser, builder::setBadgeLabels);
-                    } else if ("badge-colors".equals(childName)) {
+                    } else if (isProfile && "badge-colors".equals(childName)) {
                         setResAttributeArray(parser, builder::setBadgeColors);
                     } else {
                         Slog.w(LOG_TAG, "Unrecognized tag " + childName + " in "
@@ -282,8 +321,8 @@ public final class UserTypeFactory {
         try {
             fcn.accept(Integer.parseInt(intValue));
         } catch (NumberFormatException e) {
-            Slog.e(LOG_TAG, "Cannot parse value of '" + intValue + "' for " + attributeName +
-                    " in " + parser.getPositionDescription(), e);
+            Slog.e(LOG_TAG, "Cannot parse value of '" + intValue + "' for " + attributeName
+                    + " in " + parser.getPositionDescription(), e);
             throw e;
         }
     }
@@ -308,7 +347,7 @@ public final class UserTypeFactory {
 
     /**
      * Gets the resIds stored in "item" elements (in their "res" attribute) at the current depth.
-     * Then performs the performs the given fcn using the int[] array of these resIds.
+     * Then performs the given fcn using the int[] array of these resIds.
      * <p>
      * Each xml element is expected to be of the form {@code <item res="someResValue" />}.
      *

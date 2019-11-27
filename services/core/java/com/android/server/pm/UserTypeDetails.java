@@ -19,18 +19,17 @@ package com.android.server.pm;
 import android.annotation.ColorRes;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.UserManager;
 
 import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Contains the details about a multiuser "user type", such as a
@@ -75,8 +74,13 @@ public final class UserTypeDetails {
     /** The {@link UserInfo.UserInfoFlag}s that all users of this type will automatically have. */
     private final @UserInfoFlag int mDefaultUserInfoPropertyFlags;
 
-    // TODO(b/142482943): Hook these up to something and set them for each type.
-    private final List<String> mDefaultRestrictions;
+    /**
+     * List of User Restrictions to apply by default to newly created users of this type.
+     * <p>Does not apply to SYSTEM users (since they are not formally created); for them use
+     * {@link com.android.internal.R.array#config_defaultFirstUserRestrictions} instead.
+     * The Bundle is of the form used by {@link UserRestrictionsUtils}.
+     */
+    private final @Nullable Bundle mDefaultRestrictions;
 
 
     // Fields for profiles only, controlling the nature of their badges.
@@ -99,7 +103,7 @@ public final class UserTypeDetails {
      *
      * <p>Must be set if mIconBadge is set.
      */
-    private final int[] mBadgeLabels;
+    private final @Nullable int[] mBadgeLabels;
 
     /**
      * Resource ID ({@link ColorRes}) of the colors badge put on icons.
@@ -110,22 +114,21 @@ public final class UserTypeDetails {
      *
      * <p>Must be set if mIconBadge is set.
      */
-    private final int[] mBadgeColors;
+    private final @Nullable int[] mBadgeColors;
 
     private UserTypeDetails(@NonNull String name, boolean enabled, int maxAllowed,
             @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags, int label,
             int maxAllowedPerParent,
             int iconBadge, int badgePlain, int badgeNoBackground,
-            int[] badgeLabels, int[] badgeColors,
-            ArrayList<String> defaultRestrictions) {
+            @Nullable int[] badgeLabels, @Nullable int[] badgeColors,
+            @Nullable Bundle defaultRestrictions) {
         this.mName = name;
         this.mEnabled = enabled;
         this.mMaxAllowed = maxAllowed;
         this.mMaxAllowedPerParent = maxAllowedPerParent;
         this.mBaseType = baseType;
         this.mDefaultUserInfoPropertyFlags = defaultUserInfoPropertyFlags;
-        this.mDefaultRestrictions =
-                Collections.unmodifiableList(new ArrayList<>(defaultRestrictions));
+        this.mDefaultRestrictions = defaultRestrictions;
 
         this.mIconBadge = iconBadge;
         this.mBadgePlain = badgePlain;
@@ -231,9 +234,14 @@ public final class UserTypeDetails {
         return (mBaseType & UserInfo.FLAG_SYSTEM) != 0;
     }
 
-    // TODO(b/142482943): Hook this up and don't return the original.
-    public List<String> getDefaultRestrictions() {
-        return mDefaultRestrictions;
+    /** Returns a Bundle representing the default user restrictions. */
+    @NonNull Bundle getDefaultRestrictions() {
+        return UserRestrictionsUtils.clone(mDefaultRestrictions);
+    }
+
+    /** Adds the default user restrictions to the given bundle of restrictions. */
+    public void addDefaultRestrictionsTo(@NonNull Bundle currentRestrictions) {
+        UserRestrictionsUtils.merge(currentRestrictions, mDefaultRestrictions);
     }
 
     /** Dumps details of the UserTypeDetails. Do not parse this. */
@@ -247,7 +255,8 @@ public final class UserTypeDetails {
         pw.print(prefix); pw.print("mDefaultUserInfoFlags: ");
         pw.println(UserInfo.flagsToString(mDefaultUserInfoPropertyFlags));
         pw.print(prefix); pw.print("mLabel: "); pw.println(mLabel);
-        pw.print(prefix); pw.print("mDefaultRestrictions: "); pw.println(mDefaultRestrictions);
+        pw.print(prefix); pw.println("mDefaultRestrictions: ");
+        UserRestrictionsUtils.dumpRestrictions(pw, prefix + "    ", mDefaultRestrictions);
         pw.print(prefix); pw.print("mIconBadge: "); pw.println(mIconBadge);
         pw.print(prefix); pw.print("mBadgePlain: "); pw.println(mBadgePlain);
         pw.print(prefix); pw.print("mBadgeNoBackground: "); pw.println(mBadgeNoBackground);
@@ -265,11 +274,11 @@ public final class UserTypeDetails {
         private int mMaxAllowed = UNLIMITED_NUMBER_OF_USERS;
         private int mMaxAllowedPerParent = UNLIMITED_NUMBER_OF_USERS;
         private int mDefaultUserInfoPropertyFlags = 0;
-        private ArrayList<String> mDefaultRestrictions = new ArrayList<>();
+        private @Nullable Bundle mDefaultRestrictions = null;
         private boolean mEnabled = true;
         private int mLabel = Resources.ID_NULL;
-        private int[] mBadgeLabels = null;
-        private int[] mBadgeColors = null;
+        private @Nullable int[] mBadgeLabels = null;
+        private @Nullable int[] mBadgeColors = null;
         private @DrawableRes int mIconBadge = Resources.ID_NULL;
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
@@ -334,13 +343,13 @@ public final class UserTypeDetails {
             return this;
         }
 
-        public Builder setDefaultRestrictions(ArrayList<String> restrictions) {
+        public Builder setDefaultRestrictions(@Nullable Bundle restrictions) {
             mDefaultRestrictions = restrictions;
             return this;
         }
 
-        public boolean isBaseTypeProfile() {
-            return mBaseType == UserInfo.FLAG_PROFILE;
+        @UserInfoFlag int getBaseType() {
+            return mBaseType;
         }
 
         public UserTypeDetails createUserTypeDetails() {
