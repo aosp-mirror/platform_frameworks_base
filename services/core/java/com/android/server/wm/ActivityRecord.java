@@ -122,8 +122,6 @@ import static com.android.server.am.ActivityRecordProto.STATE;
 import static com.android.server.am.ActivityRecordProto.TRANSLUCENT;
 import static com.android.server.am.ActivityRecordProto.VISIBLE;
 import static com.android.server.am.ActivityRecordProto.VISIBLE_REQUESTED;
-import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
-import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
@@ -306,7 +304,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.am.AppTimeTracker;
-import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.display.color.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
@@ -2379,8 +2376,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // Make a local reference to its task since this.task could be set to null once this
             // activity is destroyed and detached from task.
             final Task task = getTask();
-            EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
-                    mUserId, System.identityHashCode(this),
+            EventLogTags.writeWmFinishActivity(mUserId, System.identityHashCode(this),
                     task.mTaskId, shortComponentName, reason);
             final ArrayList<ActivityRecord> activities = task.mChildren;
             final int index = activities.indexOf(this);
@@ -2655,8 +2651,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY, mUserId,
-                System.identityHashCode(this), task.mTaskId, shortComponentName, reason);
+        EventLogTags.writeWmDestroyActivity(mUserId, System.identityHashCode(this),
+                task.mTaskId, shortComponentName, reason);
 
         final ActivityStack stack = getActivityStack();
         if (hasProcess() && !stack.inLruList(this)) {
@@ -4741,7 +4737,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!mVisibleRequested) {
                 setVisibility(false);
             }
-            EventLogTags.writeAmStopActivity(
+            EventLogTags.writeWmStopActivity(
                     mUserId, System.identityHashCode(this), shortComponentName);
             mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                     StopActivityItem.obtain(mVisibleRequested, configChangeFlags));
@@ -4810,8 +4806,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void addToStopping(boolean scheduleIdle, boolean idleDelayed, String reason) {
         if (!mStackSupervisor.mStoppingActivities.contains(this)) {
-            EventLog.writeEvent(EventLogTags.AM_ADD_TO_STOPPING, mUserId,
-                    System.identityHashCode(this), shortComponentName, reason);
+            EventLogTags.writeWmAddToStopping(mUserId, System.identityHashCode(this),
+                    shortComponentName, reason);
             mStackSupervisor.mStoppingActivities.add(this);
         }
 
@@ -6942,9 +6938,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 "Relaunching: " + this + " with results=" + pendingResults
                         + " newIntents=" + pendingNewIntents + " andResume=" + andResume
                         + " preserveWindow=" + preserveWindow);
-        EventLog.writeEvent(andResume ? AM_RELAUNCH_RESUME_ACTIVITY
-                        : AM_RELAUNCH_ACTIVITY, mUserId, System.identityHashCode(this),
-                task.mTaskId, shortComponentName);
+        if (andResume) {
+            EventLogTags.writeWmRelaunchResumeActivity(mUserId, System.identityHashCode(this),
+                    task.mTaskId, shortComponentName);
+        } else {
+            EventLogTags.writeWmRelaunchActivity(mUserId, System.identityHashCode(this),
+                    task.mTaskId, shortComponentName);
+        }
 
         startFreezingScreenLocked(0);
 

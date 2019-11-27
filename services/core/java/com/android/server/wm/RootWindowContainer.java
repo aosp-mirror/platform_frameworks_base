@@ -68,7 +68,6 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
@@ -77,7 +76,6 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
-import com.android.server.EventLogTags;
 import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
@@ -488,10 +486,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final WindowSurfaceController surfaceController = winAnimator.mSurfaceController;
         boolean leakedSurface = false;
         boolean killedApps = false;
-
-        EventLog.writeEvent(EventLogTags.WM_NO_SURFACE_MEMORY, winAnimator.mWin.toString(),
+        EventLogTags.writeWmNoSurfaceMemory(winAnimator.mWin.toString(),
                 winAnimator.mSession.mPid, operation);
-
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
             // There was some problem...first, do a sanity check of the window list to make sure

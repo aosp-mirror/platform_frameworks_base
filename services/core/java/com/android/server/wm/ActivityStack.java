@@ -84,7 +84,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_APP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CLEANUP;
@@ -163,7 +162,6 @@ import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
-import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
@@ -185,7 +183,6 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.AppTimeTracker;
-import com.android.server.am.EventLogTags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -533,7 +530,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         mDockedStackMinimizeThickness =
                 supervisor.mService.mWindowManager.mContext.getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.docked_stack_minimize_thickness);
-        EventLog.writeEvent(com.android.server.EventLogTags.WM_STACK_CREATED, stackId);
+        EventLogTags.writeWmStackCreated(stackId);
         mStackSupervisor = supervisor;
         mService = supervisor.mService;
         mRootActivityContainer = mService.mRootActivityContainer;
@@ -1586,7 +1583,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         if (prev.attachedToProcess()) {
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueueing pending pause: " + prev);
             try {
-                EventLogTags.writeAmPauseActivity(prev.mUserId, System.identityHashCode(prev),
+                EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                         prev.shortComponentName, "userLeaving=" + userLeaving);
 
                 mService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
@@ -1663,10 +1660,9 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 }
                 return;
             } else {
-                EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
-                        r.mUserId, System.identityHashCode(r), r.shortComponentName,
-                        mPausingActivity != null
-                            ? mPausingActivity.shortComponentName : "(none)");
+                EventLogTags.writeWmFailedToPause(r.mUserId, System.identityHashCode(r),
+                        r.shortComponentName, mPausingActivity != null
+                                ? mPausingActivity.shortComponentName : "(none)");
                 if (r.isState(PAUSING)) {
                     r.setState(PAUSED, "activityPausedLocked");
                     if (r.finishing) {
@@ -2659,9 +2655,8 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                 // Clear app token stopped state in window manager if needed.
                 next.notifyAppResumed(next.stopped);
 
-                EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.mUserId,
-                        System.identityHashCode(next), next.getTask().mTaskId,
-                        next.shortComponentName);
+                EventLogTags.writeWmResumeActivity(next.mUserId, System.identityHashCode(next),
+                        next.getTask().mTaskId, next.shortComponentName);
 
                 next.sleeping = false;
                 mService.getAppWarningsLocked().onResumeActivity(next);
@@ -3519,10 +3514,9 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
                                 + " state=" + r.getState() + " callers=" + Debug.getCallers(5));
                         if (!r.finishing || isProcessRemoved) {
                             Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
-                            EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
-                                    r.mUserId, System.identityHashCode(r),
-                                    r.getTask().mTaskId, r.shortComponentName,
-                                    "proc died without state saved");
+                            EventLogTags.writeWmFinishActivity(r.mUserId,
+                                    System.identityHashCode(r), r.getTask().mTaskId,
+                                    r.shortComponentName, "proc died without state saved");
                         }
                     } else {
                         // We have the current state for this activity, so
@@ -3634,7 +3628,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
             }
 
             mRootActivityContainer.resumeFocusedStacksTopActivities();
-            EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.mUserId, tr.mTaskId);
+            EventLogTags.writeWmTaskToFront(tr.mUserId, tr.mTaskId);
             mService.getTaskChangeNotificationController().notifyTaskMovedToFront(tr.getTaskInfo());
         } finally {
             getDisplay().continueUpdateImeTarget();
@@ -4141,7 +4135,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
 
         super.removeChild(child);
 
-        EventLog.writeEvent(EventLogTags.AM_REMOVE_TASK, child.mTaskId, mStackId);
+        EventLogTags.writeWmRemoveTask(child.mTaskId, mStackId);
 
         if (display.isSingleTaskInstance()) {
             mService.notifySingleTaskDisplayEmpty(display.mDisplayId);
@@ -4820,9 +4814,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         }
 
         final int toTop = targetPosition == mChildren.size() - 1 ? 1 : 0;
-        EventLog.writeEvent(com.android.server.EventLogTags.WM_TASK_MOVED, child.mTaskId, toTop,
-                targetPosition);
-
+        EventLogTags.writeWmTaskMoved(child.mTaskId, toTop, targetPosition);
         return targetPosition;
     }
 
@@ -4872,8 +4864,7 @@ class ActivityStack extends WindowContainer<Task> implements BoundsAnimationTarg
         }
         super.onParentChanged(newParent, oldParent);
         if (getParent() == null && mDisplayContent != null) {
-            EventLog.writeEvent(com.android.server.EventLogTags.WM_STACK_REMOVED, mStackId);
-
+            EventLogTags.writeWmStackRemoved(mStackId);
             mDisplayContent = null;
             mWmService.mWindowPlacerLocked.requestTraversal();
         }

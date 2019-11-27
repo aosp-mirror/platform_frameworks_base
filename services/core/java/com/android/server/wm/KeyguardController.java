@@ -43,13 +43,11 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
-import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
-import com.android.server.am.EventLogTags;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
 
@@ -143,7 +141,7 @@ class KeyguardController {
         if (!keyguardChanged && !aodChanged) {
             return;
         }
-        EventLog.writeEvent(EventLogTags.AM_SET_KEYGUARD_SHOWN,
+        EventLogTags.writeWmSetKeyguardShown(
                 keyguardShowing ? 1 : 0,
                 aodShowing ? 1 : 0,
                 mKeyguardGoingAway ? 1 : 0,
@@ -184,7 +182,7 @@ class KeyguardController {
         mService.deferWindowLayout();
         try {
             setKeyguardGoingAway(true);
-            EventLog.writeEvent(EventLogTags.AM_SET_KEYGUARD_SHOWN,
+            EventLogTags.writeWmSetKeyguardShown(
                     1 /* keyguardShowing */,
                     mAodShowing ? 1 : 0,
                     1 /* keyguardGoingAway */,

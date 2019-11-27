@@ -86,6 +86,7 @@ java_library_static {
         ":tethering-servicescore-srcs",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
+        "java/com/android/server/wm/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
     ],
 

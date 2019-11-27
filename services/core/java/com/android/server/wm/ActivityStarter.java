@@ -60,7 +60,6 @@ import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.server.am.EventLogTags.AM_NEW_INTENT;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
@@ -114,14 +113,12 @@ import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.util.ArraySet;
-import android.util.EventLog;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
 import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
@@ -1550,11 +1547,12 @@ class ActivityStarter {
                 UserHandle.getAppId(mStartActivity.info.applicationInfo.uid)
         );
         if (newTask) {
-            EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, mStartActivity.mUserId,
+            EventLogTags.writeWmCreateTask(mStartActivity.mUserId,
                     mStartActivity.getTask().mTaskId);
         }
         mStartActivity.logStartActivity(
-                EventLogTags.AM_CREATE_ACTIVITY, mStartActivity.getTask());
+                EventLogTags.WM_CREATE_ACTIVITY, mStartActivity.getTask());
+
         mTargetStack.mLastPausedActivity = null;
 
         mRootActivityContainer.sendPowerHintForLaunchStartIfNeeded(
@@ -2405,7 +2403,7 @@ class ActivityStarter {
             return;
         }
 
-        activity.logStartActivity(AM_NEW_INTENT, activity.getTask());
+        activity.logStartActivity(EventLogTags.WM_NEW_INTENT, activity.getTask());
         activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
                 mStartActivity.launchedFromPackage);
         mIntentDelivered = true;

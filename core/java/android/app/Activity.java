@@ -769,17 +769,6 @@ public class Activity extends ContextThemeWrapper
 
     private static final String KEYBOARD_SHORTCUTS_RECEIVER_PKG_NAME = "com.android.systemui";
 
-    private static final int LOG_AM_ON_CREATE_CALLED = 30057;
-    private static final int LOG_AM_ON_START_CALLED = 30059;
-    private static final int LOG_AM_ON_RESUME_CALLED = 30022;
-    private static final int LOG_AM_ON_PAUSE_CALLED = 30021;
-    private static final int LOG_AM_ON_STOP_CALLED = 30049;
-    private static final int LOG_AM_ON_RESTART_CALLED = 30058;
-    private static final int LOG_AM_ON_DESTROY_CALLED = 30060;
-    private static final int LOG_AM_ON_ACTIVITY_RESULT_CALLED = 30062;
-    private static final int LOG_AM_ON_TOP_RESUMED_GAINED_CALLED = 30064;
-    private static final int LOG_AM_ON_TOP_RESUMED_LOST_CALLED = 30065;
-
     private static class ManagedDialog {
         Dialog mDialog;
         Bundle mArgs;
@@ -1863,8 +1852,13 @@ public class Activity extends ContextThemeWrapper
     final void performTopResumedActivityChanged(boolean isTopResumedActivity, String reason) {
         onTopResumedActivityChanged(isTopResumedActivity);
 
-        writeEventLog(isTopResumedActivity
-                ? LOG_AM_ON_TOP_RESUMED_GAINED_CALLED : LOG_AM_ON_TOP_RESUMED_LOST_CALLED, reason);
+        if (isTopResumedActivity) {
+            EventLogTags.writeWmOnTopResumedGainedCalled(mIdent, getComponentName().getClassName(),
+                    reason);
+        } else {
+            EventLogTags.writeWmOnTopResumedLostCalled(mIdent, getComponentName().getClassName(),
+                    reason);
+        }
     }
 
     void setVoiceInteractor(IVoiceInteractor voiceInteractor) {
@@ -7898,7 +7892,8 @@ public class Activity extends ContextThemeWrapper
         } else {
             onCreate(icicle);
         }
-        writeEventLog(LOG_AM_ON_CREATE_CALLED, "performCreate");
+        EventLogTags.writeWmOnCreateCalled(mIdent, getComponentName().getClassName(),
+                "performCreate");
         mActivityTransitionState.readState(icicle);
 
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
@@ -7920,7 +7915,7 @@ public class Activity extends ContextThemeWrapper
         mCalled = false;
         mFragments.execPendingActions();
         mInstrumentation.callActivityOnStart(this);
-        writeEventLog(LOG_AM_ON_START_CALLED, reason);
+        EventLogTags.writeWmOnStartCalled(mIdent, getComponentName().getClassName(), reason);
 
         if (!mCalled) {
             throw new SuperNotCalledException(
@@ -7998,7 +7993,7 @@ public class Activity extends ContextThemeWrapper
 
             mCalled = false;
             mInstrumentation.callActivityOnRestart(this);
-            writeEventLog(LOG_AM_ON_RESTART_CALLED, reason);
+            EventLogTags.writeWmOnRestartCalled(mIdent, getComponentName().getClassName(), reason);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
@@ -8031,7 +8026,7 @@ public class Activity extends ContextThemeWrapper
         mCalled = false;
         // mResumed is set by the instrumentation
         mInstrumentation.callActivityOnResume(this);
-        writeEventLog(LOG_AM_ON_RESUME_CALLED, reason);
+        EventLogTags.writeWmOnResumeCalled(mIdent, getComponentName().getClassName(), reason);
         if (!mCalled) {
             throw new SuperNotCalledException(
                 "Activity " + mComponent.toShortString() +
@@ -8070,7 +8065,8 @@ public class Activity extends ContextThemeWrapper
         mFragments.dispatchPause();
         mCalled = false;
         onPause();
-        writeEventLog(LOG_AM_ON_PAUSE_CALLED, "performPause");
+        EventLogTags.writeWmOnPausedCalled(mIdent, getComponentName().getClassName(),
+                "performPause");
         mResumed = false;
         if (!mCalled && getApplicationInfo().targetSdkVersion
                 >= android.os.Build.VERSION_CODES.GINGERBREAD) {
@@ -8110,7 +8106,7 @@ public class Activity extends ContextThemeWrapper
 
             mCalled = false;
             mInstrumentation.callActivityOnStop(this);
-            writeEventLog(LOG_AM_ON_STOP_CALLED, reason);
+            EventLogTags.writeWmOnStopCalled(mIdent, getComponentName().getClassName(), reason);
             if (!mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + mComponent.toShortString() +
@@ -8140,7 +8136,8 @@ public class Activity extends ContextThemeWrapper
         mWindow.destroy();
         mFragments.dispatchDestroy();
         onDestroy();
-        writeEventLog(LOG_AM_ON_DESTROY_CALLED, "performDestroy");
+        EventLogTags.writeWmOnDestroyCalled(mIdent, getComponentName().getClassName(),
+                "performDestroy");
         mFragments.doLoaderDestroy();
         if (mVoiceInteractor != null) {
             mVoiceInteractor.detachActivity();
@@ -8233,7 +8230,9 @@ public class Activity extends ContextThemeWrapper
                 frag.onActivityResult(requestCode, resultCode, data);
             }
         }
-        writeEventLog(LOG_AM_ON_ACTIVITY_RESULT_CALLED, reason);
+
+        EventLogTags.writeWmOnActivityResultCalled(mIdent, getComponentName().getClassName(),
+                reason);
     }
 
     /**
@@ -8658,11 +8657,6 @@ public class Activity extends ContextThemeWrapper
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /** Log a lifecycle event for current user id and component class. */
-    private void writeEventLog(int event, String reason) {
-        EventLog.writeEvent(event, mIdent, getComponentName().getClassName(), reason);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {
