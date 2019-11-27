@@ -19,25 +19,25 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_desc_recent_apps" msgid="2427210347871321373">"ઝલક."</string>
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="2355882496933479534">"<xliff:g id="APP">%s</xliff:g> કાઢી નાખો."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="4816790842084268400">"<xliff:g id="APP">%s</xliff:g> કાઢી નાખી."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="5693205751863608046">"તાજેતરની બધી ઍપ્લિકેશનો કાઢી નાખવામાં આવી."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="3406797323476801016">"<xliff:g id="APP">%s</xliff:g>ની ઍપ્લિકેશન માહિતી ખોલો."</string>
-    <string name="accessibility_recents_item_launched" msgid="4519918148638221791">"<xliff:g id="APP">%s</xliff:g>ને શરૂ કરી રહ્યાં છીએ."</string>
-    <string name="recents_empty_message" msgid="7967713254531861311">"તાજેતરની કોઈ આઇટમ નથી"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="1850214584987361375">"તમે બધું સાફ કર્યું"</string>
-    <string name="recents_app_info_button_label" msgid="8732926607391786762">"ઍપ્લિકેશનની માહિતી"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6087750201863853365">"સ્ક્રીન પિનિંગ"</string>
-    <string name="recents_search_bar_label" msgid="638132045925945941">"શોધો"</string>
-    <string name="recents_launch_error_message" msgid="9107963563503438012">"<xliff:g id="APP">%s</xliff:g>ને શરૂ કરી શકાઈ નથી."</string>
-    <string name="recents_launch_disabled_message" msgid="826461671965217243">"સુરક્ષિત મોડમાં <xliff:g id="APP">%s</xliff:g>ને બંધ કરવામાં આવી છે."</string>
-    <string name="recents_stack_action_button_label" msgid="1974273390109881497">"બધું સાફ કરો"</string>
-    <string name="recents_drag_hint_message" msgid="610417221848280136">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરવા માટે અહીં ખેંચો"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"સ્ક્રીનને આડી વિભાજિત કરો"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"સ્ક્રીનને ઊભી વિભાજિત કરો"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="7368405969130304811">"સ્ક્રીનને કસ્ટમ વિભાજિત કરો"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="8773505308411722524">"સ્ક્રીનને ઉપરની તરફ વિભાજિત કરો"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="722594718192007972">"સ્ક્રીનને ડાબી તરફ વિભાજિત કરો"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="2479764030969301514">"સ્ક્રીનને જમણી તરફ વિભાજિત કરો"</string>
+    <string name="accessibility_desc_recent_apps" msgid="7556662260274154402">"ઝલક."</string>
+    <string name="accessibility_recents_item_will_be_dismissed" msgid="1987979391731836442">"<xliff:g id="APP">%s</xliff:g> કાઢી નાખો."</string>
+    <string name="accessibility_recents_item_dismissed" msgid="99149432850273747">"<xliff:g id="APP">%s</xliff:g> કાઢી નાખી."</string>
+    <string name="accessibility_recents_all_items_dismissed" msgid="2584965907377043255">"તાજેતરની બધી ઍપ્લિકેશનો કાઢી નાખવામાં આવી."</string>
+    <string name="accessibility_recents_item_open_app_info" msgid="5843409407745673280">"<xliff:g id="APP">%s</xliff:g>ની ઍપ્લિકેશન માહિતી ખોલો."</string>
+    <string name="accessibility_recents_item_launched" msgid="2439069760172103351">"<xliff:g id="APP">%s</xliff:g>ને શરૂ કરી રહ્યાં છીએ."</string>
+    <string name="recents_empty_message" msgid="4718114148356836203">"તાજેતરની કોઈ આઇટમ નથી"</string>
+    <string name="recents_empty_message_dismissed_all" msgid="2873215505812268822">"તમે બધું સાફ કર્યું"</string>
+    <string name="recents_app_info_button_label" msgid="5371319329151716224">"ઍપ્લિકેશનની માહિતી"</string>
+    <string name="recents_lock_to_app_button_label" msgid="3282305316722066169">"સ્ક્રીન પિનિંગ"</string>
+    <string name="recents_search_bar_label" msgid="1910412649656301014">"શોધો"</string>
+    <string name="recents_launch_error_message" msgid="8622817255751191462">"<xliff:g id="APP">%s</xliff:g>ને શરૂ કરી શકાઈ નથી."</string>
+    <string name="recents_launch_disabled_message" msgid="1055364973720665718">"સુરક્ષિત મોડમાં <xliff:g id="APP">%s</xliff:g>ને બંધ કરવામાં આવી છે."</string>
+    <string name="recents_stack_action_button_label" msgid="7396636872618564201">"બધું સાફ કરો"</string>
+    <string name="recents_drag_hint_message" msgid="3309424039418402577">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરવા માટે અહીં ખેંચો"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="3361339364058788960">"સ્ક્રીનને આડી વિભાજિત કરો"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="5525527159623478768">"સ્ક્રીનને ઊભી વિભાજિત કરો"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="8749946272357062148">"સ્ક્રીનને કસ્ટમ વિભાજિત કરો"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="4034331660613790457">"સ્ક્રીનને ઉપરની તરફ વિભાજિત કરો"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="6523694635909067802">"સ્ક્રીનને ડાબી તરફ વિભાજિત કરો"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="559141375304415400">"સ્ક્રીનને જમણી તરફ વિભાજિત કરો"</string>
 </resources>
