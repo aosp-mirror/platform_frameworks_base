@@ -543,9 +543,10 @@ class ActivityMetricsLogger {
             return;
         }
 
-        if (info != null) {
-            // If we are already in an existing transition, only update the activity name, but not
-            // the other attributes.
+        if (info != null
+                && info.mLastLaunchedActivity.mDisplayContent == launchedActivity.mDisplayContent) {
+            // If we are already in an existing transition on the same display, only update the
+            // activity name, but not the other attributes.
 
             if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched update launched activity");
             // Coalesce multiple (trampoline) activities from a single sequence together.
