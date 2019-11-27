@@ -34,7 +34,7 @@ import java.util.HashMap;
 * By parcelling the root surface, the app can offer another app content for embedding.
 * @hide
 */
-class WindowlessWindowManager implements IWindowSession {
+public class WindowlessWindowManager implements IWindowSession {
     private final static String TAG = "WindowlessWindowManager";
 
     private class State {
@@ -45,6 +45,7 @@ class WindowlessWindowManager implements IWindowSession {
             mParams.copyFrom(p);
         }
     };
+
     /**
      * Used to store SurfaceControl we've built for clients to
      * reconfigure them if relayout is called.
@@ -67,11 +68,16 @@ class WindowlessWindowManager implements IWindowSession {
     private int mForceHeight = -1;
     private int mForceWidth = -1;
 
-    WindowlessWindowManager(Configuration c, SurfaceControl rootSurface, IBinder hostInputToken) {
+    public WindowlessWindowManager(Configuration c, SurfaceControl rootSurface,
+            IBinder hostInputToken) {
         mRootSurface = rootSurface;
         mConfiguration = new Configuration(c);
         mRealWm = WindowManagerGlobal.getWindowSession();
         mHostInputToken = hostInputToken;
+    }
+
+    protected void setConfiguration(Configuration configuration) {
+        mConfiguration.setTo(configuration);
     }
 
     /**
@@ -125,6 +131,17 @@ class WindowlessWindowManager implements IWindowSession {
     @Override
     public void remove(android.view.IWindow window) throws RemoteException {
         mRealWm.remove(window);
+        State state;
+        synchronized (this) {
+            state = mStateForWindow.remove(window.asBinder());
+        }
+        if (state == null) {
+            throw new IllegalArgumentException(
+                    "Invalid window token (never added or removed already)");
+        }
+        try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
+            t.remove(state.mSurfaceControl).apply();
+        }
     }
 
     private boolean isOpaque(WindowManager.LayoutParams attrs) {
@@ -165,10 +182,14 @@ class WindowlessWindowManager implements IWindowSession {
         int height = surfaceInsets != null ?
                 attrs.height + surfaceInsets.top + surfaceInsets.bottom : attrs.height;
 
-        t.show(sc)
-            .setBufferSize(sc, width, height)
-            .setOpaque(sc, isOpaque(attrs))
-            .apply();
+        t.setBufferSize(sc, width, height)
+            .setOpaque(sc, isOpaque(attrs));
+        if (viewFlags == View.VISIBLE) {
+            t.show(sc);
+        } else {
+            t.hide(sc);
+        }
+        t.apply();
         outSurfaceControl.copyFrom(sc);
         outFrame.set(0, 0, attrs.width, attrs.height);
 
