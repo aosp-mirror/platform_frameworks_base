@@ -40,7 +40,7 @@ import org.junit.runner.RunWith;
 import java.time.Duration;
 
 @RunWith(AndroidJUnit4.class)
-public class SimpleTimeZoneDetectorStrategyTest {
+public class SimpleTimeDetectorStrategyTest {
 
     private static final Scenario SCENARIO_1 = new Scenario.Builder()
             .setInitialDeviceSystemClockUtc(1977, 1, 1, 12, 0, 0)
@@ -440,7 +440,7 @@ public class SimpleTimeZoneDetectorStrategyTest {
             mSystemClockMillis = systemClockMillis;
         }
 
-        public void pokeTimeDetectionEnabled(boolean enabled) {
+        public void pokeAutoTimeDetectionEnabled(boolean enabled) {
             mTimeDetectionEnabled = enabled;
         }
 
@@ -455,6 +455,10 @@ public class SimpleTimeZoneDetectorStrategyTest {
         public void simulateTimePassing(int incrementMillis) {
             mElapsedRealtimeMillis += incrementMillis;
             mSystemClockMillis += incrementMillis;
+        }
+
+        public void simulateAutoTimeZoneDetectionToggle() {
+            mTimeDetectionEnabled = !mTimeDetectionEnabled;
         }
 
         public void verifySystemClockNotSet() {
@@ -493,7 +497,7 @@ public class SimpleTimeZoneDetectorStrategyTest {
         private final FakeCallback mFakeCallback;
         private final SimpleTimeDetectorStrategy mSimpleTimeDetectorStrategy;
 
-        public Script() {
+        Script() {
             mFakeCallback = new FakeCallback();
             mSimpleTimeDetectorStrategy = new SimpleTimeDetectorStrategy();
             mSimpleTimeDetectorStrategy.initialize(mFakeCallback);
@@ -501,7 +505,7 @@ public class SimpleTimeZoneDetectorStrategyTest {
         }
 
         Script pokeTimeDetectionEnabled(boolean enabled) {
-            mFakeCallback.pokeTimeDetectionEnabled(enabled);
+            mFakeCallback.pokeAutoTimeDetectionEnabled(enabled);
             return this;
         }
 
@@ -535,9 +539,8 @@ public class SimpleTimeZoneDetectorStrategyTest {
         }
 
         Script simulateAutoTimeDetectionToggle() {
-            boolean enabled = !mFakeCallback.isAutoTimeDetectionEnabled();
-            mFakeCallback.pokeTimeDetectionEnabled(enabled);
-            mSimpleTimeDetectorStrategy.handleAutoTimeDetectionToggle(enabled);
+            mFakeCallback.simulateAutoTimeZoneDetectionToggle();
+            mSimpleTimeDetectorStrategy.handleAutoTimeDetectionChanged();
             return this;
         }
 
