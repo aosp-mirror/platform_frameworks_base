@@ -47,6 +47,7 @@ import android.net.TetheringManager;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Debug;
 import android.os.Environment;
 import android.os.FactoryTest;
 import android.os.FileUtils;
@@ -502,6 +503,24 @@ public final class SystemServer {
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
             // Prepare the thread pool for init tasks that can be parallelized
             SystemServerInitThreadPool.start();
+            // Attach JVMTI agent if this is a debuggable build and the system property is set.
+            if (Build.IS_DEBUGGABLE) {
+                // Property is of the form "library_path=parameters".
+                String jvmtiAgent = SystemProperties.get("persist.sys.dalvik.jvmtiagent");
+                if (!jvmtiAgent.isEmpty()) {
+                    int equalIndex = jvmtiAgent.indexOf('=');
+                    String libraryPath = jvmtiAgent.substring(0, equalIndex);
+                    String parameterList =
+                            jvmtiAgent.substring(equalIndex + 1, jvmtiAgent.length());
+                    // Attach the agent.
+                    try {
+                        Debug.attachJvmtiAgent(libraryPath, parameterList, null);
+                    } catch (Exception e) {
+                        Slog.e("System", "*************************************************");
+                        Slog.e("System", "********** Failed to load jvmti plugin: " + jvmtiAgent);
+                    }
+                }
+            }
         } finally {
             t.traceEnd();  // InitBeforeStartServices
         }
