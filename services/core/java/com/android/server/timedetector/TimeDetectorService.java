@@ -19,6 +19,7 @@ package com.android.server.timedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.timedetector.ITimeDetectorService;
+import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -97,7 +98,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
 
     @Override
     public void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSignal) {
-        enforceSetTimePermission();
+        enforceSuggestPhoneTimePermission();
         Objects.requireNonNull(timeSignal);
 
         long idToken = Binder.clearCallingIdentity();
@@ -110,10 +111,25 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         }
     }
 
+    @Override
+    public void suggestManualTime(@NonNull ManualTimeSuggestion timeSignal) {
+        enforceSuggestManualTimePermission();
+        Objects.requireNonNull(timeSignal);
+
+        long idToken = Binder.clearCallingIdentity();
+        try {
+            synchronized (mStrategyLock) {
+                mTimeDetectorStrategy.suggestManualTime(timeSignal);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(idToken);
+        }
+    }
+
     @VisibleForTesting
     public void handleAutoTimeDetectionToggle() {
         synchronized (mStrategyLock) {
-            final boolean timeDetectionEnabled = mCallback.isTimeDetectionEnabled();
+            final boolean timeDetectionEnabled = mCallback.isAutoTimeDetectionEnabled();
             mTimeDetectorStrategy.handleAutoTimeDetectionToggle(timeDetectionEnabled);
         }
     }
@@ -128,7 +144,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         }
     }
 
-    private void enforceSetTimePermission() {
+    private void enforceSuggestPhoneTimePermission() {
+        mContext.enforceCallingPermission(android.Manifest.permission.SET_TIME, "set time");
+    }
+
+    private void enforceSuggestManualTimePermission() {
         mContext.enforceCallingPermission(android.Manifest.permission.SET_TIME, "set time");
     }
 }

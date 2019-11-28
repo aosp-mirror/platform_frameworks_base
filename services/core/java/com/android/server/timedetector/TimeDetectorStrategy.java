@@ -18,6 +18,7 @@ package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Intent;
 import android.util.TimestampedValue;
@@ -47,7 +48,7 @@ public interface TimeDetectorStrategy {
         int systemClockUpdateThresholdMillis();
 
         /** Returns true if automatic time detection is enabled. */
-        boolean isTimeDetectionEnabled();
+        boolean isAutoTimeDetectionEnabled();
 
         /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
         void acquireWakeLock();
@@ -71,8 +72,11 @@ public interface TimeDetectorStrategy {
     /** Initialize the strategy. */
     void initialize(@NonNull Callback callback);
 
-    /** Process the suggested time. */
+    /** Process the suggested time from telephony sources. */
     void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion);
+
+    /** Process the suggested manually entered time. */
+    void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
 
     /** Handle the auto-time setting being toggled on or off. */
     void handleAutoTimeDetectionToggle(boolean enabled);
