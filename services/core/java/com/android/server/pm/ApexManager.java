@@ -36,6 +36,7 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.sysprop.ApexProperties;
+import android.util.Singleton;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -65,22 +66,31 @@ abstract class ApexManager {
     static final int MATCH_ACTIVE_PACKAGE = 1 << 0;
     static final int MATCH_FACTORY_PACKAGE = 1 << 1;
 
+    private static final Singleton<ApexManager> sApexManagerSingleton =
+            new Singleton<ApexManager>() {
+                @Override
+                protected ApexManager create() {
+                    if (ApexProperties.updatable().orElse(false)) {
+                        try {
+                            return new ApexManagerImpl(IApexService.Stub.asInterface(
+                                    ServiceManager.getServiceOrThrow("apexservice")));
+                        } catch (ServiceManager.ServiceNotFoundException e) {
+                            throw new IllegalStateException(
+                                    "Required service apexservice not available");
+                        }
+                    } else {
+                        return new ApexManagerFlattenedApex();
+                    }
+                }
+            };
+
     /**
      * Returns an instance of either {@link ApexManagerImpl} or {@link ApexManagerFlattenedApex}
      * depending on whether this device supports APEX, i.e. {@link ApexProperties#updatable()}
      * evaluates to {@code true}.
      */
-    static ApexManager create(Context systemContext) {
-        if (ApexProperties.updatable().orElse(false)) {
-            try {
-                return new ApexManagerImpl(systemContext, IApexService.Stub.asInterface(
-                        ServiceManager.getServiceOrThrow("apexservice")));
-            } catch (ServiceManager.ServiceNotFoundException e) {
-                throw new IllegalStateException("Required service apexservice not available");
-            }
-        } else {
-            return new ApexManagerFlattenedApex();
-        }
+    static ApexManager getInstance() {
+        return sApexManagerSingleton.get();
     }
 
     /**
@@ -101,7 +111,7 @@ abstract class ApexManager {
      */
     abstract List<ActiveApexInfo> getActiveApexInfos();
 
-    abstract void systemReady();
+    abstract void systemReady(Context context);
 
     /**
      * Retrieves information about an APEX package.
@@ -248,7 +258,6 @@ abstract class ApexManager {
     @VisibleForTesting
     static class ApexManagerImpl extends ApexManager {
         private final IApexService mApexService;
-        private final Context mContext;
         private final Object mLock = new Object();
         /**
          * A map from {@code APEX packageName} to the {@Link PackageInfo} generated from the {@code
@@ -260,8 +269,7 @@ abstract class ApexManager {
         @GuardedBy("mLock")
         private List<PackageInfo> mAllPackagesCache;
 
-        ApexManagerImpl(Context context, IApexService apexService) {
-            mContext = context;
+        ApexManagerImpl(IApexService apexService) {
             mApexService = apexService;
         }
 
@@ -302,14 +310,14 @@ abstract class ApexManager {
         }
 
         @Override
-        void systemReady() {
-            mContext.registerReceiver(new BroadcastReceiver() {
+        void systemReady(Context context) {
+            context.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     // Post populateAllPackagesCacheIfNeeded to a background thread, since it's
                     // expensive to run it in broadcast handler thread.
                     BackgroundThread.getHandler().post(() -> populateAllPackagesCacheIfNeeded());
-                    mContext.unregisterReceiver(this);
+                    context.unregisterReceiver(this);
                 }
             }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         }
@@ -643,7 +651,7 @@ abstract class ApexManager {
         }
 
         @Override
-        void systemReady() {
+        void systemReady(Context context) {
             // No-op
         }
 

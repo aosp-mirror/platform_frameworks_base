@@ -2605,7 +2605,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         mProtectedPackages = new ProtectedPackages(mContext);
 
-        mApexManager = ApexManager.create(mContext);
+        mApexManager = ApexManager.getInstance();
         mAppsFilter = mInjector.getAppsFilter();
 
         mDirsToScanAsSystem = new ArrayList<>();
@@ -20371,7 +20371,7 @@ public class PackageManagerService extends IPackageManager.Stub
         storage.registerListener(mStorageListener);
 
         mInstallerService.systemReady();
-        mApexManager.systemReady();
+        mApexManager.systemReady(mContext);
         mPackageDexOptimizer.systemReady();
 
         mInjector.getStorageManagerInternal().addExternalStoragePolicy(
