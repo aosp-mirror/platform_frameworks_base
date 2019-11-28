@@ -20,13 +20,16 @@ import android.content.integrity.Rule;
 
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Optional;
 
 /** A helper class to serialize rules from the {@link Rule} model. */
 public interface RuleSerializer {
 
     /** Serialize rules to an output stream */
-    void serialize(List<Rule> rules, OutputStream outputStream) throws RuleSerializeException;
+    void serialize(List<Rule> rules, Optional<Integer> formatVersion, OutputStream outputStream)
+            throws RuleSerializeException;
 
     /** Serialize rules to a string. */
-    String serialize(List<Rule> rule) throws RuleSerializeException;
+    String serialize(List<Rule> rule, Optional<Integer> formatVersion)
+            throws RuleSerializeException;
 }
