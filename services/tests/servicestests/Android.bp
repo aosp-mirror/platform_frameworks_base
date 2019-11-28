@@ -41,6 +41,7 @@ android_test {
         "hamcrest-library",
         "servicestests-utils",
         "xml-writer-device-lib",
+        "service-appsearch",
         "service-jobscheduler",
     ],
 
