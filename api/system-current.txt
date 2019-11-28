@@ -4088,6 +4088,7 @@ package android.net {
   public final class IpConfiguration implements android.os.Parcelable {
     ctor public IpConfiguration();
     ctor public IpConfiguration(@NonNull android.net.IpConfiguration);
+    method public int describeContents();
     method @Nullable public android.net.ProxyInfo getHttpProxy();
     method @NonNull public android.net.IpConfiguration.IpAssignment getIpAssignment();
     method @NonNull public android.net.IpConfiguration.ProxySettings getProxySettings();
@@ -4096,6 +4097,7 @@ package android.net {
     method public void setIpAssignment(@NonNull android.net.IpConfiguration.IpAssignment);
     method public void setProxySettings(@NonNull android.net.IpConfiguration.ProxySettings);
     method public void setStaticIpConfiguration(@Nullable android.net.StaticIpConfiguration);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.IpConfiguration> CREATOR;
   }
 
