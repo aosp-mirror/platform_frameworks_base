@@ -641,16 +641,8 @@ public class PackageWatchdog {
                 if (registeredObserver != null) {
                     Iterator<MonitoredPackage> it = failedPackages.iterator();
                     while (it.hasNext()) {
-                        String failedPackage = it.next().getName();
-                        Slog.i(TAG, "Explicit health check failed for package " + failedPackage);
-                        VersionedPackage versionedPkg = getVersionedPackage(failedPackage);
-                        if (versionedPkg == null) {
-                            Slog.w(TAG, "Explicit health check failed but could not find package "
-                                    + failedPackage);
-                            // TODO(b/120598832): Skip. We only continue to pass tests for now since
-                            // the tests don't install any packages
-                            versionedPkg = new VersionedPackage(failedPackage, 0L);
-                        }
+                        VersionedPackage versionedPkg = it.next().mPackage;
+                        Slog.i(TAG, "Explicit health check failed for package " + versionedPkg);
                         registeredObserver.execute(versionedPkg);
                     }
                 }
