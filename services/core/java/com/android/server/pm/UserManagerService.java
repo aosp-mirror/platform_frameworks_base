@@ -1634,13 +1634,14 @@ public class UserManagerService extends IUserManager.Stub {
      * See {@link UserManagerInternal#setDevicePolicyUserRestrictions}
      */
     private void setDevicePolicyUserRestrictionsInner(@UserIdInt int userId,
-            @Nullable Bundle restrictions, boolean isDeviceOwner, int cameraRestrictionScope) {
+            @Nullable Bundle restrictions,
+            @UserManagerInternal.OwnerType int restrictionOwnerType) {
         final Bundle global = new Bundle();
         final Bundle local = new Bundle();
 
         // Sort restrictions into local and global ensuring they don't overlap.
-        UserRestrictionsUtils.sortToGlobalAndLocal(restrictions, isDeviceOwner,
-                cameraRestrictionScope, global, local);
+        UserRestrictionsUtils.sortToGlobalAndLocal(restrictions, restrictionOwnerType, global,
+                local);
 
         boolean globalChanged, localChanged;
         synchronized (mRestrictionsLock) {
@@ -1650,7 +1651,7 @@ public class UserManagerService extends IUserManager.Stub {
             localChanged = updateRestrictionsIfNeededLR(
                     userId, local, mDevicePolicyLocalUserRestrictions);
 
-            if (isDeviceOwner) {
+            if (restrictionOwnerType == UserManagerInternal.OWNER_TYPE_DEVICE_OWNER) {
                 // Remember the global restriction owner userId to be able to make a distinction
                 // in getUserRestrictionSource on who set local policies.
                 mDeviceOwnerUserId = userId;
@@ -4484,9 +4485,9 @@ public class UserManagerService extends IUserManager.Stub {
     private class LocalService extends UserManagerInternal {
         @Override
         public void setDevicePolicyUserRestrictions(@UserIdInt int userId,
-                @Nullable Bundle restrictions, boolean isDeviceOwner, int cameraRestrictionScope) {
-            UserManagerService.this.setDevicePolicyUserRestrictionsInner(userId, restrictions,
-                isDeviceOwner, cameraRestrictionScope);
+                @Nullable Bundle restrictions, @OwnerType int restrictionOwnerType) {
+            UserManagerService.this.setDevicePolicyUserRestrictionsInner(userId,
+                    restrictions, restrictionOwnerType);
         }
 
         @Override
