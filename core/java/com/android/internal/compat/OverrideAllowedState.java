@@ -133,4 +133,21 @@ public final class OverrideAllowedState implements Parcelable {
                     return new OverrideAllowedState[size];
                 }
             };
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof OverrideAllowedState)) {
+            return false;
+        }
+        OverrideAllowedState otherState = (OverrideAllowedState) obj;
+        return state == otherState.state
+                && appTargetSdk == otherState.appTargetSdk
+                && changeIdTargetSdk == otherState.changeIdTargetSdk;
+    }
 }
