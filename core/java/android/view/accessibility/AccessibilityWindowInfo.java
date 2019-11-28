@@ -87,6 +87,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
     /** @hide */
     public static final int ACTIVE_WINDOW_ID = Integer.MAX_VALUE;
     /** @hide */
+    public static final int UNDEFINED_CONNECTION_ID = -1;
+    /** @hide */
     public static final int UNDEFINED_WINDOW_ID = -1;
     /** @hide */
     public static final int ANY_WINDOW_ID = -2;
@@ -117,7 +119,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private CharSequence mTitle;
     private long mAnchorId = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
 
-    private int mConnectionId = UNDEFINED_WINDOW_ID;
+    private int mConnectionId = UNDEFINED_CONNECTION_ID;
 
     /**
      * Creates a new {@link AccessibilityWindowInfo}.
@@ -539,6 +541,30 @@ public final class AccessibilityWindowInfo implements Parcelable {
         }
     }
 
+    /**
+     * Refreshes this window with the latest state of the window it represents.
+     * <p>
+     * <strong>Note:</strong> If this method returns false this info is obsolete
+     * since it represents a window that is no longer exist.
+     * </p>
+     *
+     * @hide
+     */
+    public boolean refresh() {
+        if (mConnectionId == UNDEFINED_CONNECTION_ID || mId == UNDEFINED_WINDOW_ID) {
+            return false;
+        }
+        final AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        final AccessibilityWindowInfo refreshedInfo = client.getWindow(mConnectionId,
+                mId, /* bypassCache */true);
+        if (refreshedInfo == null) {
+            return false;
+        }
+        init(refreshedInfo);
+        refreshedInfo.recycle();
+        return true;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -586,6 +612,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mTitle = other.mTitle;
         mAnchorId = other.mAnchorId;
 
+        if (mChildIds != null) mChildIds.clear();
         if (other.mChildIds != null && other.mChildIds.size() > 0) {
             if (mChildIds == null) {
                 mChildIds = other.mChildIds.clone();
