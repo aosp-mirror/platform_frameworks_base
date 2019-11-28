@@ -307,6 +307,43 @@ static int _check_AudioSystem_Command(const char* caller, status_t status)
     return kAudioStatusError;
 }
 
+static jint getVectorOfAudioDeviceTypeAddr(JNIEnv *env, jintArray deviceTypes,
+                                           jobjectArray deviceAddresses,
+                                           Vector<AudioDeviceTypeAddr> &audioDeviceTypeAddrVector) {
+    if (deviceTypes == nullptr || deviceAddresses == nullptr) {
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    jsize deviceCount = env->GetArrayLength(deviceTypes);
+    if (deviceCount == 0 || deviceCount != env->GetArrayLength(deviceAddresses)) {
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    // retrieve all device types
+    std::vector<audio_devices_t> deviceTypesVector;
+    jint *typesPtr = nullptr;
+    typesPtr = env->GetIntArrayElements(deviceTypes, 0);
+    if (typesPtr == nullptr) {
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    for (jint i = 0; i < deviceCount; i++) {
+        deviceTypesVector.push_back((audio_devices_t)typesPtr[i]);
+    }
+    // check each address is a string and add device type/address to list
+    jclass stringClass = FindClassOrDie(env, "java/lang/String");
+    for (jint i = 0; i < deviceCount; i++) {
+        jobject addrJobj = env->GetObjectArrayElement(deviceAddresses, i);
+        if (!env->IsInstanceOf(addrJobj, stringClass)) {
+            return (jint)AUDIO_JAVA_BAD_VALUE;
+        }
+        const char *address = env->GetStringUTFChars((jstring)addrJobj, NULL);
+        AudioDeviceTypeAddr dev = AudioDeviceTypeAddr(typesPtr[i], address);
+        audioDeviceTypeAddrVector.add(dev);
+        env->ReleaseStringUTFChars((jstring)addrJobj, address);
+    }
+    env->ReleaseIntArrayElements(deviceTypes, typesPtr, 0);
+
+    return (jint)NO_ERROR;
+}
+
 static jint
 android_media_AudioSystem_muteMicrophone(JNIEnv *env, jobject thiz, jboolean on)
 {
@@ -1905,6 +1942,10 @@ static jint convertAudioMixToNative(JNIEnv *env,
             nCriterion.mValue.mUid = env->GetIntField(jCriterion,
                     gAudioMixMatchCriterionFields.mIntProp);
             break;
+        case RULE_MATCH_USERID:
+            nCriterion.mValue.mUserId =
+                    env->GetIntField(jCriterion, gAudioMixMatchCriterionFields.mIntProp);
+            break;
         case RULE_MATCH_ATTRIBUTE_USAGE:
         case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET: {
             jobject jAttributes = env->GetObjectField(jCriterion, gAudioMixMatchCriterionFields.mAttr);
@@ -1990,39 +2031,11 @@ exit:
 
 static jint android_media_AudioSystem_setUidDeviceAffinities(JNIEnv *env, jobject clazz,
         jint uid, jintArray deviceTypes, jobjectArray deviceAddresses) {
-    if (deviceTypes == nullptr || deviceAddresses == nullptr) {
-        return (jint) AUDIO_JAVA_BAD_VALUE;
-    }
-    jsize nb = env->GetArrayLength(deviceTypes);
-    if (nb == 0 || nb != env->GetArrayLength(deviceAddresses)) {
-        return (jint) AUDIO_JAVA_BAD_VALUE;
-    }
-    // retrieve all device types
-    std::vector<audio_devices_t> deviceTypesVector;
-    jint* typesPtr = nullptr;
-    typesPtr = env->GetIntArrayElements(deviceTypes, 0);
-    if (typesPtr == nullptr) {
-        return (jint) AUDIO_JAVA_BAD_VALUE;
-    }
-    for (jint i = 0; i < nb; i++) {
-        deviceTypesVector.push_back((audio_devices_t) typesPtr[i]);
-    }
-
-    // check each address is a string and add device type/address to list for device affinity
     Vector<AudioDeviceTypeAddr> deviceVector;
-    jclass stringClass = FindClassOrDie(env, "java/lang/String");
-    for (jint i = 0; i < nb; i++) {
-        jobject addrJobj = env->GetObjectArrayElement(deviceAddresses, i);
-        if (!env->IsInstanceOf(addrJobj, stringClass)) {
-            return (jint) AUDIO_JAVA_BAD_VALUE;
-        }
-        const char* address = env->GetStringUTFChars((jstring) addrJobj, NULL);
-        AudioDeviceTypeAddr dev = AudioDeviceTypeAddr(typesPtr[i], address);
-        deviceVector.add(dev);
-        env->ReleaseStringUTFChars((jstring) addrJobj, address);
+    jint results = getVectorOfAudioDeviceTypeAddr(env, deviceTypes, deviceAddresses, deviceVector);
+    if (results != NO_ERROR) {
+        return results;
     }
-    env->ReleaseIntArrayElements(deviceTypes, typesPtr, 0);
-
     status_t status = AudioSystem::setUidDeviceAffinities((uid_t) uid, deviceVector);
     return (jint) nativeToJavaStatus(status);
 }
@@ -2033,6 +2046,23 @@ static jint android_media_AudioSystem_removeUidDeviceAffinities(JNIEnv *env, job
     return (jint) nativeToJavaStatus(status);
 }
 
+static jint android_media_AudioSystem_setUserIdDeviceAffinities(JNIEnv *env, jobject clazz,
+                                                                jint userId, jintArray deviceTypes,
+                                                                jobjectArray deviceAddresses) {
+    Vector<AudioDeviceTypeAddr> deviceVector;
+    jint results = getVectorOfAudioDeviceTypeAddr(env, deviceTypes, deviceAddresses, deviceVector);
+    if (results != NO_ERROR) {
+        return results;
+    }
+    status_t status = AudioSystem::setUserIdDeviceAffinities((int)userId, deviceVector);
+    return (jint)nativeToJavaStatus(status);
+}
+
+static jint android_media_AudioSystem_removeUserIdDeviceAffinities(JNIEnv *env, jobject clazz,
+                                                                   jint userId) {
+    status_t status = AudioSystem::removeUserIdDeviceAffinities((int)userId);
+    return (jint)nativeToJavaStatus(status);
+}
 
 static jint
 android_media_AudioSystem_systemReady(JNIEnv *env, jobject thiz)
@@ -2437,7 +2467,9 @@ static const JNINativeMethod gMethods[] = {
     {"setPreferredDeviceForStrategy", "(IILjava/lang/String;)I", (void *)android_media_AudioSystem_setPreferredDeviceForStrategy},
     {"removePreferredDeviceForStrategy", "(I)I", (void *)android_media_AudioSystem_removePreferredDeviceForStrategy},
     {"getPreferredDeviceForStrategy", "(I[Landroid/media/AudioDeviceAddress;)I", (void *)android_media_AudioSystem_getPreferredDeviceForStrategy},
-    {"getDevicesForAttributes", "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAddress;)I", (void *)android_media_AudioSystem_getDevicesForAttributes}
+    {"getDevicesForAttributes", "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAddress;)I", (void *)android_media_AudioSystem_getDevicesForAttributes},
+    {"setUserIdDeviceAffinities", "(I[I[Ljava/lang/String;)I", (void *)android_media_AudioSystem_setUserIdDeviceAffinities},
+    {"removeUserIdDeviceAffinities", "(I)I", (void *)android_media_AudioSystem_removeUserIdDeviceAffinities}
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {

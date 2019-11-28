@@ -262,6 +262,10 @@ interface IAudioService {
 
     int removeUidDeviceAffinity(in IAudioPolicyCallback pcb, in int uid);
 
+    int setUserIdDeviceAffinity(in IAudioPolicyCallback pcb, in int userId, in int[] deviceTypes,
+             in String[] deviceAddresses);
+    int removeUserIdDeviceAffinity(in IAudioPolicyCallback pcb, in int userId);
+
     boolean hasHapticChannels(in Uri uri);
 
     boolean isCallScreeningModeSupported();
