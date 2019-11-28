@@ -191,18 +191,12 @@ public final class IpConfiguration implements Parcelable {
                83 * httpProxy.hashCode();
     }
 
-    /**
-     * Implement the Parcelable interface
-     * @hide
-     */
+    /** Implement the Parcelable interface */
     public int describeContents() {
         return 0;
     }
 
-    /**
-     * Implement the Parcelable interface
-     * @hide
-     */
+    /** Implement the Parcelable interface */
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(ipAssignment.name());
         dest.writeString(proxySettings.name());
