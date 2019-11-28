@@ -46,6 +46,7 @@ import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.util.IntArray;
 import android.util.Slog;
@@ -53,6 +54,7 @@ import android.util.SparseArray;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageHelper;
 import com.android.internal.os.BackgroundThread;
 
 import java.io.File;
@@ -274,39 +276,100 @@ public class StagingManager {
         return sessionContains(session, (s) -> !isApexSession(s));
     }
 
+    // Reverts apex sessions and user data (if checkpoint is supported). Also reboots the device.
+    private void abortCheckpoint() {
+        try {
+            if (supportsCheckpoint() && needsCheckpoint()) {
+                mApexManager.revertActiveSessions();
+                PackageHelper.getStorageManager().abortChanges(
+                        "StagingManager initiated", false /*retry*/);
+            }
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Failed to abort checkpoint", e);
+            mApexManager.revertActiveSessions();
+            mPowerManager.reboot(null);
+        }
+    }
+
+    private boolean supportsCheckpoint() throws RemoteException {
+        return PackageHelper.getStorageManager().supportsCheckpoint();
+    }
+
+    private boolean needsCheckpoint() throws RemoteException {
+        return PackageHelper.getStorageManager().needsCheckpoint();
+    }
+
     private void resumeSession(@NonNull PackageInstallerSession session) {
         Slog.d(TAG, "Resuming session " + session.sessionId);
+
         final boolean hasApex = sessionContainsApex(session);
+        ApexSessionInfo apexSessionInfo = null;
         if (hasApex) {
             // Check with apexservice whether the apex packages have been activated.
-            ApexSessionInfo apexSessionInfo = mApexManager.getStagedSessionInfo(session.sessionId);
+            apexSessionInfo = mApexManager.getStagedSessionInfo(session.sessionId);
+
+            if (apexSessionInfo != null && apexSessionInfo.isVerified) {
+                // Session has been previously submitted to apexd, but didn't complete all the
+                // pre-reboot verification, perhaps because the device rebooted in the meantime.
+                // Greedily re-trigger the pre-reboot verification. We want to avoid marking it as
+                // failed when not in checkpoint mode, hence it is being processed separately.
+                Slog.d(TAG, "Found pending staged session " + session.sessionId + " still to "
+                        + "be verified, resuming pre-reboot verification");
+                mPreRebootVerificationHandler.startPreRebootVerification(session.sessionId);
+                return;
+            }
+        }
+
+        // Before we resume session, we check if revert is needed or not. Typically, we enter file-
+        // system checkpoint mode when we reboot first time in order to install staged sessions. We
+        // want to install staged sessions in this mode as rebooting now will revert user data. If
+        // something goes wrong, then we reboot again to enter fs-rollback mode. Rebooting now will
+        // have no effect on user data, so mark the sessions as failed instead.
+        try {
+            // If checkpoint is supported, then we only resume sessions if we are in checkpointing
+            // mode. If not, we fail all sessions.
+            if (supportsCheckpoint() && !needsCheckpoint()) {
+                // TODO(b/146343545): Persist failure reason across checkpoint reboot
+                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN,
+                        "Reverting back to safe state");
+                return;
+            }
+        } catch (RemoteException e) {
+            // Cannot continue staged install without knowing if fs-checkpoint is supported
+            Slog.e(TAG, "Checkpoint support unknown. Aborting staged install for session "
+                    + session.sessionId, e);
+            // TODO: Mark all staged sessions together and reboot only once
+            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN,
+                    "Checkpoint support unknown. Aborting staged install.");
+            if (hasApex) {
+                mApexManager.revertActiveSessions();
+            }
+            mPowerManager.reboot("Checkpoint support unknown");
+            return;
+        }
+
+        if (hasApex) {
             if (apexSessionInfo == null) {
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         "apexd did not know anything about a staged session supposed to be"
                         + "activated");
+                abortCheckpoint();
                 return;
             }
             if (isApexSessionFailed(apexSessionInfo)) {
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         "APEX activation failed. Check logcat messages from apexd for "
                                 + "more information.");
-                return;
-            }
-            if (apexSessionInfo.isVerified) {
-                // Session has been previously submitted to apexd, but didn't complete all the
-                // pre-reboot verification, perhaps because the device rebooted in the meantime.
-                // Greedily re-trigger the pre-reboot verification.
-                Slog.d(TAG, "Found pending staged session " + session.sessionId + " still to be "
-                        + "verified, resuming pre-reboot verification");
-                mPreRebootVerificationHandler.startPreRebootVerification(session.sessionId);
+                abortCheckpoint();
                 return;
             }
             if (!apexSessionInfo.isActivated && !apexSessionInfo.isSuccess) {
-                // In all the remaining cases apexd will try to apply the session again at next
-                // boot. Nothing to do here for now.
-                Slog.w(TAG, "Staged session " + session.sessionId + " scheduled to be applied "
-                        + "at boot didn't activate nor fail. This usually means that apexd will "
-                        + "retry at next reboot.");
+                // Apexd did not apply the session for some unknown reason. There is no guarantee
+                // that apexd will install it next time. Safer to proactively mark as failed.
+                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Staged session " + session.sessionId + "at boot didn't "
+                                + "activate nor fail. Marking it as failed anyway.");
+                abortCheckpoint();
                 return;
             }
             Slog.i(TAG, "APEX packages in session " + session.sessionId
@@ -318,7 +381,9 @@ public class StagingManager {
             installApksInSession(session);
         } catch (PackageManagerException e) {
             session.setStagedSessionFailed(e.error, e.getMessage());
+            abortCheckpoint();
 
+            // If checkpoint is not supported, we have to handle failure for one staged session.
             if (!hasApex) {
                 return;
             }
@@ -946,6 +1011,19 @@ public class StagingManager {
                     Slog.e(TAG, "Failed to notifyStagedSession for session: "
                             + session.sessionId, re);
                 }
+            }
+            // Before marking the session as ready, start checkpoint service if available
+            try {
+                IStorageManager storageManager = PackageHelper.getStorageManager();
+                if (storageManager.supportsCheckpoint()) {
+                    storageManager.startCheckpoint(1);
+                }
+            } catch (Exception e) {
+                // Failed to get hold of StorageManager
+                Slog.e(TAG, "Failed to get hold of StorageManager", e);
+                session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_UNKNOWN,
+                        "Failed to get hold of StorageManager");
+                return;
             }
 
             // Proactively mark session as ready before calling apexd. Although this call order
