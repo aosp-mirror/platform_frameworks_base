@@ -247,7 +247,14 @@ public class PackageWatchdog {
         List<MonitoredPackage> packages = new ArrayList<>();
         for (int i = 0; i < packageNames.size(); i++) {
             // Health checks not available yet so health check state will start INACTIVE
-            packages.add(new MonitoredPackage(packageNames.get(i), durationMs, false));
+            MonitoredPackage pkg = newMonitoredPackage(packageNames.get(i), durationMs, false);
+            if (pkg != null) {
+                packages.add(pkg);
+            }
+        }
+
+        if (packages.isEmpty()) {
+            return;
         }
 
         // Sync before we add the new packages to the observers. This will #pruneObservers,
@@ -654,7 +661,7 @@ public class PackageWatchdog {
     @Nullable
     private VersionedPackage getVersionedPackage(String packageName) {
         final PackageManager pm = mContext.getPackageManager();
-        if (pm == null) {
+        if (pm == null || TextUtils.isEmpty(packageName)) {
             return null;
         }
         try {
@@ -925,9 +932,10 @@ public class PackageWatchdog {
                                             ATTR_EXPLICIT_HEALTH_CHECK_DURATION));
                             boolean hasPassedHealthCheck = Boolean.parseBoolean(
                                     parser.getAttributeValue(null, ATTR_PASSED_HEALTH_CHECK));
-                            if (!TextUtils.isEmpty(packageName)) {
-                                packages.add(watchdog.new MonitoredPackage(packageName, duration,
-                                        healthCheckDuration, hasPassedHealthCheck));
+                            MonitoredPackage pkg = watchdog.newMonitoredPackage(packageName,
+                                    duration, healthCheckDuration, hasPassedHealthCheck);
+                            if (pkg != null) {
+                                packages.add(pkg);
                             }
                         } catch (NumberFormatException e) {
                             Slog.wtf(TAG, "Skipping package for observer " + observerName, e);
@@ -963,6 +971,20 @@ public class PackageWatchdog {
         int FAILED = 3;
     }
 
+    MonitoredPackage newMonitoredPackage(
+            String name, long durationMs, boolean hasPassedHealthCheck) {
+        return newMonitoredPackage(name, durationMs, Long.MAX_VALUE, hasPassedHealthCheck);
+    }
+
+    MonitoredPackage newMonitoredPackage(String name, long durationMs, long healthCheckDurationMs,
+            boolean hasPassedHealthCheck) {
+        VersionedPackage pkg = getVersionedPackage(name);
+        if (pkg == null) {
+            return null;
+        }
+        return new MonitoredPackage(pkg, durationMs, healthCheckDurationMs, hasPassedHealthCheck);
+    }
+
     /**
      * Represents a package and its health check state along with the time
      * it should be monitored for.
@@ -995,13 +1017,9 @@ public class PackageWatchdog {
         @GuardedBy("mLock")
         private long mHealthCheckDurationMs = Long.MAX_VALUE;
 
-        MonitoredPackage(String name, long durationMs, boolean hasPassedHealthCheck) {
-            this(name, durationMs, Long.MAX_VALUE, hasPassedHealthCheck);
-        }
-
-        MonitoredPackage(String name, long durationMs, long healthCheckDurationMs,
-                boolean hasPassedHealthCheck) {
-            mPackage = getVersionedPackage(name);
+        private MonitoredPackage(VersionedPackage pkg, long durationMs,
+                long healthCheckDurationMs, boolean hasPassedHealthCheck) {
+            mPackage = pkg;
             mDurationMs = durationMs;
             mHealthCheckDurationMs = healthCheckDurationMs;
             mHasPassedHealthCheck = hasPassedHealthCheck;

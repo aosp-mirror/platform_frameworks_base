@@ -670,11 +670,11 @@ public class PackageWatchdogTest {
     public void testPackageHealthCheckStateTransitions() {
         TestController controller = new TestController();
         PackageWatchdog wd = createWatchdog(controller, true /* withPackagesReady */);
-        MonitoredPackage m1 = wd.new MonitoredPackage(APP_A, LONG_DURATION,
+        MonitoredPackage m1 = wd.newMonitoredPackage(APP_A, LONG_DURATION,
                 false /* hasPassedHealthCheck */);
-        MonitoredPackage m2 = wd.new MonitoredPackage(APP_B, LONG_DURATION, false);
-        MonitoredPackage m3 = wd.new MonitoredPackage(APP_C, LONG_DURATION, false);
-        MonitoredPackage m4 = wd.new MonitoredPackage(APP_D, LONG_DURATION, SHORT_DURATION, true);
+        MonitoredPackage m2 = wd.newMonitoredPackage(APP_B, LONG_DURATION, false);
+        MonitoredPackage m3 = wd.newMonitoredPackage(APP_C, LONG_DURATION, false);
+        MonitoredPackage m4 = wd.newMonitoredPackage(APP_D, LONG_DURATION, SHORT_DURATION, true);
 
         // Verify transition: inactive -> active -> passed
         // Verify initially inactive
