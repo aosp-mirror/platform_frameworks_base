@@ -2177,6 +2177,20 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_ALL_TRUSTED));
                         e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
                         e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_ALL_TRUSTED));
+
+                        String perm = AppOpsManager.opToPermission(op.getOpCode());
+                        if (perm == null) {
+                            e.writeBoolean(false);
+                        } else {
+                            PermissionInfo permInfo;
+                            try {
+                                permInfo = mContext.getPackageManager().getPermissionInfo(perm, 0);
+                                e.writeBoolean(permInfo.getProtection() == PROTECTION_DANGEROUS);
+                            } catch (PackageManager.NameNotFoundException exception) {
+                                e.writeBoolean(false);
+                            }
+                        }
+
                         pulledData.add(e);
                     }
                 }
