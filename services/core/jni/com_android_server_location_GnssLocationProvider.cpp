@@ -704,20 +704,22 @@ Return<void> GnssCallback::gnssSvStatusCbImpl(const T& svStatus) {
     jfloatArray elevArray = env->NewFloatArray(listSize);
     jfloatArray azimArray = env->NewFloatArray(listSize);
     jfloatArray carrierFreqArray = env->NewFloatArray(listSize);
+    jfloatArray basebandCn0Array = env->NewFloatArray(listSize);
 
     jint* svidWithFlags = env->GetIntArrayElements(svidWithFlagArray, 0);
     jfloat* cn0s = env->GetFloatArrayElements(cn0Array, 0);
     jfloat* elev = env->GetFloatArrayElements(elevArray, 0);
     jfloat* azim = env->GetFloatArrayElements(azimArray, 0);
     jfloat* carrierFreq = env->GetFloatArrayElements(carrierFreqArray, 0);
+    jfloat* basebandCn0s = env->GetFloatArrayElements(basebandCn0Array, 0);
 
     /*
      * Read GNSS SV info.
      */
     for (size_t i = 0; i < listSize; ++i) {
         enum ShiftWidth: uint8_t {
-            SVID_SHIFT_WIDTH = 8,
-            CONSTELLATION_TYPE_SHIFT_WIDTH = 4
+            SVID_SHIFT_WIDTH = 12,
+            CONSTELLATION_TYPE_SHIFT_WIDTH = 8
         };
 
         const IGnssCallback_V1_0::GnssSvInfo& info = getGnssSvInfoOfIndex(svStatus, i);
@@ -728,6 +730,8 @@ Return<void> GnssCallback::gnssSvStatusCbImpl(const T& svStatus) {
         elev[i] = info.elevationDegrees;
         azim[i] = info.azimuthDegrees;
         carrierFreq[i] = info.carrierFrequencyHz;
+        // TODO(b/144850155): fill svidWithFlags with hasBasebandCn0DbHz based on HAL versions
+        basebandCn0s[i] = 0.0;
     }
 
     env->ReleaseIntArrayElements(svidWithFlagArray, svidWithFlags, 0);
@@ -735,10 +739,11 @@ Return<void> GnssCallback::gnssSvStatusCbImpl(const T& svStatus) {
     env->ReleaseFloatArrayElements(elevArray, elev, 0);
     env->ReleaseFloatArrayElements(azimArray, azim, 0);
     env->ReleaseFloatArrayElements(carrierFreqArray, carrierFreq, 0);
+    env->ReleaseFloatArrayElements(basebandCn0Array, basebandCn0s, 0);
 
     env->CallVoidMethod(mCallbacksObj, method_reportSvStatus,
             static_cast<jint>(listSize), svidWithFlagArray, cn0Array, elevArray, azimArray,
-            carrierFreqArray);
+            carrierFreqArray, basebandCn0Array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
@@ -1545,7 +1550,7 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     method_reportLocation = env->GetMethodID(clazz, "reportLocation",
             "(ZLandroid/location/Location;)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
-    method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "(I[I[F[F[F[F)V");
+    method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "(I[I[F[F[F[F[F)V");
     method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II[B)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
     method_setTopHalCapabilities = env->GetMethodID(clazz, "setTopHalCapabilities", "(I)V");
