@@ -25,7 +25,6 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.pip.PipUI;
-import com.android.systemui.power.InattentiveSleepWarningController;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
@@ -102,13 +101,6 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(PowerUI.class)
     public abstract SystemUI bindPowerUI(PowerUI sysui);
-
-    /** Inject into InattentiveSleepWarningController. */
-    @Binds
-    @IntoMap
-    @ClassKey(InattentiveSleepWarningController.class)
-    public abstract SystemUI bindInattentiveSleepWarningController(
-            InattentiveSleepWarningController sysui);
 
     /** Inject into Recents. */
     @Binds

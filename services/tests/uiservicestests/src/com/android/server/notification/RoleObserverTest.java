@@ -129,7 +129,8 @@ public class RoleObserverTest extends UiServiceTestCase {
         mRoleObserver = mService.new RoleObserver(mRoleManager, mPm, mExecutor);
 
         try {
-            mService.init(mock(Looper.class), mock(RankingHandler.class),
+            mService.init(mService.new WorkerHandler(mock(Looper.class)),
+                    mock(RankingHandler.class),
                     mock(IPackageManager.class), mock(PackageManager.class),
                     mock(LightsManager.class),
                     mock(NotificationListeners.class), mock(NotificationAssistants.class),
@@ -140,7 +141,7 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(UsageStatsManagerInternal.class),
                     mock(DevicePolicyManagerInternal.class), mock(IUriGrantsManager.class),
                     mock(UriGrantsManagerInternal.class),
-                    mock(AppOpsManager.class), mUm);
+                    mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;

@@ -2818,9 +2818,10 @@ public class LocationManager {
 
             @Override
             public void onSvStatusChanged(int svCount, int[] svidWithFlags, float[] cn0s,
-                    float[] elevations, float[] azimuths, float[] carrierFreqs) {
+                    float[] elevations, float[] azimuths, float[] carrierFreqs,
+                    float[] basebandCn0s) {
                 GnssStatus localStatus = GnssStatus.wrap(svCount, svidWithFlags, cn0s,
-                        elevations, azimuths, carrierFreqs);
+                        elevations, azimuths, carrierFreqs, basebandCn0s);
                 mGnssStatus = localStatus;
                 execute((callback) -> callback.onSatelliteStatusChanged(localStatus));
             }

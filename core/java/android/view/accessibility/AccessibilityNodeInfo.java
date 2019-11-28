@@ -775,15 +775,38 @@ public class AccessibilityNodeInfo implements Parcelable {
     private TouchDelegateInfo mTouchDelegateInfo;
 
     /**
-     * Hide constructor from clients.
+     * Creates a new {@link AccessibilityNodeInfo}.
      */
-    private AccessibilityNodeInfo() {
-        /* do nothing */
+    public AccessibilityNodeInfo() {
     }
 
-    /** @hide */
-    AccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        init(info);
+    /**
+     * Creates a new {@link AccessibilityNodeInfo} with the given <code>source</code>.
+     *
+     * @param source The source view.
+     */
+    public AccessibilityNodeInfo(@NonNull View source) {
+        setSource(source);
+    }
+
+    /**
+     * Creates a new {@link AccessibilityNodeInfo} with the given <code>source</code>.
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual descendant.
+     */
+    public AccessibilityNodeInfo(@NonNull View root, int virtualDescendantId) {
+        setSource(root, virtualDescendantId);
+    }
+
+    /**
+     * Copy constructor. Creates a new {@link AccessibilityNodeInfo}, and this new instance is
+     * initialized from the given <code>info</code>.
+     *
+     * @param info The other info.
+     */
+    public AccessibilityNodeInfo(@NonNull AccessibilityNodeInfo info) {
+        init(info, false /* usePoolingInfo */);
     }
 
     /**
@@ -911,7 +934,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         // when it is obtained. Enforce sealing again before we init to fail when a node has been
         // recycled during a refresh to catch such errors earlier.
         enforceSealed();
-        init(refreshedInfo);
+        init(refreshedInfo, true /* usePoolingInfo */);
         refreshedInfo.recycle();
         return true;
     }
@@ -3299,6 +3322,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Returns a cached instance if such is available otherwise a new one
      * and sets the source.
      *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityNodeInfo(View)} instead.
+     *
      * @param source The source view.
      * @return An instance.
      *
@@ -3313,6 +3339,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Returns a cached instance if such is available otherwise a new one
      * and sets the source.
+     *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityNodeInfo(View, int)} instead.
      *
      * @param root The root of the virtual subtree.
      * @param virtualDescendantId The id of the virtual descendant.
@@ -3329,6 +3358,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Returns a cached instance if such is available otherwise a new one.
      *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityNodeInfo()} instead.
+     *
      * @return An instance.
      */
     public static AccessibilityNodeInfo obtain() {
@@ -3344,12 +3376,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      * create. The returned instance is initialized from the given
      * <code>info</code>.
      *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityNodeInfo(AccessibilityNodeInfo)} instead.
+     *
      * @param info The other info.
      * @return An instance.
      */
     public static AccessibilityNodeInfo obtain(AccessibilityNodeInfo info) {
         AccessibilityNodeInfo infoClone = AccessibilityNodeInfo.obtain();
-        infoClone.init(info);
+        infoClone.init(info, true /* usePoolingInfo */);
         return infoClone;
     }
 
@@ -3357,6 +3392,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Return an instance back to be reused.
      * <p>
      * <strong>Note:</strong> You must not touch the object after calling this function.
+     *
+     * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
      *
      * @throws IllegalStateException If the info is already recycled.
      */
@@ -3647,8 +3684,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Initializes this instance from another one.
      *
      * @param other The other instance.
+     * @param usePoolingInfos whether using pooled object internally or not
      */
-    private void init(AccessibilityNodeInfo other) {
+    private void init(AccessibilityNodeInfo other, boolean usePoolingInfos) {
         mSealed = other.mSealed;
         mSourceNodeId = other.mSourceNodeId;
         mParentNodeId = other.mParentNodeId;
@@ -3707,6 +3745,18 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         mExtras = other.mExtras != null ? new Bundle(other.mExtras) : null;
 
+        if (usePoolingInfos) {
+            initPoolingInfos(other);
+        } else {
+            initCopyInfos(other);
+        }
+
+        final TouchDelegateInfo otherInfo = other.mTouchDelegateInfo;
+        mTouchDelegateInfo = (otherInfo != null)
+                ? new TouchDelegateInfo(otherInfo.mTargetMap, true) : null;
+    }
+
+    private void initPoolingInfos(AccessibilityNodeInfo other) {
         if (mRangeInfo != null) mRangeInfo.recycle();
         mRangeInfo = (other.mRangeInfo != null)
                 ? RangeInfo.obtain(other.mRangeInfo) : null;
@@ -3716,10 +3766,20 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (mCollectionItemInfo != null) mCollectionItemInfo.recycle();
         mCollectionItemInfo =  (other.mCollectionItemInfo != null)
                 ? CollectionItemInfo.obtain(other.mCollectionItemInfo) : null;
+    }
 
-        final TouchDelegateInfo otherInfo = other.mTouchDelegateInfo;
-        mTouchDelegateInfo = (otherInfo != null)
-                ? new TouchDelegateInfo(otherInfo.mTargetMap, true) : null;
+    private void initCopyInfos(AccessibilityNodeInfo other) {
+        RangeInfo ri = other.mRangeInfo;
+        mRangeInfo = (ri == null) ? null
+                : new RangeInfo(ri.mType, ri.mMin, ri.mMax, ri.mCurrent);
+        CollectionInfo ci = other.mCollectionInfo;
+        mCollectionInfo = (ci == null) ? null
+                : new CollectionInfo(ci.mRowCount, ci.mColumnCount,
+                                     ci.mHierarchical, ci.mSelectionMode);
+        CollectionItemInfo cii = other.mCollectionItemInfo;
+        mCollectionItemInfo = (cii == null)  ? null
+                : new CollectionItemInfo(cii.mRowIndex, cii.mRowSpan, cii.mColumnIndex,
+                                         cii.mColumnSpan, cii.mHeading, cii.mSelected);
     }
 
     /**
@@ -3854,7 +3914,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Clears the state of this instance.
      */
     private void clear() {
-        init(DEFAULT);
+        init(DEFAULT, true /* usePoolingInfo */);
     }
 
     private static boolean isDefaultStandardAction(AccessibilityAction action) {
@@ -4709,6 +4769,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Obtains a pooled instance that is a clone of another one.
          *
+         * <p>In most situations object pooling is not beneficial. Create a new instance using the
+         * constructor {@link AccessibilityNodeInfo.RangeInfo#AccessibilityNodeInfo.RangeInfo(int,
+         * float, float, float)} instead.
+         *
          * @param other The instance to clone.
          *
          * @hide
@@ -4719,6 +4783,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Obtains a pooled instance.
+         *
+         * <p>In most situations object pooling is not beneficial. Create a new instance using the
+         * constructor {@link AccessibilityNodeInfo.RangeInfo#AccessibilityNodeInfo.RangeInfo(int,
+         * float, float, float)} instead.
          *
          * @param type The type of the range.
          * @param min The minimum value. Use {@code Float.NEGATIVE_INFINITY} if the range has no
@@ -4750,7 +4818,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *            maximum.
          * @param current The current value.
          */
-        private RangeInfo(int type, float min, float max, float current) {
+        public RangeInfo(int type, float min, float max, float current) {
             mType = type;
             mMin = min;
             mMax = max;
@@ -4799,6 +4867,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Recycles this instance.
+         *
+         * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
          */
         void recycle() {
             clear();
@@ -4849,6 +4919,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Obtains a pooled instance that is a clone of another one.
          *
+         * <p>In most situations object pooling is not beneficial. Create a new instance using the
+         * constructor {@link
+         * AccessibilityNodeInfo.CollectionInfo#AccessibilityNodeInfo.CollectionInfo} instead.
+         *
          * @param other The instance to clone.
          * @hide
          */
@@ -4859,6 +4933,11 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Obtains a pooled instance.
+         *
+         * <p>In most situations object pooling is not beneficial. Create a new instance using the
+         * constructor {@link
+         * AccessibilityNodeInfo.CollectionInfo#AccessibilityNodeInfo.CollectionInfo(int, int,
+         * boolean)} instead.
          *
          * @param rowCount The number of rows, or -1 if count is unknown.
          * @param columnCount The number of columns, or -1 if count is unknown.
@@ -4871,6 +4950,11 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Obtains a pooled instance.
+         *
+         * <p>In most situations object pooling is not beneficial. Create a new instance using the
+         * constructor {@link
+         * AccessibilityNodeInfo.CollectionInfo#AccessibilityNodeInfo.CollectionInfo(int, int,
+         * boolean, int)} instead.
          *
          * @param rowCount The number of rows.
          * @param columnCount The number of columns.
@@ -4902,9 +4986,20 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param rowCount The number of rows.
          * @param columnCount The number of columns.
          * @param hierarchical Whether the collection is hierarchical.
+         */
+        public CollectionInfo(int rowCount, int columnCount, boolean hierarchical) {
+            this(rowCount, columnCount, hierarchical, SELECTION_MODE_NONE);
+        }
+
+        /**
+         * Creates a new instance.
+         *
+         * @param rowCount The number of rows.
+         * @param columnCount The number of columns.
+         * @param hierarchical Whether the collection is hierarchical.
          * @param selectionMode The collection's selection mode.
          */
-        private CollectionInfo(int rowCount, int columnCount, boolean hierarchical,
+        public CollectionInfo(int rowCount, int columnCount, boolean hierarchical,
                 int selectionMode) {
             mRowCount = rowCount;
             mColumnCount = columnCount;
@@ -4955,6 +5050,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Recycles this instance.
+         *
+         * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
          */
         void recycle() {
             clear();
@@ -4991,6 +5088,11 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Obtains a pooled instance that is a clone of another one.
          *
+         * <p>In most situations object pooling is not beneficial. Create a new instance using the
+         * constructor {@link
+         * AccessibilityNodeInfo.CollectionItemInfo#AccessibilityNodeInfo.CollectionItemInfo}
+         * instead.
+         *
          * @param other The instance to clone.
          * @hide
          */
@@ -5001,6 +5103,11 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Obtains a pooled instance.
+         *
+         * <p>In most situations object pooling is not beneficial. Create a new instance using the
+         * constructor {@link
+         * AccessibilityNodeInfo.CollectionItemInfo#AccessibilityNodeInfo.CollectionItemInfo(int,
+         * int, int, int, boolean)} instead.
          *
          * @param rowIndex The row index at which the item is located.
          * @param rowSpan The number of rows the item spans.
@@ -5016,6 +5123,11 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Obtains a pooled instance.
+         *
+         * <p>In most situations object pooling is not beneficial. Creates a new instance using the
+         * constructor {@link
+         * AccessibilityNodeInfo.CollectionItemInfo#AccessibilityNodeInfo.CollectionItemInfo(int,
+         * int, int, int, boolean, boolean)} instead.
          *
          * @param rowIndex The row index at which the item is located.
          * @param rowSpan The number of rows the item spans.
@@ -5058,7 +5170,22 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param columnSpan The number of columns the item spans.
          * @param heading Whether the item is a heading.
          */
-        private CollectionItemInfo(int rowIndex, int rowSpan, int columnIndex, int columnSpan,
+        public CollectionItemInfo(int rowIndex, int rowSpan, int columnIndex, int columnSpan,
+                boolean heading) {
+            this(rowIndex, rowSpan, columnIndex, columnSpan, heading, false);
+        }
+
+        /**
+         * Creates a new instance.
+         *
+         * @param rowIndex The row index at which the item is located.
+         * @param rowSpan The number of rows the item spans.
+         * @param columnIndex The column index at which the item is located.
+         * @param columnSpan The number of columns the item spans.
+         * @param heading Whether the item is a heading.
+         * @param selected Whether the item is selected.
+         */
+        public CollectionItemInfo(int rowIndex, int rowSpan, int columnIndex, int columnSpan,
                 boolean heading, boolean selected) {
             mRowIndex = rowIndex;
             mRowSpan = rowSpan;
@@ -5126,6 +5253,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Recycles this instance.
+         *
+         * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
          */
         void recycle() {
             clear();

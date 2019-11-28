@@ -192,6 +192,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Brakuje aplikacji administratora profilu do pracy lub jest ona uszkodzona. Dlatego Twój profil służbowy i związane z nim dane zostały usunięte. Skontaktuj się ze swoim administratorem, by uzyskać pomoc."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Twój profil służbowy nie jest już dostępny na tym urządzeniu"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Zbyt wiele prób podania hasła"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"Urządzenie jest zarządzane"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Twoja organizacja zarządza tym urządzeniem i może monitorować ruch w sieci. Kliknij, by dowiedzieć się więcej."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Twoje urządzenie zostanie wyczyszczone"</string>
@@ -1156,10 +1158,8 @@
     <string name="loading" msgid="3138021523725055037">"Wczytuję…"</string>
     <string name="capital_on" msgid="2770685323900821829">"Wł."</string>
     <string name="capital_off" msgid="7443704171014626777">"Wył."</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"wybrano"</string>
+    <string name="not_checked" msgid="7972320087569023342">"nie wybrano"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Wykonaj czynność przez..."</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Wykonaj czynność w aplikacji %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Wykonaj działanie"</string>
@@ -2072,6 +2072,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Przełącz podzielony ekran"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ekran blokady"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Zrzut ekranu"</string>
-    <!-- no translation found for accessibility_freeform_caption (7873194416838321119) -->
-    <skip />
+    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> w wyskakującym okienku."</string>
 </resources>

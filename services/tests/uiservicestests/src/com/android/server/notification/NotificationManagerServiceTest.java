@@ -218,6 +218,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     RankingHandler mRankingHandler;
 
+    private static final int MAX_POST_DELAY = 1000;
+
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
 
@@ -246,6 +248,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             mNotificationAssistantAccessGrantedCallback;
     @Mock
     UserManager mUm;
+    @Mock
+    NotificationHistoryManager mHistoryManager;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -404,13 +408,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         when(mAssistants.isAdjustmentAllowed(anyString())).thenReturn(true);
 
-        mService.init(mTestableLooper.getLooper(), mRankingHandler,
-                mPackageManager, mPackageManagerClient, mockLightsManager,
+        mService.init(mService.new WorkerHandler(mTestableLooper.getLooper()),
+                mRankingHandler, mPackageManager, mPackageManagerClient, mockLightsManager,
                 mListeners, mAssistants, mConditionProviders,
                 mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
                 mGroupHelper, mAm, mAppUsageStats,
                 mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
-                mAppOpsManager, mUm);
+                mAppOpsManager, mUm, mHistoryManager);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
@@ -430,6 +434,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void tearDown() throws Exception {
         if (mFile != null) mFile.delete();
         clearDeviceConfig();
+        mService.unregisterDeviceConfigChange();
         InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation().dropShellPermissionIdentity();
     }
@@ -5947,4 +5952,61 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     // TODO: add tests for the rest of the non-empty cases
+
+    @Test
+    public void testOnUnlockUser() {
+        UserInfo ui = new UserInfo();
+        ui.id = 10;
+        mService.onUnlockUser(ui);
+        waitForIdle();
+
+        verify(mHistoryManager, timeout(MAX_POST_DELAY).times(1)).onUserUnlocked(ui.id);
+    }
+
+    @Test
+    public void testOnStopUser() {
+        UserInfo ui = new UserInfo();
+        ui.id = 10;
+        mService.onStopUser(ui);
+        waitForIdle();
+
+        verify(mHistoryManager, timeout(MAX_POST_DELAY).times(1)).onUserStopped(ui.id);
+    }
+
+    @Test
+    public void testOnBootPhase() {
+        mService.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
+
+        verify(mHistoryManager, never()).onBootPhaseAppsCanStart();
+
+        mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
+
+        verify(mHistoryManager, times(1)).onBootPhaseAppsCanStart();
+    }
+
+    @Test
+    public void testHandleOnPackageChanged() {
+        String[] pkgs = new String[] {PKG, PKG_N_MR1};
+        int[] uids = new int[] {mUid, UserHandle.PER_USER_RANGE + 1};
+
+        mService.handleOnPackageChanged(false, USER_SYSTEM, pkgs, uids);
+
+        verify(mHistoryManager, never()).onPackageRemoved(anyInt(), anyString());
+
+        mService.handleOnPackageChanged(true, USER_SYSTEM, pkgs, uids);
+
+        verify(mHistoryManager, times(1)).onPackageRemoved(UserHandle.getUserId(uids[0]), pkgs[0]);
+        verify(mHistoryManager, times(1)).onPackageRemoved(UserHandle.getUserId(uids[1]), pkgs[1]);
+    }
+
+    @Test
+    public void testNotificationHistory_addNoisyNotification() throws Exception {
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel,
+                null /* tvExtender */, false);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.sbn.getTag(),
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        verify(mHistoryManager, times(1)).addNotification(any());
+    }
 }

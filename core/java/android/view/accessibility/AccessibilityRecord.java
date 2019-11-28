@@ -18,6 +18,7 @@ package android.view.accessibility;
 
 import static com.android.internal.util.CollectionUtils.isEmpty;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcelable;
@@ -113,10 +114,20 @@ public class AccessibilityRecord {
 
     int mConnectionId = UNDEFINED;
 
-    /*
-     * Hide constructor.
+    /**
+     * Creates a new {@link AccessibilityRecord}.
      */
-    AccessibilityRecord() {
+    public AccessibilityRecord() {
+    }
+
+    /**
+     * Copy constructor. Creates a new {@link AccessibilityRecord}, and this instance is initialized
+     * with data from the given <code>record</code>.
+     *
+     * @param record The other record.
+     */
+    public AccessibilityRecord(@NonNull AccessibilityRecord record) {
+        init(record);
     }
 
     /**
@@ -790,6 +801,9 @@ public class AccessibilityRecord {
      * instantiated. The instance is initialized with data from the
      * given record.
      *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityRecord(AccessibilityRecord)} instead.
+     *
      * @return An instance.
      */
     public static AccessibilityRecord obtain(AccessibilityRecord record) {
@@ -801,6 +815,9 @@ public class AccessibilityRecord {
     /**
      * Returns a cached instance if such is available or a new one is
      * instantiated.
+     *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityRecord()} instead.
      *
      * @return An instance.
      */
@@ -822,6 +839,8 @@ public class AccessibilityRecord {
      * Return an instance back to be reused.
      * <p>
      * <strong>Note:</strong> You must not touch the object after calling this function.
+     *
+     * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
      *
      * @throws IllegalStateException If the record is already recycled.
      */

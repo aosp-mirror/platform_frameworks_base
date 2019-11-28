@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"ଆଡମିନ୍‍ ଆପ୍‍ ନାହିଁ କିମ୍ବା ଭୁଲ ଅଛି। ଫଳସ୍ୱରୂପ, ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍‍ ଏବଂ ସମ୍ବନ୍ଧୀୟ ଡାଟା ଡିଲିଟ୍ କରାଯାଇଛି। ସହାୟତା ପାଇଁ ଆପଣଙ୍କ ଆଡମିନଙ୍କୁ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ଏହି ଡିଭାଇସରେ ଆପଣଙ୍କ ୱର୍କ ପ୍ରୋଫାଇଲ୍‍ ଆଉ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"ବହୁତ ଥର ଭୁଲ ପାସ୍‌ୱର୍ଡ ଲେଖିଛନ୍ତି"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"ଡିଭାଇସକୁ ପରିଚାଳନା କରାଯାଉଛି"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ଆପଣଙ୍କ ସଂସ୍ଥା ଏହି ଡିଭାଇସକୁ ପରିଚାଳନା କରନ୍ତି ଏବଂ ନେଟୱର୍କ ଟ୍ରାଫିକ୍‍ ନୀରିକ୍ଷଣ କରନ୍ତି। ବିବରଣୀ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ବର୍ତ୍ତମାନ ଲିଭାଯିବ"</string>
@@ -1116,10 +1118,8 @@
     <string name="loading" msgid="3138021523725055037">"ଲୋଡ୍ କରାଯାଉଛି…"</string>
     <string name="capital_on" msgid="2770685323900821829">"ଅନ୍"</string>
     <string name="capital_off" msgid="7443704171014626777">"ଅଫ୍"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"ଯାଞ୍ଚ ହୋଇଛି"</string>
+    <string name="not_checked" msgid="7972320087569023342">"ଯାଞ୍ଚ ହୋଇନାହିଁ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"ବ୍ୟବହାର କରି କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s ବ୍ୟବହାର କରି କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ"</string>
@@ -2004,6 +2004,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"ଦୁଇଟି ସ୍କ୍ରିନ୍ ମଧ୍ୟରେ ଟୋଗଲ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ସ୍କ୍ରିନ୍ ଲକ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ସ୍କ୍ରି‍ନ୍‍ସଟ୍ ନିଅନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_freeform_caption (7873194416838321119) -->
-    <skip />
+    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"ପପ୍-ଅପ୍ ୱିଣ୍ଡୋରେ <xliff:g id="APP_NAME">%1$s</xliff:g> ଆପ୍"</string>
 </resources>

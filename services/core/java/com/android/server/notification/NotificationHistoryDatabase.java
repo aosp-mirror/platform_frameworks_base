@@ -183,6 +183,7 @@ public class NotificationHistoryDatabase {
     public NotificationHistory readNotificationHistory() {
         synchronized (mLock) {
             NotificationHistory notifications = new NotificationHistory();
+            notifications.addNotificationsToWrite(mBuffer);
 
             for (AtomicFile file : mHistoryFiles) {
                 try {
@@ -223,6 +224,13 @@ public class NotificationHistoryDatabase {
         }
     }
 
+    public void disableHistory() {
+        synchronized (mLock) {
+            mHistoryDir.delete();
+            mHistoryFiles.clear();
+        }
+    }
+
     /**
      * Remove any files that are too old and schedule jobs to clean up the rest
      */
@@ -241,6 +249,7 @@ public class NotificationHistoryDatabase {
                         Slog.d(TAG, "Removed " + currentOldestFile.getBaseFile().getName());
                     }
                     currentOldestFile.delete();
+                    // TODO: delete all relevant bitmaps, once they exist
                     mHistoryFiles.removeLast();
                 } else {
                     // all remaining files are newer than the cut off; schedule jobs to delete

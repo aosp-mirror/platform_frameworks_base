@@ -296,14 +296,42 @@ public class UserGridRecyclerView extends RecyclerView {
             }
         }
 
+        /**
+         * Get the maximum number of real (non-guest, non-managed profile) users that can be created
+         * on the device. This is a dynamic value and it decreases with the increase of the number
+         * of managed profiles on the device.
+         *
+         * <p> It excludes system user in headless system user model.
+         *
+         * @return Maximum number of real users that can be created.
+         */
+        private int getMaxSupportedRealUsers() {
+            int maxSupportedUsers = UserManager.getMaxSupportedUsers();
+            if (UserManager.isHeadlessSystemUserMode()) {
+                maxSupportedUsers -= 1;
+            }
+
+            List<UserInfo> users = mUserManager.getUsers(/* excludeDying= */ true);
+
+            // Count all users that are managed profiles of another user.
+            int managedProfilesCount = 0;
+            for (UserInfo user : users) {
+                if (user.isManagedProfile()) {
+                    managedProfilesCount++;
+                }
+            }
+
+            return maxSupportedUsers - managedProfilesCount;
+        }
+
         private void showMaxUserLimitReachedDialog() {
             AlertDialog maxUsersDialog = new Builder(mContext,
                     com.android.internal.R.style.Theme_DeviceDefault_Dialog_Alert)
                     .setTitle(R.string.user_limit_reached_title)
                     .setMessage(getResources().getQuantityString(
                             R.plurals.user_limit_reached_message,
-                            mCarUserManagerHelper.getMaxSupportedRealUsers(),
-                            mCarUserManagerHelper.getMaxSupportedRealUsers()))
+                            getMaxSupportedRealUsers(),
+                            getMaxSupportedRealUsers()))
                     .setPositiveButton(android.R.string.ok, null)
                     .create();
             // Sets window flags for the SysUI dialog

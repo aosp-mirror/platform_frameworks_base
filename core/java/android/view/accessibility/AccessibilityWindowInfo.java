@@ -119,12 +119,19 @@ public final class AccessibilityWindowInfo implements Parcelable {
 
     private int mConnectionId = UNDEFINED_WINDOW_ID;
 
-    private AccessibilityWindowInfo() {
-        /* do nothing - hide constructor */
+    /**
+     * Creates a new {@link AccessibilityWindowInfo}.
+     */
+    public AccessibilityWindowInfo() {
     }
 
-    /** @hide */
-    AccessibilityWindowInfo(AccessibilityWindowInfo info) {
+    /**
+     * Copy constructor. Creates a new {@link AccessibilityWindowInfo}, and this new instance is
+     * initialized from given <code>info</code>.
+     *
+     * @param info The other info.
+     */
+    public AccessibilityWindowInfo(@NonNull AccessibilityWindowInfo info) {
         init(info);
     }
 
@@ -469,6 +476,9 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * Returns a cached instance if such is available or a new one is
      * created.
      *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityWindowInfo()} instead.
+     *
      * @return An instance.
      */
     public static AccessibilityWindowInfo obtain() {
@@ -486,6 +496,9 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * Returns a cached instance if such is available or a new one is
      * created. The returned instance is initialized from the given
      * <code>info</code>.
+     *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityWindowInfo(AccessibilityWindowInfo)} instead.
      *
      * @param info The other info.
      * @return An instance.
@@ -513,6 +526,8 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * <p>
      * <strong>Note:</strong> You must not touch the object after calling this function.
      * </p>
+     *
+     * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
      *
      * @throws IllegalStateException If the info is already recycled.
      */

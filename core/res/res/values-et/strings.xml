@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"Tööprofiili administraatori rakendus puudub või on rikutud. Seetõttu on teie tööprofiil ja seotud andmed kustutatud. Abi saamiseks võtke ühendust administraatoriga."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"Teie tööprofiil pole selles seadmes enam saadaval"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Liiga palju paroolikatseid"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"Seade on hallatud"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Teie organisatsioon haldab seda seadet ja võib jälgida võrguliiklust. Puudutage üksikasjade vaatamiseks."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Seade kustutatakse"</string>
@@ -1116,10 +1118,8 @@
     <string name="loading" msgid="3138021523725055037">"Laadimine ..."</string>
     <string name="capital_on" msgid="2770685323900821829">"SEES"</string>
     <string name="capital_off" msgid="7443704171014626777">"VÄLJAS"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"märgitud"</string>
+    <string name="not_checked" msgid="7972320087569023342">"märkimata"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Lõpetage toiming rakendusega"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Toimingu lõpetamine, kasutades rakendust %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Vii toiming lõpule"</string>
@@ -2004,6 +2004,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"Vaheta jagatud ekraanikuva"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lukustuskuva"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Ekraanipilt"</string>
-    <!-- no translation found for accessibility_freeform_caption (7873194416838321119) -->
-    <skip />
+    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"Rakendus <xliff:g id="APP_NAME">%1$s</xliff:g> on hüpikaknas."</string>
 </resources>

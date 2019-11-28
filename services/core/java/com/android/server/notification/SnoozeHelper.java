@@ -374,9 +374,6 @@ public class SnoozeHelper {
             return;
         }
         NotificationRecord existing = pkgRecords.get(record.getKey());
-        if (existing != null && existing.isCanceled) {
-            return;
-        }
         pkgRecords.put(record.getKey(), record);
     }
 

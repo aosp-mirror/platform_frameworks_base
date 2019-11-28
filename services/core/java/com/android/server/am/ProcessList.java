@@ -1421,7 +1421,7 @@ public final class ProcessList {
         if (app.pendingStart) {
             return true;
         }
-        long startTime = SystemClock.elapsedRealtime();
+        long startTime = SystemClock.uptimeMillis();
         if (app.pid > 0 && app.pid != ActivityManagerService.MY_PID) {
             checkSlow(startTime, "startProcess: removing from pids map");
             mService.mPidsSelfLocked.remove(app);
@@ -1856,7 +1856,7 @@ public final class ProcessList {
             boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
-        long startTime = SystemClock.elapsedRealtime();
+        long startTime = SystemClock.uptimeMillis();
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(processName, info.uid, keepIfLarge);
@@ -1917,10 +1917,9 @@ public final class ProcessList {
             // An application record is attached to a previous process,
             // clean it up now.
             if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES, "App died: " + app);
-            checkSlow(startTime, "startProcess: bad proc running, killing");
             ProcessList.killProcessGroup(app.uid, app.pid);
-            mService.handleAppDiedLocked(app, true, true);
-            checkSlow(startTime, "startProcess: done killing old proc");
+            mService.waitForProcKillLocked(app, "startProcess: bad proc running, killing: %s",
+                    startTime);
         }
 
         if (app == null) {

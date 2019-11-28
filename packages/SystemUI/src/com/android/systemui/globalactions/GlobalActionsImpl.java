@@ -17,9 +17,11 @@ package com.android.systemui.globalactions;
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.app.Dialog;
-import android.app.KeyguardManager;
 import android.content.Context;
+import android.os.PowerManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -134,19 +136,51 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks,
 
         int color = Utils.getColorAttrDefaultColor(mContext,
                 com.android.systemui.R.attr.wallpaperTextColor);
-        boolean onKeyguard = mContext.getSystemService(
-                KeyguardManager.class).isKeyguardLocked();
 
         ProgressBar bar = d.findViewById(R.id.progress);
         bar.getIndeterminateDrawable().setTint(color);
-        TextView message = d.findViewById(R.id.text1);
-        message.setTextColor(color);
-        if (isReboot) message.setText(R.string.reboot_to_reset_message);
+
+        TextView reasonView = d.findViewById(R.id.text1);
+        TextView messageView = d.findViewById(R.id.text2);
+
+        reasonView.setTextColor(color);
+        messageView.setTextColor(color);
+
+        messageView.setText(getRebootMessage(isReboot, reason));
+        String rebootReasonMessage = getReasonMessage(reason);
+        if (rebootReasonMessage != null) {
+            reasonView.setVisibility(View.VISIBLE);
+            reasonView.setText(rebootReasonMessage);
+        }
 
         GradientColors colors = Dependency.get(SysuiColorExtractor.class).getNeutralColors();
         background.setColor(colors.getMainColor(), false);
 
         d.show();
+    }
+
+    @StringRes
+    private int getRebootMessage(boolean isReboot, @Nullable String reason) {
+        if (reason != null && reason.startsWith(PowerManager.REBOOT_RECOVERY_UPDATE)) {
+            return R.string.reboot_to_update_reboot;
+        } else if (reason != null && reason.equals(PowerManager.REBOOT_RECOVERY)) {
+            return R.string.reboot_to_reset_message;
+        } else if (isReboot) {
+            return R.string.reboot_to_reset_message;
+        } else {
+            return R.string.shutdown_progress;
+        }
+    }
+
+    @Nullable
+    private String getReasonMessage(@Nullable String reason) {
+        if (reason != null && reason.startsWith(PowerManager.REBOOT_RECOVERY_UPDATE)) {
+            return mContext.getString(R.string.reboot_to_update_title);
+        } else if (reason != null && reason.equals(PowerManager.REBOOT_RECOVERY)) {
+            return mContext.getString(R.string.reboot_to_reset_title);
+        } else {
+            return null;
+        }
     }
 
     @Override

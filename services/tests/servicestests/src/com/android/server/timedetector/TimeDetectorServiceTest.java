@@ -28,6 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -90,6 +91,19 @@ public class TimeDetectorServiceTest {
     }
 
     @Test
+    public void testSuggestManualTime() {
+        doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+
+        ManualTimeSuggestion manualTimeSuggestion = createManualTimeSuggestion();
+        mTimeDetectorService.suggestManualTime(manualTimeSuggestion);
+
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.SET_TIME),
+                anyString());
+        mStubbedTimeDetectorStrategy.verifySuggestManualTimeCalled(manualTimeSuggestion);
+    }
+
+    @Test
     public void testDump() {
         when(mMockContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
@@ -102,13 +116,13 @@ public class TimeDetectorServiceTest {
 
     @Test
     public void testAutoTimeDetectionToggle() {
-        when(mMockCallback.isTimeDetectionEnabled()).thenReturn(true);
+        when(mMockCallback.isAutoTimeDetectionEnabled()).thenReturn(true);
 
         mTimeDetectorService.handleAutoTimeDetectionToggle();
 
         mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionToggleCalled(true);
 
-        when(mMockCallback.isTimeDetectionEnabled()).thenReturn(false);
+        when(mMockCallback.isAutoTimeDetectionEnabled()).thenReturn(false);
 
         mTimeDetectorService.handleAutoTimeDetectionToggle();
 
@@ -117,14 +131,22 @@ public class TimeDetectorServiceTest {
 
     private static PhoneTimeSuggestion createPhoneTimeSuggestion() {
         int phoneId = 1234;
+        PhoneTimeSuggestion suggestion = new PhoneTimeSuggestion(phoneId);
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
-        return new PhoneTimeSuggestion(phoneId, timeValue);
+        suggestion.setUtcTime(timeValue);
+        return suggestion;
+    }
+
+    private static ManualTimeSuggestion createManualTimeSuggestion() {
+        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        return new ManualTimeSuggestion(timeValue);
     }
 
     private static class StubbedTimeDetectorStrategy implements TimeDetectorStrategy {
 
         // Call tracking.
         private PhoneTimeSuggestion mLastPhoneSuggestion;
+        private ManualTimeSuggestion mLastManualSuggestion;
         private Boolean mLastAutoTimeDetectionToggle;
         private boolean mDumpCalled;
 
@@ -136,6 +158,12 @@ public class TimeDetectorServiceTest {
         public void suggestPhoneTime(PhoneTimeSuggestion timeSuggestion) {
             resetCallTracking();
             mLastPhoneSuggestion = timeSuggestion;
+        }
+
+        @Override
+        public void suggestManualTime(ManualTimeSuggestion timeSuggestion) {
+            resetCallTracking();
+            mLastManualSuggestion = timeSuggestion;
         }
 
         @Override
@@ -152,12 +180,17 @@ public class TimeDetectorServiceTest {
 
         void resetCallTracking() {
             mLastPhoneSuggestion = null;
+            mLastManualSuggestion = null;
             mLastAutoTimeDetectionToggle = null;
             mDumpCalled = false;
         }
 
-        void verifySuggestPhoneTimeCalled(PhoneTimeSuggestion expectedSignal) {
-            assertEquals(expectedSignal, mLastPhoneSuggestion);
+        void verifySuggestPhoneTimeCalled(PhoneTimeSuggestion expectedSuggestion) {
+            assertEquals(expectedSuggestion, mLastPhoneSuggestion);
+        }
+
+        public void verifySuggestManualTimeCalled(ManualTimeSuggestion expectedSuggestion) {
+            assertEquals(expectedSuggestion, mLastManualSuggestion);
         }
 
         void verifyHandleAutoTimeDetectionToggleCalled(boolean expectedEnable) {

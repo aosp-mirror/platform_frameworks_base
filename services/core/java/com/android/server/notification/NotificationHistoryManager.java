@@ -21,9 +21,16 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.UserInfo;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -49,6 +56,8 @@ public class NotificationHistoryManager {
 
     private final Context mContext;
     private final UserManager mUserManager;
+    @VisibleForTesting
+    final SettingsObserver mSettingsObserver;
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final SparseArray<NotificationHistoryDatabase> mUserState = new SparseArray<>();
@@ -57,19 +66,26 @@ public class NotificationHistoryManager {
     // TODO: does this need to be persisted across reboots?
     @GuardedBy("mLock")
     private final SparseArray<List<String>> mUserPendingPackageRemovals = new SparseArray<>();
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mHistoryEnabled = new SparseBooleanArray();
 
-    public NotificationHistoryManager(Context context) {
+    public NotificationHistoryManager(Context context, Handler handler) {
         mContext = context;
         mUserManager = context.getSystemService(UserManager.class);
+        mSettingsObserver = new SettingsObserver(handler);
     }
 
-    public void onUserUnlocked(@UserIdInt int userId) {
+    void onBootPhaseAppsCanStart() {
+        mSettingsObserver.observe();
+    }
+
+    void onUserUnlocked(@UserIdInt int userId) {
         synchronized (mLock) {
             mUserUnlockedStates.put(userId, true);
             final NotificationHistoryDatabase userHistory =
                     getUserHistoryAndInitializeIfNeededLocked(userId);
             if (userHistory == null) {
-                Slog.i(TAG, "Attempted to unlock stopped or removed user " + userId);
+                Slog.i(TAG, "Attempted to unlock gone/disabled user " + userId);
                 return;
             }
 
@@ -81,6 +97,11 @@ public class NotificationHistoryManager {
                 }
                 mUserPendingPackageRemovals.put(userId, null);
             }
+
+            // delete history if it was disabled when the user was locked
+            if (!mHistoryEnabled.get(userId)) {
+                userHistory.disableHistory();
+            }
         }
     }
 
@@ -91,22 +112,25 @@ public class NotificationHistoryManager {
         }
     }
 
-    void onUserRemoved(@UserIdInt int userId) {
+    public void onUserRemoved(@UserIdInt int userId) {
         synchronized (mLock) {
             // Actual data deletion is handled by other parts of the system (the entire directory is
             // removed) - we just need clean up our internal state for GC
             mUserPendingPackageRemovals.put(userId, null);
+            mHistoryEnabled.put(userId, false);
             onUserStopped(userId);
         }
     }
 
-    void onPackageRemoved(int userId, String packageName) {
+    public void onPackageRemoved(int userId, String packageName) {
         synchronized (mLock) {
             if (!mUserUnlockedStates.get(userId, false)) {
-                List<String> userPendingRemovals =
-                        mUserPendingPackageRemovals.get(userId, new ArrayList<>());
-                userPendingRemovals.add(packageName);
-                mUserPendingPackageRemovals.put(userId, userPendingRemovals);
+                if (mHistoryEnabled.get(userId, false)) {
+                    List<String> userPendingRemovals =
+                            mUserPendingPackageRemovals.get(userId, new ArrayList<>());
+                    userPendingRemovals.add(packageName);
+                    mUserPendingPackageRemovals.put(userId, userPendingRemovals);
+                }
                 return;
             }
             final NotificationHistoryDatabase userHistory = mUserState.get(userId);
@@ -118,7 +142,8 @@ public class NotificationHistoryManager {
         }
     }
 
-    void triggerWriteToDisk() {
+    // TODO: wire this up to AMS when power button is long pressed
+    public void triggerWriteToDisk() {
         synchronized (mLock) {
             final int userCount = mUserState.size();
             for (int i = 0; i < userCount; i++) {
@@ -139,7 +164,7 @@ public class NotificationHistoryManager {
             final NotificationHistoryDatabase userHistory =
                     getUserHistoryAndInitializeIfNeededLocked(notification.getUserId());
             if (userHistory == null) {
-                Slog.w(TAG, "Attempted to add notif for locked/gone user "
+                Slog.w(TAG, "Attempted to add notif for locked/gone/disabled user "
                         + notification.getUserId());
                 return;
             }
@@ -157,7 +182,7 @@ public class NotificationHistoryManager {
                 final NotificationHistoryDatabase userHistory =
                         getUserHistoryAndInitializeIfNeededLocked(userId);
                 if (userHistory == null) {
-                    Slog.i(TAG, "Attempted to read history for locked/gone user " +userId);
+                    Slog.i(TAG, "Attempted to read history for locked/gone/disabled user " +userId);
                     continue;
                 }
                 mergedHistory.addNotificationsToWrite(userHistory.readNotificationHistory());
@@ -172,7 +197,7 @@ public class NotificationHistoryManager {
             final NotificationHistoryDatabase userHistory =
                     getUserHistoryAndInitializeIfNeededLocked(userId);
             if (userHistory == null) {
-                Slog.i(TAG, "Attempted to read history for locked/gone user " +userId);
+                Slog.i(TAG, "Attempted to read history for locked/gone/disabled user " +userId);
                 return new android.app.NotificationHistory();
             }
 
@@ -180,9 +205,38 @@ public class NotificationHistoryManager {
         }
     }
 
+    boolean isHistoryEnabled(@UserIdInt int userId) {
+        synchronized (mLock) {
+            return mHistoryEnabled.get(userId);
+        }
+    }
+
+    void onHistoryEnabledChanged(@UserIdInt int userId, boolean historyEnabled) {
+        synchronized (mLock) {
+            mHistoryEnabled.put(userId, historyEnabled);
+
+            // These requests might fail if the user is locked; onUserUnlocked will pick up those
+            // cases
+            final NotificationHistoryDatabase userHistory =
+                    getUserHistoryAndInitializeIfNeededLocked(userId);
+            if (userHistory != null) {
+                if (!historyEnabled) {
+                    userHistory.disableHistory();
+                }
+            }
+        }
+    }
+
     @GuardedBy("mLock")
     private @Nullable NotificationHistoryDatabase getUserHistoryAndInitializeIfNeededLocked(
             int userId) {
+        if (!mHistoryEnabled.get(userId)) {
+            if (DEBUG) {
+                Slog.i(TAG, "History disabled for user " + userId);
+            }
+            mUserState.put(userId, null);
+            return null;
+        }
         NotificationHistoryDatabase userHistory = mUserState.get(userId);
         if (userHistory == null) {
             final File historyDir = new File(Environment.getDataSystemCeDirectory(userId),
@@ -240,6 +294,41 @@ public class NotificationHistoryManager {
     List<String> getPendingPackageRemovalsForUser(@UserIdInt int userId) {
         synchronized (mLock) {
             return mUserPendingPackageRemovals.get(userId);
+        }
+    }
+
+    final class SettingsObserver extends ContentObserver {
+        private final Uri NOTIFICATION_HISTORY_URI
+                = Settings.Secure.getUriFor(Settings.Secure.NOTIFICATION_HISTORY_ENABLED);
+
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(NOTIFICATION_HISTORY_URI,
+                    false, this, UserHandle.USER_ALL);
+            synchronized (mLock) {
+                for (UserInfo userInfo : mUserManager.getUsers()) {
+                    update(null, userInfo.id);
+                }
+            }
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri, int userId) {
+            update(uri, userId);
+        }
+
+        public void update(Uri uri, int userId) {
+            ContentResolver resolver = mContext.getContentResolver();
+            if (uri == null || NOTIFICATION_HISTORY_URI.equals(uri)) {
+                boolean historyEnabled = Settings.Secure.getIntForUser(resolver,
+                        Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, userId)
+                        != 0;
+                onHistoryEnabledChanged(userId, historyEnabled);
+            }
         }
     }
 }

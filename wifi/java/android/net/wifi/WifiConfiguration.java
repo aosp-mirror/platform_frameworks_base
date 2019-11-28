@@ -1984,8 +1984,8 @@ public class WifiConfiguration implements Parcelable {
     public boolean isLinked(WifiConfiguration config) {
         if (config != null) {
             if (config.linkedConfigurations != null && linkedConfigurations != null) {
-                if (config.linkedConfigurations.get(configKey()) != null
-                        && linkedConfigurations.get(config.configKey()) != null) {
+                if (config.linkedConfigurations.get(getKey()) != null
+                        && linkedConfigurations.get(config.getKey()) != null) {
                     return true;
                 }
             }
@@ -2344,31 +2344,18 @@ public class WifiConfiguration implements Parcelable {
         return KeyMgmt.NONE;
     }
 
-    /* @hide
-     * Cache the config key, this seems useful as a speed up since a lot of
-     * lookups in the config store are done and based on this key.
+    /**
+     * Return a String that can be used to uniquely identify this WifiConfiguration.
+     * <br />
+     * Note: Do not persist this value! This value is not guaranteed to remain backwards compatible.
      */
-    String mCachedConfigKey;
-
-    /** @hide
-     *  return the string used to calculate the hash in WifiConfigStore
-     *  and uniquely identify this WifiConfiguration
-     */
-    public String configKey(boolean allowCached) {
-        String key;
-        if (allowCached && mCachedConfigKey != null) {
-            key = mCachedConfigKey;
-        } else if (providerFriendlyName != null) {
-            key = FQDN + KeyMgmt.strings[KeyMgmt.WPA_EAP];
-            if (!shared) {
-                key += "-" + Integer.toString(UserHandle.getUserId(creatorUid));
-            }
-        } else {
-            key = getSsidAndSecurityTypeString();
-            if (!shared) {
-                key += "-" + Integer.toString(UserHandle.getUserId(creatorUid));
-            }
-            mCachedConfigKey = key;
+    @NonNull
+    public String getKey() {
+        String key = providerFriendlyName == null
+                ? getSsidAndSecurityTypeString()
+                : FQDN + KeyMgmt.strings[KeyMgmt.WPA_EAP];
+        if (!shared) {
+            key += "-" + UserHandle.getUserId(creatorUid);
         }
         return key;
     }
@@ -2395,13 +2382,6 @@ public class WifiConfiguration implements Parcelable {
             key = SSID + KeyMgmt.strings[KeyMgmt.NONE];
         }
         return key;
-    }
-
-    /** @hide
-     * get configKey, force calculating the config string
-     */
-    public String configKey() {
-        return configKey(false);
     }
 
     /** @hide */
@@ -2589,7 +2569,6 @@ public class WifiConfiguration implements Parcelable {
                 linkedConfigurations = new HashMap<String, Integer>();
                 linkedConfigurations.putAll(source.linkedConfigurations);
             }
-            mCachedConfigKey = null; //force null configKey
             validatedInternetAccess = source.validatedInternetAccess;
             isLegacyPasspointConfig = source.isLegacyPasspointConfig;
             ephemeral = source.ephemeral;

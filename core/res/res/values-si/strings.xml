@@ -188,6 +188,8 @@
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"කාර්යාල පැතිකඩ පාලක යෙදුම නොමැති හෝ දූෂණය වී ඇත. ප්‍රතිඵලයක් ලෙස ඔබගේ කාර්යාල පැතිකඩ සහ අදාළ දත්ත මකා දමා ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කර ගන්න."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"ඔබේ කාර්යාල පැතිකඩ මෙම උපාංගය මත තවදුරටත් ලබා ගැනීමට නොහැකිය"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"මුරපද උත්සාහ කිරීම් ඉතා වැඩි ගණනකි"</string>
+    <!-- no translation found for device_ownership_relinquished (4080886992183195724) -->
+    <skip />
     <string name="network_logging_notification_title" msgid="554983187553845004">"උපාංගය කළමනාකරණය කෙරේ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ඔබගේ ආයතනය මෙම උපාංගය කළමනාකරණය කරන අතර එය ජාල තදබදය නිරීක්ෂණය කළ හැක. විස්තර සඳහා තට්ටු කරන්න."</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
@@ -1118,10 +1120,8 @@
     <string name="loading" msgid="3138021523725055037">"පූරණය වෙමින්..."</string>
     <string name="capital_on" msgid="2770685323900821829">"සක්‍රීයයි"</string>
     <string name="capital_off" msgid="7443704171014626777">"ක්‍රියාවිරහිතයි"</string>
-    <!-- no translation found for checked (9179896827054513119) -->
-    <skip />
-    <!-- no translation found for not_checked (7972320087569023342) -->
-    <skip />
+    <string name="checked" msgid="9179896827054513119">"පරීක්ෂා කර ඇත"</string>
+    <string name="not_checked" msgid="7972320087569023342">"පරීක්ෂා කර නැත"</string>
     <string name="whichApplication" msgid="5432266899591255759">"පහත භාවිතයෙන් ක්‍රියාව සම්පූර්ණ කරන්න"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s භාවිතා කරමින් ක්‍රියාව සම්පුර්ණ කරන්න"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ක්‍රියාව සම්පූර්ණ කරන්න"</string>
@@ -2006,6 +2006,5 @@
     <string name="accessibility_system_action_toggle_split_screen_label" msgid="6626177163849387748">"බෙදුම් තිරය ටොගල කරන්න"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"අගුලු තිරය"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"තිර රුව"</string>
-    <!-- no translation found for accessibility_freeform_caption (7873194416838321119) -->
-    <skip />
+    <string name="accessibility_freeform_caption" msgid="7873194416838321119">"උත්පතන කවුළුව තුළ <xliff:g id="APP_NAME">%1$s</xliff:g> යෙදුම."</string>
 </resources>

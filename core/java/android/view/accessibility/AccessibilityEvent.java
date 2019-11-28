@@ -17,6 +17,7 @@
 package android.view.accessibility;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -796,10 +797,32 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     private ArrayList<AccessibilityRecord> mRecords;
 
-    /*
-     * Hide constructor from clients.
+    /**
+     * Creates a new {@link AccessibilityEvent}.
      */
-    private AccessibilityEvent() {
+    public AccessibilityEvent() {
+        if (DEBUG_ORIGIN) originStackTrace = Thread.currentThread().getStackTrace();
+    }
+
+
+    /**
+     * Creates a new {@link AccessibilityEvent} with the given <code>eventType</code>.
+     *
+     * @param eventType The event type.
+     */
+    public AccessibilityEvent(int eventType) {
+        mEventType = eventType;
+        if (DEBUG_ORIGIN) originStackTrace = Thread.currentThread().getStackTrace();
+    }
+
+    /**
+     * Copy constructor. Creates a new {@link AccessibilityEvent}, and this instance is initialized
+     * from the given <code>event</code>.
+     *
+     * @param event The other event.
+     */
+    public AccessibilityEvent(@NonNull AccessibilityEvent event) {
+        init(event);
     }
 
     /**
@@ -816,6 +839,15 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mWindowChangeTypes = event.mWindowChangeTypes;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
+        if (event.mRecords != null) {
+            final int recordCount = event.mRecords.size();
+            mRecords = new ArrayList<>(recordCount);
+            for (int i = 0; i < recordCount; i++) {
+                final AccessibilityRecord record = event.mRecords.get(i);
+                final AccessibilityRecord recordClone = new AccessibilityRecord(record);
+                mRecords.add(recordClone);
+            }
+        }
         if (DEBUG_ORIGIN) originStackTrace = event.originStackTrace;
     }
 
@@ -1109,6 +1141,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Returns a cached instance if such is available or a new one is
      * instantiated with its type property set.
      *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityEvent(int)} instead.
+     *
      * @param eventType The event type.
      * @return An instance.
      */
@@ -1123,29 +1158,24 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * created. The returned instance is initialized from the given
      * <code>event</code>.
      *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityEvent(AccessibilityEvent)} instead.
+     *
      * @param event The other event.
      * @return An instance.
      */
     public static AccessibilityEvent obtain(AccessibilityEvent event) {
         AccessibilityEvent eventClone = AccessibilityEvent.obtain();
         eventClone.init(event);
-
-        if (event.mRecords != null) {
-            final int recordCount = event.mRecords.size();
-            eventClone.mRecords = new ArrayList<AccessibilityRecord>(recordCount);
-            for (int i = 0; i < recordCount; i++) {
-                final AccessibilityRecord record = event.mRecords.get(i);
-                final AccessibilityRecord recordClone = AccessibilityRecord.obtain(record);
-                eventClone.mRecords.add(recordClone);
-            }
-        }
-
         return eventClone;
     }
 
     /**
      * Returns a cached instance if such is available or a new one is
      * instantiated.
+     *
+     * <p>In most situations object pooling is not beneficial. Create a new instance using the
+     * constructor {@link #AccessibilityEvent()} instead.
      *
      * @return An instance.
      */
@@ -1161,6 +1191,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * <p>
      *   <b>Note: You must not touch the object after calling this function.</b>
      * </p>
+     *
+     * <p>In most situations object pooling is not beneficial, and recycling is not necessary.
      *
      * @throws IllegalStateException If the event is already recycled.
      */

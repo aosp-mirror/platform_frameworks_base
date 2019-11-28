@@ -1034,7 +1034,7 @@ stubs_defaults {
         "sdk-dir",
         "api-versions-jars-dir",
     ],
-    previous_api: ":last-released-public-api-for-metalava-annotations",
+    previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
         "metalava-manual",
     ],
@@ -1091,7 +1091,7 @@ stubs_defaults {
     libs: ["framework-internal-utils"],
     installable: false,
     annotations_enabled: true,
-    previous_api: ":last-released-public-api-for-metalava-annotations",
+    previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
         "metalava-manual",
     ],
@@ -1427,7 +1427,7 @@ droidstubs {
     installable: false,
     sdk_version: "core_platform",
     annotations_enabled: true,
-    previous_api: ":last-released-public-api-for-metalava-annotations",
+    previous_api: ":last-released-public-api",
     merge_annotations_dirs: [
         "metalava-manual",
     ],
@@ -1613,7 +1613,6 @@ filegroup {
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/TimeUtils.java",
         "core/java/com/android/internal/os/SomeArgs.java",
-        "core/java/com/android/internal/util/DumpUtils.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
@@ -1630,8 +1629,10 @@ filegroup {
 filegroup {
     name: "framework-cellbroadcast-shared-srcs",
     srcs: [
+        "core/java/android/os/HandlerExecutor.java",
         "core/java/android/util/LocalLog.java",
-        "core/java/android/util/Slog.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/Preconditions.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
     ],

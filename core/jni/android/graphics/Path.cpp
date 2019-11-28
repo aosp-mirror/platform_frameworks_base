@@ -419,7 +419,7 @@ public:
         float errorSquared = acceptableError * acceptableError;
         float errorConic = acceptableError / 2; // somewhat arbitrary
 
-        while ((verb = pathIter.next(points, false)) != SkPath::kDone_Verb) {
+        while ((verb = pathIter.next(points)) != SkPath::kDone_Verb) {
             createVerbSegments(pathIter, verb, points, segmentPoints, lengths,
                     errorSquared, errorConic);
         }

@@ -34,7 +34,7 @@ import java.util.ArrayList;
  */
 public final class GnssStatus {
 
-    // these must match the definitions in gps.h
+    // These must match the definitions in GNSS HAL.
     //
     // Note: these constants are also duplicated in GnssStatusCompat.java in the androidx support
     // library. if adding a constellation, please update that file as well.
@@ -63,9 +63,10 @@ public final class GnssStatus {
     private static final int SVID_FLAGS_HAS_ALMANAC_DATA = (1 << 1);
     private static final int SVID_FLAGS_USED_IN_FIX = (1 << 2);
     private static final int SVID_FLAGS_HAS_CARRIER_FREQUENCY = (1 << 3);
+    private static final int SVID_FLAGS_HAS_BASEBAND_CN0 = (1 << 4);
 
-    private static final int SVID_SHIFT_WIDTH = 8;
-    private static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 4;
+    private static final int SVID_SHIFT_WIDTH = 12;
+    private static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 8;
     private static final int CONSTELLATION_TYPE_MASK = 0xf;
 
     /**
@@ -123,9 +124,10 @@ public final class GnssStatus {
      */
     @NonNull
     public static GnssStatus wrap(int svCount, int[] svidWithFlags, float[] cn0DbHzs,
-            float[] elevations, float[] azimuths, float[] carrierFrequencies) {
+            float[] elevations, float[] azimuths, float[] carrierFrequencies,
+            float[] basebandCn0DbHzs) {
         return new GnssStatus(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
-                carrierFrequencies);
+                carrierFrequencies, basebandCn0DbHzs);
     }
 
     private final int mSvCount;
@@ -134,15 +136,17 @@ public final class GnssStatus {
     private final float[] mElevations;
     private final float[] mAzimuths;
     private final float[] mCarrierFrequencies;
+    private final float[] mBasebandCn0DbHzs;
 
     private GnssStatus(int svCount, int[] svidWithFlags, float[] cn0DbHzs, float[] elevations,
-            float[] azimuths, float[] carrierFrequencies) {
+            float[] azimuths, float[] carrierFrequencies, float[] basebandCn0DbHzs) {
         mSvCount = svCount;
         mSvidWithFlags = svidWithFlags;
         mCn0DbHzs = cn0DbHzs;
         mElevations = elevations;
         mAzimuths = azimuths;
         mCarrierFrequencies = carrierFrequencies;
+        mBasebandCn0DbHzs = basebandCn0DbHzs;
     }
 
     /**
@@ -284,6 +288,26 @@ public final class GnssStatus {
     }
 
     /**
+     * Reports whether a valid {@link #getBasebandCn0DbHz(int satelliteIndex)} is available.
+     *
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
+     */
+    public boolean hasBasebandCn0DbHz(@IntRange(from = 0) int satelliteIndex) {
+        return (mSvidWithFlags[satelliteIndex] & SVID_FLAGS_HAS_BASEBAND_CN0) != 0;
+    }
+
+    /**
+     * Retrieves the baseband carrier-to-noise density of the satellite at the specified index in
+     * dB-Hz.
+     *
+     * @param satelliteIndex An index from zero to {@link #getSatelliteCount()} - 1
+     */
+    @FloatRange(from = 0, to = 63)
+    public float getBasebandCn0DbHz(@IntRange(from = 0) int satelliteIndex) {
+        return mBasebandCn0DbHzs[satelliteIndex];
+    }
+
+    /**
      * Returns the string representation of a constellation type.
      *
      * @param constellationType the constellation type.
@@ -334,6 +358,8 @@ public final class GnssStatus {
          * @param usedInFix whether the satellite was used in the most recent location fix
          * @param hasCarrierFrequency whether carrier frequency data is available
          * @param carrierFrequency satellite carrier frequency in Hz
+         * @param hasBasebandCn0DbHz whether baseband carrier-to-noise density is available
+         * @param basebandCn0DbHz baseband carrier-to-noise density in dB-Hz
          */
         @NonNull
         public Builder addSatellite(@ConstellationType int constellationType,
@@ -345,9 +371,12 @@ public final class GnssStatus {
                 boolean hasAlmanac,
                 boolean usedInFix,
                 boolean hasCarrierFrequency,
-                @FloatRange(from = 0) float carrierFrequency) {
+                @FloatRange(from = 0) float carrierFrequency,
+                boolean hasBasebandCn0DbHz,
+                @FloatRange(from = 0, to = 63) float basebandCn0DbHz) {
             mSatellites.add(new GnssSvInfo(constellationType, svid, cn0DbHz, elevation, azimuth,
-                    hasEphemeris, hasAlmanac, usedInFix, hasCarrierFrequency, carrierFrequency));
+                    hasEphemeris, hasAlmanac, usedInFix, hasCarrierFrequency, carrierFrequency,
+                    hasBasebandCn0DbHz, basebandCn0DbHz));
             return this;
         }
 
@@ -371,6 +400,7 @@ public final class GnssStatus {
             float[] elevations = new float[svCount];
             float[] azimuths = new float[svCount];
             float[] carrierFrequencies = new float[svCount];
+            float[] basebandCn0DbHzs = new float[svCount];
 
             for (int i = 0; i < svidWithFlags.length; i++) {
                 svidWithFlags[i] = mSatellites.get(i).mSvidWithFlags;
@@ -387,9 +417,12 @@ public final class GnssStatus {
             for (int i = 0; i < carrierFrequencies.length; i++) {
                 carrierFrequencies[i] = mSatellites.get(i).mCarrierFrequency;
             }
+            for (int i = 0; i < basebandCn0DbHzs.length; i++) {
+                basebandCn0DbHzs[i] = mSatellites.get(i).mBasebandCn0DbHz;
+            }
 
             return wrap(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
-                    carrierFrequencies);
+                    carrierFrequencies, basebandCn0DbHzs);
         }
     }
 
@@ -400,21 +433,25 @@ public final class GnssStatus {
         private final float mElevation;
         private final float mAzimuth;
         private final float mCarrierFrequency;
+        private final float mBasebandCn0DbHz;
 
         private GnssSvInfo(int constellationType, int svid, float cn0DbHz,
                 float elevation, float azimuth, boolean hasEphemeris, boolean hasAlmanac,
-                boolean usedInFix, boolean hasCarrierFrequency, float carrierFrequency) {
+                boolean usedInFix, boolean hasCarrierFrequency, float carrierFrequency,
+                boolean hasBasebandCn0DbHz, float basebandCn0DbHz) {
             mSvidWithFlags = (svid << SVID_SHIFT_WIDTH)
                     | ((constellationType & CONSTELLATION_TYPE_MASK)
                     << CONSTELLATION_TYPE_SHIFT_WIDTH)
                     | (hasEphemeris ? SVID_FLAGS_HAS_EPHEMERIS_DATA : SVID_FLAGS_NONE)
                     | (hasAlmanac ? SVID_FLAGS_HAS_ALMANAC_DATA : SVID_FLAGS_NONE)
                     | (usedInFix ? SVID_FLAGS_USED_IN_FIX : SVID_FLAGS_NONE)
-                    | (hasCarrierFrequency ? SVID_FLAGS_HAS_CARRIER_FREQUENCY : SVID_FLAGS_NONE);
+                    | (hasCarrierFrequency ? SVID_FLAGS_HAS_CARRIER_FREQUENCY : SVID_FLAGS_NONE)
+                    | (hasBasebandCn0DbHz ? SVID_FLAGS_HAS_BASEBAND_CN0 : SVID_FLAGS_NONE);
             mCn0DbHz = cn0DbHz;
             mElevation = elevation;
             mAzimuth = azimuth;
             mCarrierFrequency = carrierFrequency;
+            mBasebandCn0DbHz = basebandCn0DbHz;
         }
     }
 }

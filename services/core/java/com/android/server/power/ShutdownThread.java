@@ -47,8 +47,8 @@ import android.util.TimingsTraceLog;
 import android.view.WindowManager;
 
 import com.android.internal.telephony.ITelephony;
-import com.android.server.RescueParty;
 import com.android.server.LocalServices;
+import com.android.server.RescueParty;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
@@ -307,7 +307,9 @@ public final class ShutdownThread extends Thread {
                             com.android.internal.R.string.reboot_to_update_reboot));
             }
         } else if (mReason != null && mReason.equals(PowerManager.REBOOT_RECOVERY)) {
-            if (RescueParty.isAttemptingFactoryReset()) {
+            if (showSysuiReboot()) {
+                return null;
+            } else if (RescueParty.isAttemptingFactoryReset()) {
                 // We're not actually doing a factory reset yet; we're rebooting
                 // to ask the user if they'd like to reset, so give them a less
                 // scary dialog message.
