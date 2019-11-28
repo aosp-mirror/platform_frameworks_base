@@ -133,6 +133,8 @@ import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
+import android.app.timedetector.ManualTimeSuggestion;
+import android.app.timedetector.TimeDetector;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -1948,6 +1950,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         AlarmManager getAlarmManager() {
             return mContext.getSystemService(AlarmManager.class);
+        }
+
+        TimeDetector getTimeDetector() {
+            return mContext.getSystemService(TimeDetector.class);
         }
 
         ConnectivityManager getConnectivityManager() {
@@ -10859,7 +10865,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) == 1) {
             return false;
         }
-        mInjector.binderWithCleanCallingIdentity(() -> mInjector.getAlarmManager().setTime(millis));
+        ManualTimeSuggestion manualTimeSuggestion = TimeDetector.createManualTimeSuggestion(
+                millis, "DevicePolicyManagerService: setTime");
+        mInjector.binderWithCleanCallingIdentity(
+                () -> mInjector.getTimeDetector().suggestManualTime(manualTimeSuggestion));
         return true;
     }
 
