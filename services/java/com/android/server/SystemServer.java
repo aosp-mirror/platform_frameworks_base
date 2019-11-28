@@ -268,6 +268,8 @@ public final class SystemServer {
             "com.android.internal.car.CarServiceHelperService";
     private static final String TIME_DETECTOR_SERVICE_CLASS =
             "com.android.server.timedetector.TimeDetectorService$Lifecycle";
+    private static final String TIME_ZONE_DETECTOR_SERVICE_CLASS =
+            "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
     private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
     private static final String ADB_SERVICE_CLASS =
@@ -1477,6 +1479,14 @@ public final class SystemServer {
                 mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
             } catch (Throwable e) {
                 reportWtf("starting StartTimeDetectorService service", e);
+            }
+            t.traceEnd();
+
+            t.traceBegin("StartTimeZoneDetectorService");
+            try {
+                mSystemServiceManager.startService(TIME_ZONE_DETECTOR_SERVICE_CLASS);
+            } catch (Throwable e) {
+                reportWtf("starting StartTimeZoneDetectorService service", e);
             }
             t.traceEnd();
 
