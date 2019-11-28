@@ -33,7 +33,6 @@ import android.net.NetworkKey;
 import android.net.NetworkScoreManager;
 import android.net.NetworkScorerAppData;
 import android.net.ScoredNetwork;
-import android.net.wifi.IWifiManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
@@ -47,7 +46,6 @@ import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -1612,13 +1610,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         final ConnectivityManager cm = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (state == DetailedState.CONNECTED) {
-            IWifiManager wifiManager = IWifiManager.Stub.asInterface(
-                    ServiceManager.getService(Context.WIFI_SERVICE));
-            NetworkCapabilities nc = null;
-
-            try {
-                nc = cm.getNetworkCapabilities(wifiManager.getCurrentNetwork());
-            } catch (RemoteException e) {}
+            WifiManager wifiManager = context.getSystemService(WifiManager.class);
+            NetworkCapabilities nc = cm.getNetworkCapabilities(wifiManager.getCurrentNetwork());
 
             if (nc != null) {
                 if (nc.hasCapability(nc.NET_CAPABILITY_CAPTIVE_PORTAL)) {
