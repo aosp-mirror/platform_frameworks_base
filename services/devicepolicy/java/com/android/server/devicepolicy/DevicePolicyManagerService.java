@@ -6685,6 +6685,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     mUserManager.setUserRestriction(
                             UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, false,
                             UserHandle.SYSTEM);
+
+                    // Device-wide policies set by the profile owner need to be cleaned up here.
+                    mLockPatternUtils.setDeviceOwnerInfo(null);
                 } finally {
                     mInjector.binderRestoreCallingIdentity(ident);
                 }
@@ -8334,14 +8337,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-            long token = mInjector.binderClearCallingIdentity();
-            try {
-                mLockPatternUtils.setDeviceOwnerInfo(info != null ? info.toString() : null);
-            } finally {
-                mInjector.binderRestoreCallingIdentity(token);
+            ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!isProfileOwnerOfOrganizationOwnedDevice(admin) && !isDeviceOwner(admin)) {
+                throw new SecurityException("Only Device Owner or Profile Owner of"
+                        + " organization-owned device can set screen lock info.");
             }
         }
+
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mLockPatternUtils.setDeviceOwnerInfo(info != null ? info.toString() : null));
+
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_DEVICE_OWNER_LOCK_SCREEN_INFO)
                 .setAdmin(who)
