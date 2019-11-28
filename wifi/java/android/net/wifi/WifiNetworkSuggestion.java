@@ -116,6 +116,16 @@ public final class WifiNetworkSuggestion implements Parcelable {
          */
         private int mCarrierId;
 
+        /**
+         * Whether this network is shared credential with user to allow user manually connect.
+         */
+        private boolean mIsUserAllowed;
+
+        /**
+         * Whether the setIsUserAllowedToManuallyConnect have been called.
+         */
+        private boolean mIsUserAllowedBeenSet;
+
         public Builder() {
             mSsid = null;
             mBssid =  null;
@@ -129,6 +139,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mIsAppInteractionRequired = false;
             mIsUserInteractionRequired = false;
             mIsMetered = false;
+            mIsUserAllowed = true;
+            mIsUserAllowedBeenSet = false;
             mPriority = UNASSIGNED_PRIORITY;
             mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
         }
@@ -365,6 +377,27 @@ public final class WifiNetworkSuggestion implements Parcelable {
             return this;
         }
 
+        /**
+         * Specifies whether the network credentials provided with this suggestion can be used by
+         * the user to explicitly (manually) connect to this network. If true this network will
+         * appear in the Wi-Fi Picker (in Settings) and the user will be able to select and connect
+         * to it with the provided credentials. If false, the user will need to enter network
+         * credentials and the resulting configuration will become a user saved network.
+         * <p>
+         * <li>Note: Only valid for secure (non-open) networks.
+         * <li>If not set, defaults to true (i.e. allow user to manually connect) for secure
+         * networks and false for open networks.</li>
+         *
+         * @param isAllowed {@code true} to indicate that the credentials may be used by the user to
+         *                              manually connect to the network, {@code false} otherwise.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         */
+        public @NonNull Builder setIsUserAllowedToManuallyConnect(boolean isAllowed) {
+            mIsUserAllowed = isAllowed;
+            mIsUserAllowedBeenSet = true;
+            return this;
+        }
+
         private void setSecurityParamsInWifiConfiguration(
                 @NonNull WifiConfiguration configuration) {
             if (!TextUtils.isEmpty(mWpa2PskPassphrase)) { // WPA-PSK network.
@@ -516,6 +549,13 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     throw new IllegalStateException("invalid bssid for suggestion");
                 }
                 wifiConfiguration = buildWifiConfiguration();
+                if (wifiConfiguration.isOpenNetwork()) {
+                    if (mIsUserAllowedBeenSet && mIsUserAllowed) {
+                        throw new IllegalStateException("Open network should not be "
+                                + "setIsUserAllowedToManuallyConnect to true");
+                    }
+                    mIsUserAllowed = false;
+                }
             }
 
             return new WifiNetworkSuggestion(
@@ -523,6 +563,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                     mPasspointConfiguration,
                     mIsAppInteractionRequired,
                     mIsUserInteractionRequired,
+                    mIsUserAllowed,
                     Process.myUid(),
                     ActivityThread.currentApplication().getApplicationContext().getOpPackageName());
         }
@@ -564,12 +605,20 @@ public final class WifiNetworkSuggestion implements Parcelable {
      */
     public final String suggestorPackageName;
 
+    /**
+     * Whether app share credential with the user, allow user use provided credential to
+     * connect network manually.
+     * @hide
+     */
+    public final boolean isUserAllowedToManuallyConnect;
+
     /** @hide */
     public WifiNetworkSuggestion() {
         this.wifiConfiguration = null;
         this.passpointConfiguration = null;
         this.isAppInteractionRequired = false;
         this.isUserInteractionRequired = false;
+        this.isUserAllowedToManuallyConnect = true;
         this.suggestorUid = -1;
         this.suggestorPackageName = null;
     }
@@ -579,6 +628,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                                  @Nullable PasspointConfiguration passpointConfiguration,
                                  boolean isAppInteractionRequired,
                                  boolean isUserInteractionRequired,
+                                 boolean isUserAllowedToManuallyConnect,
                                  int suggestorUid, @NonNull String suggestorPackageName) {
         checkNotNull(networkConfiguration);
         checkNotNull(suggestorPackageName);
@@ -587,6 +637,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
         this.isAppInteractionRequired = isAppInteractionRequired;
         this.isUserInteractionRequired = isUserInteractionRequired;
+        this.isUserAllowedToManuallyConnect = isUserAllowedToManuallyConnect;
         this.suggestorUid = suggestorUid;
         this.suggestorPackageName = suggestorPackageName;
     }
@@ -600,6 +651,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                             in.readParcelable(null), // PasspointConfiguration
                             in.readBoolean(), // isAppInteractionRequired
                             in.readBoolean(), // isUserInteractionRequired
+                            in.readBoolean(), // isSharedCredentialWithUser
                             in.readInt(), // suggestorUid
                             in.readString() // suggestorPackageName
                     );
@@ -622,6 +674,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         dest.writeParcelable(passpointConfiguration, flags);
         dest.writeBoolean(isAppInteractionRequired);
         dest.writeBoolean(isUserInteractionRequired);
+        dest.writeBoolean(isUserAllowedToManuallyConnect);
         dest.writeInt(suggestorUid);
         dest.writeString(suggestorPackageName);
     }
@@ -666,6 +719,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 .append(", FQDN=").append(wifiConfiguration.FQDN)
                 .append(", isAppInteractionRequired=").append(isAppInteractionRequired)
                 .append(", isUserInteractionRequired=").append(isUserInteractionRequired)
+                .append(", isUserAllowedToManuallyConnect=").append(isUserAllowedToManuallyConnect)
                 .append(", suggestorUid=").append(suggestorUid)
                 .append(", suggestorPackageName=").append(suggestorPackageName)
                 .append("]");
