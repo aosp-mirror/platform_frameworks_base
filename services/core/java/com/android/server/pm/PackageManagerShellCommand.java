@@ -1853,7 +1853,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
         if (internal.isApexPackage(packageName)) {
             internal.uninstallApex(
-                    packageName, versionCode, translatedUserId, receiver.getIntentSender());
+                    packageName, versionCode, translatedUserId, receiver.getIntentSender(), flags);
         } else if ((flags & PackageManager.DELETE_ALL_USERS) != 0) {
             final PackageInfo info = mInterface.getPackageInfo(packageName,
                     PackageManager.MATCH_STATIC_SHARED_LIBRARIES, translatedUserId);

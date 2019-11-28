@@ -23547,7 +23547,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public void uninstallApex(String packageName, long versionCode, int userId,
-                IntentSender intentSender) {
+                IntentSender intentSender, int flags) {
             final int callerUid = Binder.getCallingUid();
             if (callerUid != Process.ROOT_UID && callerUid != Process.SHELL_UID) {
                 throw new SecurityException("Not allowed to uninstall apexes");
@@ -23556,7 +23556,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     new PackageInstallerService.PackageDeleteObserverAdapter(
                             PackageManagerService.this.mContext, intentSender, packageName,
                             false, userId);
-            if (userId != UserHandle.USER_ALL) {
+            if ((flags & PackageManager.DELETE_ALL_USERS) == 0) {
                 adapter.onPackageDeleted(packageName, PackageManager.DELETE_FAILED_ABORTED,
                         "Can't uninstall an apex for a single user");
                 return;
