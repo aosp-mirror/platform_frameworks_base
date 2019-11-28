@@ -19,7 +19,7 @@ package android.os.incremental;
 import android.os.incremental.IncrementalDataLoaderParamsParcel;
 
 /** @hide */
-interface IIncrementalService {
+interface IIncrementalManager {
     /**
      * A set of flags for the |createMode| parameters when creating a new Incremental storage.
      */
@@ -53,6 +53,12 @@ interface IIncrementalService {
     int makeDirectory(int storageId, in @utf8InCpp String pathUnderStorage);
 
     /**
+     * Recursively creates a directory under a storage. The target directory is specified by its relative path under the storage.
+     * All the parent directories of the target directory will be created if they do not exist already.
+     */
+    int makeDirectories(int storageId, in @utf8InCpp String pathUnderStorage);
+
+    /**
      * Creates a file under a storage, specifying its name, size and metadata.
      */
     int makeFile(int storageId, in @utf8InCpp String pathUnderStorage, long size, in byte[] metadata);
@@ -64,10 +70,12 @@ interface IIncrementalService {
     int makeFileFromRange(int storageId, in @utf8InCpp String targetPathUnderStorage, in @utf8InCpp String sourcePathUnderStorage, long start, long end);
 
     /**
-     * Creates a hard link between two files in a storage.
-     * Both source and destination are specified by relative paths under storage.
+     * Creates a hard link between two files in two storage instances.
+     * Source and dest specified by parent storage IDs and their relative paths under the storage.
+     * The source and dest storage instances should be in the same fs mount.
+     * Note: destStorageId can be the same as sourceStorageId.
      */
-    int makeLink(int storageId, in @utf8InCpp String sourcePathUnderStorage, in @utf8InCpp String destPathUnderStorage);
+    int makeLink(int sourceStorageId, in @utf8InCpp String sourcePathUnderStorage, int destStorageId, in @utf8InCpp String destPathUnderStorage);
 
     /**
      * Deletes a hard link in a storage, specified by the relative path of the link target under storage.
@@ -85,12 +93,12 @@ interface IIncrementalService {
     byte[] getFileMetadata(int storageId, in @utf8InCpp String pathUnderStorage);
 
     /**
-     * Returns the list of file paths under a storage.
-     */
-    @utf8InCpp String[] getFileList(int storageId);
-
-    /**
      * Starts loading data for a storage.
      */
     boolean startLoading(int storageId);
+
+    /**
+     * Deletes a storage given its ID. Deletes its bind mounts and unmount it. Stop its data loader.
+     */
+    void deleteStorage(int storageId);
 }

@@ -772,7 +772,7 @@ cc_library {
 filegroup {
     name: "incremental_aidl",
     srcs: [
-        "core/java/android/os/incremental/IIncrementalService.aidl",
+        "core/java/android/os/incremental/IIncrementalManager.aidl",
         "core/java/android/os/incremental/IIncrementalServiceProxy.aidl",
         "core/java/android/os/incremental/IncrementalDataLoaderParamsParcel.aidl",
         "core/java/android/os/incremental/IncrementalFileSystemControlParcel.aidl",
