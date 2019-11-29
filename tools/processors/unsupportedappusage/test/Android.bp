@@ -18,7 +18,7 @@ java_test_host {
     srcs: ["src/**/*.java"],
 
     static_libs: [
-        "libjavac",
+        "compile-testing-prebuilt",
         "unsupportedappusage-annotation-processor-lib",
         "truth-host-prebuilt",
         "mockito-host",
