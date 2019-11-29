@@ -932,6 +932,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return IIpConnectivityMetrics.Stub.asInterface(
                     ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
         }
+
+        public IBatteryStats getBatteryStatsService() {
+            return BatteryStatsService.getService();
+        }
     }
 
     public ConnectivityService(Context context, INetworkManagementService netManager,
@@ -2164,7 +2168,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     opts.setMaxManifestReceiverApiLevel(Build.VERSION_CODES.M);
                     options = opts.toBundle();
                 }
-                final IBatteryStats bs = BatteryStatsService.getService();
+                final IBatteryStats bs = mDeps.getBatteryStatsService();
                 try {
                     bs.noteConnectivityChanged(intent.getIntExtra(
                             ConnectivityManager.EXTRA_NETWORK_TYPE, ConnectivityManager.TYPE_NONE),
@@ -6505,7 +6509,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // interface and any stacked links.
             // TODO: Avoid redoing this; this must only be done once when a network comes online.
             try {
-                final IBatteryStats bs = BatteryStatsService.getService();
+                final IBatteryStats bs = mDeps.getBatteryStatsService();
                 final int type = newNetwork.networkInfo.getType();
 
                 final String baseIface = newNetwork.linkProperties.getInterfaceName();

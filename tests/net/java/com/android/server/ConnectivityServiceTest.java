@@ -96,6 +96,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -197,6 +198,7 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
@@ -305,6 +307,7 @@ public class ConnectivityServiceTest {
     @Mock DefaultNetworkMetrics mDefaultNetworkMetrics;
     @Mock INetworkManagementService mNetworkManagementService;
     @Mock INetworkStatsService mStatsService;
+    @Mock IBatteryStats mBatteryStatsService;
     @Mock INetworkPolicyManager mNpm;
     @Mock IDnsResolver mMockDnsResolver;
     @Mock INetd mMockNetd;
@@ -1135,6 +1138,7 @@ public class ConnectivityServiceTest {
         doReturn(mMetricsService).when(deps).getMetricsLogger();
         doReturn(true).when(deps).queryUserAccess(anyInt(), anyInt());
         doReturn(mIpConnectivityMetrics).when(deps).getIpConnectivityMetrics();
+        doReturn(mBatteryStatsService).when(deps).getBatteryStatsService();
         doReturn(true).when(deps).hasService(Context.ETHERNET_SERVICE);
         doAnswer(inv -> {
             mPolicyTracker = new WrappedMultinetworkPolicyTracker(
@@ -5640,6 +5644,44 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(defaultCallback);
     }
 
+    @Test
+    public final void testBatteryStatsNetworkType() throws Exception {
+        final LinkProperties cellLp = new LinkProperties();
+        cellLp.setInterfaceName("cell0");
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, cellLp);
+        mCellNetworkAgent.connect(true);
+        waitForIdle();
+        verify(mBatteryStatsService).noteNetworkInterfaceType(cellLp.getInterfaceName(),
+                TYPE_MOBILE);
+        reset(mBatteryStatsService);
+
+        final LinkProperties wifiLp = new LinkProperties();
+        wifiLp.setInterfaceName("wifi0");
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI, wifiLp);
+        mWiFiNetworkAgent.connect(true);
+        waitForIdle();
+        verify(mBatteryStatsService).noteNetworkInterfaceType(wifiLp.getInterfaceName(),
+                TYPE_WIFI);
+        reset(mBatteryStatsService);
+
+        // TODO : In the current code, ConnectivityService only tells BatteryStatsService about
+        // the type of networks that satisfy a request. That is a bug in a sense, but it has no
+        // consequences because a network that never satisfies any request gets torn down right
+        // away. Because of this, in the context of this test, the cell network agent does not
+        // satisfy any request as long as WiFi is connected, so the test below would fail if
+        // the WiFi network agent is not disconnected first. When this bug is fixed, remove the
+        // WiFi disconnect for more precise testing.
+        mWiFiNetworkAgent.disconnect();
+        mCellNetworkAgent.disconnect();
+
+        cellLp.setInterfaceName("wifi0");
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, cellLp);
+        mCellNetworkAgent.connect(true);
+        waitForIdle();
+        verify(mBatteryStatsService).noteNetworkInterfaceType(cellLp.getInterfaceName(),
+                TYPE_MOBILE);
+    }
+
     /**
      * Make simulated InterfaceConfig for Nat464Xlat to query clat lower layer info.
      */
@@ -5690,15 +5732,19 @@ public class ConnectivityServiceTest {
         reset(mNetworkManagementService);
         reset(mMockDnsResolver);
         reset(mMockNetd);
+        reset(mBatteryStatsService);
         when(mNetworkManagementService.getInterfaceConfig(CLAT_PREFIX + MOBILE_IFNAME))
                 .thenReturn(getClatInterfaceConfig(myIpv4));
 
         // Connect with ipv6 link properties. Expect prefix discovery to be started.
         mCellNetworkAgent.sendLinkProperties(cellLp);
         mCellNetworkAgent.connect(true);
+        waitForIdle();
 
         verify(mMockNetd, times(1)).networkCreatePhysical(eq(cellNetId), anyInt());
         verify(mMockDnsResolver, times(1)).createNetworkCache(eq(cellNetId));
+        verify(mBatteryStatsService).noteNetworkInterfaceType(cellLp.getInterfaceName(),
+                TYPE_MOBILE);
 
         networkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
         verify(mMockDnsResolver, times(1)).startPrefix64Discovery(cellNetId);
@@ -5713,6 +5759,11 @@ public class ConnectivityServiceTest {
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
         verify(mMockDnsResolver, times(1)).stopPrefix64Discovery(cellNetId);
         verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(any());
+
+        // Make sure BatteryStats was not told about any v4- interfaces, as none should have
+        // come online yet.
+        waitForIdle();
+        verify(mBatteryStatsService, never()).noteNetworkInterfaceType(startsWith("v4-"), anyInt());
 
         verifyNoMoreInteractions(mMockNetd);
         verifyNoMoreInteractions(mMockDnsResolver);
@@ -5759,6 +5810,15 @@ public class ConnectivityServiceTest {
         ResolverParamsParcel resolvrParams = mResolverParamsParcelCaptor.getValue();
         assertEquals(1, resolvrParams.servers.length);
         assertTrue(ArrayUtils.contains(resolvrParams.servers, "8.8.8.8"));
+
+        // TODO : this should be invoked but in the current code there is no path to invoke
+        // it. In practice, it will be invoked next time this network changes what requests it
+        // satisfies through rematchNetworkAndRequests, which may in fact be too late. This code
+        // should be reinstated when the bug is fixed.
+//        for (final LinkProperties stackedLp : stackedLpsAfterChange) {
+//            verify(mBatteryStatsService).noteNetworkInterfaceType(stackedLp.getInterfaceName(),
+//                    TYPE_MOBILE);
+//        }
 
         // Add ipv4 address, expect that clatd and prefix discovery are stopped and stacked
         // linkproperties are cleaned up.
