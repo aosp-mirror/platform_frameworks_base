@@ -346,7 +346,8 @@ public final class PowerManagerService extends SystemService
     // True if systemReady() has been called.
     private boolean mSystemReady;
 
-    // True if boot completed occurred.  We keep the screen on until this happens.
+    // True if boot completed occurred. We keep the screen on until this happens.
+    // The screen will be off if we are in quiescent mode.
     private boolean mBootCompleted;
 
     // True if auto-suspend mode is enabled.
@@ -864,6 +865,12 @@ public final class PowerManagerService extends SystemService
                 mBatterySaverStateMachine.onBootCompleted();
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
+
+                if (sQuiescent) {
+                    goToSleepNoUpdateLocked(SystemClock.uptimeMillis(),
+                            PowerManager.GO_TO_SLEEP_REASON_QUIESCENT,
+                            PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE, Process.SYSTEM_UID);
+                }
                 updatePowerStateLocked();
             }
         }
@@ -1430,8 +1437,7 @@ public final class PowerManagerService extends SystemService
                     + ", uid=" + uid);
         }
 
-        if (eventTime < mLastSleepTime || eventTime < mLastWakeTime
-                || !mBootCompleted || !mSystemReady) {
+        if (eventTime < mLastSleepTime || eventTime < mLastWakeTime || !mSystemReady) {
             return false;
         }
 
@@ -1508,7 +1514,7 @@ public final class PowerManagerService extends SystemService
         }
 
         if (eventTime < mLastSleepTime || mWakefulness == WAKEFULNESS_AWAKE
-                || !mBootCompleted || !mSystemReady || mForceSuspendActive) {
+                || mForceSuspendActive || !mSystemReady) {
             return false;
         }
 
@@ -1530,6 +1536,10 @@ public final class PowerManagerService extends SystemService
             mNotifier.onWakeUp(reason, details, reasonUid, opPackageName, opUid);
             userActivityNoUpdateLocked(
                     eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, reasonUid);
+
+            if (sQuiescent) {
+                mDirty |= DIRTY_QUIESCENT;
+            }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -1561,7 +1571,8 @@ public final class PowerManagerService extends SystemService
         if (eventTime < mLastWakeTime
                 || mWakefulness == WAKEFULNESS_ASLEEP
                 || mWakefulness == WAKEFULNESS_DOZING
-                || !mBootCompleted || !mSystemReady) {
+                || !mSystemReady
+                || !mBootCompleted) {
             return false;
         }
 
@@ -2645,6 +2656,10 @@ public final class PowerManagerService extends SystemService
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
                 | DIRTY_SETTINGS | DIRTY_SCREEN_BRIGHTNESS_BOOST | DIRTY_VR_MODE_CHANGED |
                 DIRTY_QUIESCENT)) != 0) {
+            if ((dirty & DIRTY_QUIESCENT) != 0) {
+                sQuiescent = false;
+            }
+
             mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked();
 
             // Determine appropriate screen brightness and auto-brightness adjustments.
@@ -2694,9 +2709,6 @@ public final class PowerManagerService extends SystemService
                     mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
 
-            if ((dirty & DIRTY_QUIESCENT) != 0) {
-                sQuiescent = false;
-            }
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateDisplayPowerStateLocked: mDisplayReady=" + mDisplayReady
                         + ", policy=" + mDisplayPowerRequest.policy

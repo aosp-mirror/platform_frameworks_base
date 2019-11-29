@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -751,5 +752,56 @@ public class PowerManagerServiceTest {
 
         SystemClock.sleep(11);
         assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+    }
+
+    @Test
+    public void testBoot_ShouldBeAwake() throws Exception {
+        createService();
+        startSystem();
+
+        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_AWAKE);
+        verify(mNotifierMock, never()).onWakefulnessChangeStarted(anyInt(), anyInt(), anyLong());
+    }
+
+    @Test
+    public void testBoot_DesiredScreenPolicyShouldBeBright() throws Exception {
+        createService();
+        startSystem();
+
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_BRIGHT);
+    }
+
+    @Test
+    public void testQuiescentBoot_ShouldBeAsleep() throws Exception {
+        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
+        createService();
+        startSystem();
+
+        assertThat(mService.getWakefulness()).isEqualTo(WAKEFULNESS_ASLEEP);
+        verify(mNotifierMock).onWakefulnessChangeStarted(eq(WAKEFULNESS_ASLEEP), anyInt(),
+                anyLong());
+    }
+
+    @Test
+    public void testQuiescentBoot_DesiredScreenPolicyShouldBeOff() throws Exception {
+        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
+        createService();
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_OFF);
+
+        startSystem();
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_OFF);
+    }
+
+    @Test
+    public void testQuiescentBoot_WakeUp_DesiredScreenPolicyShouldBeBright() throws Exception {
+        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
+        createService();
+        startSystem();
+        forceAwake();
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_BRIGHT);
     }
 }

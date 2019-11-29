@@ -432,9 +432,15 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_INATTENTIVE = 9;
 
     /**
+     * Go to sleep reason code: Going to sleep due to quiescent boot.
      * @hide
      */
-    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_INATTENTIVE;
+    public static final int GO_TO_SLEEP_REASON_QUIESCENT = 10;
+
+    /**
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_QUIESCENT;
 
     /**
      * @hide
