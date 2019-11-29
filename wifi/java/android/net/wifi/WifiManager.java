@@ -2389,6 +2389,82 @@ public class WifiManager {
     }
 
     /**
+     * Interface for Wi-Fi activity energy info listener. Should be implemented by applications and
+     * set when calling {@link WifiManager#getWifiActivityEnergyInfoAsync}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface OnWifiActivityEnergyInfoListener {
+        /**
+         * Called when Wi-Fi activity energy info is available.
+         * Note: this listener is triggered at most once for each call to
+         * {@link #getWifiActivityEnergyInfoAsync}.
+         *
+         * @param info the latest {@link WifiActivityEnergyInfo}, or null if unavailable.
+         */
+        void onWifiActivityEnergyInfo(@Nullable WifiActivityEnergyInfo info);
+    }
+
+    private static class OnWifiActivityEnergyInfoProxy
+            extends IOnWifiActivityEnergyInfoListener.Stub {
+        private final Object mLock = new Object();
+        @Nullable @GuardedBy("mLock") private Executor mExecutor;
+        @Nullable @GuardedBy("mLock") private OnWifiActivityEnergyInfoListener mListener;
+
+        OnWifiActivityEnergyInfoProxy(Executor executor,
+                OnWifiActivityEnergyInfoListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onWifiActivityEnergyInfo(WifiActivityEnergyInfo info) {
+            Executor executor;
+            OnWifiActivityEnergyInfoListener listener;
+            synchronized (mLock) {
+                if (mExecutor == null || mListener == null) {
+                    return;
+                }
+                executor = mExecutor;
+                listener = mListener;
+                // null out to allow garbage collection, prevent triggering listener more than once
+                mExecutor = null;
+                mListener = null;
+            }
+            Binder.clearCallingIdentity();
+            executor.execute(() -> listener.onWifiActivityEnergyInfo(info));
+        }
+    }
+
+    /**
+     * Request to get the current {@link WifiActivityEnergyInfo} asynchronously.
+     * Note: This method will return null if {@link #isEnhancedPowerReportingSupported()} returns
+     * false.
+     *
+     * @param executor the executor that the listener will be invoked on
+     * @param listener the listener that will receive the {@link WifiActivityEnergyInfo} object
+     *                 when it becomes available. The listener will be triggered at most once for
+     *                 each call to this method.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public void getWifiActivityEnergyInfoAsync(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnWifiActivityEnergyInfoListener listener) {
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
+        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+        try {
+            mService.getWifiActivityEnergyInfoAsync(
+                    new OnWifiActivityEnergyInfoProxy(executor, listener));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Request a scan for access points. Returns immediately. The availability
      * of the results is made known later by means of an asynchronous event sent
      * on completion of the scan.
