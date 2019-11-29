@@ -1502,6 +1502,13 @@ static void nativeSetInputFilterEnabled(JNIEnv* /* env */, jclass /* clazz */,
     im->getInputManager()->getDispatcher()->setInputFilterEnabled(enabled);
 }
 
+static void nativeSetInTouchMode(JNIEnv* /* env */, jclass /* clazz */,
+        jlong ptr, jboolean inTouchMode) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->getInputManager()->getDispatcher()->setInTouchMode(inTouchMode);
+}
+
 static jint nativeInjectInputEvent(JNIEnv* env, jclass /* clazz */,
         jlong ptr, jobject inputEventObj, jint injectorPid, jint injectorUid,
         jint syncMode, jint timeoutMillis, jint policyFlags) {
@@ -1781,6 +1788,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativePilferPointers },
     { "nativeSetInputFilterEnabled", "(JZ)V",
             (void*) nativeSetInputFilterEnabled },
+    { "nativeSetInTouchMode", "(JZ)V",
+            (void*) nativeSetInTouchMode },
     { "nativeInjectInputEvent", "(JLandroid/view/InputEvent;IIIII)I",
             (void*) nativeInjectInputEvent },
     { "nativeToggleCapsLock", "(JI)V",
