@@ -23,12 +23,20 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.systemui.R;
+
+import static android.provider.Settings.System.SCREENRECORD_ENABLE_MIC;
+import static android.provider.Settings.System.SCREENRECORD_SHOW_TAPS;
+import static android.provider.Settings.System.SCREENRECORD_STOP_DOT;
+import static android.provider.Settings.System.SCREENRECORD_LOW_QUALITY;
 
 /**
  * Activity to select screen recording options
@@ -67,17 +75,27 @@ public class ScreenRecordDialog extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.screen_record_dialog);
 
-        final Switch micCheckBox = findViewById(R.id.checkbox_mic);
-        final Switch tapsCheckBox = findViewById(R.id.checkbox_taps);
-        final Switch dotCheckBox = findViewById(R.id.checkbox_stopdot);
-        final Switch qualityCheckBox = findViewById(R.id.checkbox_low_quality);
+        final Switch micSwitch = findViewById(R.id.checkbox_mic);
+        final Switch tapsSwitch = findViewById(R.id.checkbox_taps);
+        final Switch dotSwitch = findViewById(R.id.checkbox_stopdot);
+        final Switch qualitySwitch = findViewById(R.id.checkbox_low_quality);
+        
+        initialCheckSwitch(micSwitch, SCREENRECORD_ENABLE_MIC);
+        initialCheckSwitch(tapsSwitch, SCREENRECORD_SHOW_TAPS);
+        initialCheckSwitch(dotSwitch, SCREENRECORD_STOP_DOT);
+        initialCheckSwitch(qualitySwitch, SCREENRECORD_LOW_QUALITY);
+        
+        setSwitchListener(micSwitch, SCREENRECORD_ENABLE_MIC);
+        setSwitchListener(tapsSwitch, SCREENRECORD_SHOW_TAPS);
+        setSwitchListener(dotSwitch, SCREENRECORD_STOP_DOT);
+        setSwitchListener(qualitySwitch, SCREENRECORD_LOW_QUALITY);
 
         final Button recordButton = findViewById(R.id.record_button);
         recordButton.setOnClickListener(v -> {
-            mUseAudio = micCheckBox.isChecked();
-            mShowTaps = tapsCheckBox.isChecked();
-            mShowDot = dotCheckBox.isChecked();
-            mLowQuality = qualityCheckBox.isChecked();
+            mUseAudio = micSwitch.isChecked();
+            mShowTaps = tapsSwitch.isChecked();
+            mShowDot = dotSwitch.isChecked();
+            mLowQuality = qualitySwitch.isChecked();
             Log.d(TAG, "Record button clicked: audio " + mUseAudio + ", taps " + mShowTaps + ", dot " + mShowDot + ", quality " + mLowQuality);
 
             if (mUseAudio && checkSelfPermission(Manifest.permission.RECORD_AUDIO)
@@ -91,6 +109,19 @@ public class ScreenRecordDialog extends Activity {
         });
     }
 
+    private void initialCheckSwitch(Switch sw, String setting) {
+        sw.setChecked(
+                Settings.System.getIntForUser(this.getContentResolver(),
+                setting, 0, UserHandle.USER_CURRENT) == 1);
+    }
+    
+    private void setSwitchListener(Switch sw, String setting) {
+        sw.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Settings.System.putIntForUser(this.getContentResolver(),
+            setting, isChecked ? 1 : 0, UserHandle.USER_CURRENT);
+        });
+    }
+    
     private void requestScreenCapture() {
         MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(
                 Context.MEDIA_PROJECTION_SERVICE);
