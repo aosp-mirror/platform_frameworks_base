@@ -36,31 +36,28 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Provides operations to open or create an IncrementalStorage, using IIncrementalManager service.
- * Example Usage:
+ * Provides operations to open or create an IncrementalStorage, using IIncrementalManagerNative
+ * service. Example Usage:
  *
  * <blockquote><pre>
- * IncrementalManager manager = (IncrementalManager) getSystemService(Context.INCREMENTAL_MANAGER);
+ * IncrementalManager manager = (IncrementalManager) getSystemService(Context.INCREMENTAL_SERVICE);
  * IncrementalStorage storage = manager.openStorage("/path/to/incremental/dir");
  * </pre></blockquote>
  *
  * @hide
  */
 @SystemService(Context.INCREMENTAL_SERVICE)
-public class IncrementalManager {
+public final class IncrementalManager {
     private static final String TAG = "IncrementalManager";
-    private final IIncrementalManager mService;
-    @GuardedBy("mStorages")
-    private final SparseArray<IncrementalStorage> mStorages = new SparseArray<>();
 
     public static final int CREATE_MODE_TEMPORARY_BIND =
-            IIncrementalManager.CREATE_MODE_TEMPORARY_BIND;
+            IIncrementalManagerNative.CREATE_MODE_TEMPORARY_BIND;
     public static final int CREATE_MODE_PERMANENT_BIND =
-            IIncrementalManager.CREATE_MODE_PERMANENT_BIND;
+            IIncrementalManagerNative.CREATE_MODE_PERMANENT_BIND;
     public static final int CREATE_MODE_CREATE =
-            IIncrementalManager.CREATE_MODE_CREATE;
+            IIncrementalManagerNative.CREATE_MODE_CREATE;
     public static final int CREATE_MODE_OPEN_EXISTING =
-            IIncrementalManager.CREATE_MODE_OPEN_EXISTING;
+            IIncrementalManagerNative.CREATE_MODE_OPEN_EXISTING;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"CREATE_MODE_"}, value = {
@@ -72,8 +69,12 @@ public class IncrementalManager {
     public @interface CreateMode {
     }
 
-    public IncrementalManager(@NonNull IIncrementalManager is) {
-        mService = is;
+    private final @Nullable IIncrementalManagerNative mNativeService;
+    @GuardedBy("mStorages")
+    private final SparseArray<IncrementalStorage> mStorages = new SparseArray<>();
+
+    public IncrementalManager(IIncrementalManagerNative nativeService) {
+        mNativeService = nativeService;
     }
 
     /**
@@ -82,6 +83,7 @@ public class IncrementalManager {
      * @param storageId The storage ID to identify the storage object.
      * @return IncrementalStorage object corresponding to storage ID.
      */
+    // TODO(b/136132412): remove this
     @Nullable
     public IncrementalStorage getStorage(int storageId) {
         synchronized (mStorages) {
@@ -95,8 +97,8 @@ public class IncrementalManager {
      *
      * @param path                Absolute path to mount Incremental File System on.
      * @param params              IncrementalDataLoaderParams object to configure data loading.
-     * @param createMode          Mode for opening an old Incremental File System mount or
-     *                            creating a new mount.
+     * @param createMode          Mode for opening an old Incremental File System mount or creating
+     *                            a new mount.
      * @param autoStartDataLoader Set true to immediately start data loader after creating storage.
      * @return IncrementalStorage object corresponding to the mounted directory.
      */
@@ -105,11 +107,11 @@ public class IncrementalManager {
             @NonNull IncrementalDataLoaderParams params, @CreateMode int createMode,
             boolean autoStartDataLoader) {
         try {
-            final int id = mService.createStorage(path, params.getData(), createMode);
+            final int id = mNativeService.createStorage(path, params.getData(), createMode);
             if (id < 0) {
                 return null;
             }
-            final IncrementalStorage storage = new IncrementalStorage(mService, id);
+            final IncrementalStorage storage = new IncrementalStorage(mNativeService, id);
             synchronized (mStorages) {
                 mStorages.put(id, storage);
             }
@@ -123,8 +125,8 @@ public class IncrementalManager {
     }
 
     /**
-     * Opens an existing Incremental File System mounted directory and returns an
-     * IncrementalStorage object.
+     * Opens an existing Incremental File System mounted directory and returns an IncrementalStorage
+     * object.
      *
      * @param path Absolute target path that Incremental File System has been mounted on.
      * @return IncrementalStorage object corresponding to the mounted directory.
@@ -132,11 +134,11 @@ public class IncrementalManager {
     @Nullable
     public IncrementalStorage openStorage(@NonNull String path) {
         try {
-            final int id = mService.openStorage(path);
+            final int id = mNativeService.openStorage(path);
             if (id < 0) {
                 return null;
             }
-            final IncrementalStorage storage = new IncrementalStorage(mService, id);
+            final IncrementalStorage storage = new IncrementalStorage(mNativeService, id);
             synchronized (mStorages) {
                 mStorages.put(id, storage);
             }
@@ -155,11 +157,12 @@ public class IncrementalManager {
     public IncrementalStorage createStorage(@NonNull String path,
             @NonNull IncrementalStorage linkedStorage, @CreateMode int createMode) {
         try {
-            final int id = mService.createLinkedStorage(path, linkedStorage.getId(), createMode);
+            final int id = mNativeService.createLinkedStorage(
+                    path, linkedStorage.getId(), createMode);
             if (id < 0) {
                 return null;
             }
-            final IncrementalStorage storage = new IncrementalStorage(mService, id);
+            final IncrementalStorage storage = new IncrementalStorage(mNativeService, id);
             synchronized (mStorages) {
                 mStorages.put(id, storage);
             }
@@ -175,6 +178,7 @@ public class IncrementalManager {
      * @param file Target file to search storage for.
      * @return Absolute path which is a bind-mount point of Incremental File System.
      */
+    @Nullable
     private Path getStoragePathForFile(File file) {
         File currentPath = new File(file.getParent());
         while (currentPath.getParent() != null) {
@@ -198,18 +202,19 @@ public class IncrementalManager {
      *     </li>
      * </ol>
      *
-     * @param sourcePath   Absolute path to the source. Should be the same type as the destPath
-     *                     (file or dir). Expected to already exist and is an Incremental path.
-     * @param destPath     Absolute path to the destination.
-     * @throws IllegalArgumentException when 1) source does not exist,
-     *                     or 2) source and dest type mismatch (one is file and the other is dir),
-     *                     or 3) source path is not on Incremental File System,
-     * @throws IOException when 1) cannot find the root path of the Incremental storage of source,
-     *                     or 2) cannot retrieve the Incremental storage instance of the source,
-     *                     or 3) renaming a file, but dest is not on the same Incremental Storage,
-     *                     or 4) renaming a dir, dest dir does not exist but fails to be created.
-     *
-     * TODO(b/136132412): add unit tests
+     * @param sourcePath Absolute path to the source. Should be the same type as the destPath (file
+     *                   or dir). Expected to already exist and is an Incremental path.
+     * @param destPath   Absolute path to the destination.
+     * @throws IllegalArgumentException when 1) source does not exist, or 2) source and dest type
+     *                                  mismatch (one is file and the other is dir), or 3) source
+     *                                  path is not on Incremental File System,
+     * @throws IOException              when 1) cannot find the root path of the Incremental storage
+     *                                  of source, or 2) cannot retrieve the Incremental storage
+     *                                  instance of the source, or 3) renaming a file, but dest is
+     *                                  not on the same Incremental Storage, or 4) renaming a dir,
+     *                                  dest dir does not exist but fails to be created.
+     *                                  <p>
+     *                                  TODO(b/136132412): add unit tests
      */
     public void rename(@NonNull String sourcePath, @NonNull String destPath) throws IOException {
         final File source = new File(sourcePath);
@@ -243,6 +248,7 @@ public class IncrementalManager {
         if (storage == null) {
             throw new IOException("Failed to retrieve storage from Incremental Service.");
         }
+
         if (source.isFile()) {
             renameFile(storage, storagePath, source, dest);
         } else {
@@ -304,11 +310,11 @@ public class IncrementalManager {
      */
     public void closeStorage(@NonNull String path) {
         try {
-            final int id = mService.openStorage(path);
+            final int id = mNativeService.openStorage(path);
             if (id < 0) {
                 return;
             }
-            mService.deleteStorage(id);
+            mNativeService.deleteStorage(id);
             synchronized (mStorages) {
                 mStorages.remove(id);
             }
@@ -321,7 +327,7 @@ public class IncrementalManager {
      * Checks if path is mounted on Incremental File System.
      */
     public static boolean isIncrementalPath(@NonNull String path) {
-        // TODO(b/136132412): implement native method
+        // TODO(b/136132412): add jni implementation
         return false;
     }
 }
