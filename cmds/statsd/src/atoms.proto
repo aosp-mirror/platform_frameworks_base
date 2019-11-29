@@ -356,7 +356,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10067
+    // Next: 10068
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -424,6 +424,7 @@ message Atom {
         ProcessMemorySnapshot process_memory_snapshot = 10064;
         VmsClientStats vms_client_stats = 10065;
         NotificationRemoteViews notification_remote_views = 10066;
+        DangerousPermissionStateSampled dangerous_permission_state_sampled = 10067;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -6490,7 +6491,8 @@ message MediametricsDrmManagerReported {
 
 /**
  * State of a dangerous permission requested by a package
- */
+ * Pulled from: StatsCompanionService
+*/
 message DangerousPermissionState {
     // Name of the permission
     optional string permission_name = 1;
@@ -7541,3 +7543,22 @@ message VmsClientStats {
     optional int64 dropped_bytes = 9;
     optional int64 dropped_packets = 10;
 }
+
+/**
+ * State of a dangerous permission requested by a package - sampled
+ * Pulled from: StatsCompanionService.java with data obtained from PackageManager API
+*/
+message DangerousPermissionStateSampled {
+    // Name of the permission
+    optional string permission_name = 1;
+
+    // Uid of the package
+    optional int32 uid = 2 [(is_uid) = true];
+
+    // If the permission is granted to the uid
+    optional bool is_granted = 3;
+
+    // Permission flags as per android.content.pm.PermissionFlags
+    optional int32 permission_flags = 4;
+}
+

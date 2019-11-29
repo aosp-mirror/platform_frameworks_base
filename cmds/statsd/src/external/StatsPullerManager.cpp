@@ -284,6 +284,10 @@ std::map<PullerKey, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // NotiifcationRemoteViews.
         {{.atomTag = android::util::NOTIFICATION_REMOTE_VIEWS},
          {.puller = new StatsCompanionServicePuller(android::util::NOTIFICATION_REMOTE_VIEWS)}},
+        // PermissionStateSampled.
+        {{.atomTag = android::util::DANGEROUS_PERMISSION_STATE_SAMPLED},
+         {.puller =
+               new StatsCompanionServicePuller(android::util::DANGEROUS_PERMISSION_STATE_SAMPLED)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
