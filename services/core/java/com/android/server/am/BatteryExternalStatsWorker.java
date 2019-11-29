@@ -15,18 +15,16 @@
  */
 package com.android.server.am;
 
-import static android.net.wifi.WifiManager.WIFI_FEATURE_LINK_LAYER_STATS;
-
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SynchronousResultReceiver;
 import android.os.SystemClock;
@@ -45,6 +43,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import libcore.util.EmptyArray;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -117,7 +116,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     private final Object mWorkerLock = new Object();
 
     @GuardedBy("mWorkerLock")
-    private IWifiManager mWifiManager = null;
+    private WifiManager mWifiManager = null;
 
     @GuardedBy("mWorkerLock")
     private TelephonyManager mTelephony = null;
@@ -411,21 +410,33 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
         if ((updateFlags & BatteryStatsImpl.ExternalStatsSync.UPDATE_WIFI) != 0) {
             // We were asked to fetch WiFi data.
-            if (mWifiManager == null) {
-                mWifiManager = IWifiManager.Stub.asInterface(ServiceManager.getService(
-                        Context.WIFI_SERVICE));
+            if (mWifiManager == null && ServiceManager.getService(Context.WIFI_SERVICE) != null) {
+                // this code is reached very early in the boot process, before Wifi Service has
+                // been registered. Check that ServiceManager.getService() returns a non null
+                // value before calling mContext.getSystemService(), since otherwise
+                // getSystemService() will throw a ServiceNotFoundException.
+                mWifiManager = mContext.getSystemService(WifiManager.class);
             }
 
-            if (mWifiManager != null) {
-                try {
-                    // Only fetch WiFi power data if it is supported.
-                    if ((mWifiManager.getSupportedFeatures() & WIFI_FEATURE_LINK_LAYER_STATS) != 0) {
-                        wifiReceiver = new SynchronousResultReceiver("wifi");
-                        mWifiManager.requestActivityInfo(wifiReceiver);
-                    }
-                } catch (RemoteException e) {
-                    // Oh well.
-                }
+            // Only fetch WiFi power data if it is supported.
+            if (mWifiManager != null && mWifiManager.isEnhancedPowerReportingSupported()) {
+                SynchronousResultReceiver tempWifiReceiver = new SynchronousResultReceiver("wifi");
+                mWifiManager.getWifiActivityEnergyInfoAsync(
+                        new Executor() {
+                            @Override
+                            public void execute(Runnable runnable) {
+                                // run the listener on the binder thread, if it was run on the main
+                                // thread it would deadlock since we would be waiting on ourselves
+                                runnable.run();
+                            }
+                        },
+                        info -> {
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                            tempWifiReceiver.send(0, bundle);
+                        }
+                );
+                wifiReceiver = tempWifiReceiver;
             }
             synchronized (mStats) {
                 mStats.updateRailStatsLocked();
