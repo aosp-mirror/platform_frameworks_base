@@ -46,4 +46,5 @@ interface IPackageInstallerSession {
     int getParentSessionId();
 
     boolean isStaged();
+    void addFile(in String name, long size, in byte[] metadata);
 }

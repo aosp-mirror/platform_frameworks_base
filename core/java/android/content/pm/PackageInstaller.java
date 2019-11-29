@@ -50,6 +50,8 @@ import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.incremental.IncrementalDataLoaderParams;
+import android.os.incremental.IncrementalDataLoaderParamsParcel;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ArraySet;
@@ -1212,6 +1214,27 @@ public class PackageInstaller {
         }
 
         /**
+         * Configure files for an installation session.
+         *
+         * Currently only for Incremental installation session. Once this method is called,
+         * the files and their paths, as specified in the parameters, will be created and properly
+         * configured in the Incremental File System.
+         *
+         * TODO(b/136132412): update this and InstallationFile class with latest API design.
+         *
+         * @throws IllegalStateException if {@link SessionParams#incrementalParams} is null.
+         *
+         * @hide
+         */
+        public void addFile(@NonNull String name, long size, @NonNull byte[] metadata) {
+            try {
+                mSession.addFile(name, size, metadata);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Release this session object. You can open the session again if it
          * hasn't been finalized.
          */
@@ -1398,6 +1421,8 @@ public class PackageInstaller {
         public boolean isStaged;
         /** {@hide} */
         public long requiredInstalledVersionCode = PackageManager.VERSION_CODE_HIGHEST;
+        /** {@hide} */
+        public IncrementalDataLoaderParams incrementalParams;
 
         /**
          * Construct parameters for a new package install session.
@@ -1431,6 +1456,12 @@ public class PackageInstaller {
             isMultiPackage = source.readBoolean();
             isStaged = source.readBoolean();
             requiredInstalledVersionCode = source.readLong();
+            IncrementalDataLoaderParamsParcel dataLoaderParamsParcel = source.readParcelable(
+                    IncrementalDataLoaderParamsParcel.class.getClassLoader());
+            if (dataLoaderParamsParcel != null) {
+                incrementalParams = new IncrementalDataLoaderParams(
+                        dataLoaderParamsParcel);
+            }
         }
 
         /** {@hide} */
@@ -1454,6 +1485,7 @@ public class PackageInstaller {
             ret.isMultiPackage = isMultiPackage;
             ret.isStaged = isStaged;
             ret.requiredInstalledVersionCode = requiredInstalledVersionCode;
+            ret.incrementalParams = incrementalParams;
             return ret;
         }
 
@@ -1782,6 +1814,16 @@ public class PackageInstaller {
             return (installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0;
         }
 
+        /**
+         * Set Incremental data loader params.
+         *
+         * {@hide}
+         */
+        @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
+        public void setIncrementalParams(@NonNull IncrementalDataLoaderParams incrementalParams) {
+            this.incrementalParams = incrementalParams;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -1831,6 +1873,11 @@ public class PackageInstaller {
             dest.writeBoolean(isMultiPackage);
             dest.writeBoolean(isStaged);
             dest.writeLong(requiredInstalledVersionCode);
+            if (incrementalParams != null) {
+                dest.writeParcelable(incrementalParams.getData(), flags);
+            } else {
+                dest.writeParcelable(null, flags);
+            }
         }
 
         public static final Parcelable.Creator<SessionParams>

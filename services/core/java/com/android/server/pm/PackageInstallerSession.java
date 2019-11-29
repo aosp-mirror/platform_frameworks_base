@@ -54,6 +54,7 @@ import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
+import android.content.pm.InstallationFile;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -81,6 +82,8 @@ import android.os.Process;
 import android.os.RevocableFileDescriptor;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.incremental.IncrementalFileStorages;
+import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.system.ErrnoException;
@@ -309,6 +312,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mVerityFound;
 
+    private IncrementalFileStorages mIncrementalFileStorages;
+
     private static final FileFilter sAddedFilter = new FileFilter() {
         @Override
         public boolean accept(File file) {
@@ -471,6 +476,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStagedSessionErrorCode = stagedSessionErrorCode;
         mStagedSessionErrorMessage =
                 stagedSessionErrorMessage != null ? stagedSessionErrorMessage : "";
+
+        // TODO(b/136132412): sanity check if session should not be incremental
+        if (!params.isStaged && params.incrementalParams != null
+                && !params.incrementalParams.getPackageName().isEmpty()) {
+            IncrementalManager incrementalManager = (IncrementalManager) mContext.getSystemService(
+                    Context.INCREMENTAL_SERVICE);
+            if (incrementalManager != null) {
+                mIncrementalFileStorages =
+                        new IncrementalFileStorages(mPackageName, stageDir, incrementalManager,
+                                params.incrementalParams);
+            }
+        }
     }
 
     public SessionInfo generateInfo() {
@@ -874,10 +891,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        if (mIncrementalFileStorages != null) {
+            mIncrementalFileStorages.finishSetUp();
+        }
+
         mHandler.obtainMessage(MSG_SEAL, statusReceiver).sendToTarget();
     }
 
     private void handleSeal(@NonNull IntentSender statusReceiver) {
+        // TODO(b/136132412): update with new APIs
+        if (mIncrementalFileStorages != null) {
+            mIncrementalFileStorages.startLoading();
+        }
         if (!markAsCommitted(statusReceiver)) {
             return;
         }
@@ -1492,6 +1517,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 computeProgressLocked(true);
 
                 // Unpack native libraries
+                // TODO(b/136132412): skip for incremental installation
                 extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
             }
 
@@ -2182,7 +2208,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             destroyInternal();
         }
-
         dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
     }
 
@@ -2266,6 +2291,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public int getParentSessionId() {
         return mParentSessionId;
+    }
+
+    @Override
+    public void addFile(@NonNull String name, long size, @NonNull byte[] metadata) {
+        if (mIncrementalFileStorages == null) {
+            throw new IllegalStateException(
+                    "Cannot add Incremental File to a non-Incremental session.");
+        }
+        try {
+            mIncrementalFileStorages.addFile(new InstallationFile(name, size, metadata));
+        } catch (IOException ex) {
+            throw new IllegalStateException(
+                    "Failed to add and configure Incremental File: " + name, ex);
+        }
     }
 
     private void dispatchSessionFinished(int returnCode, String msg, Bundle extras) {
@@ -2390,6 +2429,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // since these packages are supposed to be read on reboot.
         // Those dirs are deleted when the staged session has reached a final state.
         if (stageDir != null && !params.isStaged) {
+            if (mIncrementalFileStorages != null) {
+                mIncrementalFileStorages.cleanUp();
+            }
             try {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {
@@ -2403,6 +2445,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mSessionProvider.getSession(childSessionId).cleanStageDir();
             }
         } else {
+            if (mIncrementalFileStorages != null) {
+                mIncrementalFileStorages.cleanUp();
+            }
             try {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {
