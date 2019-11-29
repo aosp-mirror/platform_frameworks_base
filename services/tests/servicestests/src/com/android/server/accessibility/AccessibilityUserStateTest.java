@@ -113,7 +113,6 @@ public class AccessibilityUserStateTest {
         mUserState.mAccessibilityButtonTargets.add(COMPONENT_NAME.flattenToString());
         mUserState.setTouchExplorationEnabledLocked(true);
         mUserState.setDisplayMagnificationEnabledLocked(true);
-        mUserState.setNavBarMagnificationEnabledLocked(true);
         mUserState.setAutoclickEnabledLocked(true);
         mUserState.setUserNonInteractiveUiTimeoutLocked(30);
         mUserState.setUserInteractiveUiTimeoutLocked(30);
@@ -132,7 +131,6 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.mAccessibilityButtonTargets.isEmpty());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
         assertFalse(mUserState.isDisplayMagnificationEnabledLocked());
-        assertFalse(mUserState.isNavBarMagnificationEnabledLocked());
         assertFalse(mUserState.isAutoclickEnabledLocked());
         assertEquals(0, mUserState.getUserNonInteractiveUiTimeoutLocked());
         assertEquals(0, mUserState.getUserInteractiveUiTimeoutLocked());

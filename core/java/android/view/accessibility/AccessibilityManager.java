@@ -1195,6 +1195,19 @@ public final class AccessibilityManager {
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void performAccessibilityShortcut() {
+        performAccessibilityShortcut(null);
+    }
+
+    /**
+     * Perform the accessibility shortcut for the given target which is assigned to the shortcut.
+     *
+     * @param targetName The flattened {@link ComponentName} string or the class name of a system
+     *        class implementing a supported accessibility feature, or {@code null} if there's no
+     *        specified target.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public void performAccessibilityShortcut(@Nullable String targetName) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1203,7 +1216,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.performAccessibilityShortcut();
+            service.performAccessibilityShortcut(targetName);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error performing accessibility shortcut. ", re);
         }
@@ -1270,7 +1283,22 @@ public final class AccessibilityManager {
      * @param displayId The logical display id.
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
     public void notifyAccessibilityButtonClicked(int displayId) {
+        notifyAccessibilityButtonClicked(displayId, null);
+    }
+
+    /**
+     * Perform the accessibility button for the given target which is assigned to the button.
+     *
+     * @param displayId displayId The logical display id.
+     * @param targetName The flattened {@link ComponentName} string or the class name of a system
+     *        class implementing a supported accessibility feature, or {@code null} if there's no
+     *        specified target.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
+    public void notifyAccessibilityButtonClicked(int displayId, @Nullable String targetName) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1279,7 +1307,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.notifyAccessibilityButtonClicked(displayId);
+            service.notifyAccessibilityButtonClicked(displayId, targetName);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while dispatching accessibility button click", re);
         }

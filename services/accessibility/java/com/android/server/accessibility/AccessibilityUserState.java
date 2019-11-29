@@ -100,7 +100,6 @@ class AccessibilityUserState {
     private boolean mIsAutoclickEnabled;
     private boolean mIsDisplayMagnificationEnabled;
     private boolean mIsFilterKeyEventsEnabled;
-    private boolean mIsNavBarMagnificationEnabled;
     private boolean mIsPerformGesturesEnabled;
     private boolean mIsTextHighContrastEnabled;
     private boolean mIsTouchExplorationEnabled;
@@ -153,7 +152,6 @@ class AccessibilityUserState {
         mAccessibilityButtonTargets.clear();
         mIsTouchExplorationEnabled = false;
         mIsDisplayMagnificationEnabled = false;
-        mIsNavBarMagnificationEnabled = false;
         mIsAutoclickEnabled = false;
         mUserNonInteractiveUiTimeout = 0;
         mUserInteractiveUiTimeout = 0;
@@ -435,8 +433,6 @@ class AccessibilityUserState {
         pw.append(", touchExplorationEnabled=").append(String.valueOf(mIsTouchExplorationEnabled));
         pw.append(", displayMagnificationEnabled=").append(String.valueOf(
                 mIsDisplayMagnificationEnabled));
-        pw.append(", navBarMagnificationEnabled=").append(String.valueOf(
-                mIsNavBarMagnificationEnabled));
         pw.append(", autoclickEnabled=").append(String.valueOf(mIsAutoclickEnabled));
         pw.append(", nonInteractiveUiTimeout=").append(String.valueOf(mNonInteractiveUiTimeout));
         pw.append(", interactiveUiTimeout=").append(String.valueOf(mInteractiveUiTimeout));
@@ -553,8 +549,12 @@ class AccessibilityUserState {
         mLastSentClientState = state;
     }
 
-    public boolean isShortcutKeyMagnificationEnabledLocked() {
-        return mAccessibilityShortcutKeyTargets.contains(MAGNIFICATION_CONTROLLER_NAME);
+    /**
+     * Returns true if navibar magnification or shortcut key magnification is enabled.
+     */
+    public boolean isShortcutMagnificationEnabledLocked() {
+        return mAccessibilityShortcutKeyTargets.contains(MAGNIFICATION_CONTROLLER_NAME)
+                || mAccessibilityButtonTargets.contains(MAGNIFICATION_CONTROLLER_NAME);
     }
 
     /**
@@ -690,28 +690,4 @@ class AccessibilityUserState {
     public void setUserNonInteractiveUiTimeoutLocked(int timeout) {
         mUserNonInteractiveUiTimeout = timeout;
     }
-
-    // TODO(a11y shortcut): These functions aren't necessary, after the new Settings shortcut Ui
-    //  is merged.
-    boolean isNavBarMagnificationEnabledLocked() {
-        return mIsNavBarMagnificationEnabled;
-    }
-
-    void setNavBarMagnificationEnabledLocked(boolean enabled) {
-        mIsNavBarMagnificationEnabled = enabled;
-    }
-
-    boolean isNavBarMagnificationAssignedToAccessibilityButtonLocked() {
-        return mAccessibilityButtonTargets.contains(MAGNIFICATION_CONTROLLER_NAME);
-    }
-
-    ComponentName getServiceAssignedToAccessibilityButtonLocked() {
-        final String targetName = mAccessibilityButtonTargets.isEmpty() ? null
-                : mAccessibilityButtonTargets.valueAt(0);
-        if (targetName == null) {
-            return null;
-        }
-        return ComponentName.unflattenFromString(targetName);
-    }
-    // TODO(a11y shortcut): End
 }

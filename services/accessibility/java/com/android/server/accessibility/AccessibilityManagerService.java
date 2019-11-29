@@ -411,6 +411,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (reboundAService) {
                         onUserStateChangedLocked(userState);
                     }
+                    migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, packageName);
                 }
             }
 
@@ -811,9 +812,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             userState.setTouchExplorationEnabledLocked(touchExplorationEnabled);
             userState.setDisplayMagnificationEnabledLocked(false);
-            userState.setNavBarMagnificationEnabledLocked(false);
             userState.disableShortcutMagnificationLocked();
-
             userState.setAutoclickEnabledLocked(false);
             userState.mEnabledServices.clear();
             userState.mEnabledServices.add(service);
@@ -853,17 +852,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * navigation area has been clicked.
      *
      * @param displayId The logical display id.
+     * @param targetName The flattened {@link ComponentName} string or the class name of a system
+     *        class implementing a supported accessibility feature, or {@code null} if there's no
+     *        specified target.
      */
     @Override
-    public void notifyAccessibilityButtonClicked(int displayId) {
+    public void notifyAccessibilityButtonClicked(int displayId, String targetName) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR_SERVICE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller does not hold permission "
                     + android.Manifest.permission.STATUS_BAR_SERVICE);
         }
-        synchronized (mLock) {
-            notifyAccessibilityButtonClickedLocked(displayId);
-        }
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::performAccessibilityShortcutInternal, this,
+                displayId, ACCESSIBILITY_BUTTON, targetName));
     }
 
     /**
@@ -1023,6 +1025,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // the state since the context in which the current user
             // state was used has changed since it was inactive.
             onUserStateChangedLocked(userState);
+            migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, null);
 
             if (announceNewUser) {
                 // Schedule announcement of the current user if needed.
@@ -1129,66 +1132,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
             final AccessibilityServiceConnection service = state.mBoundServices.get(i);
             service.notifyMagnificationChangedLocked(displayId, region, scale, centerX, centerY);
-        }
-    }
-
-    // TODO(a11y shortcut): Remove this function and Use #performAccessibilityShortcutInternal(
-    //  ACCESSIBILITY_BUTTON) instead, after the new Settings shortcut Ui merged.
-    private void notifyAccessibilityButtonClickedLocked(int displayId) {
-        final AccessibilityUserState state = getCurrentUserStateLocked();
-
-        int potentialTargets = state.isNavBarMagnificationEnabledLocked() ? 1 : 0;
-        for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
-            final AccessibilityServiceConnection service = state.mBoundServices.get(i);
-            if (service.mRequestAccessibilityButton) {
-                potentialTargets++;
-            }
-        }
-
-        if (potentialTargets == 0) {
-            return;
-        }
-        if (potentialTargets == 1) {
-            if (state.isNavBarMagnificationEnabledLocked()) {
-                mMainHandler.sendMessage(obtainMessage(
-                        AccessibilityManagerService::sendAccessibilityButtonToInputFilter, this,
-                        displayId));
-                return;
-            } else {
-                for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
-                    final AccessibilityServiceConnection service = state.mBoundServices.get(i);
-                    if (service.mRequestAccessibilityButton) {
-                        service.notifyAccessibilityButtonClickedLocked(displayId);
-                        return;
-                    }
-                }
-            }
-        } else {
-            if (state.getServiceAssignedToAccessibilityButtonLocked() == null
-                    && !state.isNavBarMagnificationAssignedToAccessibilityButtonLocked()) {
-                mMainHandler.sendMessage(obtainMessage(
-                        AccessibilityManagerService::showAccessibilityTargetsSelection, this,
-                        displayId, ACCESSIBILITY_BUTTON));
-            } else if (state.isNavBarMagnificationEnabledLocked()
-                    && state.isNavBarMagnificationAssignedToAccessibilityButtonLocked()) {
-                mMainHandler.sendMessage(obtainMessage(
-                        AccessibilityManagerService::sendAccessibilityButtonToInputFilter, this,
-                        displayId));
-                return;
-            } else {
-                for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
-                    final AccessibilityServiceConnection service = state.mBoundServices.get(i);
-                    if (service.mRequestAccessibilityButton && (service.mComponentName.equals(
-                            state.getServiceAssignedToAccessibilityButtonLocked()))) {
-                        service.notifyAccessibilityButtonClickedLocked(displayId);
-                        return;
-                    }
-                }
-            }
-            // The user may have turned off the assigned service or feature
-            mMainHandler.sendMessage(obtainMessage(
-                    AccessibilityManagerService::showAccessibilityTargetsSelection, this,
-                    displayId, ACCESSIBILITY_BUTTON));
         }
     }
 
@@ -1635,8 +1578,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (userState.isDisplayMagnificationEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_SCREEN_MAGNIFIER;
             }
-            if (userState.isNavBarMagnificationEnabledLocked()
-                    || userState.isShortcutKeyMagnificationEnabledLocked()) {
+            if (userState.isShortcutMagnificationEnabledLocked()) {
                 flags |= AccessibilityInputFilter.FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
             }
             if (userHasMagnificationServicesLocked(userState)) {
@@ -1886,14 +1828,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
                 0, userState.mUserId) == 1;
-        final boolean navBarMagnificationEnabled = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
-                0, userState.mUserId) == 1;
-        if ((displayMagnificationEnabled != userState.isDisplayMagnificationEnabledLocked())
-                || (navBarMagnificationEnabled != userState.isNavBarMagnificationEnabledLocked())) {
+        if ((displayMagnificationEnabled != userState.isDisplayMagnificationEnabledLocked())) {
             userState.setDisplayMagnificationEnabledLocked(displayMagnificationEnabled);
-            userState.setNavBarMagnificationEnabledLocked(navBarMagnificationEnabled);
             return true;
         }
         return false;
@@ -2088,8 +2024,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // displays in one display. It's not a real display and there's no input events for it.
         final ArrayList<Display> displays = getValidDisplayList();
         if (userState.isDisplayMagnificationEnabledLocked()
-                || userState.isNavBarMagnificationEnabledLocked()
-                || userState.isShortcutKeyMagnificationEnabledLocked()) {
+                || userState.isShortcutMagnificationEnabledLocked()) {
             for (int i = 0; i < displays.size(); i++) {
                 final Display display = displays.get(i);
                 getMagnificationController().register(display.getDisplayId());
@@ -2208,6 +2143,85 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         scheduleNotifyClientsOfServicesStateChangeLocked(userState);
     }
 
+    /**
+     * 1) Check if the service assigned to accessibility button target sdk version > Q.
+     *    If it isn't, remove it from the list and associated setting.
+     *    (It happens when an accessibility service package is downgraded.)
+     * 2) Check if an enabled service targeting sdk version > Q and requesting a11y button is
+     *    assigned to a shortcut. If it isn't, assigns it to the accessibility button.
+     *    (It happens when an enabled accessibility service package is upgraded.)
+     *
+     * @param packageName The package name to check, or {@code null} to check all services.
+     */
+    private void migrateAccessibilityButtonSettingsIfNecessaryLocked(
+            AccessibilityUserState userState, @Nullable String packageName) {
+        final Set<String> buttonTargets =
+                userState.getShortcutTargetsLocked(ACCESSIBILITY_BUTTON);
+        int lastSize = buttonTargets.size();
+        buttonTargets.removeIf(name -> {
+            if (packageName != null && name != null && !name.contains(packageName)) {
+                return false;
+            }
+            final ComponentName componentName = ComponentName.unflattenFromString(name);
+            if (componentName == null) {
+                return false;
+            }
+            final AccessibilityServiceInfo serviceInfo =
+                    userState.getInstalledServiceInfoLocked(componentName);
+            if (serviceInfo == null) {
+                return false;
+            }
+            if (serviceInfo.getResolveInfo().serviceInfo.applicationInfo
+                    .targetSdkVersion > Build.VERSION_CODES.Q) {
+                return false;
+            }
+            // A11y services targeting sdk version <= Q should not be in the list.
+            return true;
+        });
+        boolean changed = (lastSize != buttonTargets.size());
+        lastSize = buttonTargets.size();
+
+        final Set<String> shortcutKeyTargets =
+                userState.getShortcutTargetsLocked(ACCESSIBILITY_SHORTCUT_KEY);
+        userState.mEnabledServices.forEach(componentName -> {
+            if (packageName != null && componentName != null
+                    && !packageName.equals(componentName.getPackageName())) {
+                return;
+            }
+            final AccessibilityServiceInfo serviceInfo =
+                    userState.getInstalledServiceInfoLocked(componentName);
+            if (serviceInfo == null) {
+                return;
+            }
+            final boolean requestA11yButton = (serviceInfo.flags
+                    & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
+            if (!(serviceInfo.getResolveInfo().serviceInfo.applicationInfo
+                    .targetSdkVersion > Build.VERSION_CODES.Q && requestA11yButton)) {
+                return;
+            }
+            final String serviceName = serviceInfo.getComponentName().flattenToString();
+            if (TextUtils.isEmpty(serviceName)) {
+                return;
+            }
+            if (shortcutKeyTargets.contains(serviceName) || buttonTargets.contains(serviceName)) {
+                return;
+            }
+            // For enabled a11y services targeting sdk version > Q and requesting a11y button should
+            // be assigned to a shortcut.
+            buttonTargets.add(serviceName);
+        });
+        changed |= (lastSize != buttonTargets.size());
+        if (!changed) {
+            return;
+        }
+
+        // Update setting key with new value.
+        persistColonDelimitedSetToSettingLocked(
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
+                userState.mUserId, buttonTargets, str -> str);
+        scheduleNotifyClientsOfServicesStateChangeLocked(userState);
+    }
+
     private void updateRecommendedUiTimeoutLocked(AccessibilityUserState userState) {
         int newNonInteractiveUiTimeout = userState.getUserNonInteractiveUiTimeoutLocked();
         int newInteractiveUiTimeout = userState.getUserInteractiveUiTimeoutLocked();
@@ -2269,9 +2283,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * AIDL-exposed method to be called when the accessibility shortcut key is enabled. Requires
      * permission to write secure settings, since someone with that permission can enable
      * accessibility services themselves.
+     *
+     * @param targetName The flattened {@link ComponentName} string or the class name of a system
+     *        class implementing a supported accessibility feature, or {@code null} if there's no
+     *        specified target.
      */
     @Override
-    public void performAccessibilityShortcut() {
+    public void performAccessibilityShortcut(String targetName) {
         if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)
                 && (mContext.checkCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
                 != PackageManager.PERMISSION_GRANTED)) {
@@ -2280,7 +2298,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         mMainHandler.sendMessage(obtainMessage(
                 AccessibilityManagerService::performAccessibilityShortcutInternal, this,
-                Display.DEFAULT_DISPLAY, ACCESSIBILITY_SHORTCUT_KEY));
+                Display.DEFAULT_DISPLAY, ACCESSIBILITY_SHORTCUT_KEY, targetName));
     }
 
     /**
@@ -2288,20 +2306,31 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *
      * @param shortcutType The shortcut type.
      * @param displayId The display id of the accessibility button.
+     * @param targetName The flattened {@link ComponentName} string or the class name of a system
+     *        class implementing a supported accessibility feature, or {@code null} if there's no
+     *        specified target.
      */
     private void performAccessibilityShortcutInternal(int displayId,
-            @ShortcutType int shortcutType) {
+            @ShortcutType int shortcutType, @Nullable String targetName) {
         final List<String> shortcutTargets = getAccessibilityShortcutTargetsInternal(shortcutType);
         if (shortcutTargets.isEmpty()) {
             Slog.d(LOG_TAG, "No target to perform shortcut, shortcutType=" + shortcutType);
             return;
         }
-        // In case there are many targets assigned to the given shortcut.
-        if (shortcutTargets.size() > 1) {
-            showAccessibilityTargetsSelection(displayId, shortcutType);
-            return;
+        // In case the caller specified a target name
+        if (targetName != null) {
+            if (!shortcutTargets.contains(targetName)) {
+                Slog.d(LOG_TAG, "Perform shortcut failed, invalid target name:" + targetName);
+                return;
+            }
+        } else {
+            // In case there are many targets assigned to the given shortcut.
+            if (shortcutTargets.size() > 1) {
+                showAccessibilityTargetsSelection(displayId, shortcutType);
+                return;
+            }
+            targetName = shortcutTargets.get(0);
         }
-        final String targetName = shortcutTargets.get(0);
         // In case user assigned magnification to the given shortcut.
         if (targetName.equals(MAGNIFICATION_CONTROLLER_NAME)) {
             sendAccessibilityButtonToInputFilter(displayId);
@@ -2844,11 +2873,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mDisplayMagnificationEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED);
 
-        // TODO(a11y shortcut): Remove this setting key, and have a migrate function in
-        //  Setting provider after new shortcut UI merged.
-        private final Uri mNavBarMagnificationEnabledUri = Settings.Secure.getUriFor(
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
-
         private final Uri mAutoclickEnabledUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED);
 
@@ -2888,8 +2912,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mDisplayMagnificationEnabledUri,
                     false, this, UserHandle.USER_ALL);
-            contentResolver.registerContentObserver(mNavBarMagnificationEnabledUri,
-                    false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mAutoclickEnabledUri,
                     false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(mEnabledAccessibilityServicesUri,
@@ -2924,8 +2946,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (readTouchExplorationEnabledSettingLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
-                } else if (mDisplayMagnificationEnabledUri.equals(uri)
-                        || mNavBarMagnificationEnabledUri.equals(uri)) {
+                } else if (mDisplayMagnificationEnabledUri.equals(uri)) {
                     if (readMagnificationEnabledSettingsLocked(userState)) {
                         onUserStateChangedLocked(userState);
                     }
